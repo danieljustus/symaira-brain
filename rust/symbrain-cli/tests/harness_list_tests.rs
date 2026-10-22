@@ -252,11 +252,29 @@ fn successful_health_probe_is_native_without_go_fallback() {
     assert_eq!(report["servers"][0]["healthy"], true);
 }
 
+/// Every `config.error` family is reported natively: a fallback script that
+/// would run on any Go routing exits 17 and prints markers that must not appear.
 #[cfg(unix)]
 #[test]
-fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
+fn toml_and_io_inventory_errors_are_native_without_go_fallback() {
     use std::os::unix::fs::PermissionsExt;
     use std::os::unix::fs::symlink;
+
+    fn global_error(output: &Output, name: &str) -> String {
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        assert!(output.stderr.is_empty());
+        assert!(!String::from_utf8_lossy(&output.stdout).contains("fallback-stdout"));
+        let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        value["harnesses"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|harness| harness["name"] == name)
+            .unwrap()["global"]["error"]
+            .as_str()
+            .unwrap()
+            .to_owned()
+    }
 
     let root = TempDir::new().unwrap();
     let codex = root.path().join("home/.codex");
@@ -272,21 +290,20 @@ fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
     permissions.set_mode(0o755);
     std::fs::set_permissions(&fallback, permissions).unwrap();
 
-    let mut fallback_command = command(&root, &["harness", "list", "--json"]);
-    fallback_command.env("SYMBRAIN_GO_BINARY", &fallback);
-    let output = fallback_command.output().unwrap();
-
-    assert_eq!(output.status.code(), Some(17));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
+    let mut toml_command = command(&root, &["harness", "list", "--json"]);
+    toml_command.env("SYMBRAIN_GO_BINARY", &fallback);
+    assert_eq!(
+        global_error(&toml_command.output().unwrap(), "codex"),
+        "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"mcp_servers\"): unexpected EOF; expected value"
+    );
 
     write_claude_config(&root, b"[]");
     let mut json_command = command(&root, &["harness", "list", "--json"]);
     json_command.env("SYMBRAIN_GO_BINARY", &fallback);
-    let json_output = json_command.output().unwrap();
-    assert_eq!(json_output.status.code(), Some(17));
-    assert_eq!(json_output.stdout, b"fallback-stdout\n");
-    assert_eq!(json_output.stderr, b"fallback-stderr\n");
+    assert_eq!(
+        global_error(&json_command.output().unwrap(), "claude"),
+        "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got ["
+    );
 
     write_claude_config(
         &root,
@@ -298,6 +315,7 @@ fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
         root.path().join("project/.mcp.json"),
     )
     .unwrap();
+    let project = root.path().join("project").canonicalize().unwrap();
     let mut project_command = command(
         &root,
         &[
@@ -305,18 +323,22 @@ fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
             "list",
             "--json",
             "--project",
-            root.path()
-                .join("project")
-                .canonicalize()
-                .unwrap()
-                .to_str()
-                .unwrap(),
+            project.to_str().unwrap(),
         ],
     );
     project_command.env("SYMBRAIN_GO_BINARY", &fallback);
     let project_output = project_command.output().unwrap();
-
-    assert_eq!(project_output.status.code(), Some(17));
-    assert_eq!(project_output.stdout, b"fallback-stdout\n");
-    assert_eq!(project_output.stderr, b"fallback-stderr\n");
+    assert!(project_output.status.success());
+    assert!(!String::from_utf8_lossy(&project_output.stdout).contains("fallback-stdout"));
+    let value: serde_json::Value = serde_json::from_slice(&project_output.stdout).unwrap();
+    let claude = &value["harnesses"][0];
+    assert_eq!(claude["global"]["servers"][0]["name"], "global");
+    assert_eq!(
+        claude["project"]["error"],
+        format!(
+            "open {}/.mcp.json: too many levels of symbolic links",
+            project.display()
+        )
+    );
+    assert_eq!(claude["project"]["exists"], false);
 }

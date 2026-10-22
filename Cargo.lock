@@ -1788,6 +1788,7 @@ dependencies = [
  "rustix",
  "serde",
  "serde_json",
+ "symbrain-core",
  "tempfile",
  "toml_edit",
 ]

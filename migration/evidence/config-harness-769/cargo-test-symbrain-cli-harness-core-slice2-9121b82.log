@@ -1,0 +1,708 @@
+   Compiling symbrain-harness v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769b/rust/symbrain-harness)
+   Compiling symbrain-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769b/rust/symbrain-cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.69s
+     Running unittests src/lib.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/symbrain_cli-5f98586eb1e88080)
+
+running 120 tests
+test config_cli::tests::unknown_subcommand_matches_go_error ... ok
+test config_cli::tests::no_subcommand_matches_go_usage ... ok
+test audit_cli::tests::parses_tail_flags_and_ignores_positionals_after_first ... ok
+test doctor_cli::doctor_process::tests::rejects_malformed_pid_before_kill_check ... ok
+test doctor_cli::doctor_output::tests::ignored_fmt_failures_continue_at_the_next_whole_operation ... ok
+test activity_cli::tests::invalid_get_and_status_budgets_match_usage_before_opening_database ... ok
+test doctor_cli::tests::doctor_argument_parser_accepts_go_flag_forms ... ok
+test doctor_cli::tests::help_lists_the_force_release_flag ... ok
+test doctor_cli::doctor_process::executable_name_tests::windows_lookup_follows_pathext_order_and_ignores_extensionless_files ... ok
+test audit_cli::tests::formats_human_entry_like_go ... ok
+test doctor_cli::tests::secret_reference_classification_is_compatible_with_go ... ok
+test doctor_cli::tests::toml_harness_entries_preserve_sorted_server_names ... ok
+test doctor_cli::tests::json_harness_entries_match_go_basename_and_profile_rules ... ok
+test go_flags::tests::diagnostics_match_the_go_flag_package ... ok
+test go_flags::tests::inline_values_may_be_empty_and_last_wins ... ok
+test go_flags::tests::stops_at_first_positional_and_terminator ... ok
+test health_probe::tests::connection_failure_at_exhausted_deadline_is_a_timeout ... ok
+test harness_cli::tests::probes_keep_every_entry_when_no_worker_panics ... ok
+test doctor_cli::tests::valid_configuration_allows_native_repair_flag_forms ... ok
+test harness_cli::tests::a_panicking_worker_yields_none_instead_of_unwinding ... ok
+test health_probe::tests::latency_keeps_sub_millisecond_measurement_as_a_fraction ... ok
+test health_probe::tests::sse_reply_parser_accepts_jsonrpc_data_and_ignores_other_events ... ok
+test harness_cli::tests::several_panicking_workers_do_not_re_panic_the_scope ... ok
+test activity_cli::tests::db_override_is_used_by_each_activity_read_command ... ok
+test health_probe::tests::stdio_argument_credential_guards_are_conservative ... ok
+test health_probe::tests::unsupported_transports_and_credentials_never_get_probe_metadata ... ok
+test init_cli::tests::help_flag_outputs_usage ... ok
+test init_cli::tests::malformed_flag_preserves_go_diagnostic ... ok
+test init_cli::tests::mkdir_collision_reports_first_failing_ancestor ... ok
+test init_cli::tests::unknown_flag_fails_with_usage ... ok
+test doctor_cli::tests::arbitrary_vault_stderr_is_not_exposed ... ok
+test init_cli::tests::symlink_loop_preserves_stat_context ... ok
+test install_cli::tests::parser_accepts_all_install_flags ... ok
+test install_cli::tests::foreign_symbrain_entry_is_not_removed ... ok
+test install_cli::tests::superseded_names_are_exact_basenames ... ok
+test managed_home::tests::lexical_clean_preserves_unix_bytes_and_relative_parents ... ok
+test managed_home::tests::lexical_windows_drive_unc_and_device_roots_follow_sdk ... ok
+test mcp_cli::tests::inline_flags_accept_both_dash_forms ... ok
+test mcp_cli::tests::configured_module_path_reads_server_override ... ok
+test mcp_cli::tests::url_only_foreign_server_matches_go_warning_and_is_skipped ... ok
+test memory_cli::tests::json_output_escapes_what_the_shipped_encoder_escapes ... ok
+test memory_cli::tests::hand_written_usage_shapes_stay_native ... ok
+test memory_cli::tests::memory_sync_with_arguments_stays_on_go ... ok
+test memory_cli::tests::query_log_rejects_positionals_and_unknown_flags ... ok
+test health_probe::tests::streamable_http_rejects_malformed_and_error_replies_without_leaking_body ... ok
+test doctor_cli::doctor_process::tests::pid_checker_detects_live_child_before_dead ... ok
+test memory_cli::tests::search_flag_parser_rejects_unsupported_query_shapes ... ok
+test health_probe::tests::streamable_http_accepts_bounded_sse_rpc_replies ... ok
+test memory_cli::tests::search_prints_the_shipped_usage_for_help ... ok
+test memory_cli::tests::search_flags_consume_their_values ... ok
+test memory_cli::tests::search_refuses_a_missing_query_with_the_shipped_message ... ok
+test health_probe::tests::streamable_http_negotiates_protocol_and_pings_with_session ... ok
+test memory_cli::write_output::tests::injected_broken_pipe_does_not_terminate_the_library_caller ... ok
+test passthrough::tests::configured_path_diagnostic_preserves_non_utf8_bytes ... ok
+test passthrough::tests::config_binary_path_is_read_from_nested_table ... ok
+test passthrough::tests::empty_config_binary_path_is_not_an_override ... ok
+test passthrough::tests::managed_binary_requires_regular_executable_file ... ok
+test passthrough::tests::packaged_go_fallback_is_found_next_to_symbrain ... ok
+test passthrough::tests::windows_path_extensions_match_go_defaults ... ok
+test setup_cli::config::tests::go_parse_bool_spellings_and_empty_env_contract ... ok
+test setup_cli::config::tests::optional_browse_selection_matches_go_default_and_explicit_values ... ok
+test passthrough::tests::path_lookup_finds_binary_in_ordered_path_entry ... ok
+test setup_cli::flags::tests::help_lists_the_retained_module_lifecycle_flags ... ok
+test setup_cli::flags::tests::parse_flags_and_stop_at_first_positional_match_go_flagset ... ok
+test setup_cli::flags::tests::unknown_flag_has_go_usage_shape ... ok
+test setup_cli::json_tests::setup_json_preserves_raw_bytes_and_escapes_ordinary_fields_once ... ok
+test setup_cli::config::tests::toml_false_does_not_clear_prior_true_like_configkit ... ok
+test setup_cli::json_tests::setup_json_write_failure_remains_checked ... ok
+test doctor_cli::doctor_process::tests::terminates_timed_out_probe ... ok
+test skills_cli::sync_flags::bytes::tests::trim_keeps_wtf8_at_boundaries_and_inside_unicode_space ... ok
+test skills_cli::sync_flags::bytes::tests::wide_view_keeps_surrogates_distinct_from_replacement_and_pairs ... ok
+test skills_cli::tests::explicit_target_status_is_native_only_for_absent_user_roots ... ok
+test skills_cli::tests::list_fallback_uses_cached_typed_inventory_issues ... ok
+test skills_cli::tests::sync_project_dir_matches_absolute_working_directory ... ok
+test stdio_output::tests::embedded_raw_and_kind_only_pipe_errors_are_ordinary_errors ... ok
+test stdio_output::tests::real_stdout_io_error_retains_operation_path_cause_and_source ... ok
+test sync_cli::tests::help_flag_prints_bare_usage_not_unknown_flag_rejection ... ok
+test sync_cli::tests::unknown_flag_matches_go_flag_package_rejection ... ok
+test tests::config_get_executes_in_process ... ok
+test tests::config_get_extra_arg_rejected ... ok
+test tests::config_get_normalizes_extra_flag ... ok
+test tests::config_path_normalizes_unexpected_flags ... ok
+test tests::config_path_prints_path ... ok
+test tests::config_path_rejects_extra_argument ... ok
+test doctor_cli::tests::nonzero_version_probe_cannot_be_accepted ... ok
+test tests::config_set_executes_in_process ... ok
+test tests::config_terminator_before_set ... ok
+test tests::config_terminator_before_get ... ok
+test tests::fallback_executor_receives_unmigrated_commands_only ... ok
+test tests::help_matches_frozen_usage ... ok
+test tests::json_help_exits_usage_with_unknown_command ... ok
+test tests::missing_command_prints_help_and_exits_usage ... ok
+test tests::run_in_process_returns_none_for_unmigrated_commands ... ok
+test tests::unknown_command_quotes_properly ... ok
+test tests::version_bare_hyphen_treated_as_positional ... ok
+test tests::unrelated_native_doctor_and_setup_invocations_do_not_fallback ... ok
+test tests::version_help_flags_print_usage_only ... ok
+test tests::version_json_order_variants ... ok
+test tests::version_json_keeps_schema ... ok
+test tests::version_rejects_unknown_flag ... ok
+test tests::version_rejects_unknown_flag_with_value ... ok
+test tests::version_terminator_alone_succeeds ... ok
+test tests::version_terminator_with_extra_arg_rejected ... ok
+test tests::version_terminator_with_flag_arg_rejected_as_positional ... ok
+test tests::version_terminator_with_json_succeeds ... ok
+test tests::version_unexpected_argument ... ok
+test tests::version_version_exits_usage_with_unexpected_argument ... ok
+test usage_cli::tests::help_is_native_without_resolving_credentials ... ok
+test usage_cli::tests::table_matches_go_shape ... ok
+test usage_cli::fetch_output_tests::usage_fetch_620_cli_json_and_table_match_go_bytes ... ok
+test doctor_cli::doctor_process::tests::retained_descendant_pipes_cannot_extend_timeout ... ok
+test setup_cli::source::process::tests::owned_capture_preserves_sequential_stdout_and_stderr_writes ... ok
+test doctor_cli::doctor_process::tests::drains_large_stdout_and_stderr_without_deadlock ... ok
+test memory_cli::tests::query_log_table_and_actor_filter_match_go_shape ... ok
+test memory_cli::tests::query_log_json_matches_go_fixture ... ok
+test memory_cli::tests::query_log_table_sanitizes_multiline_query_text ... ok
+test memory_cli::tests::query_log_normalizes_schema_default_timestamp ... ok
+test memory_cli::write_output::tests::output_failure_reports_error_after_committed_set ... ok
+test setup_cli::source::process::tests::deadline_kills_and_reaps_the_owned_tool_process ... ok
+test health_probe::tests::http_deadline_and_redirect_refusal_are_measured_and_redacted ... ok
+
+test result: ok. 120 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running unittests src/main.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/symbrain-e4d0b0540ac60d54)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/activity_cli_oracle_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/activity_cli_oracle_tests-14b60870cca7ab1b)
+
+running 1 test
+test bounded_activity_reads_match_the_pinned_go_commands ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.85s
+
+     Running tests/activity_validation_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/activity_validation_tests-0305608fda9aaf05)
+
+running 1 test
+test activity_validation_matches_complete_go_process_fixture_without_fallback ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.72s
+
+     Running tests/cli_tree_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/cli_tree_tests-a2b6768d7f733bc9)
+
+running 4 tests
+test tests::fixture_loads_and_has_correct_count ... ok
+test tests::path_separator_normalization_is_confined_to_oracle_roots ... ok
+test tests::temp_root_normalization_accepts_windows_short_path_aliases ... ok
+test cli_tree_fixture_matches_native_binary ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.77s
+
+     Running tests/config_harness_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/config_harness_native-df46637bb419599f)
+
+running 3 tests
+test relative_project_config_path_is_cleaned_like_go ... ok
+test empty_harness_filter_probes_every_server_like_go ... ok
+test go_recorded_shapes_are_native_without_a_go_fallback ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s
+
+     Running tests/doctor_fix_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/doctor_fix_native-ed8fe165476b3a8e)
+
+running 2 tests
+test missing_managed_home_fails_before_config_probes_or_publication ... ok
+test doctor_repair_preserves_source_and_corruption_and_continues_failures ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.75s
+
+     Running tests/doctor_memory_schema.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/doctor_memory_schema-6a4da5789095ef3e)
+
+running 2 tests
+test same_column_view_cannot_replace_a_required_writable_table ... ok
+test applied_migrations_with_missing_columns_are_reported_without_modification ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/doctor_modules.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/doctor_modules-7d40e09adaa6adf3)
+
+running 5 tests
+test doctor_omits_empty_optional_module_extension_for_old_json_parity ... ok
+test doctor_omits_missing_modules_and_safely_ignores_missing_malformed_or_special_sidecars ... ok
+test doctor_bounds_provenance_sidecar_reads ... ok
+test doctor_preserves_release_version_repo_and_hash_without_source_build_fields ... ok
+test doctor_reports_installed_optional_modules_and_exact_sidecar_provenance ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/doctor_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/doctor_native-6b1f46409356a97a)
+
+running 8 tests
+test doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary ... ok
+test doctor_vault_agent_skips_unlistable_profiles_without_go ... ok
+test doctor_json_true_uses_json_output ... ok
+test doctor_vault_agent_skips_broken_profile_without_go ... ok
+test doctor_json_reports_static_config_and_registered_harness_natively ... ok
+test doctor_vault_agent_with_missing_vault_binary_stays_native ... ok
+test doctor_vault_agent_with_disabled_vault_profile_stays_native ... ok
+test doctor_vault_probe_does_not_expose_child_stderr ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+
+     Running tests/guard_decide_adapter.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/guard_decide_adapter-a624dcb71ffae6d3)
+
+running 4 tests
+test production_route_oversize_input_is_fail_closed ... ok
+test production_route_bounds_input_audits_and_writes_one_response ... ok
+test production_route_reader_failure_is_one_audited_deny ... ok
+test production_route_audit_failure_denies_and_output_failure_returns_one ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/guard_decide_raw_bytes.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/guard_decide_raw_bytes-898ff5bb2ec8fa5c)
+
+running 1 test
+test production_binary_matches_frozen_raw_byte_responses_and_audits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/guard_doctor_oracle_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/guard_doctor_oracle_tests-7011b314af18a918)
+
+running 1 test
+test every_oracle_case_matches_native_go_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/guard_grants_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/guard_grants_native-3ddc2c818e666a21)
+
+running 11 tests
+test native_grants_module_compiles_and_handles_empty_store ... ok
+test native_grants_preserves_existing_store_directory_mode ... ok
+test native_grants_opens_store_before_empty_id_usage ... ok
+test native_grants_creates_new_store_directory_with_go_mode ... ok
+test native_grants_does_not_rewrite_ephemeral_revoke ... ok
+test native_grants_accepts_go_null_defaults_but_rejects_empty_timestamps ... ok
+test native_grants_keeps_go_malformed_diagnostic_for_oracle_case ... ok
+test native_grants_formats_list_time_and_preserves_persisted_time_shape ... ok
+test native_grants_keeps_legacy_entries_revivable ... ok
+test native_grants_persist_uses_go_html_escaping ... ok
+test native_grants_matches_order_and_revoke_shape ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/guard_oracle_grants.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/guard_oracle_grants-ee49bd2e4b3f7eec)
+
+running 1 test
+test grants_cli_matches_go_oracle_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/harness_health_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/harness_health_tests-9090c9122d2d883d)
+
+running 7 tests
+test multiple_missing_stdio_probes_are_reported_natively ... ok
+test empty_health_matches_go_shapes ... ok
+test protocol_mismatch_is_redacted_without_fallback ... ok
+test successful_probe_reaps_persistent_child ... ok
+test multiple_native_probes_run_in_parallel_and_are_sorted ... ok
+test native_health_reports_unsupported_and_probes_stdio ... ok
+test stdio_ping_error_is_redacted_and_silent_ping_hits_the_deadline ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.06s
+
+     Running tests/harness_list_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/harness_list_tests-172ad4141457bbfe)
+
+running 9 tests
+test json_is_compact_and_preserves_inventory_schema ... ok
+test missing_command_health_reports_redacted_error_without_go_fallback ... ok
+test table_matches_go_layout_for_populated_and_missing_configs ... ok
+test table_reports_parsed_global_and_project_configs ... ok
+test invalid_and_extra_arguments_keep_go_exit_and_diagnostics ... ok
+test malformed_config_health_is_native_without_go_fallback ... ok
+test malformed_json_inventory_is_native_without_go_fallback ... ok
+test successful_health_probe_is_native_without_go_fallback ... ok
+test toml_and_io_inventory_errors_are_native_without_go_fallback ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/health_stdio_windows_diagnostic.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/health_stdio_windows_diagnostic-fdc850d518cfbacb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/init_cli_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/init_cli_tests-b9a121e67d257cbd)
+
+running 9 tests
+test missing_home_fails_with_expected_error ... ok
+test init_help_and_unknown_flags_via_subprocess ... ok
+test dangling_symlink_is_replaced ... ok
+test symlink_to_existing_file_is_skipped ... ok
+test fresh_init_creates_files_and_dirs_with_proper_modes ... ok
+test custom_xdg_environment_variables_honored ... ok
+test native_success_with_nonexistent_symbrain_go_binary ... ok
+test rerun_skips_existing_files_and_preserves_user_edits ... ok
+test positionals_and_terminators_are_accepted ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/install_oracle_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/install_oracle_tests-961ae9f6428a78fd)
+
+running 2 tests
+test install_oracle_comparison_rejects_intentional_mutation ... ok
+test install_oracle_fixture_is_consumed_by_the_native_rust_cli ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests/mcp_cli_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/mcp_cli_tests-d3f7a39dff26a954)
+
+running 20 tests
+test direct_claude_oauth_routes_usage_to_native_parser_without_provider_request ... ok
+test configured_antigravity_does_not_force_the_usage_route_to_go ... ok
+test claude_oauth_file_routes_usage_to_native_parser_without_keychain_or_provider_request ... ok
+test mcp_profile_errors_and_unknown_flags_do_not_fallback ... ok
+test codex_default_file_env_and_home_override_routes_are_native ... ok
+test kimi_and_nous_supported_home_overrides_select_native_usage_parser ... ok
+test enabled_skills_server_exposes_native_tools_without_go_fallback ... ok
+test kimi_default_file_routes_follow_the_source_bound_candidate_contract ... ok
+test supported_provider_combination_routes_before_any_live_request ... ok
+test deterministic_claude_files_are_native_and_ambiguous_accounts_remain_on_go ... ok
+test usage_subprocess_lists_and_calls_native_tool_without_go_fallback ... ok
+test copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go ... ok
+test sigterm_while_idle_exits_cleanly_with_stdin_open ... ok
+test nous_auth_file_shapes_select_native_parser_and_overflow_retains_go ... ok
+test native_mcp_audit_creates_redacted_jsonl_without_stdout_pollution ... ok
+test deprecated_serve_alias_is_native_and_warns_only_on_stderr ... ok
+test mcp_profile_flag_loads_xdg_profile_directory ... ok
+test mcp_subprocess_runs_native_initialize_list_call_and_silent_notification ... ok
+test sigterm_cancels_gateway_and_terminates_child_process_group ... ok
+test command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider_keys ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+
+     Running tests/memory_set_sigpipe.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/memory_set_sigpipe-db4bf3ed98af118f)
+
+running 1 test
+test actual_stdout_closed_reader_preserves_committed_set_and_sigpipe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/profile_cli_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/profile_cli_tests-b8e3b18261d8ed99)
+
+running 14 tests
+test remove_oracle_fixture_records_source_provenance ... ok
+test remove_deletes_file_symlink_without_following ... ok
+test remove_fails_closed_for_symlink_harness_config ... ok
+test remove_is_native_and_force_deletes_profile ... ok
+test remove_fails_closed_for_fifo_harness_config ... ok
+test remove_deletes_fifo_without_following ... ok
+test remove_aborts_on_oversized_confirmation_input ... ok
+test add_uses_restricted_template_by_default_and_secure_modes ... ok
+test remove_prompt_matches_go_for_yes_no_and_eof ... ok
+test remove_rejects_symlinked_profiles_root_without_touching_target ... ok
+test add_personal_flag_after_name_and_show_json_are_native ... ok
+test list_json_has_canonical_core_order_and_partial_errors ... ok
+test remove_keeps_relative_project_display_and_rejects_symlink_project_root ... ok
+test remove_refuses_global_and_project_bindings_without_side_effects ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/setup_fix_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/setup_fix_native-84fa6a5f0b280b9f)
+
+running 1 test
+test setup_fix_uses_native_noop_when_all_managed_versions_match ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+
+     Running tests/setup_repair_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/setup_repair_native-3f9381409541fe1d)
+
+running 1 test
+test source_installs_are_preserved_without_a_go_binary_or_release_host ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.81s
+
+     Running tests/skills_doctor_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_doctor_native-d950a62edc6a6e63)
+
+running 3 tests
+test default_doctor_matches_go_schema_and_formats ... ok
+test global_config_falls_back_before_stdout ... ok
+test doctor_flags_and_dynamic_inputs_fallback_before_stdout ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+
+     Running tests/skills_list_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_list_native-a9e74e6c503e6dd2)
+
+running 11 tests
+test empty_library_json_matches_go_bytes ... ok
+test empty_library_with_extra_flag_keeps_go_fallback ... ok
+test empty_library_table_matches_go_bytes ... ok
+test populated_library_is_reported_natively ... ok
+test sync_dry_run_json_matches_go_bytes ... ok
+test category_variants_collapse_to_one_spelling ... ok
+test marker_install_and_access_time_fill_the_record ... ok
+test access_time_inside_the_install_gap_is_not_usage ... ok
+test special_installed_marker_does_not_block_or_fabricate_an_install ... ok
+test classified_input_rejection_never_uses_go_even_with_an_override ... ok
+test unloadable_library_entry_keeps_go_fallback ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/skills_log_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_log_native-15a8dfa3020eddc5)
+
+running 8 tests
+test readable_current_and_rotated_logs_are_native_newest_first ... ok
+test log_filters_trim_values_and_ignore_blank_filters ... ok
+test empty_log_is_native_with_exact_table_and_json_bytes ... ok
+test unavailable_log_path_uses_go_before_stdout ... ok
+test symlinked_log_ancestor_uses_go_before_stdout ... ok
+test symlinked_log_uses_go_before_stdout ... ok
+test unreadable_log_uses_go_before_stdout ... ok
+test log_flags_filter_and_limit_natively_but_invalid_args_use_go ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/skills_preflight_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_preflight_native-ec112385fb52eef1)
+
+running 1 test
+test native_skills_preflight_contracts ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.73s
+
+     Running tests/skills_raw_flag_names.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_raw_flag_names-1ae5924ff8a16f06)
+
+running 2 tests
+test literal_unicode_flag_name_is_preserved ... ok
+test raw_flag_names_and_bad_syntax_remain_byte_exact ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.69s
+
+     Running tests/skills_render_drift.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_render_drift-a2c93d13ad772f4e)
+
+running 2 tests
+test unreadable_real_render_links_keep_json_and_table_reports_read_only ... ok
+test explicit_target_reports_render_drift_without_a_go_fallback ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
+
+     Running tests/skills_status_opencode_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_status_opencode_tests-d6d740cee794eb7e)
+
+running 19 tests
+test configured_status_keeps_go_fallback ... ok
+test opencode_user_status_empty_table_matches_go_bytes ... ok
+test opencode_user_status_empty_json_matches_go_bytes ... ok
+test opencode_project_status_symlink_chain_keeps_go_fallback ... ok
+test legacy_go_config_wins_when_new_skills_config_dir_exists ... ok
+test default_status_with_dynamic_target_state_keeps_go_fallback ... ok
+test opencode_project_status_no_scope_flag_defaults_to_user ... ok
+test default_user_status_empty_table_matches_go_bytes ... ok
+test default_user_status_empty_json_matches_go_bytes ... ok
+test opencode_project_status_matches_go_bytes ... ok
+test opencode_project_status_ignores_the_user_root ... ok
+test symskills_config_override_keeps_go_fallback ... ok
+test opencode_user_status_symlink_chain_keeps_go_fallback ... ok
+test opencode_user_status_populated_table_matches_go_bytes ... ok
+test opencode_user_status_json_escapes_html_like_go ... ok
+test opencode_user_status_link_onto_file_matches_go_bytes ... ok
+test opencode_user_status_managed_marker_row_matches_go_bytes ... ok
+test empty_explicit_user_roots_are_native ... ok
+test opencode_user_status_marker_states_keep_go_fallback ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/skills_sync_legacy_roots.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_sync_legacy_roots-1a72dc92c6c28665)
+
+running 3 tests
+test native_sync_plan_uses_the_platform_home_when_home_variables_disagree ... ok
+test both_layouts_present_sync_uses_the_current_namespace ... ok
+test legacy_layout_sync_repairs_like_go ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
+
+     Running tests/skills_targets_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_targets_native-5a1c166ff4cff5a2)
+
+running 7 tests
+test user_targets_table_matches_go_bytes_for_empty_sandbox ... ok
+test config_file_targets_variant_keeps_go_fallback_before_output ... ok
+test user_targets_json_is_compact_and_has_go_schema ... ok
+test target_binary_is_reported_as_evidence_natively ... ok
+test symlinked_skill_root_is_inventoried_natively ... ok
+test managed_and_unmanaged_skill_roots_are_classified_natively ... ok
+test scope_flag_is_native_but_config_stays_on_go ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/skills_windows_wide_flags.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/skills_windows_wide_flags-64970d4066c21b17)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/source_job_notifications.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/source_job_notifications-8bd42167bfafe876)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/sync_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/sync_native-54dcd427b4261e03)
+
+running 4 tests
+test skill_target_harness_syncs_natively_without_a_go_binary ... ok
+test instruction_only_target_is_native_and_matches_sync_schema ... ok
+test project_override_syncs_natively_without_a_go_binary ... ok
+test instruction_target_error_fails_sync_after_reporting_all_statuses ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/vault_admin_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/vault_admin_native-662c3d42a5f8e070)
+
+running 2 tests
+test vault_validation_stays_native_with_a_fallback_executor ... ok
+test vault_administration_matches_real_go_process_contracts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 22.21s
+
+     Running unittests src/lib.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/symbrain_core-06a03bbf09410801)
+
+running 106 tests
+test config::atomic::tests::rename_with_retry_succeeds_immediately ... ok
+test config::atomic::tests::rename_with_retry_handles_windows_sharing_violation ... ok
+test config::atomic::tests::rename_with_retry_recovers_after_transient_failures ... ok
+test config::atomic::tests::rename_with_retry_exhausts_ten_attempts ... ok
+test config::get::bytes_tests::public_go_byte_quote_keeps_wtf8_distinct_from_valid_unicode ... ok
+test config::get::tests::get_extra_arguments_rejected ... ok
+test config::get::tests::get_key_from_missing_file_exits_usage_with_not_set_message ... ok
+test config::format::tests::format_go_datetime_matches_burnt_sushi_berlin_variants ... ok
+test config::format::tests::format_go_datetime_matches_burnt_sushi_utc_variants ... ok
+test config::lossless::tests::distinct_encoding_for_pua_and_raw_byte ... ok
+test config::lossless::tests::roundtrip_all_single_bytes ... ok
+test config::get::bytes_tests::invalid_utf8_key_cannot_match_replacement_character_key ... ok
+test config::lossless::tests::roundtrip_arbitrary_invalid_bytes ... ok
+test config::get::tests::get_key_malformed_toml_exits_generic_with_parse_error ... ok
+test config::lossless::tests::roundtrip_literal_pua_and_sentinels ... ok
+test config::get::tests::get_missing_file_prints_note_to_stdout_and_exits_zero ... ok
+test config::lossless::tests::roundtrip_mixing_literal_pua_and_raw_bytes ... ok
+test config::lossless::tests::roundtrip_valid_ascii_and_unicode ... ok
+test config::get::bytes_tests::config_get_quotes_raw_unix_arguments_like_go ... ok
+test config::get::tests::get_whole_file_succeeds_even_if_toml_malformed ... ok
+test config::atomic::tests::atomic_write_handles_relative_path_without_parent ... ok
+test config::get::tests::get_key_missing_in_file_exits_usage ... ok
+test config::get::tests::get_whole_file_preserves_comments_and_exact_bytes ... ok
+test config::get::tests::get_key_formats_primitives_lists_and_tables_identically_to_go ... ok
+test config::format::tests::get_key_formats_floats_including_neg_zero_infinities_nan_and_scientific_boundaries ... ok
+test config::atomic::tests::atomic_write_creates_and_replaces_file ... ok
+test config::set::fixtures_tests::unix_raw_non_utf8_dotted_keys ... ok
+test config::set::tests::set_handles_relative_path_without_parent ... ok
+test config::set::tests::set_creates_nested_tables_and_matches_burnt_sushi_ordering ... ok
+test config::set::tests::set_preview_is_non_mutating_and_does_not_reveal_value ... ok
+test config::set::flag_alias_tests::set_accepts_go_single_dash_safeguard_flags ... ok
+test config::set::fixtures_tests::float_encoding_conventions_in_existing_tables ... ok
+test exit::tests::exit_code_constants_match_symaira_specification ... ok
+test go_text::tests::json_escapes_html_javascript_and_controls_without_replacing_valid_text ... ok
+test go_text::tests::malformed_bytes_and_literal_replacement_character_remain_distinct ... ok
+test output::tests::extract_accepts_all_flag_variants ... ok
+test output::tests::extract_accepts_duplicate_identical_flags ... ok
+test output::tests::extract_accepts_flag_after_double_dash ... ok
+test output::tests::extract_accepts_global_flags_anywhere ... ok
+test output::tests::extract_defaults_to_table_without_flags ... ok
+test output::tests::extract_rejects_conflicting_formats ... ok
+test output::tests::missing_output_value_error_normalizes_to_double_dash ... ok
+test output::tests::parse_accepts_empty_and_table_formats ... ok
+test output::tests::parse_accepts_json_formats ... ok
+test output::tests::parse_rejects_unknown_formats ... ok
+test output::tests::render_helper_formats_json_and_table ... ok
+test config::set::fixtures_tests::deeply_nested_mixed_inline_tables ... ok
+test output::tests::render_json_escapes_html_like_go ... ok
+test output::tests::render_json_escapes_line_separators_like_go ... ok
+test output::tests::render_json_preserves_values_and_appends_newline ... ok
+test output::tests::render_table_uses_table_function ... ok
+test output::tests::resolve_defaults_to_table_and_recognizes_json ... ok
+test paths::tests::resolve_location_defaults_to_current_namespace ... ok
+test paths::tests::live_component_paths_resolve_when_home_is_present ... ok
+test paths::tests::resolve_location_falls_back_to_legacy_when_only_legacy_exists ... ok
+test paths::tests::resolve_location_honors_absolute_xdg_env ... ok
+test paths::tests::resolve_location_ignores_relative_xdg_env ... ok
+test paths::tests::resolve_location_memory_data_dir ... ok
+test paths::tests::resolve_location_prefers_current_when_both_exist ... ok
+test paths::tests::resolve_location_returns_none_when_no_base_or_home ... ok
+test paths::tests::resolve_location_skills_cache_dir ... ok
+test paths::tests::resolve_location_skills_cache_legacy_fallback ... ok
+test paths::tests::resolve_location_skills_config_dir ... ok
+test paths::tests::resolve_location_skills_config_legacy_fallback ... ok
+test paths::tests::resolve_location_skills_data_dir ... ok
+test version::tests::current_platform_non_empty ... ok
+test version::tests::platform_mapping_arch ... ok
+test version::tests::platform_mapping_os ... ok
+test version::tests::platform_pair_formatting ... ok
+test version::tests::version_info_json_roundtrip ... ok
+test version::tests::version_info_json_serialization_matches_schema ... ok
+test version::tests::version_info_sets_correct_fields ... ok
+test version::tests::version_info_with_schema ... ok
+test config::set::fixtures_tests::datetime_preservation_subseconds_and_tz ... ok
+test xdg::tests::audit_dir_sits_under_data_dir ... ok
+test config::set::tests::set_rejects_intermediate_scalar_without_writing ... ok
+test xdg::tests::cache_dir_accepts_relative_xdg_cache_home ... ok
+test xdg::tests::cache_dir_honors_env_and_falls_back_to_home ... ok
+test xdg::tests::config_dir_is_parent_of_config_path ... ok
+test config::set::fixtures_tests::recursively_flatten_nested_inline_tables ... ok
+test config::set::fixtures_tests::preserve_arrays_datetime_quoted_keys_and_arrays_of_tables ... ok
+test xdg::tests::config_path_falls_back_to_default_when_both_missing ... ok
+test xdg::tests::config_path_falls_back_to_home_when_xdg_empty ... ok
+test xdg::tests::config_path_falls_back_to_home_when_xdg_unset ... ok
+test xdg::tests::config_path_honors_absolute_xdg_config_home ... ok
+test xdg::tests::config_path_ignores_relative_xdg_config_home ... ok
+test xdg::tests::data_dir_accepts_relative_xdg_data_home ... ok
+test xdg::tests::data_dir_honors_env_and_falls_back_to_home ... ok
+test xdg::tests::home_dir_empty_returns_none ... ok
+test xdg::tests::home_dir_unix_ignores_userprofile_and_homedrive ... ok
+test xdg::tests::home_dir_unix_uses_home_only ... ok
+test xdg::tests::home_dir_windows_falls_back_to_homedrive_and_homepath ... ok
+test xdg::tests::home_dir_windows_ignores_home ... ok
+test xdg::tests::home_dir_windows_partial_homedrive_or_homepath_returns_none ... ok
+test xdg::tests::home_dir_windows_uses_userprofile_first ... ok
+test xdg::tests::live_config_path_always_resolves ... ok
+test xdg::tests::live_env_resolves_when_home_is_present ... ok
+test xdg::tests::managed_bin_dir_sits_under_home ... ok
+test xdg::tests::patterns_dir_sits_under_data_dir_as_recipes ... ok
+test xdg::tests::profiles_dir_sits_under_config_dir ... ok
+test config::set::tests::set_requires_exactly_two_arguments_and_nonempty_key ... ok
+test config::set::tests::set_rewrites_comments_and_preserves_existing_values ... ok
+test config::set::fixtures_tests::mutate_and_flatten_existing_inline_tables ... ok
+test config::set::fixtures_tests::unix_raw_non_utf8_key_and_value_no_collision_with_ufffd ... ok
+test config::set::tests::set_writes_backup_and_preserves_original_when_backup_fails ... ok
+test config::set::tests::set_infers_go_bool_and_int64_spellings_then_string ... ok
+
+test result: ok. 106 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/xdg_paths_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/xdg_paths_tests-0406e50384da5b44)
+
+running 1 test
+test xdg_paths_match_go_oracle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/symbrain_harness-3db18ac5c8617d3a)
+
+running 5 tests
+test registry::tests::harnesses_without_a_project_config_have_no_project_path ... ok
+test inventory_read::tests::clean_path_preserves_leading_parent_components ... ok
+test inventory_read::tests::clean_path_matches_go_filepath_clean ... ok
+test registry::tests::project_config_path_is_cleaned_like_go_filepath_join ... ok
+test write::core::tests::backup_name_preserves_non_utf8_basename_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/go_parse_errors.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/go_parse_errors-444b217be762877d)
+
+running 3 tests
+test parse_error_messages_use_go_wording ... ok
+test deeply_nested_json_is_parsed_and_dropped_without_overflowing_the_stack ... ok
+test go_recorded_parse_results_are_reproduced_without_a_go_binary ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/harness_tests.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/harness_tests-e72754a0e4fc6cc1)
+
+running 16 tests
+test injected_paths_use_target_os_not_host_goos ... ok
+test entry_semantics_match_go_and_are_cross_platform ... ok
+test json_preserves_duplicate_key_order_and_numeric_lexemes ... ok
+test parser_rejects_malformed_and_wrong_top_level_documents ... ok
+test failed_remove_is_rollback_safe ... ok
+test backup_rejects_symlink_targets ... ok
+test go_toml_goldens_are_byte_exact_and_reversible ... ok
+test registry_is_exactly_the_nine_entry_go_registry ... ok
+test unsupported_adapters_are_not_mcp_documents ... ok
+test backup_rejects_symlink_parents ... ok
+test unified_diff_matches_go_small_and_oversized_contracts ... ok
+test go_json_goldens_are_byte_exact_and_reversible ... ok
+test backup_clock_and_mode_are_deterministic_on_unix ... ok
+test inventory_models_are_read_only_and_redact_environment_values ... ok
+test backups_with_same_timestamp_keep_both_snapshots ... ok
+test parsers_follow_go_for_large_json_shapes_and_deep_nesting ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/path_safety.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/path_safety-ec6a583bd7cb5d79)
+
+running 2 tests
+test inventory_display_preserves_leading_parent_sibling_path ... ok
+test profile_binding_scan_preserves_leading_parent_sibling_path ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests symbrain_cli
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests symbrain_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests symbrain_harness
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

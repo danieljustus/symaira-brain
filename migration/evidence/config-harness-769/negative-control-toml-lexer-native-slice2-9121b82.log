@@ -1,0 +1,27 @@
+   Compiling symbrain-harness v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769b/rust/symbrain-harness)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.72s
+     Running tests/go_parse_errors.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/go_parse_errors-dbb1e8f8428c3160)
+
+running 3 tests
+test parse_error_messages_use_go_wording ... ok
+test deeply_nested_json_is_parsed_and_dropped_without_overflowing_the_stack ... ok
+test go_recorded_parse_results_are_reproduced_without_a_go_binary ... FAILED
+
+failures:
+
+---- go_recorded_parse_results_are_reproduced_without_a_go_binary stdout ----
+
+thread 'go_recorded_parse_results_are_reproduced_without_a_go_binary' (39502499) panicked at rust/symbrain-harness/tests/go_parse_errors.rs:70:9:
+assertion `left == right` failed: "cfgh-parse-toml-019-key-quoted-newline-json" ("key-quoted-newline")
+  left: Object {"error": String("harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: strings cannot contain new lines"), "exists": Bool(true), "parsed": Bool(false), "servers": Array []}
+ right: Object {"error": String("harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: strings cannot contain newlines"), "exists": Bool(true), "parsed": Bool(false), "servers": Array []}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    go_recorded_parse_results_are_reproduced_without_a_go_binary
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+error: test failed, to rerun pass `-p symbrain-harness --test go_parse_errors`
+cargo exit 101

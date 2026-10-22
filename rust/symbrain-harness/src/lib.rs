@@ -6,6 +6,11 @@ mod backup;
 mod diff;
 mod document;
 mod entry;
+mod go_json;
+mod go_letters;
+mod go_quote;
+mod go_read;
+mod go_toml;
 mod inventory;
 mod inventory_read;
 mod json;
@@ -251,5 +256,12 @@ pub(crate) fn resolve_path(
             ));
         }
     };
-    Ok(result)
+    // Go builds these paths with `filepath.Join`, which lexically cleans them.
+    // `clean_path` rebuilds with host separators, so it only applies where the
+    // host is Unix; an injected Unix target on a Windows host stays as built.
+    if target_os == "windows" || cfg!(windows) {
+        Ok(result)
+    } else {
+        Ok(crate::inventory_read::clean_path(&result))
+    }
 }

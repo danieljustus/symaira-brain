@@ -199,6 +199,16 @@ fn render_json_escapes_html_like_go() {
 }
 
 #[test]
+fn render_json_escapes_line_separators_like_go() {
+    let mut output = Vec::new();
+    render_json(&mut output, &"a\u{2028}b\u{2029}c").unwrap();
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        "\"a\\u2028b\\u2029c\"\n"
+    );
+}
+
+#[test]
 fn render_table_uses_table_function() {
     let mut buf = Vec::new();
     let data = "ignored-for-table";

@@ -1,64 +1,124 @@
 pub(crate) use crate::json_parser::{Object, Value};
 use crate::{Entry, ServerInfo};
 
-pub(crate) use crate::json_parser::parse;
-
 pub(crate) fn marshal(value: &Value) -> Vec<u8> {
     let mut output = String::new();
-    marshal_value(&mut output, value, "");
+    marshal_value(&mut output, value);
     output.push('\n');
     output.into_bytes()
 }
 
-fn marshal_value(output: &mut String, value: &Value, prefix: &str) {
-    match value {
-        Value::Object(object) => marshal_object(output, object, prefix),
-        Value::Array(values) => marshal_array(output, values, prefix),
-        Value::String(value) => {
-            output.push_str(&serde_json::to_string(value).expect("strings are serializable"));
-        }
-        Value::Number(value) => output.push_str(value),
-        Value::Bool(value) => output.push_str(if *value { "true" } else { "false" }),
-        Value::Null => output.push_str("null"),
-    }
+/// An open container of [`marshal_value`] and the element it is writing.
+enum Frame<'a> {
+    Object(&'a Object, usize),
+    Array(&'a [Value], usize),
 }
-fn marshal_object(output: &mut String, object: &Object, prefix: &str) {
-    if object.keys.is_empty() {
-        output.push_str("{}");
-        return;
-    }
-    output.push_str("{\n");
-    let child = format!("{prefix}  ");
-    for (index, key) in object.keys.iter().enumerate() {
-        output.push_str(&child);
-        output.push_str(&serde_json::to_string(key).expect("keys are serializable"));
-        output.push_str(": ");
-        marshal_value(output, &object.values[key], &child);
-        if index + 1 != object.keys.len() {
-            output.push(',');
-        }
-        output.push('\n');
-    }
-    output.push_str(prefix);
-    output.push('}');
+
+fn push_indent(output: &mut String, depth: usize) {
+    output.extend(std::iter::repeat_n(' ', depth * 2));
 }
-fn marshal_array(output: &mut String, values: &[Value], prefix: &str) {
-    if values.is_empty() {
-        output.push_str("[]");
+
+/// Ends the element the innermost container just wrote: the separating
+/// comma (all but the last) and the line break.
+fn finish_element(output: &mut String, stack: &mut [Frame<'_>]) {
+    let Some(frame) = stack.last_mut() else {
         return;
+    };
+    let (index, len) = match frame {
+        Frame::Object(object, index) => (index, object.keys.len()),
+        Frame::Array(values, index) => (index, values.len()),
+    };
+    if *index + 1 != len {
+        output.push(',');
     }
-    output.push_str("[\n");
-    let child = format!("{prefix}  ");
-    for (index, value) in values.iter().enumerate() {
-        output.push_str(&child);
-        marshal_value(output, value, &child);
-        if index + 1 != values.len() {
-            output.push(',');
+    output.push('\n');
+    *index += 1;
+}
+
+/// Writes `value` with two-space indentation like Go's `marshalJSONValue`.
+///
+/// Nesting is walked with an explicit stack: Go's decoder accepts any depth
+/// below the configuration size cap, so the native stack must not bound it.
+fn marshal_value(output: &mut String, root: &Value) {
+    let mut stack: Vec<Frame<'_>> = Vec::new();
+    let mut pending = Some(root);
+    loop {
+        if let Some(value) = pending.take() {
+            let opened = match value {
+                Value::Object(object) if !object.keys.is_empty() => {
+                    output.push_str("{\n");
+                    stack.push(Frame::Object(object, 0));
+                    true
+                }
+                Value::Object(_) => {
+                    output.push_str("{}");
+                    false
+                }
+                Value::Array(values) if !values.is_empty() => {
+                    output.push_str("[\n");
+                    stack.push(Frame::Array(values, 0));
+                    true
+                }
+                Value::Array(_) => {
+                    output.push_str("[]");
+                    false
+                }
+                Value::String(value) => {
+                    output
+                        .push_str(&serde_json::to_string(value).expect("strings are serializable"));
+                    false
+                }
+                Value::Number(value) => {
+                    output.push_str(value);
+                    false
+                }
+                Value::Bool(value) => {
+                    output.push_str(if *value { "true" } else { "false" });
+                    false
+                }
+                Value::Null => {
+                    output.push_str("null");
+                    false
+                }
+            };
+            if !opened {
+                finish_element(output, &mut stack);
+            }
+            continue;
         }
-        output.push('\n');
+        let depth = stack.len();
+        let Some(frame) = stack.last_mut() else {
+            return;
+        };
+        match frame {
+            Frame::Object(object, index) => {
+                let object: &Object = object;
+                if let Some(key) = object.keys.get(*index) {
+                    push_indent(output, depth);
+                    output.push_str(&serde_json::to_string(key).expect("keys are serializable"));
+                    output.push_str(": ");
+                    pending = Some(&object.values[key]);
+                } else {
+                    stack.pop();
+                    push_indent(output, depth - 1);
+                    output.push('}');
+                    finish_element(output, &mut stack);
+                }
+            }
+            Frame::Array(values, index) => {
+                let values: &[Value] = values;
+                if let Some(value) = values.get(*index) {
+                    push_indent(output, depth);
+                    pending = Some(value);
+                } else {
+                    stack.pop();
+                    push_indent(output, depth - 1);
+                    output.push(']');
+                    finish_element(output, &mut stack);
+                }
+            }
+        }
     }
-    output.push_str(prefix);
-    output.push(']');
 }
 
 pub(crate) fn entry(value: &Value) -> Option<Entry> {

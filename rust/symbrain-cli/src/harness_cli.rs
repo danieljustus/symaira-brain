@@ -59,13 +59,13 @@ pub fn run(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> Option<u8> {
+) -> u8 {
     match args.first().and_then(|verb| verb.to_str()) {
         Some("list") => run_list(&args[1..], stdout, stderr, format),
-        Some("health") => Some(run_health(&args[1..], stdout, stderr, format)),
+        Some("health") => run_health(&args[1..], stdout, stderr, format),
         _ => {
             let _ = write!(stderr, "{HARNESS_USAGE}");
-            Some(exit::USAGE)
+            exit::USAGE
         }
     }
 }
@@ -75,14 +75,14 @@ fn run_list(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> Option<u8> {
+) -> u8 {
     let flags = FlagSet {
         string_flags: &["project"],
         usage: HARNESS_LIST_FLAGS,
     };
     let normalized = crate::normalize_flags(args);
     let Ok(parsed) = flags.parse(&normalized, stderr) else {
-        return Some(exit::USAGE);
+        return exit::USAGE;
     };
     if let Some(unexpected) = parsed.rest.first() {
         let _ = writeln!(
@@ -90,20 +90,11 @@ fn run_list(
             "symbrain harness list: unexpected argument {}",
             format_go_quoted(unexpected)
         );
-        return Some(exit::USAGE);
+        return exit::USAGE;
     }
     let project_dir = project_flag(&parsed);
 
     let inventory = list(project_dir.as_deref());
-    if inventory.harnesses.iter().any(|harness| {
-        [Some(&harness.global), harness.project.as_ref()]
-            .into_iter()
-            .flatten()
-            .filter_map(|config| config.error.as_deref())
-            .any(|error| !go_json_inventory_error(error))
-    }) {
-        return None;
-    }
 
     let result = match format {
         OutputFormat::Json => output::render_json(&mut *stdout, &inventory),
@@ -111,10 +102,10 @@ fn run_list(
     };
     if let Err(error) = result {
         let _ = writeln!(stderr, "symbrain harness list: format output: {error}");
-        return Some(exit::GENERIC);
+        return exit::GENERIC;
     }
 
-    Some(exit::OK)
+    exit::OK
 }
 
 /// Go treats an empty `-project` value as "no project directory".
@@ -123,15 +114,6 @@ fn project_flag(parsed: &Parsed) -> Option<PathBuf> {
         .value("project")
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)
-}
-
-fn go_json_inventory_error(error: &str) -> bool {
-    // ponytail: only this oracle-frozen JSON diagnostic is native; add other parser messages with exact Go fixture evidence.
-    error.starts_with("harness: ")
-        && error.contains(
-            " config is not valid json; refusing to edit a config symbrain cannot parse: parse json: ",
-        )
-        && error.ends_with("invalid character 'n'")
 }
 
 fn render_inventory_table(

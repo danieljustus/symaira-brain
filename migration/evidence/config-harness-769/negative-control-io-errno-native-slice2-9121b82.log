@@ -1,0 +1,12 @@
+   Compiling symbrain-harness v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769b/rust/symbrain-harness)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running tests/go_parse_errors.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/go_parse_errors-dbb1e8f8428c3160)
+
+running 3 tests
+test parse_error_messages_use_go_wording ... ok
+test deeply_nested_json_is_parsed_and_dropped_without_overflowing_the_stack ... ok
+test go_recorded_parse_results_are_reproduced_without_a_go_binary ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+cargo exit 0

@@ -1,6 +1,6 @@
-`run.sh OUTPUT_JSON [--record-fixture PATH]` compiles the production Go CLI from
+`run.sh OUTPUT_JSON [--record-fixture PATH] [--record-parse-fixture PATH]` compiles the production Go CLI from
 immutable `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #769 base, with CoreKit v0.18.2,
-as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 324 cases in
+as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 940 cases in
 disposable per-case HOME/XDG/project roots:
 
 * 116 new argv-grammar shapes for `config`, `harness`, `harness list` and
@@ -16,6 +16,23 @@ disposable per-case HOME/XDG/project roots:
   server rows (harness, server, config path, unhealthy status, order) must be
   identical and only the diagnostics follow the HAR-007 redaction
   (`scripts/harness_health_contract.py`); no-server output is byte-exact;
+* 616 `cfgh-parse-*` cases (#769 slice 2, inventory item D1; corpus in
+  `parse_cases.py`), each replayed as `harness list` (table) and
+  `harness list --json`: 108 JSON configs (`encoding/json` Decoder syntax errors
+  (messages carry no byte offsets) such as `invalid character 'x' looking for beginning
+  of value`, `EOF`, `unexpected EOF`, `expected {, got ...`, trailing data, BOM,
+  invalid UTF-8, surrogates, 20,000-deep nesting, across claude, claude-desktop,
+  cursor, opencode and antigravity), 174 codex TOML configs (BurntSushi/toml
+  v1.6.0 lexer, parser, number, datetime and table-conflict errors with
+  `toml: line N (last key "k"): ...`), 5 multi-file cases (several broken
+  configs at once in registry order, plus a broken project `.mcp.json`) and 21
+  POSIX-only read-error cases (`open PATH: <errno>`, `open configuration directory
+  component "x": ...`, non-regular files, the 8 MiB limit and its boundary,
+  symlinked and unreadable files and parents, symlinked/file/`..` project roots).
+  Go decides every expected message; `--record-parse-fixture` rewrites
+  `rust/symbrain-harness/tests/fixtures/go_parse_errors.json` from the Go
+  observations of the single-file cases (inputs over 4 KiB are skipped) and the cargo test
+  `go_parse_errors` replays it without a Go toolchain;
 * 174 existing `config_*` / `harness_*` cases from `scripts/rust-differential.py`.
   `harness_health_initialize` and `harness_health_initialize_json` are excluded
   because they use `SYMBRAIN_GO_BINARY` as their fake MCP server; the main

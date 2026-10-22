@@ -1,0 +1,3310 @@
+{
+ "cases": [
+  {
+   "content_hex": "",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "empty",
+   "harness": "claude",
+   "name": "cfgh-parse-json-000-empty-json"
+  },
+  {
+   "content_hex": "200a090d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "blank-ascii",
+   "harness": "claude",
+   "name": "cfgh-parse-json-001-blank-ascii-json"
+  },
+  {
+   "content_hex": "c2a0e28083e38080",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "blank-unicode",
+   "harness": "claude",
+   "name": "cfgh-parse-json-002-blank-unicode-json"
+  },
+  {
+   "content_hex": "0c0b",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "blank-formfeed",
+   "harness": "claude",
+   "name": "cfgh-parse-json-003-blank-formfeed-json"
+  },
+  {
+   "content_hex": "7b",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "eof-open",
+   "harness": "claude",
+   "name": "cfgh-parse-json-004-eof-open-json"
+  },
+  {
+   "content_hex": "7b226122",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "eof-key",
+   "harness": "claude",
+   "name": "cfgh-parse-json-005-eof-key-json"
+  },
+  {
+   "content_hex": "7b2261223a",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "eof-colon",
+   "harness": "claude",
+   "name": "cfgh-parse-json-006-eof-colon-json"
+  },
+  {
+   "content_hex": "7b2261223a31",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "eof-value",
+   "harness": "claude",
+   "name": "cfgh-parse-json-007-eof-value-json"
+  },
+  {
+   "content_hex": "7b2261223a312c",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "eof-comma",
+   "harness": "claude",
+   "name": "cfgh-parse-json-008-eof-comma-json"
+  },
+  {
+   "content_hex": "7b2261223a5b312c32",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "eof-array",
+   "harness": "claude",
+   "name": "cfgh-parse-json-009-eof-array-json"
+  },
+  {
+   "content_hex": "7b2261223a22616263",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "unexpected-eof-string",
+   "harness": "claude",
+   "name": "cfgh-parse-json-010-unexpected-eof-string-json"
+  },
+  {
+   "content_hex": "7b2261223a225c",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "unexpected-eof-escape",
+   "harness": "claude",
+   "name": "cfgh-parse-json-011-unexpected-eof-escape-json"
+  },
+  {
+   "content_hex": "7b2261223a225c753132",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "unexpected-eof-unicode",
+   "harness": "claude",
+   "name": "cfgh-parse-json-012-unexpected-eof-unicode-json"
+  },
+  {
+   "content_hex": "7b2261223a747275",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "unexpected-eof-literal",
+   "harness": "claude",
+   "name": "cfgh-parse-json-013-unexpected-eof-literal-json"
+  },
+  {
+   "content_hex": "7b2261223a2d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "unexpected-eof-number",
+   "harness": "claude",
+   "name": "cfgh-parse-json-014-unexpected-eof-number-json"
+  },
+  {
+   "content_hex": "7b2261223a3165",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "unexpected-eof-exp",
+   "harness": "claude",
+   "name": "cfgh-parse-json-015-unexpected-eof-exp-json"
+  },
+  {
+   "content_hex": "5b315d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got [",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-array",
+   "harness": "claude",
+   "name": "cfgh-parse-json-016-top-array-json"
+  },
+  {
+   "content_hex": "5b",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got [",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-array-open",
+   "harness": "claude",
+   "name": "cfgh-parse-json-017-top-array-open-json"
+  },
+  {
+   "content_hex": "227822",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got x",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-string",
+   "harness": "claude",
+   "name": "cfgh-parse-json-018-top-string-json"
+  },
+  {
+   "content_hex": "22615c6e5c75303065395c75643833645c75646530305c75643830307a22",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got a\n\u00e9\ud83d\ude00\ufffdz",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-string-escapes",
+   "harness": "claude",
+   "name": "cfgh-parse-json-019-top-string-escapes-json"
+  },
+  {
+   "content_hex": "225c625c665c75303030313c3e26e280a8e280a922",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got \b\f\u0001<>&\u2028\u2029",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-string-specials",
+   "harness": "claude",
+   "name": "cfgh-parse-json-020-top-string-specials-json"
+  },
+  {
+   "content_hex": "2d312e356533",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got -1.5e3",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-number",
+   "harness": "claude",
+   "name": "cfgh-parse-json-021-top-number-json"
+  },
+  {
+   "content_hex": "74727565",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got true",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-true",
+   "harness": "claude",
+   "name": "cfgh-parse-json-022-top-true-json"
+  },
+  {
+   "content_hex": "66616c7365",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got false",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-false",
+   "harness": "claude",
+   "name": "cfgh-parse-json-023-top-false-json"
+  },
+  {
+   "content_hex": "6e756c6c",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got <nil>",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-null",
+   "harness": "claude",
+   "name": "cfgh-parse-json-024-top-null-json"
+  },
+  {
+   "content_hex": "7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-close-brace",
+   "harness": "claude",
+   "name": "cfgh-parse-json-025-top-close-brace-json"
+  },
+  {
+   "content_hex": "5d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ']' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-close-bracket",
+   "harness": "claude",
+   "name": "cfgh-parse-json-026-top-close-bracket-json"
+  },
+  {
+   "content_hex": "3a",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ':' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-colon",
+   "harness": "claude",
+   "name": "cfgh-parse-json-027-top-colon-json"
+  },
+  {
+   "content_hex": "2c",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ',' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-comma",
+   "harness": "claude",
+   "name": "cfgh-parse-json-028-top-comma-json"
+  },
+  {
+   "content_hex": "efbbbf7b7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\u00ef' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-bom",
+   "harness": "claude",
+   "name": "cfgh-parse-json-029-top-bom-json"
+  },
+  {
+   "content_hex": "fffe7b007d00",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\u00ff' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-utf16-bom",
+   "harness": "claude",
+   "name": "cfgh-parse-json-030-top-utf16-bom-json"
+  },
+  {
+   "content_hex": "ff7b7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\u00ff' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-garbage",
+   "harness": "claude",
+   "name": "cfgh-parse-json-031-top-garbage-json"
+  },
+  {
+   "content_hex": "7b6e6f742d6a736f6e",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "not-literal",
+   "harness": "claude",
+   "name": "cfgh-parse-json-032-not-literal-json"
+  },
+  {
+   "content_hex": "7b613a317d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'a'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-bare",
+   "harness": "claude",
+   "name": "cfgh-parse-json-033-key-bare-json"
+  },
+  {
+   "content_hex": "7b2761273a317d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\''",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-single-quote",
+   "harness": "claude",
+   "name": "cfgh-parse-json-034-key-single-quote-json"
+  },
+  {
+   "content_hex": "7b5d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ']'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-bracket",
+   "harness": "claude",
+   "name": "cfgh-parse-json-035-key-bracket-json"
+  },
+  {
+   "content_hex": "7b7b7d7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '{'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-open-brace",
+   "harness": "claude",
+   "name": "cfgh-parse-json-036-key-open-brace-json"
+  },
+  {
+   "content_hex": "7b313a327d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '1'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-number",
+   "harness": "claude",
+   "name": "cfgh-parse-json-037-key-number-json"
+  },
+  {
+   "content_hex": "7b22612220317d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '1' after object key",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "after-key",
+   "harness": "claude",
+   "name": "cfgh-parse-json-038-after-key-json"
+  },
+  {
+   "content_hex": "7b2261227d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' after object key",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "after-key-close",
+   "harness": "claude",
+   "name": "cfgh-parse-json-039-after-key-close-json"
+  },
+  {
+   "content_hex": "7b2261223a3a317d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ':' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "double-colon",
+   "harness": "claude",
+   "name": "cfgh-parse-json-040-double-colon-json"
+  },
+  {
+   "content_hex": "7b2261223a7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-missing",
+   "harness": "claude",
+   "name": "cfgh-parse-json-041-value-missing-json"
+  },
+  {
+   "content_hex": "7b2261223a5d7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ']' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-bracket",
+   "harness": "claude",
+   "name": "cfgh-parse-json-042-value-bracket-json"
+  },
+  {
+   "content_hex": "7b2261223a2c7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ',' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-comma",
+   "harness": "claude",
+   "name": "cfgh-parse-json-043-value-comma-json"
+  },
+  {
+   "content_hex": "7b2261223a31202262223a327d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\"' after object key:value pair",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "pair-missing-comma",
+   "harness": "claude",
+   "name": "cfgh-parse-json-044-pair-missing-comma-json"
+  },
+  {
+   "content_hex": "7b2261223a312c7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for beginning of object key string",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "trailing-comma-object",
+   "harness": "claude",
+   "name": "cfgh-parse-json-045-trailing-comma-object-json"
+  },
+  {
+   "content_hex": "7b2c7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ','",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "leading-comma-object",
+   "harness": "claude",
+   "name": "cfgh-parse-json-046-leading-comma-object-json"
+  },
+  {
+   "content_hex": "7b2261223a312c2c2262223a327d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ',' looking for beginning of object key string",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "double-comma",
+   "harness": "claude",
+   "name": "cfgh-parse-json-047-double-comma-json"
+  },
+  {
+   "content_hex": "7b2261223a5b3120325d7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '2' after array element",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-missing-comma",
+   "harness": "claude",
+   "name": "cfgh-parse-json-048-array-missing-comma-json"
+  },
+  {
+   "content_hex": "7b2261223a5b312c5d7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ']' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-trailing-comma",
+   "harness": "claude",
+   "name": "cfgh-parse-json-049-array-trailing-comma-json"
+  },
+  {
+   "content_hex": "7b2261223a5b317d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' after array element",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-mismatch",
+   "harness": "claude",
+   "name": "cfgh-parse-json-050-array-mismatch-json"
+  },
+  {
+   "content_hex": "7b2261223a7b2262223a315d7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character ']' after object key:value pair",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "object-mismatch",
+   "harness": "claude",
+   "name": "cfgh-parse-json-051-object-mismatch-json"
+  },
+  {
+   "content_hex": "7b7d2078",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected trailing content after the top-level value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "trailing-text",
+   "harness": "claude",
+   "name": "cfgh-parse-json-052-trailing-text-json"
+  },
+  {
+   "content_hex": "7b7d7b7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected trailing content after the top-level value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "trailing-object",
+   "harness": "claude",
+   "name": "cfgh-parse-json-053-trailing-object-json"
+  },
+  {
+   "content_hex": "7b2261223a317d00",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected trailing content after the top-level value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "trailing-nul",
+   "harness": "claude",
+   "name": "cfgh-parse-json-054-trailing-nul-json"
+  },
+  {
+   "content_hex": "7b7d5d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "trailing-close-bracket",
+   "harness": "claude",
+   "name": "cfgh-parse-json-055-trailing-close-bracket-json"
+  },
+  {
+   "content_hex": "7b7d7d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "trailing-close-brace",
+   "harness": "claude",
+   "name": "cfgh-parse-json-056-trailing-close-brace-json"
+  },
+  {
+   "content_hex": "7b2261223a7472757d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' in literal true (expecting 'e')",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "literal-true",
+   "harness": "claude",
+   "name": "cfgh-parse-json-057-literal-true-json"
+  },
+  {
+   "content_hex": "7b2261223a66616c73787d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'x' in literal false (expecting 'e')",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "literal-false",
+   "harness": "claude",
+   "name": "cfgh-parse-json-058-literal-false-json"
+  },
+  {
+   "content_hex": "7b2261223a6e756c7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' in literal null (expecting 'l')",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "literal-null",
+   "harness": "claude",
+   "name": "cfgh-parse-json-059-literal-null-json"
+  },
+  {
+   "content_hex": "7b2261223a74727565657d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'e' after object key:value pair",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "literal-overlong",
+   "harness": "claude",
+   "name": "cfgh-parse-json-060-literal-overlong-json"
+  },
+  {
+   "content_hex": "7b2261223a2b317d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '+' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-plus",
+   "harness": "claude",
+   "name": "cfgh-parse-json-061-number-plus-json"
+  },
+  {
+   "content_hex": "7b2261223a2e357d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '.' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-dot",
+   "harness": "claude",
+   "name": "cfgh-parse-json-062-number-dot-json"
+  },
+  {
+   "content_hex": "7b2261223a2d7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' in numeric literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-minus",
+   "harness": "claude",
+   "name": "cfgh-parse-json-063-number-minus-json"
+  },
+  {
+   "content_hex": "7b2261223a2d787d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'x' in numeric literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-minus-x",
+   "harness": "claude",
+   "name": "cfgh-parse-json-064-number-minus-x-json"
+  },
+  {
+   "content_hex": "7b2261223a312e7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' after decimal point in numeric literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-fraction",
+   "harness": "claude",
+   "name": "cfgh-parse-json-065-number-fraction-json"
+  },
+  {
+   "content_hex": "7b2261223a2d302e7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' after decimal point in numeric literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-fraction-e",
+   "harness": "claude",
+   "name": "cfgh-parse-json-066-number-fraction-e-json"
+  },
+  {
+   "content_hex": "7b2261223a312e35657d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' in exponent of numeric literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-exponent",
+   "harness": "claude",
+   "name": "cfgh-parse-json-067-number-exponent-json"
+  },
+  {
+   "content_hex": "7b2261223a312e35652b7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' in exponent of numeric literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-exponent-sign",
+   "harness": "claude",
+   "name": "cfgh-parse-json-068-number-exponent-sign-json"
+  },
+  {
+   "content_hex": "7b2261223a30317d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '1' after object key:value pair",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "number-leading-zero",
+   "harness": "claude",
+   "name": "cfgh-parse-json-069-number-leading-zero-json"
+  },
+  {
+   "content_hex": "7b2261223a3132333435363738393031323334353637383930313233343536373839302c2262223a31653939397d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "number-huge-ok",
+   "harness": "claude",
+   "name": "cfgh-parse-json-070-number-huge-ok-json"
+  },
+  {
+   "content_hex": "7b2261223a2201227d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\x01' in string literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-control",
+   "harness": "claude",
+   "name": "cfgh-parse-json-071-string-control-json"
+  },
+  {
+   "content_hex": "7b2261223a22780a79227d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\n' in string literal",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-newline",
+   "harness": "claude",
+   "name": "cfgh-parse-json-072-string-newline-json"
+  },
+  {
+   "content_hex": "7b2261223a225c78227d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'x' in string escape code",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape",
+   "harness": "claude",
+   "name": "cfgh-parse-json-073-string-escape-json"
+  },
+  {
+   "content_hex": "7b2261223a225c27227d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\'' in string escape code",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape-quote",
+   "harness": "claude",
+   "name": "cfgh-parse-json-074-string-escape-quote-json"
+  },
+  {
+   "content_hex": "7b2261223a225c7531324734227d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'G' in \\u hexadecimal character escape",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-unicode-hex",
+   "harness": "claude",
+   "name": "cfgh-parse-json-075-string-unicode-hex-json"
+  },
+  {
+   "content_hex": "7b2261223a225c753132227d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\"' in \\u hexadecimal character escape",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-unicode-short",
+   "harness": "claude",
+   "name": "cfgh-parse-json-076-string-unicode-short-json"
+  },
+  {
+   "content_hex": "7b226d637053657276657273223a7b22ff223a7b22636f6d6d616e64223a22c3227d7d7d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "command": "\ufffd",
+      "name": "\ufffd",
+      "transport": "stdio"
+     }
+    ]
+   },
+   "family": "string-invalid-utf8-ok",
+   "harness": "claude",
+   "name": "cfgh-parse-json-077-string-invalid-utf8-ok-json"
+  },
+  {
+   "content_hex": "7b226d637053657276657273223a7b225c7564383030223a7b22636f6d6d616e64223a225c75643833645c75646530305c7564633030227d7d7d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "command": "\ud83d\ude00\ufffd",
+      "name": "\ufffd",
+      "transport": "stdio"
+     }
+    ]
+   },
+   "family": "string-surrogates-ok",
+   "harness": "claude",
+   "name": "cfgh-parse-json-078-string-surrogates-ok-json"
+  },
+  {
+   "content_hex": "7b017d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\x01'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-control",
+   "harness": "claude",
+   "name": "cfgh-parse-json-079-char-control-json"
+  },
+  {
+   "content_hex": "7b7f7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\x7f'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-del",
+   "harness": "claude",
+   "name": "cfgh-parse-json-080-char-del-json"
+  },
+  {
+   "content_hex": "7b2261223a807d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\u0080' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-c1",
+   "harness": "claude",
+   "name": "cfgh-parse-json-081-char-c1-json"
+  },
+  {
+   "content_hex": "7b2261223ac2a07d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\u00c2' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-nbsp",
+   "harness": "claude",
+   "name": "cfgh-parse-json-082-char-nbsp-json"
+  },
+  {
+   "content_hex": "7b2261223ac2ad7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\u00c2' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-shy",
+   "harness": "claude",
+   "name": "cfgh-parse-json-083-char-shy-json"
+  },
+  {
+   "content_hex": "7b2261223ac3a97d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\u00c3' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-latin1",
+   "harness": "claude",
+   "name": "cfgh-parse-json-084-char-latin1-json"
+  },
+  {
+   "content_hex": "7b2261223a3c3e267d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '<' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-html",
+   "harness": "claude",
+   "name": "cfgh-parse-json-085-char-html-json"
+  },
+  {
+   "content_hex": "7b2261223a226222637d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'c' after object key:value pair",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-quote",
+   "harness": "claude",
+   "name": "cfgh-parse-json-086-char-quote-json"
+  },
+  {
+   "content_hex": "7b2261223a5c7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\\\' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-backslash",
+   "harness": "claude",
+   "name": "cfgh-parse-json-087-char-backslash-json"
+  },
+  {
+   "content_hex": "7b2261223ae280a87d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\u00e2' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-line-separator",
+   "harness": "claude",
+   "name": "cfgh-parse-json-088-char-line-separator-json"
+  },
+  {
+   "content_hex": "7b2261223a0a7d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for beginning of value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-newline",
+   "harness": "claude",
+   "name": "cfgh-parse-json-089-char-newline-json"
+  },
+  {
+   "content_hex": "7b2261223a3109087d",
+   "expected": {
+    "error": "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '\\b' after object key:value pair",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "char-tab",
+   "harness": "claude",
+   "name": "cfgh-parse-json-090-char-tab-json"
+  },
+  {
+   "content_hex": "7b226d637053657276657273223a7b2262223a7b2274797065223a2268747470222c2275726c223a22687474703a2f2f68227d2c2261223a7b22636f6d6d616e64223a2263222c2261726773223a5b2278222c312c2279225d2c22656e76223a7b224b223a2276227d7d7d7d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "args": [
+       "x",
+       "y"
+      ],
+      "command": "c",
+      "env_names": [
+       "K"
+      ],
+      "name": "a",
+      "transport": "stdio"
+     },
+     {
+      "name": "b",
+      "transport": "http",
+      "url": "http://h"
+     }
+    ]
+   },
+   "family": "valid-servers",
+   "harness": "claude",
+   "name": "cfgh-parse-json-094-valid-servers-json"
+  },
+  {
+   "content_hex": "7b226d637053657276657273223a7b2261223a7b22636f6d6d616e64223a2231227d2c2261223a7b22636f6d6d616e64223a2232227d7d2c226d637053657276657273223a7b227a223a7b7d7d7d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "name": "z",
+      "transport": "stdio"
+     }
+    ]
+   },
+   "family": "valid-duplicate-keys",
+   "harness": "claude",
+   "name": "cfgh-parse-json-095-valid-duplicate-keys-json"
+  },
+  {
+   "content_hex": "7b",
+   "expected": {
+    "error": "harness: claude-desktop config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "claude-desktop-eof",
+   "harness": "claude-desktop",
+   "name": "cfgh-parse-json-096-claude-desktop-eof-json"
+  },
+  {
+   "content_hex": "5b5d",
+   "expected": {
+    "error": "harness: claude-desktop config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got [",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "claude-desktop-array",
+   "harness": "claude-desktop",
+   "name": "cfgh-parse-json-097-claude-desktop-array-json"
+  },
+  {
+   "content_hex": "7b2261223a7472757d",
+   "expected": {
+    "error": "harness: claude-desktop config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' in literal true (expecting 'e')",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "claude-desktop-literal",
+   "harness": "claude-desktop",
+   "name": "cfgh-parse-json-098-claude-desktop-literal-json"
+  },
+  {
+   "content_hex": "7b",
+   "expected": {
+    "error": "harness: cursor config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "cursor-eof",
+   "harness": "cursor",
+   "name": "cfgh-parse-json-099-cursor-eof-json"
+  },
+  {
+   "content_hex": "7b226d637053657276657273223a7b7d7d2078",
+   "expected": {
+    "error": "harness: cursor config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected trailing content after the top-level value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "cursor-trailing",
+   "harness": "cursor",
+   "name": "cfgh-parse-json-100-cursor-trailing-json"
+  },
+  {
+   "content_hex": "7b226d637053657276657273223a7b22c3a9223a7b22636f6d6d616e64223a22e282ac227d7d7dff",
+   "expected": {
+    "error": "harness: cursor config is not valid json; refusing to edit a config symbrain cannot parse: parse json: unexpected trailing content after the top-level value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "cursor-utf8",
+   "harness": "cursor",
+   "name": "cfgh-parse-json-101-cursor-utf8-json"
+  },
+  {
+   "content_hex": "7b",
+   "expected": {
+    "error": "harness: opencode config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "opencode-eof",
+   "harness": "opencode",
+   "name": "cfgh-parse-json-102-opencode-eof-json"
+  },
+  {
+   "content_hex": "7b613a317d",
+   "expected": {
+    "error": "harness: opencode config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'a'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "opencode-key",
+   "harness": "opencode",
+   "name": "cfgh-parse-json-103-opencode-key-json"
+  },
+  {
+   "content_hex": "",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "opencode-empty",
+   "harness": "opencode",
+   "name": "cfgh-parse-json-104-opencode-empty-json"
+  },
+  {
+   "content_hex": "7b",
+   "expected": {
+    "error": "harness: antigravity config is not valid json; refusing to edit a config symbrain cannot parse: parse json: EOF",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "antigravity-eof",
+   "harness": "antigravity",
+   "name": "cfgh-parse-json-105-antigravity-eof-json"
+  },
+  {
+   "content_hex": "5b315d",
+   "expected": {
+    "error": "harness: antigravity config is not valid json; refusing to edit a config symbrain cannot parse: parse json: expected {, got [",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "antigravity-array",
+   "harness": "antigravity",
+   "name": "cfgh-parse-json-106-antigravity-array-json"
+  },
+  {
+   "content_hex": "200a",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "antigravity-empty",
+   "harness": "antigravity",
+   "name": "cfgh-parse-json-107-antigravity-empty-json"
+  },
+  {
+   "content_hex": "",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "empty",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-000-empty-json"
+  },
+  {
+   "content_hex": "0a0a",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "newlines",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-001-newlines-json"
+  },
+  {
+   "content_hex": "2320630a",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "comment",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-002-comment-json"
+  },
+  {
+   "content_hex": "efbbbf61203d2031",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "bom-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-003-bom-ok-json"
+  },
+  {
+   "content_hex": "efbbbf61203d20",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "bom-garbage",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-004-bom-garbage-json"
+  },
+  {
+   "content_hex": "fffe61203d2031",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "utf16-bom",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-005-utf16-bom-json"
+  },
+  {
+   "content_hex": "feff61",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected EOF; expected key separator '='",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "utf16-bom-be",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-006-utf16-bom-be-json"
+  },
+  {
+   "content_hex": "00",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: files cannot contain NULL bytes; probably using UTF-16; TOML files must be UTF-8",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "nul-first",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-007-nul-first-json"
+  },
+  {
+   "content_hex": "616200",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: files cannot contain NULL bytes; probably using UTF-16; TOML files must be UTF-8",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "nul-early",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-008-nul-early-json"
+  },
+  {
+   "content_hex": "61203d20310a00",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: TOML files cannot contain control characters: '0x00'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "nul-late",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-009-nul-late-json"
+  },
+  {
+   "content_hex": "61",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected EOF; expected key separator '='",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-010-key-eof-json"
+  },
+  {
+   "content_hex": "61203d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-eof-value",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-011-key-eof-value-json"
+  },
+  {
+   "content_hex": "612062203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or '=', but got 'b' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-space",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-012-key-space-json"
+  },
+  {
+   "content_hex": "3d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected '=': key name appears blank",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-blank",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-013-key-blank-json"
+  },
+  {
+   "content_hex": "2e61203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected '.': keys cannot start with a '.'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-dot-start",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-014-key-dot-start-json"
+  },
+  {
+   "content_hex": "612e203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected '='",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-dot-end",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-015-key-dot-end-json"
+  },
+  {
+   "content_hex": "612e2e62203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected '.'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-dot-dot",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-016-key-dot-dot-json"
+  },
+  {
+   "content_hex": "612e2262203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected EOF; expected '\"'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-quote-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-017-key-quote-eof-json"
+  },
+  {
+   "content_hex": "22612062222e63203d2031",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "key-quoted-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-018-key-quoted-ok-json"
+  },
+  {
+   "content_hex": "22610a6222203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: strings cannot contain newlines",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-quoted-newline",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-019-key-quoted-newline-json"
+  },
+  {
+   "content_hex": "22615c7122203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: invalid escape in string '\\q'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-quoted-escape",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-020-key-quoted-escape-json"
+  },
+  {
+   "content_hex": "22612262203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or '=', but got 'b' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-after-quote",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-021-key-after-quote-json"
+  },
+  {
+   "content_hex": "61203d20",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-022-value-eof-json"
+  },
+  {
+   "content_hex": "61203d2078",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found \"x\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-bare",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-023-value-bare-json"
+  },
+  {
+   "content_hex": "61203d20666f6f20626172",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found \"foo\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-bare-long",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-024-value-bare-long-json"
+  },
+  {
+   "content_hex": "61203d205f31",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found '_' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-underscore",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-025-value-underscore-json"
+  },
+  {
+   "content_hex": "61203d202e35",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): floats must start with a digit, not '.'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-dot",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-026-value-dot-json"
+  },
+  {
+   "content_hex": "61203d20ceb1ceb2",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found \"\u03b1\u03b2\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-unicode-letter",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-027-value-unicode-letter-json"
+  },
+  {
+   "content_hex": "61203d20e285a7",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found '\u2167' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-unicode-number",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-028-value-unicode-number-json"
+  },
+  {
+   "content_hex": "61203d20c2a0",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found '\\u00a0' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-nbsp",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-029-value-nbsp-json"
+  },
+  {
+   "content_hex": "61203d203c",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found '<' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-html",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-030-value-html-json"
+  },
+  {
+   "content_hex": "61203d0a31",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found '\\n' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-newline",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-031-value-newline-json"
+  },
+  {
+   "content_hex": "61203d20747275652066616c7365",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected a top-level item to end with a newline, comment, or EOF, but got 'f' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-trailing",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-032-value-trailing-json"
+  },
+  {
+   "content_hex": "61203d20312032",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected a top-level item to end with a newline, comment, or EOF, but got '2' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "value-two-ints",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-033-value-two-ints-json"
+  },
+  {
+   "content_hex": "61203d20312027",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected a top-level item to end with a newline, comment, or EOF, but got '\\'' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "top-end-quote",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-034-top-end-quote-json"
+  },
+  {
+   "content_hex": "61203d202278",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected '\"'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-035-string-eof-json"
+  },
+  {
+   "content_hex": "61203d2022780a22",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): strings cannot contain newlines",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-newline",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-036-string-newline-json"
+  },
+  {
+   "content_hex": "61203d202778",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected \"'\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-raw-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-037-string-raw-eof-json"
+  },
+  {
+   "content_hex": "61203d2027780a27",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): strings cannot contain newlines",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-raw-newline",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-038-string-raw-newline-json"
+  },
+  {
+   "content_hex": "61203d20225c7122",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid escape in string '\\q'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-039-string-escape-json"
+  },
+  {
+   "content_hex": "61203d20225c2022",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid escape: '\\ '",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape-space",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-040-string-escape-space-json"
+  },
+  {
+   "content_hex": "61203d20225c756438303022",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Escaped character '\\ud800' is not valid UTF-8.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape-surrogate",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-041-string-escape-surrogate-json"
+  },
+  {
+   "content_hex": "61203d20225c55303031313030303022",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Escaped character '\\u00110000' is not valid UTF-8.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape-range",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-042-string-escape-range-json"
+  },
+  {
+   "content_hex": "61203d20225c783422",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected two hexadecimal digits after '\\x', but got \"\\\\x4\\\"\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape-x-short",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-043-string-escape-x-short-json"
+  },
+  {
+   "content_hex": "61203d20225c753132473422",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected four hexadecimal digits after '\\u', but got \"\\\\u12G\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape-u-bad",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-044-string-escape-u-bad-json"
+  },
+  {
+   "content_hex": "61203d20225c553132333422",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected eight hexadecimal digits after '\\U', but got \"\\\\U1234\\\"\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "string-escape-U-short",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-045-string-escape-U-short-json"
+  },
+  {
+   "content_hex": "61203d20225c655c7834315c75303065395c55303030314636303022",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "string-escape-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-046-string-escape-ok-json"
+  },
+  {
+   "content_hex": "61203d2022222278",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected '\"\"\"'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "multi-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-047-multi-eof-json"
+  },
+  {
+   "content_hex": "61203d2027272778",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected \"'''\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "multi-raw-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-048-multi-raw-eof-json"
+  },
+  {
+   "content_hex": "61203d2022222278222222222222",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected '\"\"\"\"\"\"'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "multi-six-quotes",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-049-multi-six-quotes-json"
+  },
+  {
+   "content_hex": "61203d2027272778272727272727",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected \"''''''\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "multi-raw-six-quotes",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-050-multi-raw-six-quotes-json"
+  },
+  {
+   "content_hex": "61203d20222222785c2079222222",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid escape: '\\ '",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "multi-bad-escape",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-051-multi-bad-escape-json"
+  },
+  {
+   "content_hex": "61203d20222222785c0a20202079222222",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "multi-line-ending-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-052-multi-line-ending-ok-json"
+  },
+  {
+   "content_hex": "61203d205b312c",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected EOF; expected value",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-053-array-eof-json"
+  },
+  {
+   "content_hex": "61203d205b3120325d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected a comma (',') or array terminator (']'), but got '2'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-missing-comma",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-054-array-missing-comma-json"
+  },
+  {
+   "content_hex": "61203d205b2c315d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected comma",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-leading-comma",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-055-array-leading-comma-json"
+  },
+  {
+   "content_hex": "61203d205b312c2c325d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected comma",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-double-comma",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-056-array-double-comma-json"
+  },
+  {
+   "content_hex": "61203d205b5b315d2c5b325d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected a comma (',') or array terminator (']'), but got end of file",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-unclosed-nested",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-057-array-unclosed-nested-json"
+  },
+  {
+   "content_hex": "61203d205b315d2078",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected a top-level item to end with a newline, comment, or EOF, but got 'x' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-junk",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-058-array-junk-json"
+  },
+  {
+   "content_hex": "61203d205b312c20785d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found \"x\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-bad-element",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-059-array-bad-element-json"
+  },
+  {
+   "content_hex": "61203d207b",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected '=': key name appears blank",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "inline-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-060-inline-eof-json"
+  },
+  {
+   "content_hex": "61203d207b623d31",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a.b\"): expected a comma or an inline table terminator '}', but got end of file instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "inline-eof-pair",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-061-inline-eof-pair-json"
+  },
+  {
+   "content_hex": "61203d207b623d3120633d327d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a.b\"): expected a comma or an inline table terminator '}', but got 'c' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "inline-missing-comma",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-062-inline-missing-comma-json"
+  },
+  {
+   "content_hex": "61203d207b623d312c7d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "inline-trailing-comma",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-063-inline-trailing-comma-json"
+  },
+  {
+   "content_hex": "61203d207b2c7d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): unexpected comma",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "inline-leading-comma",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-064-inline-leading-comma-json"
+  },
+  {
+   "content_hex": "61203d207b0a20623d310a7d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "inline-newline",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-065-inline-newline-json"
+  },
+  {
+   "content_hex": "61203d207b623d312c20623d327d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a.b\"): Key 'a.b' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "inline-duplicate",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-066-inline-duplicate-json"
+  },
+  {
+   "content_hex": "61203d207b623d312c20622e633d327d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a.b.c\"): Key 'a.b' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "inline-conflict",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-067-inline-conflict-json"
+  },
+  {
+   "content_hex": "5b",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected end of table name (table names cannot be empty)",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-068-table-eof-json"
+  },
+  {
+   "content_hex": "5b61",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or ']' to end table name, but got '\\x00' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-name-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-069-table-name-eof-json"
+  },
+  {
+   "content_hex": "5b5d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected end of table name (table names cannot be empty)",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-empty",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-070-table-empty-json"
+  },
+  {
+   "content_hex": "5b2e615d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected table separator (table names cannot be empty)",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-dot-start",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-071-table-dot-start-json"
+  },
+  {
+   "content_hex": "5b612e5d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: unexpected end of table name (table names cannot be empty)",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-dot-end",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-072-table-dot-end-json"
+  },
+  {
+   "content_hex": "5b6120625d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or ']' to end table name, but got 'b' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-space",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-073-table-space-json"
+  },
+  {
+   "content_hex": "5b615d5d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected a top-level item to end with a newline, comment, or EOF, but got ']' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-extra-close",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-074-table-extra-close-json"
+  },
+  {
+   "content_hex": "5b615d2078",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected a top-level item to end with a newline, comment, or EOF, but got 'x' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-trailing",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-075-table-trailing-json"
+  },
+  {
+   "content_hex": "5b615d0a5b615d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-duplicate",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-076-table-duplicate-json"
+  },
+  {
+   "content_hex": "613d310a5b615d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-after-key",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-077-table-after-key-json"
+  },
+  {
+   "content_hex": "5b612e622e635d0a5b615d0a622e632e643d31",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "table-after-dotted",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-078-table-after-dotted-json"
+  },
+  {
+   "content_hex": "5b612e625d0a5b615d0a5b612e625d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 3 (last key \"a\"): Key 'a.b' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-implicit-twice",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-079-table-implicit-twice-json"
+  },
+  {
+   "content_hex": "5b615d0a62203d20310a5b612e622e635d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 3 (last key \"a\"): Key 'a.b' was already created as a hash.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-hash-conflict",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-080-table-hash-conflict-json"
+  },
+  {
+   "content_hex": "61203d20310a5b612e625d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' was already created as a hash.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-of-scalar",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-081-table-of-scalar-json"
+  },
+  {
+   "content_hex": "5b5b615d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected end of table array name delimiter ']', but got '\\x00' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-table-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-082-array-table-eof-json"
+  },
+  {
+   "content_hex": "5b5b61",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or ']' to end table name, but got '\\x00' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-table-unclosed",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-083-array-table-unclosed-json"
+  },
+  {
+   "content_hex": "5b5b615d785d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected end of table array name delimiter ']', but got 'x' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-table-mismatch",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-084-array-table-mismatch-json"
+  },
+  {
+   "content_hex": "5b5b615d5d5d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected a top-level item to end with a newline, comment, or EOF, but got ']' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-table-extra",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-085-array-table-extra-json"
+  },
+  {
+   "content_hex": "5b615d0a5b5b615d5d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' was already created and cannot be used as an array.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-table-over-table",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-086-array-table-over-table-json"
+  },
+  {
+   "content_hex": "61203d205b5d0a5b5b615d5d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' was already created and cannot be used as an array.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-table-over-array",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-087-array-table-over-array-json"
+  },
+  {
+   "content_hex": "61203d205b7b623d317d5d0a5b5b615d5d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' was already created and cannot be used as an array.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "array-table-over-inline",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-088-array-table-over-inline-json"
+  },
+  {
+   "content_hex": "5b5b615d5d0a5b615d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "table-over-array-table",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-089-table-over-array-table-json"
+  },
+  {
+   "content_hex": "613d310a613d32",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2 (last key \"a\"): Key 'a' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-duplicate",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-090-key-duplicate-json"
+  },
+  {
+   "content_hex": "612e623d310a612e622e633d32",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2 (last key \"a.b.c\"): Key 'a.b' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-dotted-conflict",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-091-key-dotted-conflict-json"
+  },
+  {
+   "content_hex": "613d7b623d317d0a5b612e635d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "key-inline-extend",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-092-key-inline-extend-json"
+  },
+  {
+   "content_hex": "613d7b623d317d0a5b615d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key 'a' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-inline-redefine",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-093-key-inline-redefine-json"
+  },
+  {
+   "content_hex": "613d7b623d317d0a612e633d32",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "key-dotted-over-inline",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-094-key-dotted-over-inline-json"
+  },
+  {
+   "content_hex": "61203d203031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid integer \"01\": cannot have leading zeroes",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-leading-zero",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-095-int-leading-zero-json"
+  },
+  {
+   "content_hex": "61203d20315f",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid integer \"1_\": underscores must be surrounded by digits",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-underscore-end",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-096-int-underscore-end-json"
+  },
+  {
+   "content_hex": "61203d20315f5f30",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid integer \"1__0\": underscores must be surrounded by digits",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-underscore-double",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-097-int-underscore-double-json"
+  },
+  {
+   "content_hex": "61203d2039323233333732303336383534373735383038",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): 9223372036854775808 is out of range for int64",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-range-high",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-098-int-range-high-json"
+  },
+  {
+   "content_hex": "61203d202d39323233333732303336383534373735383039",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): -9223372036854775809 is out of range for int64",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-range-low",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-099-int-range-low-json"
+  },
+  {
+   "content_hex": "61203d202d39323233333732303336383534373735383038",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "int-min-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-100-int-min-ok-json"
+  },
+  {
+   "content_hex": "61203d20307846464646464646464646464646464646",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): 0xFFFFFFFFFFFFFFFF is out of range for int64",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-hex-range",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-101-int-hex-range-json"
+  },
+  {
+   "content_hex": "61203d203078",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): not a hexadecimal number: '0x\u0000'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-hex-empty",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-102-int-hex-empty-json"
+  },
+  {
+   "content_hex": "61203d20307867",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): not a hexadecimal number: '0xg'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-hex-bad",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-103-int-hex-bad-json"
+  },
+  {
+   "content_hex": "61203d2030785f31",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): not a hexadecimal number: '0x_'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-hex-underscore",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-104-int-hex-underscore-json"
+  },
+  {
+   "content_hex": "61203d20306232",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): not a binary number: '0b2'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-binary-bad",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-105-int-binary-bad-json"
+  },
+  {
+   "content_hex": "61203d20306f38",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): not an octal number: '0o8'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-octal-bad",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-106-int-octal-bad-json"
+  },
+  {
+   "content_hex": "61203d202b307831",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): cannot use sign with non-decimal numbers: '+0x'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "int-sign-base",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-107-int-sign-base-json"
+  },
+  {
+   "content_hex": "61203d20312e",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float \"1.\": '.' must be followed by one or more digits",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-dot-end",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-108-float-dot-end-json"
+  },
+  {
+   "content_hex": "61203d20312e6532",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float \"1.e2\": '.' must be followed by one or more digits",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-dot-exp",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-109-float-dot-exp-json"
+  },
+  {
+   "content_hex": "61203d2030312e35",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float \"01.5\": cannot have leading zeroes",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-leading-zero",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-110-float-leading-zero-json"
+  },
+  {
+   "content_hex": "61203d20312e352e35",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float value: \"1.5.5\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-two-dots",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-111-float-two-dots-json"
+  },
+  {
+   "content_hex": "61203d203165",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float value: \"1e\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-exponent-end",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-112-float-exponent-end-json"
+  },
+  {
+   "content_hex": "61203d2031652b",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float \"1e+\": underscores must be surrounded by digits",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-exponent-sign-end",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-113-float-exponent-sign-end-json"
+  },
+  {
+   "content_hex": "61203d203165393939",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): 1e999 is out of range for float64",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-range",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-114-float-range-json"
+  },
+  {
+   "content_hex": "61203d20312e5f35",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float \"1._5\": underscores must be surrounded by digits",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-underscore",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-115-float-underscore-json"
+  },
+  {
+   "content_hex": "61203d205b3165355f302c20315f3030302e355f352c202b696e662c202d696e662c206e616e2c202b6e616e2c202d6e616e2c20362e363236652d33345d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "float-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-116-float-ok-json"
+  },
+  {
+   "content_hex": "61203d2069616e",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float \"ian\": underscores must be surrounded by digits",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-ian",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-117-float-ian-json"
+  },
+  {
+   "content_hex": "61203d206e6e66",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): Invalid float value: \"nnf\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-nnf",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-118-float-nnf-json"
+  },
+  {
+   "content_hex": "61203d20696e",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found \"n\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-in",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-119-float-in-json"
+  },
+  {
+   "content_hex": "61203d2069",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected value but found \"i\" instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-i",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-120-float-i-json"
+  },
+  {
+   "content_hex": "61203d202b69",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid float: '+i'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-sign-i",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-121-float-sign-i-json"
+  },
+  {
+   "content_hex": "61203d202d6e",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid float: '-n'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-sign-n",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-122-float-sign-n-json"
+  },
+  {
+   "content_hex": "61203d202b",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected a digit but got '\\x00'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-sign-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-123-float-sign-eof-json"
+  },
+  {
+   "content_hex": "61203d202b78",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): expected a digit but got 'x'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "float-sign-x",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-124-float-sign-x-json"
+  },
+  {
+   "content_hex": "61203d205b313937392d30352d32372c2030373a33323a30302e352c20313937392d30352d32375430373a33323a30305a2c20313937392d30352d32372030373a33323a30302b30313a33302c20313937392d30352d32377430373a33327a5d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "date-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-125-date-ok-json"
+  },
+  {
+   "content_hex": "61203d20313937392d352d3237",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1979-5-27\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-short-month",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-126-date-short-month-json"
+  },
+  {
+   "content_hex": "61203d20313937392d30352d323754373a33323a3030",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1979-05-27T7:32:00\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-short-hour",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-127-date-short-hour-json"
+  },
+  {
+   "content_hex": "61203d20313937392d31332d3237",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1979-13-27\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-month-13",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-128-date-month-13-json"
+  },
+  {
+   "content_hex": "61203d20313937392d30322d3330",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1979-02-30\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-feb-30",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-129-date-feb-30-json"
+  },
+  {
+   "content_hex": "61203d20323030302d30322d3239",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "date-feb-29-leap",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-130-date-feb-29-leap-json"
+  },
+  {
+   "content_hex": "61203d20313930302d30322d3239",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1900-02-29\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-feb-29-century",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-131-date-feb-29-century-json"
+  },
+  {
+   "content_hex": "61203d2032343a30303a3030",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"24:00:00\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-hour-24",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-132-date-hour-24-json"
+  },
+  {
+   "content_hex": "61203d2030373a3630",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"07:60\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-minute-60",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-133-date-minute-60-json"
+  },
+  {
+   "content_hex": "61203d20373a33323a3030",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"7:32:00\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-short-time",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-134-date-short-time-json"
+  },
+  {
+   "content_hex": "61203d2030373a33323a30302e",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"07:32:00.\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-fraction-dot",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-135-date-fraction-dot-json"
+  },
+  {
+   "content_hex": "61203d20313937392d30352d32375430373a33323a30302b32353a3030",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1979-05-27T07:32:00+25:00\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-offset-25",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-136-date-offset-25-json"
+  },
+  {
+   "content_hex": "61203d20313937392d30352d32375430373a33323a30302b30303a3631",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1979-05-27T07:32:00+00:61\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-offset-minute-61",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-137-date-offset-minute-61-json"
+  },
+  {
+   "content_hex": "61203d20313937392d30352d32375430373a33323a30302d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1979-05-27T07:32:00-\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-offset-minus-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-138-date-offset-minus-eof-json"
+  },
+  {
+   "content_hex": "61203d20313937392d30352d323778",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected a top-level item to end with a newline, comment, or EOF, but got 'x' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-extra",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-139-date-extra-json"
+  },
+  {
+   "content_hex": "61203d20312d32",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"1-2\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-dash",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-140-date-dash-json"
+  },
+  {
+   "content_hex": "61203d2031323a",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid datetime: \"12:\"",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "date-colon",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-141-date-colon-json"
+  },
+  {
+   "content_hex": "61203d2001",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): TOML files cannot contain control characters: '0x01'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "control-value",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-142-control-value-json"
+  },
+  {
+   "content_hex": "61203d20220122",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): TOML files cannot contain control characters: '0x01'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "control-string",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-143-control-string-json"
+  },
+  {
+   "content_hex": "232001",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: TOML files cannot contain control characters: '0x01'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "control-comment",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-144-control-comment-json"
+  },
+  {
+   "content_hex": "61203d207f",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): TOML files cannot contain control characters: '0x7f'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "control-del",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-145-control-del-json"
+  },
+  {
+   "content_hex": "61203d20310d62203d2032",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): TOML files cannot contain control characters: '0x0d'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "control-bare-cr",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-146-control-bare-cr-json"
+  },
+  {
+   "content_hex": "61203d20310d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): TOML files cannot contain control characters: '0x0d'",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "control-cr-eof",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-147-control-cr-eof-json"
+  },
+  {
+   "content_hex": "61203d20ff",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid UTF-8 byte: 0xff",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "utf8-value",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-148-utf8-value-json"
+  },
+  {
+   "content_hex": "2320ff",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: invalid UTF-8 byte: 0xff",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "utf8-comment",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-149-utf8-comment-json"
+  },
+  {
+   "content_hex": "61203d2022c322",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid UTF-8 byte: 0xc3",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "utf8-truncated",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-150-utf8-truncated-json"
+  },
+  {
+   "content_hex": "ff203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: invalid UTF-8 byte: 0xff",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "utf8-key",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-151-utf8-key-json"
+  },
+  {
+   "content_hex": "61203d2080",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1 (last key \"a\"): invalid UTF-8 byte: 0x80",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "utf8-continuation",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-152-utf8-continuation-json"
+  },
+  {
+   "content_hex": "c3a9203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or '=', but got '\u00e9' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-unicode-ok",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-153-key-unicode-ok-json"
+  },
+  {
+   "content_hex": "6120c3a93d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or '=', but got '\u00e9' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-unicode-bare",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-154-key-unicode-bare-json"
+  },
+  {
+   "content_hex": "613c62203d2031",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 1: expected '.' or '=', but got '<' instead",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "key-html",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-155-key-html-json"
+  },
+  {
+   "content_hex": "225c625c663c3e265c753230323822203d20310a225c625c663c3e265c753230323822203d2032",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2 (last key \"\\b\\f<>&\\u2028\"): Key '\"\\b\\f<>&\u2028\"' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "duplicate-quoted-specials",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-156-duplicate-quoted-specials-json"
+  },
+  {
+   "content_hex": "5b22e280a8f09f988020c2a020c2ad20e2808b225d0a5b22e280a8f09f988020c2a020c2ad20e2808b225d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key '\"\u2028\ud83d\ude00 \u00a0 \u00ad \u200b\"' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "duplicate-quoted-unicode",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-157-duplicate-quoted-unicode-json"
+  },
+  {
+   "content_hex": "5b225c75303030315c7530303766225d0a5b225c75303030315c7530303766225d",
+   "expected": {
+    "error": "harness: codex config is not valid toml; refusing to edit a config symbrain cannot parse: parse toml: toml: line 2: Key '\"\\u0001\\u007f\"' has already been defined.",
+    "exists": true,
+    "parsed": false,
+    "servers": []
+   },
+   "family": "duplicate-quoted-control",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-158-duplicate-quoted-control-json"
+  },
+  {
+   "content_hex": "5b6d63705f736572766572732e785d0a636f6d6d616e64203d202263220a61726773203d205b2261222c20312c202262225d0a5b6d63705f736572766572732e782e656e765d0a4b203d202276220a5b6d63705f736572766572732e625d0a75726c203d2022687474703a2f2f68220a74797065203d2022737365220a",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "name": "b",
+      "transport": "sse",
+      "url": "http://h"
+     },
+     {
+      "args": [
+       "a",
+       "b"
+      ],
+      "command": "c",
+      "env_names": [
+       "K"
+      ],
+      "name": "x",
+      "transport": "stdio"
+     }
+    ]
+   },
+   "family": "valid-servers",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-159-valid-servers-json"
+  },
+  {
+   "content_hex": "6d63705f73657276657273203d207b2062203d207b2075726c203d20227522207d2c2061203d207b20636f6d6d616e64203d202263222c2061726773203d205b2278225d2c20656e76203d207b204b203d20227622207d207d207d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "args": [
+       "x"
+      ],
+      "command": "c",
+      "env_names": [
+       "K"
+      ],
+      "name": "a",
+      "transport": "stdio"
+     },
+     {
+      "name": "b",
+      "transport": "http",
+      "url": "u"
+     }
+    ]
+   },
+   "family": "valid-inline-servers",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-160-valid-inline-servers-json"
+  },
+  {
+   "content_hex": "5b6d63705f736572766572732e785d0a636f6d6d616e64203d202263220a5b5b6d63705f736572766572732e782e617267735d5d0a61203d20310a",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "command": "c",
+      "name": "x",
+      "transport": "stdio"
+     }
+    ]
+   },
+   "family": "valid-array-of-tables-args",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-161-valid-array-of-tables-args-json"
+  },
+  {
+   "content_hex": "5b6d63705f736572766572732e785d0a61726773203d205b7b613d317d2c202273225d0a",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "args": [
+       "s"
+      ],
+      "name": "x",
+      "transport": "stdio"
+     }
+    ]
+   },
+   "family": "valid-array-of-inline-args",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-162-valid-array-of-inline-args-json"
+  },
+  {
+   "content_hex": "6d63705f73657276657273203d2031",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "valid-scalar-servers",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-163-valid-scalar-servers-json"
+  },
+  {
+   "content_hex": "6d63705f73657276657273203d205b5d",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": []
+   },
+   "family": "valid-array-servers",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-164-valid-array-servers-json"
+  },
+  {
+   "content_hex": "5b6d63705f736572766572735d0a78203d20310a5b6d63705f736572766572732e7a5d0a75726c203d2022687474703a2f2f68220a",
+   "expected": {
+    "exists": true,
+    "parsed": true,
+    "servers": [
+     {
+      "name": "z",
+      "transport": "http",
+      "url": "http://h"
+     }
+    ]
+   },
+   "family": "valid-mixed-servers",
+   "harness": "codex",
+   "name": "cfgh-parse-toml-165-valid-mixed-servers-json"
+  }
+ ],
+ "go_oracle_ref": "0541e64a36d83bac8e5e4f8c4136033c03db83ae"
+}

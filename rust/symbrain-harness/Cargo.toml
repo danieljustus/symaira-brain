@@ -10,6 +10,7 @@ repository.workspace = true
 [dependencies]
 chrono.workspace = true
 serde.workspace = true
+symbrain-core.workspace = true
 serde_json.workspace = true
 toml_edit.workspace = true
 tempfile.workspace = true
