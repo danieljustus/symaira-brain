@@ -45,7 +45,7 @@ pub(crate) fn read_config(
     use std::io::Read;
     use std::os::unix::ffi::OsStrExt;
 
-    use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsExt, OpenOptionsFollowExt};
+    use cap_fs_ext::{FollowSymlinks, OpenOptionsExt, OpenOptionsFollowExt};
     use cap_std::ambient_authority;
     use cap_std::fs::{Dir, OpenOptions};
 
@@ -74,6 +74,14 @@ pub(crate) fn read_config(
     let anchor = if directory.is_absolute() { "/" } else { "." };
     let mut current =
         Dir::open_ambient_dir(anchor, ambient_authority()).map_err(|error| open_failure(&error))?;
+    // Go opens each component O_RDONLY|O_DIRECTORY|O_NOFOLLOW. cap-std's
+    // `open_dir_nofollow` uses O_PATH on Linux, which succeeds on a mode-000
+    // directory and moves the EACCES to the final file open.
+    let mut dir_options = OpenOptions::new();
+    dir_options
+        .read(true)
+        .follow(FollowSymlinks::No)
+        .custom_flags(libc::O_DIRECTORY);
     // Raw bytes, not `to_string_lossy`: a component that is not UTF-8 must
     // be opened by its real name, as Go does.
     for component in directory.as_os_str().as_bytes().split(|byte| *byte == b'/') {
@@ -85,8 +93,8 @@ pub(crate) fn read_config(
                 "configuration directory contains parent component".to_owned(),
             ));
         }
-        current = match current.open_dir_nofollow(OsStr::from_bytes(component)) {
-            Ok(next) => next,
+        current = match current.open_with(OsStr::from_bytes(component), &dir_options) {
+            Ok(next) => Dir::from_std_file(next.into_std()),
             Err(error) if error.kind() == io::ErrorKind::NotFound => {
                 return Err(ReadFailure::NotFound);
             }

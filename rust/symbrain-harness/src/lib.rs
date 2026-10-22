@@ -257,7 +257,9 @@ pub(crate) fn resolve_path(
         }
     };
     // Go builds these paths with `filepath.Join`, which lexically cleans them.
-    if target_os == "windows" {
+    // `clean_path` rebuilds with host separators, so it only applies where the
+    // host is Unix; an injected Unix target on a Windows host stays as built.
+    if target_os == "windows" || cfg!(windows) {
         Ok(result)
     } else {
         Ok(crate::inventory_read::clean_path(&result))
