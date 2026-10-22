@@ -26,16 +26,67 @@ fn physical_path(path: &Path) -> PathBuf {
     path.to_path_buf()
 }
 
+/// Lexical equivalent of Go's `filepath.Clean`: no filesystem access, `.` and
+/// empty components dropped, `..` folded into a preceding real component,
+/// leading `..` kept, `..` at a root dropped, and an empty result spelled `.`.
+#[must_use]
+pub fn clean_path(path: &Path) -> PathBuf {
+    let mut result = PathBuf::new();
+    for component in path.components() {
+        match component {
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => match result.components().next_back() {
+                Some(std::path::Component::Normal(_)) => {
+                    result.pop();
+                }
+                Some(std::path::Component::ParentDir) | None => result.push(".."),
+                _ => {}
+            },
+            component => result.push(component.as_os_str()),
+        }
+    }
+    if result.as_os_str().is_empty() {
+        result.push(".");
+    }
+    result
+}
+
+/// Go's `os.Getwd`: `$PWD` when it names the current directory, otherwise the
+/// kernel's answer.
+#[cfg(unix)]
+fn go_getwd() -> io::Result<PathBuf> {
+    use std::os::unix::fs::MetadataExt;
+    if let Some(pwd) = std::env::var_os("PWD").map(PathBuf::from)
+        && pwd.is_absolute()
+        && let (Ok(dot), Ok(named)) = (std::fs::metadata("."), std::fs::metadata(&pwd))
+        && dot.dev() == named.dev()
+        && dot.ino() == named.ino()
+    {
+        return Ok(pwd);
+    }
+    std::env::current_dir()
+}
+
+/// Go's `filepath.Abs(filepath.Clean(path))`, which `openDirectoryNoFollow`
+/// applies before it walks the trusted root from `/`.
+#[cfg(unix)]
+fn go_abs_clean(path: &Path) -> io::Result<PathBuf> {
+    let cleaned = clean_path(path);
+    if cleaned.is_absolute() {
+        return Ok(cleaned);
+    }
+    Ok(clean_path(&go_getwd()?.join(cleaned)))
+}
+
 /// Opens a path component-by-component without following symlinks/reparse
 /// points. Missing components are created only when requested.
+///
+/// Like Go, the path is first made absolute and lexically cleaned, so `..`
+/// and `.` components never reach the component walk.
 #[cfg(unix)]
 fn open_path_no_follow(path: &Path, create: bool) -> io::Result<Dir> {
-    let path = physical_path(path);
-    let mut current = if path.is_absolute() {
-        Dir::open_ambient_dir(Path::new("/"), ambient_authority())?
-    } else {
-        Dir::open_ambient_dir(Path::new("."), ambient_authority())?
-    };
+    let path = physical_path(&go_abs_clean(path)?);
+    let mut current = Dir::open_ambient_dir(Path::new("/"), ambient_authority())?;
     for component in path.components() {
         let name = match component {
             std::path::Component::RootDir | std::path::Component::CurDir => continue,

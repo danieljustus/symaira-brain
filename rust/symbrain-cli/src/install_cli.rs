@@ -18,7 +18,7 @@ const UNINSTALL_USAGE: &str = "Usage of uninstall:\n  -dry-run\n    \tprint a un
 struct InstallArgs {
     harness: String,
     profile: String,
-    project: String,
+    project: OsString,
     dry_run: bool,
     keep_superseded: bool,
 }
@@ -26,13 +26,16 @@ struct InstallArgs {
 #[derive(Default)]
 struct UninstallArgs {
     harness: String,
-    project: String,
+    project: OsString,
     dry_run: bool,
 }
 
 struct ResolvedTarget {
     harness: &'static Harness,
     location: ConfigLocation,
+    /// The lexically cleaned `--project` directory. Go resolves it with plain
+    /// `os` calls, so the operating system follows its symlinks.
+    project_root: Option<PathBuf>,
 }
 
 pub(crate) fn run_install(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
@@ -63,8 +66,7 @@ pub(crate) fn run_install(args: &[OsString], stdout: &mut dyn Write, stderr: &mu
     }
 
     install_into(
-        target.harness,
-        &target.location,
+        &target,
         &profile,
         parsed.dry_run,
         parsed.keep_superseded,
@@ -85,13 +87,7 @@ pub(crate) fn run_uninstall(
     else {
         return exit::USAGE;
     };
-    uninstall_from(
-        target.harness,
-        &target.location,
-        parsed.dry_run,
-        stdout,
-        stderr,
-    )
+    uninstall_from(&target, parsed.dry_run, stdout, stderr)
 }
 
 fn parse_install_args(args: &[OsString], stderr: &mut dyn Write) -> Option<InstallArgs> {
@@ -113,17 +109,17 @@ fn parse_uninstall_args(args: &[OsString], stderr: &mut dyn Write) -> Option<Uni
 }
 
 trait FlagValues {
-    fn set_value(&mut self, name: &str, value: String) -> bool;
+    fn set_value(&mut self, name: &str, value: OsString) -> bool;
     fn set_bool(&mut self, name: &str, value: bool) -> bool;
     fn has_value_flag(name: &str) -> bool;
     fn has_bool_flag(name: &str) -> bool;
 }
 
 impl FlagValues for InstallArgs {
-    fn set_value(&mut self, name: &str, value: String) -> bool {
+    fn set_value(&mut self, name: &str, value: OsString) -> bool {
         match name {
-            "harness" => self.harness = value,
-            "profile" => self.profile = value,
+            "harness" => self.harness = value.to_string_lossy().into_owned(),
+            "profile" => self.profile = value.to_string_lossy().into_owned(),
             "project" => self.project = value,
             _ => return false,
         }
@@ -149,9 +145,9 @@ impl FlagValues for InstallArgs {
 }
 
 impl FlagValues for UninstallArgs {
-    fn set_value(&mut self, name: &str, value: String) -> bool {
+    fn set_value(&mut self, name: &str, value: OsString) -> bool {
         match name {
-            "harness" => self.harness = value,
+            "harness" => self.harness = value.to_string_lossy().into_owned(),
             "project" => self.project = value,
             _ => return false,
         }
@@ -176,6 +172,19 @@ impl FlagValues for UninstallArgs {
     }
 }
 
+/// The raw bytes of `arg` after its first `skip` bytes.
+fn os_suffix(arg: &OsString, skip: usize) -> OsString {
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::{OsStrExt, OsStringExt};
+        OsString::from_vec(arg.as_os_str().as_bytes()[skip..].to_vec())
+    }
+    #[cfg(not(unix))]
+    {
+        OsString::from(arg.to_string_lossy()[skip..].to_owned())
+    }
+}
+
 fn parse_flags<T: FlagValues>(
     args: &[OsString],
     parsed: &mut T,
@@ -191,6 +200,7 @@ fn parse_flags<T: FlagValues>(
             break;
         }
         let name = arg.trim_start_matches('-');
+        let dashes = arg.len() - name.len();
         let (name, inline_value) = name
             .split_once('=')
             .map_or((name, None), |(name, value)| (name, Some(value)));
@@ -199,11 +209,12 @@ fn parse_flags<T: FlagValues>(
             return false;
         }
         if T::has_value_flag(name) {
-            let value = if let Some(value) = inline_value {
-                value.to_owned()
+            let value = if inline_value.is_some() {
+                // Raw bytes after `-name=`: a project path need not be UTF-8.
+                os_suffix(&args[index], dashes + name.len() + 1)
             } else if let Some(value) = args.get(index + 1) {
                 index += 1;
-                value.to_string_lossy().into_owned()
+                value.clone()
             } else {
                 let _ = writeln!(stderr, "flag needs an argument: -{name}");
                 let _ = write!(stderr, "{usage}");
@@ -236,7 +247,7 @@ fn parse_flags<T: FlagValues>(
 
 fn resolve_harness(
     name: &str,
-    project: &str,
+    project: &std::ffi::OsStr,
     command: &str,
     stderr: &mut dyn Write,
 ) -> Option<ResolvedTarget> {
@@ -273,17 +284,28 @@ fn resolve_harness(
             return None;
         }
         let path = harness.project_config_path(Path::new(project))?;
+        // Go joins and lexically cleans the project path, so `..` is folded
+        // away before the operating system ever sees it.
+        let root = path
+            .parent()
+            .filter(|parent| !parent.as_os_str().is_empty())
+            .map_or_else(|| PathBuf::from("."), Path::to_path_buf);
         return Some(ResolvedTarget {
             harness,
             location: ConfigLocation {
                 path,
-                trusted_root: PathBuf::from(project),
+                trusted_root: root.clone(),
                 relative_path: PathBuf::from(".mcp.json"),
             },
+            project_root: Some(root),
         });
     }
     match harness.config_location() {
-        Ok(location) => Some(ResolvedTarget { harness, location }),
+        Ok(location) => Some(ResolvedTarget {
+            harness,
+            location,
+            project_root: None,
+        }),
         Err(error) => {
             let _ = writeln!(
                 stderr,
@@ -347,24 +369,257 @@ fn default_profile() -> Result<String, HarnessError> {
         .to_owned())
 }
 
+/// A byte-exact message part: paths keep their raw bytes, text is UTF-8.
+trait Part {
+    fn part(&self) -> Vec<u8>;
+}
+
+impl Part for str {
+    fn part(&self) -> Vec<u8> {
+        self.as_bytes().to_vec()
+    }
+}
+
+impl Part for String {
+    fn part(&self) -> Vec<u8> {
+        self.as_bytes().to_vec()
+    }
+}
+
+impl Part for Path {
+    fn part(&self) -> Vec<u8> {
+        path_bytes(self)
+    }
+}
+
+impl Part for PathBuf {
+    fn part(&self) -> Vec<u8> {
+        path_bytes(self)
+    }
+}
+
+impl<T: Part + ?Sized> Part for &T {
+    fn part(&self) -> Vec<u8> {
+        (**self).part()
+    }
+}
+
+/// Any `Display` value (errors, harness names).
+struct Shown<T>(T);
+
+impl<T: std::fmt::Display> Part for Shown<T> {
+    fn part(&self) -> Vec<u8> {
+        self.0.to_string().into_bytes()
+    }
+}
+
+fn path_bytes(path: &Path) -> Vec<u8> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::OsStrExt;
+        path.as_os_str().as_bytes().to_vec()
+    }
+    #[cfg(not(unix))]
+    {
+        path.to_string_lossy().into_owned().into_bytes()
+    }
+}
+
+/// Writes the concatenated parts and a newline in one call.
+macro_rules! say {
+    ($writer:expr, $($part:expr),+ $(,)?) => {{
+        let mut line: Vec<u8> = Vec::new();
+        $( line.extend_from_slice(&Part::part(&$part)); )+
+        line.push(b'\n');
+        let _ = $writer.write_all(&line);
+    }};
+}
+
+/// `symbrain COMMAND: read PATH: open PATH: errno` when the failure carries an
+/// operating-system error (Go's `os.ReadFile`), otherwise the Rust wording.
+fn say_read_failure(stderr: &mut dyn Write, command: &str, path: &Path, error: &io::Error) {
+    if error.raw_os_error().is_some() {
+        say!(
+            stderr,
+            "symbrain ",
+            command,
+            ": read ",
+            path,
+            ": open ",
+            path,
+            ": ",
+            Shown(symbrain_instructions::go_io_text(error))
+        );
+    } else {
+        say!(
+            stderr,
+            "symbrain ",
+            command,
+            ": read ",
+            path,
+            ": ",
+            Shown(error)
+        );
+    }
+}
+
+/// Stands in for a non-UTF-8 path in a diff label until the bytes are spliced in.
+const PLACEHOLDER: &str = "\u{1}symbrain-diff-label\u{1}";
+
+/// The diff Go prints, with the label kept as raw bytes.
+fn diff_bytes(path: &Path, old: &[u8], new: &[u8]) -> Vec<u8> {
+    if let Some(text) = path.to_str() {
+        return symbrain_harness::unified_diff(text, old, new).into_bytes();
+    }
+    let diff = symbrain_harness::unified_diff(PLACEHOLDER, old, new);
+    let label = path_bytes(path);
+    let mut out = Vec::with_capacity(diff.len() + label.len());
+    let mut rest = diff.as_bytes();
+    while let Some(at) = rest
+        .windows(PLACEHOLDER.len())
+        .position(|window| window == PLACEHOLDER.as_bytes())
+    {
+        out.extend_from_slice(&rest[..at]);
+        out.extend_from_slice(&label);
+        rest = &rest[at + PLACEHOLDER.len()..];
+    }
+    out.extend_from_slice(rest);
+    out
+}
+
+/// `ENOTDIR` is 20 on every Unix this CLI supports (Linux, macOS, the BSDs).
+#[cfg(unix)]
+const ENOTDIR: i32 = 20;
+
+/// Go's `os.MkdirAll(path, 0o700)`, including which component an error names.
+#[cfg(unix)]
+fn go_mkdir_all(path: &Path) -> Result<(), (PathBuf, io::Error)> {
+    use std::os::unix::fs::DirBuilderExt;
+
+    match fs::metadata(path) {
+        Ok(metadata) if metadata.is_dir() => return Ok(()),
+        Ok(_) => {
+            return Err((path.to_path_buf(), io::Error::from_raw_os_error(ENOTDIR)));
+        }
+        Err(_) => {}
+    }
+    if let Some(parent) = path.parent()
+        && !parent.as_os_str().is_empty()
+        && parent != Path::new("/")
+    {
+        go_mkdir_all(parent)?;
+    }
+    match fs::DirBuilder::new().mode(0o700).create(path) {
+        Ok(()) => Ok(()),
+        Err(error) => match fs::symlink_metadata(path) {
+            Ok(metadata) if metadata.is_dir() => Ok(()),
+            _ => Err((path.to_path_buf(), error)),
+        },
+    }
+}
+
+#[cfg(not(unix))]
+fn go_mkdir_all(path: &Path) -> Result<(), (PathBuf, io::Error)> {
+    fs::create_dir_all(path).map_err(|error| (path.to_path_buf(), error))
+}
+
+/// Opens the existing config through the retained capability. A project root
+/// is resolved like Go's `os.ReadFile` does: lexically cleaned, symlinks
+/// followed by the operating system.
+fn open_existing(
+    target: &ResolvedTarget,
+) -> io::Result<(Option<AtomicFile>, Option<symbrain_harness::FileSnapshot>)> {
+    let location = &target.location;
+    let trusted_root = match &target.project_root {
+        Some(root) => match fs::canonicalize(root) {
+            Ok(physical) => physical,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok((None, None)),
+            Err(error) => return Err(error),
+        },
+        None => location.trusted_root.clone(),
+    };
+    let capability = match AtomicFile::open(
+        &trusted_root,
+        &location.relative_path,
+        location.path.clone(),
+        false,
+    ) {
+        Ok(capability) => capability,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok((None, None)),
+        Err(error) => return Err(error),
+    };
+    match capability.read_snapshot() {
+        Ok(snapshot) => Ok((Some(capability), Some(snapshot))),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok((None, None)),
+        Err(error) => Err(error),
+    }
+}
+
+/// Creates the missing project directories like Go's `os.MkdirAll` and opens
+/// the target for writing.
+fn open_for_create(
+    command: &str,
+    target: &ResolvedTarget,
+    stderr: &mut dyn Write,
+) -> Option<AtomicFile> {
+    let location = &target.location;
+    let trusted_root = match &target.project_root {
+        Some(root) => {
+            if let Err((failed, error)) = go_mkdir_all(root) {
+                say!(
+                    stderr,
+                    "symbrain ",
+                    command,
+                    ": create ",
+                    root,
+                    ": mkdir ",
+                    failed,
+                    ": ",
+                    Shown(symbrain_instructions::go_io_text(&error))
+                );
+                return None;
+            }
+            fs::canonicalize(root).unwrap_or_else(|_| root.clone())
+        }
+        None => location.trusted_root.clone(),
+    };
+    match AtomicFile::open(
+        &trusted_root,
+        &location.relative_path,
+        location.path.clone(),
+        target.project_root.is_none(),
+    ) {
+        Ok(capability) => Some(capability),
+        Err(error) => {
+            say!(
+                stderr,
+                "symbrain ",
+                command,
+                ": create ",
+                location.path,
+                ": ",
+                Shown(error)
+            );
+            None
+        }
+    }
+}
+
 #[allow(clippy::too_many_lines)]
 fn install_into(
-    harness: &Harness,
-    location: &ConfigLocation,
+    target: &ResolvedTarget,
     profile: &str,
     dry_run: bool,
     keep_superseded: bool,
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> u8 {
-    let (capability, snapshot) = match open_existing(location) {
+    let harness = target.harness;
+    let location = &target.location;
+    let (capability, snapshot) = match open_existing(target) {
         Ok(value) => value,
         Err(error) => {
-            let _ = writeln!(
-                stderr,
-                "symbrain install: read {}: {error}",
-                location.path.display()
-            );
+            say_read_failure(stderr, "install", &location.path, &error);
             return exit::GENERIC;
         }
     };
@@ -376,10 +631,11 @@ fn install_into(
         match symbrain_harness::parse(harness, &original) {
             Ok(document) => document,
             Err(error) => {
-                let _ = writeln!(
+                say!(
                     stderr,
-                    "symbrain install: {}: {}",
-                    location.path.display(),
+                    "symbrain install: ",
+                    location.path,
+                    ": ",
                     format_parse_error(harness, &error)
                 );
                 return exit::NO_INPUT;
@@ -407,33 +663,31 @@ fn install_into(
     let new_content = match document.marshal() {
         Ok(content) => content,
         Err(error) => {
-            let _ = writeln!(
+            say!(
                 stderr,
-                "symbrain install: encode {}: {error}",
-                location.path.display()
+                "symbrain install: encode ",
+                location.path,
+                ": ",
+                Shown(error)
             );
             return exit::GENERIC;
         }
     };
 
     if dry_run {
-        let diff = symbrain_harness::unified_diff(
-            &location.path.to_string_lossy(),
-            &original,
-            &new_content,
-        );
+        let diff = diff_bytes(&location.path, &original, &new_content);
         if diff.is_empty() {
-            let _ = writeln!(
+            say!(
                 stdout,
-                "{}: already up to date, no changes to make",
-                location.path.display()
+                location.path,
+                ": already up to date, no changes to make"
             );
         } else {
-            let _ = write!(stdout, "{diff}");
+            let _ = stdout.write_all(&diff);
             if !migrated.is_empty() {
-                let _ = writeln!(
+                say!(
                     stdout,
-                    "migrated superseded core entries: {}",
+                    "migrated superseded core entries: ",
                     migrated.join(", ")
                 );
             }
@@ -443,47 +697,34 @@ fn install_into(
 
     let capability = match capability {
         Some(capability) => capability,
-        None => match AtomicFile::open(
-            &location.trusted_root,
-            &location.relative_path,
-            location.path.clone(),
-            true,
-        ) {
-            Ok(capability) => capability,
-            Err(error) => {
-                let _ = writeln!(
-                    stderr,
-                    "symbrain install: create {}: {error}",
-                    location.path.display()
-                );
-                return exit::GENERIC;
-            }
+        None => match open_for_create("install", target, stderr) {
+            Some(capability) => capability,
+            None => return exit::GENERIC,
         },
     };
     if let (Some(snapshot), true) = (snapshot.as_ref(), existed) {
         match capability.backup_snapshot(snapshot, &Utc::now().format("%Y%m%dT%H%M%SZ").to_string())
         {
             Ok(backup) => {
-                let _ = writeln!(
-                    stdout,
-                    "backed up {} to {}",
-                    location.path.display(),
-                    backup.display()
-                );
+                say!(stdout, "backed up ", location.path, " to ", backup);
                 if !migrated.is_empty() {
-                    let _ = writeln!(
+                    say!(
                         stdout,
-                        "migrated superseded core entries: {} (roll back by restoring {})",
+                        "migrated superseded core entries: ",
                         migrated.join(", "),
-                        backup.display()
+                        " (roll back by restoring ",
+                        backup,
+                        ")"
                     );
                 }
             }
             Err(error) => {
-                let _ = writeln!(
+                say!(
                     stderr,
-                    "symbrain install: back up {}: {error}",
-                    location.path.display()
+                    "symbrain install: back up ",
+                    location.path,
+                    ": ",
+                    Shown(error)
                 );
                 return exit::GENERIC;
             }
@@ -491,67 +732,49 @@ fn install_into(
     }
 
     if let Err(error) = capability.write(&new_content, 0o600) {
-        let _ = writeln!(
+        say!(
             stderr,
-            "symbrain install: write {}: {error}",
-            location.path.display()
+            "symbrain install: write ",
+            location.path,
+            ": ",
+            Shown(error)
         );
         return exit::GENERIC;
     }
-    let _ = writeln!(
+    say!(
         stdout,
-        "installed symbrain into {} (harness: {}, profile: {})",
-        location.path.display(),
-        harness.name,
-        profile
+        "installed symbrain into ",
+        location.path,
+        " (harness: ",
+        Shown(harness.name),
+        ", profile: ",
+        profile,
+        ")"
     );
     exit::OK
 }
 
-fn open_existing(
-    location: &ConfigLocation,
-) -> io::Result<(Option<AtomicFile>, Option<symbrain_harness::FileSnapshot>)> {
-    let capability = match AtomicFile::open(
-        &location.trusted_root,
-        &location.relative_path,
-        location.path.clone(),
-        false,
-    ) {
-        Ok(capability) => capability,
-        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok((None, None)),
-        Err(error) => return Err(error),
-    };
-    match capability.read_snapshot() {
-        Ok(snapshot) => Ok((Some(capability), Some(snapshot))),
-        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok((None, None)),
-        Err(error) => Err(error),
-    }
-}
-
 #[allow(clippy::too_many_lines)]
 fn uninstall_from(
-    harness: &Harness,
-    location: &ConfigLocation,
+    target: &ResolvedTarget,
     dry_run: bool,
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> u8 {
-    let (capability, snapshot) = match open_existing(location) {
+    let harness = target.harness;
+    let location = &target.location;
+    let (capability, snapshot) = match open_existing(target) {
         Ok(value) => value,
         Err(error) => {
-            let _ = writeln!(
-                stderr,
-                "symbrain uninstall: read {}: {error}",
-                location.path.display()
-            );
+            say_read_failure(stderr, "uninstall", &location.path, &error);
             return exit::GENERIC;
         }
     };
     let Some(snapshot) = snapshot else {
-        let _ = writeln!(
+        say!(
             stdout,
-            "{}: no config file found, nothing to uninstall",
-            location.path.display()
+            location.path,
+            ": no config file found, nothing to uninstall"
         );
         return exit::OK;
     };
@@ -559,28 +782,29 @@ fn uninstall_from(
     let mut document = match symbrain_harness::parse(harness, &original) {
         Ok(document) => document,
         Err(error) => {
-            let _ = writeln!(
+            say!(
                 stderr,
-                "symbrain uninstall: {}: {}",
-                location.path.display(),
+                "symbrain uninstall: ",
+                location.path,
+                ": ",
                 format_parse_error(harness, &error)
             );
             return exit::NO_INPUT;
         }
     };
     let Some(entry) = document.server(SERVER_NAME) else {
-        let _ = writeln!(
+        say!(
             stdout,
-            "{}: symbrain is not installed, nothing to do",
-            location.path.display()
+            location.path,
+            ": symbrain is not installed, nothing to do"
         );
         return exit::OK;
     };
     if !entry.is_symbrain() {
-        let _ = writeln!(
+        say!(
             stdout,
-            "{}: symbrain is not installed, nothing to do",
-            location.path.display()
+            location.path,
+            ": symbrain is not installed, nothing to do"
         );
         return exit::OK;
     }
@@ -588,21 +812,18 @@ fn uninstall_from(
     let new_content = match document.marshal() {
         Ok(content) => content,
         Err(error) => {
-            let _ = writeln!(
+            say!(
                 stderr,
-                "symbrain uninstall: encode {}: {error}",
-                location.path.display()
+                "symbrain uninstall: encode ",
+                location.path,
+                ": ",
+                Shown(error)
             );
             return exit::GENERIC;
         }
     };
     if dry_run {
-        let diff = symbrain_harness::unified_diff(
-            &location.path.to_string_lossy(),
-            &original,
-            &new_content,
-        );
-        let _ = write!(stdout, "{diff}");
+        let _ = stdout.write_all(&diff_bytes(&location.path, &original, &new_content));
         return exit::OK;
     }
     let Some(capability) = capability else {
@@ -610,35 +831,36 @@ fn uninstall_from(
     };
     match capability.backup_snapshot(&snapshot, &Utc::now().format("%Y%m%dT%H%M%SZ").to_string()) {
         Ok(backup) => {
-            let _ = writeln!(
-                stdout,
-                "backed up {} to {}",
-                location.path.display(),
-                backup.display()
-            );
+            say!(stdout, "backed up ", location.path, " to ", backup);
         }
         Err(error) => {
-            let _ = writeln!(
+            say!(
                 stderr,
-                "symbrain uninstall: back up {}: {error}",
-                location.path.display()
+                "symbrain uninstall: back up ",
+                location.path,
+                ": ",
+                Shown(error)
             );
             return exit::GENERIC;
         }
     }
     if let Err(error) = capability.write(&new_content, 0o600) {
-        let _ = writeln!(
+        say!(
             stderr,
-            "symbrain uninstall: write {}: {error}",
-            location.path.display()
+            "symbrain uninstall: write ",
+            location.path,
+            ": ",
+            Shown(error)
         );
         return exit::GENERIC;
     }
-    let _ = writeln!(
+    say!(
         stdout,
-        "removed symbrain from {} (harness: {})",
-        location.path.display(),
-        harness.name
+        "removed symbrain from ",
+        location.path,
+        " (harness: ",
+        Shown(harness.name),
+        ")"
     );
     exit::OK
 }
@@ -674,7 +896,7 @@ mod tests {
         let parsed = parse_install_args(&args, &mut stderr).unwrap();
         assert_eq!(parsed.harness, "claude");
         assert_eq!(parsed.profile, "p");
-        assert_eq!(parsed.project, "/tmp/project");
+        assert_eq!(parsed.project, OsString::from("/tmp/project"));
         assert!(parsed.dry_run);
         assert!(parsed.keep_superseded);
         assert!(stderr.is_empty());

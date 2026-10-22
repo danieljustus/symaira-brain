@@ -33,7 +33,61 @@ pub fn resolve_global_path(xdg_config_home: Option<&Path>, home: Option<&Path>) 
 struct SourceLocation {
     path: PathBuf,
     capability: Option<SourceCapability>,
-    error: Option<String>,
+    error: Option<io::Error>,
+}
+
+/// Go's `syscall.Errno.Error()` wording for an operating-system error: the
+/// platform text with its first letter lower-cased and no `(os error N)`.
+#[must_use]
+pub fn go_io_text(error: &io::Error) -> String {
+    let text = error.to_string();
+    let text = match (error.raw_os_error(), text.rfind(" (os error ")) {
+        (Some(_), Some(index)) => text[..index].to_owned(),
+        _ => text,
+    };
+    if cfg!(windows) {
+        return text;
+    }
+    let mut chars = text.chars();
+    chars.next().map_or_else(String::new, |first| {
+        first.to_lowercase().chain(chars).collect()
+    })
+}
+
+/// An error message that keeps non-UTF-8 path bytes exactly as Go prints them.
+///
+/// It is the inner error of the `io::Error`s returned by [`Source::content`]
+/// for a source parent that cannot be secured. `Display` is lossy; the exact
+/// bytes come from [`Self::bytes`].
+#[derive(Debug)]
+pub struct RawMessage(Vec<u8>);
+
+impl RawMessage {
+    /// The message bytes.
+    #[must_use]
+    pub fn bytes(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl std::fmt::Display for RawMessage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&String::from_utf8_lossy(&self.0))
+    }
+}
+
+impl std::error::Error for RawMessage {}
+
+fn path_bytes(path: &Path) -> Vec<u8> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::OsStrExt;
+        path.as_os_str().as_bytes().to_vec()
+    }
+    #[cfg(not(unix))]
+    {
+        path.to_string_lossy().into_owned().into_bytes()
+    }
 }
 
 struct SourceCapability {
@@ -73,8 +127,10 @@ impl Source {
         home: Option<&Path>,
     ) -> Self {
         let global_path = resolve_global_path(xdg_config_home, home);
-        let project_path =
-            project_dir.map(|dir| dir.join(PROJECT_DIR_NAME).join(PROJECT_FILE_NAME));
+        // Go's filepath.Join cleans the joined project path lexically.
+        let project_path = project_dir.map(|dir| {
+            super::paths::clean_path(&dir.join(PROJECT_DIR_NAME).join(PROJECT_FILE_NAME))
+        });
         Self::from_paths(global_path, project_path)
     }
 
@@ -122,8 +178,11 @@ fn source_location(path: PathBuf) -> SourceLocation {
     let (capability, error) = match (name, open_source_parent(parent_path)) {
         (Some(name), Ok(parent)) => (Some(SourceCapability { parent, name }), None),
         (_, Err(error)) if error.kind() == io::ErrorKind::NotFound => (None, None),
-        (_, Err(error)) => (None, Some(error.to_string())),
-        (None, Ok(_)) => (None, Some("instruction path has no file name".into())),
+        (_, Err(error)) => (None, Some(error)),
+        (None, Ok(_)) => (
+            None,
+            Some(io::Error::other("instruction path has no file name")),
+        ),
     };
     SourceLocation {
         path,
@@ -134,12 +193,13 @@ fn source_location(path: PathBuf) -> SourceLocation {
 
 fn append_location(merged: &mut Vec<u8>, location: &SourceLocation) -> io::Result<()> {
     if let Some(error) = &location.error {
+        let mut message = b"instructions: secure source parent ".to_vec();
+        message.extend_from_slice(&path_bytes(&location.path));
+        message.extend_from_slice(b": ");
+        message.extend_from_slice(go_io_text(error).as_bytes());
         return Err(io::Error::new(
             io::ErrorKind::PermissionDenied,
-            format!(
-                "instructions: secure source parent {}: {error}",
-                location.path.display()
-            ),
+            RawMessage(message),
         ));
     }
     let Some(capability) = &location.capability else {
