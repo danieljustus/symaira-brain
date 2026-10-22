@@ -84,5 +84,15 @@ read-only directory (Go names a random temp file or wraps backups in
 `harness: reserve backup`).
 `--record-project-fixture PATH` writes the root-independent cases with Go's
 filesystem effects to
-`rust/symbrain-cli/tests/fixtures/project_path_go_shapes.json`; the native
-test `project_path_native` replays those 820 cases without Go.
+`rust/symbrain-cli/tests/fixtures/project_path_go_shapes.<os>.json`, one per OS
+(`darwin`, `linux`): the result is filesystem dependent (APFS refuses to create
+non-UTF-8 names with `EILSEQ`, ext4 accepts them), so each fixture is recorded
+by the real Go CLI on its own OS and `project_path_native` replays the one for
+the host (macOS: darwin, Linux: linux; other unix fails to compile) without Go.
+Both hold the same 820 case names. Non-UTF-8 manifest names are stored with
+their raw bytes (a fifth `rel_hex` element). The Linux fixture is recorded as
+a non-root user (uid 1000, like the CI runner; root ignores the unreadable-
+directory shapes) inside Docker, with the Go oracle built in
+`golang:1.26` and the Rust binary in `rust:1.98-bookworm`:
+`python3 scripts/config-harness-oracle/replay.py symbrain-go symbrain-rust
+report.json --record-project-fixture project_path_go_shapes.linux.json`.

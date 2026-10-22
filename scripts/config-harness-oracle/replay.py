@@ -264,9 +264,14 @@ def project_fixture_entry(case, observation):
     for rel, (kind, mode, content) in sorted(observation["manifest"].items()):
         if kind == "dir" and rel in BASE_DIRS:
             continue
+        row = [rel, kind, mode, content.hex()]
         if any(0xD800 <= ord(c) <= 0xDFFF for c in rel):
-            return None  # a filename that is not valid UTF-8
-        manifest.append([rel, kind, mode, content.hex()])
+            # A filename that is not valid UTF-8 (legal on Linux ext4; APFS
+            # refuses to create it): record the raw bytes so the native replay
+            # compares the exact name instead of a lossy string.
+            raw = os.fsencode(rel)
+            row = [raw.decode("utf-8", "replace"), kind, mode, content.hex(), raw.hex()]
+        manifest.append(row)
     ops, seed_dir, seeded = PROJECT_RECORD[case.name]
     layout = []
     for op in ops:

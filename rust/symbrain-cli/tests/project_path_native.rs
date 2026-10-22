@@ -1,13 +1,18 @@
 //! Native replay of Go-recorded `--project` path shapes for `install`,
 //! `uninstall` and `sync` (#769 slice 3).
 //!
-//! `fixtures/project_path_go_shapes.json` is written by
+//! `fixtures/project_path_go_shapes.{darwin,linux}.json` are written by
 //! `scripts/config-harness-oracle/replay.py --record-project-fixture` from the
 //! real Go CLI at the pinned oracle revision: argv, the fixture layout, Go's
 //! stdout/stderr/exit and the full filesystem it left behind. Only shapes that
 //! do not name the fixture root are recorded. Every Rust process has an absent
 //! Go fallback, and the filesystem effects must match Go's, without a Go
 //! toolchain.
+//!
+//! The result is filesystem dependent: APFS refuses to create non-UTF-8 names
+//! (`EILSEQ`), ext4 accepts them. Each host therefore replays the fixture
+//! recorded by Go on the same OS (macOS: darwin, Linux: linux). Any other unix
+//! target has no recorded oracle and the test fails closed.
 #![cfg(unix)]
 
 #[path = "../../test-support/coverage.rs"]
@@ -15,7 +20,7 @@ mod coverage;
 
 use std::collections::BTreeMap;
 use std::ffi::OsString;
-use std::os::unix::ffi::OsStringExt;
+use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::fs::{MetadataExt, PermissionsExt, symlink};
 use std::path::Path;
 use std::process::Command;
@@ -23,7 +28,20 @@ use std::process::Command;
 use serde_json::Value;
 use tempfile::TempDir;
 
-const FIXTURE: &str = include_str!("fixtures/project_path_go_shapes.json");
+#[cfg(target_os = "macos")]
+const FIXTURE: &str = include_str!("fixtures/project_path_go_shapes.darwin.json");
+#[cfg(target_os = "linux")]
+const FIXTURE: &str = include_str!("fixtures/project_path_go_shapes.linux.json");
+#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+compile_error!(
+    "project_path_native replays a Go-recorded fixture and has one only for macOS and Linux"
+);
+#[cfg(target_os = "macos")]
+const OTHER_FIXTURE: &str = include_str!("fixtures/project_path_go_shapes.linux.json");
+#[cfg(target_os = "linux")]
+const OTHER_FIXTURE: &str = include_str!("fixtures/project_path_go_shapes.darwin.json");
+/// Both OS recordings come from the same corpus: only effects may differ.
+const MIN_CASES: usize = 300;
 const SEED_MCP: &[u8] = b"{\"mcpServers\":{\"other\":{\"command\":\"other\"},\"symbrain\":{\"command\":\"symbrain\",\"args\":[\"mcp\",\"--profile\",\"p\"]}}}";
 const SEED_INSTRUCTIONS: &[u8] = b"# Project notes\n\nkeep this line\n";
 const BASE_DIRS: [&str; 6] = ["home", "config", "cache", "data", "state", "project"];
@@ -113,8 +131,8 @@ fn build_layout(project: &Path, case: &Value) {
 
 /// The oracle's `get_fs_manifest`: kind, mode and content of every entry,
 /// minus the plain base directories.
-fn manifest(root: &Path) -> BTreeMap<String, (String, u32, String)> {
-    fn walk(root: &Path, dir: &Path, out: &mut BTreeMap<String, (String, u32, String)>) {
+fn manifest(root: &Path) -> BTreeMap<Vec<u8>, (String, u32, String)> {
+    fn walk(root: &Path, dir: &Path, out: &mut BTreeMap<Vec<u8>, (String, u32, String)>) {
         let Ok(entries) = std::fs::read_dir(dir) else {
             return;
         };
@@ -123,12 +141,9 @@ fn manifest(root: &Path) -> BTreeMap<String, (String, u32, String)> {
             let Ok(metadata) = std::fs::symlink_metadata(&path) else {
                 continue;
             };
-            let rel = path
-                .strip_prefix(root)
-                .unwrap()
-                .to_string_lossy()
-                .into_owned();
-            let rel = String::from_utf8(normalize_backup_names(rel.as_bytes())).unwrap();
+            // Raw bytes: ext4 allows names that are not valid UTF-8.
+            let rel =
+                normalize_backup_names(path.strip_prefix(root).unwrap().as_os_str().as_bytes());
             let mode = metadata.mode() & 0o777;
             let file_type = metadata.file_type();
             if file_type.is_symlink() {
@@ -138,7 +153,10 @@ fn manifest(root: &Path) -> BTreeMap<String, (String, u32, String)> {
                 // always 0o777 on Linux); only its target is compared.
                 out.insert(rel, ("symlink".into(), 0, hex));
             } else if file_type.is_dir() {
-                if !BASE_DIRS.contains(&rel.as_str()) {
+                if !BASE_DIRS
+                    .iter()
+                    .any(|base| base.as_bytes() == rel.as_slice())
+                {
                     out.insert(rel, ("dir".into(), mode, String::new()));
                 }
                 walk(root, &path, out);
@@ -178,9 +196,31 @@ fn go_recorded_project_path_shapes_are_native_without_a_go_fallback() {
     let fixture: Value = serde_json::from_str(FIXTURE).unwrap();
     let cases = fixture["cases"].as_array().unwrap();
     assert!(
-        cases.len() >= 300,
+        cases.len() >= MIN_CASES,
         "fixture shrank to {} cases",
         cases.len()
+    );
+    let other: Value = serde_json::from_str(OTHER_FIXTURE).unwrap();
+    let other_cases = other["cases"].as_array().unwrap();
+    assert!(
+        other_cases.len() >= MIN_CASES,
+        "other-OS fixture shrank to {} cases",
+        other_cases.len()
+    );
+    assert_eq!(
+        fixture["go_oracle_ref"], other["go_oracle_ref"],
+        "fixtures must come from the same pinned oracle"
+    );
+    let names = |cases: &[Value]| -> Vec<String> {
+        cases
+            .iter()
+            .map(|case| case["name"].as_str().unwrap().to_owned())
+            .collect()
+    };
+    assert_eq!(
+        names(cases),
+        names(other_cases),
+        "darwin and linux fixtures must cover the same cases"
     );
     for case in cases {
         let name = case["name"].as_str().unwrap();
@@ -229,7 +269,7 @@ fn go_recorded_project_path_shapes_are_native_without_a_go_fallback() {
             normalize_backup_names(&from_hex(case["stderr_hex"].as_str().unwrap())),
             "{name}: stderr"
         );
-        let expected: BTreeMap<String, (String, u32, String)> = case["manifest"]
+        let expected: BTreeMap<Vec<u8>, (String, u32, String)> = case["manifest"]
             .as_array()
             .unwrap()
             .iter()
@@ -240,10 +280,12 @@ fn go_recorded_project_path_shapes_are_native_without_a_go_fallback() {
                 } else {
                     u32::try_from(entry[2].as_u64().unwrap()).unwrap()
                 };
-                (
-                    entry[0].as_str().unwrap().to_owned(),
-                    (kind, mode, entry[3].as_str().unwrap().to_owned()),
-                )
+                // A fifth element carries the raw name when it is not UTF-8.
+                let rel = entry.get(4).map_or_else(
+                    || entry[0].as_str().unwrap().as_bytes().to_vec(),
+                    |raw| from_hex(raw.as_str().unwrap()),
+                );
+                (rel, (kind, mode, entry[3].as_str().unwrap().to_owned()))
             })
             .collect();
         assert_eq!(actual, expected, "{name}: filesystem effects");

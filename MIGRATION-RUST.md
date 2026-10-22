@@ -694,9 +694,13 @@ files `*-slice3-39b9b46.*` under `migration/evidence/config-harness-769/`):
   directory write/backup wording (random Go temp name,
   `harness: reserve backup` wrapper) for 3 of its 12 commands.
 * `--record-project-fixture` re-recorded
-  `rust/symbrain-cli/tests/fixtures/project_path_go_shapes.json` byte-identically
+  `rust/symbrain-cli/tests/fixtures/project_path_go_shapes.darwin.json` byte-identically
   (820 root-independent cases with Go's stdout/stderr/exit and filesystem
-  effects); the test `project_path_native` replays it without Go.
+  effects); the test `project_path_native` replays it without Go on macOS. A second fixture,
+  `project_path_go_shapes.linux.json`, was recorded from the real Go CLI in Docker
+  (`golang:1.26` @sha256:6c2a5538f964…, Rust `rust:1.98-bookworm`, uid 1000, oracle ref
+  `0541e64a`) because APFS and ext4 differ on non-UTF-8 names (14 of 820 cases);
+  Linux replays it without Go. See `migration/evidence/config-harness-769/NOTES.md`.
 * Negative controls (single mutation, restored with `git checkout`, tree clean;
   run on code commit `fa4d8207b`, whose Unix code `39b9b4609` leaves unchanged;
   filtered runs of the same oracle cases): not resolving the project root
