@@ -768,6 +768,12 @@ native opener now maps that to Go's doubled wording with the primary code
 a FIFO on macOS), so no routing exception is needed. A directory as database
 path keeps `unable to open database file (14)`. A regular non-SQLite file under
 `set`/`query-log` now also prints Go's doubled `file is not a database (26)`.
+The primary-code rendering is proven only for these observed cases (and
+read-only DELETE-mode `(8)`, malformed `(11)`). Go prints extended codes or a
+suffix in other connect-phase cases, which are not claimed: a locked database
+gives Go `(5) (SQLITE_BUSY)` versus Rust `(5)` (Rust also waits about 11 s
+against Go's 5 s), and a WAL database in a read-only directory gives Go
+extended code `1544` versus Rust `8`.
 
 Evidence: `scripts/memory-cli-oracle/creation_cases.py` (new `store_creation`
 family of `replay.py`, part of `--family all`, so the existing three-OS

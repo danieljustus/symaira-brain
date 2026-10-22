@@ -20,6 +20,8 @@ pub(crate) fn go_open_failure(error: rusqlite::Error) -> StoreError {
         rusqlite::Error::SqliteFailure(failure, _) => {
             // The shipped driver prints the primary code's fixed description,
             // not the connection message that may append the offending path.
+            // Proven only for the replayed cases (8, 10, 11, 14, 26); Go adds
+            // extended codes or a `(SQLITE_BUSY)` suffix elsewhere (#769).
             let primary = failure.extended_code & 0xff;
             let detail = rusqlite::ffi::code_to_str(primary);
             StoreError::Io(format!("{OPEN}: {OPEN}: {detail} ({primary})"))
