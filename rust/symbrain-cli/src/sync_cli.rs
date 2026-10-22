@@ -5,12 +5,68 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use serde::Serialize;
-use symbrain_adapter::{target_for_harness, write_atomic};
+use serde::{Serialize, Serializer};
+use symbrain_adapter::{AtomicFile, target_for_harness};
 use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_harness::{all, lookup};
-use symbrain_instructions::Source;
+use symbrain_instructions::{RawMessage, Source, clean_path};
+
+/// Stands in for one invalid UTF-8 byte until the JSON text is final; Go's
+/// encoder writes the six characters `\ufffd` for each such byte.
+const INVALID_BYTE_SENTINEL: char = '\u{10FFFE}';
+
+/// Text that may hold non-UTF-8 path bytes, printed raw and JSON-encoded the
+/// way Go's `encoding/json` does (each invalid byte becomes `\ufffd`).
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct GoBytes(Vec<u8>);
+
+impl GoBytes {
+    fn from_path(path: &Path) -> Self {
+        #[cfg(unix)]
+        {
+            use std::os::unix::ffi::OsStrExt;
+            Self(path.as_os_str().as_bytes().to_vec())
+        }
+        #[cfg(not(unix))]
+        {
+            Self(path.to_string_lossy().into_owned().into_bytes())
+        }
+    }
+
+    fn bytes(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl From<String> for GoBytes {
+    fn from(text: String) -> Self {
+        Self(text.into_bytes())
+    }
+}
+
+impl Serialize for GoBytes {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut text = String::with_capacity(self.0.len());
+        let mut rest = self.0.as_slice();
+        loop {
+            match std::str::from_utf8(rest) {
+                Ok(valid) => {
+                    text.push_str(valid);
+                    break;
+                }
+                Err(error) => {
+                    let (valid, tail) = rest.split_at(error.valid_up_to());
+                    text.push_str(std::str::from_utf8(valid).unwrap_or_default());
+                    text.push(INVALID_BYTE_SENTINEL);
+                    // Go decodes an invalid byte as a one-byte RuneError.
+                    rest = &tail[1..];
+                }
+            }
+        }
+        serializer.serialize_str(&text)
+    }
+}
 
 /// Outcome of syncing one instruction target.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -18,12 +74,12 @@ pub struct TargetStatus {
     /// Harness name.
     pub name: String,
     /// Absolute or relative path to the synced instruction file.
-    pub path: String,
+    pub path: GoBytes,
     /// Status: created, updated, unchanged, dry-run, skipped, error.
     pub status: String,
     /// Optional diagnostic or explanation.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub message: Option<String>,
+    pub message: Option<GoBytes>,
 }
 
 /// Outcome of syncing skills for one harness target.
@@ -55,6 +111,19 @@ struct ParsedSyncArgs {
 
 /// The shipped `sync` flag set as the Go flag package prints it.
 const SYNC_FLAGS_USAGE: &str = "Usage of sync:\n  -dry-run\n    \tshow what would be written without making changes\n  -project string\n    \tproject directory (default: current directory)\n";
+
+/// The raw bytes of `arg` after its first `skip` bytes (the flag prefix).
+fn os_suffix(arg: &OsString, skip: usize) -> OsString {
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::{OsStrExt, OsStringExt};
+        OsString::from_vec(arg.as_os_str().as_bytes()[skip..].to_vec())
+    }
+    #[cfg(not(unix))]
+    {
+        OsString::from(arg.to_string_lossy()[skip..].to_owned())
+    }
+}
 
 fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArgs, u8> {
     let mut project_dir = PathBuf::from(".");
@@ -98,11 +167,11 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArg
             }
             project_dir = PathBuf::from(&args[i + 1]);
             i += 2;
-        } else if let Some(val) = arg
-            .strip_prefix("-project=")
-            .or_else(|| arg.strip_prefix("--project="))
+        } else if let Some(prefix) = ["-project=", "--project="]
+            .into_iter()
+            .find(|prefix| arg.starts_with(prefix))
         {
-            project_dir = PathBuf::from(val);
+            project_dir = PathBuf::from(os_suffix(&args[i], prefix.len()));
             i += 1;
         } else if arg == "-h" || arg == "--h" || arg == "-help" || arg == "--help" {
             // Go's flag package special-cases an unregistered "-h"/"-help":
@@ -176,12 +245,30 @@ pub fn run(
         parsed.harnesses.clone()
     };
 
+    // Go: an empty --project means the current directory.
+    let project_dir = if parsed.project_dir.as_os_str().is_empty() {
+        PathBuf::from(".")
+    } else {
+        parsed.project_dir.clone()
+    };
+
     // Load instruction source
-    let source = Source::new(Some(&parsed.project_dir));
+    let source = Source::new(Some(&project_dir));
     let instruction_content = match source.content() {
         Ok(content) => content,
         Err(err) => {
-            let _ = writeln!(stderr, "symbrain sync: load instructions: {err}");
+            // Go wraps the failure as "sync: load instructions: %w" and
+            // cmdSync prefixes it again with "symbrain sync: ".
+            let mut message = b"symbrain sync: sync: load instructions: ".to_vec();
+            match err
+                .get_ref()
+                .and_then(|inner| inner.downcast_ref::<RawMessage>())
+            {
+                Some(raw) => message.extend_from_slice(raw.bytes()),
+                None => message.extend_from_slice(err.to_string().as_bytes()),
+            }
+            message.push(b'\n');
+            let _ = stderr.write_all(&message);
             return exit::GENERIC;
         }
     };
@@ -198,56 +285,53 @@ pub fn run(
             Ok(None) => {
                 target_statuses.push(TargetStatus {
                     name: name.clone(),
-                    path: String::new(),
+                    path: GoBytes::default(),
                     status: "skipped".to_string(),
-                    message: Some(format!("harness {name:?} has no instruction adapter")),
+                    message: Some(format!("harness {name:?} has no instruction adapter").into()),
                 });
                 continue;
             }
             Err(err) => {
                 target_statuses.push(TargetStatus {
                     name: name.clone(),
-                    path: String::new(),
+                    path: GoBytes::default(),
                     status: "error".to_string(),
-                    message: Some(format!("resolve target: {err}")),
+                    message: Some(format!("resolve target: {err}").into()),
                 });
                 continue;
             }
         };
 
-        let target_path = match target.path(&parsed.project_dir) {
+        let target_path = match target.path(&project_dir) {
             Ok(p) => p,
             Err(err) => {
                 target_statuses.push(TargetStatus {
                     name: name.clone(),
-                    path: String::new(),
+                    path: GoBytes::default(),
                     status: "error".to_string(),
-                    message: Some(err.to_string()),
+                    message: Some(err.to_string().into()),
                 });
                 continue;
             }
         };
-        // Go's filepath.Join(".", target) removes the leading "./".
-        let display_path = target_path
-            .strip_prefix(".")
-            .unwrap_or(&target_path)
-            .to_string_lossy()
-            .into_owned();
+        // Go's filepath.Join cleans the joined path lexically ("./a/../b/x"
+        // becomes "b/x"), and the displayed path is that cleaned spelling.
+        let target_path = clean_path(&target_path);
+        let display_path = GoBytes::from_path(&target_path);
 
         let existing_bytes = fs::read(&target_path).unwrap_or_default();
-        let rendered =
-            match target.render(&existing_bytes, &instruction_content, &parsed.project_dir) {
-                Ok(r) => r,
-                Err(err) => {
-                    target_statuses.push(TargetStatus {
-                        name: name.clone(),
-                        path: display_path.clone(),
-                        status: "error".to_string(),
-                        message: Some(err.to_string()),
-                    });
-                    continue;
-                }
-            };
+        let rendered = match target.render(&existing_bytes, &instruction_content, &project_dir) {
+            Ok(r) => r,
+            Err(err) => {
+                target_statuses.push(TargetStatus {
+                    name: name.clone(),
+                    path: display_path.clone(),
+                    status: "error".to_string(),
+                    message: Some(err.to_string().into()),
+                });
+                continue;
+            }
+        };
 
         if rendered.output == existing_bytes {
             target_statuses.push(TargetStatus {
@@ -261,15 +345,16 @@ pub fn run(
                 name: name.clone(),
                 path: display_path.clone(),
                 status: "dry-run".to_string(),
-                message: Some("would update".to_string()),
+                message: Some("would update".to_string().into()),
             });
         } else {
             let existed = target_path.exists();
-            match write_atomic(
-                &parsed.project_dir,
-                Path::new(target.relative_path()),
-                &rendered.output,
-            ) {
+            // Go opens the target for writing first, then writes it; the two
+            // failures are worded differently.
+            let written = AtomicFile::open(&project_dir, Path::new(target.relative_path()), true)
+                .map_err(|err| (&b" for write"[..], err))
+                .and_then(|file| file.write(&rendered.output).map_err(|err| (&b""[..], err)));
+            match written {
                 Ok(()) => {
                     target_statuses.push(TargetStatus {
                         name: name.clone(),
@@ -278,12 +363,23 @@ pub fn run(
                         message: None,
                     });
                 }
-                Err(err) => {
+                Err((suffix, err)) => {
+                    // "open P for write: errno" / "write P: errno", with P raw.
+                    let opening = !suffix.is_empty();
+                    let mut message = if opening {
+                        b"open ".to_vec()
+                    } else {
+                        b"write ".to_vec()
+                    };
+                    message.extend_from_slice(display_path.bytes());
+                    message.extend_from_slice(suffix);
+                    message.extend_from_slice(b": ");
+                    message.extend_from_slice(symbrain_instructions::go_io_text(&err).as_bytes());
                     target_statuses.push(TargetStatus {
                         name: name.clone(),
                         path: display_path,
                         status: "error".to_string(),
-                        message: Some(err.to_string()),
+                        message: Some(GoBytes(message)),
                     });
                 }
             }
@@ -300,23 +396,33 @@ pub fn run(
 
     match format {
         OutputFormat::Json => {
-            let _ = symbrain_core::output::render_json(&mut *stdout, &summary);
+            let mut rendered = Vec::new();
+            let _ = symbrain_core::output::render_json(&mut rendered, &summary);
+            // Each invalid UTF-8 byte is the six characters `\ufffd` in Go.
+            let sentinel = INVALID_BYTE_SENTINEL.to_string().into_bytes();
+            let mut rest = rendered.as_slice();
+            while let Some(at) = rest
+                .windows(sentinel.len())
+                .position(|window| window == sentinel.as_slice())
+            {
+                let _ = stdout.write_all(&rest[..at]);
+                let _ = stdout.write_all(b"\\ufffd");
+                rest = &rest[at + sentinel.len()..];
+            }
+            let _ = stdout.write_all(rest);
         }
         OutputFormat::Table => {
             let _ = writeln!(stdout, "Instruction targets:");
             for t in &summary.targets {
-                let msg = t
-                    .message
-                    .as_deref()
-                    .map(|m| format!(" ({m})"))
-                    .unwrap_or_default();
-                let _ = writeln!(
-                    stdout,
-                    "  {:<12} {}{}",
-                    format!("{}:", t.name),
-                    t.status,
-                    msg
-                );
+                let mut line =
+                    format!("  {:<12} {}", format!("{}:", t.name), t.status).into_bytes();
+                if let Some(message) = &t.message {
+                    line.extend_from_slice(b" (");
+                    line.extend_from_slice(message.bytes());
+                    line.push(b')');
+                }
+                line.push(b'\n');
+                let _ = stdout.write_all(&line);
             }
             if !summary.skills.is_empty() {
                 let _ = writeln!(stdout, "\nSkills:");
@@ -336,6 +442,14 @@ pub fn run(
                 }
             }
         }
+    }
+
+    // Go reports a failed instruction target after the summary.
+    if summary.targets.iter().any(|t| t.status == "error") {
+        let _ = writeln!(
+            stderr,
+            "symbrain sync: sync: one or more instruction targets failed"
+        );
     }
 
     if has_error { exit::GENERIC } else { exit::OK }

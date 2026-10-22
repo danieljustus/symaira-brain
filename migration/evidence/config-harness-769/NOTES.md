@@ -62,8 +62,12 @@ that contains evidence files only. Evidence recorded earlier for `de6530b`
   and the exact redacted diagnostic, but not text-table column padding or JSON
   key order.
 * The oracle is wired into `rust-migration`, `rust-migration-macos` and
-  `rust-migration-windows` in `.github/workflows/ci.yml`; exact-head native
-  CI runs are still pending. This is not evidence of native three-OS CI.
+  `rust-migration-windows` in `.github/workflows/ci.yml`. Native receipt
+  (added in slice 3): the slice-1 merge commit `e328ca77e` (PR #901) passed
+  main-push CI run 39715748422 (workflow `CI`, conclusion success), with the
+  step "Go/Rust native config and harness process parity" green on
+  `rust-migration`, `rust-migration-macos` and `rust-migration-windows` and
+  `rust-init-native` green on ubuntu-latest, macos-15 and windows-2025.
 * The pre-change baseline measurements (exit 1 `start Go fallback` for every
   config flag shape, wrong bytes for `harness -h|--help|help`, ...) were taken
   in-session and not retained as a file.
@@ -140,11 +144,16 @@ tree (`candidate_dirty` false in the report). Go oracle unchanged:
   `symbrain-audit raw::tests::rejects_non_regular_targets_without_blocking`,
   which requires `SYMAIRA_EXTERNAL_RUNTIME_ROOT` on local macOS (crate not
   touched); the other 1114 pass.
-* Open: exact-head native Linux/macOS/Windows CI for the 924-case oracle is
-  pending (no three-OS claim). Windows-specific read-error wording (Go's
-  `GetFileAttributesEx`/`CreateFile` texts) is not oracle-compared locally;
-  POSIX-only cases are skipped there by the shared harness. `install`,
-  `uninstall` and `sync` residuals recorded in slice 1 were not re-measured.
+* Native receipt (added in slice 3): the exact PR head `9bf5ed337` (PR #903,
+  squash-merged as `1991381c1` with an identical tree) passed the full `CI`
+  workflow in pull-request run 39765433476 (conclusion success), including the
+  oracle step on `rust-migration`, `rust-migration-macos` and
+  `rust-migration-windows` and `rust-init-native` on ubuntu-latest, macos-15
+  and windows-2025. Windows-specific read-error wording (Go's
+  `GetFileAttributesEx`/`CreateFile` texts) is still not oracle-compared;
+  POSIX-only cases are skipped there by the shared harness. The `install`,
+  `uninstall` and `sync` residuals recorded in slice 1 were measured and
+  closed in slice 3.
 
 ## Review fixes: unbounded nesting and dotted keys (`*-deep-nesting-fix.*`)
 
@@ -170,3 +179,86 @@ tree (`candidate_dirty` false in the report). Go oracle unchanged:
   install oracles (the touched modules are `harness list`/parse paths only; the
   install paths share `json.rs::marshal`, covered by the golden tests in
   `harness_tests.rs`).
+
+
+# #769 slice 3 evidence (`--project` path shapes for install, uninstall and sync; local macOS arm64, Go 1.26.7)
+
+Candidate: `39b9b4609ea84acbcf8d27059820a449bff50667` (branch
+`issue/769-project-path-s3`, base `1991381c1`; code in `fa4d8207b` and
+`39b9b4609`, docs and this directory committed afterwards, so every `*-slice3-39b9b46.*`
+file was produced from a clean tree, `candidate_dirty` false). Go oracle
+unchanged: `0541e64a36d83bac8e5e4f8c4136033c03db83ae`.
+
+* `oracle-report-slice3-39b9b46.json` / `oracle-pass-slice3-39b9b46.log`:
+  `scripts/config-harness-oracle/run.sh` exit 0, 1915/1915 executed (940
+  earlier + 975 `cfgh-project-*`), `skipped` and `mismatched` empty, Rust
+  fallback absent. `--record-project-fixture` re-recorded
+  `rust/symbrain-cli/tests/fixtures/project_path_go_shapes.darwin.json` (renamed from
+  `project_path_go_shapes.json` afterwards) byte-identically
+  (820 cases).
+* `pre-fix-project-corpus-baseline-1991381.log`: the same project corpus
+  (without the 7 inline shapes, 936 cases) replayed against the unmodified base
+  binary: 543 cases differ from Go (55 of 78 shapes). This is the measured
+  "before" for the table in `MIGRATION-RUST.md`.
+* `negative-control-{symlink-root,sync-clean,json-invalid-byte}-oracle-fail-slice3-fa4d820.log`:
+  one-line mutations of the committed tree, filtered replays of the same
+  oracle cases (28/48, 5/42, 9/72 failing), restored with `git checkout`; run at
+  `fa4d8207b`, the Unix code of `39b9b4609` is identical (only the Windows
+  `physical_root` stub differs).
+* `cargo-test-symbrain-cli-harness-core-instructions-adapter-slice3-39b9b46.log`
+  (471 passed), `clippy-workspace-slice3-39b9b46.log`,
+  `setup-repair-oracle-slice3-39b9b46.log` (179 cases),
+  `install-profile-remove-oracle-check-slice3-39b9b46.log`,
+  `rust-differential-slice3-39b9b46.log` (504 cases),
+  `skills-argv-oracle-unittest-slice3-39b9b46.log` (26 tests). `cargo fmt
+  --check` and `make lint` exit 0 (not retained as files).
+* Windows/Linux: not run locally. The new oracle cases are `posix_only`
+  (skipped on Windows); see the residuals in `MIGRATION-RUST.md` (slice 3).
+
+### Linux project-path fixture (CI run 39784227979 / 39784227870 fix)
+
+`project_path_native` replayed the darwin recording on ubuntu and failed
+`cfgh-project-072-non-utf8-missing-install: exit left Some(0) right Some(1)`:
+APFS refuses to create non-UTF-8 names (`EILSEQ`, Go exits 1), ext4 accepts
+them (Go exits 0). Not a Rust divergence: the same Rust build matches the real
+Go CLI on Linux.
+
+* New fixture `rust/symbrain-cli/tests/fixtures/project_path_go_shapes.linux.json`
+  (820 cases, same names as `project_path_go_shapes.darwin.json`, `go_oracle_ref`
+  `0541e64a36d83bac8e5e4f8c4136033c03db83ae`), written by the unmodified recording
+  path of `scripts/config-harness-oracle/replay.py --record-project-fixture`
+  from the real Go CLI; no expected value was edited by hand. One recorder change:
+  a non-UTF-8 manifest name is kept (raw bytes in a fifth `rel_hex` element)
+  instead of dropping the case. Darwin entries are unchanged and the test falls
+  back to the UTF-8 name for them.
+* Recorded at candidate `bcd058028a51ba376b01b2d8466b4933830e0e6f` (local clone,
+  plus the `replay.py` change), Docker (linux/arm64), non-root `--user 1000:1000`
+  (root bypasses the unreadable-directory shapes and records a different
+  fixture; a root run was discarded):
+  * Go oracle: `golang:1.26` (`golang@sha256:6c2a5538f964f1c82f97ad14988bf05de100d922d159d0e398b54c7b0ca0c6c9`),
+    `GOFLAGS=-buildvcs=false`, `GOTOOLCHAIN=go1.26.7` (go.mod of the oracle ref),
+    `CGO_ENABLED=0 go build ./cmd/symbrain` from a detached worktree of the oracle ref.
+  * Rust: `rust:1.98-bookworm` (`rust@sha256:93ce27a88655056a51dbdd8f5f2d7ddc071c7b0070fb288a37b5a285fc83971e`),
+    `cargo build -p symbrain-cli --bin symbrain --locked`.
+  * Recorder: `python3 scripts/config-harness-oracle/replay.py /b/symbrain-go /b/symbrain-rust /b/report.json --record-project-fixture /b/project_path_go_shapes.linux.json`
+    in `golang:1.26`, exit 0, `1915 parity cases passed` (Rust equals Go on Linux
+    for stdout, stderr, exit and the filesystem manifest for every case;
+    `project-path-linux-record-slice3-bcd0580.log`,
+    `project-path-linux-record-report-slice3-bcd0580.json`).
+* Darwin vs Linux: 14 of 820 cases differ in substance (the non-UTF-8 name
+  shapes `072`/`073`/`074`, 4 commands each, and `inline-004`, 2 commands);
+  the other recorded differences are symlink own-mode noise, which the test
+  already ignores.
+* `project_path_native` now selects the fixture by `target_os` (macOS: darwin,
+  Linux: linux, other unix: compile error, i.e. unsupported and fail-closed),
+  asserts both fixtures have the same oracle ref and case names, and keeps the
+  `>= 300` case guard for each. Native checks with an absent Go fallback:
+  macOS pass; Linux `rust:1.98-bookworm` as uid 1000 pass
+  (`project-path-native-linux-docker-slice3.log`).
+* Linux exact-head CI is pending.
+* macOS re-check after the recorder change: `scripts/config-harness-oracle/run.sh`
+  with `--record-project-fixture` exit 0, 1915/1915
+  (`oracle-pass-slice3-bcd0580-darwin.log`), and the darwin fixture re-recorded
+  byte-identically. `cargo fmt --all -- --check`, workspace clippy
+  `-D warnings`, `cargo test -p symbrain-cli --locked` (41 test binaries ok) and
+  `make lint` exit 0.
