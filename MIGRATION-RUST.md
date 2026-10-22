@@ -576,8 +576,9 @@ the native stack, and that long TOML dotted keys were cubic. Fixed in
   take 28.8 s against 36.1 s in Go (both are quadratic in Go's algorithm).
 * `json.rs`: `marshal` writes nested documents with an explicit stack (the
   `go_json` decoder and the JSON `Value` drop were already iterative).
-  `install`/`uninstall` of a 100,000-deep JSON config now match Go instead of
-  aborting with a stack overflow.
+  `install -dry-run`/`uninstall -dry-run` of a 100,000-deep JSON config now
+  match Go (stdout, stderr, exit) instead of aborting with a stack overflow; a
+  real install of that config is refused by the 8 MiB output cap (residual 2).
 * `go_read.rs`: directory components are walked as raw bytes, so a parent
   directory whose name is not UTF-8 is opened by its real name (the lossy
   conversion looked for a different, absent directory). The unit test cannot
@@ -586,12 +587,34 @@ the native stack, and that long TOML dotted keys were cubic. Fixed in
 
 The oracle gains 8 deep/long-key TOML shapes (16 cases: 940 parity cases pass)
 and `go_parse_errors` gains four small-stack cargo tests that overflow or hang
-without the fixes. Residuals, all measured and unchanged by this fix: (1) a
-deeply nested array of tables ending in a pending `install`/`uninstall` is
-parsed by Go but `toml_edit`, the format-preserving edit backend, rejects
-nesting beyond roughly 90 levels, so Rust exits 2 with `not valid toml;
-refusing` and writes nothing (`harness list` is exact at any depth); (2) JSON
+without the fixes. Residuals, all measured and unchanged by this fix: (1) for
+codex `install`/`uninstall`, `toml_edit` (the format-preserving edit backend)
+refuses nesting deeper than 80 levels, the same limit the doctor-repair README
+records: depth 80 is accepted and 81 refused for arrays, inline tables,
+dotted-key components and table-header components alike (arrays of inline
+tables: 40 pairs accepted, 41 refused). Rust then exits 2 with `not valid toml;
+refusing to edit` and leaves the file untouched, where Go exits 0 and edits;
+`harness list` is exact at any depth; (2) JSON
 output above `MAX_CONFIG_BYTES` is refused on write by Rust while Go writes it
 (18 MB output of a 3,000-deep config); (3) inline tables nested inside arrays
 stay super-linear (12,000 levels: 43.9 s vs 13.8 s in Go, 3,000 levels: 3.0 s
-vs 1.2 s) because Rust clones the finished subtree where Go shares the map.
+vs 1.2 s) because Rust clones the finished subtree where Go shares the map;
+no crash, identical output, and far less memory than Go.
+
+Further residuals recorded from the review (not changed by this slice):
+
+* TOML and JSON parse diagnostics echo config fragments exactly like Go (for
+  example `Invalid integer "12_"`, or `expected value but found "sk" instead`
+  for an unquoted secret-looking value). This is a deliberate parity trade-off;
+  it reaches `harness list` and `install`/`uninstall` stderr unredacted, unlike
+  the HAR-007 health path.
+* `install`/`uninstall` with a `HOME` containing a `..` component: Rust exits 1
+  with `trusted root must not contain a parent component`, Go exits 0 and
+  edits (pre-existing; HAR-008 previously recorded only the `--project` case).
+* A non-UTF-8 `HOME` or any non-UTF-8 environment variable makes `harness
+  list`, `install` and `uninstall` panic in `std::env::vars()` (exit 101),
+  where Go works (pre-existing on main; tracked in #906).
+* Codex `install` output keeps comments and the existing layout
+  (format-preserving `toml_edit`), while Go re-marshals the document and drops
+  comments; exit codes match but bytes differ for configs with comments or an
+  existing `[mcp_servers.symbrain]` table (pre-existing, `toml_backend.rs`).
