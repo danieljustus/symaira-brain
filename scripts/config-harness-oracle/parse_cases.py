@@ -298,6 +298,15 @@ TOML_CASES: list[tuple[str, bytes]] = [
     ("valid-scalar-servers", b"mcp_servers = 1"),
     ("valid-array-servers", b"mcp_servers = []"),
     ("valid-mixed-servers", b'[mcp_servers]\nx = 1\n[mcp_servers.z]\nurl = "http://h"\n'),
+    # Nesting depth and key length are bounded only by the 8 MiB cap in Go.
+    ("deep-array-ok", b"a = " + b"[" * 20000 + b"]" * 20000 + b"\n"),
+    ("deep-array-eof", b"a = " + b"[" * 20000),
+    ("deep-array-mismatch", b"a = " + b"[" * 12000 + b"}" * 12000),
+    ("deep-inline-ok", b"a = " + b"{a=" * 1500 + b"1" + b"}" * 1500 + b"\n"),
+    ("deep-inline-array-ok", b"a = " + b"[{a=" * 800 + b"1" + b"}]" * 800 + b"\n"),
+    ("long-dotted-key-ok", b".".join([b"a"] * 1500) + b" = 1\n"),
+    ("long-dotted-key-duplicate", b".".join([b"a"] * 600) + b" = 1\n" + b".".join([b"a"] * 600) + b" = 2\n"),
+    ("long-dotted-key-conflict", b".".join([b"a"] * 600) + b" = 1\n" + b".".join([b"a"] * 601) + b" = 2\n"),
 ]
 
 # Several broken configs at once: registry order, table and JSON rendering.

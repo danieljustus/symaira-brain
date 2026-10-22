@@ -41,13 +41,16 @@ pub(crate) fn read_config(
     path: &Path,
     _capability: Option<(std::path::PathBuf, std::path::PathBuf)>,
 ) -> Result<Vec<u8>, ReadFailure> {
+    use std::ffi::OsStr;
     use std::io::Read;
+    use std::os::unix::ffi::OsStrExt;
 
     use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsExt, OpenOptionsFollowExt};
     use cap_std::ambient_authority;
     use cap_std::fs::{Dir, OpenOptions};
 
-    use crate::go_quote::quote_str;
+    use symbrain_core::config::format_go_quoted_bytes;
+
     use crate::inventory_read::clean_path;
 
     let display = path.to_string_lossy().into_owned();
@@ -71,16 +74,18 @@ pub(crate) fn read_config(
     let anchor = if directory.is_absolute() { "/" } else { "." };
     let mut current =
         Dir::open_ambient_dir(anchor, ambient_authority()).map_err(|error| open_failure(&error))?;
-    for component in directory.to_string_lossy().split('/') {
-        if component.is_empty() || component == "." {
+    // Raw bytes, not `to_string_lossy`: a component that is not UTF-8 must
+    // be opened by its real name, as Go does.
+    for component in directory.as_os_str().as_bytes().split(|byte| *byte == b'/') {
+        if component.is_empty() || component == b"." {
             continue;
         }
-        if component == ".." {
+        if component == b".." {
             return Err(ReadFailure::Message(
                 "configuration directory contains parent component".to_owned(),
             ));
         }
-        current = match current.open_dir_nofollow(component) {
+        current = match current.open_dir_nofollow(OsStr::from_bytes(component)) {
             Ok(next) => next,
             Err(error) if error.kind() == io::ErrorKind::NotFound => {
                 return Err(ReadFailure::NotFound);
@@ -88,7 +93,7 @@ pub(crate) fn read_config(
             Err(error) => {
                 return Err(ReadFailure::Message(format!(
                     "open configuration directory component {}: {}",
-                    quote_str(component),
+                    format_go_quoted_bytes(component),
                     go_io_text(&error)
                 )));
             }
@@ -175,4 +180,32 @@ pub(crate) fn read_config(
     file.read_snapshot()
         .map(|snapshot| snapshot.bytes)
         .map_err(|error| failure(&error))
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use std::ffi::OsStr;
+    use std::os::unix::ffi::OsStrExt;
+
+    use super::{ReadFailure, read_config};
+
+    /// A directory whose name is not UTF-8 must be walked by its real bytes
+    /// (a lossy conversion would look for a different, absent directory).
+    /// File systems that reject such names (APFS) cannot host the case; the
+    /// test then has nothing to check and returns.
+    #[test]
+    fn non_utf8_directory_components_are_opened_by_their_bytes() {
+        let root = tempfile::tempdir().unwrap();
+        let directory = root.path().join(OsStr::from_bytes(b"d\xff\xfe"));
+        if std::fs::create_dir(&directory).is_err() {
+            return;
+        }
+        std::fs::write(directory.join("config.toml"), b"a = 1\n").unwrap();
+        let bytes = match read_config(&directory.join("config.toml"), None) {
+            Ok(bytes) => bytes,
+            Err(ReadFailure::NotFound) => panic!("lossy path walk missed the directory"),
+            Err(ReadFailure::Message(message)) => panic!("{message}"),
+        };
+        assert_eq!(bytes, b"a = 1\n");
+    }
 }

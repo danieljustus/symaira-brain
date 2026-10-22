@@ -148,3 +148,128 @@ fn parse_error_messages_use_go_wording() {
         );
     }
 }
+
+/// Runs `body` on a thread with a deliberately small stack: any walk that
+/// recurses in proportion to the nesting depth overflows it long before the
+/// depths below are reached.
+fn on_small_stack(body: impl FnOnce() + Send + 'static) {
+    std::thread::Builder::new()
+        .stack_size(256 * 1024)
+        .spawn(body)
+        .unwrap()
+        .join()
+        .expect("no stack overflow or panic on a small stack");
+}
+
+fn toml_global(content: &[u8]) -> Value {
+    let home = tempfile::tempdir().unwrap();
+    write_config(home.path(), "codex", content);
+    inventory_for(home.path(), "codex")
+}
+
+#[test]
+fn deeply_nested_toml_is_parsed_and_dropped_without_overflowing_the_stack() {
+    on_small_stack(|| {
+        let depth = 100_000;
+        let mut content = b"a = ".to_vec();
+        content.extend(std::iter::repeat_n(b'[', depth));
+        content.extend(std::iter::repeat_n(b']', depth));
+        content.push(b'\n');
+        let arrays = toml_global(&content);
+        assert_eq!(arrays["parsed"], true, "{arrays}");
+        assert!(arrays.get("error").is_none());
+
+        // Unterminated: the error is Go's, and the half-built tree is
+        // dropped without recursion.
+        let mut open = b"a = ".to_vec();
+        open.extend(std::iter::repeat_n(b'[', depth));
+        let global = toml_global(&open);
+        assert_eq!(global["parsed"], false);
+        assert!(
+            global["error"].as_str().unwrap().contains("toml: line 1"),
+            "{global}"
+        );
+
+        // Inline tables register a context per level (quadratic in Go too).
+        let depth = 1_500;
+        let mut tables = b"a = ".to_vec();
+        for _ in 0..depth {
+            tables.extend_from_slice(b"{a=");
+        }
+        tables.push(b'1');
+        tables.extend(std::iter::repeat_n(b'}', depth));
+        tables.push(b'\n');
+        let tables = toml_global(&tables);
+        assert_eq!(tables["parsed"], true, "{tables}");
+        assert!(tables.get("error").is_none());
+    });
+}
+
+#[test]
+fn deeply_nested_toml_inline_tables_in_arrays_do_not_overflow_the_stack() {
+    on_small_stack(|| {
+        let depth = 1_500;
+        let mut content = b"a = ".to_vec();
+        for _ in 0..depth {
+            content.extend_from_slice(b"[{a=");
+        }
+        content.push(b'1');
+        for _ in 0..depth {
+            content.extend_from_slice(b"}]");
+        }
+        content.push(b'\n');
+        let global = toml_global(&content);
+        assert_eq!(global["parsed"], true, "{global}");
+        assert!(global.get("error").is_none());
+    });
+}
+
+#[test]
+fn long_toml_dotted_keys_parse_in_bounded_time() {
+    // The parser used to copy the whole context and re-walk the mapping per
+    // key component (cubic: 1000 components took ~37 s in release builds).
+    let started = std::time::Instant::now();
+    let mut content = vec![b'a'; 1];
+    for _ in 1..2_000 {
+        content.extend_from_slice(b".a");
+    }
+    content.extend_from_slice(b" = 1\n");
+    let global = toml_global(&content);
+    assert_eq!(global["parsed"], true, "{global}");
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(30),
+        "dotted-key parse took {:?}",
+        started.elapsed()
+    );
+}
+
+#[test]
+fn deeply_nested_json_documents_are_edited_and_marshalled_without_overflow() {
+    use symbrain_harness::{Entry, SERVER_NAME, lookup, parse};
+    on_small_stack(|| {
+        // Marshal output grows with depth squared (indentation): keep it
+        // near 18 MB like the reviewer's 3000-deep probe.
+        let depth = 3_000;
+        let mut content = b"{\"mcpServers\":{\"o\":{\"command\":\"x\"}},\"a\":".to_vec();
+        content.extend(std::iter::repeat_n(b'[', depth));
+        content.extend(std::iter::repeat_n(b']', depth));
+        content.push(b'}');
+        let harness = lookup("claude").unwrap();
+        let mut document = parse(harness, &content).unwrap();
+        document.set_server(SERVER_NAME, Entry::new("personal"));
+        let out = document.marshal().unwrap();
+        assert!(out.len() > 9_000_000, "unexpectedly small: {}", out.len());
+        assert!(document.remove_server(SERVER_NAME));
+        assert!(document.marshal().unwrap().len() > 9_000_000);
+        drop(document);
+
+        let mut objects = b"{\"a\":".to_vec();
+        for _ in 0..depth {
+            objects.extend_from_slice(b"{\"a\":");
+        }
+        objects.push(b'1');
+        objects.extend(std::iter::repeat_n(b'}', depth + 1));
+        let document = parse(harness, &objects).unwrap();
+        assert!(!document.marshal().unwrap().is_empty());
+    });
+}
