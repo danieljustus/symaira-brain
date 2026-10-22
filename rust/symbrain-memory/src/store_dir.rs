@@ -156,13 +156,101 @@ pub(crate) fn go_dir(path: &Path) -> Vec<u8> {
         .into_bytes()
 }
 
+/// The kinds of `std::path::Component`, constructible on every platform so the
+/// Windows walk plan can be unit-tested everywhere.
+#[cfg(any(windows, test))]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PartKind {
+    /// A Windows prefix such as `C:`, `\\?\C:` or `\\server\share`.
+    Prefix,
+    RootDir,
+    CurDir,
+    ParentDir,
+    Normal,
+}
+
+/// One step of the Windows directory walk.
+#[cfg(any(windows, test))]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Step {
+    /// Part of the volume root (`vol + separator` in Go): never inspected.
+    Root,
+    /// A directory name that is verified or created.
+    Check,
+    /// `..` after the lexical clean has nothing left to remove: dropped.
+    Skip,
+    /// `..` removes the previous checked directory name.
+    Pop,
+    /// `.`: nothing to do.
+    Ignore,
+}
+
+/// Plans the component-by-component walk of `SafeMkdirAll` on Windows.
+///
+/// Go starts at `filepath.VolumeName(abs) + separator` and only looks at the
+/// names below it. Inspecting the prefix itself is wrong: `\\?\C:` (the shape
+/// `Path::canonicalize` returns) names the volume device, not its root
+/// directory, so a metadata call on it is not a directory and the walk would
+/// reject every verbatim path (#769).
+#[cfg(any(windows, test))]
+fn walk_plan(parts: &[PartKind]) -> Vec<Step> {
+    let mut plan = Vec::with_capacity(parts.len());
+    let mut depth = 0_usize;
+    let mut in_root = true;
+    for part in parts {
+        let step = match part {
+            PartKind::Prefix | PartKind::RootDir if in_root => Step::Root,
+            // A prefix or root in the middle cannot occur in an absolute
+            // path; treat it as a name so it is verified, not trusted.
+            PartKind::Prefix | PartKind::RootDir | PartKind::Normal => Step::Check,
+            PartKind::CurDir => Step::Ignore,
+            PartKind::ParentDir if depth > 0 => Step::Pop,
+            PartKind::ParentDir => Step::Skip,
+        };
+        match step {
+            Step::Check => {
+                in_root = false;
+                depth += 1;
+            }
+            Step::Pop => depth -= 1,
+            Step::Root | Step::Skip | Step::Ignore => {}
+        }
+        plan.push(step);
+    }
+    plan
+}
+
 #[cfg(not(unix))]
 pub(crate) fn safe_mkdir_all(directory: &[u8]) -> Result<(), String> {
+    use std::path::Component;
+
     let directory = String::from_utf8_lossy(directory).into_owned();
-    let mut current = std::path::PathBuf::new();
     let absolute = std::path::absolute(&directory).map_err(|error| error.to_string())?;
-    for component in absolute.components() {
-        current.push(component);
+    let components: Vec<Component<'_>> = absolute.components().collect();
+    let kinds: Vec<PartKind> = components
+        .iter()
+        .map(|component| match component {
+            Component::Prefix(_) => PartKind::Prefix,
+            Component::RootDir => PartKind::RootDir,
+            Component::CurDir => PartKind::CurDir,
+            Component::ParentDir => PartKind::ParentDir,
+            Component::Normal(_) => PartKind::Normal,
+        })
+        .collect();
+    let mut current = std::path::PathBuf::new();
+    for (component, step) in components.into_iter().zip(walk_plan(&kinds)) {
+        match step {
+            Step::Root => {
+                current.push(component);
+                continue;
+            }
+            Step::Ignore | Step::Skip => continue,
+            Step::Pop => {
+                current.pop();
+                continue;
+            }
+            Step::Check => current.push(component),
+        }
         match std::fs::metadata(&current) {
             Ok(metadata) if metadata.is_dir() => {}
             Ok(_) => {
@@ -182,6 +270,56 @@ pub(crate) fn safe_mkdir_all(directory: &[u8]) -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod walk_plan_tests {
+    use super::PartKind::{CurDir, Normal, ParentDir, Prefix, RootDir};
+    use super::{Step, walk_plan};
+
+    #[test]
+    fn the_volume_root_is_never_inspected() {
+        // `\\?\D:\a\data` canonicalized on Windows: Prefix, RootDir, names.
+        assert_eq!(
+            walk_plan(&[Prefix, RootDir, Normal, Normal]),
+            [Step::Root, Step::Root, Step::Check, Step::Check]
+        );
+        // A bare root and a drive-relative prefix without a root.
+        assert_eq!(walk_plan(&[RootDir, Normal]), [Step::Root, Step::Check]);
+        assert_eq!(walk_plan(&[Prefix, Normal]), [Step::Root, Step::Check]);
+        assert_eq!(walk_plan(&[Normal, Normal]), [Step::Check, Step::Check]);
+        assert!(walk_plan(&[]).is_empty());
+    }
+
+    #[test]
+    fn dot_segments_follow_the_lexical_clean() {
+        // Verbatim paths are not normalized by `std::path::absolute`.
+        assert_eq!(
+            walk_plan(&[Prefix, RootDir, Normal, CurDir, Normal, ParentDir, Normal]),
+            [
+                Step::Root,
+                Step::Root,
+                Step::Check,
+                Step::Ignore,
+                Step::Check,
+                Step::Pop,
+                Step::Check
+            ]
+        );
+        // `..` at the root has nothing to remove (Go clamps it).
+        assert_eq!(
+            walk_plan(&[Prefix, RootDir, ParentDir, Normal]),
+            [Step::Root, Step::Root, Step::Skip, Step::Check]
+        );
+    }
+
+    #[test]
+    fn a_misplaced_root_is_verified_not_trusted() {
+        assert_eq!(
+            walk_plan(&[Prefix, RootDir, Normal, RootDir]),
+            [Step::Root, Step::Root, Step::Check, Step::Check]
+        );
+    }
 }
 
 #[cfg(all(test, unix))]
