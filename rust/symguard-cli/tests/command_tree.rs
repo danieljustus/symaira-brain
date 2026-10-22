@@ -164,7 +164,11 @@ fn every_inventory_path_is_exercised_and_none_is_unported() {
         }
     }
     let rendered = serde_json::to_string(&inventory["probes"]).unwrap();
-    for marker in ["not yet ported", "not ported"] {
+    for marker in [
+        "not yet ported",
+        "not ported",
+        "unsupported native diagnostic state",
+    ] {
         assert!(
             !rendered.contains(marker),
             "Go oracle never prints {marker:?}"

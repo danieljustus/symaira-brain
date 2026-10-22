@@ -458,7 +458,13 @@ nine paths (root dispatcher, `version`, `doctor`, `decide`, `grants`, `grants li
 cross-checked against the frozen source's dispatcher cases and flag literals.
 All 80 recorded probes (help, `-h`, unknown word/flag, `--`, flag-before/after-positional
 forms) match byte-for-byte between Go and the native `symguard`; the result is 9
-native, 0 unported, 0 Go fallback. `proxy`, `spawn`, `approval`, `proposal`,
+native, 0 unported, 0 Go fallback at path level; within `doctor`, the
+known unsupported TOML diagnostic states still fail closed with
+`unsupported native diagnostic state` (SEC-007). The frozen tree has no
+`guard/cmd/symguard/main.go`; the dispatcher used is the project-written
+`scripts/guard-standalone-oracle/main.go.txt` over the real command packages, whose
+cases equal the reachable `cmd/symbrain/cmd_guard.go` dispatcher (the retired main
+also called `version.CheckLatest()`, which is not part of this contract). `proxy`, `spawn`, `approval`, `proposal`,
 `sequence`, `discovery` and `update` are library packages without a command case,
 so they are not CLI paths; `archguard`, `proposal`, `update` (never invoked by any
 command) and the `spawn` package remain unported as libraries and are listed in the

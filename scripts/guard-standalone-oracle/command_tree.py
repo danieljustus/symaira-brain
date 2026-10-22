@@ -111,7 +111,7 @@ def walk_help_tree(runner, go):
 
 
 def source_literals(src):
-    main_text = (src / "oracle770/main.go").read_text()
+    main_text = (src / "oracle770/main.go").read_text(encoding="utf-8")
     packages = sorted(set(re.findall(r'symguard/(\w+)"', main_text)))
     code = lambda text: "\n".join(re.sub(r"//.*$", "", line) for line in text.splitlines())
     case_re = re.compile(r'case\s+((?:"[^"]+"\s*,\s*)*"[^"]+")\s*:')
@@ -125,7 +125,7 @@ def source_literals(src):
     dispatcher_words = set(cases(code(main_text))) if "switch args[0]" in main_text else set()
     flags, sub_words = {}, {}
     for package in packages:
-        source = code((src / "guard/cmd/symguard" / package / "command.go").read_text())
+        source = code((src / "guard/cmd/symguard" / package / "command.go").read_text(encoding="utf-8"))
         found = {}
         for name, equals in re.findall(r'"(-{1,2}[A-Za-z][A-Za-z0-9-]*)(=?)"', source):
             found[name] = found.get(name, False) or bool(equals)
@@ -140,7 +140,7 @@ def package_users(src, every):
     for path in sorted((src / "guard/cmd/symguard").rglob("*.go")):
         if path.name.endswith("_test.go"):
             continue
-        for name in re.findall(r'"' + re.escape(PKG_PREFIX) + r'(\w+)"', path.read_text()):
+        for name in re.findall(r'"' + re.escape(PKG_PREFIX) + r'(\w+)"', path.read_text(encoding="utf-8")):
             users.setdefault(name, set()).add(path.parent.name)
     return {name: sorted(value) for name, value in users.items()}
 
@@ -151,11 +151,11 @@ def update_check_invoked(src):
     for path in sorted(src.joinpath("guard").rglob("*.go")):
         if path.name.endswith("_test.go"):
             continue
-        for line in path.read_text().splitlines():
+        for line in path.read_text(encoding="utf-8").splitlines():
             code = line.split("//")[0]
             if "CheckLatest(" in code and "func CheckLatest" not in code:
                 calls.append(str(path))
-    return bool(calls) or "CheckLatest" in (src / "oracle770/main.go").read_text()
+    return bool(calls) or "CheckLatest" in (src / "oracle770/main.go").read_text(encoding="utf-8")
 
 
 def internal_packages(src):
@@ -294,7 +294,7 @@ def summarize(probes, tree):
 
 
 def assert_no_fallback():
-    manifest = (ROOT / "rust/symguard-cli/Cargo.toml").read_text()
+    manifest = (ROOT / "rust/symguard-cli/Cargo.toml").read_text(encoding="utf-8")
     assert "symbrain-cli" not in manifest and "symbrain-gateway" not in manifest, "standalone Guard depends on the Brain CLI"
 
 
@@ -315,7 +315,8 @@ def run_controls(runner, go, rust, probe_index, tmp):
                            f"p = subprocess.run([{str(rust)!r}, *sys.argv[1:]], input=sys.stdin.buffer.read(), capture_output=True)\n"
                            "out, err, code = p.stdout, p.stderr, p.returncode\n"
                            f"{body}\n"
-                           "sys.stdout.buffer.write(out); sys.stderr.buffer.write(err); sys.exit(code)\n")
+                           "sys.stdout.buffer.write(out); sys.stderr.buffer.write(err); sys.exit(code)\n",
+                           encoding="utf-8")
         for target in targets:
             left = probe_index[tuple(target)]["go"]
             right = runner.run(wrapper, target, True)
@@ -368,8 +369,8 @@ def main():
         summary = summarize(probes, inventory["tree"])
         if write:
             FIXTURE.parent.mkdir(parents=True, exist_ok=True)
-            FIXTURE.write_text(json.dumps(inventory, indent=2, ensure_ascii=False) + "\n")
-        fixture = json.loads(FIXTURE.read_text())
+            FIXTURE.write_text(json.dumps(inventory, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
         fixture_diff(inventory, fixture)
         fixture_rejected = run_fixture_control(inventory, fixture)
         index = {tuple(p["args"]): p for p in probes}
@@ -384,7 +385,7 @@ def main():
                   control_mutants_rejected=controls, fixture_mutants_rejected=fixture_rejected,
                   probes=[dict(owner=p["owner"], args=p["args"], status=p["status"]) for p in probes])
     report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text(json.dumps(output, indent=2) + "\n")
+    report.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
     assert not summary["paths_unported"], f"unported symguard paths: {summary['paths_unported']}"
     assert summary["probes_native"] == summary["probes"], "probe mismatch: " + str(
         [p["args"] for p in probes if p["status"] != "native"])
