@@ -305,10 +305,12 @@ invalid typed configuration: Rust reconstructs Go's TOML, environment and
 filesystem diagnostics. The setup-repair, setup-source and doctor-repair
 oracles now all pin Go `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (CoreKit
 v0.18.2, which no longer skips zero values); local macOS runs match 179, 95 and
-507 cases. Parser-dialect residuals (dotted-key/header conflicts, leap
-seconds, the 80-level `toml_edit` recursion limit) are listed in
-`scripts/doctor-repair-oracle/README.md`; native Linux and Windows receipts
-come from exact-head CI.
+556 cases. The exact-head CI receipts (run 39716321451, artifacts
+`doctor-repair-parity-{Linux,macOS,Windows}`) match doctor-repair 567/567 on
+Linux, 556/556 on macOS and 551/551 on Windows, including the CRLF cases.
+Parser-dialect residuals (dotted-key/header conflicts, leap seconds, the
+80-level `toml_edit` recursion limit) are listed in
+`scripts/doctor-repair-oracle/README.md`.
 
 Rust skill input hardening (#476) checks control-file and normalized frontmatter
 bounds before allocating the full document or parsing YAML. Resource traversal

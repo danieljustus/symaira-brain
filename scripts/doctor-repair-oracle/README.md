@@ -2,7 +2,7 @@
 `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #765 base; CoreKit v0.18.2), builds the
 candidate Rust CLI, and compares real `doctor --fix`, `setup --fix` and
 `setup --from-source` subprocesses with an absent Go fallback.
-It replays 518 cases on Linux, 507 on macOS and 502 on Windows (Unix signals/permissions
+It replays 567 cases on Linux, 556 on macOS and 551 on Windows (Unix signals/permissions
 and Windows large exitcodes have separate native fixtures). A supplemental native
 Go fixture supplies version responses; it never changes the oracle, production Go or frozen cases.
 
