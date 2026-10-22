@@ -1,0 +1,6448 @@
+{
+ "bootstrap": [
+  "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"raw-oracle\",\"version\":\"0\"}}}",
+  "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}",
+  "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}"
+ ],
+ "cases": [
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "68900b1819e07253dcf81c857f65afe4e4d7438ad0a20a0ad271de35f4fbec97",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-dot-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "68900b1819e07253dcf81c857f65afe4e4d7438ad0a20a0ad271de35f4fbec97",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-dot-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "c78dda773b853cdf5d3155c8e30d28c7f96499a6f854b41fefab27d8bd585f3b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "wire-eof-escape-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "c78dda773b853cdf5d3155c8e30d28c7f96499a6f854b41fefab27d8bd585f3b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "wire-eof-escape-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "adc432529a78fb053858edc97300ca258fb51b7f7849b2167c87c324c6b43e35",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-exp-sign-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "adc432529a78fb053858edc97300ca258fb51b7f7849b2167c87c324c6b43e35",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-exp-sign-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "50b8eea5717ab4fe5d0c39a8adb3dbb2d84db6d1b144858dfdbf10228822a54f",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "50b8eea5717ab4fe5d0c39a8adb3dbb2d84db6d1b144858dfdbf10228822a54f",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "c5a8981cef4054256a0fbdb3dc0b8d2f2e2608e70659f60e81e710cca3a6cf60",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "wire-eof-false-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "c5a8981cef4054256a0fbdb3dc0b8d2f2e2608e70659f60e81e710cca3a6cf60",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "wire-eof-false-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "9fa42188aaebee77303d2a63029c05759137d096ebfce0810c8b935099febd52",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "9fa42188aaebee77303d2a63029c05759137d096ebfce0810c8b935099febd52",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "wire-eof-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "b89f4af8ffadf53ef6c46dbaca31166600052207433ae8f4df92db0e0bb55a22",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "wire-eof-null-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "b89f4af8ffadf53ef6c46dbaca31166600052207433ae8f4df92db0e0bb55a22",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "wire-eof-null-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "9c741a7a662b84274523b6f6b2d60c32173cbf6f5e1b2c5c275efc38c027e77c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "wire-eof-true-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "9c741a7a662b84274523b6f6b2d60c32173cbf6f5e1b2c5c275efc38c027e77c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "wire-eof-true-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a225c753132",
+     1
+    ]
+   ],
+   "body_sha256": "cd7575ad9d406e6d55671a9ff43fcede96028640f638210f458464d5b7da5f5e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "wire-eof-unicode-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a225c753132",
+     1
+    ]
+   ],
+   "body_sha256": "cd7575ad9d406e6d55671a9ff43fcede96028640f638210f458464d5b7da5f5e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "wire-eof-unicode-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a5b305d7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f7c21c3155c911afb23b2649a0556d976506644b19f63fd8eb5e0eb004630fe0",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-ignored-depth-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a5b305d7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f7c21c3155c911afb23b2649a0556d976506644b19f63fd8eb5e0eb004630fe0",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-ignored-depth-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     10001
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     10001
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "69b54e281317e233b380a032f47b14a8c4f64aa8df56e521902a0690bb4cd66d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "wire-json-novel-ignored-depth-10001-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     10001
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     10001
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "69b54e281317e233b380a032f47b14a8c4f64aa8df56e521902a0690bb4cd66d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "wire-json-novel-ignored-depth-10001-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "5bdb46f8e393bc8ef517353bc44d1f2466a0e7f6a1726161ca8cde0e1751a52b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-ignored-depth-9997-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "5bdb46f8e393bc8ef517353bc44d1f2466a0e7f6a1726161ca8cde0e1751a52b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-ignored-depth-9997-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "2af598cc0a2ff0b481482c5549ada956e1390e74692d71f8e82dba0cdc8b7bca",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "wire-json-novel-ignored-depth-9998-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "2af598cc0a2ff0b481482c5549ada956e1390e74692d71f8e82dba0cdc8b7bca",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "wire-json-novel-ignored-depth-9998-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22746f6b656e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "fb56dedd23eb6f42d5452edacb76f001006c6e1df98ddfe35f5287550946013c",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "wire-json-novel-meta-actual-overflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22746f6b656e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "fb56dedd23eb6f42d5452edacb76f001006c6e1df98ddfe35f5287550946013c",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "wire-json-novel-meta-actual-overflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a5b305d7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "bf137a82708eaf2d74cd14a98aeeb7bfe60e8d329598c71d39aecf1b6c817cd8",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a5b305d7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "bf137a82708eaf2d74cd14a98aeeb7bfe60e8d329598c71d39aecf1b6c817cd8",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     1024
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     1024
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "74ff1f3a2a264454741e613b9479afed22e6150cd7906264d7a05992db16ef17",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-1024-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     1024
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     1024
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "74ff1f3a2a264454741e613b9479afed22e6150cd7906264d7a05992db16ef17",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-1024-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "81f19793b3aa5e3c85e54c249b74df9859f4e70ff866fc5c049949b378e1f564",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-128-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "81f19793b3aa5e3c85e54c249b74df9859f4e70ff866fc5c049949b378e1f564",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-128-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     16
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     16
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "fe40cc9a23c95a49b5561c9da0c4b7665098a575a820a40ffb0249dd397aef7e",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-16-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     16
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     16
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "fe40cc9a23c95a49b5561c9da0c4b7665098a575a820a40ffb0249dd397aef7e",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-16-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     4096
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     4096
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "df0298e25ae7d4ec72f7728da929b620f173d6d83f67c6bcdaf27458a79a9cba",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-4096-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     4096
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     4096
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "df0298e25ae7d4ec72f7728da929b620f173d6d83f67c6bcdaf27458a79a9cba",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-4096-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9000
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9000
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d6d2c0d1916da226fda663e341425fe32e87d75bb06334cdf57a2f5f45b68473",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-9000-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9000
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9000
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d6d2c0d1916da226fda663e341425fe32e87d75bb06334cdf57a2f5f45b68473",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-deep-9000-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22746f6b656e223a302e317d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a9803953a08fc7547f8b31e10dc5c7742c9a9c591dde0a6db9d2e7aa7b43ba86",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-ordinary-finite-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22746f6b656e223a302e317d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a9803953a08fc7547f8b31e10dc5c7742c9a9c591dde0a6db9d2e7aa7b43ba86",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-ordinary-finite-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22746f6b656e223a302e",
+     1
+    ],
+    [
+     "30",
+     10000
+    ],
+    [
+     "31653130303030307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e8ee587fa3b6138eaab2102f1106cdaac02e401169e4cb423fedb7e4e532f56c",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-sdk-long-finite-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22746f6b656e223a302e",
+     1
+    ],
+    [
+     "30",
+     10000
+    ],
+    [
+     "31653130303030307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e8ee587fa3b6138eaab2102f1106cdaac02e401169e4cb423fedb7e4e532f56c",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "wire-json-novel-meta-sdk-long-finite-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "dc286c8f99ff1d81e8e7efe1b0ac519dedf04b1c03e93d34b2736e3a6a0b139d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "dc286c8f99ff1d81e8e7efe1b0ac519dedf04b1c03e93d34b2736e3a6a0b139d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a302e",
+     1
+    ]
+   ],
+   "body_sha256": "2665abc706b1e8024423ebbf6d297075d4afb7728b080dd7515a883f7a48ba37",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-zero-dot-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a302e",
+     1
+    ]
+   ],
+   "body_sha256": "2665abc706b1e8024423ebbf6d297075d4afb7728b080dd7515a883f7a48ba37",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-zero-dot-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "ebe86fcd92cd25c53896d60e4743d5edbe0e4a8b47c3e50e95402123b0613089",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-dot-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "ebe86fcd92cd25c53896d60e4743d5edbe0e4a8b47c3e50e95402123b0613089",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-dot-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "b844d1b26d66282cd29dd1c17fddb52d5a41d3277eedc320847499576e6f725e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "b844d1b26d66282cd29dd1c17fddb52d5a41d3277eedc320847499576e6f725e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a3145",
+     1
+    ]
+   ],
+   "body_sha256": "362d4c168df4485e1843dfbb0d3892914f87100d0d8fe6a5ecd767a2c6164419",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-upper-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a3145",
+     1
+    ]
+   ],
+   "body_sha256": "362d4c168df4485e1843dfbb0d3892914f87100d0d8fe6a5ecd767a2c6164419",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-upper-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "86ce6d7f2087fe8a3b9695868974792c4a4a72cb5fdd0e66be04d7785e31f1a5",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-exp-plus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "86ce6d7f2087fe8a3b9695868974792c4a4a72cb5fdd0e66be04d7785e31f1a5",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-exp-plus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a31652d",
+     1
+    ]
+   ],
+   "body_sha256": "49023e4c5b66dbc23490c857f98ed3febd7fa669bb75ff78e49eac04f75f4f6f",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-exp-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a31652d",
+     1
+    ]
+   ],
+   "body_sha256": "49023e4c5b66dbc23490c857f98ed3febd7fa669bb75ff78e49eac04f75f4f6f",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-exp-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a2d30452b",
+     1
+    ]
+   ],
+   "body_sha256": "57c2fd0d8842720bd30b7e4f539a68bb9c0c697bfea2dadff9964ffa770dfb15",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-signed-exp-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a2d30452b",
+     1
+    ]
+   ],
+   "body_sha256": "57c2fd0d8842720bd30b7e4f539a68bb9c0c697bfea2dadff9964ffa770dfb15",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-meta-signed-exp-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a74",
+     1
+    ]
+   ],
+   "body_sha256": "cb7d5206c635cd625d70163f5b9b482a23fb7d11c0344062ba003d67b464e325",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'r')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-true-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a74",
+     1
+    ]
+   ],
+   "body_sha256": "cb7d5206c635cd625d70163f5b9b482a23fb7d11c0344062ba003d67b464e325",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'r')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-true-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a7472",
+     1
+    ]
+   ],
+   "body_sha256": "6e4ad930a2d704b232adeae47c0271f1c69a5f6baa14a30479c6acd34ef7d516",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-true-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a7472",
+     1
+    ]
+   ],
+   "body_sha256": "6e4ad930a2d704b232adeae47c0271f1c69a5f6baa14a30479c6acd34ef7d516",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-true-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "8329183548ff3eff4cdc435a0bd4e15d38476756901ddae1330a76e9552373cb",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-true-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "8329183548ff3eff4cdc435a0bd4e15d38476756901ddae1330a76e9552373cb",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-true-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a66",
+     1
+    ]
+   ],
+   "body_sha256": "96f690dc20e51c8022393c3fdc2b0e4a37b9105d837b0c64ae7c43ec386bbffe",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'a')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a66",
+     1
+    ]
+   ],
+   "body_sha256": "96f690dc20e51c8022393c3fdc2b0e4a37b9105d837b0c64ae7c43ec386bbffe",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'a')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6661",
+     1
+    ]
+   ],
+   "body_sha256": "b64b1f865b602fd485b341d6d2abfb8be75383d2a71252531f4c85b55da8b3a3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6661",
+     1
+    ]
+   ],
+   "body_sha256": "b64b1f865b602fd485b341d6d2abfb8be75383d2a71252531f4c85b55da8b3a3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a66616c",
+     1
+    ]
+   ],
+   "body_sha256": "2884d9b2d5517507a6ba2c1433b51f3c3b05deb0927ab6ebc06876048fba9e2f",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 's')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a66616c",
+     1
+    ]
+   ],
+   "body_sha256": "2884d9b2d5517507a6ba2c1433b51f3c3b05deb0927ab6ebc06876048fba9e2f",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 's')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "afafd98e805d29a82a12e93fe0764b0a6a91d8e65cb8da19984969f288fc19b6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-4-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "afafd98e805d29a82a12e93fe0764b0a6a91d8e65cb8da19984969f288fc19b6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-false-4-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6e",
+     1
+    ]
+   ],
+   "body_sha256": "fb07b4629aab88cac6ee4d26c0799f34ceb30bb256f81b53b565189db699f2c4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-null-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6e",
+     1
+    ]
+   ],
+   "body_sha256": "fb07b4629aab88cac6ee4d26c0799f34ceb30bb256f81b53b565189db699f2c4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-null-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6e75",
+     1
+    ]
+   ],
+   "body_sha256": "10d8ae6bfca2c72c120f6e4e9caa7f54b78f1e9e5fc2a94ca25645efe8e38ece",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-null-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6e75",
+     1
+    ]
+   ],
+   "body_sha256": "10d8ae6bfca2c72c120f6e4e9caa7f54b78f1e9e5fc2a94ca25645efe8e38ece",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-null-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "d19792f25c589ba6d7ffda33bc63591ab5686a0f233231ae3881825ccf352f99",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-null-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "d19792f25c589ba6d7ffda33bc63591ab5686a0f233231ae3881825ccf352f99",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-meta-null-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "d66172d6e61f68046ee6eb5123403e271521393af625afe79ba664cc1bf58415",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "eof-meta-escape-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "d66172d6e61f68046ee6eb5123403e271521393af625afe79ba664cc1bf58415",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "eof-meta-escape-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c75",
+     1
+    ]
+   ],
+   "body_sha256": "b637676f0288e9c70a8fa6d3c94af11ceae7d8413c6490b58a97317b533eb78b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-0-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c75",
+     1
+    ]
+   ],
+   "body_sha256": "b637676f0288e9c70a8fa6d3c94af11ceae7d8413c6490b58a97317b533eb78b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-0-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c7530",
+     1
+    ]
+   ],
+   "body_sha256": "e763199641686e58f2fd83f97c8b14fa42bd02ca12d43325a164d52efc515385",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c7530",
+     1
+    ]
+   ],
+   "body_sha256": "e763199641686e58f2fd83f97c8b14fa42bd02ca12d43325a164d52efc515385",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c753030",
+     1
+    ]
+   ],
+   "body_sha256": "e20d41279762c8076f58271998ae643590763a79b656d99e62f2cc92a742b4e8",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c753030",
+     1
+    ]
+   ],
+   "body_sha256": "e20d41279762c8076f58271998ae643590763a79b656d99e62f2cc92a742b4e8",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c75303030",
+     1
+    ]
+   ],
+   "body_sha256": "f450299cbbf8a323711d3f9579535d743b7b997509a7fff68acc46f468e179f3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c75303030",
+     1
+    ]
+   ],
+   "body_sha256": "f450299cbbf8a323711d3f9579535d743b7b997509a7fff68acc46f468e179f3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-meta-unicode-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "57d341bbd91ac19aba6073406db524861aa2e2dd180d6349fc1ecdfdac1535e4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "57d341bbd91ac19aba6073406db524861aa2e2dd180d6349fc1ecdfdac1535e4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a302e",
+     1
+    ]
+   ],
+   "body_sha256": "5de31e77294c9f977efb9221489884c0433fd04969db8c43adb4227fbf729d28",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-zero-dot-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a302e",
+     1
+    ]
+   ],
+   "body_sha256": "5de31e77294c9f977efb9221489884c0433fd04969db8c43adb4227fbf729d28",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-zero-dot-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "c52c3dbb039c048e59aaf2ca2b6f747a445d11cb0973af89a6126275c5426a94",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-dot-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "c52c3dbb039c048e59aaf2ca2b6f747a445d11cb0973af89a6126275c5426a94",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-dot-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "738e47c39aca8f47fd00aaa600bf71e99bf536a9d99351bd7538d8f6b78d83f2",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "738e47c39aca8f47fd00aaa600bf71e99bf536a9d99351bd7538d8f6b78d83f2",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a3145",
+     1
+    ]
+   ],
+   "body_sha256": "b8b7a5d61a24f3080e745044c6f0a18bc0079420788e10bfe7c5d4249d4cc3d4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-upper-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a3145",
+     1
+    ]
+   ],
+   "body_sha256": "b8b7a5d61a24f3080e745044c6f0a18bc0079420788e10bfe7c5d4249d4cc3d4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-upper-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "a05c2686b4304e8e41437a58db718031d61c7f8ab8047835350541ce250c8f50",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-exp-plus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "a05c2686b4304e8e41437a58db718031d61c7f8ab8047835350541ce250c8f50",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-exp-plus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a31652d",
+     1
+    ]
+   ],
+   "body_sha256": "8e3b68ff7454ccf5d7b29885d21964a5cee16c0ab5c410902d7e38a8e272e0f0",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-exp-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a31652d",
+     1
+    ]
+   ],
+   "body_sha256": "8e3b68ff7454ccf5d7b29885d21964a5cee16c0ab5c410902d7e38a8e272e0f0",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-exp-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a2d30452b",
+     1
+    ]
+   ],
+   "body_sha256": "c1e17b508ce18eb0888ab99ee819aebdcd39abc3e73b02c3d5d8d4e0cf47960c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-signed-exp-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a2d30452b",
+     1
+    ]
+   ],
+   "body_sha256": "c1e17b508ce18eb0888ab99ee819aebdcd39abc3e73b02c3d5d8d4e0cf47960c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-signed-exp-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a74",
+     1
+    ]
+   ],
+   "body_sha256": "34e4d954966a5f640da1ed6db612e01c307afb4d331053a3ff7a43bc966d8d3d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'r')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-true-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a74",
+     1
+    ]
+   ],
+   "body_sha256": "34e4d954966a5f640da1ed6db612e01c307afb4d331053a3ff7a43bc966d8d3d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'r')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-true-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a7472",
+     1
+    ]
+   ],
+   "body_sha256": "17c36f0b812ae1fcc1e290227004ddf9f8bf84f554c9d8bc769bc3c7ef96723d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-true-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a7472",
+     1
+    ]
+   ],
+   "body_sha256": "17c36f0b812ae1fcc1e290227004ddf9f8bf84f554c9d8bc769bc3c7ef96723d",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-true-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "e1a749f90455507c63062b2cfd1883d90d50cb46ec2dc8dfbb29ad7a1be7d995",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-true-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "e1a749f90455507c63062b2cfd1883d90d50cb46ec2dc8dfbb29ad7a1be7d995",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-true-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a66",
+     1
+    ]
+   ],
+   "body_sha256": "2a1f8a3adba8b1bd4eab7aa7ee1cd31568aa75413445fec20b23f37a67adeef6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'a')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a66",
+     1
+    ]
+   ],
+   "body_sha256": "2a1f8a3adba8b1bd4eab7aa7ee1cd31568aa75413445fec20b23f37a67adeef6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'a')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6661",
+     1
+    ]
+   ],
+   "body_sha256": "abd1b467aaa4598f324d99535680bb035988c825232d8ddb844fc501f162df61",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6661",
+     1
+    ]
+   ],
+   "body_sha256": "abd1b467aaa4598f324d99535680bb035988c825232d8ddb844fc501f162df61",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a66616c",
+     1
+    ]
+   ],
+   "body_sha256": "a027a443ebcf9eaf91e64868718ff9197a568c133f267840d2375944662f4a00",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 's')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a66616c",
+     1
+    ]
+   ],
+   "body_sha256": "a027a443ebcf9eaf91e64868718ff9197a568c133f267840d2375944662f4a00",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 's')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "f19281c4ec3990dd5ea8a40fd391d65ea53eb28e4031b4e9b051a7a2dbf0bf9b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-4-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "f19281c4ec3990dd5ea8a40fd391d65ea53eb28e4031b4e9b051a7a2dbf0bf9b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-false-4-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6e",
+     1
+    ]
+   ],
+   "body_sha256": "96730f75401cc45a396e3a76734901f1975adc51c7cd4b333681f60e88208a69",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-null-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6e",
+     1
+    ]
+   ],
+   "body_sha256": "96730f75401cc45a396e3a76734901f1975adc51c7cd4b333681f60e88208a69",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-null-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6e75",
+     1
+    ]
+   ],
+   "body_sha256": "bdf11ed2f02398d35e5e60ca24402fc220d772f97f64c1e4ba03c192c3e90368",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-null-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6e75",
+     1
+    ]
+   ],
+   "body_sha256": "bdf11ed2f02398d35e5e60ca24402fc220d772f97f64c1e4ba03c192c3e90368",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-null-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "76bfac302bf8a6daaca5f7a678ed21424dd21c450055b4aaf1bf83c6683184d1",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-null-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "76bfac302bf8a6daaca5f7a678ed21424dd21c450055b4aaf1bf83c6683184d1",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-null-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "034e0da74cfac6ae1dd0c465986374de7a73acd046f70ef785a1406a0c36cc1a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-escape-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "034e0da74cfac6ae1dd0c465986374de7a73acd046f70ef785a1406a0c36cc1a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-escape-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c75",
+     1
+    ]
+   ],
+   "body_sha256": "5efcf31ac1f1046e89930281bacc96a8438d341a7fdfa0a5a5fdddb5e912f52b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-0-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c75",
+     1
+    ]
+   ],
+   "body_sha256": "5efcf31ac1f1046e89930281bacc96a8438d341a7fdfa0a5a5fdddb5e912f52b",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-0-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c7530",
+     1
+    ]
+   ],
+   "body_sha256": "71a8355a42cb13cdd9ddcbb4cd43b9f127e85033beeb05ff327e7d4dcd0999d8",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c7530",
+     1
+    ]
+   ],
+   "body_sha256": "71a8355a42cb13cdd9ddcbb4cd43b9f127e85033beeb05ff327e7d4dcd0999d8",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c753030",
+     1
+    ]
+   ],
+   "body_sha256": "bfaa52ec98ac2f60423b8afba64f5430e3873b5c95e930d4121bcaea88cdbbbc",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c753030",
+     1
+    ]
+   ],
+   "body_sha256": "bfaa52ec98ac2f60423b8afba64f5430e3873b5c95e930d4121bcaea88cdbbbc",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c75303030",
+     1
+    ]
+   ],
+   "body_sha256": "def86ed6ef099a64f8273e33812db83c2acc6fc96b5b0745f7751d6915dbc2f3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a225c75303030",
+     1
+    ]
+   ],
+   "body_sha256": "def86ed6ef099a64f8273e33812db83c2acc6fc96b5b0745f7751d6915dbc2f3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-arguments-unicode-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "302d2d6d3cbb32a10c3a28b7d40f05d75e5fb5815e782a70db451841420d47c7",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a2d",
+     1
+    ]
+   ],
+   "body_sha256": "302d2d6d3cbb32a10c3a28b7d40f05d75e5fb5815e782a70db451841420d47c7",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a302e",
+     1
+    ]
+   ],
+   "body_sha256": "58739fa45529e31eda77b9bd9b3c1560e2410bc6691a994bbe5bc4e1874d4b56",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-zero-dot-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a302e",
+     1
+    ]
+   ],
+   "body_sha256": "58739fa45529e31eda77b9bd9b3c1560e2410bc6691a994bbe5bc4e1874d4b56",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-zero-dot-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "5f8c36eef06b1c8e57065e62e6c0d3599501070db27744641ca5fb97ca676e14",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-dot-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a312e",
+     1
+    ]
+   ],
+   "body_sha256": "5f8c36eef06b1c8e57065e62e6c0d3599501070db27744641ca5fb97ca676e14",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' after decimal point in numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-dot-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "d8e96207531351ea67ab6829c9a95a0440eddfe17a305a8cc059739a54eb0bb3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a3165",
+     1
+    ]
+   ],
+   "body_sha256": "d8e96207531351ea67ab6829c9a95a0440eddfe17a305a8cc059739a54eb0bb3",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a3145",
+     1
+    ]
+   ],
+   "body_sha256": "c47b0ea19b3fb8b2fc01dbefd25cf8fb6fef643afdd29ed1a187a030ad29096a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-upper-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a3145",
+     1
+    ]
+   ],
+   "body_sha256": "c47b0ea19b3fb8b2fc01dbefd25cf8fb6fef643afdd29ed1a187a030ad29096a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-upper-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "8367de8d8ca00b452f7eddb43718b17b9bca6388e88a0cf1387dd2ebc545f89c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-exp-plus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a31652b",
+     1
+    ]
+   ],
+   "body_sha256": "8367de8d8ca00b452f7eddb43718b17b9bca6388e88a0cf1387dd2ebc545f89c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-exp-plus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a31652d",
+     1
+    ]
+   ],
+   "body_sha256": "9f0f80d35d3483a4cb63da493c759f1f7f5c0c41afb86feccf74958cd1396491",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-exp-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a31652d",
+     1
+    ]
+   ],
+   "body_sha256": "9f0f80d35d3483a4cb63da493c759f1f7f5c0c41afb86feccf74958cd1396491",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-exp-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a2d30452b",
+     1
+    ]
+   ],
+   "body_sha256": "65e563f379ab61c8b82967b04b1ee61e6309565a83cff9adc62d542c9f7dfb8e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-signed-exp-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a2d30452b",
+     1
+    ]
+   ],
+   "body_sha256": "65e563f379ab61c8b82967b04b1ee61e6309565a83cff9adc62d542c9f7dfb8e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in exponent of numeric literal"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-signed-exp-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a74",
+     1
+    ]
+   ],
+   "body_sha256": "3172117ad6aee62245e06d322482fb28d4843e787bc0d281cf0542fe5c1c761c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'r')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-true-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a74",
+     1
+    ]
+   ],
+   "body_sha256": "3172117ad6aee62245e06d322482fb28d4843e787bc0d281cf0542fe5c1c761c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'r')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-true-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a7472",
+     1
+    ]
+   ],
+   "body_sha256": "bc07760e4752f9ac980a6e0eef005ee82d45cdf4343907f357c315337c9592f1",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-true-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a7472",
+     1
+    ]
+   ],
+   "body_sha256": "bc07760e4752f9ac980a6e0eef005ee82d45cdf4343907f357c315337c9592f1",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-true-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "e1fe8e0540e6698ed585c36e70781afb91d4e7d21352680b42d3d18a4e247c8a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-true-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a747275",
+     1
+    ]
+   ],
+   "body_sha256": "e1fe8e0540e6698ed585c36e70781afb91d4e7d21352680b42d3d18a4e247c8a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal true (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-true-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a66",
+     1
+    ]
+   ],
+   "body_sha256": "acac5b4808da83838bfb9c3b2aa5a8ad5aa0cf60c2e840f34f7d406005f96ece",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'a')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a66",
+     1
+    ]
+   ],
+   "body_sha256": "acac5b4808da83838bfb9c3b2aa5a8ad5aa0cf60c2e840f34f7d406005f96ece",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'a')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6661",
+     1
+    ]
+   ],
+   "body_sha256": "14e6b30906cf48e853603a9f906cb48d96cc94ebc9c47e2c580413b6b5eb4352",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6661",
+     1
+    ]
+   ],
+   "body_sha256": "14e6b30906cf48e853603a9f906cb48d96cc94ebc9c47e2c580413b6b5eb4352",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a66616c",
+     1
+    ]
+   ],
+   "body_sha256": "8fbaf7862a30f7c60aca48535ac35e712b6da11cc7a06005d1c67c8b90a898ca",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 's')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a66616c",
+     1
+    ]
+   ],
+   "body_sha256": "8fbaf7862a30f7c60aca48535ac35e712b6da11cc7a06005d1c67c8b90a898ca",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 's')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "350449460b39257a88065c99f48103e028f91a05e24e2845702bb758c091cbce",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-4-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a66616c73",
+     1
+    ]
+   ],
+   "body_sha256": "350449460b39257a88065c99f48103e028f91a05e24e2845702bb758c091cbce",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal false (expecting 'e')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-false-4-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6e",
+     1
+    ]
+   ],
+   "body_sha256": "7b3396c3f15e57593c960c90064dbec9e6b09faf1599e0be5a8e8921c3ad2d6a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-null-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6e",
+     1
+    ]
+   ],
+   "body_sha256": "7b3396c3f15e57593c960c90064dbec9e6b09faf1599e0be5a8e8921c3ad2d6a",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'u')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-null-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6e75",
+     1
+    ]
+   ],
+   "body_sha256": "b313d25ef7fd6a9dcd749e6fa0e95f55304216b32e0ec70e4636373665f3a7ee",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-null-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6e75",
+     1
+    ]
+   ],
+   "body_sha256": "b313d25ef7fd6a9dcd749e6fa0e95f55304216b32e0ec70e4636373665f3a7ee",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-null-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "0967ceb14b072fd0076f04c862eb0e441992fd3f371f8867572120ad2a5bf546",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-null-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a6e756c",
+     1
+    ]
+   ],
+   "body_sha256": "0967ceb14b072fd0076f04c862eb0e441992fd3f371f8867572120ad2a5bf546",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in literal null (expecting 'l')"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-null-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "59a9256946ec2d338d5b0164433b251395ccf93c05997ae96da89722aba6dc5c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-escape-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a226162635c",
+     1
+    ]
+   ],
+   "body_sha256": "59a9256946ec2d338d5b0164433b251395ccf93c05997ae96da89722aba6dc5c",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in string escape code"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-escape-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c75",
+     1
+    ]
+   ],
+   "body_sha256": "748f749b559c5a60c21f525ef2ba4b0ac53dfc0536dd1a742e61a40e4d4c1014",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-0-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c75",
+     1
+    ]
+   ],
+   "body_sha256": "748f749b559c5a60c21f525ef2ba4b0ac53dfc0536dd1a742e61a40e4d4c1014",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-0-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c7530",
+     1
+    ]
+   ],
+   "body_sha256": "7faa7590da83632115cde75d70efa2309a5c1c017fc8e6d70d7f71ca5da9d6c0",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-1-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c7530",
+     1
+    ]
+   ],
+   "body_sha256": "7faa7590da83632115cde75d70efa2309a5c1c017fc8e6d70d7f71ca5da9d6c0",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-1-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c753030",
+     1
+    ]
+   ],
+   "body_sha256": "4cc340f2613cd76c431bff949d162ed780f0481746746b58a380c7829a3e6af6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-2-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c753030",
+     1
+    ]
+   ],
+   "body_sha256": "4cc340f2613cd76c431bff949d162ed780f0481746746b58a380c7829a3e6af6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-2-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c75303030",
+     1
+    ]
+   ],
+   "body_sha256": "3250f6df8f4c9c4878ddd24f0d0933861cba744b85b9cc95a84b463c9a4c263e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-3-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b2269676e6f726564223a225c75303030",
+     1
+    ]
+   ],
+   "body_sha256": "3250f6df8f4c9c4878ddd24f0d0933861cba744b85b9cc95a84b463c9a4c263e",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ' ' in \\u hexadecimal character escape"
+    },
+    "id": null
+   },
+   "id": "eof-syntax-before-type-unicode-3-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a7b",
+     1
+    ]
+   ],
+   "body_sha256": "30758f89040700d22f2f5c76d0359be485ab17a6082ae62aa86ccb299393f977",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-object-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a7b",
+     1
+    ]
+   ],
+   "body_sha256": "30758f89040700d22f2f5c76d0359be485ab17a6082ae62aa86ccb299393f977",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-object-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a5b",
+     1
+    ]
+   ],
+   "body_sha256": "94d477a3b59c46b33206c0b4cf91109f794ebf9a10a3315be4f5f0c7cb202cb6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-array-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a5b",
+     1
+    ]
+   ],
+   "body_sha256": "94d477a3b59c46b33206c0b4cf91109f794ebf9a10a3315be4f5f0c7cb202cb6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-array-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a22616263",
+     1
+    ]
+   ],
+   "body_sha256": "d3194e70b7122cf1413cc5310fe90626ff3bcf421393b2effbe72d91b261ff90",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-string-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a22616263",
+     1
+    ]
+   ],
+   "body_sha256": "d3194e70b7122cf1413cc5310fe90626ff3bcf421393b2effbe72d91b261ff90",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-string-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c7531323334",
+     1
+    ]
+   ],
+   "body_sha256": "297e7bfe22317c67e131888a68a2cac8523f15c957375ae90b4750132c750e56",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-unicode-complete-unclosed-string-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a225c7531323334",
+     1
+    ]
+   ],
+   "body_sha256": "297e7bfe22317c67e131888a68a2cac8523f15c957375ae90b4750132c750e56",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-unicode-complete-unclosed-string-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a31",
+     1
+    ]
+   ],
+   "body_sha256": "4f82d4c78d9d1762f0a316375428550a2e418f52b14d65817a13258a2e5483fe",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-complete-number-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a31",
+     1
+    ]
+   ],
+   "body_sha256": "4f82d4c78d9d1762f0a316375428550a2e418f52b14d65817a13258a2e5483fe",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-complete-number-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a74727565",
+     1
+    ]
+   ],
+   "body_sha256": "6b7cdecbc88a7e4bfc68ab2b7396bd723e712679b532e4e7b1729e7c58e100d6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-complete-literal-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a74727565",
+     1
+    ]
+   ],
+   "body_sha256": "6b7cdecbc88a7e4bfc68ab2b7396bd723e712679b532e4e7b1729e7c58e100d6",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-complete-literal-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a2261626322",
+     1
+    ]
+   ],
+   "body_sha256": "fd793598bbf60796be714be0cba4723ff84716d76fbf859c2e7b8c13e43b6848",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-complete-string-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a2261626322",
+     1
+    ]
+   ],
+   "body_sha256": "fd793598bbf60796be714be0cba4723ff84716d76fbf859c2e7b8c13e43b6848",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: unexpected end of JSON input"
+    },
+    "id": null
+   },
+   "id": "eof-generic-complete-string-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d317d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f77b33d904e5bcc895801fcde9388229b7116079ce17c65dc8c028b8901cb562",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-minus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d317d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f77b33d904e5bcc895801fcde9388229b7116079ce17c65dc8c028b8901cb562",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-minus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a312e307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "588bd02ccee8092f142f346cda540e2eab119cdc4037990cb8ae09318cf6b7d9",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-fraction-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a312e307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "588bd02ccee8092f142f346cda540e2eab119cdc4037990cb8ae09318cf6b7d9",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-fraction-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a31652b327d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "25e11d1a2211cdaf2fa0f9b814817dc6f633577b8615b1db8213adcf2a688611",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-exponent-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a31652b327d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "25e11d1a2211cdaf2fa0f9b814817dc6f633577b8615b1db8213adcf2a688611",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-exponent-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a747275657d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e0796e06f5422636585c1be6bb4c4bda264a8a8cc1c76655260b61b84b93b2c6",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-true-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a747275657d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e0796e06f5422636585c1be6bb4c4bda264a8a8cc1c76655260b61b84b93b2c6",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-true-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a66616c73657d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "07e9314dd1b7b3fe00dfa3dafaa27f0ca98ba598cc0da1f33d39c70acbe4f934",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-false-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a66616c73657d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "07e9314dd1b7b3fe00dfa3dafaa27f0ca98ba598cc0da1f33d39c70acbe4f934",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-false-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a6e756c6c7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d550c1e2cc7b8674993eb15d7d860e1ddc8230cc8d332a26512405ea9259ae54",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-null-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a6e756c6c7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d550c1e2cc7b8674993eb15d7d860e1ddc8230cc8d332a26512405ea9259ae54",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-null-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a22616263227d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "b011dde4f7bc7b9ea023c08f1defb8a06d22b9535e6a67b88fbab96831e9a90b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-string-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a22616263227d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "b011dde4f7bc7b9ea023c08f1defb8a06d22b9535e6a67b88fbab96831e9a90b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-string-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a225c7531323334227d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "19976d4f210baa2dde90268e7abada94e774ea367a0a6cacbcb6f08a6b9b677c",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-unicode-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a225c7531323334227d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "19976d4f210baa2dde90268e7abada94e774ea367a0a6cacbcb6f08a6b9b677c",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "eof-valid-unicode-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     100
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     100
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "bfa0635da2340303f658e616d4c759c7e5027a277e2f85f60309a569bac766f2",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-100-arguments-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     100
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     100
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "bfa0635da2340303f658e616d4c759c7e5027a277e2f85f60309a569bac766f2",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-100-arguments-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     100
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     100
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "cce9cc51f68a3fb31db75c01516030f7431da02db5791ab6b172c4967920071d",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-100-meta-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     100
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     100
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "cce9cc51f68a3fb31db75c01516030f7431da02db5791ab6b172c4967920071d",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-100-meta-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     100
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     100
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "108174cbe82be70f1178e512228a735155f2c136165a31af8d287388c891f298",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-100-envelope-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     100
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     100
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "108174cbe82be70f1178e512228a735155f2c136165a31af8d287388c891f298",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-100-envelope-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d538caef0b1674322ce060f9344200614776ad80c5a18ffec21a5e96e20bcd4e",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-128-arguments-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d538caef0b1674322ce060f9344200614776ad80c5a18ffec21a5e96e20bcd4e",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-128-arguments-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "81f19793b3aa5e3c85e54c249b74df9859f4e70ff866fc5c049949b378e1f564",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-128-meta-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "81f19793b3aa5e3c85e54c249b74df9859f4e70ff866fc5c049949b378e1f564",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-128-meta-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "7a6d31284ad5333829ce486f3858bd8f211b9f038ac60221fd278032d17e3ac1",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-128-envelope-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     128
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     128
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "7a6d31284ad5333829ce486f3858bd8f211b9f038ac60221fd278032d17e3ac1",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-128-envelope-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9996
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9996
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "cd5c703bc4dbcef961a348b3dea28880d29a97dda7bee6e646ad0b19cb4f8efd",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9996-arguments-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9996
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9996
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "cd5c703bc4dbcef961a348b3dea28880d29a97dda7bee6e646ad0b19cb4f8efd",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9996-arguments-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9996
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9996
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "4245bde490fb3263b98326cbe56438070e17df481803275642f65eaaea028a9e",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9996-meta-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9996
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9996
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "4245bde490fb3263b98326cbe56438070e17df481803275642f65eaaea028a9e",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9996-meta-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9996
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9996
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "29f8137847b2ce10b5c952155b20310c0293a6ea0d5340ee96d8e0df96cea9f5",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9996-envelope-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9996
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9996
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "29f8137847b2ce10b5c952155b20310c0293a6ea0d5340ee96d8e0df96cea9f5",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9996-envelope-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "5bdb46f8e393bc8ef517353bc44d1f2466a0e7f6a1726161ca8cde0e1751a52b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9997-arguments-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "5bdb46f8e393bc8ef517353bc44d1f2466a0e7f6a1726161ca8cde0e1751a52b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9997-arguments-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "4d6b3e15a169b31a5cd3e1c49481124139978df28b9411439ece5d5feb15a9b6",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9997-meta-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "4d6b3e15a169b31a5cd3e1c49481124139978df28b9411439ece5d5feb15a9b6",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9997-meta-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "428ea8361805d186b55d9eadf12c65483220f96d7d31a8662ca3014122a9e9c5",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9997-envelope-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9997
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9997
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "428ea8361805d186b55d9eadf12c65483220f96d7d31a8662ca3014122a9e9c5",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9997-envelope-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "2af598cc0a2ff0b481482c5549ada956e1390e74692d71f8e82dba0cdc8b7bca",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "depth-9998-arguments-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "2af598cc0a2ff0b481482c5549ada956e1390e74692d71f8e82dba0cdc8b7bca",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "depth-9998-arguments-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ab9a2bdc97d99053baf5b85a86a30db9002cd4e70a523453c2e662b418ebc353",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "depth-9998-meta-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ab9a2bdc97d99053baf5b85a86a30db9002cd4e70a523453c2e662b418ebc353",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '[' exceeded max depth"
+    },
+    "id": null
+   },
+   "id": "depth-9998-meta-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c02b1239b119536d4c48035594b64a085f220b69de9616fb087f101e690be196",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9998-envelope-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c2269676e6f726564223a",
+     1
+    ],
+    [
+     "5b",
+     9998
+    ],
+    [
+     "30",
+     1
+    ],
+    [
+     "5d",
+     9998
+    ],
+    [
+     "2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c02b1239b119536d4c48035594b64a085f220b69de9616fb087f101e690be196",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "depth-9998-envelope-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d302e",
+     1
+    ],
+    [
+     "30",
+     10000
+    ],
+    [
+     "31653130303030307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a9095625f454e3ace0df62d55a5f6be00f98bbdae8a1ad806ffc7930240b8903",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-negative-long-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d302e",
+     1
+    ],
+    [
+     "30",
+     10000
+    ],
+    [
+     "31653130303030307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a9095625f454e3ace0df62d55a5f6be00f98bbdae8a1ad806ffc7930240b8903",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-negative-long-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "19db9493a66b2e0f7cce0c805a538b39a79c22e321f0f7993f06250a8809ca8c",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-negative-zero-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "19db9493a66b2e0f7cce0c805a538b39a79c22e321f0f7993f06250a8809ca8c",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-negative-zero-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d31652d393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f50961cd4110ab9db71563e9cd550270c03aefdb45f3742cc60bdd446f249df5",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-negative-underflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d31652d393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f50961cd4110ab9db71563e9cd550270c03aefdb45f3742cc60bdd446f249df5",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-negative-underflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a31652d393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "acc9b24e91fbe3cb724c10bec39fbbe33e9658fae2a10d5ada1f23a1960cb005",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-positive-underflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a31652d393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "acc9b24e91fbe3cb724c10bec39fbbe33e9658fae2a10d5ada1f23a1960cb005",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-positive-underflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ba917220b79ce716a87d217a6f31208629c14751ebca6d7e99181e820225e0c5",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number -1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "float-negative-overflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ba917220b79ce716a87d217a6f31208629c14751ebca6d7e99181e820225e0c5",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number -1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "float-negative-overflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a312e37393736393331333438363233313537653330387d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "2f2b5862bd247fcd5fa8e00ac6feb25da2bbc9261648f69c8be124a00b973f8b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-finite-max-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a312e37393736393331333438363233313537653330387d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "2f2b5862bd247fcd5fa8e00ac6feb25da2bbc9261648f69c8be124a00b973f8b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-finite-max-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a312e37393736393331333438363233313539653330387d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f2f2f60b892128c83409d1680220964e76acbae3920372a05de7b00676dbbb53",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1.7976931348623159e308 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "float-boundary-overflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a312e37393736393331333438363233313539653330387d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f2f2f60b892128c83409d1680220964e76acbae3920372a05de7b00676dbbb53",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1.7976931348623159e308 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "float-boundary-overflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a35652d3332347d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "33ec320ad3f20efd44e8e3ec8379d4fd54b30158e805e3e3da27135e9a9a7810",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-least-subnormal-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a35652d3332347d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "33ec320ad3f20efd44e8e3ec8379d4fd54b30158e805e3e3da27135e9a9a7810",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-least-subnormal-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a322e34373033323832323932303632333237652d3332347d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c9cfcb84fa5df7d33050b791f1e8bbd69692a1a6c4685b50ef0c9ac7a12d5459",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-tie-underflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a322e34373033323832323932303632333237652d3332347d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c9cfcb84fa5df7d33050b791f1e8bbd69692a1a6c4685b50ef0c9ac7a12d5459",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "float-tie-underflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a225b7b5c5c5c227d5d222c2278223a307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "9453fe3647e0d7344c3674783ae7aa4ec7ad78d93f1a391b822e96eca1373908",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "quoted-containers-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a225b7b5c5c5c227d5d222c2278223a307d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "9453fe3647e0d7344c3674783ae7aa4ec7ad78d93f1a391b822e96eca1373908",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "quoted-containers-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d3165393939392c226e223a302c2278223a5b3165393939395d7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "71331fbcfcfd42e3d57e287482a03d7d4cd67b5691e887e41e3e775f1e4f5f2f",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number -1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "duplicate-first-negative-overflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a2d3165393939392c226e223a302c2278223a5b3165393939395d7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "71331fbcfcfd42e3d57e287482a03d7d4cd67b5691e887e41e3e775f1e4f5f2f",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number -1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "duplicate-first-negative-overflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939392c226e223a2d3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "26c3f0b5585e9608b7594d6270b4b45dcab9dd5e8e1b853ff721a192a8b95a9e",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "duplicate-first-positive-overflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939392c226e223a2d3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "26c3f0b5585e9608b7594d6270b4b45dcab9dd5e8e1b853ff721a192a8b95a9e",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "duplicate-first-positive-overflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22316539393939223a22316539393939222c223078317032223a66616c73657d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a2e5ceaf4da176cc793d4bfb92c99ff538c10978a584570f39e95f4f2ebe261b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "numeric-key-is-not-number-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b22316539393939223a22316539393939222c223078317032223a66616c73657d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a2e5ceaf4da176cc793d4bfb92c99ff538c10978a584570f39e95f4f2ebe261b",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "numeric-key-is-not-number-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a5b7b226669727374223a2d3165393939397d5d2c227365636f6e64223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "9c8d01afe2fdd7c2809b6026f9530971d3e3acdabf807ddd22b8731accdca159",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number -1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "nested-first-error-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a5b7b226669727374223a2d3165393939397d5d2c227365636f6e64223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "9c8d01afe2fdd7c2809b6026f9530971d3e3acdabf807ddd22b8731accdca159",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number -1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "nested-first-error-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a2b317d7d",
+     1
+    ]
+   ],
+   "body_sha256": "b8d17cb715c60a9ad6f4119820ee67472fdf3b5aa9cb1ff1f05a4ec646bc9e46",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '+' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-plus-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a2b317d7d",
+     1
+    ]
+   ],
+   "body_sha256": "b8d17cb715c60a9ad6f4119820ee67472fdf3b5aa9cb1ff1f05a4ec646bc9e46",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '+' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-plus-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a30317d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a48daf351c3c051a9e3ba5543112fe767ba2f30c350b3151f1e8cbd0a2637d38",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '1' after object key:value pair"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-leading-zero-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a30317d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a48daf351c3c051a9e3ba5543112fe767ba2f30c350b3151f1e8cbd0a2637d38",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '1' after object key:value pair"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-leading-zero-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a30783170327d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ba9fdcd3fd61364da49626f4da2d088549874ddd821beb850e7a1174dd56a1f2",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character 'x' after object key:value pair"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-hex-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a30783170327d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ba9fdcd3fd61364da49626f4da2d088549874ddd821beb850e7a1174dd56a1f2",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character 'x' after object key:value pair"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-hex-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a315f307d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f6c7515796dcf45887aa6a77c6112a1705901bf00a5927af8ba9f7d766c9bca9",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '_' after object key:value pair"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-underscore-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a315f307d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f6c7515796dcf45887aa6a77c6112a1705901bf00a5927af8ba9f7d766c9bca9",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '_' after object key:value pair"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-underscore-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a4e614e7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "6da7ba36e1e835243f0964f89435d5b1d741711434b69741249ee45fdcfa0904",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character 'N' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-nan-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a4e614e7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "6da7ba36e1e835243f0964f89435d5b1d741711434b69741249ee45fdcfa0904",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character 'N' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-nan-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a496e667d7d",
+     1
+    ]
+   ],
+   "body_sha256": "226e157c8f0fef20ce363878cf943af1d65f245d3d9e5531065628da30762385",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character 'I' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-inf-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a496e667d7d",
+     1
+    ]
+   ],
+   "body_sha256": "226e157c8f0fef20ce363878cf943af1d65f245d3d9e5531065628da30762385",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character 'I' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-inf-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a5b312c5d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "cca27e2598d2ed7ce69c35ca46fbb5c7e74ac56a85b06a501d56307e8a8dcdf2",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ']' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-trailing-comma-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a5b312c5d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "cca27e2598d2ed7ce69c35ca46fbb5c7e74ac56a85b06a501d56307e8a8dcdf2",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character ']' looking for beginning of value"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-trailing-comma-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b226e2220317d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "57e5c20d5e3fe170c1a9e156d790abdf4da0db239dda50787a1f6f133dad4ce4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '1' after object key"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-missing-colon-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b5d2c22617267756d656e7473223a7b226e2220317d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "57e5c20d5e3fe170c1a9e156d790abdf4da0db239dda50787a1f6f133dad4ce4",
+   "go": {
+    "error": {
+     "code": -32700,
+     "message": "Parse error: invalid character '1' after object key"
+    },
+    "id": null
+   },
+   "id": "syntax-before-type-missing-colon-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a09659bd90ec06cf69f7d91aaed93ab944f6cf945379a01edb6af3fa625a0c3e",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number into Go struct field .name of type string"
+    },
+    "id": 3
+   },
+   "id": "envelope-name-number-line",
+   "known_divergence": "non-skills name owner",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a342c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "a09659bd90ec06cf69f7d91aaed93ab944f6cf945379a01edb6af3fa625a0c3e",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number into Go struct field .name of type string"
+    },
+    "id": 3
+   },
+   "id": "envelope-name-number-framed",
+   "known_divergence": "non-skills name owner",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a5b5d2c226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f68f3973d1578476b305d026fb7285763dd43cd7a09fce57cb5ff22b0ae074c1",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal array into Go struct field .name of type string"
+    },
+    "id": 3
+   },
+   "id": "envelope-name-array-then-valid-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a5b5d2c226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "f68f3973d1578476b305d026fb7285763dd43cd7a09fce57cb5ff22b0ae074c1",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal array into Go struct field .name of type string"
+    },
+    "id": 3
+   },
+   "id": "envelope-name-array-then-valid-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a2278227d7d",
+     1
+    ]
+   ],
+   "body_sha256": "05daa595f534709968fd47586e8e4ae767a621962a9bc79ce375b86d7c97e437",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal string into Go struct field ._meta of type map[string]interface {}"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-string-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a2278227d7d",
+     1
+    ]
+   ],
+   "body_sha256": "05daa595f534709968fd47586e8e4ae767a621962a9bc79ce375b86d7c97e437",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal string into Go struct field ._meta of type map[string]interface {}"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-string-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b315d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "57cb5dafe3cdd2db8b1993d2ac83e53998db1e4376459960d0a394fee2ac2cfb",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal array into Go struct field ._meta of type map[string]interface {}"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-array-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a5b315d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "57cb5dafe3cdd2db8b1993d2ac83e53998db1e4376459960d0a394fee2ac2cfb",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal array into Go struct field ._meta of type map[string]interface {}"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-array-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "0e5fa9e608dd701e3c7cf1891348d48c6a917a675d3b0ddf78d8a72924f1f5ff",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-overflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "0e5fa9e608dd701e3c7cf1891348d48c6a917a675d3b0ddf78d8a72924f1f5ff",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-overflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b224e414d45223a22736b696c6c735f6c697374222c225f4d455441223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c62c0009b198d04fc9598625477f99ab5680933c9fa1b6efb8d216d58095b255",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-case-folded-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b224e414d45223a22736b696c6c735f6c697374222c225f4d455441223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c62c0009b198d04fc9598625477f99ab5680933c9fa1b6efb8d216d58095b255",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "envelope-meta-case-folded-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a322c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374227d7d",
+     1
+    ]
+   ],
+   "body_sha256": "7acc7b82313c5ac35797d30700019b0911fa2af1cfb7a58e9f61f11c4f456e1f",
+   "go": {
+    "error": {
+     "code": -32600,
+     "message": "Invalid Request"
+    },
+    "id": null
+   },
+   "id": "envelope-jsonrpc-number-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a322c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374227d7d",
+     1
+    ]
+   ],
+   "body_sha256": "7acc7b82313c5ac35797d30700019b0911fa2af1cfb7a58e9f61f11c4f456e1f",
+   "go": {
+    "error": {
+     "code": -32600,
+     "message": "Invalid Request"
+    },
+    "id": null
+   },
+   "id": "envelope-jsonrpc-number-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a7b7d2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374227d7d",
+     1
+    ]
+   ],
+   "body_sha256": "b36813dd565c91b719e2bf3849be28a9a9d4a499746c336eb960c48e54829992",
+   "go": {
+    "error": {
+     "code": -32600,
+     "message": "Invalid Request"
+    },
+    "id": null
+   },
+   "id": "envelope-method-object-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a7b7d2c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374227d7d",
+     1
+    ]
+   ],
+   "body_sha256": "b36813dd565c91b719e2bf3849be28a9a9d4a499746c336eb960c48e54829992",
+   "go": {
+    "error": {
+     "code": -32600,
+     "message": "Invalid Request"
+    },
+    "id": null
+   },
+   "id": "envelope-method-object-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "76db6c6c1c97d527ad7b05a508c39f2fb36c4460f78adf915eb756e4703045ea",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "envelope-ignored-arg-overflow-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b2269676e6f726564223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "76db6c6c1c97d527ad7b05a508c39f2fb36c4460f78adf915eb756e4703045ea",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "envelope-ignored-arg-overflow-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a225c7564383030222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e59ef84124359d5b37ca25cbfa9fcf11701face97193dea83923fa8234a6c07c",
+   "go": {
+    "error": {
+     "code": -32601,
+     "message": "Unknown tool: \ufffd"
+    },
+    "id": 3
+   },
+   "id": "envelope-lone-surrogate-name-line",
+   "known_divergence": "non-skills name owner",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a225c7564383030222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e59ef84124359d5b37ca25cbfa9fcf11701face97193dea83923fa8234a6c07c",
+   "go": {
+    "error": {
+     "code": -32601,
+     "message": "Unknown tool: \ufffd"
+    },
+    "id": 3
+   },
+   "id": "envelope-lone-surrogate-name-framed",
+   "known_divergence": "non-skills name owner",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "091a202045e527f0e1994e8f4bde6f796afbcaf9a1d936aba0266d9329ead934",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "ok-skills_list-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "091a202045e527f0e1994e8f4bde6f796afbcaf9a1d936aba0266d9329ead934",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "ok-skills_list-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "813fb539b83732552d2bed8b3e402f877000a8bcb2747c58bdfe22ce6cd28413",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_list-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f6c697374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "813fb539b83732552d2bed8b3e402f877000a8bcb2747c58bdfe22ce6cd28413",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_list-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7370656374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d2f8813386577de4b58d8874c14315fb8e3c7747787295eed7ea3d5b163521ca",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_inspect-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7370656374222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "d2f8813386577de4b58d8874c14315fb8e3c7747787295eed7ea3d5b163521ca",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_inspect-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7370656374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "07b3d8534157a05003fa833a003a418a736550616c24c7fbc3d7f66793352898",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_inspect-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7370656374222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "07b3d8534157a05003fa833a003a418a736550616c24c7fbc3d7f66793352898",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_inspect-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f76616c6964617465222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ec8174500cad87f41fc659603e0507329438f6695bf0e4f145039d8dc8ca8c19",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_validate-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f76616c6964617465222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "ec8174500cad87f41fc659603e0507329438f6695bf0e4f145039d8dc8ca8c19",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_validate-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f76616c6964617465222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e6470a6707d0d0ef212df8240537ea6865bbe73f68ac768328fb70e81c0cfba6",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_validate-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f76616c6964617465222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "e6470a6707d0d0ef212df8240537ea6865bbe73f68ac768328fb70e81c0cfba6",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_validate-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f72656e6465725f706c616e222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "8217d2d02b5740d57332c2b7357766d869843e6a570b1f5c078973ed43346b9a",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_render_plan-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f72656e6465725f706c616e222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "8217d2d02b5740d57332c2b7357766d869843e6a570b1f5c078973ed43346b9a",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_render_plan-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f72656e6465725f706c616e222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c2f663c1e19acb12a82d48986f48d729c4b25e2d22d3a6286e608e28bb07edc7",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_render_plan-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f72656e6465725f706c616e222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "c2f663c1e19acb12a82d48986f48d729c4b25e2d22d3a6286e608e28bb07edc7",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_render_plan-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7374616c6c222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "fe11bf33878114027b854ef527e90fdded665c4e1e3378db5f9e678f6ca6f103",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_install-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7374616c6c222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "fe11bf33878114027b854ef527e90fdded665c4e1e3378db5f9e678f6ca6f103",
+   "go": {
+    "id": 3,
+    "isError": true
+   },
+   "id": "ok-skills_install-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7374616c6c222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "212ff2484c95d30ba0f50d620c1ba400f8d17468ee8e0f6e2a6ee25fe6cce49b",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_install-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f696e7374616c6c222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "212ff2484c95d30ba0f50d620c1ba400f8d17468ee8e0f6e2a6ee25fe6cce49b",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_install-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f746172676574735f737461747573222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "4c6907c48fbc1e4ec14b9a090102fad5f7d2dd4a1c18ddd2815821732bf3b6ec",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "ok-skills_targets_status-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f746172676574735f737461747573222c22617267756d656e7473223a7b7d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "4c6907c48fbc1e4ec14b9a090102fad5f7d2dd4a1c18ddd2815821732bf3b6ec",
+   "go": {
+    "id": 3,
+    "isError": false
+   },
+   "id": "ok-skills_targets_status-framed",
+   "mode": "framed"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f746172676574735f737461747573222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "376c94c3eb97ea651ab38907f46460d875662f8b59dd2bddca6697afdcaa866d",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_targets_status-line",
+   "mode": "line"
+  },
+  {
+   "body_rle": [
+    [
+     "7b226a736f6e727063223a22322e30222c226964223a332c226d6574686f64223a22746f6f6c732f63616c6c222c22706172616d73223a7b226e616d65223a22736b696c6c735f746172676574735f737461747573222c22617267756d656e7473223a7b7d2c225f6d657461223a7b226e223a3165393939397d7d7d",
+     1
+    ]
+   ],
+   "body_sha256": "376c94c3eb97ea651ab38907f46460d875662f8b59dd2bddca6697afdcaa866d",
+   "go": {
+    "error": {
+     "code": -32602,
+     "message": "Invalid params: json: cannot unmarshal number 1e9999 into Go struct field ._meta of type float64"
+    },
+    "id": 3
+   },
+   "id": "meta-overflow-skills_targets_status-framed",
+   "mode": "framed"
+  }
+ ],
+ "go_trees": {
+  "cmd": "9f185fd1bd60e83ff024334e468874e1b66afe2e",
+  "go.mod": "6f863234352e70ee0b00d5d93f07f4bc58b90cde",
+  "go.sum": "08a49413046f7a3aae6423ffae0695d76bc98605",
+  "internal": "3631a6fa6a23d0664cd613071c8168527f2a245f"
+ },
+ "go_version": "go version go1.26.7 darwin/arm64",
+ "pinned_ref": "9bf83c3f2130f14cb24ae40ac9a3743d83aedd92",
+ "source": "real Go `symbrain mcp` replies, never hand-written"
+}
