@@ -48,13 +48,19 @@ fn data_directory(
     })
 }
 
+/// Opens (creating when absent) the store the way the shipped commands do;
+/// every failure keeps the shipped `<verb>: open memory database:` diagnostic.
 pub(super) fn open_store(
     stderr: &mut dyn Write,
+    verb: &str,
     override_path: Option<&std::ffi::OsStr>,
 ) -> Result<Store, u8> {
     let db_path = resolve_db_path(override_path);
     Store::open(&db_path).map_err(|err| {
-        let _ = writeln!(stderr, "symbrain memory: open database: {err}");
+        let _ = writeln!(
+            stderr,
+            "symbrain memory {verb}: open memory database: {err}"
+        );
         exit::GENERIC
     })
 }

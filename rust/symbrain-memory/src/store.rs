@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 
 use chrono::Utc;
@@ -17,11 +16,22 @@ impl Store {
     /// # Errors
     /// Returns a `StoreError` when validation, SQLite, or filesystem access fails.
     pub fn open(path: &Path) -> Result<Self, StoreError> {
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)
-                .map_err(|error| StoreError::Io(format!("create memory directory: {error}")))?;
-        }
-        let store = Self::configure(Connection::open(path)?)?;
+        // The shipped opener wraps both failures below in this one prefix.
+        const OPEN: &str = "failed to open sqlite database";
+        crate::store_dir::safe_mkdir_all(&crate::store_dir::go_dir(path)).map_err(|error| {
+            StoreError::Io(format!(
+                "{OPEN}: failed to create database directory: {error}"
+            ))
+        })?;
+        let connection = Connection::open(path).map_err(|error| match error {
+            rusqlite::Error::SqliteFailure(failure, _)
+                if failure.code == rusqlite::ErrorCode::CannotOpen =>
+            {
+                StoreError::Io(format!("{OPEN}: {OPEN}: unable to open database file (14)"))
+            }
+            other => StoreError::Sql(other),
+        })?;
+        let store = Self::configure(connection)?;
         #[cfg(unix)]
         crate::migration::secure_files(path)?;
         Ok(store)

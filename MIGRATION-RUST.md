@@ -618,3 +618,50 @@ Further residuals recorded from the review (not changed by this slice):
   (format-preserving `toml_edit`), while Go re-marshals the document and drops
   comments; exit codes match but bytes differ for configs with comments or an
   existing `[mcp_servers.symbrain]` table (pre-existing, `toml_backend.rs`).
+
+### `memory` store creation and `sync` dead route without a Go fallback (#769 slice 4)
+
+Three Go routes are gone. (1) `sync_cli::requires_go_fallback` was a constant
+`false`; the `"sync" if ... => None` arm in `lib.rs` is removed. (2) `memory`
+no longer keeps Go when the database path cannot be created: `Store::open`
+now reproduces `sqlitekit.Open`'s `SafeMkdirAll(dir, 0700)` (`store_dir.rs`):
+`filepath.Dir`/`Abs`/`Clean` semantics (`d/` and `a/../b` included), a
+root-to-leaf walk, mode `0700` under the process umask, existing directories
+untouched, non-root-owned symlinks refused with `too many levels of symbolic
+links`, non-directories with `not a directory`, and `mkdir PATH: <errno>` text
+from the platform `strerror` (lower-cased like Go's errno table). A database
+that cannot be opened reports Go's doubled `failed to open sqlite database:
+failed to open sqlite database: unable to open database file (14)`. Every
+memory verb now prints Go's `symbrain memory <verb>: open memory database: ...`
+prefix instead of the earlier Rust-only `symbrain memory: open database:`.
+(3) `set`/`delete` on a database that does not exist (or is not a regular
+file) are native: a fresh store has no rows to hydrate, so no Go admission
+applies; directories get `0700` and the new database `0600`, as in Go.
+
+Evidence: `scripts/memory-cli-oracle/creation_cases.py` (new `store_creation`
+family of `replay.py`, part of `--family all`, so the existing three-OS
+`memory-cli-native.yml` replay runs it) compares 34 scenarios (Windows: the
+creation scenarios without POSIX modes) between the immutable Go `dcddcef0`
+CLI and the Rust CLI with an absent `SYMBRAIN_GO_BINARY`: stdout, stderr, exit
+and the full created tree including permission bits. 34/34 match on macOS/APFS
+(local) and on Linux/ext4-overlay in Docker `rust:1.98-bookworm` as
+`--user 1000:1000` against the Go oracle cross-built for linux/arm64. Go
+itself does not differ between the two platforms except for a symlink's own
+mode (0755 APFS, 0777 ext4), which is excluded from the comparison; no per-OS
+fixtures are needed because the live Go replay runs on every runner. Before the
+change the same probe showed 34 differences (Go fallback required, or `0755`
+directories instead of `0700`, and Rust-only error text). Negative controls
+(`creation_controls.py`, wired into CI): three real-process mutants wrapping the
+native CLI (directory mode `0700`->`0755`, one stderr byte, a success exit
+rewritten to 7) are each rejected by the replay through exactly their own field
+(15, 34 and 13 rejected cases). `rust/symbrain-cli/tests/memory_store_creation.rs`
+holds the Go-recorded bytes and modes natively for plain `cargo test`. The
+retired `new-file` delegation case of `write_boundaries.py` is removed because
+the route is now native. Contract row MEM-CLI-003.
+
+Local evidence only; exact-head native Linux/macOS/Windows CI is pending. The
+Windows branch of `safe_mkdir_all` is a code port of the Windows `SafeMkdirAll`
+and its error wording is not compared. Still routed to Go (#769 open):
+`memory serve`, `memory sync <args>`, `set` with unsupported write shapes,
+`search` with `prefilter`, reads/deletes on a database outside the native
+decoder domain, and the usage/skills/setup/doctor routes.

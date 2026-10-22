@@ -56,11 +56,6 @@ struct ParsedSyncArgs {
 /// The shipped `sync` flag set as the Go flag package prints it.
 const SYNC_FLAGS_USAGE: &str = "Usage of sync:\n  -dry-run\n    \tshow what would be written without making changes\n  -project string\n    \tproject directory (default: current directory)\n";
 
-/// Native sync covers every argument shape, including Go's flag terminator.
-pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
-    false
-}
-
 fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArgs, u8> {
     let mut project_dir = PathBuf::from(".");
     let mut dry_run = false;

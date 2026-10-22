@@ -29,7 +29,7 @@ shared current/legacy roots, current precedence and directory-versus-file type.
 Reflection executed against Go verifies that the Rust descriptor covers exactly
 the immutable 86-field typed schema, including `bm25_weight`.
 
-Linux/macOS execute 621 cases; Windows executes 584 because 37 argv byte cases
+Linux/macOS execute 655 cases; Windows executes 584 because 37 argv byte cases
 require Unix. `controls.py` compiles a disposable process wrapper that runs the
 actual Rust candidate and then changes one semantic stdout token or its success
 exit code. Both real replays must fail for the intended comparison assertion,
@@ -64,9 +64,10 @@ rewrites can invalidate admission before hydration; malformed JSON still errors,
 but exact Go diagnostics and null/type semantics are not an atomic concurrent
 mutation guarantee in this slice.
 
+`--family store_creation` (`creation_cases.py`, 34 Unix scenarios, fewer on Windows) replays missing-store creation and every directory/open failure shape for list, rules, query-log, set and delete and compares stdout, stderr, exit and the whole created tree with permission bits (directories `0700`, database `0600` under umask 022). `creation_controls.py` runs three real-process mutants (directory mode, stderr byte, exit status) that the family must reject through exactly their own field.
+
 This increment proves parser/config and seeded read behavior. It does not certify
-governed writes, missing/corrupt/unwritable database error strings, database file
-creation modes, configured Hamming prefilter, evidence JSONL decoding or MCP
+governed writes, corrupt database error strings, configured Hamming prefilter, evidence JSONL decoding or MCP
 cutover. Those remain open #758 acceptance work. No Go source or frozen fixture
 is modified. Native Ubuntu/macOS/Windows workflow receipts are required; local
 Linux execution alone does not satisfy the release gate.
