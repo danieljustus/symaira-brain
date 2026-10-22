@@ -28,14 +28,6 @@ pub(crate) mod doctor_process;
 #[path = "doctor_types.rs"]
 mod doctor_types;
 
-/// Config-load diagnostics remain Go-owned until the typed loader is ported.
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    parse_args(args, &mut Vec::new()).is_ok_and(|parsed| parsed.fix)
-        && doctor_fix::managed_bin_dir().is_some()
-        && (!crate::vault_config::valid_configuration()
-            || crate::setup_cli::enabled_cores().is_err())
-}
-
 pub fn run(
     args: &[OsString],
     stdout: &mut dyn Write,
@@ -283,25 +275,6 @@ args = ["mcp", "--profile", "default"]
         let parsed = parse_args(&args, &mut Vec::new()).expect("valid flags");
         assert!(!parsed.fix);
         assert_eq!(parsed.vault_agent, "agent");
-    }
-
-    #[test]
-    fn valid_configuration_allows_native_repair_flag_forms() {
-        let args = |rest: &[&str]| -> Vec<OsString> { rest.iter().map(OsString::from).collect() };
-        assert!(!requires_go_fallback(&args(&["--vault-agent", "agent"])));
-        assert!(!requires_go_fallback(&args(&["--vault-agent=agent"])));
-        assert!(!requires_go_fallback(&args(&["--json"])));
-        assert!(!requires_go_fallback(&args(&["--force-release"])));
-        assert!(!requires_go_fallback(&args(&["--force-release=true"])));
-        assert!(!requires_go_fallback(&args(&["--fix"])));
-        assert!(!requires_go_fallback(&args(&["--fix=TRUE"])));
-        assert!(!requires_go_fallback(&args(&["--fix=0"])));
-        assert!(!requires_go_fallback(&args(&["--force-release", "--fix"])));
-        assert!(!requires_go_fallback(&args(&[
-            "--fix=false",
-            "--force-release=false"
-        ])));
-        assert!(!requires_go_fallback(&args(&["--fix=FALSE"])));
     }
 
     #[test]

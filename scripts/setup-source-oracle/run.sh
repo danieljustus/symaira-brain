@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 umask 022
-oracle_ref=dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
+oracle_ref=0541e64a36d83bac8e5e4f8c4136033c03db83ae
 work_dir="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/setup-source-765.XXXXXX")"
 trap 'rm -rf "$work_dir"' EXIT
 go_binary="$work_dir/symbrain-go"

@@ -19,7 +19,7 @@ from pathlib import Path
 from cases import cases
 
 ROOT = Path(__file__).resolve().parents[2]
-ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+ORACLE = "0541e64a36d83bac8e5e4f8c4136033c03db83ae"
 sys.path.insert(0, str(ROOT / "scripts"))
 spec = importlib.util.spec_from_file_location("doctor_legacy", ROOT / "scripts/rust-differential.py")
 legacy = importlib.util.module_from_spec(spec)
@@ -38,6 +38,11 @@ def build_probe(root):
     subprocess.run(["go","build","-trimpath","-o",str(binary),str(source)],
                    cwd=root,env={**os.environ,"CGO_ENABLED":"0","GO111MODULE":"off"},check=True)
     return binary
+
+
+def document_bytes(document):
+    """Configuration bytes exactly as written in the case, on every OS."""
+    return document if isinstance(document, bytes) else document.encode("utf-8")
 
 
 def configure(case, root, env, probe):
@@ -66,12 +71,17 @@ def configure(case, root, env, probe):
         env["DOCTOR_SIGNATURE_RECEIPT"] = str(root / "signature-invocations")
     for key, value in case.env:
         env[key] = value
-    if case.config is not None:
+    if case.config is not None or case.config_directory:
         path = Path(env["XDG_CONFIG_HOME"]) / "symbrain/config.toml"
         path.parent.mkdir(parents=True)
-        path.write_text(case.config)
+        if case.config_directory:
+            path.mkdir()
+        else:
+            # Explicit bytes: write_text would turn "\n" into CRLF on Windows and
+            # change the input; CRLF is exercised by cases that spell "\r\n".
+            path.write_bytes(document_bytes(case.config))
     if case.project_config is not None:
-        (Path(env["PROJECT"]) / ".symbrain.toml").write_text(case.project_config)
+        (Path(env["PROJECT"]) / ".symbrain.toml").write_bytes(document_bytes(case.project_config))
     if case.home_mode:
         home_key = "USERPROFILE" if os.name == "nt" else "HOME"
         if case.home_mode == "unset":env.pop(home_key, None)

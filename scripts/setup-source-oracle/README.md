@@ -6,7 +6,7 @@ Run from the repository root with native Go, Rust and Python:
 scripts/setup-source-oracle/run.sh /tmp/setup-source-parity.json
 ```
 
-The launcher builds the full frozen production Go CLI at `dcddcef0` using the
+The launcher builds the full production Go CLI at the #765 base `0541e64a` (CoreKit v0.18.2) using the
 existing immutable oracle launcher and the candidate Rust CLI with `--locked`.
 It runs 111 real Go/Rust CLI cases on Linux and 95 each on macOS and Windows, plus two separate deliberately failing native
 process controls (`wrong-exit`, `wrong-source`). These controls execute the actual
@@ -54,8 +54,9 @@ Native macOS and Windows execution requires their CI jobs; Linux is not that pro
 This is Rust CLI orchestration of historical Go Browse/Swift Operate/Scope workers.
 It does not establish Go-independent source setup or close #765/#783. Future Rust
 Browse builds need an explicit trusted manifest/version contract and locked Cargo
-builds; rejected/failed builds must not downgrade silently. Full invalid-config
-loader diagnostics remain a separately tracked Go-owned boundary. Hardware, native
+builds; rejected/failed builds must not downgrade silently. Typed invalid-config
+loader diagnostics are native since #765 (see the doctor-repair oracle for their
+parser-dialect residuals). Hardware, native
 permissions, production signatures and the complete worker feature ports remain
 outside this fixture proof. See the source setup ADR for decisions and rationale.
 # Failure observability
