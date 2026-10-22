@@ -1,6 +1,6 @@
 `run.sh OUTPUT_JSON [--record-fixture PATH] [--record-parse-fixture PATH]` compiles the production Go CLI from
 immutable `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #769 base, with CoreKit v0.18.2,
-as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 940 cases in
+as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 1915 cases in
 disposable per-case HOME/XDG/project roots:
 
 * 116 new argv-grammar shapes for `config`, `harness`, `harness list` and
@@ -62,3 +62,37 @@ empty-`--harness` filter in `harness_cli.rs` fails 10 seeded health cases and
 The oracle is wired into the `rust-migration`, `rust-migration-macos` and
 `rust-migration-windows` jobs of `.github/workflows/ci.yml`; exact-head native
 Linux/macOS/Windows runs are still pending, so no three-OS claim is made.
+
+#### `--project` path shapes for install, uninstall and sync (#769 slice 3)
+
+`project_cases.py` adds 975 `cfgh-project-*` cases (1915 in total): 78 shapes
+(`.`, `./`, `./x/../`, `../project`, `..`, `a/b/../../..`, `a//b`, `a/./b`,
+trailing slashes, missing and deep directories, symlinked directories,
+symlink chains/loops/dangling links, a symlink inside the path, a file or a
+symlink to a file as the project, an unreadable directory, a 300-byte
+component, spaces, quotes, newlines, `<&>`, U+2028/U+2029, `~`, `-dash`,
+absolute variants of the same, raw non-UTF-8 bytes, the empty value) and 7
+`--project=VALUE` shapes, each replayed through up to 12 commands: `install`
+and `install --dry-run` on an absent and a pre-seeded `.mcp.json`, `uninstall`
+(absent, seeded, `--dry-run`), and `sync` (plain, seeded, `--dry-run`,
+`--dry-run --json`, absent and seeded). Seeding writes `.mcp.json`,
+`CLAUDE.md` and `AGENTS.md`. All run in the disposable project cwd, are
+POSIX-only (`posix_only`: skipped on Windows) and compare stdout, stderr, exit
+and the full filesystem manifest with modes and symlink targets.
+`NOT_REPLAYED` lists the only exclusions: install/uninstall writes into a
+read-only directory (Go names a random temp file or wraps backups in
+`harness: reserve backup`).
+`--record-project-fixture PATH` writes the root-independent cases with Go's
+filesystem effects to
+`rust/symbrain-cli/tests/fixtures/project_path_go_shapes.<os>.json`, one per OS
+(`darwin`, `linux`): the result is filesystem dependent (APFS refuses to create
+non-UTF-8 names with `EILSEQ`, ext4 accepts them), so each fixture is recorded
+by the real Go CLI on its own OS and `project_path_native` replays the one for
+the host (macOS: darwin, Linux: linux; other unix fails to compile) without Go.
+Both hold the same 820 case names. Non-UTF-8 manifest names are stored with
+their raw bytes (a fifth `rel_hex` element). The Linux fixture is recorded as
+a non-root user (uid 1000, like the CI runner; root ignores the unreadable-
+directory shapes) inside Docker, with the Go oracle built in
+`golang:1.26` and the Rust binary in `rust:1.98-bookworm`:
+`python3 scripts/config-harness-oracle/replay.py symbrain-go symbrain-rust
+report.json --record-project-fixture project_path_go_shapes.linux.json`.

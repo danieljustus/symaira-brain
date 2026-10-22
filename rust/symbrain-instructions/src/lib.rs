@@ -32,5 +32,5 @@ pub const MAX_SOURCE_FILE_BYTES: u64 = 1 << 20;
 pub const MAX_SOURCE_TOTAL_BYTES: u64 = 3 << 19;
 
 pub use block::render;
-pub use paths::open_trusted_root;
-pub use source::{Source, resolve_global_path};
+pub use paths::{clean_path, open_trusted_root};
+pub use source::{RawMessage, Source, go_io_text, resolve_global_path};

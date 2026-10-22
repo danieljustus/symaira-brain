@@ -13,6 +13,7 @@ import importlib.util
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 import time
@@ -23,6 +24,7 @@ ORACLE_REF = "0541e64a36d83bac8e5e4f8c4136033c03db83ae"
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import parse_cases  # noqa: E402  (corpus beside this script)
+import project_cases  # noqa: E402  (#769 slice 3: --project path shapes)
 spec = importlib.util.spec_from_file_location("cfgh_legacy", ROOT / "scripts/rust-differential.py")
 legacy = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = legacy
@@ -124,6 +126,50 @@ def parse_corpus_cases():
     return cases
 
 
+PROJECT_RECORD: dict[str, tuple[list, str | None, bool]] = {}
+
+
+def project_corpus_cases():
+    """#769 slice 3: every --project path shape for install, uninstall and sync."""
+    cases = []
+    for index, (label, arg, ops, seed_dir) in enumerate(project_cases.SHAPES):
+        for suffix, template, seeded in project_cases.command_variants():
+            if suffix in project_cases.NOT_REPLAYED.get(label, ()):
+                continue
+            name = f"cfgh-project-{index:03d}-{label}-{suffix}"
+            PROJECT_RECORD[name] = (ops, seed_dir, seeded)
+            cases.append(legacy.Case(
+                name, project_cases.expand(template, arg),
+                setup=project_cases.make_setup(ops, seed_dir, seeded), mutating=True, posix_only=True))
+    commands = {suffix: (template, seeded) for suffix, template, seeded in project_cases.command_variants()}
+    for index, (label, value, ops, seed_dir) in enumerate(project_cases.INLINE_SHAPES):
+        for suffix in project_cases.INLINE_COMMANDS:
+            template, seeded = commands[suffix]
+            name = f"cfgh-project-inline-{index:03d}-{label}-{suffix}"
+            PROJECT_RECORD[name] = (ops, seed_dir, seeded)
+            cases.append(legacy.Case(
+                name, project_cases.expand_inline(template, value),
+                setup=project_cases.make_setup(ops, seed_dir, seeded), mutating=True, posix_only=True))
+    return cases
+
+
+def materialize_argv(argv, root):
+    """`PROJECT/rest` expands to the absolute fixture project plus `/rest`."""
+    project = str(root / "project")
+    expanded = []
+    for arg in argv:
+        if isinstance(arg, str) and arg.startswith("PROJECT/"):
+            arg = project + arg[len("PROJECT"):]
+        elif isinstance(arg, bytes) and arg.startswith(b"PROJECT/"):
+            arg = os.fsencode(project) + arg[len(b"PROJECT"):]
+        expanded.append(arg)
+    return ORIGINAL_MATERIALIZE(tuple(expanded), root)
+
+
+ORIGINAL_MATERIALIZE = legacy.materialize_argv
+legacy.materialize_argv = materialize_argv
+
+
 def new_cases():
     cases = []
     for index, argv in enumerate(CONFIG_SHAPES):
@@ -142,6 +188,7 @@ def new_cases():
         cases.append(legacy.Case(f"cfgh-seeded-list-{index}", ("harness", "list", *argv),
                                  setup=setup_seeded_harness))
     cases.extend(parse_corpus_cases())
+    cases.extend(project_corpus_cases())
     return cases
 
 
@@ -190,6 +237,55 @@ def fixture_entry(case, observation):
     }
 
 
+def normalize_backup_stamp(data):
+    """The shared harness normalizes backup timestamps in every comparison."""
+    return re.sub(rb"\.bak\.[0-9]{8}T[0-9]{6}Z(?:\.[0-9]+)?", b".bak.<timestamp>", data)
+
+
+BASE_DIRS = ("home", "config", "cache", "data", "state", "project")
+
+
+def project_fixture_entry(case, observation):
+    """Root-independent Go result of a --project case, with its filesystem effects.
+
+    Cases that name the fixture root (`PROJECT/...`, absolute paths in the
+    output) are skipped: the native replay cannot reproduce Go's root.
+    """
+    if case.name not in PROJECT_RECORD:
+        return None
+    out, err = observation["stdout"], observation["stderr"]
+    names_root = any(
+        (a == "PROJECT" or a.startswith("PROJECT/")) if isinstance(a, str)
+        else (a == b"PROJECT" or a.startswith(b"PROJECT/"))
+        for a in case.argv)
+    if b"<root>" in out or b"<root>" in err or names_root:
+        return None
+    manifest = []
+    for rel, (kind, mode, content) in sorted(observation["manifest"].items()):
+        if kind == "dir" and rel in BASE_DIRS:
+            continue
+        row = [rel, kind, mode, content.hex()]
+        if any(0xD800 <= ord(c) <= 0xDFFF for c in rel):
+            # A filename that is not valid UTF-8 (legal on Linux ext4; APFS
+            # refuses to create it): record the raw bytes so the native replay
+            # compares the exact name instead of a lossy string.
+            raw = os.fsencode(rel)
+            row = [raw.decode("utf-8", "replace"), kind, mode, content.hex(), raw.hex()]
+        manifest.append(row)
+    ops, seed_dir, seeded = PROJECT_RECORD[case.name]
+    layout = []
+    for op in ops:
+        extra = op[2] if len(op) > 2 else None
+        layout.append([op[0], op[1], extra.hex() if isinstance(extra, bytes) else extra])
+    return {
+        "name": case.name,
+        "argv_hex": [(a if isinstance(a, bytes) else a.encode()).hex() for a in case.argv],
+        "layout": layout, "seed_dir": seed_dir, "seeded": seeded,
+        "exit": observation["exit"], "stdout_hex": out.hex(), "stderr_hex": err.hex(),
+        "manifest": manifest,
+    }
+
+
 def main():
     # Re-exec through the external-storage wrapper here, not inside
     # legacy.main(): its own re-exec would restart rust-differential.py and
@@ -206,8 +302,13 @@ def main():
         at = args.index("--record-parse-fixture")
         parse_fixture_path = args[at + 1]
         del args[at:at + 2]
+    project_fixture_path = None
+    if "--record-project-fixture" in args:
+        at = args.index("--record-project-fixture")
+        project_fixture_path = args[at + 1]
+        del args[at:at + 2]
     if len(args) != 3:
-        raise SystemExit("usage: replay.py GO_BINARY RUST_BINARY REPORT_JSON [--record-fixture PATH] [--record-parse-fixture PATH]")
+        raise SystemExit("usage: replay.py GO_BINARY RUST_BINARY REPORT_JSON [--record-fixture PATH] [--record-parse-fixture PATH] [--record-project-fixture PATH]")
     go, rust, report = args
     cases = selected_cases()
     assert len({case.name for case in cases}) == len(cases)
@@ -226,12 +327,14 @@ def main():
         elapsed = time.perf_counter() - started
         if Path(binary).resolve() in (Path(go).resolve(), Path(rust).resolve()):
             fixture_root = Path(env["PROJECT"]).parent
+            is_go = Path(binary).resolve() == Path(go).resolve()
             observations.append({
-                "binary": "go" if Path(binary).resolve() == Path(go).resolve() else "rust",
+                "binary": "go" if is_go else "rust",
                 "exit": completed.returncode,
-                "stdout": legacy.normalize_fixture_root(completed.stdout, fixture_root),
-                "stderr": legacy.normalize_fixture_root(completed.stderr, fixture_root),
+                "stdout": normalize_backup_stamp(legacy.normalize_fixture_root(completed.stdout, fixture_root)),
+                "stderr": normalize_backup_stamp(legacy.normalize_fixture_root(completed.stderr, fixture_root)),
                 "elapsed_s": elapsed,
+                "manifest": legacy.get_fs_manifest(fixture_root) if is_go else None,
             })
         return completed
 
@@ -285,6 +388,15 @@ def main():
                    if case.name.startswith("cfgh-") and (entry := fixture_entry(case, go_obs))]
         Path(fixture_path).write_text(json.dumps(
             {"go_oracle_ref": ORACLE_REF, "cases": entries}, indent=1, sort_keys=True) + "\n")
+    if project_fixture_path and code == 0:
+        entries = []
+        for case, (go_obs, _) in zip(executed, pairs):
+            entry = project_fixture_entry(case, go_obs)
+            if entry:
+                entries.append(entry)
+        Path(project_fixture_path).write_text(json.dumps(
+            {"go_oracle_ref": ORACLE_REF, "cases": entries}, sort_keys=True,
+            separators=(",", ":")) + "\n")
     if parse_fixture_path and code == 0:
         entries = []
         for case, (go_obs, _) in zip(executed, pairs):

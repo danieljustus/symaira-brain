@@ -508,17 +508,24 @@ reverting the project-path cleaning fails 10 seeded cases and its native test.
 `rust/symbrain-cli/tests/config_harness_native.rs` replays 100 Go-recorded
 root-independent shapes without Go and holds the seeded empty-filter and
 relative-project contracts natively. Contract rows CLI-011 and HAR-008;
-reports are under `migration/evidence/config-harness-769/`. Local macOS only:
-the oracle is wired into the `rust-migration`, `rust-migration-macos` and
-`rust-migration-windows` jobs of `ci.yml`, but exact-head native
-Linux/macOS/Windows CI runs are still pending; no three-OS claim is made.
+reports are under `migration/evidence/config-harness-769/`. Local evidence is
+macOS; native CI receipt: the oracle step ("Go/Rust native config and harness
+process parity") is wired into `rust-migration` (Linux), `rust-migration-macos`
+and `rust-migration-windows`, and the slice-1 merge commit `e328ca77e` (PR
+#901) passed all of them in main-push CI run 39715748422 (workflow `CI`,
+conclusion success; `rust-init-native` on ubuntu-latest, macos-15 and
+windows-2025, `rust-windows-audit-guard` and `rust-mcp-fuzz-smoke` also
+success). That run covers the 324-case oracle and the 100-case native replay at
+that exact head on the three OSes; POSIX-only and raw-byte cases are skipped on
+Windows by the shared harness.
 Still routed to Go (#769 open): the
 setup/doctor/usage/memory/skills predicates (`harness list` is closed by slice 2 below). Intentional divergence: Go has no
 `recover` in `harness health`, so an unrecovered probe panic aborts Go with
 exit 2 and a trace; Rust exits 1 with a fixed message (unit-tested via
-`run_probes`). Open residuals: `install`/`uninstall`/`sync` with a `..`-bearing
-`--project` still differ from Go, and a non-UTF-8 `-project` is displayed
-lossily (Unix only).
+`run_probes`). The `install`/`uninstall`/`sync` `--project` residuals recorded
+here at slice 1 (a `..`-bearing `--project`, symlinked or non-directory
+project roots, uncleaned `sync --dry-run --json` paths and a lossily displayed
+non-UTF-8 `-project`) are closed by slice 3 below.
 
 ### `harness list` config parse errors without a Go fallback (#769 slice 2 / D1)
 
@@ -553,10 +560,20 @@ install oracles pass; `symbrain-audit`'s environment-gated
 `rejects_non_regular_targets_without_blocking` needs
 `SYMAIRA_EXTERNAL_RUNTIME_ROOT` locally. Contract rows HAR-008 (updated) and
 HAR-009; reports under `migration/evidence/config-harness-769/*-slice2-9121b82.*`.
-Local macOS only: exact-head native Linux/macOS/Windows CI is pending and no
-three-OS claim is made; Windows OS-specific read-error wording is not compared.
-Still open under #769: the setup/doctor/usage/memory/skills Go routes and the
-slice-1 `install`/`uninstall`/`sync` project-path residuals (not re-measured).
+Local evidence is macOS; native CI receipt: the exact PR head `9bf5ed337`
+(PR #903, which squash-merged as `1991381c1`) passed the full `CI` workflow in
+pull-request run 39765433476 (conclusion success), including the oracle step on
+`rust-migration` (Linux), `rust-migration-macos` and `rust-migration-windows`
+(each "Go/Rust native config and harness process parity" success) and
+`rust-init-native` on ubuntu-latest, macos-15 and windows-2025 (the Windows
+leg runs the portable oracles). That covers the 940-case oracle and
+`go_parse_errors` replay at that head on three OSes. The POSIX-only read-error
+cases (21 shapes, table and `--json`) are skipped on Windows by the shared
+harness, so Windows OS-specific read-error wording (Go's
+`GetFileAttributesEx`/`CreateFile` texts) is still not compared against Go.
+Still open under #769: the setup/doctor/usage/memory/skills Go routes. The
+slice-1 `install`/`uninstall`/`sync` project-path residuals were measured and
+closed in slice 3 below.
 
 #### Review fixes: unbounded nesting and dotted-key cost (#769 slice 2)
 
@@ -618,3 +635,108 @@ Further residuals recorded from the review (not changed by this slice):
   (format-preserving `toml_edit`), while Go re-marshals the document and drops
   comments; exit codes match but bytes differ for configs with comments or an
   existing `[mcp_servers.symbrain]` table (pre-existing, `toml_backend.rs`).
+
+### `install` / `uninstall` / `sync` `--project` path shapes (#769 slice 3)
+
+Closes the residuals slices 1 and 2 left open: a `..`-bearing `--project`,
+symlinked and non-directory project roots, uncleaned `sync --dry-run --json`
+paths and a lossily displayed non-UTF-8 `-project`. Method: the Go sources
+(`cmd/symbrain/cmd_install.go`, `cmd_sync.go`, `internal/sync`,
+`internal/instructions`) were read first, then every project-path shape was
+replayed against the immutable Go pin `0541e64a…` (CoreKit v0.18.2) through
+`install`, `uninstall` and `sync`, with and without `--dry-run` and `--json`,
+with the config/instruction files absent and pre-seeded.
+
+Go semantics now reproduced:
+
+* `install`/`uninstall` join and lexically clean the project path
+  (`filepath.Join`), so `..`, `.` and doubled or trailing slashes fold away
+  before the OS sees them; the OS then follows symlinks in the project root
+  (`os.ReadFile`, `os.MkdirAll`). Rust cleans the path, resolves the root with
+  `canonicalize` (Unix) and opens the config below it through the existing
+  capability (a symlinked `.mcp.json` itself is still refused). Missing
+  directories are created by a port of `os.MkdirAll` so errors name the failing
+  component (`create P: mkdir Q: file exists|not a directory|illegal byte
+  sequence`); read errors use `read P: open P: <errno>`.
+* `sync` secures the project source/target root the way `openDirectoryNoFollow`
+  does: absolute path from `os.Getwd` (`$PWD` honoured when it names `.`),
+  lexically cleaned, then walked with `O_NOFOLLOW`, so a symlinked project
+  directory is refused (`symbrain sync: sync: load instructions: instructions:
+  secure source parent P: not a directory`) while `..`-bearing paths work.
+  Displayed target paths are `filepath.Join`-cleaned, the failed-target
+  summary line `symbrain sync: sync: one or more instruction targets failed`
+  is printed, write failures read `open P for write: errno` / `write P: errno`,
+  and an empty `-project` means `.`.
+* Raw bytes: `--project`/`-project=` values, diff labels, messages and the
+  `sync` table keep non-UTF-8 bytes; `sync --json` writes `\ufffd` for each
+  invalid byte like `encoding/json` (`GoBytes`).
+
+Measured before the fix (Rust base `1991381c1` against Go, 78 shapes x 12
+commands): 543 of 936 cases differed, in 55 of the 78 shapes (see
+`pre-fix-project-corpus-baseline-1991381.log`): every `..` shape for
+`install`/`uninstall` (exit 1 `trusted root must not contain a parent
+component` or the file silently read as absent and written elsewhere) and for
+`sync` (exit 1 `path contains an unsafe component`, or exit 0 with an uncleaned
+`x/../CLAUDE.md` path), `a//b`/`a/./b`/`child/` display paths in `sync --json`,
+symlinked project roots (`install`/`uninstall` exit 1, Go exit 0), file and
+symlink-to-file/dangling/looping roots, long components and unreadable
+directories (errno wording), and every non-UTF-8 shape (lossy text).
+
+Evidence (candidate `39b9b4609`, clean tree, local macOS arm64, Go 1.26.7;
+files `*-slice3-39b9b46.*` under `migration/evidence/config-harness-769/`):
+
+* `scripts/config-harness-oracle/run.sh`: exit 0, `candidate_dirty` false,
+  1915/1915 executed (940 earlier + 975 new `cfgh-project-*`: 78 shapes x up to
+  12 commands = 933, plus 7 `--project=VALUE` shapes x 6 commands = 42),
+  `skipped` and `mismatched` empty, Rust fallback absent. Byte-for-byte stdout,
+  stderr, exit and full filesystem manifests (modes, symlink targets,
+  `.bak.<timestamp>` normalized). The only exclusions are the read-only
+  directory write/backup wording (random Go temp name,
+  `harness: reserve backup` wrapper) for 3 of its 12 commands.
+* `--record-project-fixture` re-recorded
+  `rust/symbrain-cli/tests/fixtures/project_path_go_shapes.darwin.json` byte-identically
+  (820 root-independent cases with Go's stdout/stderr/exit and filesystem
+  effects); the test `project_path_native` replays it without Go on macOS. A second fixture,
+  `project_path_go_shapes.linux.json`, was recorded from the real Go CLI in Docker
+  (`golang:1.26` @sha256:6c2a5538f964…, Rust `rust:1.98-bookworm`, uid 1000, oracle ref
+  `0541e64a`) because APFS and ext4 differ on non-UTF-8 names (14 of 820 cases);
+  Linux replays it without Go. See `migration/evidence/config-harness-769/NOTES.md`.
+* Negative controls (single mutation, restored with `git checkout`, tree clean;
+  run on code commit `fa4d8207b`, whose Unix code `39b9b4609` leaves unchanged;
+  filtered runs of the same oracle cases): not resolving the project root
+  fails 28 of 48 `symlink-dir*` cases; skipping the sync root clean fails 5 of
+  42 `embedded-dotdot*` cases; printing the literal replacement character
+  instead of `\ufffd` fails 9 of 72 `non-utf8*` cases.
+* Gates on `39b9b4609`: `cargo test -p symbrain-cli -p symbrain-harness -p
+  symbrain-core -p symbrain-instructions -p symbrain-adapter --locked
+  --no-fail-fast` 471 passed, workspace `clippy --all-targets -D warnings`,
+  `cargo fmt --check`, `scripts/setup-repair-oracle/run.sh` (179 cases), the
+  504-case `make parity-smoke` differential, `make install-oracle-check
+  profile-remove-oracle-check`, the skills-argv unittest (26 tests, no owner
+  hash needed requalifying) and `make lint` all pass. `symbrain-instructions`
+  also passes `clippy --target x86_64-pc-windows-msvc` (compile-only).
+* Contract rows: CLI-011 and HAR-008 (receipts and residual text updated),
+  HAR-009 (receipt), new HAR-010 (this slice).
+
+Residuals (stated, not claimed): (1) the 975 oracle cases and the native replay
+are POSIX-only; Windows `--project` behaviour (`\\?\` roots, junctions,
+`..` handling of the Windows source walk, which still refuses `..`) is not
+compared against Go and the CLI keeps the previous unresolved-root behaviour
+there; Linux has no local run: the new cases run there only through the existing
+`rust-migration` wiring once this commit is pushed (exact-head three-OS CI for
+slice 3 is pending, no claim is made), and the errno wording for symlinked
+roots (`ELOOP`/`ENOTDIR`) comes from the host `strerror`, lower-cased as
+`go_io_text` already does. (2) A read-only project
+directory: install/uninstall write and backup failures keep Rust wording
+(`Permission denied (os error 13)`), and Go's `.mcp.json.tmp-<random>` name
+cannot be matched anyway; `sync` is exact. (3) `HOME`, `XDG_*` and other
+environment-derived config roots containing `..` still use the old
+no-parent capability walk (global `install`/`uninstall`, noted in slice 2).
+(4) A symlinked or special `.mcp.json`/`CLAUDE.md` target is a file shape,
+not a project-path shape: it was not measured and not changed. `install`/
+`uninstall` open the target through the no-follow capability, but `sync`
+reads an existing target with ambient `fs::read` (`sync_cli.rs`), which
+follows a symlinked `CLAUDE.md`: Rust then reports `dry-run (would update)`
+with exit 0 where Go exits 1 (pre-existing, #909). (5) `$PWD`-reached symlinked
+working directories are modelled (`go_getwd`) but not oracle-covered. Still
+routed to Go under #769: the setup/doctor/usage/memory/skills predicates.

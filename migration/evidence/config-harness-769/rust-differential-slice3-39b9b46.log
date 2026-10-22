@@ -1,0 +1,522 @@
+./scripts/run-go-oracle.sh "HEAD" run scripts/generate-go-printable-table.go -check
+./scripts/run-go-oracle.sh "HEAD" build -ldflags "-X main.version=dev" -o "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/artifacts/go/symbrain-go" ./cmd/symbrain
+SYMAIRA_EXTERNAL_BASE="/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain" bash "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769c/scripts/run-external-env.sh" env SYMBRAIN_VERSION=dev CARGO_TARGET_DIR="/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/cargo-target/c4d820bbccc273c2" cargo build --workspace --locked
+   Compiling symbrain-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769c/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.80s
+./guard/scripts/guard-scan-oracle/run.sh parity "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/cargo-target/c4d820bbccc273c2/debug/symbrain"
+PASS: native/Go guard scan parity passed (9 cases)
+SYMAIRA_EXTERNAL_BASE="/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain" bash "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769c/scripts/run-external-env.sh" python3 scripts/rust-differential.py "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/artifacts/go/symbrain-go" "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/cargo-target/c4d820bbccc273c2/debug/symbrain"
+PASS guard_doctor_invalid_config_native
+PASS guard_doctor_corrupt_anchor_native
+PASS no_args
+PASS help
+PASS help_long
+PASS help_short
+PASS version_human
+PASS version_terminator
+PASS version_json
+PASS version_terminator_json
+PASS version_json_before
+PASS version_output_equals
+PASS version_missing_output_value
+PASS version_output_single_missing
+PASS version_conflicting_output
+PASS version_unknown_flag
+PASS version_flag_value_double
+PASS version_flag_value_single
+PASS version_bare_hyphen
+PASS version_help_short
+PASS version_help_single_dash
+PASS version_help_double_dash
+PASS version_unexpected_argument
+PASS version_terminator_extra
+PASS version_terminator_flag
+PASS version_version
+PASS version_json_version
+PASS json_help
+PASS config_path
+PASS config_path_extra
+PASS config_path_unexpected_double
+PASS config_path_unexpected_single
+PASS config_path_unexpected_terminator
+PASS config_path_no_env
+PASS config_path_relative_xdg
+PASS unknown_command_quoted
+PASS unknown_fallback
+PASS config_get_no_file
+PASS config_get_no_file_key
+PASS config_get_raw_ff_key
+PASS config_get_raw_latin1_key
+PASS config_get_raw_nel_key
+PASS config_get_raw_nbsp_key
+PASS config_get_raw_zwsp_key
+PASS config_get_raw_line_separator_key
+PASS config_get_raw_bom_key
+PASS config_get_raw_quote_backslash_control_key
+PASS config_get_unicode_key
+PASS config_get_unicode_replacement_key
+PASS config_get_unicode_emoji_key
+PASS config_get_unicode_cjk_key
+PASS config_get_unicode_nel_key
+PASS config_get_unicode_nbsp_key
+PASS config_get_unicode_zwsp_key
+PASS config_get_unicode_line_separator_key
+PASS config_get_unicode_bom_key
+PASS config_get_whole_file
+PASS config_get_whole_file_malformed
+PASS config_get_terminator
+PASS config_get_string
+PASS config_get_bool_true
+PASS config_get_bool_false
+PASS config_get_int
+PASS config_get_dotted_three
+PASS config_get_table
+PASS config_get_table_nested
+PASS config_get_inline_table
+PASS config_get_inline_table_leaf
+PASS config_get_list
+PASS config_get_empty_list
+PASS config_get_empty_table
+PASS config_get_missing_key
+PASS config_get_malformed_key
+PASS config_get_extra_arg
+PASS config_get_raw_extra_arg
+PASS config_get_extra_arg_flag
+PASS config_get_key_flag
+PASS config_get_home_variant
+PASS config_get_unreadable_file
+PASS config_get_unreadable_file_key
+PASS config_get_float_pos_zero
+PASS config_get_float_neg_zero
+PASS config_get_float_pos_inf
+PASS config_get_float_pos_inf_plus
+PASS config_get_float_neg_inf
+PASS config_get_float_nan
+PASS config_get_float_pos_nan
+PASS config_get_float_neg_nan
+PASS config_get_float_large
+PASS config_get_float_large2
+PASS config_get_float_small
+PASS config_get_float_small2
+PASS config_get_float_large_neg
+PASS config_get_float_large2_neg
+PASS config_get_float_small_neg
+PASS config_get_float_small2_neg
+PASS config_get_float_sci1
+PASS config_get_float_sci2
+PASS config_get_float_pi
+PASS config_get_float_boundary_below_large
+PASS config_get_float_boundary_above_small
+PASS config_get_float_boundary_below_small
+PASS config_get_odt_z
+PASS config_get_odt_z_lower
+PASS config_get_odt_space_z
+PASS config_get_odt_frac_micro_z
+PASS config_get_odt_frac_milli_z
+PASS config_get_odt_frac_nano_z
+PASS config_get_odt_frac_trailing_z
+PASS config_get_odt_frac_zero_z
+PASS config_get_odt_no_sec_z
+PASS config_get_odt_pos_offset
+PASS config_get_odt_neg_offset
+PASS config_get_odt_offset_zero
+PASS config_get_odt_offset_neg_zero
+PASS config_get_odt_space_offset
+PASS config_get_odt_frac_micro_offset
+PASS config_get_odt_frac_half_hour_offset
+PASS config_get_odt_frac_trailing_offset
+PASS config_get_odt_no_sec_offset
+PASS config_get_ldt
+PASS config_get_ldt_space
+PASS config_get_ldt_lower
+PASS config_get_ldt_frac_micro
+PASS config_get_ldt_frac_milli
+PASS config_get_ldt_frac_nano
+PASS config_get_ldt_frac_trailing
+PASS config_get_ldt_frac_zero
+PASS config_get_ldt_no_sec
+PASS config_get_ld
+PASS config_get_ld_today
+PASS config_get_ld_year_one
+PASS config_get_lt
+PASS config_get_lt_frac_micro
+PASS config_get_lt_frac_milli
+PASS config_get_lt_frac_nano
+PASS config_get_lt_frac_trailing
+PASS config_get_lt_frac_zero
+PASS config_get_lt_no_sec
+PASS profile_help
+PASS profile_help_long
+PASS profile_list_empty
+PASS profile_list_empty_json
+PASS profile_list_fixture_json
+PASS profile_list_partial_error
+PASS profile_list_extra
+PASS profile_list_help_flag
+PASS profile_list_help_short
+PASS profile_show_missing
+PASS profile_show_missing_json
+PASS profile_show_help_flag
+PASS profile_show_help_short
+PASS profile_show_fixture_json
+PASS profile_show_fixture_json_flag_before_name
+PASS profile_show_fixture_human
+PASS profile_add_default (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_add_personal_after_name (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_add_personal_before_name (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_add_invalid_name
+PASS profile_add_invalid_from
+PASS profile_add_exists
+PASS profile_add_help_flag
+PASS profile_add_help_short
+PASS profile_add_unknown_flag
+PASS profile_add_unknown_after_name
+PASS profile_add_missing_from_value
+PASS profile_add_from_equals (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_add_trailing_terminator (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_add_terminator_then_flag (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_missing
+PASS profile_remove_force (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_prompt_yes (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_prompt_no
+PASS profile_remove_prompt_eof
+PASS profile_remove_prompt_oversized
+PASS profile_remove_bound_global_refuses (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_bound_project_refuses (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_bound_project_relative_refuses (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_bound_project_symlink_refuses (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_bound_force (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_malformed_profile (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_malformed_harness_config (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_malformed_harness_refuses (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_symlink (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_symlink_profiles_root (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_special_file (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_empty_directory (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_force_before_name (stdout, stderr, exit code, fs manifest/modes)
+PASS profile_remove_terminator (stdout, stderr, exit code, fs manifest/modes)
+PASS audit_missing_subcommand
+PASS audit_unknown_subcommand
+PASS audit_help
+PASS audit_tail_empty_json
+PASS audit_tail_missing_profile_json
+PASS audit_tail_fixture_json
+PASS audit_tail_global_json
+PASS audit_tail_fixture_human
+PASS audit_tail_negative_limit
+PASS audit_tail_help
+PASS audit_tail_unknown_flag
+PASS audit_tail_missing_n
+PASS audit_tail_invalid_n
+PASS doctor_empty_human
+PASS doctor_empty_json
+PASS doctor_global_json
+PASS doctor_disabled_fix
+PASS doctor_disabled_force_release
+PASS doctor_unused_force_release
+PASS doctor_unused_force_release_true
+PASS doctor_disabled_fix_zero
+PASS doctor_invalid_force_release
+PASS doctor_disabled_vault_profile
+PASS doctor_missing_vault_profile
+PASS doctor_failing_vault_handshake
+PASS doctor_successful_vault_handshake
+PASS doctor_empty_vault_agent
+PASS doctor_slow_vault_handshake
+PASS doctor_help
+PASS doctor_unknown_flag
+PASS doctor_ignores_positionals
+PASS doctor_vault_agent_value_consumes_force_release
+PASS doctor_vault_agent_then_help
+PASS doctor_vault_agent_equals_then_help
+PASS doctor_vault_agent_missing_value
+PASS doctor_failed_version_json
+PASS vault_passthrough_argv_stdio
+PASS vault_exit_status
+PASS vault_signal_status
+PASS vault_tty_inheritance
+PASS vault_managed_precedes_path
+PASS vault_configured_precedes_managed
+PASS vault_env_override_precedes_config
+PASS vault_missing_binary
+PASS vault_configured_binary_missing
+PASS vault_empty_config_uses_path
+PASS vault_raw_env_missing
+PASS setup_unknown_flag
+PASS setup_lone_hyphen (stdout, stderr, exit code, fs manifest/modes)
+PASS setup_install_json (stdout, stderr, exit code, fs manifest/modes)
+PASS setup_install_human (stdout, stderr, exit code, fs manifest/modes)
+PASS setup_install_cosign_fail_json (stdout, stderr, exit code, fs manifest/modes)
+PASS setup_cosign_command_fail_json (stdout, stderr, exit code, fs manifest/modes)
+PASS setup_fix_correct_json (stdout, stderr, exit code, fs manifest/modes)
+PASS setup_fix_correct_human (stdout, stderr, exit code, fs manifest/modes)
+PASS setup_fix_mismatched_json (stdout, stderr, exit code, fs manifest/modes)
+PASS install_cursor_fresh (stdout, stderr, exit code, fs manifest/modes)
+PASS install_claude_fresh (stdout, stderr, exit code, fs manifest/modes)
+PASS install_claude_desktop_fresh (stdout, stderr, exit code, fs manifest/modes)
+PASS install_opencode_fresh (stdout, stderr, exit code, fs manifest/modes)
+PASS install_codex_fresh (stdout, stderr, exit code, fs manifest/modes)
+PASS install_antigravity_fresh (stdout, stderr, exit code, fs manifest/modes)
+PASS install_default_profile_env_override (stdout, stderr, exit code, fs manifest/modes)
+PASS install_malformed_global_config (stdout, stderr, exit code, fs manifest/modes)
+PASS install_cursor_equals_flags (stdout, stderr, exit code, fs manifest/modes)
+PASS install_missing_profile (stdout, stderr, exit code, fs manifest/modes)
+PASS install_default_profile (stdout, stderr, exit code, fs manifest/modes)
+PASS install_malformed_refuses_before_backup (stdout, stderr, exit code, fs manifest/modes)
+PASS install_superseded_basenames_keep_vault (stdout, stderr, exit code, fs manifest/modes)
+PASS install_keep_superseded (stdout, stderr, exit code, fs manifest/modes)
+PASS install_claude_project (stdout, stderr, exit code, fs manifest/modes)
+PASS install_unsupported_project (stdout, stderr, exit code, fs manifest/modes)
+PASS install_dry_run (stdout, stderr, exit code, fs manifest/modes)
+PASS uninstall_foreign_symbrain_noop (stdout, stderr, exit code, fs manifest/modes)
+PASS uninstall_missing_config_noop (stdout, stderr, exit code, fs manifest/modes)
+PASS uninstall_absent_entry_noop (stdout, stderr, exit code, fs manifest/modes)
+PASS uninstall_removes_symbrain (stdout, stderr, exit code, fs manifest/modes)
+PASS uninstall_dry_run (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_fallback (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_no_args
+PASS config_set_one_arg
+PASS config_set_three_args
+PASS config_set_empty_key
+PASS config_set_new_string (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_true (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_false (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_1 (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_0 (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_t (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_f (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_T (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_F (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_TRUE (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_FALSE (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_True (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_False (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_int (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_int_neg (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_string_float (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_nested (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_deep_nested (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_existing_update (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_existing_parent_mode (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_existing_sample (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_terminator (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_type_conflict
+PASS config_set_malformed_existing
+PASS config_set_unreadable_file
+PASS config_unrelated_subcommand_fallback
+PASS config_no_subcommand_fallback
+PASS config_set_raw_ff_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_raw_latin1_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_raw_dotted_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_raw_type_conflict
+PASS config_set_inline_leaf (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_inline_new_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_nested_inline_leaf (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_nested_inline_new_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_sample_nested_inline (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_floats_preserve_existing (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_floats_update_neg_zero (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_floats_update_large (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_datetime_preserve_existing (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_complex_preserve (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_quoted_key_update (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_array_of_tables_add_field
+PASS config_set_symlink (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_readonly_dir
+PASS skills_status_opencode_root_missing
+PASS skills_status_opencode_root_empty
+PASS skills_status_opencode_unmanaged_skill
+PASS skills_status_opencode_dir_without_skill
+PASS skills_status_opencode_regular_file
+PASS skills_status_opencode_dangling_symlink
+PASS skills_status_opencode_symlink_to_dir
+PASS skills_status_opencode_symlink_to_file
+PASS skills_status_opencode_symlink_to_marker_file
+PASS skills_status_opencode_symlink_chain
+PASS skills_status_opencode_orphaned_marker
+PASS skills_status_opencode_foreign_marker
+PASS skills_status_opencode_legacy_hash_only_marker
+PASS skills_status_opencode_malformed_marker
+PASS skills_status_opencode_unsupported_schema_marker
+PASS skills_status_opencode_empty_marker
+PASS skills_status_opencode_wrong_type_marker
+PASS skills_status_opencode_mixed
+PASS skills_status_opencode_mixed_json
+ACCEPTED SKL-008 skills_status_opencode_managed_symlink (validated render drift contract)
+PASS skills_status_opencode_managed_symlink
+ACCEPTED SKL-008 skills_status_opencode_managed_symlink_json (validated render drift contract)
+PASS skills_status_opencode_managed_symlink_json
+ACCEPTED SKL-008 skills_status_opencode_managed_copy_json (validated render drift contract)
+PASS skills_status_opencode_managed_copy_json
+ACCEPTED SKL-008 skills_status_opencode_managed_harness_changed_json (validated render drift contract)
+PASS skills_status_opencode_managed_harness_changed_json
+ACCEPTED SKL-008 skills_status_opencode_managed_conflict_json (validated render drift contract)
+PASS skills_status_opencode_managed_conflict_json
+ACCEPTED SKL-008 skills_status_opencode_managed_conflict (validated render drift contract)
+PASS skills_status_opencode_managed_conflict
+PASS skills_status_opencode_managed_orphaned
+PASS skills_status_default_dynamic_target_fallback
+PASS skills_status_opencode_project_root_missing
+PASS skills_status_opencode_project_unmanaged_skill
+PASS skills_status_opencode_project_dir_without_skill
+PASS skills_status_opencode_project_regular_file
+PASS skills_status_opencode_project_mixed_json
+PASS skills_status_opencode_project_orphaned_marker
+PASS skills_status_opencode_project_unsupported_schema_marker
+PASS skills_status_opencode_project_malformed_marker_json
+PASS skills_status_opencode_project_symlink_to_file
+PASS skills_status_opencode_project_symlink_chain
+PASS skills_status_opencode_project_isolated_from_user_root
+PASS skills_status_unknown_scope_fallback
+PASS skills_status_claude_missing_root_table
+PASS skills_status_claude_missing_root_json
+PASS skills_status_codex_missing_root_table
+PASS skills_status_codex_missing_root_json
+PASS skills_status_hermes_missing_root_table
+PASS skills_status_hermes_missing_root_json
+PASS skills_status_antigravity_missing_root_table
+PASS skills_status_antigravity_missing_root_json
+PASS skills_status_openclaw_missing_root_table
+PASS skills_status_openclaw_missing_root_json
+PASS skills_status_opencode_escapable_name_json
+PASS memory_list_fallback
+PASS memory_list_seeded
+PASS memory_search_seeded
+PASS memory_search_seeded_table
+PASS memory_search_seeded_scope
+PASS memory_search_seeded_other_scope
+PASS memory_search_seeded_limit
+PASS memory_search_seeded_limit_zero
+PASS memory_search_two_candidates_limit
+PASS memory_search_two_candidates_limit_one
+PASS memory_search_db_override
+PASS memory_search_limit_and_db
+PASS memory_search_no_candidate
+PASS memory_search_no_candidate_table
+PASS memory_search_empty_query
+PASS memory_search_missing_query_fallback
+PASS memory_search_unknown_flag_fallback
+PASS memory_search_help_fallback
+PASS memory_query_log_seeded
+PASS activity_usage
+PASS activity_help
+PASS activity_missing_profile
+PASS activity_get_missing_profile
+PASS activity_search_missing_profile
+PASS activity_status_reader_profile
+PASS activity_status_reader_profile_table
+PASS activity_status_db_override
+PASS activity_get_db_override
+PASS activity_search_db_override
+PASS activity_status_missing_budget
+PASS activity_status_zero_budget
+PASS activity_status_excess_budget
+PASS activity_get_missing_row
+PASS activity_get_missing_row_table
+PASS activity_get_missing_budget
+PASS activity_get_zero_budget
+PASS activity_get_excess_budget
+PASS activity_search_reader_profile_table
+PASS activity_search_invalid_window_keeps_go
+PASS activity_search_out_of_bounds_keeps_go
+PASS activity_get_identifier_before_flags_keeps_go
+PASS activity_search_reader_profile
+PASS activity_unknown_subcommand
+PASS usage_missing
+PASS usage_missing_json
+PASS usage_opencode_workspace_only
+PASS usage_opencode_workspace_only_json
+PASS usage_codex_stale_auth_file
+PASS usage_codex_stale_auth_file_json
+PASS activity_usage_fallback
+PASS activity_help_fallback
+PASS activity_missing_profile_fallback
+PASS activity_get_fallback
+PASS audit_tail_missing_directory
+PASS audit_tail_missing_directory_json
+PASS memory_list_seeded_table
+PASS memory_list_seeded_scope_alias
+PASS memory_list_seeded_limit_zero
+PASS memory_list_unknown_flag_fallback
+PASS memory_set_native
+PASS memory_set_native_table
+PASS memory_set_native_staged
+PASS memory_set_missing_kind_fallback
+PASS memory_set_invalid_kind_fallback
+PASS memory_set_author_fallback
+PASS memory_delete_missing_row
+PASS memory_delete_seeded_json
+PASS memory_delete_seeded_table
+PASS memory_delete_no_id_fallback
+PASS memory_help_fallback
+PASS memory_rules_empty
+PASS memory_rules_empty_table
+PASS memory_rules_seeded
+PASS memory_rules_seeded_table
+PASS memory_rules_seeded_scope
+PASS memory_query_log_seeded_table
+PASS memory_query_log_fallback
+PASS sync_dry_run_empty
+PASS sync_dry_run_all
+PASS sync_html_project_json
+PASS sync_flag_terminator
+PASS sync_flag_after_positional
+PASS sync_flag_after_terminator
+PASS sync_bool_true
+PASS sync_bool_false
+PASS sync_bool_invalid
+PASS sync_dry_run_with_library
+PASS sync_installs_library_skill
+PASS sync_unknown_harness
+PASS sync_help
+PASS sync_unknown_flag
+PASS harness_list_empty
+PASS harness_list_empty_json
+PASS harness_list_installed
+PASS harness_list_installed_json
+PASS harness_list_foreign_json
+PASS harness_list_malformed_json
+PASS harness_list_unknown_flag
+PASS harness_unknown_subcommand
+PASS harness_health_empty_json
+PASS harness_health_malformed_json
+PASS harness_health_malformed_json_response
+ACCEPTED HAR-007 harness_health_missing_command (validated versioned health contract)
+PASS harness_health_missing_command
+ACCEPTED HAR-007 harness_health_missing_command_json (validated versioned health contract)
+PASS harness_health_missing_command_json
+PASS harness_health_initialize
+ACCEPTED HAR-007 harness_health_initialize_json (validated versioned health contract)
+PASS harness_health_initialize_json
+PASS harness_health_filter_json
+PASS harness_health_unknown_harness
+PASS skills_list_empty_library
+PASS skills_list_empty_library_json
+PASS skills_list_populated_library
+PASS skills_list_populated_library_json
+PASS skills_list_categories_json
+PASS skills_list_managed_installs_json
+PASS skills_list_last_used_json
+PASS skills_list_target_flag_is_ignored
+PASS skills_list_broken_skill_fallback
+PASS skills_list_missing_skill_md_fallback
+PASS skills_list_unknown_flag_fallback
+PASS skills_list_dynamic_config_fallback
+PASS skills_targets_dynamic_root_native
+PASS skills_targets_mixed_json
+PASS skills_targets_mixed_table
+PASS skills_targets_empty_root_json
+PASS skills_targets_managed_only_json
+PASS skills_targets_config_dir_evidence_json
+PASS skills_targets_project_scope_json
+PASS skills_targets_symlink_entry_json
+PASS skills_targets_unknown_scope_fallback
+PASS skills_targets_unknown_flag_fallback
+PASS skills_log_populated_fallback
+PASS skills_sync_dry_run_dynamic_config
+PASS skills_sync_dry_run_json
+PASS skills_log_empty_json
+PASS skills_targets_default_json
+PASS skills_status_unknown_target
+PASS skills_status_unknown_flag
+504 parity cases passed
