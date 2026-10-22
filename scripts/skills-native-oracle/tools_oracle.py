@@ -65,6 +65,10 @@ GATEWAY_PARENTS = ("config/symbrain", "data/symbrain")
 # Lock files the install transaction leaves behind. Go and the shared Rust install layer name them
 # differently (`.symskills-lock-<name>` vs `.symskills-lock-<sha256>`); documented residual, not compared.
 LOCK_PREFIX = ".symskills-lock-"
+# ...and only where the install/render transactions create them: next to install destinations in the
+# harness roots under home/ and beside rendered outputs. A lock file anywhere else (notably inside the
+# skill library or a victim repository) is a real side effect and stays compared.
+LOCK_ROOTS = ("home/", "data/symbrain/skills/rendered/", "data/symbrain/skills/base/")
 GATEWAY_STATE = ("data/symbrain/memory", "config/symbrain/memory", "data/symbrain/audit", "data/symbrain/recipes")
 
 LIB = "data/symbrain/skills/library"
@@ -327,7 +331,99 @@ def cases():
          install=[("alpha", "opencode"), ("alpha", "claude")])
     case("restore-sync-harness-changed-skipped", [restore("HEAD~2", dry_run=False, sync=True)], repos=[alpha],
          install=[("alpha", "opencode")], pre_go=[("edit", "home/.config/opencode/skills/alpha/SKILL.md", "hand edited in harness\n")])
+    absolute_name_cases(case, call, alpha, skill_md, toml_profile)
     return out
+
+
+def absolute_name_cases(case, call, alpha, skill_md, toml_profile):
+    """Absolute and escaping skill names and tracked-symlink restores (review of #764 slice b).
+
+    Go's `filepath.Join(lib, "/abs")` is `lib/abs`: an absolute name never names the absolute path.
+    The victim repository lives beside the library; any write, commit or log read that reaches it
+    shows up in the whole-root snapshot.
+    """
+    def victim(dir_):
+        return {"dir": dir_, "files": {"SKILL.md": skill_md("victim", "Victim v1."), "keep.md": "precious\n"},
+                "commits": [("import: victim", {}), ("update: victim v2", {"SKILL.md": skill_md("victim", "Victim v2."), "keep.md": "changed\n"}),
+                            ("update: victim v3", {"keep.md": "latest\n"})]}
+
+    outside = victim("victim")
+    # `/zz/victim` is a root-independent absolute name: Go re-roots it to <lib>/zz/victim, which exists only here.
+    rerooted = victim(f"{LIB}/zz/victim")
+    for label, absolute, repos in (("victim-only", "<ROOT>/victim", [alpha, outside]),
+                                   ("rerooted-also-exists", "/zz/victim", [alpha, outside, rerooted])):
+        case(f"restore-absolute-name-dry-run-{label}",
+             [call(3, "skills_restore", {"name": absolute, "rev": "HEAD~1"})], repos=repos)
+        case(f"restore-absolute-name-explicit-dry-run-{label}",
+             [call(3, "skills_restore", {"name": absolute, "rev": "HEAD~1", "dry_run": True})], repos=repos)
+        case(f"restore-absolute-name-real-{label}",
+             [call(3, "skills_restore", {"name": absolute, "rev": "HEAD~1", "dry_run": False}),
+              call(4, "skills_history", {"name": absolute, "limit": 10})], repos=repos)
+        case(f"restore-absolute-name-real-dirty-allowed-{label}",
+             [call(3, "skills_restore", {"name": absolute, "rev": "HEAD~2", "dry_run": False, "allow_dirty": True})],
+             repos=repos, files={"victim/untracked.md": "x\n"})
+        case(f"history-absolute-name-{label}", [call(3, "skills_history", {"name": absolute})], repos=repos)
+        case(f"history-absolute-name-limit-{label}", [call(3, "skills_history", {"name": absolute, "limit": 1})], repos=repos)
+    case("restore-absolute-name-root-slash", [call(3, "skills_restore", {"name": "/", "rev": "HEAD", "dry_run": False})], repos=[alpha, outside])
+    case("history-absolute-name-root-slash", [call(3, "skills_history", {"name": "/"})], repos=[alpha, outside])
+    case("restore-absolute-name-etc", [call(3, "skills_restore", {"name": "/etc", "rev": "HEAD"})], repos=[alpha, outside])
+    case("restore-absolute-name-library-alpha", [call(3, "skills_restore", {"name": f"<ROOT>/{LIB}/alpha", "rev": "HEAD~1", "dry_run": False})],
+         repos=[alpha, outside])
+    case("restore-absolute-name-double-slash", [call(3, "skills_restore", {"name": "//zz/victim", "rev": "HEAD~1", "dry_run": False})],
+         repos=[alpha, outside, rerooted])
+    # No restore variant of the relative `..` traversal: Go writes the extracted tree to Join(tmp, name), which for
+    # a name that climbs past the library climbs out of the isolated root too (a Go quirk kept for parity, see
+    # the ADR); a corpus case would write outside the sandbox.
+    case("history-relative-name-dot-dot-to-victim", [call(3, "skills_history", {"name": "../../../../victim"})], repos=[alpha, outside])
+    # profiles: absolute names and absolute skill links never leave their roots either.
+    abs_files = {f"{PROFILES}/abs-link.toml": toml_profile("abs-link", links=[("a", "<ROOT>/victim", "")]),
+                 f"{PROFILES}/ok.toml": toml_profile("ok", links=[("a", "alpha", "")]),
+                 f"{LIB}/alpha/SKILL.md": skill_md("alpha"), "victim/SKILL.md": skill_md("victim")}
+    case("profile-resolve-absolute-name", [call(3, "skills_profile_resolve", {"name": "/zz/victim"})], files=abs_files)
+    case("profile-resolve-absolute-name-slash", [call(3, "skills_profile_resolve", {"name": "/ok"})], files=abs_files)
+    case("profile-resolve-absolute-skill-link", [call(3, "skills_profile_resolve", {"name": "abs-link"})], files=abs_files)
+    case("profile-resolve-absolute-skill-link-rerooted", [call(3, "skills_profile_resolve", {"name": "abs-zz"})],
+         files={**abs_files, f"{PROFILES}/abs-zz.toml": toml_profile("abs-zz", links=[("a", "/zz/victim", "")]),
+                f"{LIB}/zz/victim/SKILL.md": skill_md("victim")})
+    case("profile-list-absolute-skill-link", [call(3, "skills_profile_list", {})], files=abs_files)
+
+    # tracked symlinks in a restored revision: HEAD is clean, HEAD~1 carries the link.
+    def linked(name, links):
+        return {"dir": f"{LIB}/{name}", "files": {"SKILL.md": skill_md(name), "sub/keep.md": "k\n"},
+                "commits": [("import: base", {}), ("update: add links", {rel: ["symlink", target] for rel, target in links}),
+                            ("update: drop links", {**{rel: None for rel, _ in links}, "note.md": "n\n"})]}
+    # A dangling link extracts fine in both, but the shared bundle loader words the follow-up validation error
+    # differently (`statat x: no such file` vs strerror text) -- a loader residual outside this slice, not a case.
+    outside_file = {"outside/secret.txt": "secret\n", "outside/dir/inner.txt": "inner\n"}
+    for slug, links in (
+        ("parent-escape", [("evil", "../../outside")]),
+        ("absolute-target", [("evil", "/zz/outside")]),
+        ("absolute-etc", [("evil", "/etc/passwd")]),
+        ("deep-escape", [("a/b/evil", "../../../outside")]),
+        ("dot", [("dot", ".")]),
+        ("dot-slash", [("dot", "./")]),
+        ("parent-of-subdir", [("sub/lnk", "..")]),
+        ("parent-of-root", [("lnk", "..")]),
+        ("clean-to-root", [("x", "sub/..")]),
+        ("clean-above-root", [("up", "sub/../..")]),
+        ("deep-to-root", [("a/b/up", "../..")]),
+        ("empty-looking-dotdot-slash", [("lnk", "../")]),
+        ("inside-ok", [("sub/ok", "../SKILL.md")]),
+        ("inside-dir-ok", [("lnk", "sub")]),
+        ("inside-sibling-ok", [("sub/sib", "keep.md")]),
+        ("dir-then-escape", [("sub/ok", "keep.md"), ("sub/evil", "../../outside")]),
+    ):
+        name = "lnk"
+        repo = linked(name, links)
+        case(f"restore-symlink-{slug}-dry-run", [call(3, "skills_restore", {"name": name, "rev": "HEAD~1"})],
+             repos=[repo], files=outside_file)
+        case(f"restore-symlink-{slug}-real", [call(3, "skills_restore", {"name": name, "rev": "HEAD~1", "dry_run": False})],
+             repos=[repo], files=outside_file)
+    # A symlink that IS the restored tree's committed state, restored back after removal (forward restore of a link).
+    keep = linked("lnk", [("sub/ok", "../SKILL.md")])
+    case("restore-symlink-inside-ok-roundtrip", [call(3, "skills_restore", {"name": "lnk", "rev": "HEAD~1", "dry_run": False}),
+                                                call(4, "skills_restore", {"name": "lnk", "rev": "HEAD", "dry_run": False}),
+                                                call(5, "skills_history", {"name": "lnk", "limit": 10})], repos=[keep])
 
 
 # ---------------------------------------------------------------- materialization
@@ -340,6 +436,22 @@ def git(args, cwd, env):
     return subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, check=True).stdout
 
 
+def put(base, rel, value, root=None):
+    """Write `value` at base/rel: str -> file, None -> delete, ["symlink", target] -> symlink."""
+    target = base / rel
+    if value is None:
+        target.unlink()
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if isinstance(value, list):
+        assert value[0] == "symlink"
+        if target.is_symlink() or target.exists():
+            target.unlink()
+        os.symlink(value[1].replace("<ROOT>", str(root)), target)
+    else:
+        target.write_text(value)
+
+
 def materialize(root, case):
     """Create the case's pre-state under `root`.  Mirrors rust/symbrain-cli/tests/skills_tools_oracle.rs."""
     root = Path(root)
@@ -349,27 +461,21 @@ def materialize(root, case):
         (root / rel).mkdir(parents=True, exist_ok=True)
     env = {"PATH": PATH_WITH_GIT, "HOME": str(root / "home"), **GIT_ENV}
     for repo in case["repos"]:
-        base = root / repo["dir"]
+        base = root / repo["dir"].replace("<ROOT>", str(root))
         base.mkdir(parents=True, exist_ok=True)
         git(["init", "-q", "-b", "main"], base, env)
         for rel, text in repo["files"].items():
-            (base / rel).parent.mkdir(parents=True, exist_ok=True)
-            (base / rel).write_text(text)
+            put(base, rel, text, root)
         if repo["commits"]:
             git(["add", "-A"], base, env)
             git(["commit", "-q", "-m", repo["commits"][0][0]], base, env)
         for message, changes in repo["commits"][1:]:
             for rel, text in changes.items():
-                target = base / rel
-                if text is None:
-                    target.unlink()
-                else:
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(text)
+                put(base, rel, text, root)
             git(["add", "-A"], base, env)
             git(["commit", "-q", "-m", message], base, env)
     for rel, text in case["files"].items():
-        path = root / rel
+        path = root / rel.replace("<ROOT>", str(root))
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text.replace("<ROOT>", str(root)))
     for rel, target in case["symlinks"]:
@@ -427,7 +533,7 @@ def snapshot(root):
     repos = []
     for path in sorted(root.rglob("*")):
         rel = path.relative_to(root).as_posix()
-        if rel.startswith(GATEWAY_STATE) or rel in GATEWAY_PARENTS or path.name.startswith(LOCK_PREFIX):
+        if rel.startswith(GATEWAY_STATE) or rel in GATEWAY_PARENTS or (path.name.startswith(LOCK_PREFIX) and rel.startswith(LOCK_ROOTS) and not path.is_dir()):
             continue
         if rel == "profile.toml" or "/.git/" in f"/{rel}/" or rel.endswith("/.git"):
             if rel.endswith("/.git") and path.is_dir():
@@ -436,7 +542,7 @@ def snapshot(root):
         if path.is_symlink():
             entries[rel] = {"type": "symlink", "target": os.readlink(path)}
         elif path.is_dir():
-            entries[rel] = {"type": "dir"}
+            entries[rel] = {"type": "dir", "mode": path.stat().st_mode & 0o777}
         else:
             data = path.read_bytes().replace(str(root).encode(), b"<ROOT>")
             if path.name in MASKED_NAMES:

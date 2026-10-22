@@ -381,7 +381,7 @@ fn discover_sources(raw: Option<&RawValue>) -> Outcome {
 // ----------------------------------------------------------------------
 
 fn skill_dir(dirs: &Dirs, name: &str) -> PathBuf {
-    gotext::clean(&dirs.library.join(name))
+    gotext::join(&dirs.library, name)
 }
 
 fn not_versioned(context: &str, name: &str, dir: &Path) -> ToolError {
@@ -490,7 +490,7 @@ fn restore(dirs: &Dirs, raw: Option<&RawValue>) -> Outcome {
         .prefix("symskills-restore-")
         .tempdir()
         .map_err(|error| ToolError::internal("restore skill", error))?;
-    let tree = gotext::clean(&tmp.path().join(&name));
+    let tree = gotext::join(tmp.path(), &name);
     vcs::extract(&dir, &resolved, &tree)
         .map_err(|error| ToolError::internal("extract revision", error))?;
     validate_restored(&resolved, &tree)?;

@@ -141,7 +141,7 @@ pub(crate) fn archive(dir: &Path, rev: &str) -> Result<Vec<u8>, SkillError> {
 /// Whether a working repository exists, without initializing it.
 #[must_use]
 pub fn is_repo(dir: &Path) -> bool {
-    dir.join(".git").exists() && run(dir, &["rev-parse", "--git-dir"]).is_ok()
+    crate::gotext::join(dir, ".git").exists() && run(dir, &["rev-parse", "--git-dir"]).is_ok()
 }
 
 /// Resolves a revision to a full commit hash.

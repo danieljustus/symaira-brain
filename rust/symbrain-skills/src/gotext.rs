@@ -48,6 +48,27 @@ pub fn clean(path: &Path) -> PathBuf {
     out.iter().collect()
 }
 
+/// `filepath.Join(base, elem)`: empty elements are skipped, the rest are
+/// joined with a separator and lexically cleaned. Unlike [`Path::join`], an
+/// absolute `elem` is **not** a new root (`Join("/lib", "/abs")` is
+/// `/lib/abs`), so a caller-supplied name can never leave `base` except by
+/// relative `..` components, exactly as in Go.
+#[must_use]
+pub fn join(base: impl AsRef<Path>, elem: impl AsRef<Path>) -> PathBuf {
+    let (base, elem) = (base.as_ref(), elem.as_ref());
+    match (base.as_os_str().is_empty(), elem.as_os_str().is_empty()) {
+        (true, true) => PathBuf::new(),
+        (true, false) => clean(elem),
+        (false, true) => clean(base),
+        (false, false) => {
+            let mut joined = base.as_os_str().to_os_string();
+            joined.push("/");
+            joined.push(elem.as_os_str());
+            clean(Path::new(&joined))
+        }
+    }
+}
+
 /// `filepath.Abs`: join with the working directory, then clean.
 #[must_use]
 pub fn absolute(path: &Path) -> PathBuf {
@@ -110,6 +131,21 @@ mod tests {
         assert_eq!(clean(Path::new("/a/../..")), PathBuf::from("/"));
         assert_eq!(clean(Path::new("a/..")), PathBuf::from("."));
         assert_eq!(clean(Path::new("../a")), PathBuf::from("../a"));
+    }
+
+    #[test]
+    fn join_is_go_filepath_join_not_path_join() {
+        // An absolute second element is re-rooted under the base, never a new root.
+        assert_eq!(join("/lib", "/etc/x"), PathBuf::from("/lib/etc/x"));
+        assert_eq!(join("/lib", "/"), PathBuf::from("/lib"));
+        assert_eq!(join("/lib", "a/../b"), PathBuf::from("/lib/b"));
+        assert_eq!(join("/lib", "../x"), PathBuf::from("/x"));
+        assert_eq!(join("/lib/", "./a//b/"), PathBuf::from("/lib/a/b"));
+        assert_eq!(join("", "x"), PathBuf::from("x"));
+        assert_eq!(join("x", ""), PathBuf::from("x"));
+        assert_eq!(join("", ""), PathBuf::new());
+        assert_eq!(join(".", ".."), PathBuf::from(".."));
+        assert_eq!(join("a", ".."), PathBuf::from("."));
     }
 
     #[cfg(unix)]

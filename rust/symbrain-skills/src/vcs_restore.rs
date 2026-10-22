@@ -1,18 +1,28 @@
 //! Bounded revision extraction and staged restore while retaining `.git`.
 
+use crate::gotext;
 use crate::{MAX_INPUT_SIZE, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError};
 use cap_std::fs::Dir;
 use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
 
+/// `filepath.IsLocal` for an already cleaned path.
 fn local(path: &Path) -> bool {
     !path.as_os_str().is_empty()
+        && !path.is_absolute()
         && path
             .components()
             .all(|component| matches!(component, Component::Normal(_) | Component::CurDir))
 }
 
+/// Go's symlink check: `linkPath := Clean(Join(Dir(name), linkName))` must be
+/// local and must not be `.` (a link to the extraction root or to any parent
+/// that resolves to it is refused). `Clean` is lexical, so the walk is a
+/// depth count: popping below the root or ending at the root is an escape.
 fn confined_link(path: &Path, target: &Path) -> bool {
+    if target.as_os_str().is_empty() || target.is_absolute() {
+        return false;
+    }
     let mut depth = path.parent().map_or(0, |parent| {
         parent
             .components()
@@ -27,7 +37,7 @@ fn confined_link(path: &Path, target: &Path) -> bool {
             _ => return false,
         }
     }
-    !target.as_os_str().is_empty()
+    depth > 0
 }
 
 fn err(error: impl std::fmt::Display) -> SkillError {
@@ -58,9 +68,12 @@ pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
         if kind.is_pax_global_extensions() || kind.is_pax_local_extensions() {
             continue;
         }
-        if !local(&path) {
+        // Go: `name := filepath.Clean(hdr.Name)`; diagnostics keep `hdr.Name`.
+        let header_name = path;
+        let path = gotext::clean(&header_name);
+        if !local(&path) || (!kind.is_dir() && path == Path::new(".")) {
             return Err(SkillError(format!(
-                "archive entry {path:?} escapes destination"
+                "archive entry {header_name:?} escapes destination"
             )));
         }
         if kind.is_dir() {
@@ -68,18 +81,28 @@ pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
             continue;
         }
         if kind.is_symlink() {
+            // Go rejects an empty Linkname with the same escape diagnostic.
             let target = entry
                 .link_name()
                 .map_err(err)?
-                .ok_or_else(|| SkillError("archive symlink target missing".into()))?;
-            if target.is_absolute() || !confined_link(&path, &target) {
+                .map(std::borrow::Cow::into_owned);
+            let Some(target) = target.filter(|target| confined_link(&path, target)) else {
                 return Err(SkillError(format!(
-                    "archive symlink {path:?} escapes destination"
+                    "archive symlink {header_name:?} escapes destination"
                 )));
-            }
+            };
             root.create_dir_all(path.parent().unwrap_or_else(|| Path::new(".")))
                 .map_err(err)?;
-            let _ = root.remove_file(&path);
+            // Go: `root.Remove(name)`, tolerating only "does not exist".
+            match root.remove_file(&path) {
+                Ok(()) => {}
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(first) => match root.remove_dir(&path) {
+                    Ok(()) => {}
+                    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                    Err(_) => return Err(err(first)),
+                },
+            }
             #[cfg(unix)]
             root.symlink(&target, &path).map_err(err)?;
             #[cfg(windows)]
@@ -127,7 +150,7 @@ fn copy_tree(real_root: &Path, src: &Path, dst: &Path) -> Result<(), SkillError>
     for entry in entries {
         let name = entry.file_name();
         let path = entry.path();
-        let target = dst.join(&name);
+        let target = gotext::join(dst, &name);
         let kind = entry.file_type().map_err(err)?;
         if kind.is_dir() && name == ".git" {
             continue;
@@ -137,9 +160,9 @@ fn copy_tree(real_root: &Path, src: &Path, dst: &Path) -> Result<(), SkillError>
             if !real.starts_with(real_root) {
                 return Err(SkillError(format!(
                     "symlink {} escapes source root {}: points to {}",
-                    crate::gotext::quote(&name.to_string_lossy()),
-                    crate::gotext::quote(&src.to_string_lossy()),
-                    crate::gotext::quote(&real.to_string_lossy())
+                    gotext::quote(&name.to_string_lossy()),
+                    gotext::quote(&src.to_string_lossy()),
+                    gotext::quote(&real.to_string_lossy())
                 )));
             }
             let metadata = std::fs::metadata(&real).map_err(err)?;
@@ -211,7 +234,34 @@ pub fn restore(dir: &Path, src: &Path, message: &str) -> Result<String, SkillErr
     }
     for entry in std::fs::read_dir(staging.path()).map_err(err)? {
         let entry = entry.map_err(err)?;
-        std::fs::rename(entry.path(), dir.join(entry.file_name())).map_err(err)?;
+        std::fs::rename(entry.path(), gotext::join(dir, entry.file_name())).map_err(err)?;
     }
     super::commit(dir, message)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::confined_link;
+    use std::path::Path;
+
+    fn ok(path: &str, target: &str) -> bool {
+        confined_link(Path::new(path), Path::new(target))
+    }
+
+    #[test]
+    fn link_check_is_gos_clean_join_local_and_not_dot() {
+        assert!(ok("a", "b"));
+        assert!(ok("sub/ok", "../SKILL.md"));
+        assert!(ok("a/b/c", "../x"));
+        assert!(ok("lnk", "sub"));
+        assert!(!ok("dot", "."));
+        assert!(!ok("dot", "./"));
+        assert!(!ok("sub/lnk", ".."));
+        assert!(!ok("a/b/up", "../.."));
+        assert!(!ok("x", "sub/.."));
+        assert!(!ok("lnk", ".."));
+        assert!(!ok("sub/evil", "../../outside"));
+        assert!(!ok("evil", "/etc/passwd"));
+        assert!(!ok("evil", ""));
+    }
 }

@@ -20,6 +20,13 @@ use std::process::{Command, Stdio};
 const FIXTURE: &str = include_str!("fixtures/skills_tools_go_oracle.json");
 const GATEWAY_PARENTS: [&str; 2] = ["config/symbrain", "data/symbrain"];
 const LOCK_PREFIX: &str = ".symskills-lock-";
+/// Lock files are only masked where the install/render transactions create them; one inside the library or a
+/// victim repository is a real side effect and stays compared.
+const LOCK_ROOTS: [&str; 3] = [
+    "home/",
+    "data/symbrain/skills/rendered/",
+    "data/symbrain/skills/base/",
+];
 const GATEWAY_STATE: [&str; 4] = [
     "data/symbrain/memory",
     "config/symbrain/memory",
@@ -77,11 +84,16 @@ fn materialize(oracle: &Value, case: &Value, root: &Path) {
     }
     let env = pinned_git_env(oracle, root);
     for repo in case["repos"].as_array().unwrap() {
-        let base = root.join(repo["dir"].as_str().unwrap());
+        let base = root.join(
+            repo["dir"]
+                .as_str()
+                .unwrap()
+                .replace("<ROOT>", &root.display().to_string()),
+        );
         std::fs::create_dir_all(&base).unwrap();
         git(&["init", "-q", "-b", "main"], &base, &env);
-        for (rel, text) in repo["files"].as_object().unwrap() {
-            write(&base.join(rel), text.as_str().unwrap());
+        for (rel, value) in repo["files"].as_object().unwrap() {
+            put(&base, rel, value, root);
         }
         let commits = repo["commits"].as_array().unwrap();
         if let Some(first) = commits.first() {
@@ -93,11 +105,8 @@ fn materialize(oracle: &Value, case: &Value, root: &Path) {
             );
         }
         for commit in commits.iter().skip(1) {
-            for (rel, text) in commit[1].as_object().unwrap() {
-                match text.as_str() {
-                    Some(text) => write(&base.join(rel), text),
-                    None => std::fs::remove_file(base.join(rel)).unwrap(),
-                }
+            for (rel, value) in commit[1].as_object().unwrap() {
+                put(&base, rel, value, root);
             }
             git(&["add", "-A"], &base, &env);
             git(
@@ -109,7 +118,7 @@ fn materialize(oracle: &Value, case: &Value, root: &Path) {
     }
     for (rel, text) in case["files"].as_object().unwrap() {
         write(
-            &root.join(rel),
+            &root.join(rel.replace("<ROOT>", &root.display().to_string())),
             &text
                 .as_str()
                 .unwrap()
@@ -141,6 +150,27 @@ fn materialize(oracle: &Value, case: &Value, root: &Path) {
             "edit" => std::fs::write(&path, step[2].as_str().unwrap()).unwrap(),
             other => panic!("unknown pre-state step {other}"),
         }
+    }
+}
+
+/// Mirrors `tools_oracle.put`: string -> file, null -> delete, `["symlink", target]` -> symlink.
+fn put(base: &Path, rel: &str, value: &Value, root: &Path) {
+    let path = base.join(rel);
+    match value {
+        Value::Null => std::fs::remove_file(path).unwrap(),
+        Value::Array(link) => {
+            assert_eq!(link[0], "symlink");
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            if std::fs::symlink_metadata(&path).is_ok() {
+                std::fs::remove_file(&path).unwrap();
+            }
+            let target = link[1]
+                .as_str()
+                .unwrap()
+                .replace("<ROOT>", &root.display().to_string());
+            std::os::unix::fs::symlink(target, path).unwrap();
+        }
+        text => write(&path, text.as_str().unwrap()),
     }
 }
 
@@ -281,11 +311,13 @@ fn snapshot(oracle: &Value, root: &Path) -> Value {
             .replace('\\', "/");
         if GATEWAY_STATE.iter().any(|prefix| rel.starts_with(prefix))
             || GATEWAY_PARENTS.contains(&rel.as_str())
-            || path
+            || (path
                 .file_name()
                 .unwrap()
                 .to_string_lossy()
                 .starts_with(LOCK_PREFIX)
+                && LOCK_ROOTS.iter().any(|prefix| rel.starts_with(prefix))
+                && !path.is_dir())
         {
             continue;
         }
@@ -300,7 +332,7 @@ fn snapshot(oracle: &Value, root: &Path) -> Value {
         let value = if meta.file_type().is_symlink() {
             json!({"type": "symlink", "target": std::fs::read_link(&path).unwrap().to_string_lossy()})
         } else if meta.is_dir() {
-            json!({"type": "dir"})
+            json!({"type": "dir", "mode": meta.permissions().mode() & 0o777})
         } else {
             let name = path.file_name().unwrap().to_string_lossy().into_owned();
             let root_bytes = root.as_os_str().as_encoded_bytes();
@@ -511,7 +543,7 @@ fn native_tools_match_every_recorded_go_reply_and_side_effect() {
         failures.join("\n")
     );
     // Anti-vacuity: the corpus must cover every tool, both outcomes, each error kind and real writes.
-    assert!(cases.len() >= 130, "{}", cases.len());
+    assert!(cases.len() >= 190, "{}", cases.len());
     // Tool result texts (the inner JSON or error message), one string per recorded reply.
     let text = |case: &Value| -> String {
         case["go"]["replies"]
@@ -534,6 +566,9 @@ fn native_tools_match_every_recorded_go_reply_and_side_effect() {
         "is not versioned",
         "uncommitted changes",
         "refusing restore",
+        // Review of #764 slice b: absolute names re-root under the library, links may not escape.
+        "is not versioned: no git repository at <ROOT>/data/symbrain/skills/library<ROOT>/victim",
+        "escapes destination",
     ] {
         assert!(
             cases.iter().any(|case| text(case).contains(needle)),

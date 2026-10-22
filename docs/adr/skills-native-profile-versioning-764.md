@@ -1,7 +1,8 @@
 # Skills MCP profile, discovery and versioning tools (#764, slice b)
 
-Status: implemented and locally verified (macOS and Linux `rust:1.98-bookworm`
-as uid 1000) on top of slice (a). Native Windows CI is pending. Salvaged from
+Status: implemented and locally verified (macOS; the first 141 cases also on Linux
+`rust:1.98-bookworm` as uid 1000, the review-extended 197-case corpus not yet
+rerun there) on top of slice (a). Native Windows CI is pending. Salvaged from
 PR #813 (head `578d201f5`) where the design carried over; the code was rewritten
 against current main because PR #813 depends on its YAML fork, `binary`/`text`
 byte-presentation layers and a reordered catalog that are owner decisions.
@@ -29,18 +30,27 @@ process, no `symskills` binary.
    directory, no event log, `vcs.enabled` always on. The native tools do the
    same; project/parent profile contexts and the disabled-versioning branch are
    therefore unreachable from this surface.
-4. **Git exactly as Go.** All repository access goes through `git` on `PATH`
+4. **Go path semantics for names.** `filepath.Join(lib, name)` is join-then-clean
+   and an absolute `name` is *not* a new root (`Join("/lib", "/abs")` is
+   `/lib/abs`). `Path::join` replaces the prefix instead, which would have let an
+   absolute `name` aim `skills_restore`/`skills_history` at any repository the
+   caller can write (extraction runs before the dry-run return). Every
+   name-derived path therefore goes through `gotext::join`; there is no
+   `Path::join` on a caller-controlled element. The Go quirk for relative `..`
+   names is kept as is (see residuals).
+5. **Git exactly as Go.** All repository access goes through `git` on `PATH`
    with `GIT_TERMINAL_PROMPT=0`, `LC_ALL=C`, combined stdout+stderr, the
    `symskills <symskills@localhost>` identity and `commit.gpgsign=false`.
    A missing binary means "not versioned". Restore extracts through `git
    archive` into a capability-confined directory (traversal, absolute and
    escaping links rejected, size/entry bounds), validates the restored tree
-   before any write, copies it into a sibling staging directory, swaps entries
+   before any write (symlinks must satisfy Go's `Clean(Join(Dir(name), link))` is
+   local and not `.`; a failed removal before link creation is an error), copies it into a sibling staging directory, swaps entries
    while keeping `.git`, and records a forward commit.
-5. **Restore sync.** `sync=true` reuses the shared install layer; the added
+6. **Restore sync.** `sync=true` reuses the shared install layer; the added
    `install::sync_selected` is `sync` over an already filtered status list,
    which is what Go's `install.Sync(stale, ...)` receives.
-6. **Catalog.** The five registrations (description, schema, annotations) are
+7. **Catalog.** The five registrations (description, schema, annotations) are
    Go's; the eleven Skills tools are exposed in Go's relative order. Skills vs
    Usage ordering in the whole catalog stays the deferred reorder.
 
@@ -48,6 +58,11 @@ process, no `symskills` binary.
 
 * TOML parse/type error text (BurntSushi vs `toml_edit`) and YAML frontmatter
   parser text differ; class, code and the Skills-owned prefix are asserted.
+* A restored revision containing a dangling symlink fails validation in both
+  implementations, but the shared bundle loader words the I/O error differently
+  (`statat x: no such file or directory` vs strerror text); not in the corpus.
+* Lock files are masked only below `home/`, `rendered/` and the install `base/`
+  store; the Go and Rust install layers name them differently.
 * The shared install layer writes `output_digest`/`output_manifest` into
   `.symskills.json` and names its lock files differently from Go; the replay
   compares every other marker field and ignores lock files.

@@ -34,7 +34,7 @@ pub struct Candidate {
 }
 
 fn source_id(path: &Path) -> String {
-    let content = std::fs::read(path.join("SKILL.md")).unwrap_or_default();
+    let content = std::fs::read(crate::gotext::join(path, "SKILL.md")).unwrap_or_default();
     let mut hash = Sha256::new();
     hash.update(path.as_os_str().as_encoded_bytes());
     hash.update([0]);
@@ -51,8 +51,8 @@ fn base_name(path: &Path) -> String {
 
 fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> Candidate {
     let canonical = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
-    let managed =
-        path.join(".symskills.json").exists() || canonical.join(".symskills.json").exists();
+    let managed = crate::gotext::join(path, ".symskills.json").exists()
+        || crate::gotext::join(&canonical, ".symskills.json").exists();
     let mut row = Candidate {
         source_id: source_id(&canonical),
         target: target.into(),
@@ -154,7 +154,7 @@ pub fn scanned(home: &Path, paths: &[String]) -> Result<Vec<Candidate>, SkillErr
                 continue;
             }
         };
-        if path.join("SKILL.md").exists() {
+        if crate::gotext::join(&path, "SKILL.md").exists() {
             let row = candidate(&path, &source, &target, &loader);
             found.insert(row.source_id.clone(), row);
             continue;
@@ -166,7 +166,7 @@ pub fn scanned(home: &Path, paths: &[String]) -> Result<Vec<Candidate>, SkillErr
             Ok(entries) => {
                 for entry in entries {
                     let entry = entry.path();
-                    if !entry.join("SKILL.md").exists() {
+                    if !crate::gotext::join(&entry, "SKILL.md").exists() {
                         continue;
                     }
                     let row = candidate(&entry, &source, &target, &loader);

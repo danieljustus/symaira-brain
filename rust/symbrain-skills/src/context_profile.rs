@@ -46,12 +46,12 @@ fn contexts(global: &Path, project: Option<&Path>) -> Vec<(String, PathBuf)> {
         let project = crate::gotext::absolute(project);
         result.push((
             "project".into(),
-            project.join(".symskills").join("profiles"),
+            crate::gotext::join(&project, ".symskills/profiles"),
         ));
         for (index, parent) in project.ancestors().skip(1).enumerate() {
             result.push((
                 format!("parent:{}", index + 1),
-                parent.join(".symskills").join("profiles"),
+                crate::gotext::join(parent, ".symskills/profiles"),
             ));
         }
     }
@@ -169,7 +169,7 @@ pub fn resolve(
     let mut resolved = Vec::new();
     let mut count = 0;
     for index in 0..contexts.len() {
-        let path = contexts[index].1.join(format!("{name}.toml"));
+        let path = crate::gotext::join(&contexts[index].1, format!("{name}.toml"));
         if present(&path, "stat profile", &path.display().to_string())? {
             resolved.push(resolve_at(
                 &contexts,
@@ -196,7 +196,7 @@ pub fn resolve(
                 message: "link has no skill".into(),
                 path: row.name.clone(),
             });
-        } else if let Err(error) = std::fs::metadata(library.join(&row.skill)) {
+        } else if let Err(error) = std::fs::metadata(crate::gotext::join(library, &row.skill)) {
             if error.kind() == std::io::ErrorKind::NotFound {
                 issues.push(Issue {
                     code: "profile_missing_skill".into(),
@@ -212,7 +212,11 @@ pub fn resolve(
                 issues.push(Issue {
                     code: "profile_library_read".into(),
                     severity: "error".into(),
-                    message: crate::gotext::path_error("stat", &library.join(&row.skill), &error),
+                    message: crate::gotext::path_error(
+                        "stat",
+                        &crate::gotext::join(library, &row.skill),
+                        &error,
+                    ),
                     path: row.skill.clone(),
                 });
             }
@@ -238,7 +242,10 @@ fn resolve_at(
     if *count > crate::MAX_RESOURCE_ENTRIES || visited.len() > crate::MAX_RESOURCE_DEPTH {
         return Err(SkillError("profile inheritance exceeds input limit".into()));
     }
-    let doc = load(&contexts[index].1.join(format!("{name}.toml")))?;
+    let doc = load(&crate::gotext::join(
+        &contexts[index].1,
+        format!("{name}.toml"),
+    ))?;
     let declared = doc
         .get("name")
         .and_then(toml_edit::Item::as_str)
@@ -262,7 +269,7 @@ fn resolve_at(
             })?;
             let mut found = None;
             for (next, (_, directory)) in contexts.iter().enumerate().skip(index) {
-                let path = directory.join(format!("{parent}.toml"));
+                let path = crate::gotext::join(directory, format!("{parent}.toml"));
                 if present(&path, "stat inherited profile", parent)? {
                     found = Some(next);
                     break;
