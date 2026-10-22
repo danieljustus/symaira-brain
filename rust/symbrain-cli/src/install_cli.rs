@@ -532,6 +532,7 @@ fn physical_root(root: &Path) -> io::Result<PathBuf> {
 }
 
 #[cfg(not(unix))]
+#[allow(clippy::unnecessary_wraps)] // same signature as the fallible Unix variant
 fn physical_root(root: &Path) -> io::Result<PathBuf> {
     Ok(root.to_path_buf())
 }

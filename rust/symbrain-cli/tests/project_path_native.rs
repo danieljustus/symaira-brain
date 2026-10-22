@@ -134,7 +134,9 @@ fn manifest(root: &Path) -> BTreeMap<String, (String, u32, String)> {
             if file_type.is_symlink() {
                 let target = std::fs::read_link(&path).unwrap();
                 let hex = hex(target.into_os_string().as_encoded_bytes());
-                out.insert(rel, ("symlink".into(), mode, hex));
+                // A symlink's own mode is platform noise (0o755 on macOS,
+                // always 0o777 on Linux); only its target is compared.
+                out.insert(rel, ("symlink".into(), 0, hex));
             } else if file_type.is_dir() {
                 if !BASE_DIRS.contains(&rel.as_str()) {
                     out.insert(rel, ("dir".into(), mode, String::new()));
@@ -232,13 +234,15 @@ fn go_recorded_project_path_shapes_are_native_without_a_go_fallback() {
             .unwrap()
             .iter()
             .map(|entry| {
+                let kind = entry[1].as_str().unwrap().to_owned();
+                let mode = if kind == "symlink" {
+                    0
+                } else {
+                    u32::try_from(entry[2].as_u64().unwrap()).unwrap()
+                };
                 (
                     entry[0].as_str().unwrap().to_owned(),
-                    (
-                        entry[1].as_str().unwrap().to_owned(),
-                        u32::try_from(entry[2].as_u64().unwrap()).unwrap(),
-                        entry[3].as_str().unwrap().to_owned(),
-                    ),
+                    (kind, mode, entry[3].as_str().unwrap().to_owned()),
                 )
             })
             .collect();

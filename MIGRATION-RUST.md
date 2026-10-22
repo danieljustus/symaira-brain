@@ -729,7 +729,10 @@ cannot be matched anyway; `sync` is exact. (3) `HOME`, `XDG_*` and other
 environment-derived config roots containing `..` still use the old
 no-parent capability walk (global `install`/`uninstall`, noted in slice 2).
 (4) A symlinked or special `.mcp.json`/`CLAUDE.md` target is a file shape,
-not a project-path shape: it was not measured and not changed (the native
-capability open refuses symlinked targets by design). (5) `$PWD`-reached symlinked
+not a project-path shape: it was not measured and not changed. `install`/
+`uninstall` open the target through the no-follow capability, but `sync`
+reads an existing target with ambient `fs::read` (`sync_cli.rs`), which
+follows a symlinked `CLAUDE.md`: Rust then reports `dry-run (would update)`
+with exit 0 where Go exits 1 (pre-existing, #909). (5) `$PWD`-reached symlinked
 working directories are modelled (`go_getwd`) but not oracle-covered. Still
 routed to Go under #769: the setup/doctor/usage/memory/skills predicates.
