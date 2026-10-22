@@ -217,4 +217,36 @@ mod tests {
         let error = std::io::Error::from_raw_os_error(13);
         assert_eq!(errno_text(&error), "permission denied");
     }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn root_owned_symlink_is_trusted_but_user_owned_is_refused() {
+        use std::os::unix::fs::MetadataExt;
+
+        // macOS `/tmp` -> `private/tmp` is a root-owned system link.
+        assert_eq!(std::fs::symlink_metadata("/tmp").unwrap().uid(), 0);
+        let unique = format!("symbrain-store-dir-{}", std::process::id());
+        let through = format!("/tmp/{unique}/nested");
+        let real = std::path::PathBuf::from(format!("/private/tmp/{unique}"));
+        let result = safe_mkdir_all(through.as_bytes());
+        let created = real.join("nested").is_dir();
+        let _ = std::fs::remove_dir_all(&real);
+        assert_eq!(result, Ok(()));
+        assert!(
+            created,
+            "directory created beneath the resolved link target"
+        );
+
+        let root = std::env::temp_dir().join(unique);
+        std::fs::create_dir_all(root.join("real")).unwrap();
+        std::os::unix::fs::symlink(root.join("real"), root.join("link")).unwrap();
+        let refused = root.join("link/sub");
+        let result = safe_mkdir_all(refused.as_os_str().as_encoded_bytes());
+        let _ = std::fs::remove_dir_all(&root);
+        let message = result.unwrap_err();
+        assert!(
+            message.ends_with("too many levels of symbolic links"),
+            "{message}"
+        );
+    }
 }

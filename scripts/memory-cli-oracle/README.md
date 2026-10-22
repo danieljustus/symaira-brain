@@ -64,7 +64,7 @@ rewrites can invalidate admission before hydration; malformed JSON still errors,
 but exact Go diagnostics and null/type semantics are not an atomic concurrent
 mutation guarantee in this slice.
 
-`--family store_creation` (`creation_cases.py`, 34 Unix scenarios, fewer on Windows) replays missing-store creation and every directory/open failure shape for list, rules, query-log, set and delete and compares stdout, stderr, exit and the whole created tree with permission bits (directories `0700`, database `0600` under umask 022). `creation_controls.py` runs three real-process mutants (directory mode, stderr byte, exit status) that the family must reject through exactly their own field.
+`--family store_creation` (`creation_cases.py`, 48 Unix scenarios, 51 on macOS where the root-owned `/tmp` link is exercised, fewer on Windows) replays missing-store creation and every directory/open failure shape for list, rules, query-log, set and delete, plus `--db /dev/null` and a FIFO for all six verbs (Go never blocks on them; a CLI timeout is a mismatch) and compares stdout, stderr, exit and the whole created tree with permission bits (directories `0700`, database `0600` under umask 022). `creation_controls.py` runs three real-process mutants (directory mode, stderr byte, exit status) that the family must reject through exactly their own field.
 
 This increment proves parser/config and seeded read behavior. It does not certify
 governed writes, corrupt database error strings, configured Hamming prefilter, evidence JSONL decoding or MCP

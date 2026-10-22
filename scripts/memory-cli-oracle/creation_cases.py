@@ -6,6 +6,14 @@ random IDs normalised) and the complete filesystem tree: kind and permission
 bits of every created entry. Error-text scenarios depend on POSIX symlink and
 permission semantics and run on Unix only; Windows keeps the creation
 scenarios and compares tree kinds without POSIX mode bits.
+
+Non-regular database paths (`/dev/null`, a FIFO) never block in Go: SQLite
+opens them and fails in the first WAL pragma, which the shipped opener reports
+with its doubled `failed to open sqlite database` wording and the primary code.
+The root-owned-symlink scenarios address the temporary directory through its
+unresolved alias (macOS `/var` -> `private/var`), which the shipped
+`SafeMkdirAll` trusts because root owns the link; they are skipped where the
+temporary directory has no such alias.
 """
 import os
 from pathlib import Path
@@ -38,6 +46,27 @@ def _setup(root, kind):
     elif kind == "dir0777":
         (root / "wide").mkdir()
         (root / "wide").chmod(0o777)
+    elif kind == "fifo":
+        os.mkfifo(root / "fifo")
+    elif kind == "notsqlite":
+        (root / "plain.db").write_text("this is not a sqlite database, only text of header length")
+
+
+ALIAS_BASE = "/private/tmp"
+
+
+def root_owned_alias():
+    """True when `/tmp` is a root-owned symlink to `/private/tmp` (macOS)."""
+    if not POSIX or not os.path.islink("/tmp"):
+        return False
+    return os.lstat("/tmp").st_uid == 0 and os.path.realpath("/tmp") == ALIAS_BASE
+
+
+def alias_of(root):
+    """The unresolved spelling of `root` (below /private/tmp) through the link."""
+    text = str(root)
+    assert text.startswith(ALIAS_BASE + "/"), text
+    return "/tmp" + text[len(ALIAS_BASE):]
 
 
 def scenarios():
@@ -80,7 +109,19 @@ def scenarios():
         ("set-existing-parent-0755-kept", "dir0755", with_db(SET, "pub", "x.db"), True),
         ("set-existing-parent-0777-new-child-0700", "dir0777", with_db(SET, "wide", "sub", "x.db"), True),
         ("list-existing-parent-0777-new-child-0700", "dir0777", with_db(["list"], "wide", "sub", "x.db"), True),
+        ("query-log-existing-non-sqlite-file", "notsqlite", with_db(["query-log"], "plain.db"), True),
+        ("set-existing-non-sqlite-file", "notsqlite", with_db(SET, "plain.db"), True),
     ]
+    # Non-regular database paths: the shipped opener's doubled wording and code.
+    for verb, args in (("list", ["list"]), ("rules", ["rules"]), ("query-log", ["query-log"]),
+                       ("set", SET), ("delete", ["delete", "a"]), ("search", ["search", "x"])):
+        items.append((f"{verb}-database-is-dev-null", None,
+                      lambda root, args=args: [*args, "--db", "/dev/null"], True))
+        items.append((f"{verb}-database-is-fifo", "fifo", with_db(args, "fifo"), True))
+    if root_owned_alias():
+        for verb, args in (("set", SET), ("list", ["list"]), ("delete", ["delete", "a"])):
+            items.append((f"{verb}-through-root-owned-symlink", "alias",
+                          lambda root, args=args: [*args, "--db", alias_of(root) + "/n/x.db"], True))
     return [item for item in items if POSIX or not item[3]]
 
 
@@ -91,7 +132,8 @@ def _tree(root):
         if relative.split("/")[0] in ("config", "cache", "state", "absent-go"):
             continue
         status = path.lstat()
-        kind = "l" if stat.S_ISLNK(status.st_mode) else "d" if stat.S_ISDIR(status.st_mode) else "f"
+        kind = ("l" if stat.S_ISLNK(status.st_mode) else "d" if stat.S_ISDIR(status.st_mode)
+                else "p" if stat.S_ISFIFO(status.st_mode) else "f")
         # A symlink's own mode is filesystem noise (0755 on APFS, 0777 on ext4).
         mode = oct(stat.S_IMODE(status.st_mode)) if POSIX and kind != "l" else None
         entries[relative] = [kind, mode]
@@ -99,9 +141,18 @@ def _tree(root):
 
 
 def _observe(binary, args, root, env):
-    result = subprocess.run([str(binary), "memory", *args], cwd=root, env=env,
-                            capture_output=True, timeout=30)
-    text = lambda data: UUID.sub("<uuid>", data.decode("utf-8", "replace").replace(str(root), "<root>"))
+    try:
+        result = subprocess.run([str(binary), "memory", *args], cwd=root, env=env,
+                                capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:  # a FIFO open must never hang a CLI
+        return dict(exit="timeout", stdout="", stderr="", tree=_tree(root))
+    aliased = alias_of(root) if str(root).startswith(ALIAS_BASE + "/") else None
+
+    def text(data):
+        value = data.decode("utf-8", "replace").replace(str(root), "<root>")
+        if aliased:
+            value = value.replace(aliased, "<root>")
+        return UUID.sub("<uuid>", value)
     return dict(exit=result.returncode, stdout=text(result.stdout), stderr=text(result.stderr),
                 tree=_tree(root))
 
@@ -122,9 +173,10 @@ def run(go, rust, output, snapshot, isolated_env):
                 continue  # permission denial is meaningless for root
             observed = []
             for binary in (go, rust):
-                with tempfile.TemporaryDirectory(prefix="memory-cli-create-") as temporary:
+                base = ALIAS_BASE if setup == "alias" else None
+                with tempfile.TemporaryDirectory(prefix="memory-cli-create-", dir=base) as temporary:
                     root = Path(temporary).resolve()
-                    if setup:
+                    if setup and setup != "alias":
                         _setup(root, setup)
                     observed.append(_observe(binary, build(root), root, isolated_env(root)))
                     if POSIX:

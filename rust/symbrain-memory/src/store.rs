@@ -10,6 +10,24 @@ use crate::model::{Memory, Store, StoreError};
 use crate::rows::{row_memory, row_memory_score};
 const MAX_LIST_RESULTS: usize = 1000;
 
+/// Maps a failure of the shipped opener's connect phase (file open plus the
+/// busy-timeout, foreign-key and WAL pragmas its DSN applies on the first
+/// ping) to the opener's doubled wording with the primary SQLite code. Other
+/// errors keep their native shape.
+pub(crate) fn go_open_failure(error: rusqlite::Error) -> StoreError {
+    const OPEN: &str = "failed to open sqlite database";
+    match error {
+        rusqlite::Error::SqliteFailure(failure, _) => {
+            // The shipped driver prints the primary code's fixed description,
+            // not the connection message that may append the offending path.
+            let primary = failure.extended_code & 0xff;
+            let detail = rusqlite::ffi::code_to_str(primary);
+            StoreError::Io(format!("{OPEN}: {OPEN}: {detail} ({primary})"))
+        }
+        other => StoreError::Sql(other),
+    }
+}
+
 impl Store {
     /// Executes a bounded store operation.
     ///
@@ -23,14 +41,7 @@ impl Store {
                 "{OPEN}: failed to create database directory: {error}"
             ))
         })?;
-        let connection = Connection::open(path).map_err(|error| match error {
-            rusqlite::Error::SqliteFailure(failure, _)
-                if failure.code == rusqlite::ErrorCode::CannotOpen =>
-            {
-                StoreError::Io(format!("{OPEN}: {OPEN}: unable to open database file (14)"))
-            }
-            other => StoreError::Sql(other),
-        })?;
+        let connection = Connection::open(path).map_err(go_open_failure)?;
         let store = Self::configure(connection)?;
         #[cfg(unix)]
         crate::migration::secure_files(path)?;
@@ -310,5 +321,31 @@ mod tests {
             .set("local activity", "global", "note", metadata, false)
             .expect("set excluded memory");
         assert_eq!(entries(&store).len(), 2);
+    }
+}
+
+#[cfg(test)]
+mod open_failure_tests {
+    use super::go_open_failure;
+    use rusqlite::ffi;
+
+    #[test]
+    fn connect_phase_failures_use_the_shipped_doubled_wording() {
+        for (extended, text) in [
+            (ffi::SQLITE_CANTOPEN, "unable to open database file (14)"),
+            (ffi::SQLITE_IOERR_FSTAT, "disk I/O error (10)"),
+            (ffi::SQLITE_NOTADB, "file is not a database (26)"),
+        ] {
+            let error = rusqlite::Error::SqliteFailure(
+                ffi::Error::new(extended),
+                Some("connection message with /some/path".to_owned()),
+            );
+            assert_eq!(
+                go_open_failure(error).to_string(),
+                format!("failed to open sqlite database: failed to open sqlite database: {text}")
+            );
+        }
+        let other = go_open_failure(rusqlite::Error::QueryReturnedNoRows);
+        assert!(matches!(other, crate::model::StoreError::Sql(_)));
     }
 }

@@ -35,11 +35,15 @@ use rusqlite::{Connection, TransactionBehavior};
 use std::time::Duration;
 
 pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
-    conn.busy_timeout(Duration::from_secs(5))?;
+    // The shipped opener applies these three pragmas through its DSN on the
+    // first ping, so their failures carry its doubled open wording.
+    conn.busy_timeout(Duration::from_secs(5))
+        .map_err(crate::store::go_open_failure)?;
+    conn.execute_batch("PRAGMA foreign_keys=ON;")
+        .map_err(crate::store::go_open_failure)?;
     // WAL transitions have lock-upgrade paths that skip SQLite's busy handler.
     // Retry only that autocommit pragma within the same five-second budget.
-    conn.execute_batch("PRAGMA foreign_keys=ON;")?;
-    crate::wal_open::ensure_wal(&conn)?;
+    crate::wal_open::ensure_wal(&conn).map_err(crate::store::go_open_failure)?;
     conn.execute_batch("PRAGMA secure_delete=ON;")?;
     // Reserve the writer before inspecting schema. A deferred read snapshot
     // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and

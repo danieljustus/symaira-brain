@@ -751,23 +751,35 @@ now reproduces `sqlitekit.Open`'s `SafeMkdirAll(dir, 0700)` (`store_dir.rs`):
 root-to-leaf walk, mode `0700` under the process umask, existing directories
 untouched, non-root-owned symlinks refused with `too many levels of symbolic
 links`, non-directories with `not a directory`, and `mkdir PATH: <errno>` text
-from the platform `strerror` (lower-cased like Go's errno table). A database
-that cannot be opened reports Go's doubled `failed to open sqlite database:
-failed to open sqlite database: unable to open database file (14)`. Every
+from the platform `strerror` (lower-cased like Go's errno table). A failure in the
+connect phase (file open plus the busy-timeout, foreign-key and WAL pragmas the
+Go DSN applies on its first ping) reports Go's doubled `failed to open sqlite
+database: failed to open sqlite database: <fixed SQLite description> (<primary
+code>)`; later-phase errors (secure-delete, migrations) are not remapped. Every
 memory verb now prints Go's `symbrain memory <verb>: open memory database: ...`
 prefix instead of the earlier Rust-only `symbrain memory: open database:`.
-(3) `set`/`delete` on a database that does not exist (or is not a regular
-file) are native: a fresh store has no rows to hydrate, so no Go admission
-applies; directories get `0700` and the new database `0600`, as in Go.
+(3) `set`/`delete` (and the reads) on a database path that does not exist, or
+exists but is not a regular file, are native: a fresh store has no rows to
+hydrate, so no Go admission applies; directories get `0700` and the new
+database `0600`, as in Go. Non-regular existing paths (`/dev/null`, a FIFO)
+are opened by SQLite without blocking and fail in the first WAL pragma; the
+native opener now maps that to Go's doubled wording with the primary code
+(`unable to open database file (14)` for `/dev/null`, `disk I/O error (10)` for
+a FIFO on macOS), so no routing exception is needed. A directory as database
+path keeps `unable to open database file (14)`. A regular non-SQLite file under
+`set`/`query-log` now also prints Go's doubled `file is not a database (26)`.
 
 Evidence: `scripts/memory-cli-oracle/creation_cases.py` (new `store_creation`
 family of `replay.py`, part of `--family all`, so the existing three-OS
-`memory-cli-native.yml` replay runs it) compares 34 scenarios (Windows: the
-creation scenarios without POSIX modes) between the immutable Go `dcddcef0`
+`memory-cli-native.yml` replay runs it) compares 48 scenarios on Linux (51 on macOS, which adds three
+through the root-owned `/tmp` link; Windows: the creation scenarios without POSIX
+modes) between the immutable Go `dcddcef0`
 CLI and the Rust CLI with an absent `SYMBRAIN_GO_BINARY`: stdout, stderr, exit
-and the full created tree including permission bits. 34/34 match on macOS/APFS
-(local) and on Linux/ext4-overlay in Docker `rust:1.98-bookworm` as
-`--user 1000:1000` against the Go oracle cross-built for linux/arm64. Go
+and the full created tree including permission bits. The original 34 matched on macOS/APFS and on
+Linux/ext4-overlay in Docker `rust:1.98-bookworm` as `--user 1000:1000` against the
+Go oracle cross-built for linux/arm64; the review-fix additions (14 non-regular /
+non-SQLite scenarios, 3 macOS root-owned-symlink scenarios) are 51/51 on macOS with
+Go `go1.26.7` and are LINUX-UNVERIFIED locally (see residuals). Go
 itself does not differ between the two platforms except for a symlink's own
 mode (0755 APFS, 0777 ext4), which is excluded from the comparison; no per-OS
 fixtures are needed because the live Go replay runs on every runner. Before the
@@ -780,6 +792,24 @@ rewritten to 7) are each rejected by the replay through exactly their own field
 holds the Go-recorded bytes and modes natively for plain `cargo test`. The
 retired `new-file` delegation case of `write_boundaries.py` is removed because
 the route is now native. Contract row MEM-CLI-003.
+
+Review fix (#769 slice 4): `/dev/null` and a FIFO as `--db` were routed native
+by `routing.rs` (`!path.is_file()`) but printed bare SQLite text; the connect
+phase now maps to Go's wording and 12 scenarios (`<verb>-database-is-dev-null`,
+`<verb>-database-is-fifo` for list/rules/query-log/set/delete/search; Go never
+blocks on them, and the harness additionally treats a CLI timeout as a
+mismatch) plus `set`/`query-log` on a non-SQLite regular file are in the
+family. The root-owned-symlink trust branch of `safe_mkdir_all` (macOS
+`/tmp` -> `private/tmp`) is covered by three macOS-only scenarios and a macOS
+unit test; the mutant "refuse every symlink" is rejected by 3 scenarios.
+
+Ledger honesty: only the open/connect-phase failures listed above
+(`unable to open database file (14)`, `disk I/O error (10)`, `file is not a
+database (26)` for `set`/`query-log`) are proven byte-equal. Other failures are
+NOT claimed: `list`/`rules`/`delete`/`search` on an existing non-SQLite regular
+file still go to Go through the admission gate, busy/locked, read-only-media,
+later-phase (secure-delete, migration) and Windows error wording are not
+compared, and the FIFO/`/dev/null` codes were only observed on macOS.
 
 Local evidence only; exact-head native Linux/macOS/Windows CI is pending. The
 Windows branch of `safe_mkdir_all` is a code port of the Windows `SafeMkdirAll`

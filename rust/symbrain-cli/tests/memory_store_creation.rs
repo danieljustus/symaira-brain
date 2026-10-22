@@ -184,3 +184,42 @@ fn read_only_parent_reports_directory_and_file_errors() {
     );
     std::fs::set_permissions(&ro, std::fs::Permissions::from_mode(0o700)).expect("cleanup");
 }
+
+#[test]
+fn non_regular_database_paths_report_the_shipped_doubled_open_error() {
+    // Go opens FIFOs and `/dev/null` without blocking and fails in the first
+    // WAL pragma: macOS records `unable to open database file (14)` for
+    // `/dev/null` and `disk I/O error (10)` for a FIFO (the live Go replay
+    // compares the exact bytes on every runner); no verb may fall back to Go
+    // (absent here) or print a bare SQLite message.
+    let (_guard, root) = temp();
+    let fifo = root.join("fifo");
+    let status = Command::new("/usr/bin/mkfifo")
+        .arg(&fifo)
+        .status()
+        .expect("mkfifo");
+    assert!(status.success());
+    let wrap = "failed to open sqlite database: failed to open sqlite database: ";
+    for database in ["/dev/null", fifo.to_str().unwrap()] {
+        for verb in ["list", "rules", "query-log", "set", "delete", "search"] {
+            let mut args = vec![verb];
+            match verb {
+                "set" => args.extend(["hello", "--kind", "fact", "--staged"]),
+                "delete" => args.push("a"),
+                "search" => args.push("x"),
+                _ => {}
+            }
+            args.extend(["--db", database]);
+            let result = run(&root, &args);
+            let prefix = format!("symbrain memory {verb}: open memory database: {wrap}");
+            assert_eq!(result.code, 1, "{verb} {database}: {}", result.stderr);
+            assert_eq!(result.stdout, "", "{verb} {database}");
+            assert!(
+                result.stderr.starts_with(&prefix)
+                    && (result.stderr.ends_with(" (14)\n") || result.stderr.ends_with(" (10)\n")),
+                "{verb} {database}: {}",
+                result.stderr
+            );
+        }
+    }
+}
