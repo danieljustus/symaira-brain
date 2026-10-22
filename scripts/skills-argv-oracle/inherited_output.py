@@ -40,7 +40,13 @@ SOURCE_HASHES = {
     # (`Some(harness_cli::run(..))`), and render_json additionally escapes
     # U+2028/U+2029 like Go's encoding/json. Neither touches the early output
     # blocks or the inherited error text.
-    CLI: "9c970c6ec279f8c030eb8baadb1ed4b8c1be689d49851d0b863e1ee0ae5157be",
+    # Reviewed after #769 slice 4: the only change to symbrain-cli/src/lib.rs is
+    # the removed `"sync" if sync_cli::requires_go_fallback(rest) => None` arm
+    # (native sync covers every argument shape, so the always-false predicate
+    # and its Go-fallback route are gone). `run_native`'s early output return,
+    # `peek_command` and `is_output_command` are untouched and qualify() still
+    # compares them byte-for-byte with the parent.
+    CLI: "34d8435b6a095e151b6a723b22404a9788a55ba9484ebfd164737477f274dc66",
     CORE: GUARD_CORE_HASH,
     OUTPUT: "b0b663cacd0d38c47d8198550dce40af6af8f312733c9eaad5c2b67a9f4ab9c1",
 }
