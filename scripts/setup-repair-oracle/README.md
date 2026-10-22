@@ -1,5 +1,5 @@
 `run.sh OUTPUT_JSON` builds the complete production Go CLI from immutable
-`dcddcef0df5789123c7c9a7ebe6e01f10e941f2c` and the candidate Rust CLI, then
+`0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #765 base; CoreKit v0.18.2) and the candidate Rust CLI, then
 replays 201 local release-repair cases on Linux (179 on macOS, whose APFS
 cannot create the invalid-UTF-8 raw HOME paths; 177 on Windows). The original differential corpus and
 Go source stay unchanged. Existing release fixtures supply archives, publisher

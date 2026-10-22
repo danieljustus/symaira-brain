@@ -17,6 +17,13 @@ Rust bearbeitet Cores deterministisch. Go iteriert eine Map mit wechselnder Reih
 
 Fehlerdiagnosen des vollständigen typisierten Konfigurationsladers bleiben zunächst Go-verwaltet. Ein bestehender Eligibility-Gate verhindert die native Reparatur, wenn Go die Konfiguration ablehnen würde; dieser Gate führt keine Versionsprobe aus. Ebenso bleiben `setup --from-source` und dessen Modul-Lifecycle außerhalb dieses Schrittes. Eine Teilmigration als komplette Erledigung von #765 zu kennzeichnen würde den späteren sicheren Fallback-Abbau erschweren.
 
+> **Überholt am 2026-10-21 (#765):** Die Fehlerdiagnosen des typisierten Konfigurationsladers
+> sind inzwischen nativ (`setup_config.rs`, Syntaxtexte in `setup_config_toml.rs`) und gegen
+> den Go-Stand `0541e64a` (CoreKit v0.18.2) belegt; `setup --fix` und `doctor --fix` benötigen
+> dafür keinen Go-Eligibility-Gate mehr. Verbleibende Abweichungen des TOML-Dialekts stehen im
+> README von `scripts/doctor-repair-oracle/`. Der vorstehende Absatz bleibt als historischer
+> Stand erhalten.
+
 Die reproduzierbare Validierung liegt in `scripts/doctor-repair-oracle/` und `migration/evidence/doctor-repair-765/`. Drei absichtlich beschädigte tatsächliche CLI-Prozesse müssen am falschen Exitcode, fehlenden Header beziehungsweise fehlenden Core-Ereignis scheitern. Die CI behält positive und negative Belege auf allen drei Betriebssystemen auch bei Fehlern für 14 Tage. Merge und Issue-Abschluss setzen weiterhin die echten Annahmekriterien voraus.
 
 ## Native Windows lint and current main integration

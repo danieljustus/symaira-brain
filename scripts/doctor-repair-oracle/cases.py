@@ -9,8 +9,9 @@ class Case:
     args: tuple[str, ...] = ("doctor", "--fix")
     version: bytes | None = None
     provenance: bytes | str | None = None
-    config: str | None = None
-    project_config: str | None = None
+    config: str | bytes | None = None
+    config_directory: bool = False
+    project_config: str | bytes | None = None
     env: tuple[tuple[str, str], ...] = ()
     probe_exit: int = 0
     probe_wait: int = 0
@@ -165,4 +166,89 @@ def cases():
             result.append(Case(f"escaped-home-doctor-{lexical}-fault-{fault}",
                 args=("doctor", "--fix", "--force-release"), verifier=True,
                 escaping_home=escaped, home_lexical=lexical, bin_fault=fault))
+    result.extend(invalid_configuration_cases())
+    return result
+
+
+# Entry points whose Go implementation calls config.Load(); the managed
+# directory is present, so any write would be visible in the filesystem diff.
+CONFIG_ENTRIES = (
+    ("setup-fix", ("setup", "--fix")),
+    ("setup-fix-json", ("setup", "--fix", "--json")),
+    ("setup-plain", ("setup",)),
+    ("setup-source", ("setup", "--from-source", ".")),
+    ("setup-source-modules", ("setup", "--from-source", ".", "--modules", "browse")),
+    ("doctor-fix", ("doctor", "--fix")),
+    ("doctor-fix-json", ("doctor", "--fix", "--json")),
+    ("doctor-fix-force", ("doctor", "--fix", "--force-release")),
+)
+# (name, global config, project config, environment). Every row is rejected by
+# the Go loader; `config` may be bytes for non-UTF-8 documents.
+INVALID_CONFIGS = (
+    ("corrupt", "this is = = not toml\n", None, ()),
+    ("array-eof", "invalid = [", None, ()),
+    ("bool-int", "[modules]\nbrowse = 1\n", None, ()),
+    ("bool-string", "[modules]\nbrowse = \"maybe\"\n", None, ()),
+    ("bool-zero", "[modules]\nbrowse = 0\n", None, ()),
+    ("bool-empty-string", "[modules]\nbrowse = \"\"\n", None, ()),
+    ("scope-float", "[modules]\nscope = 1.5\n", None, ()),
+    ("profile-int", "default_profile = 3\n", None, ()),
+    ("audit-array", "[audit]\nenabled = []\n", None, ()),
+    ("audit-datetime", "[audit]\nenabled = 1979-05-27T07:32:00Z\n", None, ()),
+    ("audit-table", "[audit.enabled]\nx = 1\n", None, ()),
+    ("audit-aot", "[[audit.enabled]]\nx = 1\n", None, ()),
+    ("server-path-int", "[servers.vault]\nbinary_path = 5\n", None, ()),
+    ("threshold-string", "[patterns]\npromotion_threshold = \"abc\"\n", None, ()),
+    ("threshold-overflow", "[patterns]\npromotion_threshold = \"99999999999999999999\"\n", None, ()),
+    ("field-order", "[patterns]\npromotion_threshold = \"a\"\n[audit]\nenabled = 3\n", None, ()),
+    ("project-corrupt", None, "x = = 1\n", ()),
+    ("project-type", "[audit]\nenabled = true\n", "[modules]\nbrowse = []\n", ()),
+    ("env-bool", None, None, (("SYMBRAIN_MODULES_BROWSE", "maybe"),)),
+    ("env-empty-bool", None, None, (("SYMBRAIN_AUDIT_ENABLED", ""),)),
+    ("env-int", None, None, (("SYMBRAIN_PATTERNS_PROMOTION_THRESHOLD", "x"),)),
+    ("bad-utf8", b"a = \"\xff\"\n", None, ()),
+    ("utf16", b"\xff\xfea\x00 \x00=\x00 \x001\x00\n\x00", None, ()),
+    ("nul", b"a = 1\x00\n", None, ()),
+    ("syntax-no-value", "[modules]\nbrowse =\n", None, ()),
+    # Explicit CRLF documents. The Go lexer takes `\r` as the line break, so the
+    # diagnostics name '\r' and some line numbers shift (even to line 0); the
+    # harness writes these bytes verbatim so every OS replays the same input.
+    ("crlf-syntax-no-value", b"[modules]\r\nbrowse =\r\n", None, ()),
+    ("crlf-table-unclosed", b"[modules\r\nbrowse = true\r\n", None, ()),
+    ("crlf-bare-key", b"[modules]\r\nbrowse\r\n", None, ()),
+    ("crlf-digit-expected", b"[patterns]\r\npromotion_threshold = +\r\n", None, ()),
+    ("crlf-unterminated-string", b"default_profile = \"abc\r\n", None, ()),
+    ("crlf-project-no-value", None, b"[modules]\r\nbrowse =\r\n", ()),
+    ("duplicate-key", "[a]\nb = 1\nb = 2\n", None, ()),
+)
+
+
+def invalid_configuration_cases():
+    result = []
+    for entry, args in CONFIG_ENTRIES:
+        for name, config, project, env in INVALID_CONFIGS:
+            result.append(Case(f"config-error-{entry}-{name}", args=args, config=config,
+                               project_config=project, env=env))
+        result.append(Case(f"config-error-{entry}-directory", args=args, config_directory=True))
+        # Go reports the failure without creating the managed directory.
+        result.append(Case(f"config-error-{entry}-no-managed-dir", args=args, config="[bad config",
+                           all_missing=True))
+    # Ordering: argument/root diagnostics precede configuration loading.
+    result.extend((
+        Case("config-order-source-not-directory", args=("setup", "--from-source", "missing-root"), config="[bad config"),
+        Case("config-order-source-fix", args=("setup", "--from-source", ".", "--fix"), config="[bad config"),
+        Case("config-order-modules-without-source", args=("setup", "--modules", "browse"), config="[bad config"),
+        Case("config-order-unknown-module-after-load", args=("setup", "--from-source", ".", "--modules", "bogus"),
+             config="[bad config"),
+        # Valid-configuration controls: the same entry points keep working.
+        Case("config-control-unknown-module", args=("setup", "--from-source", ".", "--modules", "bogus")),
+        Case("config-control-unknown-key", args=("setup", "--from-source", ".", "--modules", "bogus"),
+             config="[bogus]\nx = 1\n"),
+        Case("config-control-setup-fix", args=("setup", "--fix")),
+        Case("config-control-setup-fix-false-clears-true", args=("setup", "--fix", "--json"),
+             config="[modules]\nbrowse = true\n", project_config="[modules]\nbrowse = false\n"),
+        Case("config-control-crlf-valid", args=("setup", "--fix", "--json"),
+             config=b"[modules]\r\nbrowse = true\r\n", project_config=b"[modules]\r\nbrowse = false\r\n"),
+        Case("config-control-doctor-fix-utf8-bom", config=b"\xef\xbb\xbf[modules]\nbrowse = false\n"),
+    ))
     return result

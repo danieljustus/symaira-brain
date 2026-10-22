@@ -142,7 +142,7 @@ def cases():
             legacy.setup_correct_managed_binaries(root, env)
             path = Path(env["XDG_CONFIG_HOME"]) / 'symbrain/config.toml'
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(text)
+            path.write_bytes(text.encode())  # no platform newline translation
         result.append(legacy.Case(f"repair-module-config-{index}",
             ("setup", "--fix", "--allow-unsigned", "--json"), setup=configured, mutating=True))
     for json_out in (False,True):
@@ -171,6 +171,10 @@ def cases():
 
 
 def main():
+    # Re-exec through the external-storage wrapper here, not inside
+    # legacy.main(): its own re-exec would restart rust-differential.py and
+    # replay the legacy suite instead of this corpus, then exit 0 with no report.
+    legacy.ensure_external_environment(__file__)
     if len(sys.argv) != 4:
         raise SystemExit("usage: replay.py GO_BINARY RUST_BINARY REPORT_JSON")
     go, rust, report = sys.argv[1:]
@@ -236,7 +240,7 @@ def main():
     code = legacy.main()
     assert len(observations) == 2 * len(selected), "incomplete process replay"
     data = {
-        "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+        "go_oracle_ref": "0541e64a36d83bac8e5e4f8c4136033c03db83ae",
         "candidate_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "candidate_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT)),
         "runtime": platform.platform(), "total": len(selected), "exit": code,

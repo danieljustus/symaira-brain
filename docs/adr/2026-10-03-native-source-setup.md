@@ -59,7 +59,7 @@ abgelehnter nativer Build darf niemals still auf historische Go-Quellen downgrad
 ## Belege und Grenzen
 
 `scripts/setup-source-oracle/run.sh` baut den vollständigen unveränderten Go-CLI
-von `dcddcef0` und vergleicht echte CLI-Prozesse. Private native Git-/Go-/Swift-
+von `0541e64a` (#765-Basis, CoreKit v0.18.2) und vergleicht echte CLI-Prozesse. Private native Git-/Go-/Swift-
 Fixture-Executables erfassen Tool-argv, cwd und CGO. Ein zusätzlicher Browse-Fall
 baut mit dem tatsächlichen Go-SDK einen eigenen dependency-free Worker; dessen
 installierte Version und Payload-Hash werden geprüft. Der gemeinsame private
