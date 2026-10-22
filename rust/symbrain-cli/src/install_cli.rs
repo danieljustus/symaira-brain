@@ -523,6 +523,19 @@ fn go_mkdir_all(path: &Path) -> Result<(), (PathBuf, io::Error)> {
     fs::create_dir_all(path).map_err(|error| (path.to_path_buf(), error))
 }
 
+/// The directory the operating system resolves a cleaned project root to,
+/// following symlinks like Go's plain `os` calls. Windows keeps the cleaned
+/// path (a verbatim `\\?\` prefix would change the capability anchor).
+#[cfg(unix)]
+fn physical_root(root: &Path) -> io::Result<PathBuf> {
+    fs::canonicalize(root)
+}
+
+#[cfg(not(unix))]
+fn physical_root(root: &Path) -> io::Result<PathBuf> {
+    Ok(root.to_path_buf())
+}
+
 /// Opens the existing config through the retained capability. A project root
 /// is resolved like Go's `os.ReadFile` does: lexically cleaned, symlinks
 /// followed by the operating system.
@@ -531,7 +544,7 @@ fn open_existing(
 ) -> io::Result<(Option<AtomicFile>, Option<symbrain_harness::FileSnapshot>)> {
     let location = &target.location;
     let trusted_root = match &target.project_root {
-        Some(root) => match fs::canonicalize(root) {
+        Some(root) => match physical_root(root) {
             Ok(physical) => physical,
             Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok((None, None)),
             Err(error) => return Err(error),
@@ -579,7 +592,7 @@ fn open_for_create(
                 );
                 return None;
             }
-            fs::canonicalize(root).unwrap_or_else(|_| root.clone())
+            physical_root(root).unwrap_or_else(|_| root.clone())
         }
         None => location.trusted_root.clone(),
     };
