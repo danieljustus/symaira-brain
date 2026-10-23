@@ -133,6 +133,17 @@ impl Parser<'_> {
             .ok_or_else(|| EOF_MESSAGE.to_owned())
     }
 
+    /// Peek inside a token whose scanner state rejects the trailing space that
+    /// Go's `scanner.eof()` feeds at end of input (`s.step(s, ' ')`): end of
+    /// input there reports `invalid character ' ' <context>` instead of
+    /// `unexpected end of JSON input`.
+    fn peek_in(&self, context: &str) -> Result<u8, String> {
+        self.bytes
+            .get(self.pos)
+            .copied()
+            .ok_or_else(|| format!("invalid character ' ' {context}"))
+    }
+
     fn key(&mut self) -> Result<String, String> {
         self.skip_ws();
         if self.peek()? != b'"' {
@@ -150,7 +161,7 @@ impl Parser<'_> {
     fn hex4(&mut self) -> Result<u32, String> {
         let mut value = 0;
         for _ in 0..4 {
-            let byte = self.peek()?;
+            let byte = self.peek_in("in \\u hexadecimal character escape")?;
             let Some(digit) = char::from(byte).to_digit(16) else {
                 return self.fail("in \\u hexadecimal character escape");
             };
@@ -172,7 +183,7 @@ impl Parser<'_> {
                 }
                 b'\\' => {
                     self.pos += 1;
-                    let escape = self.peek()?;
+                    let escape = self.peek_in("in string escape code")?;
                     self.pos += 1;
                     match escape {
                         b'"' => out.push('"'),
@@ -235,7 +246,7 @@ impl Parser<'_> {
     }
 
     fn need_digit(&mut self, context: &str) -> Result<(), String> {
-        if self.peek()?.is_ascii_digit() {
+        if self.peek_in(context)?.is_ascii_digit() {
             self.pos += 1;
             Ok(())
         } else {
@@ -246,7 +257,7 @@ impl Parser<'_> {
     fn number(&mut self) -> Result<(), String> {
         if self.bytes[self.pos] == b'-' {
             self.pos += 1;
-            if !self.peek()?.is_ascii_digit() {
+            if !self.peek_in("in numeric literal")?.is_ascii_digit() {
                 return self.fail("in numeric literal");
             }
         }
@@ -274,11 +285,9 @@ impl Parser<'_> {
     fn literal(&mut self, word: &'static str) -> Result<(), String> {
         self.pos += 1;
         for expected in word.bytes().skip(1) {
-            if self.peek()? != expected {
-                return self.fail(&format!(
-                    "in literal {word} (expecting '{}')",
-                    char::from(expected)
-                ));
+            let context = format!("in literal {word} (expecting '{}')", char::from(expected));
+            if self.peek_in(&context)? != expected {
+                return self.fail(&context);
             }
             self.pos += 1;
         }
@@ -521,6 +530,7 @@ fn decode_entry(value: &Json, entry: &mut Entry, first_error: &mut Option<String
         Json::Object(items) => items,
         other => return fail(type_error(other, ENTRY_TYPE)),
     };
+    let mut args = ArgsSlice::default();
     for (key, value) in items {
         let Some((name, field)) = match_field(key) else {
             continue;
@@ -540,16 +550,17 @@ fn decode_entry(value: &Json, entry: &mut Entry, first_error: &mut Option<String
                 }
             }
             Field::Args => match value {
-                Json::Null => entry.args.clear(),
+                Json::Null => args.set_nil(),
                 Json::Array(items) => {
-                    entry.args.clear();
-                    for item in items {
+                    for (index, item) in items.iter().enumerate() {
+                        let slot = args.expose(index);
                         match item {
-                            Json::Null => entry.args.push(String::new()),
-                            Json::String(text) => entry.args.push(text.clone()),
+                            Json::Null => {}
+                            Json::String(text) => slot.clone_from(text),
                             other => fail(field_error(other, name, "string")),
                         }
                     }
+                    args.finish(items.len());
                 }
                 other => fail(field_error(other, name, "[]string")),
             },
@@ -578,6 +589,51 @@ fn decode_entry(value: &Json, entry: &mut Entry, first_error: &mut Option<String
                 }
             }
         }
+    }
+    entry.args = args.into_vec();
+}
+
+/// A Go `[]string` as `encoding/json`'s `array()` sees it across duplicate
+/// `args` keys: decoding reuses the existing slice, so the length is reset and
+/// regrown over the old backing array. A `null` element keeps whatever the
+/// re-exposed slot held, and slots beyond the previous length keep their stale
+/// values (`SetLen`, `Grow` preserves `old[len:cap]`). `null` drops the
+/// backing array; an empty array replaces it with a fresh zero-capacity one.
+#[derive(Default)]
+struct ArgsSlice {
+    backing: Vec<String>,
+    len: usize,
+}
+
+impl ArgsSlice {
+    fn set_nil(&mut self) {
+        self.backing.clear();
+        self.len = 0;
+    }
+
+    /// `if i >= Cap { Grow }; if i >= Len { SetLen(i+1) }`, then `Index(i)`.
+    fn expose(&mut self, index: usize) -> &mut String {
+        if index >= self.backing.len() {
+            self.backing.resize(index + 1, String::new());
+        }
+        if index >= self.len {
+            self.len = index + 1;
+        }
+        &mut self.backing[index]
+    }
+
+    /// `if i < Len { SetLen(i) }; if i == 0 { MakeSlice(0, 0) }`.
+    fn finish(&mut self, count: usize) {
+        if count == 0 {
+            self.set_nil();
+        } else if count < self.len {
+            self.len = count;
+        }
+    }
+
+    fn into_vec(mut self) -> Vec<String> {
+        self.backing.truncate(self.len);
+        self.backing
     }
 }
 
@@ -631,6 +687,79 @@ mod tests {
         assert_eq!(
             error("{\"a\":\u{e9}}"),
             "invalid character 'Ã' looking for beginning of value"
+        );
+    }
+
+    #[test]
+    fn eof_inside_a_token_reports_the_scanner_space_context() {
+        let space = |context: &str| format!("invalid character ' ' {context}");
+        for (text, context) in [
+            ("{\"a\":\"\\", "in string escape code"),
+            ("{\"a\":\"\\u", "in \\u hexadecimal character escape"),
+            ("{\"a\":\"\\u12", "in \\u hexadecimal character escape"),
+            ("{\"a\":\"\\u123", "in \\u hexadecimal character escape"),
+            ("{\"a\":-", "in numeric literal"),
+            ("{\"a\":1.", "after decimal point in numeric literal"),
+            ("{\"a\":1e", "in exponent of numeric literal"),
+            ("{\"a\":1E+", "in exponent of numeric literal"),
+            ("{\"a\":t", "in literal true (expecting 'r')"),
+            ("{\"a\":tr", "in literal true (expecting 'u')"),
+            ("{\"a\":tru", "in literal true (expecting 'e')"),
+            ("{\"a\":f", "in literal false (expecting 'a')"),
+            ("{\"a\":fals", "in literal false (expecting 'e')"),
+            ("{\"a\":n", "in literal null (expecting 'u')"),
+            ("{\"a\":nu", "in literal null (expecting 'l')"),
+            ("{\"a\":nul", "in literal null (expecting 'l')"),
+            ("{\"a\\u00", "in \\u hexadecimal character escape"),
+        ] {
+            assert_eq!(error(text), space(context), "{text:?}");
+        }
+        // Complete tokens, strings and structure keep the generic message.
+        for text in [
+            "{\"a\":0",
+            "{\"a\":1",
+            "{\"a\":1.5",
+            "{\"a\":1e5",
+            "{\"a\":true",
+            "{\"a\":\"ab",
+            "{\"a\"",
+            "{\"a\":",
+            "{\"a\":[",
+        ] {
+            assert_eq!(error(text), EOF_MESSAGE, "{text:?}");
+        }
+    }
+
+    #[test]
+    fn duplicate_args_reuse_the_existing_slice_like_go() {
+        fn args(body: &str) -> Vec<String> {
+            let doc = format!("{{\"mcpServers\":{{\"s\":{{{body}}}}}}}");
+            match entries(&doc, "mcpServers") {
+                Outcome::Entries(map) => map["s"].args.clone(),
+                _ => panic!("decode failed: {body}"),
+            }
+        }
+        assert_eq!(args(r#""args":["a"],"ARGS":[null]"#), ["a"]);
+        assert_eq!(
+            args(r#""args":["a","b","c"],"args":["x"],"args":[null,null]"#),
+            ["x", "b"]
+        );
+        assert_eq!(
+            args(r#""args":["a","b"],"args":["x"],"args":["y",null,null]"#),
+            ["y", "b", ""]
+        );
+        assert_eq!(args(r#""args":["a"],"args":null,"args":[null]"#), [""]);
+        assert_eq!(
+            args(r#""args":["a","b"],"args":[],"args":[null,null]"#),
+            ["", ""]
+        );
+        assert_eq!(
+            args(r#""args":["a","b","c"],"args":[null,"y"],"args":[null,null,null,null]"#),
+            ["a", "y", "c", ""]
+        );
+        assert_eq!(
+            args(r#""args":["a","b"],"args":null"#),
+            Vec::<String>::new()
         );
     }
 

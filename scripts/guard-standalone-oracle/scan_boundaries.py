@@ -6,10 +6,15 @@ handler and the native binary for `--format=json` and `--format=table`, and
 compares stdout, stderr, exit and file state.  Go ranges over a map when it
 reports per-entry findings, so the order of the finding lines after the
 `symguard scan: N finding(s)` header is not stable between Go runs; those
-lines are compared as a sorted multiset (the only normalisation).
+lines are compared as a sorted multiset (the only normalisation).  Only the
+lines Go emits from a map range (`server "..." is missing ...` / `has unknown
+type ...`) are sorted, and only within a run of consecutive such lines; the
+source-level finding lines (parse errors, `config file not found`) keep their
+order, which is the fixed source order.
 """
 import json
 import os
+import re
 from pathlib import Path
 import stat
 import subprocess
@@ -45,6 +50,13 @@ RESIDUAL_YAML = {
     'yaml-tab-indent': 'YAML syntax error wording',
     'yaml-multi-document': 'second YAML document: yaml.v3 reads the first, native rejects',
 }
+
+
+TRUNCATION_DOCUMENTS = [
+    ('value-kinds', b'{"mcpServers":{"s":{"command":"a\\u00e9\\ud83d\\ude00\\n\\"\\/","args":["x",null],'
+                    b'"env":{"K":"v"},"n":-1.5e+3,"m":0,"o":10.25E-2,"t":true,"f":false,"z":null}}}'),
+    ('escapes', b'{"Servers":true,"mcpServers":{"s":{"url":"u\\\\\\t\\b\\f\\r","type":"sse"},"t":[]}}'),
+]
 
 
 def j(body, key='mcpServers'):
@@ -97,6 +109,21 @@ def cases():
     add('field-duplicate-string-last-wins', j('"r":{"command":"a","command":"b"}'))
     add('field-duplicate-env-merges', j('"r":{"command":"c","env":{"A":"1"},"env":{"B":"2"}}'))
     add('field-duplicate-args-replaces', j('"r":{"command":"c","args":["a","b"],"args":["z"]}'))
+    # Go decodes a duplicate `args` into the existing slice: null elements keep the old
+    # slot, a regrown slice re-exposes stale backing slots, null drops the backing array.
+    for ident, args in [
+        ('null-element-keeps', '"args":["a"],"ARGS":[null]'),
+        ('stale-slots-reexposed', '"args":["a","b","c"],"args":["x"],"args":[null,null]'),
+        ('stale-slots-grow-past-len', '"args":["a","b"],"args":["x"],"args":["y",null,null]'),
+        ('null-drops-backing', '"args":["a"],"args":null,"args":[null]'),
+        ('empty-replaces-backing', '"args":["a","b"],"args":[],"args":[null,null]'),
+        ('null-then-longer', '"args":["a","b"],"args":null,"args":["x","y","z"]'),
+        ('shorter-then-null-mix', '"args":["a","b","c"],"args":[null,"y"],"args":[null,null,null,null]'),
+        ('three-way-case-folded', '"args":["a","b"],"Args":["x"],"ARGS":[null,"q",null]'),
+        ('type-error-element', '"args":["a"],"args":[1]'),
+        ('wrong-type-after-array', '"args":["a","b"],"args":"x"'),
+    ]:
+        add('field-duplicate-args-' + ident, j('"r":{"command":"c",' + args + '}'))
     add('field-duplicate-case-mixed', j('"r":{"command":"a","COMMAND":"b"}'))
     add('server-duplicate-name', j('"r":{"command":"a","args":["x"]},"r":{"url":"u"}'))
     add('server-names-sorted', j('"b":{"command":"1"},"a":{"command":"2"},"B":{"command":"3"},"é":{"command":"4"},"":{"command":"5"}'))
@@ -163,6 +190,28 @@ def cases():
         add(ident, text.encode())
     add('syntax-invalid-utf8-char', b'{"a":\xff}')
     add('syntax-after-comment-strip', b'{"mcpServers":{} // trailing\n')
+    # Go's scanner.eof() feeds a trailing space, so EOF inside a token is reported as
+    # `invalid character ' ' <context>`; structural/in-string EOF stays
+    # `unexpected end of JSON input`.  Every prefix of each document is compared.
+    for name, document in TRUNCATION_DOCUMENTS:
+        for cut in range(len(document)):
+            add('truncated-%s-%03d' % (name, cut), document[:cut])
+    for ident, text in [
+        ('minus', '{"a":-'), ('zero', '{"a":0'), ('digit', '{"a":1'), ('dot', '{"a":1.'),
+        ('fraction', '{"a":1.5'), ('exp', '{"a":1e'), ('exp-sign', '{"a":1e+'), ('exp-digit', '{"a":1e5'),
+        ('t', '{"a":t'), ('tr', '{"a":tr'), ('tru', '{"a":tru'), ('true', '{"a":true'),
+        ('f', '{"a":f'), ('fa', '{"a":fa'), ('fal', '{"a":fal'), ('fals', '{"a":fals'),
+        ('n', '{"a":n'), ('nu', '{"a":nu'), ('nul', '{"a":nul'), ('null', '{"a":null'),
+        ('backslash', '{"a":"\\'), ('u0', '{"a":"\\u'), ('u1', '{"a":"\\u1'),
+        ('u2', '{"a":"\\u12'), ('u3', '{"a":"\\u123'), ('u4', '{"a":"\\u1234'),
+        ('surrogate-pair-u', '{"a":"\\ud83d\\u'), ('surrogate-pair-u2', '{"a":"\\ud83d\\ude'),
+        ('key-backslash', '{"a\\'), ('key-u', '{"a\\u00'), ('in-string', '{"a":"abc'),
+        ('after-key', '{"a"'), ('after-colon', '{"a":'), ('after-value', '{"a":1'),
+        ('after-comma', '{"a":1,'), ('array-open', '{"a":['), ('array-comma', '{"a":[1,'),
+        ('literal-in-array', '{"a":[tru'), ('number-in-array', '{"a":[-'),
+        ('servers-tru', '{"Servers":tru'), ('servers-escape', '{"mcpServers":{"s":{"command":"a\\u00'),
+    ]:
+        add('truncated-token-' + ident, text.encode())
     # --- JSON type errors (Go UnmarshalTypeError, first error in document order) -------
     for ident, body in [
         ('type-servers-array', '"mcpServers":[]'),
@@ -280,13 +329,30 @@ def prepare(root, case):
     return env
 
 
+MAP_RANGED = re.compile(rb'^  \w+ \[[^\]]*\] .*: server ".*" (is missing both command and url|has unknown type .*)$')
+
+
+def order_map_ranged(body):
+    """Sort each run of consecutive map-ranged finding lines of one source; keep the rest in order."""
+    out, run = [], []
+    for line in body + [None]:
+        if line is not None and MAP_RANGED.match(line):
+            run.append(line)
+            continue
+        out.extend(sorted(run))
+        run = []
+        if line is not None:
+            out.append(line)
+    return out
+
+
 def split_findings(stderr):
-    """Return (header, sorted finding lines, rest) for a scan stderr stream."""
+    """Return (header, finding lines with map-ranged runs sorted, rest) for a scan stderr stream."""
     lines = stderr.split(b'\n')
     if lines and lines[0].startswith(b'symguard scan: ') and lines[0].endswith(b' finding(s)'):
         count = int(lines[0].split()[2])
         body = lines[1:1 + count]
-        return lines[0], sorted(body), lines[1 + count:]
+        return lines[0], order_map_ranged(body), lines[1 + count:]
     return None, None, lines
 
 
@@ -364,6 +430,8 @@ MUTANTS = [
     ('hide-parse-error', 'parse-error', 'syntax-bare-word'),
     ('case-sensitive-fields', 'field-case', 'field-case-insensitive'),
     ('accept-type-error', 'type-error', 'type-command-number'),
+    ('reorder-source-findings', 'source-order', 'syntax-bare-word'),
+    ('truncated-token-as-eof', 'eof-context', 'truncated-token-tru'),
 ]
 
 
@@ -383,6 +451,13 @@ def mutate(mode, stdout, stderr, code):
         return b'{\n  "servers": []\n}\n', stderr, code
     if mode == 'accept-type-error':
         return b'{\n  "servers": []\n}\n', b'', 0
+    if mode == 'reorder-source-findings':
+        lines = stderr.split(b'\n')
+        count = int(lines[0].split()[2])
+        return stdout, b'\n'.join(lines[:1] + lines[1:1 + count][::-1] + lines[1 + count:]), code
+    if mode == 'truncated-token-as-eof':
+        return stdout, stderr.replace(b"invalid character ' ' in literal true (expecting 'e')",
+                                      b'unexpected end of JSON input'), code
     raise AssertionError(mode)
 
 
@@ -449,6 +524,7 @@ def main():
                   binaries_sha256=dict(go=replay.digest(go.read_bytes()), native=replay.digest(native.read_bytes())),
                   results=rows,
                   limits=['finding lines are compared as a sorted multiset because Go ranges over a map',
+                          'only runs of consecutive map-ranged finding lines of one source are sorted; source-level lines keep order',
                           'YAML parser messages and unsupported YAML shapes: see disposition of yaml-* cases',
                           'native Linux/macOS/Windows CI still required'])
     report.write_text(json.dumps(output, indent=2) + '\n', encoding='utf-8')
