@@ -1649,6 +1649,125 @@ def setup_status_config_library_symlink(root: Path, env: dict[str, str]) -> None
 
 
 
+def managed_config_then(
+    mutate: Callable[[Path, dict[str, str]], None],
+    *,
+    library: bool = True,
+    base: bool = True,
+) -> Callable[[Path, dict[str, str]], None]:
+    """Relocated Go-generated managed install, then one extra hostile shape."""
+
+    def wrapped(root: Path, env: dict[str, str]) -> None:
+        with_managed_config(generate_managed_install, library=library, base=base)(root, env)
+        mutate(root, env)
+
+    return wrapped
+
+
+def _status_cfg_write(path: Path, body: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _write_text(path, body, encoding="utf-8")
+
+
+def _status_cfg_dir_as_config_toml(root: Path, env: dict[str, str]) -> None:
+    (root / "config/symskills/config.toml").mkdir(parents=True)
+
+
+def _status_cfg_dir_as_project_config(root: Path, env: dict[str, str]) -> None:
+    (root / "project/.symskills.toml").mkdir(parents=True)
+
+
+def _status_cfg_unreadable_dir(root: Path, env: dict[str, str]) -> None:
+    (root / "config/symskills").mkdir(parents=True)
+    (root / "config/symskills").chmod(0o000)
+
+
+def _status_cfg_dir_is_file(root: Path, env: dict[str, str]) -> None:
+    _status_cfg_write(root / "config/symskills", "not a directory\n")
+
+
+def _status_cfg_symlink_loop(root: Path, env: dict[str, str]) -> None:
+    (root / "config/symskills").mkdir(parents=True)
+    os.symlink("config.toml", root / "config/symskills/config.toml")
+
+
+def _status_cfg_dangling_symlink(root: Path, env: dict[str, str]) -> None:
+    (root / "config/symskills").mkdir(parents=True)
+    os.symlink("does-not-exist.toml", root / "config/symskills/config.toml")
+
+
+def _status_cfg_empty_config_dir(root: Path, env: dict[str, str]) -> None:
+    (root / "config/symskills").mkdir(parents=True)
+
+
+def _status_cfg_library_symlinked_ancestor(root: Path, env: dict[str, str]) -> None:
+    os.symlink(root / "alt", root / "alt-link")
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt-link/library")
+
+
+def _status_cfg_library_dotdot(root: Path, env: dict[str, str]) -> None:
+    (root / "alt/sub").mkdir()
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt/sub/../library")
+
+
+def _status_cfg_library_dotdot_through_symlink(root: Path, env: dict[str, str]) -> None:
+    (root / "alt/sub").mkdir()
+    os.symlink(root / "alt/sub", root / "lnk")
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "lnk/../library")
+    # `lnk/..` is `alt/sub/..` for the kernel: the relocated library is `alt/library`.
+
+
+def _status_cfg_library_dot_segment(root: Path, env: dict[str, str]) -> None:
+    # pathlib would drop a `.` element, so splice it in as text.
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt") + "/./library"
+
+
+def _status_cfg_library_trailing_slash(root: Path, env: dict[str, str]) -> None:
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt/library") + "/"
+
+
+def _status_cfg_library_mode_000(root: Path, env: dict[str, str]) -> None:
+    (root / STATUS_ALT_LIBRARY).chmod(0o000)
+
+
+def _status_cfg_base_symlinked_ancestor(root: Path, env: dict[str, str]) -> None:
+    os.symlink(root / "alt", root / "alt-link")
+    env["SYMSKILLS_BASE_DIR"] = str(root / "alt-link/base")
+
+
+def _status_cfg_home_unset(root: Path, env: dict[str, str]) -> None:
+    env.pop("HOME")
+
+
+def _status_cfg_home_empty(root: Path, env: dict[str, str]) -> None:
+    env["HOME"] = ""
+
+
+def _status_cfg_xdg_relative_home_config(root: Path, env: dict[str, str]) -> None:
+    env["XDG_CONFIG_HOME"] = "relative/config"
+    _status_cfg_write(root / "home/.config/symskills/config.toml", 'vcs = { enabled = false }\n')
+
+
+def _status_cfg_xdg_empty_home_config(root: Path, env: dict[str, str]) -> None:
+    env["XDG_CONFIG_HOME"] = ""
+    _status_cfg_write(root / "home/.config/symskills/config.toml", 'vcs = { enabled = false }\n')
+
+
+def _status_cfg_xdg_absolute_config_file(root: Path, env: dict[str, str]) -> None:
+    env["XDG_CONFIG_HOME"] = str(root / "xdg-alt")
+    _status_cfg_write(root / "xdg-alt/symskills/config.toml", 'vcs = { enabled = false }\n')
+
+
+def _status_cfg_xdg_dotdot_through_symlink(root: Path, env: dict[str, str]) -> None:
+    # Go cleans `lnk/../cfg` lexically to `cfg`; the kernel resolves it to
+    # `deep/cfg`. Only the lexical spelling holds a config file.
+    (root / "deep/sub").mkdir(parents=True)
+    os.symlink(root / "deep/sub", root / "lnk")
+    env["XDG_CONFIG_HOME"] = str(root / "lnk/../cfg")
+    _status_cfg_write(root / "cfg/symskills/config.toml", 'vcs = { enabled = false }\n')
+
+
+
 @dataclass(frozen=True)
 class Case:
     name: str
@@ -3236,6 +3355,12 @@ CASES = (
         expect_fallback=True,
     ),
     Case(
+        "skills_status_config_fallback_relative_clean_library",
+        ("skills", "status", "--target", "opencode"),
+        setup=with_env(generate_managed_install, SYMSKILLS_LIBRARY_DIR="alt/library"),
+        expect_fallback=True,
+    ),
+    Case(
         "skills_status_config_fallback_empty_library_value",
         ("skills", "status", "--target", "opencode"),
         setup=with_env(generate_managed_install, SYMSKILLS_LIBRARY_DIR=""),
@@ -3280,6 +3405,186 @@ CASES = (
         ("skills", "status", "--target", "opencode", "--scope", "bogus"),
         setup=with_env(None, SYMSKILLS_LIBRARY_DIR="{root}/alt/library"),
         expect_fallback=True,
+    ),
+    # Probe/override shapes in which Go is not on a plain "does not exist"
+    # path (the whole config is dropped for the defaults) or in which the Rust
+    # install layer would fail where Go succeeds: all stay on Go.
+    Case(
+        "skills_status_config_fallback_config_toml_is_directory_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_dir_as_config_toml),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_project_config_is_directory",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(_status_cfg_dir_as_project_config),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_config_dir_is_file_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_dir_is_file),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_config_symlink_loop_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_symlink_loop),
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_library_symlinked_ancestor_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_library_symlinked_ancestor, base=True),
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_base_symlinked_ancestor_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_base_symlinked_ancestor),
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_library_dotdot_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_library_dotdot),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_library_dotdot_through_symlink_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_library_dotdot_through_symlink),
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_library_dot_segment",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(_status_cfg_library_dot_segment),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_library_trailing_slash",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(_status_cfg_library_trailing_slash),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_home_unset_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_home_unset),
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_home_empty",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(_status_cfg_home_empty),
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_default_home_unset_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=_status_cfg_home_unset,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_default_home_unset_no_target",
+        ("skills", "status"),
+        setup=_status_cfg_home_unset,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_xdg_relative_home_config_file",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_xdg_relative_home_config),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_xdg_empty_home_config_file",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(_status_cfg_xdg_empty_home_config),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_xdg_absolute_config_file_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_xdg_absolute_config_file),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_fallback_xdg_dotdot_through_symlink_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_xdg_dotdot_through_symlink),
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    # Absences Go skips (ENOENT through `os.Stat`) stay native and
+    # byte-identical, including relative/empty XDG_CONFIG_HOME which Go ignores.
+    Case(
+        "skills_status_config_env_config_dir_without_file_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_empty_config_dir),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_dangling_config_symlink_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(_status_cfg_dangling_symlink),
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_env_xdg_relative_ignored_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(lambda root, env: env.__setitem__("XDG_CONFIG_HOME", "relative/config")),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_xdg_empty_ignored",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(lambda root, env: env.__setitem__("XDG_CONFIG_HOME", "")),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_xdg_unset_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(lambda root, env: env.pop("XDG_CONFIG_HOME")),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_xdg_absolute_missing_dir_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(lambda root, env: env.__setitem__("XDG_CONFIG_HOME", str(root / "no-such-config"))),
+        native=True, read_only=True,
+    ),
+    # Privilege-dependent shapes (chmod 000 does not restrict root).
+    *(
+        (
+            Case(
+                "skills_status_config_fallback_unreadable_config_dir_json",
+                ("skills", "status", "--target", "opencode", "--json"),
+                setup=managed_config_then(_status_cfg_unreadable_dir),
+                expect_fallback=True,
+                posix_only=True,
+            ),
+            Case(
+                "skills_status_config_fallback_library_mode_000_json",
+                ("skills", "status", "--target", "opencode", "--json"),
+                setup=managed_config_then(_status_cfg_library_mode_000),
+                expect_fallback=True,
+                posix_only=True,
+            ),
+        )
+        if hasattr(os, "geteuid") and os.geteuid() != 0
+        else ()
     ),
 )
 def materialize_argv(argv: tuple[str | bytes, ...], root: Path) -> tuple[str | bytes, ...]:

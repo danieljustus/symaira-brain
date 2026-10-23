@@ -163,6 +163,13 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             if !matches!(scope.as_str(), "user" | "project") {
                 return true;
             }
+            if !go_home_defined() {
+                // Go's `os.UserHomeDir` fails: `config.Load()` falls back to
+                // the defaults and the install scan exits 1 with
+                // `$HOME is not defined`, which native code would turn into
+                // an empty report.
+                return true;
+            }
             if has_dynamic_config()
                 && !(target.as_deref() == Some("opencode") && status_env_config().is_some())
             {
@@ -346,17 +353,118 @@ fn parse_skill_log_args(args: &[OsString]) -> Result<SkillLogArgs, &'static str>
 /// either reads (`LIBRARY_DIR`, `BASE_DIR`) or provably ignores.
 const STATUS_INERT_ENV: &[&str] = &["SYMSKILLS_RENDER_DIR", "SYMSKILLS_PROFILES_DIR"];
 
+/// Whether Go's `os.UserHomeDir` succeeds: `$HOME` (`%USERPROFILE%` on
+/// Windows) must be set and non-empty. Without it `config.Load()` and the
+/// install scan both fail in Go, so the report is Go's to produce.
+fn go_home_defined() -> bool {
+    let name = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
+    std::env::var_os(name).is_some_and(|value| !value.is_empty())
+}
+
+/// Whether `value` has a `.` or `..` path element. Go's `filepath.Join` cleans
+/// those lexically, while the kernel resolves `..` through symlinks, so the
+/// two spellings of one path can name different files.
+fn has_dot_segment(value: &str) -> bool {
+    value
+        .split(std::path::is_separator)
+        .any(|segment| segment == "." || segment == "..")
+}
+
+/// Whether `value` is already in `filepath.Clean` form: no `.`/`..` element,
+/// no empty element (doubled or trailing separator) other than the leading
+/// root separator.
+fn is_lexically_clean(value: &str) -> bool {
+    if has_dot_segment(value) {
+        return false;
+    }
+    let body = value.strip_prefix(std::path::is_separator).unwrap_or(value);
+    body.is_empty() || !body.split(std::path::is_separator).any(str::is_empty)
+}
+
+/// Windows path shapes where Rust's `Path::is_absolute` and Go's
+/// `filepath.IsAbs` disagree or that name devices rather than files: UNC and
+/// verbatim/device prefixes (`\\host\share`, `\\?\`, `\\.\`), drive-relative
+/// and rooted-without-drive paths, and reserved device names. They stay on Go.
+/// Pure so every platform exercises it.
+fn windows_path_needs_go(value: &str) -> bool {
+    let normalized = value.replace('/', "\\");
+    if normalized.starts_with("\\\\") {
+        return true;
+    }
+    let bytes = normalized.as_bytes();
+    let drive_absolute =
+        bytes.len() >= 3 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' && bytes[2] == b'\\';
+    if !drive_absolute {
+        return true;
+    }
+    normalized[3..].split('\\').any(|segment| {
+        let stem = segment
+            .split('.')
+            .next()
+            .unwrap_or("")
+            .trim_end_matches([' ', '\u{a0}'])
+            .to_ascii_uppercase();
+        matches!(
+            stem.as_str(),
+            "CON" | "PRN" | "AUX" | "NUL" | "CONIN$" | "CONOUT$"
+        ) || ((stem.starts_with("COM") || stem.starts_with("LPT"))
+            && stem.len() == 4
+            && stem.as_bytes()[3].is_ascii_digit()
+            && stem.as_bytes()[3] != b'0')
+    })
+}
+
+/// Go's `os.IsNotExist` for a stat error: plain `ENOENT` (`ERROR_FILE_NOT_FOUND`
+/// / `ERROR_PATH_NOT_FOUND` on Windows). `ENOTDIR`, `EACCES`, `ELOOP` and every
+/// other failure make Go's TOML decode fail instead of skipping the file.
+fn is_go_not_exist(error: &std::io::Error) -> bool {
+    #[cfg(unix)]
+    {
+        error.raw_os_error() == Some(2)
+    }
+    #[cfg(not(unix))]
+    {
+        error.kind() == std::io::ErrorKind::NotFound
+    }
+}
+
+/// `true` only when `os.Stat(path)` would report "does not exist" (following
+/// symlinks, so a dangling link is absent exactly as in Go).
+fn config_probe_absent(path: &std::path::Path) -> bool {
+    matches!(fs::metadata(path), Err(error) if is_go_not_exist(&error))
+}
+
 /// A config-file source (`config.toml` or `.symskills.toml`) that Go merges
-/// before the environment. Its TOML decoding stays Go-only.
-fn has_config_file() -> bool {
+/// before the environment, or any shape in which Go's probe of it is not a
+/// plain "does not exist".
+///
+/// Go's `configkit.mergeFile` skips a source only when `os.Stat` reports
+/// `ENOENT`; a directory, an unreadable or non-directory parent, a symlink loop
+/// or any other stat/decode error makes `config.Load()` fail, and the caller
+/// then replaces the whole config, environment overrides included, with the
+/// defaults. So the native path requires both probes to be a verified absence
+/// and every other outcome stays on Go; it also owns the TOML decoding.
+fn config_files_need_go() -> bool {
     // Go's `configkit.DefaultPath` honours `XDG_CONFIG_HOME` only when absolute.
-    let config_root = std::env::var_os("XDG_CONFIG_HOME")
+    let root = match std::env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
         .filter(|path| path.is_absolute())
-        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
-        .unwrap_or_else(|| PathBuf::from(".config"));
-    config_root.join("symskills/config.toml").is_file()
-        || current_project_dir().join(".symskills.toml").is_file()
+    {
+        Some(xdg) => xdg,
+        None => match symbrain_core::xdg::home_dir() {
+            Some(home) => home.join(".config"),
+            None => return true,
+        },
+    };
+    let text = root.to_string_lossy();
+    if has_dot_segment(&text) || (cfg!(windows) && windows_path_needs_go(&text)) {
+        return true;
+    }
+    let Ok(cwd) = std::env::current_dir() else {
+        return true;
+    };
+    !(config_probe_absent(&root.join("symskills/config.toml"))
+        && config_probe_absent(&cwd.join(".symskills.toml")))
 }
 
 /// Go `strconv.ParseBool`: the only spellings `SYMSKILLS_VCS_ENABLED` accepts.
@@ -371,23 +479,56 @@ fn go_parse_bool(value: &std::ffi::OsStr) -> bool {
 #[derive(Debug)]
 struct GoOnlyConfig;
 
-/// An absolute override directory that is not itself a symlink or a
-/// non-directory. Relative values resolve against the working directory in Go
-/// and a linked or special-file root is reported with cap-std diagnostics, so
-/// both stay on Go.
+/// Whether every existing component of `path` is a real directory the
+/// process can enter, and the final directory (when present) can be listed and
+/// traversed. A symlinked ancestor, a non-directory ancestor, a mode-000
+/// directory or any stat failure other than "absent" makes the Rust install
+/// layer fail where Go succeeds, so those paths stay on Go.
+fn override_dir_is_plain(path: &std::path::Path) -> bool {
+    let mut prefix = PathBuf::new();
+    let mut present = true;
+    for component in path.components() {
+        prefix.push(component);
+        if matches!(
+            component,
+            std::path::Component::Prefix(_) | std::path::Component::RootDir
+        ) {
+            continue;
+        }
+        match fs::symlink_metadata(&prefix) {
+            Ok(metadata) if metadata.is_dir() => {}
+            Err(error) if is_go_not_exist(&error) => {
+                present = false;
+                break;
+            }
+            _ => return false,
+        }
+    }
+    !present || (fs::read_dir(path).is_ok() && fs::metadata(path.join(".")).is_ok())
+}
+
+/// An absolute, lexically clean override directory whose existing ancestors
+/// are plain directories. Relative values resolve against the working
+/// directory in Go; `.`/`..`/doubled-separator spellings and symlinked
+/// ancestors resolve differently in the capability-based install layer; a
+/// linked or special-file root is reported with cap-std diagnostics; an
+/// unreadable directory is an error natively but not in Go. All stay on Go.
 fn status_override_dir(name: &str) -> Result<Option<PathBuf>, GoOnlyConfig> {
     let Some(value) = std::env::var_os(name) else {
         return Ok(None);
     };
-    let path = PathBuf::from(value);
-    if !path.is_absolute() {
+    let Some(text) = value.to_str() else {
+        return Err(GoOnlyConfig);
+    };
+    let path = PathBuf::from(&value);
+    if !path.is_absolute()
+        || !is_lexically_clean(text)
+        || (cfg!(windows) && windows_path_needs_go(text))
+        || !override_dir_is_plain(&path)
+    {
         return Err(GoOnlyConfig);
     }
-    match fs::symlink_metadata(&path) {
-        Ok(metadata) if metadata.is_dir() => Ok(Some(path)),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Some(path)),
-        _ => Err(GoOnlyConfig),
-    }
+    Ok(Some(path))
 }
 
 /// Library and base-snapshot directories configured purely through
@@ -411,7 +552,7 @@ struct StatusEnvConfig {
 /// native-only `SYMBRAIN_SKILLS_*` variables are not Go config, so all three
 /// stay on Go.
 fn status_env_config() -> Option<StatusEnvConfig> {
-    if has_config_file()
+    if config_files_need_go()
         || std::env::var_os("SYMSKILLS_CACHE_DIR").is_some()
         || std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
         || std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR").is_some()
@@ -459,7 +600,7 @@ fn has_dynamic_config() -> bool {
     {
         return true;
     }
-    has_config_file()
+    config_files_need_go()
 }
 
 /// Reports whether the native `skills list` scan has to stay on Go for this
@@ -1326,8 +1467,90 @@ fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<
 
 #[cfg(test)]
 mod tests {
-    use super::{current_project_dir, library_needs_go, target_status_missing_root_needs_go_at};
+    use super::{
+        current_project_dir, has_dot_segment, is_lexically_clean, library_needs_go,
+        override_dir_is_plain, target_status_missing_root_needs_go_at, windows_path_needs_go,
+    };
     use std::fs;
+
+    #[test]
+    fn dot_segments_and_lexical_cleanliness() {
+        for dotted in ["/a/../b", "/a/./b", "/a/..", "/a/.", "/.."] {
+            assert!(has_dot_segment(dotted), "{dotted}");
+            assert!(!is_lexically_clean(dotted), "{dotted}");
+        }
+        for clean in ["/", "/a", "/a/b", "/a/.hidden", "/a/..x/b", "/a/b.c"] {
+            assert!(!has_dot_segment(clean), "{clean}");
+            assert!(is_lexically_clean(clean), "{clean}");
+        }
+        for unclean in ["/a//b", "/a/b/", "//a"] {
+            assert!(!has_dot_segment(unclean), "{unclean}");
+            assert!(!is_lexically_clean(unclean), "{unclean}");
+        }
+    }
+
+    #[test]
+    fn windows_shapes_that_must_stay_on_go() {
+        for go_only in [
+            r"\\host\share",
+            r"\\host\share\dir",
+            r"\\?\C:\dir",
+            r"\\.\COM1",
+            "//host/share",
+            r"C:dir",
+            r"\dir",
+            "dir",
+            r"C:\NUL",
+            r"C:\dir\con.txt",
+            r"c:\dir\Aux",
+            r"C:\dir\COM1",
+            r"C:\dir\lpt9.log",
+            r"C:\dir\nul ",
+        ] {
+            assert!(windows_path_needs_go(go_only), "{go_only}");
+        }
+        for native in [
+            r"C:\Users\dev",
+            "C:/Users/dev",
+            r"d:\a\b.c",
+            r"C:\dir\COM0",
+            r"C:\dir\console",
+            r"C:\dir\com10",
+        ] {
+            assert!(!windows_path_needs_go(native), "{native}");
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn override_dir_requires_plain_ancestors() {
+        use std::os::unix::fs::{PermissionsExt, symlink};
+        let root = tempfile::tempdir().expect("temporary root");
+        let base = fs::canonicalize(root.path()).expect("canonical root");
+        let real = base.join("real");
+        fs::create_dir_all(real.join("lib")).expect("real library");
+        symlink(&real, base.join("link")).expect("symlink");
+        fs::write(base.join("file"), "x").expect("file");
+
+        assert!(override_dir_is_plain(&real.join("lib")));
+        assert!(override_dir_is_plain(&real.join("absent/deeper")));
+        assert!(!override_dir_is_plain(&base.join("link/lib")));
+        assert!(!override_dir_is_plain(&base.join("link")));
+        assert!(!override_dir_is_plain(&base.join("file")));
+        assert!(!override_dir_is_plain(&base.join("file/child")));
+
+        let locked = real.join("locked");
+        fs::create_dir(&locked).expect("locked dir");
+        fs::set_permissions(&locked, fs::Permissions::from_mode(0o000)).expect("chmod");
+        let readable = fs::read_dir(&locked).is_ok();
+        let plain = override_dir_is_plain(&locked);
+        let nested = override_dir_is_plain(&locked.join("child"));
+        fs::set_permissions(&locked, fs::Permissions::from_mode(0o755)).expect("restore");
+        if !readable {
+            assert!(!plain, "mode-000 directory");
+            assert!(!nested, "child of mode-000 directory");
+        }
+    }
 
     #[test]
     fn list_fallback_uses_cached_typed_inventory_issues() {

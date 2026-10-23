@@ -487,8 +487,8 @@ unqualified multi-target CLI fallback remain part of #764.
 
 `symbrain skills status --target opencode [--scope user|project]` is native when
 the only custom `symskills` config is environment variables: `SYMSKILLS_LIBRARY_DIR`
-and `SYMSKILLS_BASE_DIR` (absolute, an existing directory or absent, never a symlink or
-special file) move the library and the frozen base snapshots, and
+and `SYMSKILLS_BASE_DIR` (absolute, lexically clean, an existing directory or absent, with no symlinked
+ancestor) move the library and the frozen base snapshots, and
 `SYMSKILLS_RENDER_DIR`, `SYMSKILLS_PROFILES_DIR` and a valid
 `SYMSKILLS_VCS_ENABLED` bool are accepted because Go's status never reads them.
 Any of these variables makes the report exactly Go's bytes: the #621
@@ -499,25 +499,58 @@ mode) stays off. Go decodes `config.Load()` as defaults, `config.toml`,
 rather than being re-derived. `XDG_CONFIG_HOME` is now honoured only when
 absolute, like `configkit.DefaultPath`, for every skills verb's config-file probe.
 
-Still on Go for `skills status`: any `config.toml`/`.symskills.toml`;
-`SYMSKILLS_CACHE_DIR` (Go writes its status render cache there; native never does);
-relative, empty, symlinked or non-directory `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR`;
-empty or invalid `SYMSKILLS_VCS_ENABLED`; the native-only `SYMBRAIN_SKILLS_*`
-variables; every non-OpenCode target or unqualified multi-target scan with
-config; unknown scope; flag errors; and the previously documented marker/symlink
-states. Known, unchanged side-effect difference: Go status writes a
+Config probe and override hardening (review round 1). Go's `configkit.mergeFile`
+skips a config source only when `os.Stat` reports `ENOENT`; every other
+outcome (a directory, an unreadable or non-directory parent, a symlink loop) makes
+`config.Load()` fail and `loadSkillsEnv` replace the whole config, env overrides
+included, with the defaults. Native therefore requires both
+`$XDG_CONFIG_HOME|$HOME/.config/symskills/config.toml` and `./.symskills.toml` to be a
+verified `ENOENT` through `fs::metadata` (symlinks followed, so a dangling link is
+absent exactly as in Go; `ENOENT` is checked by errno on Unix); anything else, a
+`.`/`..` element in the config root (Go cleans those lexically, the kernel does
+not), an unresolvable home or an unreadable working directory stays on Go. This
+also hardens the default-config probe shared by `list`, `targets`, `doctor` and
+`sync`. A `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` override is native only if it is absolute,
+lexically clean (no `.`/`..`/empty element, no trailing separator), every existing
+ancestor is a real directory (no symlinked or non-directory ancestor, no stat
+failure other than `ENOENT`), and an existing leaf can be listed and traversed
+(the Rust install layer opens roots capability-style and fails where Go succeeds
+for a symlinked ancestor such as macOS `/tmp`, for `..` through a symlink and for a
+mode-000 directory). An undefined or empty `$HOME` (`%USERPROFILE%` on Windows)
+makes Go exit 1 (`scan installs: $HOME is not defined`), so `skills status` with
+no resolvable home is routed to Go for every target, with or without `SYMSKILLS_*`
+variables. On Windows any UNC/verbatim/device, drive-relative, rooted-without-drive or
+reserved-device-name path (`windows_path_needs_go`, a pure function unit-tested on every
+OS) stays on Go because `Path::is_absolute` and `filepath.IsAbs` disagree there.
+
+Still on Go for `skills status`: any `config.toml`/`.symskills.toml` and any config probe
+that is not a plain `ENOENT`; `SYMSKILLS_CACHE_DIR` (Go writes its status render cache
+there; native never does); relative, empty, symlinked, non-clean or non-directory
+`SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` and overrides below a symlinked or unreadable
+ancestor; empty or invalid `SYMSKILLS_VCS_ENABLED`; the native-only
+`SYMBRAIN_SKILLS_*` variables; every non-OpenCode target or unqualified multi-target
+scan with config; unknown scope; flag errors; and the previously documented
+marker/symlink states. Known, unchanged side-effect difference: Go status writes a
 `status-render` cache under the skills cache directory for managed installs;
 native status writes nothing.
 
-Evidence: 27 native cases and 13 must-fallback cases (`skills_status_config_*` in
-`scripts/rust-differential.py`) compare the Go binary (built with Go 1.26.7 from
+Evidence: 33 native cases and 34 must-fallback cases (`skills_status_config_*` in
+`scripts/rust-differential.py`; 67 in total, 2 of the fallback cases need a non-root
+user because they rely on `chmod 000`) compare the Go binary (built with Go 1.26.7 from
 base revision 90f0bbac6; this change touches no Go source) with the Rust binary. Native cases
 run Rust with `SYMBRAIN_GO_BINARY` unset and a Go-free `PATH`, and assert the fixture
 root (type, mode, size, mtime, link targets, content hashes) is unchanged;
 fallback cases assert the missing-fallback diagnostic when no Go route exists.
-Managed installs are genuine Go artifacts relocated verbatim. Ten source mutants
-(`scripts/skills-status-config-oracle/run.py --mutants`) must each fail the
-expected cases. Native three-OS CI at the candidate head remains required.
+Managed installs are genuine Go artifacts relocated verbatim. The 18 source mutants in
+`scripts/skills-status-config-oracle/run.py --mutants` (probe `is_file`, any-error-is-absent,
+symlink-following ancestor walk, unclean paths, unreadable leaf, HOME guard, XDG dot
+segment and relative XDG, among others) are each killed by the expected cases. Residuals: the Windows branches (`cfg!(windows)` guards, non-Unix `ENOENT`
+mapping) are covered by the pure-function unit tests and a `cfg` review only; the
+local `cargo check --target x86_64-pc-windows-msvc` could not run because
+`aws-lc-sys` needs a Windows C toolchain. HOME-undefined routing is applied to
+`skills status` only; `list`, `targets`, `doctor` and `sync` keep their previous
+(unverified-for-unset-`HOME`) routing. Native three-OS CI at the candidate head remains
+required.
 
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)

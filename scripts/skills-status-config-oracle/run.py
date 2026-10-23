@@ -33,6 +33,14 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "rust/symbrain-cli/src/skills_cli.rs"
 PREFIX = "skills_status_config_"
 
+# chmod 000 does not restrict root, so these cases only exist for an
+# unprivileged user; a mutant is then judged on its remaining expectations.
+UNPRIVILEGED_ONLY = {
+    "skills_status_config_fallback_unreadable_config_dir_json",
+    "skills_status_config_fallback_library_mode_000_json",
+}
+PRIVILEGED = hasattr(os, "geteuid") and os.geteuid() == 0
+
 # name -> (old, new, case names that must fail)
 MUTANTS = {
     "ignore-library-env": (
@@ -64,7 +72,7 @@ MUTANTS = {
         ["skills_status_config_fallback_cache_dir_json"],
     ),
     "accept-config-file": (
-        "    if has_config_file()\n        || std::env::var_os(\"SYMSKILLS_CACHE_DIR\")",
+        "    if config_files_need_go()\n        || std::env::var_os(\"SYMSKILLS_CACHE_DIR\")",
         "    if std::env::var_os(\"SYMSKILLS_CACHE_DIR\")",
         [
             "skills_status_config_fallback_config_file_json",
@@ -80,19 +88,82 @@ MUTANTS = {
         ],
     ),
     "accept-relative-path": (
-        "    if !path.is_absolute() {\n        return Err(GoOnlyConfig);\n    }\n",
-        "",
-        [
-            "skills_status_config_fallback_relative_library_json",
-            "skills_status_config_fallback_empty_library_value",
-        ],
+        "    if !path.is_absolute()\n        || !is_lexically_clean(text)",
+        "    if !is_lexically_clean(text)",
+        ["skills_status_config_fallback_relative_clean_library"],
     ),
     "accept-linked-library": (
-        "Ok(metadata) if metadata.is_dir() => Ok(Some(path)),",
-        "Ok(_) => Ok(Some(path)),",
+        "            Ok(metadata) if metadata.is_dir() => {}\n",
+        "            Ok(_) => {}\n",
         [
             "skills_status_config_fallback_library_symlink_json",
-            "skills_status_config_fallback_library_is_file",
+            "skills_status_config_fallback_library_symlinked_ancestor_json",
+        ],
+    ),
+    "follow-symlinked-ancestor": (
+        "        match fs::symlink_metadata(&prefix) {",
+        "        match fs::metadata(&prefix) {",
+        [
+            "skills_status_config_fallback_library_symlink_json",
+            "skills_status_config_fallback_library_symlinked_ancestor_json",
+            "skills_status_config_fallback_base_symlinked_ancestor_json",
+        ],
+    ),
+    "accept-unclean-path": (
+        "        || !is_lexically_clean(text)\n",
+        "",
+        [
+            "skills_status_config_fallback_library_dotdot_json",
+            "skills_status_config_fallback_library_dot_segment",
+            "skills_status_config_fallback_library_trailing_slash",
+        ],
+    ),
+    "accept-unreadable-library": (
+        "    !present || (fs::read_dir(path).is_ok() && fs::metadata(path.join(\".\")).is_ok())",
+        "    true",
+        ["skills_status_config_fallback_library_mode_000_json"],
+    ),
+    "is-file-config-probe": (
+        "    matches!(fs::metadata(path), Err(error) if is_go_not_exist(&error))",
+        "    !path.is_file()",
+        [
+            "skills_status_config_fallback_config_toml_is_directory_json",
+            "skills_status_config_fallback_project_config_is_directory",
+            "skills_status_config_fallback_config_dir_is_file_json",
+            "skills_status_config_fallback_config_symlink_loop_json",
+            "skills_status_config_fallback_unreadable_config_dir_json",
+        ],
+    ),
+    "any-probe-error-is-absent": (
+        "    matches!(fs::metadata(path), Err(error) if is_go_not_exist(&error))",
+        "    fs::metadata(path).is_err()",
+        [
+            "skills_status_config_fallback_config_dir_is_file_json",
+            "skills_status_config_fallback_config_symlink_loop_json",
+            "skills_status_config_fallback_unreadable_config_dir_json",
+        ],
+    ),
+    "missing-home-guard": (
+        "            if !go_home_defined() {\n                // Go's",
+        "            if false {\n                // Go's",
+        [
+            "skills_status_config_fallback_home_unset_json",
+            "skills_status_config_fallback_home_empty",
+            "skills_status_config_fallback_default_home_unset_json",
+            "skills_status_config_fallback_default_home_unset_no_target",
+        ],
+    ),
+    "xdg-dot-segment-accepted": (
+        "    if has_dot_segment(&text) || (cfg!(windows) && windows_path_needs_go(&text)) {",
+        "    if cfg!(windows) && windows_path_needs_go(&text) {",
+        ["skills_status_config_fallback_xdg_dotdot_through_symlink_json"],
+    ),
+    "xdg-relative-honoured": (
+        "        .filter(|path| path.is_absolute())\n    {\n        Some(xdg) => xdg,",
+        "    {\n        Some(xdg) => xdg,",
+        [
+            "skills_status_config_fallback_xdg_relative_home_config_file",
+            "skills_status_config_fallback_xdg_empty_home_config_file",
         ],
     ),
     "write-a-file": (
@@ -173,7 +244,14 @@ def main() -> int:
     if mutant_dir is None:
         return 0
     survivors = []
+    checked = 0
     for name, (old, new, expect) in MUTANTS.items():
+        if PRIVILEGED:
+            expect = [case for case in expect if case not in UNPRIVILEGED_ONLY]
+        if not expect:
+            print(f"MUTANT {name}: SKIPPED (needs an unprivileged user)")
+            continue
+        checked += 1
         binary = build_mutant(name, mutant_dir, old, new)
         mutated = differential(go, binary)
         output = mutated.stdout + mutated.stderr
@@ -192,7 +270,7 @@ def main() -> int:
     if survivors:
         print(f"FAIL: surviving mutants: {survivors}", file=sys.stderr)
         return 1
-    print(f"{len(MUTANTS)}/{len(MUTANTS)} mutants killed")
+    print(f"{checked}/{checked} mutants killed")
     return 0
 
 
