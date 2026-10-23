@@ -110,3 +110,11 @@ missing-parent Windows output is derived from the Go source; it is **not** cover
 Windows capture of this replay; the `guard-doctor-oracle` case `missing_client_parents` (which skips
 pre-creating the client directories) makes the Windows CI leg record Go's real bytes for the shared
 `symbrain guard doctor` handler, pending that CI run.
+
+**Scan discovery boundaries (#770 slice 2).** `scan_boundaries.py GO RUST REPORT` compares the actual
+`scan --format=json|table` processes for 172 client-config shapes (JSON syntax/type errors with Go's
+`encoding/json` wording, field-name folding, duplicate keys, invalid UTF-8, lone surrogates, HTML-escaped
+output, I/O errors, YAML). Finding lines are compared as a sorted multiset because Go ranges over a map;
+24 documented yaml.v3 shapes are executed as explicit residuals and never counted as matches. Six actual
+process mutants (server order, dropped finding, unescaped HTML, hidden parse error, case-sensitive
+fields, swallowed type error) must be rejected. `run.sh` writes `-scan-boundaries.json`.

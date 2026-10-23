@@ -30,4 +30,5 @@ python3 scripts/guard-standalone-oracle/doctor_boundaries.py "$go_binary" "$rust
 python3 scripts/guard-standalone-oracle/config_warnings.py "$go_binary" "$rust_binary" "${report%.json}-config-warnings.json"
 python3 scripts/guard-standalone-oracle/config_paths.py "$go_binary" "$rust_binary" "${report%.json}-config-paths.json"
 python3 scripts/guard-standalone-oracle/command_tree.py "$go_binary" "$rust_binary" "${report%.json}-command-tree.json" "$owned/go-source"
+python3 scripts/guard-standalone-oracle/scan_boundaries.py "$go_binary" "$rust_binary" "${report%.json}-scan-boundaries.json"
 python3 scripts/guard-standalone-oracle/windows_path_reference.py "${report%.json}-windows-path-reference.json"
