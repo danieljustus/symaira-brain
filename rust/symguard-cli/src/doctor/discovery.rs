@@ -3,7 +3,6 @@ use super::config::SpawnEntry;
 use crate::guard_scan::{self, guard_scan_config};
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
-use std::fs;
 use std::path::{Component, Path, PathBuf};
 
 #[derive(Clone, Debug)]
@@ -37,12 +36,13 @@ pub(super) fn discover_all() -> DiscoveryOutcome {
                 path.display()
             ))
         };
-        let data = match fs::read(&path) {
+        let data = match guard_scan::read_source(&path) {
             Ok(data) => data,
-            Err(error) if guard_scan::missing_source_is_silent(&error) => continue,
-            Err(error) => return unsupported(guard_scan::read_error_message(&path, &error)),
+            Err(failure) if guard_scan::missing_source_is_silent(&failure.error) => continue,
+            Err(failure) => return unsupported(guard_scan::read_error_message(&path, &failure)),
         };
-        // Parser wording is native; Go's JSON/YAML decoders word it differently (#770).
+        // JSON parse/decode wording is Go-exact (`guard_scan_json`); YAML wording stays a
+        // residual because yaml.v3 words its errors differently (#770).
         let entries = match guard_scan_config::parse_config(&data, source.key) {
             Ok(entries) => entries,
             Err(error) => return unsupported(error),

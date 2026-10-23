@@ -128,3 +128,66 @@ fn yaml_dependency_preserves_typed_fields_and_aliases() {
         assert!(error.starts_with("parse YAML:"));
     }
 }
+
+#[test]
+fn json_decode_follows_go_encoding_json() {
+    // Go: exact-or-folded field names, duplicate `env` objects merge, `null` clears.
+    let parsed = parse_config(
+        br#"{"mcpServers":{"s":{"COMMAND":"c","Env":{"A":"1"},"env":{"B":"2"},"arg\u017f":["x"]}}}"#,
+        "mcpServers",
+    )
+    .expect("folded fields");
+    assert_eq!(parsed["s"].command, "c");
+    assert_eq!(parsed["s"].args, ["x"]);
+    assert_eq!(parsed["s"].env.len(), 2);
+    let cleared = parse_config(
+        br#"{"mcpServers":{"s":{"command":"c","env":{"A":"1"},"env":null}}}"#,
+        "mcpServers",
+    )
+    .expect("null clears");
+    assert!(cleared["s"].env.is_empty());
+
+    // The first type error in document order wins, with Go's wording.
+    let error = parse_config(
+        br#"{"mcpServers":{"z":{"command":1},"a":{"url":2}}}"#,
+        "mcpServers",
+    )
+    .err()
+    .expect("type error");
+    assert_eq!(
+        error,
+        "parse \"mcpServers\": json: cannot unmarshal number into Go struct field Entry.command of type string"
+    );
+    let error = parse_config(br#"{"mcp":[]}"#, "mcp")
+        .err()
+        .expect("array root");
+    assert_eq!(
+        error,
+        "parse \"mcp\": json: cannot unmarshal array into Go value of type map[string]mcpcfgkit.Entry"
+    );
+    // Syntax errors beat type errors; trailing garbage is reported after the value.
+    let error = parse_config(br#"{"mcpServers":{"s":{"command":1}}} x"#, "mcpServers")
+        .err()
+        .expect("syntax error");
+    assert_eq!(
+        error,
+        "parse JSON: invalid character 'x' after top-level value"
+    );
+}
+
+#[test]
+fn json_inventory_is_html_escaped_like_go() {
+    assert_eq!(
+        go_html_escape("a<b>&\u{2028}\u{2029}é"),
+        "a\\u003cb\\u003e\\u0026\\u2028\\u2029é"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn directory_read_failure_is_a_read_error_with_go_errno_text() {
+    let dir = std::env::temp_dir();
+    let failure = read_source(&dir).expect_err("directory");
+    assert_eq!(failure.op, "read");
+    assert!(read_error_message(&dir, &failure).ends_with(": is a directory"));
+}
