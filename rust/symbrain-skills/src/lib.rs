@@ -4,7 +4,10 @@
 #![deny(missing_docs)]
 
 mod cap_root;
+pub mod context_profile;
+pub mod discover;
 mod encode;
+pub mod gotext;
 pub mod install;
 pub mod library;
 mod load;
@@ -18,6 +21,7 @@ mod target;
 pub mod targets_status;
 mod validation;
 pub mod variant;
+pub mod vcs;
 
 pub use load::{BundleLoader, load_bundle};
 pub use materialize::{Materialized, MaterializedFile, materialize, materialize_with_fault};

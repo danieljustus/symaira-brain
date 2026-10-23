@@ -17,12 +17,18 @@ pub(crate) const MEMORY_TOOLS: &[&str] = &[
     "query_log",
 ];
 pub(crate) const ACTIVITY_TOOLS: &[&str] = &["activity_search", "activity_get", "activity_status"];
+/// Go registration order of the eleven Skills tools.
 pub(crate) const SKILLS_TOOLS: &[&str] = &[
     "skills_list",
     "skills_inspect",
     "skills_validate",
+    "skills_profile_list",
+    "skills_profile_resolve",
     "skills_render_plan",
     "skills_install",
+    "skills_discover_sources",
+    "skills_history",
+    "skills_restore",
     "skills_targets_status",
 ];
 
@@ -52,6 +58,9 @@ fn schema(name: &str) -> Box<serde_json::value::RawValue> {
 
 fn listed(name: &str) -> ListedTool {
     if let Some(tool) = super::memory_catalog::listed(name) {
+        return tool;
+    }
+    if let Some(tool) = super::skills_catalog::listed(name) {
         return tool;
     }
     let read = !matches!(

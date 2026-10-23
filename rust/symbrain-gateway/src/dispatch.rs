@@ -22,6 +22,15 @@ impl Gateway {
                 Err(message) => return Ok(self.invalid_call(id, started, message)),
             };
             if self.skills_tool_names.iter().any(|tool| tool == &name) {
+                if super::embedded::is_profile_or_versioning_tool(&name) {
+                    return self.handle_versioning_call(
+                        id,
+                        &name,
+                        raw_arguments.as_deref(),
+                        context,
+                        started,
+                    );
+                }
                 let mut fields = serde_json::Map::new();
                 fields.insert(
                     "arguments".to_string(),
@@ -139,6 +148,55 @@ impl Gateway {
         }
     }
 
+    fn handle_versioning_call(
+        &self,
+        id: Value,
+        name: &str,
+        raw: Option<&RawValue>,
+        context: DispatchContext<'_>,
+        started: Instant,
+    ) -> Result<GatewayResponse, GatewayError> {
+        let response = match Self::handle_skills_versioning(id.clone(), name, raw, context) {
+            Ok(response) => response,
+            Err(error) => GatewayResponse::success(id, tool_result(error.to_string(), true))?,
+        };
+        let audit_args = symbrain_mcp::raw_skills_arguments(raw)
+            .to_string()
+            .into_bytes();
+        self.audit_embedded_response(name, &response, &audit_args, started);
+        Ok(response)
+    }
+
+    fn audit_embedded_response(
+        &self,
+        name: &str,
+        response: &GatewayResponse,
+        audit_args: &[u8],
+        started: Instant,
+    ) {
+        let failed = response.error.is_some()
+            || response
+                .result
+                .as_ref()
+                .and_then(|raw| serde_json::from_str::<Value>(raw.get()).ok())
+                .and_then(|value| value.get("isError").and_then(Value::as_bool))
+                .unwrap_or(false);
+        let (server, tool, exposure) = self.audit_target(name);
+        let classification = symbrain_audit::Classification {
+            category: "tool".to_string(),
+            retryable: false,
+        };
+        self.audit_write(
+            &server,
+            &tool,
+            audit_args,
+            started,
+            if failed { "error" } else { "ok" },
+            &exposure,
+            failed.then_some(&classification),
+        );
+    }
+
     fn handle_embedded_call(
         &self,
         id: Value,
@@ -152,30 +210,10 @@ impl Gateway {
                 Ok(response) => response,
                 Err(error) => GatewayResponse::success(id, tool_result(error.to_string(), true))?,
             };
-        let failed = response.error.is_some()
-            || response
-                .result
-                .as_ref()
-                .and_then(|raw| serde_json::from_str::<Value>(raw.get()).ok())
-                .and_then(|value| value.get("isError").and_then(Value::as_bool))
-                .unwrap_or(false);
-        let (server, tool, exposure) = self.audit_target(name);
-        let classification = symbrain_audit::Classification {
-            category: "tool".to_string(),
-            retryable: false,
-        };
         let audit_args = params
             .get("arguments")
             .map_or_else(Vec::new, |value| value.to_string().into_bytes());
-        self.audit_write(
-            &server,
-            &tool,
-            &audit_args,
-            started,
-            if failed { "error" } else { "ok" },
-            &exposure,
-            failed.then_some(&classification),
-        );
+        self.audit_embedded_response(name, &response, &audit_args, started);
         Ok(response)
     }
 

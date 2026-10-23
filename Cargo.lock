@@ -1760,6 +1760,7 @@ dependencies = [
  "symbrain-policy",
  "symbrain-skills",
  "symbrain-usage",
+ "tempfile",
 ]
 
 [[package]]
@@ -1894,6 +1895,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "symbrain-harness",
+ "tar",
  "tempfile",
  "toml_edit",
  "yaml_serde",

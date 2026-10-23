@@ -1,19 +1,10 @@
 //! Full transport → gateway → ordered Skills outer-decoder regressions.
 //!
-//! Slice (a) of #764 wires the raw layer into the six Skills tools that main's
-//! gateway implements; the other five of Go's eleven are not exposed yet.
+//! Slice (a) of #764 wires the raw layer into the Skills tools; slice (b) makes
+//! all eleven of Go's tools native, so the whole catalog is exposed.
 use serde_json::Value;
 use std::io::Write;
 use std::process::{Command, Stdio};
-
-const IMPLEMENTED: [&str; 6] = [
-    "skills_list",
-    "skills_inspect",
-    "skills_validate",
-    "skills_render_plan",
-    "skills_install",
-    "skills_targets_status",
-];
 
 fn run(enabled: bool, tool: &str, arguments: &str, framed: bool) -> Vec<Value> {
     let call = format!(
@@ -136,14 +127,9 @@ fn enabled_and_disabled_catalog_retain_full_go_order_and_exposure() {
                 })
                 .collect();
             if enabled {
-                // Go registers eleven; main exposes the implemented six, in Go's
-                // relative order (the remaining five are slice (b)).
-                let implemented: Vec<_> = symbrain_mcp::SKILLS_TOOL_NAMES
-                    .iter()
-                    .copied()
-                    .filter(|name| IMPLEMENTED.contains(name))
-                    .collect();
-                assert_eq!(names, implemented);
+                // All eleven Go Skills tools are native now (slice (b) added the
+                // profile, discovery and history/restore tools), in Go's order.
+                assert_eq!(names, symbrain_mcp::SKILLS_TOOL_NAMES);
                 assert_eq!(replies[1]["result"]["isError"], false);
             } else {
                 assert!(names.is_empty());

@@ -194,8 +194,27 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
         },
         &loader,
     )?;
+    sync_selected(options, &statuses)
+}
+
+/// Reinstalls an already collected subset of status rows (the MCP restore
+/// path filters stale/harness-changed rows itself, exactly like Go's
+/// `install.Sync(stale, ...)`); `sync` is this function over every row.
+///
+/// # Errors
+/// Mirrors [`sync`]; per-row failures are reported as rows, not errors.
+pub fn sync_selected(
+    options: &SyncOptions,
+    statuses: &[super::InstallStatus],
+) -> Result<Vec<SyncResult>, SkillError> {
+    let scope = if options.scope.is_empty() {
+        "user".to_owned()
+    } else {
+        options.scope.clone()
+    };
+    let loader = BundleLoader::default();
     let mut results = Vec::new();
-    for status in statuses {
+    for status in statuses.iter().cloned() {
         if status.status == super::StatusKind::HarnessChanged {
             results.push(skipped(&status, "harness changed; use symskills pull"));
             continue;
