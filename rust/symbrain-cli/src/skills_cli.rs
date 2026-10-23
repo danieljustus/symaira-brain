@@ -138,8 +138,10 @@ fn current_project_dir() -> PathBuf {
 
 /// Keeps the native status slice limited to the `OpenCode` static contract.
 ///
-/// Custom config, other targets, and every dynamic target state stay on the Go
-/// implementation until their byte contract is independently frozen.
+/// Custom config files, other targets, and every dynamic target state stay on
+/// the Go implementation until their byte contract is independently frozen.
+/// The one custom-config shape replayed natively is the environment-only
+/// override of `skills status --target opencode` (see [`status_env_config`]).
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     match args.first().map(|arg| arg.to_string_lossy()) {
         Some(verb) if verb == "status" => {
@@ -158,7 +160,15 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             } else {
                 None
             };
-            if has_dynamic_config() || !matches!(scope.as_str(), "user" | "project") {
+            if !matches!(scope.as_str(), "user" | "project") {
+                return true;
+            }
+            if has_dynamic_config()
+                && !(target.as_deref() == Some("opencode") && status_env_config().is_some())
+            {
+                // Only the environment-only override shape of the OpenCode
+                // static contract is replayed natively (#770 residual
+                // fallback); every other custom-config shape stays on Go.
                 return true;
             }
             match target.as_deref() {
@@ -332,6 +342,106 @@ fn parse_skill_log_args(args: &[OsString]) -> Result<SkillLogArgs, &'static str>
     Ok(parsed)
 }
 
+/// Environment overrides of the Go `symskills` config that `skills status`
+/// either reads (`LIBRARY_DIR`, `BASE_DIR`) or provably ignores.
+const STATUS_INERT_ENV: &[&str] = &["SYMSKILLS_RENDER_DIR", "SYMSKILLS_PROFILES_DIR"];
+
+/// A config-file source (`config.toml` or `.symskills.toml`) that Go merges
+/// before the environment. Its TOML decoding stays Go-only.
+fn has_config_file() -> bool {
+    // Go's `configkit.DefaultPath` honours `XDG_CONFIG_HOME` only when absolute.
+    let config_root = std::env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .filter(|path| path.is_absolute())
+        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
+        .unwrap_or_else(|| PathBuf::from(".config"));
+    config_root.join("symskills/config.toml").is_file()
+        || current_project_dir().join(".symskills.toml").is_file()
+}
+
+/// Go `strconv.ParseBool`: the only spellings `SYMSKILLS_VCS_ENABLED` accepts.
+fn go_parse_bool(value: &std::ffi::OsStr) -> bool {
+    const SPELLINGS: &[&str] = &[
+        "1", "t", "T", "TRUE", "true", "True", "0", "f", "F", "FALSE", "false", "False",
+    ];
+    value.to_str().is_some_and(|text| SPELLINGS.contains(&text))
+}
+
+/// A shape native `skills status` cannot replay exactly.
+#[derive(Debug)]
+struct GoOnlyConfig;
+
+/// An absolute override directory that is not itself a symlink or a
+/// non-directory. Relative values resolve against the working directory in Go
+/// and a linked or special-file root is reported with cap-std diagnostics, so
+/// both stay on Go.
+fn status_override_dir(name: &str) -> Result<Option<PathBuf>, GoOnlyConfig> {
+    let Some(value) = std::env::var_os(name) else {
+        return Ok(None);
+    };
+    let path = PathBuf::from(value);
+    if !path.is_absolute() {
+        return Err(GoOnlyConfig);
+    }
+    match fs::symlink_metadata(&path) {
+        Ok(metadata) if metadata.is_dir() => Ok(Some(path)),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Some(path)),
+        _ => Err(GoOnlyConfig),
+    }
+}
+
+/// Library and base-snapshot directories configured purely through
+/// `SYMSKILLS_*` environment variables.
+#[derive(Debug, Default)]
+struct StatusEnvConfig {
+    library_dir: Option<PathBuf>,
+    base_dir: Option<PathBuf>,
+}
+
+/// Returns the environment-only config native `skills status` replays, or
+/// `None` when the shape must stay on Go.
+///
+/// Go builds its status options from `config.Load()`: defaults, then
+/// `config.toml`, then `.symskills.toml`, then `SYMSKILLS_*` variables. Go
+/// status reads only `LibraryDir`, `BaseDir` and `CacheDir`; `RenderDir`,
+/// `ProfilesDir` and `VCS.Enabled` never reach it, and a variable that fails
+/// config decoding (an invalid `SYMSKILLS_VCS_ENABLED` bool) makes Go discard
+/// the whole config and use defaults. A `CacheDir` override moves the status
+/// render cache Go writes, any config file carries TOML Go owns, and the
+/// native-only `SYMBRAIN_SKILLS_*` variables are not Go config, so all three
+/// stay on Go.
+fn status_env_config() -> Option<StatusEnvConfig> {
+    if has_config_file()
+        || std::env::var_os("SYMSKILLS_CACHE_DIR").is_some()
+        || std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
+        || std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR").is_some()
+    {
+        return None;
+    }
+    if let Some(value) = std::env::var_os("SYMSKILLS_VCS_ENABLED")
+        && !go_parse_bool(&value)
+    {
+        return None;
+    }
+    Some(StatusEnvConfig {
+        library_dir: status_override_dir("SYMSKILLS_LIBRARY_DIR").ok()?,
+        base_dir: status_override_dir("SYMSKILLS_BASE_DIR").ok()?,
+    })
+}
+
+/// Whether any `SYMSKILLS_*` variable is present, in which case the status
+/// report must be exactly Go's bytes with none of the #621 render extension.
+fn status_env_active() -> bool {
+    [
+        "SYMSKILLS_LIBRARY_DIR",
+        "SYMSKILLS_BASE_DIR",
+        "SYMSKILLS_VCS_ENABLED",
+    ]
+    .iter()
+    .chain(STATUS_INERT_ENV)
+    .any(|name| std::env::var_os(name).is_some())
+}
+
 fn has_dynamic_config() -> bool {
     const CONFIG_OVERRIDES: &[&str] = &[
         "SYMSKILLS_LIBRARY_DIR",
@@ -349,12 +459,7 @@ fn has_dynamic_config() -> bool {
     {
         return true;
     }
-    let config_root = std::env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
-        .unwrap_or_else(|| PathBuf::from(".config"));
-    config_root.join("symskills/config.toml").is_file()
-        || current_project_dir().join(".symskills.toml").is_file()
+    has_config_file()
 }
 
 /// Reports whether the native `skills list` scan has to stay on Go for this
@@ -676,6 +781,28 @@ fn table_content(value: &str) -> String {
     value.replace(['\t', '\r', '\n'], " ")
 }
 
+/// Library, base, home and render roots for one status scan.
+///
+/// Any `SYMSKILLS_*` override reproduces Go's bytes exactly: the configured
+/// directories replace the defaults and the #621 render extension, which Go
+/// never prints, stays off.
+fn status_dirs() -> (PathBuf, PathBuf, PathBuf, Option<PathBuf>) {
+    let (mut library_dir, mut base_dir, home_dir) = resolve_skills_dirs();
+    if !status_env_active() {
+        return (
+            library_dir,
+            base_dir,
+            home_dir,
+            Some(skills_data_root().join("rendered")),
+        );
+    }
+    if let Some(config) = status_env_config() {
+        library_dir = config.library_dir.unwrap_or(library_dir);
+        base_dir = config.base_dir.unwrap_or(base_dir);
+    }
+    (library_dir, base_dir, home_dir, None)
+}
+
 fn run_status(
     args: &[OsString],
     stdout: &mut dyn Write,
@@ -705,7 +832,7 @@ fn run_status(
         return exit::USAGE;
     }
 
-    let (library_dir, base_dir, home_dir) = resolve_skills_dirs();
+    let (library_dir, base_dir, home_dir, render_dir) = status_dirs();
     let project_dir = current_project_dir();
     let targets = target.into_iter().collect();
 
@@ -717,7 +844,7 @@ fn run_status(
         library_dir,
         base_dir: Some(base_dir),
         skills: Vec::new(),
-        render_dir: Some(skills_data_root().join("rendered")),
+        render_dir,
     };
 
     let statuses = match install::status(&opts) {

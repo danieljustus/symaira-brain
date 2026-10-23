@@ -483,6 +483,42 @@ existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
 three-OS CI at the final candidate head remains required. Dynamic config and
 unqualified multi-target CLI fallback remain part of #764.
 
+### Skills status environment-only config (#764 slice c)
+
+`symbrain skills status --target opencode [--scope user|project]` is native when
+the only custom `symskills` config is environment variables: `SYMSKILLS_LIBRARY_DIR`
+and `SYMSKILLS_BASE_DIR` (absolute, an existing directory or absent, never a symlink or
+special file) move the library and the frozen base snapshots, and
+`SYMSKILLS_RENDER_DIR`, `SYMSKILLS_PROFILES_DIR` and a valid
+`SYMSKILLS_VCS_ENABLED` bool are accepted because Go's status never reads them.
+Any of these variables makes the report exactly Go's bytes: the #621
+render-drift extension (RENDER column, `render_status`, `linked` presentation
+mode) stays off. Go decodes `config.Load()` as defaults, `config.toml`,
+`.symskills.toml`, then env; an env value that fails decoding (an invalid
+`SYMSKILLS_VCS_ENABLED`) makes Go discard the whole config, so that shape stays on Go
+rather than being re-derived. `XDG_CONFIG_HOME` is now honoured only when
+absolute, like `configkit.DefaultPath`, for every skills verb's config-file probe.
+
+Still on Go for `skills status`: any `config.toml`/`.symskills.toml`;
+`SYMSKILLS_CACHE_DIR` (Go writes its status render cache there; native never does);
+relative, empty, symlinked or non-directory `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR`;
+empty or invalid `SYMSKILLS_VCS_ENABLED`; the native-only `SYMBRAIN_SKILLS_*`
+variables; every non-OpenCode target or unqualified multi-target scan with
+config; unknown scope; flag errors; and the previously documented marker/symlink
+states. Known, unchanged side-effect difference: Go status writes a
+`status-render` cache under the skills cache directory for managed installs;
+native status writes nothing.
+
+Evidence: 27 native cases and 13 must-fallback cases (`skills_status_config_*` in
+`scripts/rust-differential.py`) compare the Go binary (built with Go 1.26.7 from
+base revision 90f0bbac6; this change touches no Go source) with the Rust binary. Native cases
+run Rust with `SYMBRAIN_GO_BINARY` unset and a Go-free `PATH`, and assert the fixture
+root (type, mode, size, mtime, link targets, content hashes) is unchanged;
+fallback cases assert the missing-fallback diagnostic when no Go route exists.
+Managed installs are genuine Go artifacts relocated verbatim. Ten source mutants
+(`scripts/skills-status-config-oracle/run.py --mutants`) must each fail the
+expected cases. Native three-OS CI at the candidate head remains required.
+
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 
