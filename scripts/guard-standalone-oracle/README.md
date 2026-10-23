@@ -92,3 +92,14 @@ requires zero unported paths. It verifies (never rewrites) the committed
 `migration/evidence/guard-command-tree-770/inventory.json`, and rejects four actual process mutants
 (help text, silent success, usage exit code, JSON key) and three fixture mutants. `run.sh` writes
 the `-command-tree.json` receipt; the Go-free replay lives in `rust/symguard-cli/tests/command_tree.rs`.
+
+*Host-dependent probes.* The Go `doctor` command reads every client config below `$HOME`. On Windows a
+missing parent directory is `ERROR_PATH_NOT_FOUND` ("The system cannot find the path specified."), which
+`guard/internal/discovery.containsNotExist` (`no such file` / `file does not exist` / `cannot find the
+file`) does not treat as missing; the empty-HOME probe therefore prints an `mcp servers  error:
+discovery: ...` row and exits 1, while the Unix capture exits 0. The generator records this as
+`HOST_DEPENDENT` (`host_dependent_reason` on the seven `doctor` probes; payload otherwise unchanged, a
+fixture mutant drops the reason). `command_tree.rs` compares those probes byte-for-byte on Unix and, off
+Unix, only checks the host-independent invariants (exit 0/1, a `symguard doctor` report on stdout, empty
+stderr) with an executed-count guard (all other 73 probes stay byte-exact); the Windows doctor bytes are
+asserted against the host-recorded doctor oracle (`SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE`).

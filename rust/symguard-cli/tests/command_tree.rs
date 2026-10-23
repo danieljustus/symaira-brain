@@ -104,8 +104,37 @@ fn without_runtime_lines(text: &str) -> String {
         .collect()
 }
 
+/// True when the generator recorded that this probe's Go bytes are only valid on a Unix host.
+fn host_dependent(probe: &Value) -> bool {
+    probe["host_dependent_reason"]
+        .as_str()
+        .is_some_and(|reason| !reason.is_empty())
+}
+
+/// Host-dependent probes (Go `doctor`) are recorded on Unix. Off Unix the Go report legitimately
+/// differs (a missing client-config parent directory is `ERROR_PATH_NOT_FOUND`, which Go's
+/// string-based discovery check reports, exit 1), so only the invariants common to every host are
+/// checked here; the Windows doctor bytes are asserted against the host-recorded doctor oracle.
+fn compare_host_invariants(probe: &Value, observed: &Observed) -> Result<(), String> {
+    let args = strings(&probe["args"]);
+    if !matches!(observed.code, 0 | 1) {
+        return Err(format!("{args:?}: exit code {} outside 0/1", observed.code));
+    }
+    if !observed.stdout.starts_with("symguard doctor\n") {
+        return Err(format!("{args:?}: not a doctor report"));
+    }
+    if !observed.stderr.is_empty() {
+        return Err(format!("{args:?}: unexpected stderr"));
+    }
+    Ok(())
+}
+
 /// `Err` names the first difference between the recorded Go probe and the observed Rust process.
-fn compare(probe: &Value, observed: &Observed) -> Result<(), String> {
+/// `unix` selects whether host-dependent probes are compared byte-for-byte (Unix capture host).
+fn compare_on(probe: &Value, observed: &Observed, unix: bool) -> Result<(), String> {
+    if !unix && host_dependent(probe) {
+        return compare_host_invariants(probe, observed);
+    }
     let args = strings(&probe["args"]);
     if probe["exit_code"].as_i64() != Some(i64::from(observed.code)) {
         return Err(format!("{args:?}: exit code {}", observed.code));
@@ -126,6 +155,10 @@ fn compare(probe: &Value, observed: &Observed) -> Result<(), String> {
     Ok(())
 }
 
+fn compare(probe: &Value, observed: &Observed) -> Result<(), String> {
+    compare_on(probe, observed, cfg!(unix))
+}
+
 #[test]
 fn every_go_probe_matches_the_native_process() {
     let inventory = fixture();
@@ -135,11 +168,90 @@ fn every_go_probe_matches_the_native_process() {
         "inventory shrank to {} probes",
         probes.len()
     );
+    let relaxed = probes.iter().filter(|probe| host_dependent(probe)).count();
+    let mut exact = 0;
     let failures: Vec<String> = probes
         .iter()
-        .filter_map(|probe| compare(probe, &run(&strings(&probe["args"]))).err())
+        .filter_map(|probe| {
+            let observed = run(&strings(&probe["args"]));
+            if !host_dependent(probe) || cfg!(unix) {
+                exact += 1;
+            }
+            compare(probe, &observed).err()
+        })
         .collect();
     assert!(failures.is_empty(), "{failures:#?}");
+    // Only the generator-recorded host-dependent probes (the doctor paths) may skip the byte-exact
+    // comparison, and only off Unix: everything else, and every probe on Unix, is compared exactly.
+    assert!(relaxed >= 1, "generator recorded no host-dependent probe");
+    assert!(
+        probes
+            .iter()
+            .filter(|probe| host_dependent(probe))
+            .all(|probe| strings(&probe["owner"]) == ["doctor"]),
+        "only doctor probes may be host-dependent"
+    );
+    let expected = if cfg!(unix) {
+        probes.len()
+    } else {
+        probes.len() - relaxed
+    };
+    assert_eq!(exact, expected, "byte-exact probe count");
+    assert!(exact >= 73, "byte-exact probes shrank to {exact}");
+}
+
+#[test]
+fn host_dependence_only_relaxes_doctor_probes_off_unix() {
+    let inventory = fixture();
+    let probes = inventory["probes"].as_array().unwrap();
+    let windows_doctor = Observed {
+        code: 1,
+        stdout: "symguard doctor\n\n  mcp servers      error: discovery: read failed\n".to_owned(),
+        stderr: String::new(),
+    };
+    let doctor = probes
+        .iter()
+        .find(|probe| strings(&probe["args"]) == ["doctor"])
+        .unwrap();
+    // The Unix capture exits 0; a Windows host exits 1. Unix keeps the exact comparison.
+    assert!(compare_on(doctor, &windows_doctor, true).is_err());
+    assert!(compare_on(doctor, &windows_doctor, false).is_ok());
+    // The relaxation still rejects anything that is not a doctor report on any host.
+    for broken in [
+        Observed {
+            code: 2,
+            stdout: windows_doctor.stdout.clone(),
+            stderr: String::new(),
+        },
+        Observed {
+            code: 1,
+            stdout: String::new(),
+            stderr: String::new(),
+        },
+        Observed {
+            code: 1,
+            stdout: windows_doctor.stdout.clone(),
+            stderr: "boom\n".to_owned(),
+        },
+    ] {
+        assert!(
+            compare_on(doctor, &broken, false).is_err(),
+            "relaxed too far"
+        );
+    }
+    // A non-doctor probe is never relaxed: a drifting exit code fails on every host.
+    let scan = probes
+        .iter()
+        .find(|probe| strings(&probe["args"]) == ["scan", "--help"])
+        .unwrap();
+    assert!(!host_dependent(scan));
+    let drifted = Observed {
+        code: 1,
+        stdout: String::new(),
+        stderr: String::new(),
+    };
+    assert!(compare_on(scan, &drifted, false).is_err());
+    assert!(compare_on(scan, &drifted, true).is_err());
 }
 
 #[test]

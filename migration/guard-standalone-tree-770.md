@@ -28,6 +28,13 @@ the same probes against the Rust process with no Go toolchain. Result on macOS a
 9 native, 0 unported, 0 fallback, 80 probes matched, four actual process mutants and three
 fixture mutants rejected. Native Linux/Windows runs are pending CI.
 
+The seven `doctor` probes carry a generator-recorded `host_dependent_reason`: on a Windows host the
+Go doctor itself exits 1 for an empty HOME (missing client-config parent directories are
+`ERROR_PATH_NOT_FOUND`, which Go's string-based `containsNotExist` does not skip), so the Unix
+capture is only byte-compared on Unix; off Unix the replay checks exit 0/1, a doctor report and empty
+stderr, still byte-compares the other 73 probes, and the Windows doctor output is covered by the
+host-recorded doctor oracle.
+
 Library-only state (not command paths): `approval`, `capability`, `policy`, `sequence` are not
 imported by any command and are owned by `symbrain-guard-core`; `archguard` and `proposal` are
 not imported and have no Rust port; `spawn` is used only by `doctor` and is ported inside

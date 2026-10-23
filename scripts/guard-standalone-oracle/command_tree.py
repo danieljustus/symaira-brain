@@ -27,6 +27,19 @@ FIXTURE = ROOT / "migration/evidence/guard-command-tree-770/inventory.json"
 HELP = ("--help", "-h")
 UNKNOWN_WORD, UNKNOWN_FLAG, POSITIONAL = "no-such-word", "--no-such-flag", "positional-x"
 PKG_PREFIX = "github.com/danieljustus/symaira-brain/guard/internal/"
+# Command paths whose exit code and report depend on the machine, not on the Rust port.  The Go
+# doctor reads every client config below $HOME; on Windows a missing parent directory is
+# ERROR_PATH_NOT_FOUND ("The system cannot find the path specified."), which the Go adapter's
+# string-based missing-file check (`containsNotExist`: "no such file" / "file does not exist" /
+# "cannot find the file") does not recognise, so the empty-HOME probe prints `mcp servers  error:
+# discovery: ...` and exits 1 where the recorded Unix capture exits 0.  The replay compares these
+# probes byte-for-byte on Unix and only checks the invariants common to every host elsewhere; the
+# Windows doctor bytes are asserted against the host-recorded doctor oracle instead.
+HOST_DEPENDENT = {
+    ("doctor",): "Go doctor exit/report depend on the host: on Windows a missing client-config parent "
+                 "directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as "
+                 "missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0).",
+}
 # Hand-annotated Rust owners of the Go library packages; existence is verified.
 RUST_OWNERS = {
     "approval": ["rust/symbrain-guard-core/src/approval.rs"],
@@ -236,8 +249,12 @@ def deterministic(probes, nodes, flags, packages, dispatcher_words, sub_words, e
     entries = []
     for probe in probes:
         stdout, stderr = text_of(probe["go"]["normalized_stdout_hex"]), text_of(probe["go"]["normalized_stderr_hex"])
-        entries.append(dict(args=probe["args"], owner=probe["owner"], exit_code=probe["go"]["exit_code"],
-                            stdout=stdout, stderr=stderr, root_dependent="<root>" in stdout + stderr))
+        entry = dict(args=probe["args"], owner=probe["owner"], exit_code=probe["go"]["exit_code"],
+                     stdout=stdout, stderr=stderr, root_dependent="<root>" in stdout + stderr)
+        reason = HOST_DEPENDENT.get(tuple(probe["owner"]))
+        if reason:
+            entry["host_dependent_reason"] = reason
+        entries.append(entry)
     tree = []
     for path in sorted(nodes):
         info = nodes[path]
@@ -275,6 +292,8 @@ def fixture_diff(actual, fixture):
     for key, entry in left.items():
         other = right[key]
         assert entry["exit_code"] == other["exit_code"], f"fixture drift: exit code of {list(key)}"
+        assert entry.get("host_dependent_reason") == other.get("host_dependent_reason"), \
+            f"fixture drift: host-dependence of {list(key)}"
         if not entry["root_dependent"] and not other["root_dependent"]:
             assert entry["stdout"] == other["stdout"] and entry["stderr"] == other["stderr"], \
                 f"fixture drift: output of {list(key)}"
@@ -332,15 +351,17 @@ def run_controls(runner, go, rust, probe_index, tmp):
 def run_fixture_control(inventory, fixture):
     """The fixture check itself must reject an altered help line and a dropped path."""
     rejected = []
-    for name in ["help-line", "dropped-path", "exit-code"]:
+    for name in ["help-line", "dropped-path", "exit-code", "host-reason"]:
         mutated = json.loads(json.dumps(fixture))
         if name == "help-line":
             node = next(n for n in mutated["tree"] if n["path"] == ["scan"])
             node["help_text"] = node["help_text"].replace("Discovers", "Finds", 1)
         elif name == "dropped-path":
             mutated["tree"] = [n for n in mutated["tree"] if n["path"] != ["grants", "revoke"]]
-        else:
+        elif name == "exit-code":
             next(e for e in mutated["probes"] if e["args"] == [])["exit_code"] = 0
+        else:
+            del next(e for e in mutated["probes"] if e["args"] == ["doctor"])["host_dependent_reason"]
         try:
             fixture_diff(inventory, mutated)
         except AssertionError:
