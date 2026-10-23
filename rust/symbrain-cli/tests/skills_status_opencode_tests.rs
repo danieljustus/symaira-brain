@@ -16,10 +16,19 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     for path in [&home, &config, &data, &cache, &project] {
         std::fs::create_dir_all(path).unwrap();
     }
+    // `env_clear` also drops the temp-directory variables. Windows then falls
+    // back to `%USERPROFILE%` (the fixture `home`) for the scratch directory
+    // that `skills status` stages a fresh render in, which would change the
+    // directory mtime that the read-only assertions compare. Point it at the
+    // system temp directory, outside every fixture tree.
+    let scratch = std::env::temp_dir();
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .env_clear()
         .envs(coverage::profile_environment())
+        .env("TMPDIR", &scratch)
+        .env("TMP", &scratch)
+        .env("TEMP", &scratch)
         .env("HOME", &home)
         .env("USERPROFILE", &home)
         .env("XDG_CONFIG_HOME", &config)

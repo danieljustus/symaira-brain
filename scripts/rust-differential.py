@@ -3458,7 +3458,15 @@ CASES = (
         "skills_status_config_fallback_config_dir_is_file_json",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=managed_config_then(_status_cfg_dir_is_file),
-        expect_fallback=True,
+        # POSIX stat reports ENOTDIR, which Go does not treat as "does not
+        # exist", so the whole config is dropped and the command stays on Go.
+        # Windows reports ERROR_PATH_NOT_FOUND, which Go skips like a missing
+        # file: the library override is honoured and the native run must equal
+        # Go's bytes (the relocated library only resolves when it is honoured)
+        # without touching the fixture.
+        expect_fallback=os.name != "nt",
+        native=os.name == "nt",
+        read_only=os.name == "nt",
     ),
     Case(
         "skills_status_config_fallback_config_symlink_loop_json",
