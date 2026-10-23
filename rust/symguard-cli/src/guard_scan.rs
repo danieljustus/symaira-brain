@@ -19,6 +19,7 @@ use serde::Serialize;
 use symbrain_core::exit;
 
 pub(crate) mod guard_scan_config;
+pub(crate) mod guard_scan_json;
 use guard_scan_config::parse_config;
 
 const USAGE: &str = "Usage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n";
@@ -131,10 +132,7 @@ pub fn run(args: &[std::ffi::OsString], stdout: &mut dyn Write, stderr: &mut dyn
         servers: servers.into_iter().map(view).collect(),
     };
     let output = if format == "json" {
-        serde_json::to_string_pretty(&inventory).map(|mut text| {
-            text.push('\n');
-            text
-        })
+        serde_json::to_string_pretty(&inventory).map(|text| go_html_escape(&text) + "\n")
     } else {
         let mut text = format!("Discovered {} MCP server(s)\n", inventory.servers.len());
         for server in &inventory.servers {
@@ -198,7 +196,7 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
     let mut findings = Vec::new();
     for source in SOURCES {
         let path = source_path(source);
-        match fs::read(&path) {
+        match read_source(&path) {
             Ok(data) => match parse_config(&data, source.key) {
                 Ok(entries) => {
                     for (name, entry) in entries {
@@ -246,15 +244,15 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
                     message: error,
                 }),
             },
-            Err(error) if missing_source_is_silent(&error) => findings.push(Finding {
+            Err(failure) if missing_source_is_silent(&failure.error) => findings.push(Finding {
                 client: source.client.to_owned(),
                 path,
                 status: "unsupported",
                 message: "config file not found".to_owned(),
             }),
-            Err(error) => findings.push(Finding {
+            Err(failure) => findings.push(Finding {
                 client: source.client.to_owned(),
-                message: read_error_message(&path, &error),
+                message: read_error_message(&path, &failure),
                 path,
                 status: "unsupported",
             }),
@@ -280,9 +278,31 @@ pub(crate) fn missing_source_is_silent(error: &io::Error) -> bool {
     }
 }
 
+/// A failed `os.ReadFile`: Go reports the failing step (`open` or `read`) in its `PathError`.
+pub(crate) struct ReadFailure {
+    pub(crate) op: &'static str,
+    pub(crate) error: io::Error,
+}
+
+/// `os.ReadFile`: opening a directory succeeds and the first read then fails,
+/// so Go names the operation `read` there and `open` for every open failure.
+pub(crate) fn read_source(path: &std::path::Path) -> Result<Vec<u8>, ReadFailure> {
+    use std::io::Read as _;
+    let mut file = fs::File::open(path).map_err(|error| ReadFailure { op: "open", error })?;
+    let mut data = Vec::new();
+    file.read_to_end(&mut data)
+        .map_err(|error| ReadFailure { op: "read", error })?;
+    Ok(data)
+}
+
 /// Formats the read diagnostic emitted by Go's os.ReadFile `PathError`.
-pub(crate) fn read_error_message(path: &std::path::Path, error: &io::Error) -> String {
-    format!("read failed: open {}: {}", path.display(), io_detail(error))
+pub(crate) fn read_error_message(path: &std::path::Path, failure: &ReadFailure) -> String {
+    format!(
+        "read failed: {} {}: {}",
+        failure.op,
+        path.display(),
+        go_errno_text(&failure.error)
+    )
 }
 
 /// The platform error text without Rust's ` (os error N)` suffix. Go prints its
@@ -297,6 +317,37 @@ pub(crate) fn io_detail(error: &io::Error) -> String {
                 .map(str::to_owned)
         })
         .unwrap_or(detail)
+}
+
+/// Go's errno table on Unix is the C library text with a lower-case first
+/// letter (`is a directory`); `os.ReadFile` diagnostics use it. Windows wording
+/// stays platform text.
+fn go_errno_text(error: &io::Error) -> String {
+    let detail = io_detail(error);
+    if cfg!(unix) && error.raw_os_error().is_some() {
+        let mut chars = detail.chars();
+        if let Some(first) = chars.next() {
+            return first.to_lowercase().chain(chars).collect();
+        }
+    }
+    detail
+}
+
+/// Go's `encoding/json` encoder escapes HTML-significant characters and the
+/// JavaScript line separators by default; they only occur inside strings.
+fn go_html_escape(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for c in text.chars() {
+        match c {
+            '<' => out.push_str("\\u003c"),
+            '>' => out.push_str("\\u003e"),
+            '&' => out.push_str("\\u0026"),
+            '\u{2028}' => out.push_str("\\u2028"),
+            '\u{2029}' => out.push_str("\\u2029"),
+            c => out.push(c),
+        }
+    }
+    out
 }
 
 pub(crate) fn source_path(source: Source) -> PathBuf {

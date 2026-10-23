@@ -2,8 +2,6 @@
 
 use std::collections::BTreeMap;
 
-use serde_json::Value;
-
 #[derive(Default)]
 pub(crate) struct Entry {
     pub(crate) command: String,
@@ -43,122 +41,44 @@ impl Entry {
 }
 
 pub(crate) fn parse_config(data: &[u8], key: &str) -> Result<BTreeMap<String, Entry>, String> {
-    let trimmed = String::from_utf8_lossy(data).trim().to_owned();
-    if trimmed.starts_with('{') {
-        let stripped = strip_jsonc(&trimmed);
-        let root: Value =
-            serde_json::from_str(&stripped).map_err(|error| format!("parse JSON: {error}"))?;
-        if let Some(entries) = lookup_entries(&root, key) {
-            return parse_entries(entries);
+    use super::guard_scan_json::{self as json, Outcome};
+    // Go: `strings.TrimSpace(string(data))`, then JSONC-strip the untrimmed text.
+    let text = json::go_lossy(data);
+    if text.trim().starts_with('{') {
+        match json::entries(&strip_jsonc(&text), key) {
+            Outcome::Entries(entries) => return Ok(entries),
+            Outcome::Error(error) => return Err(error),
+            Outcome::KeyNotFound => {}
         }
-        if let Ok(doc) = serde_yaml_ng::from_str::<serde_yaml_ng::Value>(&trimmed)
-            && let Some(entries) = lookup_yaml_entries(&doc, key)
-        {
-            return parse_yaml_entries(entries);
-        }
-        return Err(format!("key not found: {key:?}"));
     }
     let root: serde_yaml_ng::Value =
         serde_yaml_ng::from_slice(data).map_err(|error| format!("parse YAML: {error}"))?;
-    let Some(entries) = lookup_yaml_entries(&root, key) else {
+    let Some((found, entries)) = lookup_yaml_entries(&root, key) else {
         return Err(format!("key not found: {key:?}"));
     };
-    parse_yaml_entries(entries)
-}
-
-fn lookup_entries<'a>(root: &'a Value, key: &str) -> Option<&'a Value> {
-    let object = root.as_object()?;
-    [key, "mcpServers", "mcp_servers", "mcp"]
-        .into_iter()
-        .find_map(|candidate| object.get(candidate))
+    parse_yaml_entries(entries, found)
 }
 
 fn lookup_yaml_entries<'a>(
     root: &'a serde_yaml_ng::Value,
-    key: &str,
-) -> Option<&'a serde_yaml_ng::Value> {
+    key: &'a str,
+) -> Option<(&'a str, &'a serde_yaml_ng::Value)> {
     let map = root.as_mapping()?;
     [key, "mcpServers", "mcp_servers", "mcp"]
         .into_iter()
-        .find_map(|candidate| map.get(serde_yaml_ng::Value::String(candidate.to_owned())))
-}
-
-fn parse_entries(value: &Value) -> Result<BTreeMap<String, Entry>, String> {
-    if value.is_null() {
-        return Ok(BTreeMap::new());
-    }
-    let object = value
-        .as_object()
-        .ok_or_else(|| "parse entries: expected object".to_owned())?;
-    let mut entries = BTreeMap::new();
-    for (name, value) in object {
-        let entry = match value {
-            Value::Null => Entry::default(),
-            Value::Object(entry) => entry_from_json(entry)
-                .map_err(|error| format!("parse entries: server {name:?}: {error}"))?,
-            _ => return Err(format!("parse entries: expected object for {name:?}")),
-        };
-        entries.insert(name.clone(), entry);
-    }
-    Ok(entries)
-}
-
-fn entry_from_json(value: &serde_json::Map<String, Value>) -> Result<Entry, String> {
-    let args = match value.get("args") {
-        None | Some(Value::Null) => Vec::new(),
-        Some(Value::Array(args)) => args
-            .iter()
-            .enumerate()
-            .map(|(index, value)| match value {
-                Value::Null => Ok(String::new()),
-                Value::String(value) => Ok(value.clone()),
-                _ => Err(format!("args[{index}] must be a string")),
-            })
-            .collect::<Result<_, _>>()?,
-        Some(_) => return Err("args must be an array".to_owned()),
-    };
-    Ok(Entry {
-        command: string_field(value, "command")?,
-        url: string_field(value, "url")?,
-        args,
-        kind: string_field(value, "type")?,
-        transport_name: string_field(value, "transport")?,
-        env: map_field(value.get("env"), "env")?,
-        environment: map_field(value.get("environment"), "environment")?,
-    })
-}
-
-fn string_field(value: &serde_json::Map<String, Value>, key: &str) -> Result<String, String> {
-    match value.get(key) {
-        None | Some(Value::Null) => Ok(String::new()),
-        Some(Value::String(value)) => Ok(value.clone()),
-        Some(_) => Err(format!("{key} must be a string")),
-    }
-}
-
-fn map_field(value: Option<&Value>, field: &str) -> Result<BTreeMap<String, String>, String> {
-    let Some(value) = value else {
-        return Ok(BTreeMap::new());
-    };
-    let Some(map) = value.as_object() else {
-        if value.is_null() {
-            return Ok(BTreeMap::new());
-        }
-        return Err(format!("{field} must be an object"));
-    };
-    map.iter()
-        .map(|(key, value)| match value {
-            Value::Null => Ok((key.clone(), String::new())),
-            Value::String(value) => Ok((key.clone(), value.clone())),
-            _ => Err(format!("{field} value {key:?} must be a string")),
+        .find_map(|candidate| {
+            map.get(serde_yaml_ng::Value::String(candidate.to_owned()))
+                .map(|value| (candidate, value))
         })
-        .collect()
 }
 
-fn parse_yaml_entries(value: &serde_yaml_ng::Value) -> Result<BTreeMap<String, Entry>, String> {
+fn parse_yaml_entries(
+    value: &serde_yaml_ng::Value,
+    key: &str,
+) -> Result<BTreeMap<String, Entry>, String> {
     let object = value
         .as_mapping()
-        .ok_or_else(|| "key is not an object".to_owned())?;
+        .ok_or_else(|| format!("key {key:?} is not an object"))?;
     let mut entries = BTreeMap::new();
     for (name, value) in object {
         let Some(name) = name.as_str() else { continue };

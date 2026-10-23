@@ -33,7 +33,7 @@ All three CI jobs retain this additional receipt. See
 
 The additive `-doctor-boundaries.json` receipt admits equivalent typed inline
 TOML/array forms and Go-compatible anchor string/key Unicode replacement.
-It executes78 actual process cases:67 complete comparisons and11 explicitly
+It executes78 actual process cases:68 complete comparisons and10 explicitly
 retained TOML decoder/map-order gates. Three actual mutants remove a
 configured inline allowlist, gate a repaired healthy anchor and hide a later
 typed anchor error. All original124 input bytes are retained; the three specific unknown-key inputs
@@ -43,8 +43,9 @@ The [remaining boundary inventory](../../migration/guard-doctor-boundary-invento
 distinguishes healthy Go-only states from decoder errors and warning-only states.
 
 The `-config-warnings.json` receipt ports ordered unknown-key stderr for
-successfully typed configurations. Linux executes54 cases:46 full comparisons
-and8 retained typed/alias/discovery/map-order gates, plus ten actual Go repeats
+successfully typed configurations. The corpus requests54 cases; macOS arm64 executes 53 (raw-path-0 is unexecutable on Darwin):
+47 full comparisons and 6 retained typed/alias gates (`warning-discovery-delegation` now matches);
+the Linux count is pending CI. Plus ten actual Go repeats
 and five real warning mutants. It preserves the exact fourteen original healthy
 Go inventory inputs. Windows runs52 launchable cases and records the two raw
 Unix path forms as inapplicable; none is a UTF16 runtime claim. A known config
@@ -110,3 +111,17 @@ missing-parent Windows output is derived from the Go source; it is **not** cover
 Windows capture of this replay; the `guard-doctor-oracle` case `missing_client_parents` (which skips
 pre-creating the client directories) makes the Windows CI leg record Go's real bytes for the shared
 `symbrain guard doctor` handler, pending that CI run.
+
+**Scan discovery boundaries (#770 slice 2).** `scan_boundaries.py GO RUST REPORT` compares the actual
+`scan --format=json|table` processes for 453 client-config shapes (JSON syntax/type errors with Go's
+`encoding/json` wording, field-name folding, duplicate keys and duplicate `args` slice reuse, invalid UTF-8,
+lone surrogates, HTML-escaped output, I/O errors, YAML, plus every prefix of two representative documents
+and hand-picked token truncations, where EOF inside a token must report Go's `invalid character ' ' <context>`).
+Only runs of consecutive map-ranged finding lines (`server "…" is missing …`, `has unknown type …`) are compared
+as a sorted multiset because Go ranges over a map; source-level finding lines keep their order.
+24 documented yaml.v3 shapes are executed as explicit residuals and never counted as matches. Eight actual
+process mutants (server order, dropped finding, unescaped HTML, hidden parse error, case-sensitive
+fields, swallowed type error, reordered source-level findings, token EOF reported as generic EOF) must be rejected.
+On Windows the `io-directory` case uses a `host-wording` contract: the whole text after `read failed:` is
+ignored, which also hides the Go `open` versus `read` word of the `PathError`; exit, stdout and the finding
+frame must still match (Windows wording is derived from the Go source, not recorded). `run.sh` writes `-scan-boundaries.json`.
