@@ -499,6 +499,57 @@ Skills tools, handler-level typed argument decoding, the vendored YAML fork and
 the #834 startup-state changes. Decisions: `docs/adr/skills-native-raw-transport-764.md`.
 
 
+### Skills MCP profile, discovery and versioning tools (#764 slice b)
+
+The five remaining Go Skills tools -- `skills_profile_list`,
+`skills_profile_resolve`, `skills_discover_sources`, `skills_history`,
+`skills_restore` -- are native, salvaged from PR #813 and rewritten against
+current main without the vendored YAML fork. Handler-level typed argument
+decoding, `exitcodes` kinds in `_meta`, Go's compact HTML-escaped JSON and
+field order, per-skill `git` history/forward restore (dry-run default, dirty
+refusal, snapshot commit, pre-write validation, `sync=true` re-install) and
+Go-exact catalog metadata are covered. Decisions and residuals:
+`docs/adr/skills-native-profile-versioning-764.md`.
+
+Evidence is local: `scripts/skills-native-oracle/tools_oracle.py` records 197
+cases from the real Go `symbrain mcp` (pinned ref 3d9a89e7a, Go 1.26.7 via
+`GOTOOLCHAIN=go1.26.7`, isolated HOME/XDG, pinned git identity/dates) into
+`rust/symbrain-cli/tests/fixtures/skills_tools_go_oracle.json`; `record`/`check`
+prove the fixture equals Go's actual behavior. The replay test
+`skills_tools_oracle` recreates each pre-state (files, links, git repositories,
+Go-made installs for `sync=true`), requires byte-identical reply lines and an
+identical post-call tree (modes, hashes, links, git log/status), compares the
+five `tools/list` entries byte for byte, and carries four negative controls plus
+two implementation mutations that were run and failed as intended (skipped
+working-tree cleanup: 10 cases differ; limit default and JSON escaping: 12
+differ). Green on macOS (and, for the original 141 cases, in `rust:1.98-bookworm` as
+uid 1000; the 197-case rerun on Linux is pending); native Windows CI is pending.
+
+Independent-review fixes (same slice): a skill `name` is joined with Go's exact
+`filepath.Join` (new `gotext::join`: join, then lexical clean) instead of
+`Path::join`, where an absolute name replaced the library prefix and let
+`skills_restore`/`skills_history` extract over, commit in or read the log of any
+repository the user can write (even with `dry_run:true`). Go re-roots such a name
+(`<lib>/<abs>`) and answers "not versioned". The same helper now builds every
+name-derived path in profile, discovery and VCS code. `extract`'s link check is
+Go's (`Clean(Join(Dir(name), link))` must be local and not `.`) and a failed
+removal before link creation is propagated. The corpus grew from 141 to 197
+Go-recorded cases: absolute and re-rooted names for restore (dry-run and real) and
+history, `/`, `/etc`, `//zz/victim`, relative traversal to a sibling victim
+repository, absolute profile names and skill links, and restores of revisions that
+carry `../../outside`, absolute, deep, `.`, `sub/..` and clean-to-root links
+(plus accepted in-tree links). The replay snapshot covers the whole isolated root
+(victim repositories included), now also with directory modes, and masks
+`.symskills-lock-*` files only below `home/`, `data/symbrain/skills/rendered/`
+and `data/symbrain/skills/base/`. Negative controls run against the fixed code:
+`Path::join` for the library dir (17 cases fail), no link confinement (26 fail),
+the old `confined_link` (10 fail). Not included: the vendored YAML encoder (#835), the catalog
+reorder of Skills before Usage, audit arguments of repaired values.
+Known residual vulnerability, identical in Go (#918): a relative `../`-repeated
+`name` still lets `skills_restore` extract over (even dry-run) or commit into, and
+`skills_history` read, any repository the user can write. Rust reproduces Go's
+effects exactly and writes nowhere Go cannot; the fix needs Go and Rust together.
+
 ### Skills sync Windows raw argv follow-up (#793 / #794)
 
 Source preparation corrects the earlier Windows replacement assumption: pinned

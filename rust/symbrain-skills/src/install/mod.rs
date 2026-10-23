@@ -38,5 +38,5 @@ pub use marker::{
 pub use render_status::{RenderDrift, RenderStatus};
 pub use replace::FaultPoint;
 pub use status::{InstallStatus, StatusKind, StatusOptions, status};
-pub use sync::{ConflictPolicy, SyncOptions, SyncResult, sync};
+pub use sync::{ConflictPolicy, SyncOptions, SyncResult, sync, sync_selected};
 pub use uninstall::{uninstall, uninstall_skill};
