@@ -252,3 +252,80 @@ fn description_and_code_parses_only_the_shipped_shape() {
         assert_eq!(description_and_code(bad), None, "{bad:?}");
     }
 }
+
+#[test]
+fn relative_database_path_honours_only_pwd_naming_the_current_directory() {
+    use std::os::unix::fs::MetadataExt;
+
+    // Observed against Go dcddcef0: valid logical PWD preserves the symlink
+    // rejection; absent, relative or unrelated PWD uses the physical cwd.
+    for args in [&SET[..], &["delete", "absent"][..]] {
+        for spelling in [
+            "symlink",
+            "physical",
+            "wrong-directory",
+            "relative",
+            "unset",
+        ] {
+            let (_guard, root) = temp();
+            let real = root.join("real");
+            let link = root.join("link");
+            std::fs::create_dir(&real).unwrap();
+            std::os::unix::fs::symlink(&real, &link).unwrap();
+            if spelling == "symlink" && std::fs::symlink_metadata(&link).unwrap().uid() == 0 {
+                eprintln!("SKIP logical-PWD symlink rejection: root-owned links are trusted");
+                continue;
+            }
+            let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
+            command
+                .arg("memory")
+                .args(args)
+                .args(["--db", "rel/sub/c.db"])
+                .env_clear()
+                .env("HOME", &root)
+                .env("XDG_CONFIG_HOME", root.join("config"))
+                .env("XDG_DATA_HOME", root.join("data"))
+                .env("XDG_CACHE_HOME", root.join("cache"))
+                .env("PATH", "")
+                .env("SYMBRAIN_GO_BINARY", root.join("absent-go"))
+                .current_dir(&real);
+            match spelling {
+                "symlink" => command.env("PWD", &link),
+                "physical" => command.env("PWD", &real),
+                "wrong-directory" => command.env("PWD", &root),
+                "relative" => command.env("PWD", "link"),
+                _ => &mut command,
+            };
+            let output = command.output().expect("native CLI child");
+            let stderr = String::from_utf8(output.stderr).unwrap();
+            let verb = args[0];
+            if spelling == "symlink" {
+                assert_eq!(output.status.code(), Some(1), "{verb}: {stderr}");
+                assert!(output.stdout.is_empty());
+                assert_eq!(
+                    stderr,
+                    format!(
+                        "symbrain memory {verb}: open memory database: failed to open sqlite database: failed to create database directory: mkdir {}: too many levels of symbolic links\n",
+                        link.display()
+                    )
+                );
+                assert!(
+                    !real.join("rel").exists(),
+                    "rejection must not create directories"
+                );
+            } else {
+                assert!(
+                    real.join("rel/sub/c.db").is_file(),
+                    "{verb} {spelling}: {stderr}"
+                );
+                if verb == "set" {
+                    assert!(output.status.success(), "{spelling}: {stderr}");
+                    assert!(stderr.is_empty());
+                } else {
+                    assert_eq!(output.status.code(), Some(1));
+                    assert_eq!(stderr, "symbrain memory delete: memory not found: absent\n");
+                }
+            }
+        }
+    }
+}

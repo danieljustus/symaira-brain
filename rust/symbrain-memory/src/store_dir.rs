@@ -90,8 +90,22 @@ pub(crate) fn safe_mkdir_all(directory: &[u8]) -> Result<(), String> {
     let absolute = if directory.first() == Some(&b'/') {
         go_clean(directory)
     } else {
-        let mut joined = std::env::current_dir()
-            .map(|cwd| cwd.into_os_string().into_vec())
+        // Go os.Getwd keeps a valid logical PWD, including symlinks that the
+        // directory walk below must still reject (#928).
+        let pwd = std::env::var_os("PWD").filter(|pwd| {
+            Path::new(pwd).is_absolute()
+                && matches!(
+                    (std::fs::metadata("."), std::fs::metadata(pwd)),
+                    (Ok(dot), Ok(named)) if dot.dev() == named.dev() && dot.ino() == named.ino()
+                )
+        });
+        let mut joined = pwd
+            .or_else(|| {
+                std::env::current_dir()
+                    .ok()
+                    .map(std::path::PathBuf::into_os_string)
+            })
+            .map(|cwd| cwd.into_vec())
             .unwrap_or_default();
         joined.push(b'/');
         joined.extend_from_slice(directory);
