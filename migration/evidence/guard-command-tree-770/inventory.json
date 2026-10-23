@@ -582,7 +582,7 @@
       "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
       "stderr": "",
       "root_dependent": false,
-      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0)."
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
     },
     {
       "args": [
@@ -596,7 +596,7 @@
       "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
       "stderr": "",
       "root_dependent": false,
-      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0)."
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
     },
     {
       "args": [
@@ -610,7 +610,7 @@
       "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
       "stderr": "",
       "root_dependent": false,
-      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0)."
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
     },
     {
       "args": [
@@ -624,7 +624,7 @@
       "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
       "stderr": "",
       "root_dependent": false,
-      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0)."
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
     },
     {
       "args": [
@@ -638,7 +638,7 @@
       "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
       "stderr": "",
       "root_dependent": false,
-      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0)."
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
     },
     {
       "args": [
@@ -652,7 +652,7 @@
       "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
       "stderr": "",
       "root_dependent": false,
-      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0)."
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
     },
     {
       "args": [
@@ -666,7 +666,7 @@
       "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
       "stderr": "",
       "root_dependent": false,
-      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0)."
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
     },
     {
       "args": [

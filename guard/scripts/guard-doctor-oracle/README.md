@@ -7,10 +7,15 @@ Frozen production output of the Go `symguard doctor` command, captured through
 `github.com/danieljustus/symaira-brain/guard/cmd/symguard/doctor` and calls
 `doctor.Run(&buf)` with an injected `HOME`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME`
 and `SYMGUARD_CONFIG`, so the fixture is the real command's bytes and not a
-re-implementation. Seven cases: empty machine, healthy config (1 rule + 1
+re-implementation. Ten cases: empty machine, healthy config (1 rule + 1
 spawn allowlist entry), invalid TOML, audit log without anchor, audit log with
 a corrupt anchor, a discovered Cursor MCP server that is not on the allowlist,
-and a discovered server whose environment carries a literal secret value.
+a discovered server whose environment carries a literal secret value, and
+`missing_client_parents`, the only case that does not pre-create the client
+config directories. On Unix it is `none discovered`, exit 0; on Windows a
+missing parent is `ERROR_PATH_NOT_FOUND`, which the Go discovery check does not
+skip, so the Windows CI leg records Go's real `mcp servers error` row and exit 1
+(`symguard`'s command-tree replay derives the same bytes from the Go source).
 
 ```sh
 # regenerate the fixture (pinned toolchain, from the repository root)

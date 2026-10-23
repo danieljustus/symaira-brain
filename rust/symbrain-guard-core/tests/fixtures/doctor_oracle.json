@@ -53,6 +53,12 @@
       "setup": "Cursor mcp.json with server carrying a plaintext secret env key",
       "exit_code": 1,
       "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   \\u003cos/arch\\u003e\\n\\n  binary           ok\\n  go runtime       ok\\n  config           not configured (no config file found)\\n  policy           defaults only (no rules — deny by default)\\n  audit log        not initialized (created on first 'symguard decide')\\n  spawn allowlist  not configured (empty — deny by default)\\n  mcp servers      1 discovered\\n\\nDiscovered MCP servers (spawn allowlist):\\n  [DENIED]  server-with-secret (cursor/stdio) → /usr/bin/env (not on spawn allowlist)\\n\\nPlaintext secret risk:\\n  server-with-secret (cursor): env SECRET_KEY stored as plaintext values in the client config\\n  symguard reports this risk but is not a secret store — move these values to symvault and reference them at launch time.\\n\\n1 issue(s) found. See details above.\\n\""
+    },
+    {
+      "id": "missing_client_parents",
+      "setup": "no client config directories exist below HOME (Windows: ERROR_PATH_NOT_FOUND discovery error, exit 1)",
+      "exit_code": 0,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   \\u003cos/arch\\u003e\\n\\n  binary           ok\\n  go runtime       ok\\n  config           not configured (no config file found)\\n  policy           defaults only (no rules — deny by default)\\n  audit log        not initialized (created on first 'symguard decide')\\n  spawn allowlist  not configured (empty — deny by default)\\n  mcp servers      none discovered\\n\\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\\n\""
     }
   ],
   "source": "guard/cmd/symguard/doctor/command.go + checks.go"

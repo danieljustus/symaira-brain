@@ -31,9 +31,14 @@ fixture mutants rejected. Native Linux/Windows runs are pending CI.
 The seven `doctor` probes carry a generator-recorded `host_dependent_reason`: on a Windows host the
 Go doctor itself exits 1 for an empty HOME (missing client-config parent directories are
 `ERROR_PATH_NOT_FOUND`, which Go's string-based `containsNotExist` does not skip), so the Unix
-capture is only byte-compared on Unix; off Unix the replay checks exit 0/1, a doctor report and empty
-stderr, still byte-compares the other 73 probes, and the Windows doctor output is covered by the
-host-recorded doctor oracle.
+capture is only byte-compared on Unix; off Unix the replay requires exit 1, empty stderr and the
+recorded stdout with exactly two Go-source-derived rewrites (the `mcp servers` row becomes the
+`error:` row with free OS wording, the closing line becomes `1 issue(s) found. See details above.`),
+still byte-compares the other 73 probes, and counts 73 exact / 7 relaxed. The Windows missing-parent
+output is derived from the Go source and is not covered by a recorded Windows capture of this
+replay; the `guard-doctor-oracle` case `missing_client_parents` (no client directories pre-created)
+lets the Windows CI leg record Go's real exit 1 and error row for the shared `symbrain guard doctor`
+handler, pending that CI run.
 
 Library-only state (not command paths): `approval`, `capability`, `policy`, `sequence` are not
 imported by any command and are owned by `symbrain-guard-core`; `archguard` and `proposal` are

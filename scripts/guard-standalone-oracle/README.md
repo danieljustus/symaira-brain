@@ -99,7 +99,14 @@ missing parent directory is `ERROR_PATH_NOT_FOUND` ("The system cannot find the 
 file`) does not treat as missing; the empty-HOME probe therefore prints an `mcp servers  error:
 discovery: ...` row and exits 1, while the Unix capture exits 0. The generator records this as
 `HOST_DEPENDENT` (`host_dependent_reason` on the seven `doctor` probes; payload otherwise unchanged, a
-fixture mutant drops the reason). `command_tree.rs` compares those probes byte-for-byte on Unix and, off
-Unix, only checks the host-independent invariants (exit 0/1, a `symguard doctor` report on stdout, empty
-stderr) with an executed-count guard (all other 73 probes stay byte-exact); the Windows doctor bytes are
-asserted against the host-recorded doctor oracle (`SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE`).
+fixture mutant drops the reason). `command_tree.rs` compares those probes byte-for-byte on Unix. Off
+Unix it requires exit 1 and empty stderr and compares stdout against the recorded Unix bytes after
+exactly two rewrites derived from `guard/cmd/symguard/doctor/command.go` (the `mcp servers  none
+discovered` row becomes the `error:` row, and the closing `All basic checks passed...` line becomes
+`1 issue(s) found. See details above.`), both sides through the runtime-line mask; only the OS wording
+of the error row is free (`discovery: hermes (<root>/home/.config/hermes/config.json): [unsupported]
+read failed: open ...: ...`). All other 73 probes stay byte-exact (executed counts are asserted). This
+missing-parent Windows output is derived from the Go source; it is **not** covered by a recorded
+Windows capture of this replay; the `guard-doctor-oracle` case `missing_client_parents` (which skips
+pre-creating the client directories) makes the Windows CI leg record Go's real bytes for the shared
+`symbrain guard doctor` handler, pending that CI run.

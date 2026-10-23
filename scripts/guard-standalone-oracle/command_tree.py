@@ -33,12 +33,16 @@ PKG_PREFIX = "github.com/danieljustus/symaira-brain/guard/internal/"
 # string-based missing-file check (`containsNotExist`: "no such file" / "file does not exist" /
 # "cannot find the file") does not recognise, so the empty-HOME probe prints `mcp servers  error:
 # discovery: ...` and exits 1 where the recorded Unix capture exits 0.  The replay compares these
-# probes byte-for-byte on Unix and only checks the invariants common to every host elsewhere; the
-# Windows doctor bytes are asserted against the host-recorded doctor oracle instead.
+# probes byte-for-byte on Unix.  Off Unix it derives the expected bytes from the Go source (exit 1;
+# the recorded stdout with the `mcp servers` row turned into the `error:` row and the closing line
+# turned into `1 issue(s) found. See details above.`) and masks only the OS wording of that row.
+# This Windows output is derived from the Go source; it is NOT covered by a recorded Windows
+# capture (the guard-doctor oracle pre-creates every client directory).
 HOST_DEPENDENT = {
     ("doctor",): "Go doctor exit/report depend on the host: on Windows a missing client-config parent "
                  "directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as "
-                 "missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0).",
+                 "missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); "
+                 "the Windows bytes are derived from the Go source, not a recorded Windows capture.",
 }
 # Hand-annotated Rust owners of the Go library packages; existence is verified.
 RUST_OWNERS = {

@@ -56,7 +56,7 @@ var (
 	osArchLine    = regexp.MustCompile(`(OS/Arch:\s+)\S+`)
 )
 
-func runCase(root, id string, setup func(string) error) (string, int, error) {
+func runCase(root, id string, clientDirs bool, setup func(string) error) (string, int, error) {
 	caseRoot := filepath.Join(root, id)
 	if err := os.RemoveAll(caseRoot); err != nil {
 		return "", 0, fmt.Errorf("remove %s: %w", caseRoot, err)
@@ -68,15 +68,17 @@ func runCase(root, id string, setup func(string) error) (string, int, error) {
 		return "", 0, fmt.Errorf("mkdir data: %w", err)
 	}
 	home := filepath.Join(caseRoot, "home")
-	for _, relative := range []string{
-		".config/hermes",
-		".cursor",
-		".vscode",
-		".config/opencode",
-		".config/claude",
-	} {
-		if err := os.MkdirAll(filepath.Join(home, relative), 0o755); err != nil {
-			return "", 0, fmt.Errorf("mkdir discovery source: %w", err)
+	if clientDirs {
+		for _, relative := range []string{
+			".config/hermes",
+			".cursor",
+			".vscode",
+			".config/opencode",
+			".config/claude",
+		} {
+			if err := os.MkdirAll(filepath.Join(home, relative), 0o755); err != nil {
+				return "", 0, fmt.Errorf("mkdir discovery source: %w", err)
+			}
 		}
 	}
 	if err := setup(caseRoot); err != nil {
@@ -105,8 +107,8 @@ func buildSuite() doctorSuite {
 	defer os.RemoveAll(root)
 
 	var cases []doctorCase
-	add := func(id, setup string, fn func(string) error) {
-		output, exit, err := runCase(root, id, fn)
+	addWith := func(clientDirs bool, id, setup string, fn func(string) error) {
+		output, exit, err := runCase(root, id, clientDirs, fn)
 		if err != nil {
 			panic(err)
 		}
@@ -117,6 +119,8 @@ func buildSuite() doctorSuite {
 			OutputJSON: string(mustJSON(output)),
 		})
 	}
+
+	add := func(id, setup string, fn func(string) error) { addWith(true, id, setup, fn) }
 
 	add("empty_machine", "no config file, no audit log, no discovered servers", func(root string) error { return nil })
 
@@ -175,6 +179,12 @@ path = %q
 		}
 		return os.WriteFile(cursor, []byte(`{"mcpServers":{"server-with-secret":{"command":"/usr/bin/env","env":{"SECRET_KEY":"literal"}}}}`), 0o644)
 	})
+
+	// The only case that does not pre-create the client config directories: every discovery source
+	// has a missing parent. Unix skips them as missing files (exit 0); on Windows the same read is
+	// ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not recognise, so the Windows CI
+	// leg records Go's real `mcp servers error: discovery: ...` row and exit 1.
+	addWith(false, "missing_client_parents", "no client config directories exist below HOME (Windows: ERROR_PATH_NOT_FOUND discovery error, exit 1)", func(root string) error { return nil })
 
 	return doctorSuite{
 		Cases:  cases,

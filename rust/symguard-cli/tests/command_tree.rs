@@ -111,22 +111,115 @@ fn host_dependent(probe: &Value) -> bool {
         .is_some_and(|reason| !reason.is_empty())
 }
 
-/// Host-dependent probes (Go `doctor`) are recorded on Unix. Off Unix the Go report legitimately
-/// differs (a missing client-config parent directory is `ERROR_PATH_NOT_FOUND`, which Go's
-/// string-based discovery check reports, exit 1), so only the invariants common to every host are
-/// checked here; the Windows doctor bytes are asserted against the host-recorded doctor oracle.
-fn compare_host_invariants(probe: &Value, observed: &Observed) -> Result<(), String> {
-    let args = strings(&probe["args"]);
-    if !matches!(observed.code, 0 | 1) {
-        return Err(format!("{args:?}: exit code {} outside 0/1", observed.code));
+/// Go `doctor/command.go` row for an empty discovery result (the recorded Unix capture).
+const UNIX_MCP_ROW: &str = "  mcp servers      none discovered\n";
+/// Go `doctor/command.go` closing line when `problems == 0` (the recorded Unix capture).
+const UNIX_PASS_LINE: &str =
+    "All basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n";
+/// Go `doctor/command.go` closing line for `problems == 1` (`fmt.Fprintf("%d issue(s) found...")`).
+const WINDOWS_ISSUE_LINE: &str = "1 issue(s) found. See details above.\n";
+/// Stands for the one row whose OS wording is free; see [`error_row_matches`].
+const ERROR_ROW_PLACEHOLDER: &str = "  mcp servers      error: <discovery error>\n";
+
+/// Derives the stdout Go's `doctor` prints on Windows for the replay's empty HOME from the
+/// recorded Unix stdout, by exactly the two rewrites its source dictates: the `mcp servers` row
+/// becomes the `error:` row (`report("mcp servers", "error: ...", true)`) and, because that counts
+/// one problem, the closing line becomes `1 issue(s) found. See details above.`.
+/// The error row is returned as [`ERROR_ROW_PLACEHOLDER`] because its OS text is host-specific.
+fn windows_expected_stdout(recorded_unix: &str) -> Result<String, String> {
+    if recorded_unix.matches(UNIX_MCP_ROW).count() != 1 {
+        return Err("recorded stdout lacks exactly one `mcp servers none discovered` row".into());
     }
-    if !observed.stdout.starts_with("symguard doctor\n") {
-        return Err(format!("{args:?}: not a doctor report"));
+    if recorded_unix.matches(UNIX_PASS_LINE).count() != 1
+        || !recorded_unix.ends_with(UNIX_PASS_LINE)
+    {
+        return Err(
+            "recorded stdout does not end with the single `All basic checks passed` line".into(),
+        );
+    }
+    let rewritten = recorded_unix.replacen(UNIX_MCP_ROW, ERROR_ROW_PLACEHOLDER, 1);
+    let body = rewritten.strip_suffix(UNIX_PASS_LINE).unwrap_or(&rewritten);
+    Ok(format!("{body}{WINDOWS_ISSUE_LINE}"))
+}
+
+/// Hand-written equivalent of the regex
+/// `^  mcp servers      error: discovery: hermes \(<root>[\\/]home[\\/]\.config[\\/]hermes[\\/]config\.json\): \[unsupported\] read failed: open .+: .+$`
+/// applied to one line without its newline. Everything after `open ` (the path and the Windows
+/// `ERROR_PATH_NOT_FOUND` text) is free wording, as documented at `guard_scan::io_detail`.
+fn error_row_matches(line: &str) -> bool {
+    let Some(mut rest) = line.strip_prefix("  mcp servers      error: discovery: hermes (<root>")
+    else {
+        return false;
+    };
+    for part in ["home", ".config", "hermes", "config.json"] {
+        let Some(after) = rest
+            .strip_prefix(['\\', '/'])
+            .and_then(|after| after.strip_prefix(part))
+        else {
+            return false;
+        };
+        rest = after;
+    }
+    let Some(tail) = rest.strip_prefix("): [unsupported] read failed: open ") else {
+        return false;
+    };
+    !tail.contains(['\n', '\r'])
+        && tail
+            .match_indices(": ")
+            .any(|(at, _)| at >= 1 && at + 2 < tail.len())
+}
+
+/// Masked byte comparison of a Windows `doctor` run: exit 1, empty stderr, and stdout equal to the
+/// Go-derived [`windows_expected_stdout`] (both sides through [`without_runtime_lines`]) except the
+/// error row, which must satisfy [`error_row_matches`]. Pure, so it is unit-tested on every host.
+fn compare_windows_doctor(recorded_unix: &str, observed: &Observed) -> Result<(), String> {
+    if observed.code != 1 {
+        return Err(format!("exit code {} (Go exits 1)", observed.code));
     }
     if !observed.stderr.is_empty() {
-        return Err(format!("{args:?}: unexpected stderr"));
+        return Err("unexpected stderr".into());
+    }
+    let expected = without_runtime_lines(&windows_expected_stdout(recorded_unix)?);
+    let actual = without_runtime_lines(&observed.stdout);
+    let (expected, actual): (Vec<&str>, Vec<&str>) = (
+        expected.split_inclusive('\n').collect(),
+        actual.split_inclusive('\n').collect(),
+    );
+    if expected.len() != actual.len() {
+        return Err(format!(
+            "stdout has {} lines, expected {}",
+            actual.len(),
+            expected.len()
+        ));
+    }
+    for (want, got) in expected.iter().zip(&actual) {
+        let same = if *want == ERROR_ROW_PLACEHOLDER {
+            got.strip_suffix('\n').is_some_and(error_row_matches)
+        } else {
+            want == got
+        };
+        if !same {
+            return Err(format!("stdout line {got:?} differs from {want:?}"));
+        }
     }
     Ok(())
+}
+
+/// Host-dependent probes (Go `doctor`) are recorded on Unix. Off Unix Go itself reports a missing
+/// client-config parent directory as `ERROR_PATH_NOT_FOUND`, which its string-based discovery check
+/// does not skip, so the empty-HOME probe exits 1 with an `mcp servers error` row. That output is
+/// derived from the Go source (`doctor/command.go`, `discovery.containsNotExist`) and is NOT covered
+/// by a recorded Windows capture of this replay (the Windows CI leg of the `missing_client_parents`
+/// doctor-oracle case records Go's real bytes for the shared handler, pending that run). Off Unix
+/// the recorded Unix bytes are therefore rewritten by exactly the two source-derived edits and
+/// compared byte-for-byte, see [`compare_windows_doctor`].
+fn compare_host_invariants(probe: &Value, observed: &Observed) -> Result<(), String> {
+    let args = strings(&probe["args"]);
+    if probe["exit_code"].as_i64() != Some(0) {
+        return Err(format!("{args:?}: recorded Unix capture is not exit 0"));
+    }
+    compare_windows_doctor(probe["stdout"].as_str().unwrap(), observed)
+        .map_err(|error| format!("{args:?}: {error}"))
 }
 
 /// `Err` names the first difference between the recorded Go probe and the observed Rust process.
@@ -168,88 +261,188 @@ fn every_go_probe_matches_the_native_process() {
         "inventory shrank to {} probes",
         probes.len()
     );
-    let relaxed = probes.iter().filter(|probe| host_dependent(probe)).count();
-    let mut exact = 0;
-    let failures: Vec<String> = probes
+    let recorded: Vec<&Value> = probes
         .iter()
-        .filter_map(|probe| {
-            let observed = run(&strings(&probe["args"]));
-            if !host_dependent(probe) || cfg!(unix) {
-                exact += 1;
-            }
-            compare(probe, &observed).err()
-        })
+        .filter(|probe| host_dependent(probe))
         .collect();
-    assert!(failures.is_empty(), "{failures:#?}");
-    // Only the generator-recorded host-dependent probes (the doctor paths) may skip the byte-exact
-    // comparison, and only off Unix: everything else, and every probe on Unix, is compared exactly.
-    assert!(relaxed >= 1, "generator recorded no host-dependent probe");
+    assert_eq!(
+        recorded.len(),
+        7,
+        "generator-recorded host-dependent probes"
+    );
+    // Only the doctor paths may skip the byte-exact comparison, and only off Unix.
     assert!(
-        probes
+        recorded
             .iter()
-            .filter(|probe| host_dependent(probe))
             .all(|probe| strings(&probe["owner"]) == ["doctor"]),
         "only doctor probes may be host-dependent"
     );
-    let expected = if cfg!(unix) {
-        probes.len()
-    } else {
-        probes.len() - relaxed
-    };
-    assert_eq!(exact, expected, "byte-exact probe count");
-    assert!(exact >= 73, "byte-exact probes shrank to {exact}");
+    let failures: Vec<String> = probes
+        .iter()
+        .filter_map(|probe| compare(probe, &run(&strings(&probe["args"]))).err())
+        .collect();
+    assert!(failures.is_empty(), "{failures:#?}");
+    let relaxed = if cfg!(unix) { 0 } else { recorded.len() };
+    let exact = probes.len() - relaxed;
+    let (want_exact, want_relaxed) = if cfg!(unix) { (80, 0) } else { (73, 7) };
+    assert_eq!(relaxed, want_relaxed, "relaxed probe count");
+    assert_eq!(exact, want_exact, "byte-exact probe count");
+}
+
+/// The error row Go prints on Windows for the replay's empty HOME (OS text from the Windows SDK).
+const WINDOWS_ERROR_ROW: &str = "  mcp servers      error: discovery: hermes (<root>\\home\\.config\\hermes\\config.json): [unsupported] read failed: open <root>\\home\\.config\\hermes\\config.json: The system cannot find the path specified.\n";
+
+/// A Windows `doctor` stdout built independently of [`windows_expected_stdout`] from Go's source.
+fn simulated_windows_stdout(recorded_unix: &str) -> String {
+    recorded_unix
+        .replace(UNIX_MCP_ROW, WINDOWS_ERROR_ROW)
+        .replace(UNIX_PASS_LINE, WINDOWS_ISSUE_LINE)
+        .replace("Toolchain: <actual>", "Toolchain: rustc 9.9.9")
+        .replace("OS/Arch:   <os-arch>", "OS/Arch:   windows/amd64")
+}
+
+fn observed(code: i32, stdout: impl AsRef<str>, stderr: &str) -> Observed {
+    Observed {
+        code,
+        stdout: stdout.as_ref().to_owned(),
+        stderr: stderr.to_owned(),
+    }
+}
+
+/// Deviations from the Go-derived Windows `doctor` output; each must be rejected off Unix.
+fn negative_controls(windows: &str) -> Vec<(&'static str, Observed)> {
+    vec![
+        ("exit 0", observed(0, windows, "")),
+        ("exit 2", observed(2, windows, "")),
+        ("extra stderr", observed(1, windows, "boom\n")),
+        ("empty stdout", observed(1, "", "")),
+        (
+            "changed config row",
+            observed(
+                1,
+                windows.replace(
+                    "config           not configured (no config file found)",
+                    "config           ok",
+                ),
+                "",
+            ),
+        ),
+        (
+            "missing issue line",
+            observed(1, windows.replace(WINDOWS_ISSUE_LINE, ""), ""),
+        ),
+        (
+            "pass line kept",
+            observed(1, windows.replace(WINDOWS_ISSUE_LINE, UNIX_PASS_LINE), ""),
+        ),
+        (
+            "wrong issue count",
+            observed(
+                1,
+                windows.replace(WINDOWS_ISSUE_LINE, "2 issue(s) found. See details above.\n"),
+                "",
+            ),
+        ),
+        (
+            "wrong client name",
+            observed(
+                1,
+                windows.replace("discovery: hermes (", "discovery: cursor ("),
+                "",
+            ),
+        ),
+        (
+            "unrecognised path",
+            observed(1, windows.replace("config.json)", "mcp.json)"), ""),
+        ),
+        (
+            "no error row",
+            observed(1, windows.replace(WINDOWS_ERROR_ROW, UNIX_MCP_ROW), ""),
+        ),
+        (
+            "empty OS wording",
+            observed(
+                1,
+                windows.replace(
+                    "config.json: The system cannot find the path specified.",
+                    "config.json: ",
+                ),
+                "",
+            ),
+        ),
+        (
+            "extra row",
+            observed(
+                1,
+                windows.replace(
+                    WINDOWS_ERROR_ROW,
+                    &format!("{WINDOWS_ERROR_ROW}  extra           x\n"),
+                ),
+                "",
+            ),
+        ),
+    ]
 }
 
 #[test]
 fn host_dependence_only_relaxes_doctor_probes_off_unix() {
     let inventory = fixture();
     let probes = inventory["probes"].as_array().unwrap();
-    let windows_doctor = Observed {
-        code: 1,
-        stdout: "symguard doctor\n\n  mcp servers      error: discovery: read failed\n".to_owned(),
-        stderr: String::new(),
-    };
     let doctor = probes
         .iter()
         .find(|probe| strings(&probe["args"]) == ["doctor"])
         .unwrap();
-    // The Unix capture exits 0; a Windows host exits 1. Unix keeps the exact comparison.
-    assert!(compare_on(doctor, &windows_doctor, true).is_err());
-    assert!(compare_on(doctor, &windows_doctor, false).is_ok());
-    // The relaxation still rejects anything that is not a doctor report on any host.
-    for broken in [
-        Observed {
-            code: 2,
-            stdout: windows_doctor.stdout.clone(),
-            stderr: String::new(),
-        },
-        Observed {
-            code: 1,
-            stdout: String::new(),
-            stderr: String::new(),
-        },
-        Observed {
-            code: 1,
-            stdout: windows_doctor.stdout.clone(),
-            stderr: "boom\n".to_owned(),
-        },
-    ] {
+    let recorded = doctor["stdout"].as_str().unwrap();
+    let windows = simulated_windows_stdout(recorded);
+    assert_ne!(windows, recorded);
+    let good = observed(1, &windows, "");
+
+    // Every host-dependent probe accepts the Go-derived Windows output off Unix; Unix keeps the
+    // byte-exact comparison and rejects it.
+    for probe in probes.iter().filter(|probe| host_dependent(probe)) {
+        let stdout = simulated_windows_stdout(probe["stdout"].as_str().unwrap());
+        let windows_run = observed(1, &stdout, "");
+        assert_eq!(compare_on(probe, &windows_run, false), Ok(()));
+        assert!(compare_on(probe, &windows_run, true).is_err());
+    }
+    // Forward slashes and other OS wording in the free part are accepted.
+    let slashes = windows.replace(
+        WINDOWS_ERROR_ROW,
+        "  mcp servers      error: discovery: hermes (<root>/home/.config/hermes/config.json): [unsupported] read failed: open <root>/home/.config/hermes/config.json: No such file or directory\n",
+    );
+    assert_eq!(
+        compare_on(doctor, &observed(1, &slashes, ""), false),
+        Ok(())
+    );
+
+    // Negative controls: each deviation fails off Unix.
+    let broken = negative_controls(&windows);
+    for (name, run) in &broken {
         assert!(
-            compare_on(doctor, &broken, false).is_err(),
-            "relaxed too far"
+            compare_on(doctor, run, false).is_err(),
+            "{name}: relaxed too far"
         );
     }
+
+    // The rewrite is a pure function of the recorded bytes and refuses anything else.
+    assert_eq!(
+        windows_expected_stdout(recorded)
+            .unwrap()
+            .matches(ERROR_ROW_PLACEHOLDER)
+            .count(),
+        1
+    );
+    assert!(windows_expected_stdout(&recorded.replace(UNIX_MCP_ROW, "")).is_err());
+    assert!(windows_expected_stdout(&recorded.replace(UNIX_PASS_LINE, "")).is_err());
+    assert!(compare_windows_doctor("not a doctor report", &good).is_err());
+
     // A non-doctor probe is never relaxed: a drifting exit code fails on every host.
     let scan = probes
         .iter()
         .find(|probe| strings(&probe["args"]) == ["scan", "--help"])
         .unwrap();
     assert!(!host_dependent(scan));
-    let drifted = Observed {
-        code: 1,
-        stdout: String::new(),
-        stderr: String::new(),
-    };
+    let drifted = observed(1, "", "");
     assert!(compare_on(scan, &drifted, false).is_err());
     assert!(compare_on(scan, &drifted, true).is_err());
 }
