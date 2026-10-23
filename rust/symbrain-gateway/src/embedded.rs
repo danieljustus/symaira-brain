@@ -6,14 +6,32 @@ mod common;
 mod memory;
 mod memory_catalog;
 mod skills;
+mod skills_catalog;
+mod skills_config;
+mod skills_tools;
 
 use crate::{Gateway, GatewayError, GatewayResponse};
 use serde_json::{Value, json};
 use symbrain_mcp::DispatchContext;
 
 pub(crate) use catalog::{exposed_native, exposed_skills};
+pub(crate) use skills_tools::handles as is_profile_or_versioning_tool;
 
 impl Gateway {
+    /// Profile, discovery and per-skill versioning tools: they decode the raw
+    /// `arguments` member themselves (Go's typed `json.Unmarshal`).
+    pub(crate) fn handle_skills_versioning(
+        id: Value,
+        name: &str,
+        raw: Option<&serde_json::value::RawValue>,
+        context: DispatchContext<'_>,
+    ) -> Result<GatewayResponse, GatewayError> {
+        common::check_cancel(context)?;
+        let response = skills_tools::response(id, name, raw)?;
+        common::check_cancel(context)?;
+        Ok(response)
+    }
+
     pub(crate) fn handle_embedded(
         &self,
         id: Value,
