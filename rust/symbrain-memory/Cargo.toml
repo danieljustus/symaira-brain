@@ -17,7 +17,7 @@ hyper-util = { version = "=0.1.21", features = ["tokio"] }
 http-body-util = "=0.1.5"
 bytes = "=1.12.1"
 percent-encoding = "=2.3.2"
-tokio = { version = "=1.53.1", features = ["rt-multi-thread", "net", "time", "signal", "sync", "macros"] }
+tokio = { version = "=1.53.3", features = ["rt-multi-thread", "net", "time", "signal", "sync", "macros"] }
 chrono.workspace = true
 rusqlite.workspace = true
 serde.workspace = true
