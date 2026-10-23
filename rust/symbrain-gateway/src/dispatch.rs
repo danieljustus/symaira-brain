@@ -14,6 +14,22 @@ impl Gateway {
         context: DispatchContext<'_>,
     ) -> Result<GatewayResponse, GatewayError> {
         let started = Instant::now();
+        if let Some(call) = symbrain_mcp::raw_skills_params(params) {
+            // Ordered outer Skills admission: complete syntax and the first
+            // typed envelope error are decided before any handler can run.
+            let (name, raw_arguments) = match call {
+                Ok(call) => call,
+                Err(message) => return Ok(self.invalid_call(id, started, message)),
+            };
+            if self.skills_tool_names.iter().any(|tool| tool == &name) {
+                let mut fields = serde_json::Map::new();
+                fields.insert(
+                    "arguments".to_string(),
+                    symbrain_mcp::raw_skills_arguments(raw_arguments.as_deref()),
+                );
+                return self.handle_embedded_call(id, &name, &fields, context, started);
+            }
+        }
         let params = match decode_params(params) {
             Ok(params) => params,
             Err(message) => return Ok(self.invalid_call(id, started, message)),

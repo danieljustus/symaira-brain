@@ -47,7 +47,10 @@ SOURCE_HASHES = {
     # `peek_command` and `is_output_command` are untouched and qualify() still
     # compares them byte-for-byte with the parent.
     CLI: "34d8435b6a095e151b6a723b22404a9788a55ba9484ebfd164737477f274dc66",
-    CORE: GUARD_CORE_HASH,
+    # Reviewed after #764 slice a: symbrain-core/src/lib.rs only gains
+    # `pub mod go_json_float;` (the Go float64 parser used by the raw Skills
+    # layer). No owner early-output block or inherited error text changes.
+    CORE: "30a4a1014ca860498705f6632473f47df05cd115237ed6d0ae025a94cf88d263",
     OUTPUT: "b0b663cacd0d38c47d8198550dce40af6af8f312733c9eaad5c2b67a9f4ab9c1",
 }
 PROFILES = {

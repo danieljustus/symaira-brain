@@ -464,6 +464,41 @@ three-OS CI at the final candidate head remains required. Dynamic config and
 unqualified multi-target CLI fallback remain part of #764.
 
 
+### Skills MCP raw JSON/EOF transport layer (#764 slice a)
+
+Salvaged from the unmerged PR #813 (head 578d201f5) and adapted to current main:
+the exact Go `encoding/json` outer-error layer for `tools/call` requests that
+name one of Go's eleven Skills tools, in both line and Content-Length framing.
+It validates complete syntax (nesting limit 10000, number grammar, escapes,
+literals) before typed fields, reports Go's first ordered `name`/`_meta`/
+`jsonrpc`/`method` type error, reproduces the active-token EOF errors, converts
+`_meta` numbers with the Go 1.26.7 float64 algorithm (a private copy in
+`symbrain-core::go_json_float`) and repairs lone surrogates/invalid UTF-8 in
+strings. `symbrain-gateway` consults it before `decode_params`, so malformed or
+typed-invalid Skills calls never reach a handler; admitted calls for the six
+tools main implements receive their arguments with those repairs and with
+ignored out-of-range numbers no longer failing the call.
+
+Evidence is local: `scripts/skills-native-oracle/raw_layer_oracle.py` records
+330 cases from the real Go `symbrain mcp` (pinned ref 9bf83c3f2, Go 1.26.7) into
+`rust/symbrain-cli/tests/fixtures/skills_raw_go_oracle.json`, and
+`skills_raw_oracle` replays them natively; `record`/`check` prove the fixture
+equals Go's actual replies; this needs `GOTOOLCHAIN=go1.26.7` (#912). 326 of
+the 330 cases match. Four recorded cases whose `name` is not a Skills tool
+represent a wider class: every `tools/call` whose name is not one of the eleven
+Skills tools (other tool names with typed `_meta` errors, a missing name, `name`
+as array or number, non-object params) still uses the inherited generic decoder
+and diverges from Go's outer error. The four are asserted to differ, not how.
+Native
+Linux/macOS/Windows CI is pending. The #813 `skills_raw_transport` failure at
+line 68 was not a layer defect: under `cargo llvm-cov` the test's `env_clear`
+dropped `LLVM_PROFILE_FILE`, so the instrumented child wrote a `.profraw` into
+the isolated tree whose immutability the test asserts; the test now forwards
+the collector path. Not included (open owner/other slices): the five remaining
+Skills tools, handler-level typed argument decoding, the vendored YAML fork and
+the #834 startup-state changes. Decisions: `docs/adr/skills-native-raw-transport-764.md`.
+
+
 ### Skills sync Windows raw argv follow-up (#793 / #794)
 
 Source preparation corrects the earlier Windows replacement assumption: pinned
