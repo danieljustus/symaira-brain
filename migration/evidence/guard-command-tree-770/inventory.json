@@ -1,0 +1,1433 @@
+{
+  "oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "go_toolchain": "go1.26.7",
+  "dispatcher_words": [
+    "--help",
+    "-h",
+    "decide",
+    "doctor",
+    "grants",
+    "help",
+    "scan",
+    "version"
+  ],
+  "command_packages": [
+    "decide",
+    "doctor",
+    "grants",
+    "scan",
+    "version"
+  ],
+  "update_check_invoked_by_any_command": false,
+  "tree": [
+    {
+      "path": [],
+      "kind": "root",
+      "children": [
+        "version",
+        "doctor",
+        "decide",
+        "grants",
+        "scan"
+      ],
+      "builtin_help": true,
+      "help_exit": 0,
+      "help_flag_ignored": false,
+      "help_text": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "package_flags": []
+    },
+    {
+      "path": [
+        "decide"
+      ],
+      "kind": "command",
+      "children": [],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": false,
+      "help_text": "Usage:\n  symguard decide < request.json\n\nReads one JSON decision request from stdin and writes the JSON decision\nto stdout:\n\n  request:  {\"command\": \"...\", \"risk_class\": \"low|medium|high|critical\",\n             \"domain\": \"...\", \"warnings\": [\"...\"]}\n  response: {\"decision\": \"allow|confirm|deny\", \"reason\": \"...\"}\n\nAny error produces decision \"deny\" with an explanatory reason.\n",
+      "package_flags": [
+        {
+          "name": "--help",
+          "takes_value": false,
+          "advertised": false
+        },
+        {
+          "name": "-h",
+          "takes_value": false,
+          "advertised": false
+        }
+      ]
+    },
+    {
+      "path": [
+        "doctor"
+      ],
+      "kind": "command",
+      "children": [],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": true,
+      "help_text": null,
+      "package_flags": []
+    },
+    {
+      "path": [
+        "grants"
+      ],
+      "kind": "command",
+      "children": [
+        "list",
+        "revoke"
+      ],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": false,
+      "help_text": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "package_flags": [
+        {
+          "name": "--all",
+          "takes_value": false,
+          "advertised": true
+        },
+        {
+          "name": "--help",
+          "takes_value": false,
+          "advertised": true
+        },
+        {
+          "name": "-h",
+          "takes_value": false,
+          "advertised": true
+        }
+      ]
+    },
+    {
+      "path": [
+        "grants",
+        "list"
+      ],
+      "kind": "subcommand",
+      "children": [],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": true,
+      "help_text": null,
+      "package_flags": [
+        {
+          "name": "--all",
+          "takes_value": false,
+          "advertised": true
+        },
+        {
+          "name": "--help",
+          "takes_value": false,
+          "advertised": true
+        },
+        {
+          "name": "-h",
+          "takes_value": false,
+          "advertised": true
+        }
+      ]
+    },
+    {
+      "path": [
+        "grants",
+        "revoke"
+      ],
+      "kind": "subcommand",
+      "children": [],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": false,
+      "help_text": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "package_flags": [
+        {
+          "name": "--all",
+          "takes_value": false,
+          "advertised": true
+        },
+        {
+          "name": "--help",
+          "takes_value": false,
+          "advertised": true
+        },
+        {
+          "name": "-h",
+          "takes_value": false,
+          "advertised": true
+        }
+      ]
+    },
+    {
+      "path": [
+        "scan"
+      ],
+      "kind": "command",
+      "children": [],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": false,
+      "help_text": "Usage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "package_flags": [
+        {
+          "name": "--format",
+          "takes_value": true,
+          "advertised": true
+        },
+        {
+          "name": "--help",
+          "takes_value": false,
+          "advertised": false
+        },
+        {
+          "name": "-h",
+          "takes_value": false,
+          "advertised": false
+        }
+      ]
+    },
+    {
+      "path": [
+        "version"
+      ],
+      "kind": "command",
+      "children": [],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": true,
+      "help_text": null,
+      "package_flags": [
+        {
+          "name": "--json",
+          "takes_value": false,
+          "advertised": false
+        }
+      ]
+    },
+    {
+      "path": [
+        "help"
+      ],
+      "kind": "builtin",
+      "children": [],
+      "builtin_help": false,
+      "help_exit": 0,
+      "help_flag_ignored": false,
+      "help_text": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "package_flags": []
+    }
+  ],
+  "library_packages": [
+    {
+      "package": "approval",
+      "import_reachable_from_dispatcher": false,
+      "imported_by_command_packages": [],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symbrain-guard-core/src/approval.rs"
+      ]
+    },
+    {
+      "package": "archguard",
+      "import_reachable_from_dispatcher": false,
+      "imported_by_command_packages": [],
+      "command_path": false,
+      "rust_owners": []
+    },
+    {
+      "package": "audit",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "decide",
+        "doctor"
+      ],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symbrain-guard-core/src/audit.rs",
+        "rust/symbrain-audit"
+      ]
+    },
+    {
+      "package": "capability",
+      "import_reachable_from_dispatcher": false,
+      "imported_by_command_packages": [],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symbrain-guard-core/src/capability.rs"
+      ]
+    },
+    {
+      "package": "config",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "decide",
+        "doctor"
+      ],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symguard-cli/src/doctor/config.rs",
+        "rust/symguard-cli/src/guard_scan_config.rs"
+      ]
+    },
+    {
+      "package": "discovery",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "doctor",
+        "scan"
+      ],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symguard-cli/src/guard_scan.rs"
+      ]
+    },
+    {
+      "package": "grant",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "grants"
+      ],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symbrain-guard-core/src/grant.rs",
+        "rust/symguard-cli/src/guard_grants_store.rs"
+      ]
+    },
+    {
+      "package": "model",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "decide"
+      ],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symbrain-guard-core/src/model.rs"
+      ]
+    },
+    {
+      "package": "output",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "scan"
+      ],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symguard-cli/src/guard_scan.rs"
+      ]
+    },
+    {
+      "package": "policy",
+      "import_reachable_from_dispatcher": false,
+      "imported_by_command_packages": [],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symbrain-guard-core/src/policy.rs"
+      ]
+    },
+    {
+      "package": "proposal",
+      "import_reachable_from_dispatcher": false,
+      "imported_by_command_packages": [],
+      "command_path": false,
+      "rust_owners": []
+    },
+    {
+      "package": "sequence",
+      "import_reachable_from_dispatcher": false,
+      "imported_by_command_packages": [],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symbrain-guard-core/src/sequence.rs"
+      ]
+    },
+    {
+      "package": "spawn",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "doctor"
+      ],
+      "command_path": false,
+      "rust_owners": [
+        "rust/symguard-cli/src/guard_doctor.rs"
+      ]
+    },
+    {
+      "package": "update",
+      "import_reachable_from_dispatcher": true,
+      "imported_by_command_packages": [
+        "version"
+      ],
+      "command_path": false,
+      "rust_owners": []
+    }
+  ],
+  "probes": [
+    {
+      "args": [],
+      "owner": [],
+      "exit_code": 2,
+      "stdout": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "--help"
+      ],
+      "owner": [],
+      "exit_code": 0,
+      "stdout": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "-h"
+      ],
+      "owner": [],
+      "exit_code": 0,
+      "stdout": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "no-such-word"
+      ],
+      "owner": [],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "symguard: unknown command \"no-such-word\"\n\nsymguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "--no-such-flag"
+      ],
+      "owner": [],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "symguard: unknown command \"--no-such-flag\"\n\nsymguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "--help",
+        "positional-x"
+      ],
+      "owner": [],
+      "exit_code": 0,
+      "stdout": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "-"
+      ],
+      "owner": [],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "symguard: unknown command \"-\"\n\nsymguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "--"
+      ],
+      "owner": [],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "symguard: unknown command \"--\"\n\nsymguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "help"
+      ],
+      "owner": [
+        "help"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "help",
+        "positional-x"
+      ],
+      "owner": [
+        "help"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "help",
+        "--help"
+      ],
+      "owner": [
+        "help"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "decide"
+      ],
+      "owner": [
+        "decide"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"decision\":\"deny\",\"reason\":\"decide: empty request\"}\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "decide",
+        "--help"
+      ],
+      "owner": [
+        "decide"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard decide < request.json\n\nReads one JSON decision request from stdin and writes the JSON decision\nto stdout:\n\n  request:  {\"command\": \"...\", \"risk_class\": \"low|medium|high|critical\",\n             \"domain\": \"...\", \"warnings\": [\"...\"]}\n  response: {\"decision\": \"allow|confirm|deny\", \"reason\": \"...\"}\n\nAny error produces decision \"deny\" with an explanatory reason.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "decide",
+        "-h"
+      ],
+      "owner": [
+        "decide"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard decide < request.json\n\nReads one JSON decision request from stdin and writes the JSON decision\nto stdout:\n\n  request:  {\"command\": \"...\", \"risk_class\": \"low|medium|high|critical\",\n             \"domain\": \"...\", \"warnings\": [\"...\"]}\n  response: {\"decision\": \"allow|confirm|deny\", \"reason\": \"...\"}\n\nAny error produces decision \"deny\" with an explanatory reason.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "decide",
+        "help"
+      ],
+      "owner": [
+        "decide"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"decision\":\"deny\",\"reason\":\"decide: empty request\"}\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "decide",
+        "no-such-word"
+      ],
+      "owner": [
+        "decide"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"decision\":\"deny\",\"reason\":\"decide: empty request\"}\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "decide",
+        "--no-such-flag"
+      ],
+      "owner": [
+        "decide"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"decision\":\"deny\",\"reason\":\"decide: empty request\"}\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "decide",
+        "--"
+      ],
+      "owner": [
+        "decide"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"decision\":\"deny\",\"reason\":\"decide: empty request\"}\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "doctor"
+      ],
+      "owner": [
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+      "stderr": "",
+      "root_dependent": false,
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
+    },
+    {
+      "args": [
+        "doctor",
+        "--help"
+      ],
+      "owner": [
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+      "stderr": "",
+      "root_dependent": false,
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
+    },
+    {
+      "args": [
+        "doctor",
+        "-h"
+      ],
+      "owner": [
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+      "stderr": "",
+      "root_dependent": false,
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
+    },
+    {
+      "args": [
+        "doctor",
+        "help"
+      ],
+      "owner": [
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+      "stderr": "",
+      "root_dependent": false,
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
+    },
+    {
+      "args": [
+        "doctor",
+        "no-such-word"
+      ],
+      "owner": [
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+      "stderr": "",
+      "root_dependent": false,
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
+    },
+    {
+      "args": [
+        "doctor",
+        "--no-such-flag"
+      ],
+      "owner": [
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+      "stderr": "",
+      "root_dependent": false,
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
+    },
+    {
+      "args": [
+        "doctor",
+        "--"
+      ],
+      "owner": [
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   <os-arch>\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+      "stderr": "",
+      "root_dependent": false,
+      "host_dependent_reason": "Go doctor exit/report depend on the host: on Windows a missing client-config parent directory is ERROR_PATH_NOT_FOUND, which discovery.containsNotExist does not treat as missing, so the empty-HOME probe exits 1 with an `mcp servers error` row (Unix: exit 0); the Windows bytes are derived from the Go source, not a recorded Windows capture."
+    },
+    {
+      "args": [
+        "grants"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "--help"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "-h"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "help"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "no-such-word"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "unknown grants subcommand: no-such-word\n\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "--no-such-flag"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "unknown grants subcommand: --no-such-flag\n\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "--"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "unknown grants subcommand: --\n\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "--all"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "unknown grants subcommand: --all\n\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "--all",
+        "positional-x"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "unknown grants subcommand: --all\n\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "positional-x",
+        "--all"
+      ],
+      "owner": [
+        "grants"
+      ],
+      "exit_code": 0,
+      "stdout": "unknown grants subcommand: positional-x\n\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "--help"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "-h"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "help"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "no-such-word"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "--no-such-flag"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "--"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "--all"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "--all",
+        "positional-x"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "list",
+        "positional-x",
+        "--all"
+      ],
+      "owner": [
+        "grants",
+        "list"
+      ],
+      "exit_code": 0,
+      "stdout": "No active grants.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "grants revoke: missing grant ID or --all\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "--help"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "-h"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "help"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "grants: grant: not found: help\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "no-such-word"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "grants: grant: not found: no-such-word\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "--no-such-flag"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "grants revoke: unexpected flag \"--no-such-flag\"\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "--"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "grants revoke: unexpected flag \"--\"\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "--all"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "Revoked 0 grant(s).\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "--all",
+        "positional-x"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "grants revoke: --all cannot be combined with a grant ID\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "grants",
+        "revoke",
+        "positional-x",
+        "--all"
+      ],
+      "owner": [
+        "grants",
+        "revoke"
+      ],
+      "exit_code": 0,
+      "stdout": "grants revoke: --all cannot be combined with a grant ID\nUsage:\n  symguard grants list\n  symguard grants revoke <id> | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants <command> --help' for details.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"servers\": []\n}\n",
+      "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] <root>/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] <root>/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] <root>/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] <root>/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] <root>/home/Library/Application Support/Claude/claude_desktop_config.json: config file not found\n",
+      "root_dependent": true
+    },
+    {
+      "args": [
+        "scan",
+        "--help"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "-h"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 0,
+      "stdout": "Usage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "help"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: unknown argument \"help\"\nUsage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "no-such-word"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: unknown argument \"no-such-word\"\nUsage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "--no-such-flag"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: unknown argument \"--no-such-flag\"\nUsage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "--"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: unknown argument \"--\"\nUsage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "--format"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: --format requires a value (table or json)\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "--format",
+        "positional-x"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: unsupported format \"positional-x\" (supported: table, json)\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "positional-x",
+        "--format"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: unknown argument \"positional-x\"\nUsage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "scan",
+        "--format="
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"servers\": []\n}\n",
+      "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] <root>/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] <root>/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] <root>/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] <root>/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] <root>/home/Library/Application Support/Claude/claude_desktop_config.json: config file not found\n",
+      "root_dependent": true
+    },
+    {
+      "args": [
+        "scan",
+        "--format=json"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"servers\": []\n}\n",
+      "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] <root>/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] <root>/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] <root>/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] <root>/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] <root>/home/Library/Application Support/Claude/claude_desktop_config.json: config file not found\n",
+      "root_dependent": true
+    },
+    {
+      "args": [
+        "scan",
+        "--format=table"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 0,
+      "stdout": "Discovered 0 MCP server(s)\n",
+      "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] <root>/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] <root>/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] <root>/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] <root>/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] <root>/home/Library/Application Support/Claude/claude_desktop_config.json: config file not found\n",
+      "root_dependent": true
+    },
+    {
+      "args": [
+        "scan",
+        "--format",
+        "json"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"servers\": []\n}\n",
+      "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] <root>/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] <root>/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] <root>/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] <root>/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] <root>/home/Library/Application Support/Claude/claude_desktop_config.json: config file not found\n",
+      "root_dependent": true
+    },
+    {
+      "args": [
+        "scan",
+        "--format=no-such-word"
+      ],
+      "owner": [
+        "scan"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "scan: unsupported format \"no-such-word\" (supported: table, json)\n",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard dev\n  toolchain <actual>\n  os/arch <os-arch>\n  built   2026-01-01 (compile-time placeholder)\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "--help"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard dev\n  toolchain <actual>\n  os/arch <os-arch>\n  built   2026-01-01 (compile-time placeholder)\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "-h"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard dev\n  toolchain <actual>\n  os/arch <os-arch>\n  built   2026-01-01 (compile-time placeholder)\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "help"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard dev\n  toolchain <actual>\n  os/arch <os-arch>\n  built   2026-01-01 (compile-time placeholder)\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "no-such-word"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard dev\n  toolchain <actual>\n  os/arch <os-arch>\n  built   2026-01-01 (compile-time placeholder)\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "--no-such-flag"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard dev\n  toolchain <actual>\n  os/arch <os-arch>\n  built   2026-01-01 (compile-time placeholder)\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "--"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "symguard dev\n  toolchain <actual>\n  os/arch <os-arch>\n  built   2026-01-01 (compile-time placeholder)\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "--json"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"tool\":\"symguard\",\"version\":\"dev\",\"schema_version\":1}\n\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "--json",
+        "positional-x"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"tool\":\"symguard\",\"version\":\"dev\",\"schema_version\":1}\n\n",
+      "stderr": "",
+      "root_dependent": false
+    },
+    {
+      "args": [
+        "version",
+        "positional-x",
+        "--json"
+      ],
+      "owner": [
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"tool\":\"symguard\",\"version\":\"dev\",\"schema_version\":1}\n\n",
+      "stderr": "",
+      "root_dependent": false
+    }
+  ]
+}

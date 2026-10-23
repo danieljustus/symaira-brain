@@ -67,19 +67,22 @@ fn normalize_root_paths(value: &str) -> String {
 fn setup(id: &str, case_root: &Path) {
     fs::create_dir_all(case_root.join("home/.config/symguard")).unwrap();
     fs::create_dir_all(case_root.join("data/symguard")).unwrap();
-    for relative in [
-        "home/.config/hermes",
-        "home/.cursor",
-        "home/.vscode",
-        "home/.config/opencode",
-        "home/.config/claude",
-    ] {
-        fs::create_dir_all(case_root.join(relative)).unwrap();
+    // `missing_client_parents` is the one case that leaves every client directory absent.
+    if id != "missing_client_parents" {
+        for relative in [
+            "home/.config/hermes",
+            "home/.cursor",
+            "home/.vscode",
+            "home/.config/opencode",
+            "home/.config/claude",
+        ] {
+            fs::create_dir_all(case_root.join(relative)).unwrap();
+        }
     }
     let config = case_root.join("home/.config/symguard/config.toml");
     let log = case_root.join("data/symguard/audit.log");
     match id {
-        "empty_machine" => {}
+        "empty_machine" | "missing_client_parents" => {}
         "healthy_config" => {
             let command = toml_edit::Value::from(native_command().as_str()).to_string();
             fs::write(
@@ -152,7 +155,7 @@ fn run(case_root: &Path) -> Output {
 fn every_oracle_case_matches_native_go_bytes() {
     let suite = fixture();
     let cases = suite["cases"].as_array().expect("cases array");
-    assert_eq!(cases.len(), 9, "the frozen oracle scenario count changed");
+    assert_eq!(cases.len(), 10, "the frozen oracle scenario count changed");
     let temp = TempDir::new().unwrap();
     // The oracle rewrites its own mktemp root to <root>; macOS hands out
     // /var/... symlinks to /private/var/..., so canonicalize like it does.
@@ -205,6 +208,7 @@ fn every_oracle_case_matches_native_go_bytes() {
             "audit_log_corrupt_anchor",
             "discovered_server_denied",
             "discovered_server_secret_risk",
+            "missing_client_parents",
         ],
         "the set of natively handled cases changed"
     );
