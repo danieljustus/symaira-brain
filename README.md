@@ -8,7 +8,9 @@
 [![License](https://img.shields.io/github/license/danieljustus/symaira-brain)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26%2B-00ADD8)](go.mod)
 
-![symbrain doctor terminal output](assets/symbrain-doctor.svg)
+![Symaira Brain](docs/assets/social-preview.png)
+
+[Historical doctor capture (August 2026)](assets/symbrain-doctor.svg). This is not a current runtime check.
 
 `symbrain` is the portable agent-context layer for AI coding harnesses. It
 exposes the three Symaira *state cores* — credentials, memory/entities, and
@@ -736,6 +738,8 @@ Native SwiftUI apps for macOS and iOS are included in the repo. They use
 theme, CLI runner, and tool detection.
 
 ![SymBrain macOS dashboard](assets/dashboard.png)
+
+*Historical application screenshot, retained as documentation. It predates the Liquid Topography rollout and has not been restyled to imply a newer running build.*
 
 ### Build from source
 
