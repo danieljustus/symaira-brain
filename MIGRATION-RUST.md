@@ -500,15 +500,18 @@ rather than being re-derived. `XDG_CONFIG_HOME` is now honoured only when
 absolute, like `configkit.DefaultPath`, for every skills verb's config-file probe.
 
 Config probe and override hardening (review round 1). Go's `configkit.mergeFile`
-skips a config source only when `os.Stat` reports `ENOENT`; every other
-outcome (a directory, an unreadable or non-directory parent, a symlink loop) makes
-`config.Load()` fail and `loadSkillsEnv` replace the whole config, env overrides
-included, with the defaults. Native therefore requires both
-`$XDG_CONFIG_HOME|$HOME/.config/symskills/config.toml` and `./.symskills.toml` to be a
-verified `ENOENT` through `fs::metadata` (symlinks followed, so a dangling link is
-absent exactly as in Go; `ENOENT` is checked by errno on Unix); anything else, a
-`.`/`..` element in the config root (Go cleans those lexically, the kernel does
-not), an unresolvable home or an unreadable working directory stays on Go. This
+skips a config source only when `os.IsNotExist` accepts the `os.Stat` error:
+`ENOENT` on POSIX, or Windows codes 2, 3 and 53 (`ERROR_FILE_NOT_FOUND`,
+`ERROR_PATH_NOT_FOUND`, `_ERROR_BAD_NETPATH`). Other failed probes or a directory
+used as a config file make `config.Load()` fail and `loadSkillsEnv` replace the
+whole config, env overrides included, with the defaults. Native therefore
+requires both `$XDG_CONFIG_HOME|$HOME/.config/symskills/config.toml` and
+`./.symskills.toml` to be verified absent with those platform-specific codes
+through `fs::metadata` (symlinks followed, so dangling links are absent as in Go).
+A file used as a config directory is absent on Windows but returns `ENOTDIR` on
+POSIX. Any other probe outcome, a `.`/`..` element in the config root (Go cleans
+those lexically, the kernel does not), an unresolvable home or an unreadable
+working directory stays on Go. This
 also hardens the default-config probe shared by `list`, `targets`, `doctor` and
 `sync`. A `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` override is native only if it is absolute,
 lexically clean (no `.`/`..`/empty element, no trailing separator), every existing
@@ -524,7 +527,7 @@ reserved-device-name path (`windows_path_needs_go`, a pure function unit-tested 
 OS) stays on Go because `Path::is_absolute` and `filepath.IsAbs` disagree there.
 
 Still on Go for `skills status`: any `config.toml`/`.symskills.toml` and any config probe
-that is not a plain `ENOENT`; `SYMSKILLS_CACHE_DIR` (Go writes its status render cache
+not accepted by Go's platform-specific `os.IsNotExist`; `SYMSKILLS_CACHE_DIR` (Go writes its status render cache
 there; native never does); relative, empty, symlinked, non-clean or non-directory
 `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` and overrides below a symlinked or unreadable
 ancestor; empty or invalid `SYMSKILLS_VCS_ENABLED`; the native-only
