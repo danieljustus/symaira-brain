@@ -1507,10 +1507,11 @@ fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<
 
 #[cfg(test)]
 mod tests {
+    #[cfg(unix)]
+    use super::override_dir_is_plain;
     use super::{
         current_project_dir, has_dot_segment, is_lexically_clean, library_needs_go,
-        override_dir_is_plain, target_status_missing_root_needs_go_at, windows_code_is_not_exist,
-        windows_path_needs_go,
+        target_status_missing_root_needs_go_at, windows_code_is_not_exist, windows_path_needs_go,
     };
     use std::fs;
 
