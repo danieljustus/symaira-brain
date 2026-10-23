@@ -105,7 +105,7 @@ pub(crate) fn safe_mkdir_all(directory: &[u8]) -> Result<(), String> {
                     .ok()
                     .map(std::path::PathBuf::into_os_string)
             })
-            .map(|cwd| cwd.into_vec())
+            .map(OsStringExt::into_vec)
             .unwrap_or_default();
         joined.push(b'/');
         joined.extend_from_slice(directory);
