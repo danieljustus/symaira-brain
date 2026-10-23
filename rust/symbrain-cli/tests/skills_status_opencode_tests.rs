@@ -249,7 +249,13 @@ fn symskills_library_override_status_is_native_and_read_only() {
     // Default library has no `managed` source: the install is orphaned.
     assert_eq!(status_of(&run(&root, &args)), "orphaned");
 
-    let library = root.path().join("alt/library");
+    // Unix temp aliases must not trigger the symlink fallback. Windows keeps
+    // its plain spelling because canonicalization introduces a verbatim path.
+    #[cfg(windows)]
+    let alt = root.path().join("alt");
+    #[cfg(not(windows))]
+    let alt = root.path().canonicalize().unwrap().join("alt");
+    let library = alt.join("library");
     std::fs::create_dir_all(library.join("managed")).unwrap();
     std::fs::write(
         library.join("managed/SKILL.md"),
@@ -270,14 +276,14 @@ fn symskills_library_override_status_is_native_and_read_only() {
     );
 
     // The same override pointing at an empty directory restores the orphan row.
-    let empty = root.path().join("alt/empty");
+    let empty = alt.join("empty");
     std::fs::create_dir_all(&empty).unwrap();
     let output = command(&root, &args)
         .env("SYMSKILLS_LIBRARY_DIR", &empty)
-        .env("SYMSKILLS_BASE_DIR", root.path().join("alt/base"))
+        .env("SYMSKILLS_BASE_DIR", alt.join("base"))
         .env("SYMSKILLS_VCS_ENABLED", "false")
-        .env("SYMSKILLS_RENDER_DIR", root.path().join("alt/render"))
-        .env("SYMSKILLS_PROFILES_DIR", root.path().join("alt/profiles"))
+        .env("SYMSKILLS_RENDER_DIR", alt.join("render"))
+        .env("SYMSKILLS_PROFILES_DIR", alt.join("profiles"))
         .output()
         .unwrap();
     assert_eq!(status_of(&output), "orphaned");
