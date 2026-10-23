@@ -148,9 +148,19 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
                 return true;
             };
-            let opencode_needs_go = if target.as_deref() == Some("opencode")
-                && matches!(scope.as_str(), "user" | "project")
-            {
+            if !matches!(scope.as_str(), "user" | "project") {
+                return true;
+            }
+            if !go_home_defined() {
+                // Go's `os.UserHomeDir` fails: `config.Load()` falls back to
+                // the defaults and the install scan exits 1 with
+                // `$HOME is not defined`, which native code would turn into
+                // an empty report. This gate precedes the unsafe-marker rule
+                // below: Go reports the missing home before it ever scans a
+                // skill root.
+                return true;
+            }
+            let opencode_needs_go = if target.as_deref() == Some("opencode") {
                 match opencode_status_needs_go(&scope) {
                     Ok(needs_go) => Some(needs_go),
                     // Classified unsafe marker input must not reach Go, even
@@ -160,16 +170,6 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             } else {
                 None
             };
-            if !matches!(scope.as_str(), "user" | "project") {
-                return true;
-            }
-            if !go_home_defined() {
-                // Go's `os.UserHomeDir` fails: `config.Load()` falls back to
-                // the defaults and the install scan exits 1 with
-                // `$HOME is not defined`, which native code would turn into
-                // an empty report.
-                return true;
-            }
             if has_dynamic_config()
                 && !(target.as_deref() == Some("opencode") && status_env_config().is_some())
             {
@@ -397,26 +397,51 @@ fn windows_path_needs_go(value: &str) -> bool {
     if !drive_absolute {
         return true;
     }
-    normalized[3..].split('\\').any(|segment| {
-        let stem = segment
-            .split('.')
-            .next()
-            .unwrap_or("")
-            .trim_end_matches([' ', '\u{a0}'])
-            .to_ascii_uppercase();
-        matches!(
-            stem.as_str(),
-            "CON" | "PRN" | "AUX" | "NUL" | "CONIN$" | "CONOUT$"
-        ) || ((stem.starts_with("COM") || stem.starts_with("LPT"))
-            && stem.len() == 4
-            && stem.as_bytes()[3].is_ascii_digit()
-            && stem.as_bytes()[3] != b'0')
-    })
+    normalized[3..].split('\\').any(windows_reserved_element)
 }
 
-/// Go's `os.IsNotExist` for a stat error: plain `ENOENT` (`ERROR_FILE_NOT_FOUND`
-/// / `ERROR_PATH_NOT_FOUND` on Windows). `ENOTDIR`, `EACCES`, `ELOOP` and every
-/// other failure make Go's TOML decode fail instead of skipping the file.
+/// Mirror of Go's `internal/filepathlite.isReservedName` (go1.26): the device
+/// base name is the element cut at its first `:` or `.`, trailing spaces
+/// dropped. `CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`, the
+/// superscript forms `COM¹`/`COM²`/`COM³` and `LPT¹`/`LPT²`/`LPT³`, `CONIN$`
+/// and `CONOUT$` are reserved; `COM0` is not. Whether an element with a
+/// suffix is still reserved depends on the Windows build, so every such
+/// shape stays on Go.
+fn windows_reserved_element(element: &str) -> bool {
+    let base = element.split([':', '.']).next().unwrap_or("");
+    let base = base.trim_end_matches([' ', '\u{a0}']);
+    let upper = base.to_ascii_uppercase();
+    if matches!(
+        upper.as_str(),
+        "CON" | "PRN" | "AUX" | "NUL" | "CONIN$" | "CONOUT$"
+    ) {
+        return true;
+    }
+    if let Some(suffix) = upper
+        .strip_prefix("COM")
+        .or_else(|| upper.strip_prefix("LPT"))
+    {
+        return matches!(suffix.as_bytes(), [b'1'..=b'9'])
+            || matches!(suffix, "\u{b2}" | "\u{b3}" | "\u{b9}");
+    }
+    false
+}
+
+/// Go's `syscall.Errno.Is(ErrNotExist)` on Windows: exactly the raw codes
+/// `ERROR_FILE_NOT_FOUND` (2), `ERROR_PATH_NOT_FOUND` (3) and
+/// `ERROR_BAD_NETPATH` (53). Rust's `ErrorKind::NotFound` is wider
+/// (`ERROR_INVALID_DRIVE` 15, `ERROR_BAD_PATHNAME` 161 and others), and for
+/// those Go's TOML decode fails instead of skipping the file. Pure so every
+/// platform exercises it.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn windows_code_is_not_exist(code: i32) -> bool {
+    matches!(code, 2 | 3 | 53)
+}
+
+/// Go's `os.IsNotExist` for a stat error: plain `ENOENT` on Unix, the raw
+/// Windows codes of [`windows_code_is_not_exist`] elsewhere. `ENOTDIR`,
+/// `EACCES`, `ELOOP` and every other failure make Go's TOML decode fail
+/// instead of skipping the file.
 fn is_go_not_exist(error: &std::io::Error) -> bool {
     #[cfg(unix)]
     {
@@ -424,7 +449,7 @@ fn is_go_not_exist(error: &std::io::Error) -> bool {
     }
     #[cfg(not(unix))]
     {
-        error.kind() == std::io::ErrorKind::NotFound
+        error.raw_os_error().is_some_and(windows_code_is_not_exist)
     }
 }
 
@@ -480,23 +505,33 @@ fn go_parse_bool(value: &std::ffi::OsStr) -> bool {
 struct GoOnlyConfig;
 
 /// Whether every existing component of `path` is a real directory the
-/// process can enter, and the final directory (when present) can be listed and
-/// traversed. A symlinked ancestor, a non-directory ancestor, a mode-000
-/// directory or any stat failure other than "absent" makes the Rust install
-/// layer fail where Go succeeds, so those paths stay on Go.
+/// process can enter **and list**, and the final directory (when present) can
+/// be traversed. A symlinked ancestor, a non-directory ancestor, a mode-000
+/// directory, a search-only (`--x`) ancestor or any stat failure other than
+/// "absent" makes the Rust install layer fail where Go succeeds: the stat walk
+/// below needs only search permission on the parents, but the capability-based
+/// install layer opens every ancestor read-only, which also needs read
+/// permission. Those paths stay on Go.
 fn override_dir_is_plain(path: &std::path::Path) -> bool {
     let mut prefix = PathBuf::new();
     let mut present = true;
     for component in path.components() {
         prefix.push(component);
-        if matches!(
-            component,
-            std::path::Component::Prefix(_) | std::path::Component::RootDir
-        ) {
+        if matches!(component, std::path::Component::Prefix(_)) {
+            continue;
+        }
+        if matches!(component, std::path::Component::RootDir) {
+            if fs::read_dir(&prefix).is_err() {
+                return false;
+            }
             continue;
         }
         match fs::symlink_metadata(&prefix) {
-            Ok(metadata) if metadata.is_dir() => {}
+            Ok(metadata) if metadata.is_dir() => {
+                if fs::read_dir(&prefix).is_err() {
+                    return false;
+                }
+            }
             Err(error) if is_go_not_exist(&error) => {
                 present = false;
                 break;
@@ -504,7 +539,9 @@ fn override_dir_is_plain(path: &std::path::Path) -> bool {
             _ => return false,
         }
     }
-    !present || (fs::read_dir(path).is_ok() && fs::metadata(path.join(".")).is_ok())
+    // The listing of every existing component, the leaf included, was checked
+    // above; the leaf must also be searchable.
+    !present || fs::metadata(path.join(".")).is_ok()
 }
 
 /// An absolute, lexically clean override directory whose existing ancestors
@@ -600,7 +637,10 @@ fn has_dynamic_config() -> bool {
     {
         return true;
     }
-    config_files_need_go()
+    // Without a home Go's `config.Load()` fails and every report is built from
+    // defaults resolved against an undefined home (`.claude/skills` rather
+    // than `./.claude/skills`), which native code cannot reproduce.
+    !go_home_defined() || config_files_need_go()
 }
 
 /// Reports whether the native `skills list` scan has to stay on Go for this
@@ -1469,7 +1509,8 @@ fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<
 mod tests {
     use super::{
         current_project_dir, has_dot_segment, is_lexically_clean, library_needs_go,
-        override_dir_is_plain, target_status_missing_root_needs_go_at, windows_path_needs_go,
+        override_dir_is_plain, target_status_missing_root_needs_go_at, windows_code_is_not_exist,
+        windows_path_needs_go,
     };
     use std::fs;
 
@@ -1506,6 +1547,20 @@ mod tests {
             r"C:\dir\COM1",
             r"C:\dir\lpt9.log",
             r"C:\dir\nul ",
+            r"C:\dir\CON:x",
+            r"C:\dir\con:stream:$DATA",
+            r"C:\dir\com1:",
+            r"C:\dir\NUL.txt:x",
+            r"C:\dir\aux .txt",
+            "C:\\dir\\COM\u{b9}",
+            "C:\\dir\\com\u{b2}",
+            "C:\\dir\\COM\u{b3}",
+            "C:\\dir\\LPT\u{b9}",
+            "C:\\dir\\lpt\u{b2}",
+            "C:\\dir\\LPT\u{b3}.txt",
+            "C:\\dir\\COM\u{b2}:x",
+            r"C:\dir\CONIN$",
+            r"C:\dir\conout$",
         ] {
             assert!(windows_path_needs_go(go_only), "{go_only}");
         }
@@ -1516,9 +1571,54 @@ mod tests {
             r"C:\dir\COM0",
             r"C:\dir\console",
             r"C:\dir\com10",
+            r"C:\dir\COM0:x",
+            r"C:\dir\LPT0",
+            "C:\\dir\\COM\u{b9}x",
+            "C:\\dir\\COM\u{2074}",
+            "C:\\dir\\\u{b9}COM",
+            r"C:\dir\xCON:y",
+            r"C:\dir\CONIN",
         ] {
             assert!(!windows_path_needs_go(native), "{native}");
         }
+    }
+
+    #[test]
+    fn windows_not_exist_codes_match_go_errno_is() {
+        // ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND, _ERROR_BAD_NETPATH.
+        for code in [2, 3, 53] {
+            assert!(windows_code_is_not_exist(code), "{code}");
+        }
+        // ERROR_ACCESS_DENIED, ERROR_INVALID_DRIVE, ERROR_DIRECTORY,
+        // ERROR_BAD_PATHNAME, ERROR_INVALID_NAME, ERROR_CANT_RESOLVE_FILENAME.
+        for code in [0, 5, 15, 123, 267, 161, 1921] {
+            assert!(!windows_code_is_not_exist(code), "{code}");
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn override_dir_requires_listable_ancestors() {
+        use std::os::unix::fs::PermissionsExt;
+        let root = tempfile::tempdir().expect("temporary root");
+        let base = fs::canonicalize(root.path()).expect("canonical root");
+        let xonly = base.join("xonly");
+        fs::create_dir_all(xonly.join("library")).expect("library");
+        fs::create_dir_all(xonly.join("mid/library")).expect("nested library");
+        for mode in [0o311, 0o111] {
+            fs::set_permissions(&xonly, fs::Permissions::from_mode(mode)).expect("chmod");
+            let listable = fs::read_dir(&xonly).is_ok();
+            let leaf = override_dir_is_plain(&xonly.join("library"));
+            let absent = override_dir_is_plain(&xonly.join("absent/deeper"));
+            let nested = override_dir_is_plain(&xonly.join("mid/library"));
+            fs::set_permissions(&xonly, fs::Permissions::from_mode(0o755)).expect("restore");
+            if !listable {
+                assert!(!leaf, "search-only ancestor {mode:o}");
+                assert!(!absent, "absent leaf below search-only ancestor {mode:o}");
+                assert!(!nested, "nested leaf below search-only ancestor {mode:o}");
+            }
+        }
+        assert!(override_dir_is_plain(&xonly.join("library")));
     }
 
     #[cfg(unix)]

@@ -1735,6 +1735,39 @@ def _status_cfg_base_symlinked_ancestor(root: Path, env: dict[str, str]) -> None
     env["SYMSKILLS_BASE_DIR"] = str(root / "alt-link/base")
 
 
+def _status_cfg_search_only_ancestor(name: str, mode: int) -> Callable[[Path, dict[str, str]], None]:
+    """Relocate the managed `library`/`base` under a directory that has search
+    (x) but no read permission. Go stats and opens the leaf by path; the native
+    install layer opens every ancestor read-only and would fail."""
+
+    def build(root: Path, env: dict[str, str]) -> None:
+        holder = root / "xonly"
+        holder.mkdir()
+        shutil.move(str(root / "alt" / name), str(holder / name))
+        env["SYMSKILLS_" + name.upper() + "_DIR"] = str(holder / name)
+        holder.chmod(mode)
+
+    return build
+
+
+def _status_cfg_library_mode_444(root: Path, env: dict[str, str]) -> None:
+    (root / STATUS_ALT_LIBRARY).chmod(0o444)
+
+
+def _status_cfg_home_unset_abs_xdg(root: Path, env: dict[str, str]) -> None:
+    # HOME unset while XDG_CONFIG_HOME stays absolute: the config probe alone
+    # looks plain, only Go's `os.UserHomeDir` failure tells the shapes apart.
+    env.pop("HOME")
+    (root / "config").mkdir(exist_ok=True)
+
+
+def _status_cfg_home_unset_symlinked_project_root(root: Path, env: dict[str, str]) -> None:
+    env.pop("HOME")
+    (root / "project/.opencode").mkdir(parents=True)
+    (root / "elsewhere").mkdir()
+    os.symlink(root / "elsewhere", root / "project/.opencode/skills")
+
+
 def _status_cfg_home_unset(root: Path, env: dict[str, str]) -> None:
     env.pop("HOME")
 
@@ -3565,6 +3598,52 @@ CASES = (
         setup=managed_config_then(lambda root, env: env.__setitem__("XDG_CONFIG_HOME", str(root / "no-such-config"))),
         native=True, read_only=True,
     ),
+    # HOME unset with an absolute XDG_CONFIG_HOME: every skills verb whose
+    # defaults derive from the home directory belongs to Go.
+    Case(
+        "skills_status_config_fallback_doctor_home_unset_abs_xdg_json",
+        ("skills", "doctor", "--json"),
+        setup=_status_cfg_home_unset_abs_xdg,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_doctor_home_unset_abs_xdg",
+        ("skills", "doctor"),
+        setup=_status_cfg_home_unset_abs_xdg,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_targets_home_unset_abs_xdg_json",
+        ("skills", "targets", "--json"),
+        setup=_status_cfg_home_unset_abs_xdg,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_targets_home_unset_abs_xdg",
+        ("skills", "targets"),
+        setup=_status_cfg_home_unset_abs_xdg,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    # The missing-home gate runs before the classified-unsafe-marker rule: Go
+    # fails on `$HOME is not defined` before it ever scans the linked root.
+    Case(
+        "skills_status_config_fallback_home_unset_symlinked_project_root",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=_status_cfg_home_unset_symlinked_project_root,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_fallback_home_unset_symlinked_project_root_json",
+        ("skills", "status", "--target", "opencode", "--scope", "project", "--json"),
+        setup=_status_cfg_home_unset_symlinked_project_root,
+        expect_fallback=True,
+        posix_only=True,
+    ),
     # Privilege-dependent shapes (chmod 000 does not restrict root).
     *(
         (
@@ -3579,6 +3658,50 @@ CASES = (
                 "skills_status_config_fallback_library_mode_000_json",
                 ("skills", "status", "--target", "opencode", "--json"),
                 setup=managed_config_then(_status_cfg_library_mode_000),
+                expect_fallback=True,
+                posix_only=True,
+            ),
+        )
+        if hasattr(os, "geteuid") and os.geteuid() != 0
+        else ()
+    ),
+    # Existing-but-unlistable ancestors: Go needs only search permission on
+    # them, the native install layer opens each one read-only. Unprivileged
+    # users only (root ignores the permission bits).
+    *(
+        (
+            Case(
+                "skills_status_config_fallback_library_ancestor_search_only",
+                ("skills", "status", "--target", "opencode", "--json"),
+                setup=managed_config_then(_status_cfg_search_only_ancestor("library", 0o311)),
+                expect_fallback=True,
+                posix_only=True,
+            ),
+            Case(
+                "skills_status_config_fallback_library_ancestor_search_only_111",
+                ("skills", "status", "--target", "opencode"),
+                setup=managed_config_then(_status_cfg_search_only_ancestor("library", 0o111)),
+                expect_fallback=True,
+                posix_only=True,
+            ),
+            Case(
+                "skills_status_config_fallback_base_ancestor_search_only",
+                ("skills", "status", "--target", "opencode", "--json"),
+                setup=managed_config_then(_status_cfg_search_only_ancestor("base", 0o311)),
+                expect_fallback=True,
+                posix_only=True,
+            ),
+            Case(
+                "skills_status_config_fallback_base_ancestor_search_only_111",
+                ("skills", "status", "--target", "opencode"),
+                setup=managed_config_then(_status_cfg_search_only_ancestor("base", 0o111)),
+                expect_fallback=True,
+                posix_only=True,
+            ),
+            Case(
+                "skills_status_config_fallback_library_mode_444_json",
+                ("skills", "status", "--target", "opencode", "--json"),
+                setup=managed_config_then(_status_cfg_library_mode_444),
                 expect_fallback=True,
                 posix_only=True,
             ),

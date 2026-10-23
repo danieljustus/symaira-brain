@@ -534,22 +534,41 @@ marker/symlink states. Known, unchanged side-effect difference: Go status writes
 `status-render` cache under the skills cache directory for managed installs;
 native status writes nothing.
 
-Evidence: 33 native cases and 34 must-fallback cases (`skills_status_config_*` in
-`scripts/rust-differential.py`; 67 in total, 2 of the fallback cases need a non-root
-user because they rely on `chmod 000`) compare the Go binary (built with Go 1.26.7 from
+Evidence: 33 native cases and 45 must-fallback cases (`skills_status_config_*` in
+`scripts/rust-differential.py`; 78 in total, 7 of the fallback cases need a non-root
+user because they rely on `chmod`: unreadable config dir, mode-000 and mode-444
+library leaf, and search-only `0311`/`0111` ancestors of the library and the base) compare the Go binary (built with Go 1.26.7 from
 base revision 90f0bbac6; this change touches no Go source) with the Rust binary. Native cases
 run Rust with `SYMBRAIN_GO_BINARY` unset and a Go-free `PATH`, and assert the fixture
 root (type, mode, size, mtime, link targets, content hashes) is unchanged;
 fallback cases assert the missing-fallback diagnostic when no Go route exists.
-Managed installs are genuine Go artifacts relocated verbatim. The 18 source mutants in
+Managed installs are genuine Go artifacts relocated verbatim. The 21 source mutants in
 `scripts/skills-status-config-oracle/run.py --mutants` (probe `is_file`, any-error-is-absent,
-symlink-following ancestor walk, unclean paths, unreadable leaf, HOME guard, XDG dot
-segment and relative XDG, among others) are each killed by the expected cases. Residuals: the Windows branches (`cfg!(windows)` guards, non-Unix `ENOENT`
-mapping) are covered by the pure-function unit tests and a `cfg` review only; the
-local `cargo check --target x86_64-pc-windows-msvc` could not run because
-`aws-lc-sys` needs a Windows C toolchain. HOME-undefined routing is applied to
-`skills status` only; `list`, `targets`, `doctor` and `sync` keep their previous
-(unverified-for-unset-`HOME`) routing. Native three-OS CI at the candidate head remains
+symlink-following ancestor walk, unclean paths, unlistable ancestor, unsearchable leaf,
+HOME guard, HOME check in `has_dynamic_config`, HOME gate ordered after the
+unsafe-marker rule, XDG dot segment and relative XDG, among others) are each killed by
+the expected cases; the one shape covered by two independent layers (`skills status`
+with HOME unset and no `--target`) is deliberately not claimed by either single-line
+mutant.
+
+Review-delta hardening: every existing override-directory component must be
+*listable*, not merely searchable (the Rust install layer opens each ancestor
+read-only, so a `0311`/`0111` ancestor that Go traverses by path stays on Go);
+`has_dynamic_config` now includes the undefined-`HOME` check, so `skills list`,
+`targets`, `doctor` and `sync` also stay on Go without a home (their defaults
+derive from the home directory, e.g. `.claude/skills` versus `./.claude/skills`);
+the HOME gate of `skills status` runs before the classified-unsafe-marker rule
+(Go fails on `$HOME is not defined` before scanning a skill root); the Windows
+reserved-name check mirrors Go 1.26 `isReservedName` (`:`/`.` suffixes, trailing
+spaces, superscript `COM¹²³`/`LPT¹²³`, `COM0` not reserved), and the non-Unix
+not-exist test uses Go's `Errno.Is(ErrNotExist)` raw codes 2, 3 and 53
+(`ERROR_FILE_NOT_FOUND`, `ERROR_PATH_NOT_FOUND`, `_ERROR_BAD_NETPATH`) instead of
+`ErrorKind::NotFound`. Residuals: the Windows branches (`cfg!(windows)` guards,
+non-Unix not-exist mapping) are covered by the pure-function unit tests and a `cfg`
+review only; the local `cargo check --target x86_64-pc-windows-msvc` could not run
+because `aws-lc-sys` needs a Windows C toolchain. Reserved device names with an
+extension or stream suffix depend on `RtlIsDosDeviceName_U`, so all such shapes are
+kept on Go rather than classified. Native three-OS CI at the candidate head remains
 required.
 
 

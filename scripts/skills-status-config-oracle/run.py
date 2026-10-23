@@ -38,6 +38,11 @@ PREFIX = "skills_status_config_"
 UNPRIVILEGED_ONLY = {
     "skills_status_config_fallback_unreadable_config_dir_json",
     "skills_status_config_fallback_library_mode_000_json",
+    "skills_status_config_fallback_library_ancestor_search_only",
+    "skills_status_config_fallback_library_ancestor_search_only_111",
+    "skills_status_config_fallback_base_ancestor_search_only",
+    "skills_status_config_fallback_base_ancestor_search_only_111",
+    "skills_status_config_fallback_library_mode_444_json",
 }
 PRIVILEGED = hasattr(os, "geteuid") and os.geteuid() == 0
 
@@ -93,7 +98,7 @@ MUTANTS = {
         ["skills_status_config_fallback_relative_clean_library"],
     ),
     "accept-linked-library": (
-        "            Ok(metadata) if metadata.is_dir() => {}\n",
+        "            Ok(metadata) if metadata.is_dir() => {\n                if fs::read_dir(&prefix).is_err() {\n                    return false;\n                }\n            }\n",
         "            Ok(_) => {}\n",
         [
             "skills_status_config_fallback_library_symlink_json",
@@ -118,10 +123,20 @@ MUTANTS = {
             "skills_status_config_fallback_library_trailing_slash",
         ],
     ),
-    "accept-unreadable-library": (
-        "    !present || (fs::read_dir(path).is_ok() && fs::metadata(path.join(\".\")).is_ok())",
+    "accept-unlistable-ancestor": (
+        "            Ok(metadata) if metadata.is_dir() => {\n                if fs::read_dir(&prefix).is_err() {\n                    return false;\n                }\n            }\n",
+        "            Ok(metadata) if metadata.is_dir() => {}\n",
+        [
+            "skills_status_config_fallback_library_ancestor_search_only",
+            "skills_status_config_fallback_library_ancestor_search_only_111",
+            "skills_status_config_fallback_base_ancestor_search_only",
+            "skills_status_config_fallback_base_ancestor_search_only_111",
+        ],
+    ),
+    "accept-unsearchable-leaf": (
+        "    !present || fs::metadata(path.join(\".\")).is_ok()",
         "    true",
-        ["skills_status_config_fallback_library_mode_000_json"],
+        ["skills_status_config_fallback_library_mode_444_json"],
     ),
     "is-file-config-probe": (
         "    matches!(fs::metadata(path), Err(error) if is_go_not_exist(&error))",
@@ -150,7 +165,10 @@ MUTANTS = {
             "skills_status_config_fallback_home_unset_json",
             "skills_status_config_fallback_home_empty",
             "skills_status_config_fallback_default_home_unset_json",
-            "skills_status_config_fallback_default_home_unset_no_target",
+            # `skills status` without --target is also routed to Go by the
+            # home check inside `has_dynamic_config` (mutant
+            # dynamic-config-ignores-home), so that shape is covered by two
+            # independent layers and no single-line mutant can fail it.
         ],
     ),
     "xdg-dot-segment-accepted": (
@@ -164,6 +182,24 @@ MUTANTS = {
         [
             "skills_status_config_fallback_xdg_relative_home_config_file",
             "skills_status_config_fallback_xdg_empty_home_config_file",
+        ],
+    ),
+    "dynamic-config-ignores-home": (
+        "    !go_home_defined() || config_files_need_go()",
+        "    config_files_need_go()",
+        [
+            "skills_status_config_fallback_doctor_home_unset_abs_xdg_json",
+            "skills_status_config_fallback_doctor_home_unset_abs_xdg",
+            "skills_status_config_fallback_targets_home_unset_abs_xdg_json",
+            "skills_status_config_fallback_targets_home_unset_abs_xdg",
+        ],
+    ),
+    "home-gate-after-unsafe-marker": (
+        "            if !go_home_defined() {\n                // Go's",
+        "            if !go_home_defined() && opencode_status_needs_go(&scope).is_ok() {\n                // Go's",
+        [
+            "skills_status_config_fallback_home_unset_symlinked_project_root",
+            "skills_status_config_fallback_home_unset_symlinked_project_root_json",
         ],
     ),
     "write-a-file": (
