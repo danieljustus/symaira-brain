@@ -553,6 +553,11 @@ unsafe-marker rule, XDG dot segment and relative XDG, among others) are each kil
 the expected cases; the one shape covered by two independent layers (`skills status`
 with HOME unset and no `--target`) is deliberately not claimed by either single-line
 mutant.
+Each replay is classified KILLED, SURVIVED or INCONCLUSIVE(timeout|build|harness); only an
+all-KILLED run exits 0. Every replay keeps its own evidence folder (full streams, mutant
+executable sha256, a distinct differential-journal root with per-case timeout events), and a
+child that hits the 10 s deadline is reported as `TIMEOUT case=<id>` without discarding
+earlier comparison failures (#940).
 
 Review-delta hardening: every existing override-directory component must be
 *listable*, not merely searchable (the Rust install layer opens each ancestor
