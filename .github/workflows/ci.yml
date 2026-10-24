@@ -93,6 +93,17 @@ jobs:
       - name: Prove notarization failures prevent publication
         run: python3 -m unittest discover -s scripts -p test_macos_release_verification.py -v
 
+  # Unit tests for the differential harness and the skills-status mutant
+  # runner: timeouts must stay failures and keep earlier diagnostics (#940).
+  differential-harness-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Differential harness timeout handling
+        run: python3 -m unittest discover -s scripts -p test_rust_differential.py -v
+      - name: Skills-status mutant classification
+        run: python3 -m unittest discover -s scripts/skills-status-config-oracle -p test_run.py -v
+
   # golangci-lint has a known incompatibility with Go 1.26 in this
   # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
   # until golangci-lint ships a Go-1.26-compatible release — re-enable a
