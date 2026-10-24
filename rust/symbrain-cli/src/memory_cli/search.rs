@@ -33,7 +33,7 @@ pub(super) fn run_search(
         limit = 5;
     }
 
-    let store = match open_store(stderr, Some(&parsed.raw("db"))) {
+    let store = match open_store(stderr, "search", Some(&parsed.raw("db"))) {
         Ok(store) => store,
         Err(code) => return code,
     };
