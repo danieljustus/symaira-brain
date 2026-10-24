@@ -1,11 +1,10 @@
 {
-  "fill": "automatic",
   "groups": [
     {
-      "name": "Brain — Vordergrund",
+      "name": "Brain \u2014 Vordergrund",
       "layers": [
         {
-          "name": "Brain — Vordergrund",
+          "name": "Brain \u2014 Vordergrund",
           "image-name": "signet.png",
           "glass": false,
           "fill-specializations": [
@@ -41,7 +40,7 @@
       }
     },
     {
-      "name": "Original Symaira S — hinter Signet freigestellt",
+      "name": "Original Symaira S \u2014 hinter Signet freigestellt",
       "layers": [
         {
           "name": "Original Symaira S",
@@ -66,5 +65,22 @@
   ],
   "supported-platforms": {
     "squares": "shared"
-  }
+  },
+  "fill-specializations": [
+    {
+      "value": {
+        "solid": "srgb:0.93333333,0.92941176,0.91764706,1"
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "srgb:0.10980392,0.10980392,0.10588235,1"
+      }
+    },
+    {
+      "appearance": "tinted",
+      "value": "automatic"
+    }
+  ]
 }
