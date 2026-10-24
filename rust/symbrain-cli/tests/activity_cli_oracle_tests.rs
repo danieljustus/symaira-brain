@@ -113,12 +113,16 @@ fn run_case(oracle: &Oracle) {
         }
     }
     let output = command.output().expect("run native activity CLI case");
-    assert_eq!(
+    // Every mismatch prints both streams and the exit status, so a failure
+    // seen only on a CI runner (Windows) is diagnosable from its log.
+    let observed = format!(
+        "{}: exit {:?}, stdout {:?}, stderr {:?}",
+        oracle.id,
         output.status.code(),
-        Some(oracle.exit_code),
-        "{}",
-        oracle.id
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
     );
-    assert_eq!(output.stdout, oracle.stdout.as_bytes(), "{}", oracle.id);
-    assert_eq!(output.stderr, oracle.stderr.as_bytes(), "{}", oracle.id);
+    assert_eq!(output.status.code(), Some(oracle.exit_code), "{observed}");
+    assert_eq!(output.stdout, oracle.stdout.as_bytes(), "{observed}");
+    assert_eq!(output.stderr, oracle.stderr.as_bytes(), "{observed}");
 }

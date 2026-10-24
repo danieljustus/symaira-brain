@@ -25,6 +25,7 @@ mod schema;
 mod schema_inspection;
 mod search_rows;
 mod store;
+mod store_dir;
 mod wal_open;
 mod write;
 
