@@ -12,31 +12,33 @@ use std::time::{Duration, Instant};
 #[path = "../src/setup_source_windows_job.rs"]
 mod source_job;
 
-fn event(root: &Path, phase: &str, pid: u32) {
+/// Appends one complete JSON line with a single write. The parent and its
+/// helper processes append to the same journal concurrently; formatted
+/// `writeln!`/`serde_json::to_writer` on an unbuffered file issue several
+/// writes per line, which interleave across processes and corrupt lines.
+fn append_phase(root: &Path, value: &serde_json::Value) {
+    let mut line = serde_json::to_vec(value).unwrap();
+    line.push(b'\n');
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
         .open(root.join("phases.jsonl"))
         .unwrap();
-    writeln!(file, "{{\"phase\":\"{phase}\",\"pid\":{pid}}}").unwrap();
+    file.write_all(&line).unwrap();
     file.sync_all().unwrap();
+}
+
+fn event(root: &Path, phase: &str, pid: u32) {
+    append_phase(root, &serde_json::json!({"phase": phase, "pid": pid}));
     println!("owned phase={phase} pid={pid}");
 }
 
 fn event_result<T>(root: &Path, phase: &str, pid: u32, result: &std::io::Result<T>) {
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(root.join("phases.jsonl"))
-        .unwrap();
-    serde_json::to_writer(
-        &mut file,
+    append_phase(
+        root,
         &serde_json::json!({"phase": phase, "pid": pid, "ok": result.is_ok(),
                            "error": result.as_ref().err().map(ToString::to_string)}),
-    )
-    .unwrap();
-    writeln!(file).unwrap();
-    file.sync_all().unwrap();
+    );
     println!("owned phase={phase} pid={pid} ok={}", result.is_ok());
 }
 
