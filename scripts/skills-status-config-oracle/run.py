@@ -4,6 +4,7 @@ environment-only config shape (`SYMSKILLS_LIBRARY_DIR` / `SYMSKILLS_BASE_DIR`
 for `--target opencode`).
 
 Usage: run.py GO_BINARY RUST_BINARY [--mutants MUTANT_TARGET_DIR]
+              [--evidence-dir DIR]
 
 1. Runs every `skills_status_config_*` case of scripts/rust-differential.py:
    native cases run the Rust binary with every Go fallback route removed and
@@ -14,6 +15,15 @@ Usage: run.py GO_BINARY RUST_BINARY [--mutants MUTANT_TARGET_DIR]
    requires the same case set to FAIL on the expected cases. The source file
    is restored byte-for-byte afterwards, even on failure.
 
+Every mutant is classified KILLED, SURVIVED (it ran to completion and the
+expected cases did not all fail) or INCONCLUSIVE(timeout|build|harness). Only an
+all-KILLED run exits 0; an inconclusive replay is never reported as SURVIVED and
+never as KILLED. Each replay keeps its evidence under
+EVIDENCE_DIR/<NN>-<name>/ (default MUTANT_TARGET_DIR/evidence/<stamp>-<pid>):
+full stdout/stderr, result.json (case ids, mutant executable sha256), the
+differential journal (distinct root per replay, with per-case timeout events and
+raw child streams) and, unless KILLED, the mutant executable itself.
+
 Set SYMBRAIN_MUTANT_CARGO (default `cargo`) to wrap the build, for example
 `/Users/daniel/.local/bin/dev-external cargo`.
 """
@@ -21,12 +31,15 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -223,15 +236,63 @@ def load_cases():
     return [case for case in module.CASES if case.name.startswith(PREFIX)]
 
 
-def differential(go: Path, rust: Path) -> subprocess.CompletedProcess[str]:
+KILLED = "KILLED"
+SURVIVED = "SURVIVED"
+INCONCLUSIVE = "INCONCLUSIVE"
+TIMEOUT_LINE = re.compile(r"^TIMEOUT case=(\S+) ", re.MULTILINE)
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def differential(go: Path, rust: Path, journal: Path | None = None) -> subprocess.CompletedProcess[str]:
     env = dict(os.environ, SYMBRAIN_DIFFERENTIAL_CASE_PREFIX=PREFIX)
+    env.pop("SYMBRAIN_DIFFERENTIAL_JOURNAL", None)
+    if journal is not None:
+        # The journal refuses an existing root, so every replay needs its own.
+        env["SYMBRAIN_DIFFERENTIAL_JOURNAL"] = str(journal)
     return subprocess.run(
         [sys.executable, str(ROOT / "scripts/rust-differential.py"), str(go), str(rust)],
         env=env, text=True, capture_output=True, check=False,
     )
 
 
-def build_mutant(name: str, target_dir: Path, old: str, new: str) -> Path:
+def failed_cases(expect: list[str], stderr: str) -> list[str]:
+    """Expected cases reported as failed, matched as whole `case: ` line starts."""
+    lines = stderr.splitlines()
+    return [case for case in expect if any(line.startswith(f"{case}: ") for line in lines)]
+
+
+def timed_out_cases(stderr: str, journal: Path | None) -> list[str]:
+    """Cases whose child hit the differential deadline (stderr line or journal event)."""
+    found = list(dict.fromkeys(TIMEOUT_LINE.findall(stderr)))
+    phases = journal / "phases.jsonl" if journal is not None else None
+    if phases is not None and phases.is_file():
+        for line in phases.read_text(encoding="utf-8").splitlines():
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if row.get("phase") == "child_timeout" and row.get("case") not in found:
+                found.append(row["case"])
+    return found
+
+
+def classify(returncode: int, stderr: str, expect: list[str], timeouts: list[str]) -> tuple[str, str, list[str]]:
+    """Return (status, reason, expected cases seen failing) for a finished replay."""
+    failed = failed_cases(expect, stderr)
+    if timeouts:
+        return INCONCLUSIVE, "timeout", failed
+    if returncode not in (0, 1) or "Traceback (most recent call last)" in stderr:
+        return INCONCLUSIVE, "harness", failed
+    if returncode != 0 and len(failed) == len(expect):
+        return KILLED, "expected cases failed", failed
+    return SURVIVED, "expected cases did not all fail", failed
+
+
+def build_mutant(name: str, target_dir: Path, old: str, new: str, dest: Path) -> Path:
+    """Build one mutant into `dest`; the source is restored even on failure."""
     original = SOURCE.read_bytes()
     text = original.decode()
     assert text.count(old) == 1, f"mutant {name}: pattern must match exactly once"
@@ -245,22 +306,91 @@ def build_mutant(name: str, target_dir: Path, old: str, new: str) -> Path:
         )
     finally:
         SOURCE.write_bytes(original)
-    kept = Path(tempfile.mkdtemp(prefix="status-mutant-")) / f"symbrain-{name}"
+    kept = dest / f"symbrain-{name}"
     shutil.copy2(target_dir / "debug/symbrain", kept)
     return kept
 
 
+def write_text(path: Path, text: str) -> None:
+    path.write_text(text, encoding="utf-8", errors="replace")
+
+
+def replay(index: int, name: str, mutant: tuple[str, str, list[str]], expect: list[str],
+           go: Path, target_dir: Path, evidence: Path | None) -> dict:
+    """Build and replay one mutant; always return a classified record."""
+    old, new, _ = mutant
+    work = Path(tempfile.mkdtemp(prefix="status-mutant-"))
+    folder = None
+    if evidence is not None:
+        folder = evidence / f"{index:02d}-{name}"
+        folder.mkdir(parents=True, exist_ok=False)
+    record: dict = {"mutant": name, "expected_cases": expect, "evidence": str(folder) if folder else None}
+    binary = None
+    try:
+        try:
+            binary = build_mutant(name, target_dir, old, new, work)
+        except subprocess.CalledProcessError as error:
+            record.update(status=INCONCLUSIVE, reason="build", returncode=error.returncode)
+            if folder is not None:
+                write_text(folder / "build.stdout", error.stdout or "")
+                write_text(folder / "build.stderr", error.stderr or "")
+            record["tail"] = ((error.stdout or "") + (error.stderr or ""))[-2000:]
+            return record
+        except (OSError, AssertionError) as error:
+            record.update(status=INCONCLUSIVE, reason="harness", returncode=None, tail=repr(error))
+            return record
+        record["mutant_sha256"] = sha256_file(binary)
+        journal = folder / "journal" if folder else None
+        mutated = differential(go, binary, journal)
+        timeouts = timed_out_cases(mutated.stderr, journal)
+        status, reason, failed = classify(mutated.returncode, mutated.stderr, expect, timeouts)
+        record.update(status=status, reason=reason, returncode=mutated.returncode,
+                      expected_failures_seen=failed, timed_out_cases=timeouts,
+                      tail=(mutated.stdout + mutated.stderr)[-2000:])
+        if folder is not None:
+            write_text(folder / "stdout.txt", mutated.stdout)
+            write_text(folder / "stderr.txt", mutated.stderr)
+            record["stdout_sha256"] = hashlib.sha256(mutated.stdout.encode(errors="replace")).hexdigest()
+            record["stderr_sha256"] = hashlib.sha256(mutated.stderr.encode(errors="replace")).hexdigest()
+            if status != KILLED:
+                # A non-killed replay is the evidence; keep the exact executable.
+                shutil.copy2(binary, folder / binary.name)
+        return record
+    except Exception as error:  # keep the remaining mutants running
+        record.update(status=INCONCLUSIVE, reason="harness", returncode=None, tail=repr(error))
+        return record
+    finally:
+        if folder is not None:
+            write_text(folder / "result.json", json.dumps(record, indent=2, sort_keys=True) + "\n")
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def pop_option(args: list[str], flag: str) -> str | None:
+    if flag not in args:
+        return None
+    index = args.index(flag)
+    value = args[index + 1]
+    del args[index:index + 2]
+    return value
+
+
 def main() -> int:
     args = sys.argv[1:]
-    mutant_dir = None
-    if "--mutants" in args:
-        index = args.index("--mutants")
-        mutant_dir = Path(args[index + 1]).resolve()
-        del args[index:index + 2]
+    mutants_opt = pop_option(args, "--mutants")
+    mutant_dir = Path(mutants_opt).resolve() if mutants_opt else None
+    evidence_opt = pop_option(args, "--evidence-dir")
     if len(args) != 2:
         print(__doc__, file=sys.stderr)
         return 2
     go, rust = (Path(arg).resolve() for arg in args)
+    evidence = None
+    if evidence_opt:
+        evidence = Path(evidence_opt).resolve()
+    elif mutant_dir is not None:
+        evidence = mutant_dir / "evidence" / f"{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{os.getpid()}"
+    if evidence is not None:
+        evidence.mkdir(parents=True, exist_ok=False)
+        print(f"EVIDENCE {evidence}")
     cases = load_cases()
     native = [case for case in cases if case.native]
     fallback = [case for case in cases if case.expect_fallback]
@@ -268,9 +398,12 @@ def main() -> int:
     assert all(case.read_only for case in native)
 
     before = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
-    result = differential(go, rust)
+    result = differential(go, rust, evidence / "baseline-journal" if evidence else None)
     sys.stdout.write(result.stdout)
     sys.stderr.write(result.stderr)
+    if evidence is not None:
+        write_text(evidence / "baseline.stdout", result.stdout)
+        write_text(evidence / "baseline.stderr", result.stderr)
     expected_line = f"{len(cases)} parity cases passed"
     if result.returncode != 0 or expected_line not in result.stdout:
         print(f"FAIL baseline: rc={result.returncode}, expected {expected_line!r}", file=sys.stderr)
@@ -279,34 +412,43 @@ def main() -> int:
 
     if mutant_dir is None:
         return 0
-    survivors = []
-    checked = 0
-    for name, (old, new, expect) in MUTANTS.items():
+    records = []
+    for index, (name, mutant) in enumerate(MUTANTS.items(), start=1):
+        expect = mutant[2]
         if PRIVILEGED:
             expect = [case for case in expect if case not in UNPRIVILEGED_ONLY]
         if not expect:
             print(f"MUTANT {name}: SKIPPED (needs an unprivileged user)")
             continue
-        checked += 1
-        binary = build_mutant(name, mutant_dir, old, new)
-        mutated = differential(go, binary)
-        output = mutated.stdout + mutated.stderr
-        failed = [case for case in expect if f"{case}:" in mutated.stderr]
-        # A killed mutant fails the run and names every expected case.
-        killed = mutated.returncode != 0 and len(failed) == len(expect)
-        print(f"MUTANT {name}: {'KILLED' if killed else 'SURVIVED'} "
-              f"(rc={mutated.returncode}, expected failures seen: {len(failed)}/{len(expect)})")
-        if not killed:
-            survivors.append(name)
-            print(output[-2000:], file=sys.stderr)
-        shutil.rmtree(binary.parent, ignore_errors=True)
+        record = replay(index, name, mutant, expect, go, mutant_dir, evidence)
+        records.append(record)
+        seen = len(record.get("expected_failures_seen", []))
+        label = record["status"] if record["status"] != INCONCLUSIVE else f"{INCONCLUSIVE}({record['reason']})"
+        print(f"MUTANT {name}: {label} (rc={record['returncode']}, "
+              f"expected failures seen: {seen}/{len(expect)}"
+              + (f", timed-out cases: {record['timed_out_cases']}" if record.get("timed_out_cases") else "")
+              + (f", mutant sha256 {record['mutant_sha256']}" if record.get("mutant_sha256") else "")
+              + ")")
+        if record["status"] != KILLED:
+            print(record.get("tail", ""), file=sys.stderr)
+            if record.get("evidence"):
+                print(f"  evidence retained: {record['evidence']}", file=sys.stderr)
     if hashlib.sha256(SOURCE.read_bytes()).hexdigest() != before:
         print("FAIL: skills_cli.rs was not restored", file=sys.stderr)
         return 1
-    if survivors:
-        print(f"FAIL: surviving mutants: {survivors}", file=sys.stderr)
+    counts = {status: sum(1 for r in records if r["status"] == status)
+              for status in (KILLED, SURVIVED, INCONCLUSIVE)}
+    if evidence is not None:
+        write_text(evidence / "summary.json", json.dumps(
+            {"counts": counts, "mutants": records}, indent=2, sort_keys=True) + "\n")
+    print(f"SUMMARY {counts[KILLED]} killed, {counts[SURVIVED]} survived, "
+          f"{counts[INCONCLUSIVE]} inconclusive of {len(records)}")
+    if counts[SURVIVED] or counts[INCONCLUSIVE]:
+        bad = [f"{r['mutant']}={r['status']}" + (f"({r['reason']})" if r["status"] == INCONCLUSIVE else "")
+               for r in records if r["status"] != KILLED]
+        print(f"FAIL: mutants not killed: {bad}", file=sys.stderr)
         return 1
-    print(f"{checked}/{checked} mutants killed")
+    print(f"{len(records)}/{len(records)} mutants killed")
     return 0
 
 

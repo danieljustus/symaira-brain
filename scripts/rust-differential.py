@@ -3829,6 +3829,15 @@ def normalize_last_used(stdout_bytes: bytes, placeholder: str) -> bytes:
     )
 
 
+def timeout_failure(case_name: str, error: subprocess.TimeoutExpired) -> str:
+    """One stable, single-line diagnostic for a child that hit its deadline."""
+    cmd = error.cmd if isinstance(error.cmd, (list, tuple)) else [error.cmd]
+    shown = " ".join(repr(part) if isinstance(part, bytes) else str(part) for part in cmd[1:])
+    return (f"TIMEOUT case={case_name} timeout={error.timeout}s "
+            f"binary={cmd[0] if cmd else '?'} argv={shown!r}; "
+            "comparison for this case was not completed")
+
+
 def prepare_root(root_path: Path, go_binary: Path) -> dict[str, str]:
     (root_path / "home").mkdir(parents=True, exist_ok=True)
     (root_path / "config").mkdir(parents=True, exist_ok=True)
@@ -4166,6 +4175,17 @@ def main() -> int:
                         print(f"PASS {case.name} (stdout, stderr, exit code, fs manifest/modes)")
                 else:
                     print(f"PASS {case.name}")
+            except subprocess.TimeoutExpired as error:
+                # Keep earlier comparison failures and keep going: a hung child
+                # is its own failure, never a pass and never a lost diagnostic.
+                # The stable `TIMEOUT case=<name>` prefix is parsed by the
+                # skills-status mutant runner.
+                failures.append(timeout_failure(case.name, error))
+            except BaseException:
+                # Any other abort still owes the operator what was collected.
+                if failures:
+                    print("\n".join(failures), file=sys.stderr)
+                raise
             finally:
                 journal.fixture_state(case.name, "Go", go_root)
                 journal.fixture_state(case.name, "Rust", rust_root)
