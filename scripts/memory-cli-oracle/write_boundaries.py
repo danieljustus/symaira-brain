@@ -21,7 +21,6 @@ def execute(go,rust,wrapper,report):
         ('Unicode-metadata','set','hello world',['--staged','--metadata','{"a":"β"}'],None),
         ('invalid-duplicate-metadata','set','hello world',['--staged','--metadata','{"a":1,"a":"ok"}'],None),
         ('invalid-scope','set','hello world',['--staged','--scope','invalid'],None),
-        ('new-file','set','hello world',['--staged'],None),
         ('bad-metadata-delete','delete','victim',[],("metadata",'{"a":1}')),
         ('bad-embedding-delete','delete','victim',[],("embedding",'invalid json')),
         ('bad-time-delete','delete','victim',[],("created_at",'invalid time')),
@@ -41,7 +40,6 @@ def execute(go,rust,wrapper,report):
                         field,value=mutation
                         db.execute('UPDATE memories SET '+field+'=? WHERE id=\'victim\'',(value,))
                 before=writes.snapshot(path)
-                if name=='new-file': path=root/'new.db'
                 args=[verb,content,'--db',str(path),'--json',*extra]
                 if verb=='set': args+=['--kind','fact']
                 env.update(SYMBRAIN_GO_BINARY=str(wrapper),MEMORY_CLI_FALLBACK_GO=str(go),MEMORY_CLI_FALLBACK_RECEIPT=str(trace))

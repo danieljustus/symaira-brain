@@ -26,7 +26,7 @@ pub(super) fn run_rules(
         return exit::USAGE;
     }
     let scope = parsed.text("scope");
-    let store = match open_store(stderr, Some(&parsed.raw("db"))) {
+    let store = match open_store(stderr, "rules", Some(&parsed.raw("db"))) {
         Ok(store) => store,
         Err(code) => return code,
     };

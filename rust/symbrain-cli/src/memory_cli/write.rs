@@ -49,7 +49,7 @@ pub(super) fn run_set(
     };
     let scope = parsed.text("scope");
     let staged = parsed.staged;
-    let store = match open_store(stderr, Some(&parsed.raw("db"))) {
+    let store = match open_store(stderr, "set", Some(&parsed.raw("db"))) {
         Ok(s) => s,
         Err(code) => return code,
     };
@@ -119,7 +119,7 @@ pub(super) fn run_delete(
         let _ = writeln!(stderr, "symbrain memory delete: id is required");
         return exit::USAGE;
     }
-    let store = match open_store(stderr, Some(&parsed.raw("db"))) {
+    let store = match open_store(stderr, "delete", Some(&parsed.raw("db"))) {
         Ok(store) => store,
         Err(code) => return code,
     };
