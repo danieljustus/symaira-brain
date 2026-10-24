@@ -483,6 +483,102 @@ existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
 three-OS CI at the final candidate head remains required. Dynamic config and
 unqualified multi-target CLI fallback remain part of #764.
 
+### Skills status environment-only config (#764 slice c)
+
+`symbrain skills status --target opencode [--scope user|project]` is native when
+the only custom `symskills` config is environment variables: `SYMSKILLS_LIBRARY_DIR`
+and `SYMSKILLS_BASE_DIR` (absolute, lexically clean, an existing directory or absent, with no symlinked
+ancestor) move the library and the frozen base snapshots, and
+`SYMSKILLS_RENDER_DIR`, `SYMSKILLS_PROFILES_DIR` and a valid
+`SYMSKILLS_VCS_ENABLED` bool are accepted because Go's status never reads them.
+Any of these variables makes the report exactly Go's bytes: the #621
+render-drift extension (RENDER column, `render_status`, `linked` presentation
+mode) stays off. Go decodes `config.Load()` as defaults, `config.toml`,
+`.symskills.toml`, then env; an env value that fails decoding (an invalid
+`SYMSKILLS_VCS_ENABLED`) makes Go discard the whole config, so that shape stays on Go
+rather than being re-derived. `XDG_CONFIG_HOME` is now honoured only when
+absolute, like `configkit.DefaultPath`, for every skills verb's config-file probe.
+
+Config probe and override hardening (review round 1). Go's `configkit.mergeFile`
+skips a config source only when `os.IsNotExist` accepts the `os.Stat` error:
+`ENOENT` on POSIX, or Windows codes 2, 3 and 53 (`ERROR_FILE_NOT_FOUND`,
+`ERROR_PATH_NOT_FOUND`, `_ERROR_BAD_NETPATH`). Other failed probes or a directory
+used as a config file make `config.Load()` fail and `loadSkillsEnv` replace the
+whole config, env overrides included, with the defaults. Native therefore
+requires both `$XDG_CONFIG_HOME|$HOME/.config/symskills/config.toml` and
+`./.symskills.toml` to be verified absent with those platform-specific codes
+through `fs::metadata` (symlinks followed, so dangling links are absent as in Go).
+A file used as a config directory is absent on Windows but returns `ENOTDIR` on
+POSIX. Any other probe outcome, a `.`/`..` element in the config root (Go cleans
+those lexically, the kernel does not), an unresolvable home or an unreadable
+working directory stays on Go. This
+also hardens the default-config probe shared by `list`, `targets`, `doctor` and
+`sync`. A `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` override is native only if it is absolute,
+lexically clean (no `.`/`..`/empty element, no trailing separator), every existing
+ancestor is a real directory (no symlinked or non-directory ancestor, no stat
+failure other than `ENOENT`), and an existing leaf can be listed and traversed
+(the Rust install layer opens roots capability-style and fails where Go succeeds
+for a symlinked ancestor such as macOS `/tmp`, for `..` through a symlink and for a
+mode-000 directory). An undefined or empty `$HOME` (`%USERPROFILE%` on Windows)
+makes Go exit 1 (`scan installs: $HOME is not defined`), so `skills status` with
+no resolvable home is routed to Go for every target, with or without `SYMSKILLS_*`
+variables. On Windows any UNC/verbatim/device, drive-relative, rooted-without-drive or
+reserved-device-name path (`windows_path_needs_go`, a pure function unit-tested on every
+OS) stays on Go because `Path::is_absolute` and `filepath.IsAbs` disagree there.
+
+Still on Go for `skills status`: any `config.toml`/`.symskills.toml` and any config probe
+not accepted by Go's platform-specific `os.IsNotExist`; `SYMSKILLS_CACHE_DIR` (Go writes its status render cache
+there; native never does); relative, empty, symlinked, non-clean or non-directory
+`SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` and overrides below a symlinked or unreadable
+ancestor; empty or invalid `SYMSKILLS_VCS_ENABLED`; the native-only
+`SYMBRAIN_SKILLS_*` variables; every non-OpenCode target or unqualified multi-target
+scan with config; unknown scope; flag errors; and the previously documented
+marker/symlink states. Known, unchanged side-effect difference: Go status writes a
+`status-render` cache under the skills cache directory for managed installs;
+native status writes nothing.
+
+Evidence: 33 native cases and 45 must-fallback cases (`skills_status_config_*` in
+`scripts/rust-differential.py`; 78 in total, 7 of the fallback cases need a non-root
+user because they rely on `chmod`: unreadable config dir, mode-000 and mode-444
+library leaf, and search-only `0311`/`0111` ancestors of the library and the base) compare the Go binary (built with Go 1.26.7 from
+base revision 90f0bbac6; this change touches no Go source) with the Rust binary. Native cases
+run Rust with `SYMBRAIN_GO_BINARY` unset and a Go-free `PATH`, and assert the fixture
+root (type, mode, size, mtime, link targets, content hashes) is unchanged;
+fallback cases assert the missing-fallback diagnostic when no Go route exists.
+Managed installs are genuine Go artifacts relocated verbatim. The 21 source mutants in
+`scripts/skills-status-config-oracle/run.py --mutants` (probe `is_file`, any-error-is-absent,
+symlink-following ancestor walk, unclean paths, unlistable ancestor, unsearchable leaf,
+HOME guard, HOME check in `has_dynamic_config`, HOME gate ordered after the
+unsafe-marker rule, XDG dot segment and relative XDG, among others) are each killed by
+the expected cases; the one shape covered by two independent layers (`skills status`
+with HOME unset and no `--target`) is deliberately not claimed by either single-line
+mutant.
+Each replay is classified KILLED, SURVIVED or INCONCLUSIVE(timeout|build|harness); only an
+all-KILLED run exits 0. Every replay keeps its own evidence folder (full streams, mutant
+executable sha256, a distinct differential-journal root with per-case timeout events), and a
+child that hits the 10 s deadline is reported as `TIMEOUT case=<id>` without discarding
+earlier comparison failures (#940).
+
+Review-delta hardening: every existing override-directory component must be
+*listable*, not merely searchable (the Rust install layer opens each ancestor
+read-only, so a `0311`/`0111` ancestor that Go traverses by path stays on Go);
+`has_dynamic_config` now includes the undefined-`HOME` check, so `skills list`,
+`targets`, `doctor` and `sync` also stay on Go without a home (their defaults
+derive from the home directory, e.g. `.claude/skills` versus `./.claude/skills`);
+the HOME gate of `skills status` runs before the classified-unsafe-marker rule
+(Go fails on `$HOME is not defined` before scanning a skill root); the Windows
+reserved-name check mirrors Go 1.26 `isReservedName` (`:`/`.` suffixes, trailing
+spaces, superscript `COM¹²³`/`LPT¹²³`, `COM0` not reserved), and the non-Unix
+not-exist test uses Go's `Errno.Is(ErrNotExist)` raw codes 2, 3 and 53
+(`ERROR_FILE_NOT_FOUND`, `ERROR_PATH_NOT_FOUND`, `_ERROR_BAD_NETPATH`) instead of
+`ErrorKind::NotFound`. Residuals: the Windows branches (`cfg!(windows)` guards,
+non-Unix not-exist mapping) are covered by the pure-function unit tests and a `cfg`
+review only; the local `cargo check --target x86_64-pc-windows-msvc` could not run
+because `aws-lc-sys` needs a Windows C toolchain. Reserved device names with an
+extension or stream suffix depend on `RtlIsDosDeviceName_U`, so all such shapes are
+kept on Go rather than classified. Native three-OS CI at the candidate head remains
+required.
+
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 
