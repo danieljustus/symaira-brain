@@ -227,10 +227,12 @@ rust-coverage:
 ## rust-audit: Audit the committed lockfile without resolving or updating it
 rust-audit:
 	$(EXTERNAL_RUN) cargo audit --file Cargo.lock --deny warnings
+	$(EXTERNAL_RUN) cargo audit --file fuzz/Cargo.lock --deny warnings
 
 ## rust-deny: Enforce dependency/license policy without changing Cargo.lock
 rust-deny:
 	$(EXTERNAL_RUN) cargo deny --locked --all-features check
+	$(EXTERNAL_RUN) cargo deny --manifest-path fuzz/Cargo.toml --locked --all-features check
 
 ## rust-fast: Run focused Rust migration checks for the CLI, skills, and Guard
 rust-fast:
