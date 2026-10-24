@@ -227,10 +227,12 @@ rust-coverage:
 ## rust-audit: Audit the committed lockfile without resolving or updating it
 rust-audit:
 	$(EXTERNAL_RUN) cargo audit --file Cargo.lock --deny warnings
+	$(EXTERNAL_RUN) cargo audit --file fuzz/Cargo.lock --deny warnings
 
 ## rust-deny: Enforce dependency/license policy without changing Cargo.lock
 rust-deny:
 	$(EXTERNAL_RUN) cargo deny --locked --all-features check
+	$(EXTERNAL_RUN) cargo deny --manifest-path fuzz/Cargo.toml --locked --all-features check
 
 ## rust-fast: Run focused Rust migration checks for the CLI, skills, and Guard
 rust-fast:
@@ -256,9 +258,12 @@ rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check usag
 	$(EXTERNAL_RUN) cargo test --workspace --doc --all-features --locked
 	$(EXTERNAL_RUN) cargo audit
 	$(EXTERNAL_RUN) cargo deny check
+	$(EXTERNAL_RUN) cargo audit --file fuzz/Cargo.lock --deny warnings
+	$(EXTERNAL_RUN) cargo deny --manifest-path fuzz/Cargo.toml --locked --all-features check
 
 ## rust-fuzz-build: Compile every MCP fuzz target with nightly libFuzzer
 rust-fuzz-build:
+	$(EXTERNAL_RUN) cargo metadata --locked --format-version 1 --manifest-path fuzz/Cargo.toml >/dev/null
 	$(EXTERNAL_RUN) cargo +nightly fuzz build frame-decoder
 	$(EXTERNAL_RUN) cargo +nightly fuzz build jsonrpc-envelope
 
