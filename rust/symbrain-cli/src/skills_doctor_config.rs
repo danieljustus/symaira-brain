@@ -21,8 +21,13 @@
 //!   failure resets regardless of the global file's content (a decode error
 //!   there resets as well).
 //!
-//! Any config file with content (or a special file) needs the Go TOML decoder
-//! and stays on Go, as does every shape whose bytes native code could not
+//! A regular config file is decoded by `symbrain_skills::config_toml` (SKL-018,
+//! the Go-exact replay of `config.Load`'s two merges): a decoded value is
+//! merged in Go's order (defaults, global, project, environment), a Go apply
+//! error resets the whole config to the defaults like any other `Load` failure,
+//! and everything the decoder classifies `NeedsGo` (syntax errors, invalid
+//! UTF-8, Go parser quirks) stays on Go, as does a special file and every
+//! shape whose bytes native code could not
 //! print exactly: unclean or non-UTF-8 base paths (Go's `filepath.Join`
 //! cleans, `PathBuf::join` does not), a `$PWD` that is not the physical
 //! working directory (Go's `os.Getwd` returns `$PWD`), and U+2028/U+2029
@@ -31,6 +36,8 @@
 use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
+
+use symbrain_skills::config_toml::{self, ConfigFile, LoadOutcome, SkillsConfig};
 
 use super::{is_go_not_exist, is_lexically_clean, skills_config_path, windows_path_needs_go};
 
@@ -140,14 +147,36 @@ fn probe(path: &Path) -> Probe {
     }
 }
 
-/// Whether `config.Load()` fails (so the config resets to the defaults), or
-/// `None` when the outcome needs Go's TOML decoder.
-fn load_fails(global: Probe, project: Probe) -> Option<bool> {
+/// What `configkit.loadOnce` does with the two config sources before the
+/// environment is applied.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Plan {
+    /// `config.Load()` fails on a probe, so the config resets to the defaults.
+    Reset,
+    /// Neither source can fail on its own: decode the regular ones.
+    Decode,
+}
+
+/// The merge plan, or `None` when the outcome needs Go.
+fn plan(global: Probe, project: Probe) -> Option<Plan> {
     match (global, project) {
-        (Probe::Absent, Probe::Absent) => Some(false),
-        // The global file is merged first; its failure ends the load.
-        (Probe::Fails, _) | (Probe::Absent | Probe::Regular, Probe::Fails) => Some(true),
+        // The global file is merged first; its failure ends the load. A
+        // failing project probe resets whatever the global file holds (a
+        // decode error there resets as well), so its content is irrelevant.
+        (Probe::Fails, _) | (Probe::Absent | Probe::Regular, Probe::Fails) => Some(Plan::Reset),
+        (Probe::Absent | Probe::Regular, Probe::Absent | Probe::Regular) => Some(Plan::Decode),
         _ => None,
+    }
+}
+
+/// The bytes of a regular config file, `Ok(None)` for an absent one. A read
+/// error (Go would fail the decode with its own message) or a special file is
+/// Go's to handle.
+fn read_source(path: &Path, probe: Probe) -> std::io::Result<Option<Vec<u8>>> {
+    match probe {
+        Probe::Absent => Ok(None),
+        Probe::Regular => fs::read(path).map(Some),
+        _ => Err(std::io::Error::other("not a plain config file")),
     }
 }
 
@@ -167,13 +196,14 @@ fn defaults(config_path: &Path) -> Option<DoctorConfig> {
     })
 }
 
-/// Applies the `SYMSKILLS_*` environment as `configkit.applyEnvOverrides`
-/// does, or returns the defaults when Go's `Load` would fail on it.
-fn apply_env(defaults: DoctorConfig) -> Option<DoctorConfig> {
-    let mut config = defaults.clone();
+/// Applies the `SYMSKILLS_*` environment on top of `base` as
+/// `configkit.applyEnvOverrides` does, or returns `defaults` when Go's `Load`
+/// would fail on it (the whole config, file values included, is replaced).
+fn apply_env(base: DoctorConfig, defaults: &DoctorConfig) -> Option<DoctorConfig> {
+    let mut config = base;
     if let Some(value) = std::env::var_os("SYMSKILLS_VCS_ENABLED") {
         let Some(enabled) = go_bool(&value) else {
-            return Some(defaults);
+            return Some(defaults.clone());
         };
         config.vcs_enabled = enabled;
     }
@@ -195,6 +225,83 @@ fn apply_env(defaults: DoctorConfig) -> Option<DoctorConfig> {
     Some(config)
 }
 
+impl From<&DoctorConfig> for SkillsConfig {
+    fn from(config: &DoctorConfig) -> Self {
+        Self {
+            library_dir: config.library_dir.clone(),
+            render_dir: config.render_dir.clone(),
+            cache_dir: config.cache_dir.clone(),
+            profiles_dir: config.profiles_dir.clone(),
+            base_dir: config.base_dir.clone(),
+            vcs_enabled: config.vcs_enabled,
+        }
+    }
+}
+
+impl From<SkillsConfig> for DoctorConfig {
+    fn from(config: SkillsConfig) -> Self {
+        Self {
+            library_dir: config.library_dir,
+            render_dir: config.render_dir,
+            cache_dir: config.cache_dir,
+            profiles_dir: config.profiles_dir,
+            base_dir: config.base_dir,
+            vcs_enabled: config.vcs_enabled,
+        }
+    }
+}
+
+/// `loadSkillsEnv` for the given defaults: the config files at `config_path`
+/// and `cwd/.symskills.toml`, then the environment, with the whole result
+/// replaced by `defaults` on any `Load` failure. `None` when only Go can
+/// produce it.
+pub(super) fn merged(
+    defaults: &DoctorConfig,
+    config_path: &Path,
+    cwd: &Path,
+) -> Option<DoctorConfig> {
+    let project_path = cwd.join(".symskills.toml");
+    let global = probe(config_path);
+    let project = probe(&project_path);
+    let sources = match plan(global, project)? {
+        Plan::Reset => return Some(defaults.clone()),
+        Plan::Decode => (
+            read_source(config_path, global).ok()?,
+            read_source(&project_path, project).ok()?,
+        ),
+    };
+    let global_path = config_path.to_string_lossy();
+    let project_path = project_path.to_string_lossy();
+    let base = match config_toml::load(
+        &SkillsConfig::from(defaults),
+        sources.0.as_deref().map(|content| ConfigFile {
+            path: &global_path,
+            content,
+        }),
+        sources.1.as_deref().map(|content| ConfigFile {
+            path: &project_path,
+            content,
+        }),
+    ) {
+        LoadOutcome::Loaded(config) => DoctorConfig::from(config),
+        // Go's apply error: `loadSkillsEnv` discards the config for the defaults.
+        LoadOutcome::Error(_) => return Some(defaults.clone()),
+        LoadOutcome::NeedsGo(_) => return None,
+    };
+    let config = apply_env(base, defaults)?;
+    // File values reach the report verbatim like environment values do.
+    let plain = [
+        &config.library_dir,
+        &config.render_dir,
+        &config.cache_dir,
+        &config.profiles_dir,
+        &config.base_dir,
+    ]
+    .into_iter()
+    .all(|value| json_plain(value));
+    plain.then_some(config)
+}
+
 /// The config `skills doctor` prints, or `None` when only Go can produce it.
 pub(super) fn resolve() -> Option<DoctorConfig> {
     // An undefined home is the caller's gate (`go_home_defined`): Go's
@@ -214,12 +321,7 @@ pub(super) fn resolve() -> Option<DoctorConfig> {
     }
     let config_path = skills_config_path();
     let defaults = defaults(&config_path)?;
-    let global = probe(&config_path);
-    let project = probe(&cwd.join(".symskills.toml"));
-    if load_fails(global, project)? {
-        return Some(defaults);
-    }
-    apply_env(defaults)
+    merged(&defaults, &config_path, &cwd)
 }
 
 #[cfg(test)]
@@ -270,19 +372,21 @@ mod tests {
     }
 
     #[test]
-    fn load_failure_table_follows_the_merge_order() {
+    fn merge_plan_follows_the_merge_order() {
+        use Plan::{Decode, Reset};
         use Probe::{Absent, Fails, Other, Regular};
-        assert_eq!(load_fails(Absent, Absent), Some(false));
-        assert_eq!(load_fails(Fails, Absent), Some(true));
-        assert_eq!(load_fails(Fails, Regular), Some(true));
-        assert_eq!(load_fails(Fails, Other), Some(true));
-        assert_eq!(load_fails(Absent, Fails), Some(true));
-        assert_eq!(load_fails(Regular, Fails), Some(true));
-        assert_eq!(load_fails(Regular, Absent), None);
-        assert_eq!(load_fails(Absent, Regular), None);
-        assert_eq!(load_fails(Regular, Regular), None);
-        assert_eq!(load_fails(Other, Fails), None);
-        assert_eq!(load_fails(Absent, Other), None);
+        assert_eq!(plan(Absent, Absent), Some(Decode));
+        assert_eq!(plan(Regular, Absent), Some(Decode));
+        assert_eq!(plan(Absent, Regular), Some(Decode));
+        assert_eq!(plan(Regular, Regular), Some(Decode));
+        assert_eq!(plan(Fails, Absent), Some(Reset));
+        assert_eq!(plan(Fails, Regular), Some(Reset));
+        assert_eq!(plan(Fails, Other), Some(Reset));
+        assert_eq!(plan(Absent, Fails), Some(Reset));
+        assert_eq!(plan(Regular, Fails), Some(Reset));
+        assert_eq!(plan(Other, Fails), None);
+        assert_eq!(plan(Absent, Other), None);
+        assert_eq!(plan(Other, Absent), None);
     }
 
     #[test]

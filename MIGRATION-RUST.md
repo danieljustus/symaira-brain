@@ -787,11 +787,74 @@ zero mismatches.
 table, inline `vcs`, error label, both fold characters, collision, empty-targets
 override, capability merge, non-table map, `%q` width): 16 of 16 killed.
 
-Residual: routing. `skills_cli.rs`/`skills_doctor_config.rs` must still (1) read the
+Residual: routing (delivered for `list`/`doctor`/`status` in SKL-019 below). `skills_cli.rs`/`skills_doctor_config.rs` must still (1) read the
 config bytes through the same stat/`os.IsNotExist` gates, (2) call `config_toml::load`
 and fall back on `NeedsGo`, (3) apply `SYMSKILLS_*` and the discard-to-defaults rule, and
 (4) for `status`/`list`/`sync` feed `LoadTargets` into the native verbs, each with its own
 Go-vs-Rust differential. Native three-OS CI at the final head remains required.
+
+### Skills config-file routing (#764 slice g, SKL-019)
+
+`skills list`, `skills doctor` and `skills status --target opencode` now read
+`config.toml`/`.symskills.toml` natively through `symbrain_skills::config_toml::load`
+(SKL-018). `skills targets` needed nothing: it never reads the symskills config (SKL-017).
+
+The traced Go precedence (`cmdSkills*` -> `loadSkillsEnv` -> corekit `configkit.loadOnce`):
+`Defaults()`, then the global file, then `./.symskills.toml`, then `SYMSKILLS_*`
+(`{LIBRARY,RENDER,CACHE,PROFILES,BASE}_DIR` verbatim even when empty, `SYMSKILLS_VCS_ENABLED`
+through `strconv.ParseBool`); any `Load` error (a stat/read failure, a decode or apply
+error, an invalid bool in a file or in the environment) makes `loadSkillsEnv` swap the
+**whole** config, environment included, for `Defaults()`. The Rust side is one function,
+`doctor_config::merged`, shared by all three verbs: probe both sources (Absent, Fails,
+Regular, Other), `Reset` on a failing probe, otherwise decode the regular files and map
+`LoadOutcome::Loaded` -> env overrides, `Error` -> defaults, `NeedsGo` -> Go.
+
+Verb specifics:
+
+- `list` uses only `library_dir` (Go passes only `cfg.LibraryDir` to `ListLibrary`). The
+  merged value must be the default or pass the same plain-directory gate as the old
+  environment override (absolute, lexically clean, real-directory ancestors); everything
+  else, and the native-only `SYMBRAIN_SKILLS_*` variables, stays on Go.
+- `doctor` prints the merged config; file values get the same U+2028/U+2029 guard as
+  environment values.
+- `status` uses `library_dir`/`base_dir` (same gate); a merged `cache_dir` different from the
+  default moves Go's render cache and stays on Go. Any config file switches off the #621
+  render extension exactly like a `SYMSKILLS_*` variable does.
+
+The environment-only fallbacks of SKL-013/015/016 that were really "invalid bool" or
+"config path is a directory" shapes are now native too (Go's reset-to-defaults is
+reproduced); 22 pre-existing `expect_fallback` cases were flipped to `native` for that
+reason and renamed (`skills_status_config_file_*`).
+
+Evidence: `skills_status_config_file_*` in `scripts/rust-differential.py` (93 cases: 34 list,
+23 doctor, 36 status; 69 native with the Go route removed and the fixture root asserted
+unchanged, 24 must-fallback) against the real Go binary built from `HEAD` af344aae2 by
+`scripts/run-go-oracle.sh` (Go 1.26.7). Shapes: global/project files, project over global,
+env over file, apply errors resetting the env, invalid `vcs.enabled` strings, a first
+failing global ending the load, BOM, CRLF, empty and comment-only files, literal/multi-line
+strings, unicode escapes, dotted `vcs.enabled`, non-table `vcs`, inert keys, `[[targets]]`,
+managed installs and file-only status without any environment; fallbacks for syntax errors,
+invalid UTF-8, duplicate keys, leap seconds, relative/unclean/empty/dot-segment libraries, a
+moved cache, line separators in values, an unreadable file, other status targets. The
+`skills_status_config_` family is 286 cases (192 native, 94 fallback) and the full
+differential 790 cases, all passing. `scripts/skills-status-config-oracle/run.py` carries 44
+source mutants (the config-file ones are new or rewritten: files ignored, project ignored, file
+over env, apply error keeps env / goes to Go, `NeedsGo` answered natively, JSON-unsafe file
+value, read error answered, unchecked list/status directory values, relative/unclean values,
+cache moved, plus the list mutants re-pointed at the shared resolver); 44 of 44 are killed. The ignore-the-file mutant fails 4 expected cases.
+Rust integration tests in `skills_list_native.rs`, `skills_doctor_native.rs` and
+`skills_status_opencode_tests.rs` pin the precedence, the reset and the fallback boundary; the
+pre-existing `skills_status_opencode_tests` assertions that any config file stays on Go
+were rewritten accordingly.
+
+Residuals: `skills sync` with a config file (needs `LoadTargets` fed into the install path)
+and `skills status` for targets other than `opencode` still go to Go whenever a config file
+exists; Windows is cfg-reviewed only; native three-OS CI at the final head remains
+required. Found, not fixed: native `skills status` already reported `in-sync` where Go
+reports `stale` when `SYMSKILLS_LIBRARY_DIR` points away from the default library while the
+default `base` directory does not exist (reproducible with the environment alone, before this
+slice); the new cases avoid that shape.
+
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 

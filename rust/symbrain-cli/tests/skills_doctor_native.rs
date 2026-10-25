@@ -188,7 +188,7 @@ fn undecoded_shapes_fall_back_before_stdout() {
             None,
         ),
         (
-            "project config with content",
+            "project config the decoder hands to Go",
             &["skills", "doctor"][..],
             None,
         ),
@@ -204,9 +204,9 @@ fn undecoded_shapes_fall_back_before_stdout() {
         ),
     ] {
         let root = TempDir::new().unwrap();
-        if name == "project config with content" {
+        if name == "project config the decoder hands to Go" {
             fs::create_dir_all(root.path().join("project")).unwrap();
-            fs::write(root.path().join("project/.symskills.toml"), b"vcs = {}\n").unwrap();
+            fs::write(root.path().join("project/.symskills.toml"), b"[unclosed\n").unwrap();
         }
         let mut command = command(&root, args);
         command.env("SYMBRAIN_GO_BINARY", fallback(&root));
@@ -218,15 +218,73 @@ fn undecoded_shapes_fall_back_before_stdout() {
 }
 
 #[test]
-fn global_config_falls_back_before_stdout() {
+fn global_config_the_decoder_hands_to_go_falls_back_before_stdout() {
     let root = TempDir::new().unwrap();
     let config = root.path().join("config/symskills");
     fs::create_dir_all(&config).unwrap();
-    fs::write(config.join("config.toml"), b"vcs = {}\n").unwrap();
+    fs::write(config.join("config.toml"), b"library_dir = \n").unwrap();
 
     let output = command(&root, &["skills", "doctor"])
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
     assert_fake_fallback(&output);
+}
+
+#[test]
+fn config_files_are_decoded_natively_with_go_precedence() {
+    // SKL-019: valid TOML is decoded by the Go-exact SKL-018 decoder, the
+    // project file overrides the global one, the environment overrides both and
+    // an apply error resets the whole config to the defaults.
+    let root = TempDir::new().unwrap();
+    let missing_go = root.path().join("missing-go");
+    let report = |root: &TempDir, env: &[(&str, &str)]| -> serde_json::Value {
+        let mut command = command(root, &["skills", "doctor", "--json"]);
+        command.env("SYMBRAIN_GO_BINARY", &missing_go);
+        for (name, value) in env {
+            command.env(name, value);
+        }
+        let output = command.output().unwrap();
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        serde_json::from_slice(&output.stdout).unwrap()
+    };
+    let default = report(&root, &[]);
+    let config = root.path().join("config/symskills");
+    fs::create_dir_all(&config).unwrap();
+    fs::create_dir_all(root.path().join("project")).unwrap();
+    fs::write(
+        config.join("config.toml"),
+        "\u{feff}library_dir = \"/global/library\"\ncache_dir = \"/global/cache\"\nvcs = { enabled = \"false\" }\n",
+    )
+    .unwrap();
+    fs::write(
+        root.path().join("project/.symskills.toml"),
+        "library_dir = \"/project/library\"\n",
+    )
+    .unwrap();
+    let merged = report(&root, &[]);
+    assert_eq!(merged["config"]["library_dir"], "/project/library");
+    assert_eq!(merged["config"]["cache_dir"], "/global/cache");
+    assert_eq!(merged["config"]["vcs"]["enabled"], json!(false));
+    assert_eq!(
+        merged["config"]["base_dir"], default["config"]["base_dir"],
+        "unset keys keep the defaults"
+    );
+
+    let env = report(
+        &root,
+        &[
+            ("SYMSKILLS_LIBRARY_DIR", "/env/library"),
+            ("SYMSKILLS_VCS_ENABLED", "T"),
+        ],
+    );
+    assert_eq!(env["config"]["library_dir"], "/env/library");
+    assert_eq!(env["config"]["cache_dir"], "/global/cache");
+    assert_eq!(env["config"]["vcs"]["enabled"], json!(true));
+
+    // A wrong type is a Go apply error: the whole config, environment
+    // included, falls back to the defaults.
+    fs::write(config.join("config.toml"), "library_dir = 5\n").unwrap();
+    let reset = report(&root, &[("SYMSKILLS_BASE_DIR", "/env/base")]);
+    assert_eq!(reset["config"], default["config"]);
 }
