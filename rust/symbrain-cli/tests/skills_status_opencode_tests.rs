@@ -16,10 +16,19 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     for path in [&home, &config, &data, &cache, &project] {
         std::fs::create_dir_all(path).unwrap();
     }
+    // `env_clear` also drops the temp-directory variables. Windows then falls
+    // back to `%USERPROFILE%` (the fixture `home`) for the scratch directory
+    // that `skills status` stages a fresh render in, which would change the
+    // directory mtime that the read-only assertions compare. Point it at the
+    // system temp directory, outside every fixture tree.
+    let scratch = std::env::temp_dir();
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .env_clear()
         .envs(coverage::profile_environment())
+        .env("TMPDIR", &scratch)
+        .env("TMP", &scratch)
+        .env("TEMP", &scratch)
         .env("HOME", &home)
         .env("USERPROFILE", &home)
         .env("XDG_CONFIG_HOME", &config)
@@ -165,17 +174,232 @@ fn legacy_go_config_wins_when_new_skills_config_dir_exists() {
     assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
 }
 
+fn assert_go_fallback(output: &Output, what: &str) {
+    assert_eq!(output.status.code(), Some(1), "{what}");
+    assert!(output.stdout.is_empty(), "{what}");
+    assert!(
+        String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
+        "{what}: {:?}",
+        output.stderr
+    );
+}
+
+/// Writes a managed-marker install whose library source decides its row.
+fn managed_marker_install(root: &TempDir) -> std::path::PathBuf {
+    let skill = root.path().join("home/.config/opencode/skills/managed");
+    std::fs::create_dir_all(&skill).unwrap();
+    std::fs::write(skill.join("SKILL.md"), b"managed\n").unwrap();
+    std::fs::write(
+        skill.join(".symskills.json"),
+        br#"{"schema_version":1,"managed_by":"symskills","target":"opencode","name":"managed","mode":"copy","installed":"2026-01-02T03:04:05Z","source_hash":"abc123","allow_executable":true}"#,
+    )
+    .unwrap();
+    skill
+}
+
+fn status_of(output: &Output) -> String {
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(report["installs"][0].get("render_status").is_none());
+    report["installs"][0]["status"].as_str().unwrap().to_owned()
+}
+
+fn tree_snapshot(root: &std::path::Path) -> Vec<(String, Vec<u8>)> {
+    fn walk(path: &std::path::Path, root: &std::path::Path, out: &mut Vec<(String, Vec<u8>)>) {
+        let mut entries: Vec<_> = std::fs::read_dir(path)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .collect();
+        entries.sort();
+        for entry in entries {
+            let rel = entry
+                .strip_prefix(root)
+                .unwrap()
+                .to_string_lossy()
+                .into_owned();
+            let metadata = std::fs::symlink_metadata(&entry).unwrap();
+            let stamp = metadata
+                .modified()
+                .unwrap()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            if metadata.is_dir() {
+                out.push((format!("{rel}/ {stamp}"), Vec::new()));
+                walk(&entry, root, out);
+            } else {
+                out.push((
+                    format!("{rel} {stamp}"),
+                    std::fs::read(&entry).unwrap_or_default(),
+                ));
+            }
+        }
+    }
+    let mut out = Vec::new();
+    walk(root, root, &mut out);
+    out
+}
+
 #[test]
-fn symskills_config_override_keeps_go_fallback() {
+fn symskills_library_override_status_is_native_and_read_only() {
+    let root = TempDir::new().unwrap();
+    managed_marker_install(&root);
+    let args = ["skills", "status", "--target", "opencode", "--json"];
+    // Default library has no `managed` source: the install is orphaned.
+    assert_eq!(status_of(&run(&root, &args)), "orphaned");
+
+    // Unix temp aliases must not trigger the symlink fallback. Windows keeps
+    // its plain spelling because canonicalization introduces a verbatim path.
+    #[cfg(windows)]
+    let alt = root.path().join("alt");
+    #[cfg(not(windows))]
+    let alt = root.path().canonicalize().unwrap().join("alt");
+    let library = alt.join("library");
+    std::fs::create_dir_all(library.join("managed")).unwrap();
+    std::fs::write(
+        library.join("managed/SKILL.md"),
+        b"---\nname: managed\ndescription: alt library\n---\n\nBody\n",
+    )
+    .unwrap();
+    let before = tree_snapshot(root.path());
+    let output = command(&root, &args)
+        .env("SYMSKILLS_LIBRARY_DIR", &library)
+        .output()
+        .unwrap();
+    // The override is honored (no longer orphaned) with no Go route at all.
+    assert_eq!(status_of(&output), "stale");
+    assert_eq!(
+        tree_snapshot(root.path()),
+        before,
+        "status must be read-only"
+    );
+
+    // The same override pointing at an empty directory restores the orphan row.
+    let empty = alt.join("empty");
+    std::fs::create_dir_all(&empty).unwrap();
+    let output = command(&root, &args)
+        .env("SYMSKILLS_LIBRARY_DIR", &empty)
+        .env("SYMSKILLS_BASE_DIR", alt.join("base"))
+        .env("SYMSKILLS_VCS_ENABLED", "false")
+        .env("SYMSKILLS_RENDER_DIR", alt.join("render"))
+        .env("SYMSKILLS_PROFILES_DIR", alt.join("profiles"))
+        .output()
+        .unwrap();
+    assert_eq!(status_of(&output), "orphaned");
+}
+
+#[test]
+fn symskills_inert_overrides_do_not_add_the_render_extension() {
+    let root = TempDir::new().unwrap();
+    managed_marker_install(&root);
+    // A retained render cache would add RENDER columns without any override.
+    let cache = root
+        .path()
+        .join("data/symbrain/skills/rendered/opencode/managed");
+    std::fs::create_dir_all(&cache).unwrap();
+    std::fs::write(cache.join("SKILL.md"), b"managed\n").unwrap();
+    let output = command(&root, &["skills", "status", "--target", "opencode"])
+        .env("SYMSKILLS_VCS_ENABLED", "TRUE")
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.starts_with("TARGET\tSKILL\tSTATUS\tMODE\tPATH\n"),
+        "{stdout}"
+    );
+}
+
+#[test]
+fn symskills_cache_dir_override_keeps_go_fallback() {
     let root = TempDir::new().unwrap();
     let mut command = command(&root, &["skills", "status", "--target", "opencode"]);
     let output = command
-        .env("SYMSKILLS_LIBRARY_DIR", "/different/library")
+        .env("SYMSKILLS_CACHE_DIR", "/different/cache")
         .output()
         .unwrap();
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert_go_fallback(&output, "cache dir");
+}
+
+type Shape<'a> = (&'a [&'a str], &'a [(&'a str, &'a str)], &'a str);
+
+#[test]
+fn symskills_unreplayable_env_shapes_keep_go_fallback() {
+    let root = TempDir::new().unwrap();
+    let file = root.path().join("not-a-dir");
+    std::fs::write(&file, b"x").unwrap();
+    let cases: &[Shape] = &[
+        (
+            &["skills", "status", "--target", "opencode"],
+            &[("SYMSKILLS_VCS_ENABLED", "maybe")],
+            "invalid bool",
+        ),
+        (
+            &["skills", "status", "--target", "opencode"],
+            &[("SYMSKILLS_VCS_ENABLED", "")],
+            "empty bool",
+        ),
+        (
+            &["skills", "status", "--target", "opencode"],
+            &[("SYMSKILLS_LIBRARY_DIR", "relative/library")],
+            "relative library",
+        ),
+        (
+            &["skills", "status", "--target", "opencode"],
+            &[("SYMSKILLS_BASE_DIR", "")],
+            "empty base",
+        ),
+        (
+            &["skills", "status", "--target", "opencode"],
+            &[("SYMSKILLS_LIBRARY_DIR", file.to_str().unwrap())],
+            "library is a file",
+        ),
+        (
+            &["skills", "status", "--target", "claude"],
+            &[("SYMSKILLS_LIBRARY_DIR", "/different/library")],
+            "other target",
+        ),
+        (
+            &["skills", "status"],
+            &[("SYMSKILLS_LIBRARY_DIR", "/different/library")],
+            "no target",
+        ),
+        (
+            &["skills", "status", "--target", "opencode"],
+            &[("SYMBRAIN_SKILLS_LIBRARY_DIR", "/different/library")],
+            "native-only variable",
+        ),
+        (
+            &[
+                "skills", "status", "--target", "opencode", "--scope", "bogus",
+            ],
+            &[("SYMSKILLS_LIBRARY_DIR", "/different/library")],
+            "unknown scope",
+        ),
+    ];
+    for (args, env, what) in cases {
+        let mut command = command(&root, args);
+        for (key, value) in *env {
+            command.env(key, value);
+        }
+        assert_go_fallback(&command.output().unwrap(), what);
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn symskills_library_override_symlink_keeps_go_fallback() {
+    let root = TempDir::new().unwrap();
+    let real = root.path().join("real-library");
+    std::fs::create_dir_all(&real).unwrap();
+    let link = root.path().join("linked-library");
+    std::os::unix::fs::symlink(&real, &link).unwrap();
+    let output = command(&root, &["skills", "status", "--target", "opencode"])
+        .env("SYMSKILLS_LIBRARY_DIR", &link)
+        .output()
+        .unwrap();
+    assert_go_fallback(&output, "linked library");
 }
 
 #[cfg(unix)]
