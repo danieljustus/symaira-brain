@@ -1,3 +1,9 @@
+/// Raw `SKILL.md` bytes through the retained root capability (the document is
+/// not part of `resources`).
+pub(crate) fn read_skill_md_bytes(bundle: &Bundle, limit: u64) -> Result<Vec<u8>, SkillError> {
+    read_limited_nofollow(&bundle.root_cap, Path::new("SKILL.md"), "SKILL.md", limit)
+}
+
 pub(crate) fn read_bundle_bytes(
     root: &Bundle,
     relative: &Path,

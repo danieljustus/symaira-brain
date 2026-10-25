@@ -1664,6 +1664,16 @@ def managed_config_then(
     return wrapped
 
 
+def drop_default_base(root: Path, env: dict[str, str]) -> None:
+    """Remove the default base-snapshot directory (#955).
+
+    Without snapshots Go falls back to the coarse source-hash comparison, whose
+    outcome depends on *where* the library lives: a library that moved away
+    from the install-time location is stale, one that stayed is in-sync.
+    """
+    shutil.rmtree(root / "data/symbrain/skills/base")
+
+
 def _status_cfg_write(path: Path, body: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     _write_text(path, body, encoding="utf-8")
@@ -3687,6 +3697,60 @@ CASES = (
         setup=project_scope_fixture(with_managed_config(setup_skills_opencode_managed_harness_changed)),
         native=True, read_only=True,
     ),
+    # #955: the library moves away from the install-time location while the
+    # default base-snapshot directory does not exist. Go has no snapshot, so it
+    # falls back to the coarse source-hash comparison; the pinned Go binary is
+    # the expected side of every comparison below.
+    Case(
+        "skills_status_config_env_library_moved_base_missing_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(drop_default_base, base=False),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_library_moved_base_missing",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(drop_default_base, base=False),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_library_moved_base_missing_copy_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_managed_config(
+            lambda root, env: (convert_managed_install_to_copy(root, env), drop_default_base(root, env)),
+            base=False,
+        ),
+        native=True, read_only=True,
+    ),
+    Case(
+        # The library did not move either: Go still reports stale, because the
+        # cached status render hashes differently from the install (#955). Any
+        # `SYMSKILLS_*` variable switches the #621 render extension off.
+        "skills_status_config_env_library_default_base_missing_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_env(
+            lambda root, env: (generate_managed_install(root, env), drop_default_base(root, env)),
+            SYMSKILLS_VCS_ENABLED="T",
+        ),
+        native=True, read_only=True,
+    ),
+    Case(
+        # Control: the snapshot directory is relocated (not missing).
+        "skills_status_config_env_library_moved_base_relocated_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_managed_config(generate_managed_install),
+        native=True, read_only=True,
+    ),
+    Case(
+        # The base override points at a directory that does not exist.
+        "skills_status_config_env_library_moved_base_override_missing_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_env(
+            managed_config_then(drop_default_base, base=False),
+            SYMSKILLS_BASE_DIR="{root}/alt/never-created-base",
+        ),
+        native=True, read_only=True,
+    ),
     # Shapes that must keep routing to Go (`expect_fallback` proves the route;
     # the ordinary comparison still checks the shipped bytes).
     Case(
@@ -5016,6 +5080,12 @@ CASES = (
         file_status("project_library_base_json", file_cfg(FILE_PROJECT, FILE_STATUS_PATHS)),
         file_status("project_over_global_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\nbase_dir = "{root}/alt/nowhere-base"\n'), file_cfg(FILE_PROJECT, FILE_STATUS_PATHS)),
         file_status("library_only_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/library"\n'), base=False),
+        # #955: library moved by a config file, default base directory missing.
+        file_status("library_moved_base_missing_json", file_cfg(FILE_GLOBAL, FILE_LIB), drop_default_base, base=False),
+        file_status("library_moved_base_missing_table", file_cfg(FILE_GLOBAL, FILE_LIB), drop_default_base, base=False, args=("skills", "status", "--target", "opencode")),
+        file_status("library_moved_base_missing_project_json", file_cfg(FILE_PROJECT, FILE_LIB), drop_default_base, base=False),
+        file_status("library_moved_base_missing_with_vcs_json", file_cfg(FILE_GLOBAL, FILE_LIB + "[vcs]\nenabled = false\n"), drop_default_base, base=False),
+        file_status("library_moved_base_missing_base_dir_missing_json", file_cfg(FILE_GLOBAL, FILE_LIB + 'base_dir = "{root}/alt/never-created-base"\n'), drop_default_base, base=False),
         file_status("base_only_json", file_cfg(FILE_GLOBAL, 'base_dir = "{root}/alt/base"\n')),
         file_status("env_over_file_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\nbase_dir = "{root}/alt/nowhere-base"\n'), lambda root, env: env.update(SYMSKILLS_LIBRARY_DIR=str(root / "alt/library"), SYMSKILLS_BASE_DIR=str(root / "alt/base"))),
         file_status("invalid_type_resets_env_json", file_cfg(FILE_GLOBAL, "library_dir = 5\n"), lambda root, env: env.update(SYMSKILLS_LIBRARY_DIR=str(root / "alt/library"), SYMSKILLS_BASE_DIR=str(root / "alt/base"))),

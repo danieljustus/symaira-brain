@@ -17,7 +17,7 @@ use sha2::{Digest, Sha256};
 #[cfg(windows)]
 use crate::cap_root::sync_windows_dir;
 use crate::cap_root::{is_reparse_point, open_child_nofollow, open_filesystem_root};
-use crate::load::read_bundle_bytes;
+use crate::load::{read_bundle_bytes, read_skill_md_bytes};
 use crate::model::{
     Bundle, MAX_INPUT_SIZE, MAX_RESOURCE_SIZE, MAX_TOTAL_RESOURCE_BYTES, SkillError,
 };

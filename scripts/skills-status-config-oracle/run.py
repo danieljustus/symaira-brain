@@ -49,7 +49,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "rust/symbrain-cli/src/skills_cli.rs"
 # Mutants may patch either file; a pattern must match exactly one of them once.
-SOURCES = (SOURCE, ROOT / "rust/symbrain-cli/src/skills_doctor_config.rs")
+SOURCES = (
+    SOURCE,
+    ROOT / "rust/symbrain-cli/src/skills_doctor_config.rs",
+    ROOT / "rust/symbrain-skills/src/install/status_compare.rs",
+)
 PREFIX = "skills_status_config_"
 
 # chmod 000 does not restrict root, so these cases only exist for an
@@ -430,6 +434,38 @@ MUTANTS = {
         "    let (library_dir, base_dir, home_dir, render_dir) = status_dirs();\n"
         "    let _ = fs::create_dir_all(skills_data_root().join(\"mutant-scratch\"));\n",
         ["skills_status_config_env_symlink_insync_json"],
+    ),
+    # #955: Go's `skills status` passes the cache directory, so the coarse
+    # (no base snapshot) comparison reads the cached render's fingerprint hash.
+    "status-without-cache-hash": (
+        "cached_render_hash: true,",
+        "cached_render_hash: false,",
+        [
+        "skills_status_config_env_library_moved_base_missing_json",
+        "skills_status_config_env_library_moved_base_missing",
+        "skills_status_config_env_library_default_base_missing_json",
+        "skills_status_config_env_library_moved_base_override_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_table",
+        "skills_status_config_file_status_library_moved_base_missing_project_json",
+        "skills_status_config_file_status_library_moved_base_missing_with_vcs_json",
+        "skills_status_config_file_status_library_moved_base_missing_base_dir_missing_json",
+    ],
+    ),
+    "coarse-hash-install-time": (
+        "crate::materialize::status_cache_source_hash(&bundle, &rendered)?",
+        "fresh.source_hash.clone()",
+        [
+        "skills_status_config_env_library_moved_base_missing_json",
+        "skills_status_config_env_library_moved_base_missing",
+        "skills_status_config_env_library_default_base_missing_json",
+        "skills_status_config_env_library_moved_base_override_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_table",
+        "skills_status_config_file_status_library_moved_base_missing_project_json",
+        "skills_status_config_file_status_library_moved_base_missing_with_vcs_json",
+        "skills_status_config_file_status_library_moved_base_missing_base_dir_missing_json",
+    ],
     ),
 }
 

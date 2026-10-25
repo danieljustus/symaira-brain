@@ -81,6 +81,11 @@ where
     // A retained cache is a separate observation: even an unreadable installed
     // tree must retain its render diagnostic once a fresh render is available.
     let comparison = (|| -> Result<InstallStatus, SkillError> {
+        let coarse_hash = if options.cached_render_hash {
+            crate::materialize::status_cache_source_hash(&bundle, &rendered)?
+        } else {
+            fresh.source_hash.clone()
+        };
         if let Some(manifest) = read_manifest_for(
             &options.home_dir,
             options.base_dir.as_deref(),
@@ -113,10 +118,9 @@ where
                 error,
             ));
         }
-        let fresh_hash = fresh.source_hash;
         if !marker.source_hash.is_empty() {
             return Ok(common(
-                if marker.source_hash == fresh_hash {
+                if marker.source_hash == coarse_hash {
                     StatusKind::InSync
                 } else {
                     StatusKind::Stale
