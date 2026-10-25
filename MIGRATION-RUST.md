@@ -618,13 +618,78 @@ cases. The full differential (608 cases) passes. The Rust-side test
 for an env override and a custom-target config file, and keeps the fallback for flag,
 scope and missing-home shapes.
 
-Still on Go: `skills doctor` (it prints the merged config), `skills list` and
-`skills sync` with any config; every `skills status` shape listed under #764
+Still on Go: `skills doctor` with a config file that has content (the SKL-015
+slice below narrows the rest), `skills list` and `skills sync` with any config; every `skills status` shape listed under #764
 slice c. The Windows run of this slice rests on `cargo clippy --target
 x86_64-pc-windows-gnu` and a `cfg` review (the probe helpers are no longer on this
 verb's path); native Linux/macOS/Windows CI at the candidate head remains required.
 
-### Skills list environment-only config (#764 slice e)
+### Skills doctor merged-config replay (#764 slice e)
+
+`symbrain skills doctor [--json]` no longer routes to Go for the symskills
+environment or for flags. Unlike `targets`, the report prints the merged config, so
+the shapes are replayed from Go's `config.Load()` (`configkit.Loader.loadOnce`):
+`config.Defaults()`, then the global `config.toml`, then `./.symskills.toml`, then
+`SYMSKILLS_*`; `loadSkillsEnv` replaces the **whole** result with `Defaults()` when
+`Load` returns any error (`cmd/symbrain/cmd_skills.go:66`). Native code reproduces:
+
+- both files absent (`os.Stat` reports `ENOENT`): `SYMSKILLS_{LIBRARY,RENDER,CACHE,
+  PROFILES,BASE}_DIR` replace their field verbatim (empty and relative values
+  included, no path cleaning); `SYMSKILLS_VCS_ENABLED` goes through
+  `strconv.ParseBool`, and an invalid or empty value makes `Load` fail and the whole
+  config, overrides included, reset to the defaults; `SYMBRAIN_SKILLS_*` is not Go
+  config and changes nothing;
+- a config path whose stat fails with anything but `ENOENT` (`ENOTDIR`, `EACCES`,
+  `ELOOP`) or that is a directory (`toml.DecodeFile` fails with `EISDIR`): the same
+  reset to defaults. The global file is merged first, so its failure ends the load;
+  a failing project path resets whatever the global file contains (a decode error
+  there resets too), so that outcome needs no TOML decoder;
+- `--target`/`--scope` (value ignored, never validated, unlike `status`) in the
+  forms `parse_list_flags` already accepts; the table output applies `orDash` to
+  every value, so an empty or whitespace-only path prints `-`.
+
+What stays on Go: a config file with content (the TOML decoder, also an empty
+regular file), any other file type at a config path, flag-package errors,
+positionals, `--`, `--help`, an undefined, empty, relative or non-clean `HOME` and
+non-clean absolute `XDG_{CONFIG,DATA,CACHE}_HOME` (`filepath.Join` cleans,
+`PathBuf::join` does not), a `$PWD` that names the working directory under another
+spelling (`os.Getwd` returns it; an unrelated or relative `$PWD` is ignored by both),
+non-UTF-8 override values and U+2028/U+2029 (Go's JSON encoder escapes them,
+`serde_json` does not). `has_dynamic_config` no longer gates this verb; it still
+gates `list`/`status`/`sync`.
+
+Evidence: 70 `skills_status_config_doctor_*` cases in `scripts/rust-differential.py`
+(43 native with the Go route removed and the fixture root asserted unchanged, 27
+must-fallback; the unreadable-config-directory case needs a non-root user) compare
+the Go binary built from `HEAD` e92baa02d (Go 1.26.7, no Go source changed) with the
+Rust binary in per-scenario HOME/XDG roots with `PATH` pinned to `/usr/bin:/bin`.
+They include the previously unproven default report, `legacy` and current data/cache
+roots, relative/empty/unset/alternate XDG roots, directory/looping/dangling/file-as-
+directory config probes with a live environment override that Go drops, regular
+global/project config files (fallback), and the home/XDG/PWD/encoding gates above.
+The whole `skills_status_config_*` family (174 cases: 98 native, 76 fallback) matches
+Go. Nine new mutants in `scripts/skills-status-config-oracle/run.py`
+(`doctor-gated-on-config`, `doctor-ignores-home`, `doctor-accepts-bad-flags`,
+`doctor-invalid-bool-applies-env`, `doctor-directory-config-is-absent`,
+`doctor-stat-error-is-absent`, `doctor-accepts-unclean-base`, `doctor-ignores-pwd`,
+`doctor-accepts-line-separator`) are killed together with the affected `targets-*`,
+`missing-home-guard`, `home-gate-after-unsafe-marker` and `write-a-file` mutants (15
+of 15, new `--only` selector); `dynamic-config-ignores-home` is replaced by
+`doctor-ignores-home` because doctor no longer reads `has_dynamic_config`. The
+mutant runner now accepts patterns in either `skills_cli.rs` or
+`skills_doctor_config.rs`. `skills_doctor_native.rs` asserts the native env/flag
+output, the reset and the remaining fallbacks.
+
+Residual: a config file with content stays on Go until a TOML decode with
+BurntSushi/`configkit` acceptance is ported (the minimal prerequisite for the last
+`skills doctor` fallback); `config_path`/`log_path` are built with `native_join`/`filepath.Join` semantics and a
+directory config probe resets to the defaults on every platform (Windows CI run
+40215584258 showed `/`-joined paths and a Go fallback for the directory cases);
+Windows branches (`windows_path_needs_go`, stat-error
+classification is Unix-only) rest on `cargo clippy --target x86_64-pc-windows-gnu`
+and a `cfg` review; native Linux/macOS/Windows CI at the candidate head remains
+required.
+### Skills list environment-only config (#764 slice f)
 
 `symbrain skills list` no longer routes to Go for an environment-only `symskills`
 configuration. Go's `cmdSkillsList` takes exactly one field from the loaded config,
@@ -661,7 +726,7 @@ override, the inert variables and the fallback shapes.
 
 Still on Go: `skills sync` with any config, `skills status` shapes listed under #764 slice c,
 `skills log` (log-path symlink shapes) and every config-file shape (a Go-exact TOML parser does
-not exist in Rust; `skills doctor` is SKL-015, PR #950). The Windows run of this slice rests on a
+not exist in Rust; `skills doctor` is SKL-015, merged in #950). The Windows run of this slice rests on a
 `cfg` review; native Linux/macOS/Windows CI at the candidate head remains required.
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)

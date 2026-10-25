@@ -103,29 +103,115 @@ fn default_doctor_matches_go_schema_and_formats() {
 }
 
 #[test]
-fn doctor_flags_and_dynamic_inputs_fallback_before_stdout() {
-    for (name, args, env_name) in [
+fn flags_and_symskills_env_are_native_like_go() {
+    // Go ignores `--target`/`--scope` for doctor and applies the SYMSKILLS_*
+    // environment verbatim (differential: `skills_status_config_doctor_*`).
+    let root = TempDir::new().unwrap();
+    let missing_go = root.path().join("missing-go");
+    let default = command(&root, &["skills", "doctor", "--json"])
+        .env("SYMBRAIN_GO_BINARY", &missing_go)
+        .output()
+        .unwrap();
+    let flagged = command(&root, &["skills", "doctor", "--target", "claude", "--json"])
+        .env("SYMBRAIN_GO_BINARY", &missing_go)
+        .output()
+        .unwrap();
+    assert!(flagged.status.success(), "stderr: {:?}", flagged.stderr);
+    assert_eq!(flagged.stdout, default.stdout);
+
+    let overridden = command(&root, &["skills", "doctor", "--json"])
+        .env("SYMBRAIN_GO_BINARY", &missing_go)
+        .env("SYMSKILLS_LIBRARY_DIR", "/different/library")
+        .env("SYMSKILLS_PROFILES_DIR", "")
+        .env("SYMSKILLS_VCS_ENABLED", "F")
+        .output()
+        .unwrap();
+    assert!(
+        overridden.status.success(),
+        "stderr: {:?}",
+        overridden.stderr
+    );
+    assert!(overridden.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&overridden.stdout).unwrap();
+    assert_eq!(report["config"]["library_dir"], "/different/library");
+    assert_eq!(report["config"]["profiles_dir"], "");
+    assert_eq!(report["profiles_dir"], "");
+    assert_eq!(report["config"]["vcs"]["enabled"], json!(false));
+
+    let table = command(&root, &["skills", "doctor"])
+        .env("SYMBRAIN_GO_BINARY", &missing_go)
+        .env("SYMSKILLS_PROFILES_DIR", "")
+        .env("SYMSKILLS_BASE_DIR", "  ")
+        .output()
+        .unwrap();
+    let table = String::from_utf8(table.stdout).unwrap();
+    assert!(table.contains("profiles    -\n"), "{table}");
+    assert!(table.contains("base        -\n"), "{table}");
+}
+
+#[test]
+fn failing_config_probe_resets_environment_to_defaults() {
+    // A directory at config.toml makes Go's `config.Load()` fail, and the
+    // whole config — the environment included — falls back to the defaults.
+    let root = TempDir::new().unwrap();
+    let missing_go = root.path().join("missing-go");
+    let default = command(&root, &["skills", "doctor", "--json"])
+        .env("SYMBRAIN_GO_BINARY", &missing_go)
+        .output()
+        .unwrap();
+    fs::create_dir_all(root.path().join("config/symskills/config.toml")).unwrap();
+    for (name, value) in [
+        ("SYMSKILLS_LIBRARY_DIR", "/different/library"),
+        ("SYMSKILLS_VCS_ENABLED", "maybe"),
+    ] {
+        let output = command(&root, &["skills", "doctor", "--json"])
+            .env("SYMBRAIN_GO_BINARY", &missing_go)
+            .env(name, value)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{name}: {:?}", output.stderr);
+        assert_eq!(output.stdout, default.stdout, "{name}");
+    }
+}
+
+#[test]
+fn undecoded_shapes_fall_back_before_stdout() {
+    for (name, args, env) in [
         (
-            "target flag",
-            &["skills", "doctor", "--target", "claude"][..],
+            "flag error",
+            &["skills", "doctor", "--bogus"][..],
+            None::<(&str, &str)>,
+        ),
+        (
+            "positional argument",
+            &["skills", "doctor", "extra"][..],
             None,
         ),
-        ("project config", &["skills", "doctor"][..], None),
         (
-            "skills override",
+            "project config with content",
             &["skills", "doctor"][..],
-            Some("SYMSKILLS_LIBRARY_DIR"),
+            None,
+        ),
+        (
+            "unclean xdg base",
+            &["skills", "doctor"][..],
+            Some(("XDG_DATA_HOME", "/data/../data")),
+        ),
+        (
+            "line separator in override",
+            &["skills", "doctor"][..],
+            Some(("SYMSKILLS_LIBRARY_DIR", "/a\u{2028}b")),
         ),
     ] {
         let root = TempDir::new().unwrap();
-        if name == "project config" {
+        if name == "project config with content" {
             fs::create_dir_all(root.path().join("project")).unwrap();
             fs::write(root.path().join("project/.symskills.toml"), b"vcs = {}\n").unwrap();
         }
         let mut command = command(&root, args);
         command.env("SYMBRAIN_GO_BINARY", fallback(&root));
-        if let Some(env_name) = env_name {
-            command.env(env_name, "/different/library");
+        if let Some((name, value)) = env {
+            command.env(name, value);
         }
         assert_fake_fallback(&command.output().unwrap());
     }
