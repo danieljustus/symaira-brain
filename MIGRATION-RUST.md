@@ -689,6 +689,45 @@ Windows branches (`windows_path_needs_go`, stat-error
 classification is Unix-only) rest on `cargo clippy --target x86_64-pc-windows-gnu`
 and a `cfg` review; native Linux/macOS/Windows CI at the candidate head remains
 required.
+### Skills list environment-only config (#764 slice f)
+
+`symbrain skills list` no longer routes to Go for an environment-only `symskills`
+configuration. Go's `cmdSkillsList` takes exactly one field from the loaded config,
+`LibraryDir`, for `skill.ListLibrary`; the events log and the per-skill install scan are
+derived from the home directory, and `BaseDir`, `CacheDir`, `RenderDir`, `ProfilesDir` and
+`VCS.Enabled` never reach the report (nothing is written, unlike `skills status` with a
+`CacheDir`). `SYMSKILLS_LIBRARY_DIR` therefore moves the scanned library and the other
+`SYMSKILLS_*` overrides plus a valid `SYMSKILLS_VCS_ENABLED` are inert. The override must pass
+the same gate as the SKL-013 status overrides (`status_override_dir`: absolute, lexically clean,
+real-directory ancestors that can be listed); the whole shape is also gated on a defined
+`HOME`, a verified absence of both config files and no native-only `SYMBRAIN_SKILLS_*`
+variable (Go ignores those, native code would honour them).
+
+Stays on Go: any `config.toml`/`.symskills.toml` and any config probe that is not a plain
+`ENOENT` (the TOML decode is Go's), `SYMBRAIN_SKILLS_LIBRARY_DIR`/`SYMBRAIN_SKILLS_BASE_DIR`,
+an invalid `SYMSKILLS_VCS_ENABLED` bool (Go then discards the whole config for the defaults),
+relative, empty, symlinked, non-clean, non-directory or unlistable library overrides, an
+undefined or empty `HOME`, libraries with entries Go reports through cap-std diagnostics, and
+flag-package errors. Classified input rejections (`skill_input_rejected`,
+`library_input_bound`) stay native with any configuration, as before.
+
+Evidence: 31 `skills_status_config_list_*` cases in `scripts/rust-differential.py` (15 native
+with the Go route removed and the fixture root asserted unchanged, 16 must-fallback) compare
+the Go binary built from `HEAD` 128f73e1d (Go 1.26.7, no Go source changed) with the Rust
+binary. Native cases cover populated, categorised, managed (real Go-generated installs),
+`last_used`, empty and missing libraries in table and JSON form, ignored `--target`/`--scope`,
+inert base/render/cache/profiles/VCS variables, a relative or empty `XDG_CONFIG_HOME` and an
+empty config directory. The whole `skills_status_config_*` family (135 cases: 70 native, 65
+fallback) matches Go. Seven new source mutants in `scripts/skills-status-config-oracle/run.py`
+(`list-ignores-library-env`, `list-accepts-config-file`, `list-ignores-home`,
+`list-accepts-native-only-env`, `list-accepts-invalid-bool`, `list-override-unchecked`,
+`list-accepts-bad-flags`) are killed (31 of 31 mutants of the family killed); the full differential (639 cases) passes. Three Rust tests in `skills_list_native.rs` pin the
+override, the inert variables and the fallback shapes.
+
+Still on Go: `skills sync` with any config, `skills status` shapes listed under #764 slice c,
+`skills log` (log-path symlink shapes) and every config-file shape (a Go-exact TOML parser does
+not exist in Rust; `skills doctor` is SKL-015, merged in #950). The Windows run of this slice rests on a
+`cfg` review; native Linux/macOS/Windows CI at the candidate head remains required.
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 

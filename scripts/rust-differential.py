@@ -1958,6 +1958,74 @@ def _doctor_non_utf8_env(root: Path, env: dict[str, str]) -> None:
     env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt") + "/\udcff"
 
 
+# --- skills list: environment-only symskills config ------------------------
+#
+# Go's `cmdSkillsList` hands only `LibraryDir` to `skill.ListLibrary`; the
+# events log and the install scan hang off the home directory, and `BaseDir`,
+# `CacheDir`, `RenderDir`, `ProfilesDir` and `VCS.Enabled` never reach it. An
+# environment-only config is therefore native (library moved by
+# `SYMSKILLS_LIBRARY_DIR`, everything else inert); config files, native-only
+# variables, invalid bool values and unusual override spellings stay on Go.
+LIST_CONFIG_PREFIX = "skills_status_config_list_"
+
+
+def list_relocated(
+    builder: Callable[[Path, dict[str, str]], None],
+) -> Callable[[Path, dict[str, str]], None]:
+    """A Go-built library, relocated to `alt/library` via the env override."""
+    return with_managed_config(builder, base=False)
+
+
+def list_then(
+    builder: Callable[[Path, dict[str, str]], None],
+    mutate: Callable[[Path, dict[str, str]], None],
+) -> Callable[[Path, dict[str, str]], None]:
+    """A relocated Go-built library, then one extra shape on top of it."""
+
+    def wrapped(root: Path, env: dict[str, str]) -> None:
+        list_relocated(builder)(root, env)
+        mutate(root, env)
+
+    return wrapped
+
+
+def _list_cfg_library_link(root: Path, env: dict[str, str]) -> None:
+    os.symlink(root / STATUS_ALT_LIBRARY, root / "library-link")
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "library-link")
+
+
+def _list_cfg_inert_vars(root: Path, env: dict[str, str]) -> None:
+    for name in ("BASE", "RENDER", "CACHE", "PROFILES"):
+        env["SYMSKILLS_" + name + "_DIR"] = str(root / "never-created" / name.lower())
+    env["SYMSKILLS_VCS_ENABLED"] = "false"
+
+
+def _list_cfg_missing_library(root: Path, env: dict[str, str]) -> None:
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "no-such-library")
+
+
+def _list_cfg_empty_library(root: Path, env: dict[str, str]) -> None:
+    # A decoy in the default library: only an ignored override would list it.
+    write_library_skill(root, "decoy")
+    (root / "alt/empty-library").mkdir(parents=True)
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt/empty-library")
+
+
+def _list_cfg_library_is_file(root: Path, env: dict[str, str]) -> None:
+    _status_cfg_write(root / "alt/library-file", "not a directory\n")
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt/library-file")
+
+
+def _list_cfg_library_broken_skill(root: Path, env: dict[str, str]) -> None:
+    setup_skills_library_broken_skill(root, env)
+    relocate_managed_state(root, env, base=False)
+
+
+def _list_cfg_library_mode_000(root: Path, env: dict[str, str]) -> None:
+    (root / STATUS_ALT_LIBRARY).chmod(0o000)
+
+
+
 @dataclass(frozen=True)
 class Case:
     name: str
@@ -4575,6 +4643,199 @@ CASES = (
         )
         if hasattr(os, "geteuid") and os.geteuid() != 0
         else ()
+    ),
+    Case(
+        "skills_status_config_list_env_populated_json",
+        ("skills", "list", "--json"),
+        setup=list_relocated(setup_skills_library_fixture),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_populated",
+        ("skills", "list"),
+        setup=list_relocated(setup_skills_library_fixture),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_categories_json",
+        ("skills", "list", "--json"),
+        setup=list_relocated(setup_skills_library_categories),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_managed_json",
+        ("skills", "list", "--json"),
+        setup=list_relocated(setup_skills_library_managed),
+        normalize_atime=True,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_managed",
+        ("skills", "list"),
+        setup=list_relocated(setup_skills_library_managed),
+        normalize_atime=True,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_last_used_json",
+        ("skills", "list", "--json"),
+        setup=list_relocated(setup_skills_library_last_used),
+        normalize_atime=True,
+        require_last_used=True,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_target_flag_ignored_json",
+        ("skills", "list", "--target", "opencode", "--scope", "project", "--json"),
+        setup=list_relocated(setup_skills_library_managed),
+        normalize_atime=True,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_empty_library_json",
+        ("skills", "list", "--json"),
+        setup=_list_cfg_empty_library,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_empty_library",
+        ("skills", "list"),
+        setup=_list_cfg_empty_library,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_missing_library_json",
+        ("skills", "list", "--json"),
+        setup=_list_cfg_missing_library,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_inert_vars_json",
+        ("skills", "list", "--json"),
+        setup=with_env(setup_skills_library_fixture, SYMSKILLS_BASE_DIR="{root}/never-created/base", SYMSKILLS_RENDER_DIR="{root}/never-created/render", SYMSKILLS_CACHE_DIR="{root}/never-created/cache", SYMSKILLS_PROFILES_DIR="{root}/never-created/profiles", SYMSKILLS_VCS_ENABLED="false"),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_inert_vars_relocated",
+        ("skills", "list"),
+        setup=list_relocated(lambda root, env: (setup_skills_library_categories(root, env), _list_cfg_inert_vars(root, env))),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_vcs_spelling_json",
+        ("skills", "list", "--json"),
+        setup=with_env(setup_skills_library_fixture, SYMSKILLS_VCS_ENABLED="T"),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_xdg_relative_ignored_json",
+        ("skills", "list", "--json"),
+        setup=list_relocated(lambda root, env: (setup_skills_library_fixture(root, env), env.__setitem__("XDG_CONFIG_HOME", "relative/config"))),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_env_config_dir_without_file_json",
+        ("skills", "list", "--json"),
+        setup=list_relocated(lambda root, env: (setup_skills_library_fixture(root, env), (root / "config/symskills").mkdir(parents=True))),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_config_file_json",
+        ("skills", "list", "--json"),
+        setup=lambda root, env: (setup_skills_library_fixture(root, env), write_symskills_config(root, 'library_dir = "/nonexistent/library"\n')),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_project_config_file",
+        ("skills", "list"),
+        setup=lambda root, env: (setup_skills_library_fixture(root, env), _write_text(root / "project/.symskills.toml", 'library_dir = "/nonexistent"\n', encoding="utf-8")),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_config_toml_is_directory_json",
+        ("skills", "list", "--json"),
+        setup=lambda root, env: (setup_skills_library_fixture(root, env), _status_cfg_dir_as_config_toml(root, env)),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_invalid_vcs_bool_json",
+        ("skills", "list", "--json"),
+        setup=list_then(setup_skills_library_fixture, lambda root, env: env.__setitem__("SYMSKILLS_VCS_ENABLED", "maybe")),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_native_only_env_json",
+        ("skills", "list", "--json"),
+        setup=with_env(setup_skills_library_fixture, SYMBRAIN_SKILLS_LIBRARY_DIR="{root}/alt/library"),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_native_only_base_env_json",
+        ("skills", "list", "--json"),
+        setup=with_env(setup_skills_library_fixture, SYMBRAIN_SKILLS_BASE_DIR="{root}/alt/base"),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_relative_library_json",
+        ("skills", "list", "--json"),
+        setup=with_env(setup_skills_library_fixture, SYMSKILLS_LIBRARY_DIR="relative/library"),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_empty_library_value",
+        ("skills", "list"),
+        setup=with_env(setup_skills_library_fixture, SYMSKILLS_LIBRARY_DIR=""),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_library_symlink_json",
+        ("skills", "list", "--json"),
+        setup=list_then(setup_skills_library_fixture, _list_cfg_library_link),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_library_is_file_json",
+        ("skills", "list", "--json"),
+        setup=_list_cfg_library_is_file,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_library_trailing_slash",
+        ("skills", "list"),
+        setup=list_then(setup_skills_library_fixture, _status_cfg_library_trailing_slash),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_library_dotdot_json",
+        ("skills", "list", "--json"),
+        setup=list_then(setup_skills_library_fixture, _status_cfg_library_dotdot),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_broken_skill_json",
+        ("skills", "list", "--json"),
+        setup=_list_cfg_library_broken_skill,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_home_unset_json",
+        ("skills", "list", "--json"),
+        setup=lambda root, env: (setup_skills_library_fixture(root, env), _status_cfg_home_unset(root, env)),
+        posix_only=True,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_home_empty",
+        ("skills", "list"),
+        setup=lambda root, env: (setup_skills_library_fixture(root, env), _status_cfg_home_empty(root, env)),
+        posix_only=True,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_list_fallback_unknown_flag_with_env",
+        ("skills", "list", "--bogus"),
+        setup=list_relocated(setup_skills_library_fixture),
+        expect_fallback=True,
     ),
     *(
         (
