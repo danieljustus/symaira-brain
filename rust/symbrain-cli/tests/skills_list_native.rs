@@ -296,7 +296,13 @@ fn special_installed_marker_does_not_block_or_fabricate_an_install() {
 fn symskills_library_override_moves_the_scan_natively() {
     let root = TempDir::new().unwrap();
     write_library_skill(&root, "default-library-skill", "");
-    // The override gate rejects symlinked ancestors (macOS `/var`): pin the real path.
+    // Unix temp aliases (macOS `/var`) are symlinked ancestors the override
+    // gate keeps on Go, so pin the real path. Windows keeps the plain
+    // `C:\...` spelling a user types: `canonicalize` there yields a verbatim
+    // `\\?\C:\...` path that the gate deliberately leaves to Go.
+    #[cfg(windows)]
+    let alternate = root.path().join("alt-library");
+    #[cfg(not(windows))]
     let alternate = root.path().canonicalize().unwrap().join("alt-library");
     std::fs::create_dir_all(alternate.join("moved")).unwrap();
     std::fs::write(
