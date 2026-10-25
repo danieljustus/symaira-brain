@@ -647,6 +647,38 @@ fn has_dynamic_config() -> bool {
     !go_home_defined() || config_files_need_go()
 }
 
+/// The library `skills list` scans, or `None` when the configuration forces
+/// the Go implementation.
+///
+/// Go's `cmdSkillsList` reads exactly one config field: `LibraryDir` goes to
+/// `skill.ListLibrary`; the events log and the install scan hang off the home
+/// directory, and `BaseDir`, `CacheDir`, `RenderDir`, `ProfilesDir` and
+/// `VCS.Enabled` never reach it. An environment-only configuration is
+/// therefore replayed natively with `SYMSKILLS_LIBRARY_DIR` moving the scan
+/// and the other overrides inert. Everything native cannot reproduce stays on
+/// Go: any config file (the TOML decode is Go's), an undefined home, the
+/// native-only `SYMBRAIN_SKILLS_*` variables (Go ignores them), an invalid
+/// `SYMSKILLS_VCS_ENABLED` bool (Go then discards the whole config) and a
+/// library override that [`status_override_dir`] does not accept.
+fn list_library_dir() -> Option<PathBuf> {
+    if !go_home_defined()
+        || config_files_need_go()
+        || std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
+        || std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR").is_some()
+    {
+        return None;
+    }
+    if let Some(value) = std::env::var_os("SYMSKILLS_VCS_ENABLED")
+        && !go_parse_bool(&value)
+    {
+        return None;
+    }
+    match status_override_dir("SYMSKILLS_LIBRARY_DIR").ok()? {
+        Some(path) => Some(path),
+        None => Some(resolve_skills_dirs().0),
+    }
+}
+
 /// Reports whether the native `skills list` scan has to stay on Go for this
 /// library.
 ///
@@ -874,9 +906,15 @@ pub fn run(
 
 fn run_list(args: &[OsString], stdout: &mut dyn Write, format: OutputFormat) -> Option<u8> {
     parse_list_flags(args).ok()?;
-    let (library_dir, _, _) = resolve_skills_dirs();
+    // A configuration native code cannot replay still scans the default
+    // library: classified input rejections are reported natively even then
+    // (they must never re-enter the legacy Go loader), everything else is Go's.
+    let (library_dir, dynamic_config) = match list_library_dir() {
+        Some(path) => (path, false),
+        None => (resolve_skills_dirs().0, true),
+    };
     let (entries, issues) = list_library(&library_dir);
-    if library_needs_go(&issues, has_dynamic_config()) {
+    if library_needs_go(&issues, dynamic_config) {
         return None;
     }
 

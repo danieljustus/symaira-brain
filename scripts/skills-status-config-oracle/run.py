@@ -8,7 +8,9 @@ Usage: run.py GO_BINARY RUST_BINARY [--mutants MUTANT_TARGET_DIR]
 
 1. Runs every `skills_status_config_*` case of scripts/rust-differential.py
    (this includes `skills_status_config_targets_*`: `skills targets` is
-   config-independent in Go, so every env/config shape is native there):
+   config-independent in Go, so every env/config shape is native there, and
+   `skills_status_config_list_*`: `skills list` reads only LibraryDir from the
+   config, so an environment-only config is native):
    native cases run the Rust binary with every Go fallback route removed and
    must leave the fixture root untouched; `fallback` cases must reach the
    missing-fallback diagnostic when no Go route exists.
@@ -100,8 +102,8 @@ MUTANTS = {
         ],
     ),
     "accept-invalid-bool": (
-        "&& !go_parse_bool(&value)",
-        "&& false",
+        "&& !go_parse_bool(&value)\n    {\n        return None;\n    }\n    Some(StatusEnvConfig {",
+        "&& false\n    {\n        return None;\n    }\n    Some(StatusEnvConfig {",
         [
             "skills_status_config_fallback_invalid_vcs_bool_json",
             "skills_status_config_fallback_empty_vcs_bool",
@@ -247,6 +249,64 @@ MUTANTS = {
             "skills_status_config_fallback_home_unset_symlinked_project_root",
             "skills_status_config_fallback_home_unset_symlinked_project_root_json",
         ],
+    ),
+    "list-ignores-library-env": (
+        # An override that names an empty library is treated as unset: the
+        # decoy skill of the default library leaks into the report. (Ignoring
+        # every override would trip the harness' non-vacuity assertion of the
+        # `last_used` case before any comparison is reported.)
+        "        Some(path) => Some(path),\n        None =>",
+        "        Some(path) if !path.ends_with(\"empty-library\") => Some(path),\n        _ =>",
+        [
+            "skills_status_config_list_env_empty_library_json",
+            "skills_status_config_list_env_empty_library",
+        ],
+    ),
+    "list-accepts-config-file": (
+        "    if !go_home_defined()\n        || config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
+        "    if !go_home_defined()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
+        [
+            "skills_status_config_list_fallback_config_file_json",
+            "skills_status_config_list_fallback_project_config_file",
+            "skills_status_config_list_fallback_config_toml_is_directory_json",
+        ],
+    ),
+    "list-ignores-home": (
+        "    if !go_home_defined()\n        || config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
+        "    if config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
+        [
+            "skills_status_config_list_fallback_home_unset_json",
+            "skills_status_config_list_fallback_home_empty",
+        ],
+    ),
+    "list-accepts-native-only-env": (
+        "        || config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\").is_some()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_BASE_DIR\").is_some()\n",
+        "        || config_files_need_go()\n",
+        [
+            "skills_status_config_list_fallback_native_only_env_json",
+            "skills_status_config_list_fallback_native_only_base_env_json",
+        ],
+    ),
+    "list-accepts-invalid-bool": (
+        "        && !go_parse_bool(&value)\n    {\n        return None;\n    }\n    match status_override_dir(",
+        "        && false\n    {\n        return None;\n    }\n    match status_override_dir(",
+        ["skills_status_config_list_fallback_invalid_vcs_bool_json"],
+    ),
+    "list-override-unchecked": (
+        "    match status_override_dir(\"SYMSKILLS_LIBRARY_DIR\").ok()? {",
+        "    match std::env::var_os(\"SYMSKILLS_LIBRARY_DIR\").map(PathBuf::from) {",
+        [
+            "skills_status_config_list_fallback_relative_library_json",
+            "skills_status_config_list_fallback_empty_library_value",
+            "skills_status_config_list_fallback_library_symlink_json",
+            "skills_status_config_list_fallback_library_trailing_slash",
+            "skills_status_config_list_fallback_library_dotdot_json",
+        ],
+    ),
+    "list-accepts-bad-flags": (
+        "    parse_list_flags(args).ok()?;\n",
+        "    let _ = parse_list_flags(args);\n",
+        ["skills_status_config_list_fallback_unknown_flag_with_env"],
     ),
     "write-a-file": (
         "    let (library_dir, base_dir, home_dir, render_dir) = status_dirs();\n",

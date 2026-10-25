@@ -291,3 +291,93 @@ fn special_installed_marker_does_not_block_or_fabricate_an_install() {
             .is_empty()
     );
 }
+
+#[test]
+fn symskills_library_override_moves_the_scan_natively() {
+    let root = TempDir::new().unwrap();
+    write_library_skill(&root, "default-library-skill", "");
+    // The override gate rejects symlinked ancestors (macOS `/var`): pin the real path.
+    let alternate = root.path().canonicalize().unwrap().join("alt-library");
+    std::fs::create_dir_all(alternate.join("moved")).unwrap();
+    std::fs::write(
+        alternate.join("moved/SKILL.md"),
+        "---\nname: moved\ndescription: moved skill\nlicense: Apache-2.0\n---\n\n# moved\n",
+    )
+    .unwrap();
+    let output = command(&root, &["skills", "list", "--json"])
+        .env("SYMSKILLS_LIBRARY_DIR", &alternate)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let skills = value["skills"].as_array().unwrap();
+    assert_eq!(skills.len(), 1);
+    assert_eq!(skills[0]["name"], "moved");
+    assert_eq!(
+        skills[0]["path"],
+        alternate.join("moved").display().to_string()
+    );
+}
+
+#[test]
+fn inert_symskills_overrides_do_not_change_the_report() {
+    let root = TempDir::new().unwrap();
+    write_library_skill(&root, "demo", "");
+    let plain = run(&root, &["skills", "list", "--json"]);
+    assert!(plain.status.success());
+    let mut command = command(&root, &["skills", "list", "--json"]);
+    let configured = command
+        .env("SYMSKILLS_BASE_DIR", "/different/base")
+        .env("SYMSKILLS_RENDER_DIR", "/different/render")
+        .env("SYMSKILLS_CACHE_DIR", "/different/cache")
+        .env("SYMSKILLS_PROFILES_DIR", "/different/profiles")
+        .env("SYMSKILLS_VCS_ENABLED", "false")
+        .output()
+        .unwrap();
+    assert!(
+        configured.status.success(),
+        "stderr: {:?}",
+        configured.stderr
+    );
+    assert_eq!(configured.stdout, plain.stdout);
+    assert!(configured.stderr.is_empty());
+}
+
+#[test]
+fn config_file_native_only_env_and_bad_overrides_keep_go_fallback() {
+    let root = TempDir::new().unwrap();
+    write_library_skill(&root, "demo", "");
+    std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
+    std::fs::write(
+        root.path().join("config/symskills/config.toml"),
+        "vcs = { enabled = false }\n",
+    )
+    .unwrap();
+    let output = run(&root, &["skills", "list", "--json"]);
+    assert_eq!(output.status.code(), Some(1), "config file");
+    assert!(output.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+
+    let clean = TempDir::new().unwrap();
+    write_library_skill(&clean, "demo", "");
+    for (name, value) in [
+        ("SYMBRAIN_SKILLS_LIBRARY_DIR", "/different/library"),
+        ("SYMBRAIN_SKILLS_BASE_DIR", "/different/base"),
+        ("SYMSKILLS_LIBRARY_DIR", "relative/library"),
+        ("SYMSKILLS_LIBRARY_DIR", ""),
+        ("SYMSKILLS_VCS_ENABLED", "maybe"),
+    ] {
+        let output = command(&clean, &["skills", "list", "--json"])
+            .env(name, value)
+            .output()
+            .unwrap();
+        assert_eq!(output.status.code(), Some(1), "{name}={value}");
+        assert!(output.stdout.is_empty(), "{name}={value}");
+        assert!(
+            String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
+            "{name}={value}: {:?}",
+            output.stderr
+        );
+    }
+}
