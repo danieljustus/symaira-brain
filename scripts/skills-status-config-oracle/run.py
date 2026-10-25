@@ -4,7 +4,7 @@ environment-only config shape (`SYMSKILLS_LIBRARY_DIR` / `SYMSKILLS_BASE_DIR`
 for `--target opencode`).
 
 Usage: run.py GO_BINARY RUST_BINARY [--mutants MUTANT_TARGET_DIR]
-              [--evidence-dir DIR]
+              [--evidence-dir DIR] [--only NAME[,NAME...]]
 
 1. Runs every `skills_status_config_*` case of scripts/rust-differential.py
    (this includes `skills_status_config_targets_*`: `skills targets` is
@@ -46,6 +46,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "rust/symbrain-cli/src/skills_cli.rs"
+# Mutants may patch either file; a pattern must match exactly one of them once.
+SOURCES = (SOURCE, ROOT / "rust/symbrain-cli/src/skills_doctor_config.rs")
 PREFIX = "skills_status_config_"
 
 # chmod 000 does not restrict root, so these cases only exist for an
@@ -58,6 +60,7 @@ UNPRIVILEGED_ONLY = {
     "skills_status_config_fallback_base_ancestor_search_only",
     "skills_status_config_fallback_base_ancestor_search_only_111",
     "skills_status_config_fallback_library_mode_444_json",
+    "skills_status_config_doctor_config_dir_unreadable_resets_env_json",
 }
 PRIVILEGED = hasattr(os, "geteuid") and os.geteuid() == 0
 
@@ -199,14 +202,88 @@ MUTANTS = {
             "skills_status_config_fallback_xdg_empty_home_config_file",
         ],
     ),
-    "dynamic-config-ignores-home": (
-        "    !go_home_defined() || config_files_need_go()",
-        "    config_files_need_go()",
+    "doctor-gated-on-config": (
+        "            parse_list_flags(&args[1..]).is_err()\n                || !go_home_defined()\n                || doctor_config::resolve().is_none()\n",
+        "            args.len() != 1 || has_dynamic_config()\n",
+        [
+            "skills_status_config_doctor_env_library_dir_json",
+            "skills_status_config_doctor_env_all_overrides_table",
+            "skills_status_config_doctor_env_invalid_vcs_bool_resets_json",
+            "skills_status_config_doctor_config_is_directory_resets_env_json",
+            "skills_status_config_doctor_flag_target_ignored_json",
+        ],
+    ),
+    "doctor-ignores-home": (
+        "                || !go_home_defined()\n                || doctor_config::resolve().is_none()\n",
+        "                || doctor_config::resolve().is_none()\n",
         [
             "skills_status_config_fallback_doctor_home_unset_abs_xdg_json",
             "skills_status_config_fallback_doctor_home_unset_abs_xdg",
-            # `skills targets` no longer consults `has_dynamic_config`: its own
-            # home gate is covered by the `targets-ignores-home` mutant.
+            "skills_status_config_doctor_fallback_home_unset_with_env_json",
+        ],
+    ),
+    "doctor-accepts-bad-flags": (
+        "            parse_list_flags(&args[1..]).is_err()\n                || !go_home_defined()\n                || doctor_config::resolve().is_none()\n",
+        "            !go_home_defined() || doctor_config::resolve().is_none()\n",
+        [
+            "skills_status_config_doctor_fallback_unknown_flag",
+            "skills_status_config_doctor_fallback_unknown_flag_with_env_json",
+            "skills_status_config_doctor_fallback_target_without_value",
+            "skills_status_config_doctor_fallback_positional_argument",
+        ],
+    ),
+    "doctor-invalid-bool-applies-env": (
+        "        let Some(enabled) = go_bool(&value) else {\n            return Some(defaults);\n        };\n",
+        "        let enabled = go_bool(&value).unwrap_or(true);\n",
+        [
+            "skills_status_config_doctor_env_invalid_vcs_bool_resets_json",
+            "skills_status_config_doctor_env_invalid_vcs_bool_resets_table",
+            "skills_status_config_doctor_env_empty_vcs_bool_resets_json",
+        ],
+    ),
+    "doctor-directory-config-is-absent": (
+        "        Ok(metadata) if cfg!(unix) && metadata.is_dir() => Probe::Fails,\n",
+        "        Ok(metadata) if cfg!(unix) && metadata.is_dir() => Probe::Absent,\n",
+        [
+            "skills_status_config_doctor_config_is_directory_resets_env_json",
+            "skills_status_config_doctor_config_is_directory_resets_env_table",
+            "skills_status_config_doctor_project_config_is_directory_resets_env_json",
+            "skills_status_config_doctor_project_config_is_directory_after_regular_global_json",
+        ],
+    ),
+    "doctor-stat-error-is-absent": (
+        "        Err(_) if cfg!(unix) => Probe::Fails,\n",
+        "        Err(_) if cfg!(unix) => Probe::Absent,\n",
+        [
+            "skills_status_config_doctor_config_dir_is_file_resets_env_json",
+            "skills_status_config_doctor_config_symlink_loop_resets_env_json",
+            "skills_status_config_doctor_config_dir_unreadable_resets_env_json",
+        ],
+    ),
+    "doctor-accepts-unclean-base": (
+        "        && is_lexically_clean(text)\n        && json_plain(text)\n",
+        "        && json_plain(text)\n",
+        [
+            "skills_status_config_doctor_fallback_home_unclean_doubled_slash_json",
+            "skills_status_config_doctor_fallback_home_dot_segment_table",
+            "skills_status_config_doctor_fallback_xdg_config_unclean_json",
+            "skills_status_config_doctor_fallback_xdg_data_dotdot_json",
+        ],
+    ),
+    "doctor-ignores-pwd": (
+        "    if !cwd.to_str().is_some_and(json_plain) || !pwd_is_physical(&cwd) {\n",
+        "    if !cwd.to_str().is_some_and(json_plain) {\n",
+        [
+            "skills_status_config_doctor_fallback_pwd_symlink_json",
+            "skills_status_config_doctor_fallback_pwd_symlink_table",
+        ],
+    ),
+    "doctor-accepts-line-separator": (
+        "    !text.contains(['\\u{2028}', '\\u{2029}'])\n",
+        "    true\n",
+        [
+            "skills_status_config_doctor_fallback_env_line_separator_json",
+            "skills_status_config_doctor_fallback_env_paragraph_separator_table",
         ],
     ),
     "targets-gated-on-config": (
@@ -326,11 +403,13 @@ def classify(returncode: int, stderr: str, expect: list[str], timeouts: list[str
 
 def build_mutant(name: str, target_dir: Path, old: str, new: str, dest: Path) -> Path:
     """Build one mutant into `dest`; the source is restored even on failure."""
-    original = SOURCE.read_bytes()
+    matches = [(path, path.read_bytes()) for path in SOURCES if old in path.read_text()]
+    assert len(matches) == 1, f"mutant {name}: pattern must match exactly one source"
+    source, original = matches[0]
     text = original.decode()
     assert text.count(old) == 1, f"mutant {name}: pattern must match exactly once"
     try:
-        SOURCE.write_text(text.replace(old, new, 1))
+        source.write_text(text.replace(old, new, 1))
         env = dict(os.environ, CARGO_TARGET_DIR=str(target_dir))
         subprocess.run(
             [*shlex.split(os.environ.get("SYMBRAIN_MUTANT_CARGO", "cargo")),
@@ -338,7 +417,7 @@ def build_mutant(name: str, target_dir: Path, old: str, new: str, dest: Path) ->
             cwd=ROOT, env=env, check=True, capture_output=True, text=True,
         )
     finally:
-        SOURCE.write_bytes(original)
+        source.write_bytes(original)
     kept = dest / f"symbrain-{name}"
     shutil.copy2(target_dir / "debug/symbrain", kept)
     return kept
@@ -412,6 +491,11 @@ def main() -> int:
     mutants_opt = pop_option(args, "--mutants")
     mutant_dir = Path(mutants_opt).resolve() if mutants_opt else None
     evidence_opt = pop_option(args, "--evidence-dir")
+    only_opt = pop_option(args, "--only")
+    only = set(only_opt.split(",")) if only_opt else None
+    if only is not None and not only <= set(MUTANTS):
+        print(f"unknown mutants: {sorted(only - set(MUTANTS))}", file=sys.stderr)
+        return 2
     if len(args) != 2:
         print(__doc__, file=sys.stderr)
         return 2
@@ -430,7 +514,7 @@ def main() -> int:
     assert native and fallback and len(native) + len(fallback) == len(cases)
     assert all(case.read_only for case in native)
 
-    before = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
+    before = [hashlib.sha256(path.read_bytes()).hexdigest() for path in SOURCES]
     result = differential(go, rust, evidence / "baseline-journal" if evidence else None)
     sys.stdout.write(result.stdout)
     sys.stderr.write(result.stderr)
@@ -447,6 +531,8 @@ def main() -> int:
         return 0
     records = []
     for index, (name, mutant) in enumerate(MUTANTS.items(), start=1):
+        if only is not None and name not in only:
+            continue
         expect = mutant[2]
         if PRIVILEGED:
             expect = [case for case in expect if case not in UNPRIVILEGED_ONLY]
@@ -466,8 +552,8 @@ def main() -> int:
             print(record.get("tail", ""), file=sys.stderr)
             if record.get("evidence"):
                 print(f"  evidence retained: {record['evidence']}", file=sys.stderr)
-    if hashlib.sha256(SOURCE.read_bytes()).hexdigest() != before:
-        print("FAIL: skills_cli.rs was not restored", file=sys.stderr)
+    if [hashlib.sha256(path.read_bytes()).hexdigest() for path in SOURCES] != before:
+        print("FAIL: a mutated source file was not restored", file=sys.stderr)
         return 1
     counts = {status: sum(1 for r in records if r["status"] == status)
               for status in (KILLED, SURVIVED, INCONCLUSIVE)}

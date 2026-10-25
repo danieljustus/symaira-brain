@@ -20,6 +20,8 @@ use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
 
+#[path = "skills_doctor_config.rs"]
+mod doctor_config;
 #[path = "skills_sync_flags.rs"]
 mod sync_flags;
 
@@ -213,7 +215,16 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             parse_scope_flag(&args[1..]).is_err() || !go_home_defined()
         }
         Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
-        Some(verb) if verb == "doctor" => args.len() != 1 || has_dynamic_config(),
+        // `skills doctor` prints the merged symskills config, which native code
+        // rebuilds from the environment and Go's whole-config reset on a
+        // failing load (see `doctor_config`). Flag-package errors, an
+        // undefined home and every shape the module cannot reproduce stay on
+        // Go.
+        Some(verb) if verb == "doctor" => {
+            parse_list_flags(&args[1..]).is_err()
+                || !go_home_defined()
+                || doctor_config::resolve().is_none()
+        }
         _ => false,
     }
 }
@@ -863,7 +874,7 @@ pub fn run(
         "targets" => run_targets(rest, stdout, stderr, format),
         "log" => run_log(rest, stdout, stderr, format),
         "sync" => run_sync(rest, stdout, stderr, format),
-        "doctor" => run_doctor(rest, stdout, stderr, format),
+        "doctor" => return run_doctor(stdout, format),
         _ => {
             let _ = writeln!(stderr, "symbrain skills: unknown subcommand {verb:?}\n");
             let _ = write!(stderr, "{SKILLS_USAGE}");
@@ -1408,13 +1419,11 @@ fn run_sync(
     exit::OK
 }
 
-fn run_doctor(
-    _args: &[OsString],
-    stdout: &mut dyn Write,
-    _stderr: &mut dyn Write,
-    format: OutputFormat,
-) -> u8 {
-    let (report, pairs) = skills_doctor_report();
+/// `symbrain skills doctor`. Returns `None` when the invocation is Go's, so
+/// the routing decision and the report share one config resolution.
+fn run_doctor(stdout: &mut dyn Write, format: OutputFormat) -> Option<u8> {
+    let config = doctor_config::resolve()?;
+    let (report, pairs) = skills_doctor_report(config);
 
     match format {
         OutputFormat::Json => {
@@ -1422,37 +1431,31 @@ fn run_doctor(
         }
         OutputFormat::Table => {
             for (name, value) in pairs {
-                let _ = writeln!(stdout, "{name:<11} {value}");
+                let _ = writeln!(stdout, "{name:<11} {}", or_dash(&value));
             }
         }
     }
 
-    exit::OK
+    Some(exit::OK)
 }
 
-fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
+fn skills_doctor_report(
+    config: doctor_config::DoctorConfig,
+) -> (SkillsDoctorReport, [(&'static str, String); 9]) {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let project_dir = current_project_dir();
     let config_path = skills_config_path();
-    let profiles_dir = config_path
-        .parent()
-        .map_or_else(|| PathBuf::from("profiles"), |path| path.join("profiles"));
-    let data_root = symbrain_core::paths::skills_data_dir()
-        .map_or_else(|| PathBuf::from("."), |location| location.dir);
-    let cache_root = symbrain_core::paths::skills_cache_dir()
-        .map_or_else(|| PathBuf::from("."), |location| location.dir);
-    let library_dir = data_root.join("library");
-    let render_dir = data_root.join("rendered");
-    let base_dir = data_root.join("base");
     let log_path = home.join(".local/share/symskills/events.jsonl");
     let config = SkillsDoctorConfig {
-        library_dir: library_dir.display().to_string(),
-        render_dir: render_dir.display().to_string(),
-        cache_dir: cache_root.display().to_string(),
-        profiles_dir: profiles_dir.display().to_string(),
-        base_dir: base_dir.display().to_string(),
+        library_dir: config.library_dir,
+        render_dir: config.render_dir,
+        cache_dir: config.cache_dir,
+        profiles_dir: config.profiles_dir,
+        base_dir: config.base_dir,
         targets: None,
-        vcs: SkillsDoctorVcs { enabled: true },
+        vcs: SkillsDoctorVcs {
+            enabled: config.vcs_enabled,
+        },
     };
     let targets = symbrain_skills::default_targets()
         .into_iter()
@@ -1467,10 +1470,10 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
         })
         .collect();
     let report = SkillsDoctorReport {
+        profiles_dir: config.profiles_dir.clone(),
         config,
         config_path: config_path.display().to_string(),
         log_path: log_path.display().to_string(),
-        profiles_dir: profiles_dir.display().to_string(),
         project_dir: project_dir.display().to_string(),
         targets,
     };
