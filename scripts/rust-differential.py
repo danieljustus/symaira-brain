@@ -1875,6 +1875,89 @@ def _targets_cfg_xdg_relative_with_config(root: Path, env: dict[str, str]) -> No
     _targets_cfg_custom_target("home/.config/symskills/config.toml")(root, env)
 
 
+# --- skills doctor: merged symskills config ----------------------------------
+#
+# Go's `cmdSkillsDoctor` prints the merged symskills config: defaults, the
+# global and project TOML files, then `SYMSKILLS_*`; any load error resets the
+# *whole* config (environment overrides included) to the defaults. Native
+# replays the environment and the failing-probe resets; a config file with
+# content, flag-package errors, an undefined or unclean home and the shapes in
+# `skills_doctor_config.rs` stay on Go. PATH is pinned only for symmetry with
+# the targets family: the doctor report embeds no binary evidence.
+DOCTOR_CONFIG_PREFIX = "skills_status_config_doctor_"
+DOCTOR_ENV = {"PATH": "/usr/bin:/bin"} if os.name == "posix" else None
+
+
+def doctor_setup(*mutators: Callable[[Path, dict[str, str]], None]) -> Callable[[Path, dict[str, str]], None]:
+    def wrapped(root: Path, env: dict[str, str]) -> None:
+        for mutate in mutators:
+            mutate(root, env)
+
+    return wrapped
+
+
+def _doctor_env(**values: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        for key, value in values.items():
+            env[key] = value.replace("{root}", str(root))
+
+    return mutate
+
+
+def _doctor_regular_config(location: str, body: str = 'vcs = { enabled = false }\n') -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        _status_cfg_write(root / location, body)
+
+    return mutate
+
+
+def _doctor_legacy_roots(root: Path, env: dict[str, str]) -> None:
+    (root / "data/symskills").mkdir(parents=True)
+    (root / "cache/symskills").mkdir(parents=True)
+
+
+def _doctor_current_roots(root: Path, env: dict[str, str]) -> None:
+    (root / "data/symbrain/skills").mkdir(parents=True)
+    (root / "data/symskills").mkdir(parents=True)
+    (root / "cache/symbrain/skills").mkdir(parents=True)
+
+
+def _doctor_alt_xdg(root: Path, env: dict[str, str]) -> None:
+    for name, key in (("cfg-alt", "XDG_CONFIG_HOME"), ("data-alt", "XDG_DATA_HOME"), ("cache-alt", "XDG_CACHE_HOME")):
+        (root / name).mkdir()
+        env[key] = str(root / name)
+
+
+def _doctor_pwd_physical(root: Path, env: dict[str, str]) -> None:
+    env["PWD"] = str(root / "project")
+
+
+def _doctor_pwd_symlink(root: Path, env: dict[str, str]) -> None:
+    os.symlink(root / "project", root / "project-link")
+    env["PWD"] = str(root / "project-link")
+
+
+def _doctor_pwd_stale(root: Path, env: dict[str, str]) -> None:
+    (root / "elsewhere").mkdir()
+    env["PWD"] = str(root / "elsewhere")
+
+
+def _doctor_home_suffix(suffix: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        env["HOME"] = str(root / "home") + suffix
+
+    return mutate
+
+
+def _doctor_unreadable_config_dir(root: Path, env: dict[str, str]) -> None:
+    (root / "config/symskills").mkdir(parents=True)
+    (root / "config/symskills").chmod(0o000)
+
+
+def _doctor_non_utf8_env(root: Path, env: dict[str, str]) -> None:
+    env["SYMSKILLS_LIBRARY_DIR"] = str(root / "alt") + "/\udcff"
+
+
 @dataclass(frozen=True)
 class Case:
     name: str
@@ -3974,6 +4057,524 @@ CASES = (
         setup=targets_config(_status_cfg_home_unset, _targets_cfg_custom_target("config/symskills/config.toml")),
         env_overrides=TARGETS_ENV,
         expect_fallback=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_default_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_default_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_library_dir_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_all_overrides_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library", SYMSKILLS_RENDER_DIR="{root}/alt/render", SYMSKILLS_CACHE_DIR="{root}/alt/cache", SYMSKILLS_PROFILES_DIR="{root}/alt/profiles", SYMSKILLS_BASE_DIR="{root}/alt/base", SYMSKILLS_VCS_ENABLED="false")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_all_overrides_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library", SYMSKILLS_RENDER_DIR="{root}/alt/render", SYMSKILLS_CACHE_DIR="{root}/alt/cache", SYMSKILLS_PROFILES_DIR="{root}/alt/profiles", SYMSKILLS_BASE_DIR="{root}/alt/base", SYMSKILLS_VCS_ENABLED="F")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_vcs_true_spelling_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_VCS_ENABLED="T", SYMSKILLS_PROFILES_DIR="{root}/alt/profiles")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_vcs_zero_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_VCS_ENABLED="0")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_invalid_vcs_bool_resets_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_VCS_ENABLED="maybe", SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used", SYMSKILLS_PROFILES_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_invalid_vcs_bool_resets_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_VCS_ENABLED="yes", SYMSKILLS_BASE_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_empty_vcs_bool_resets_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_VCS_ENABLED="", SYMSKILLS_CACHE_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_empty_values_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="", SYMSKILLS_RENDER_DIR="", SYMSKILLS_CACHE_DIR="", SYMSKILLS_PROFILES_DIR="", SYMSKILLS_BASE_DIR="")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_empty_values_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="", SYMSKILLS_RENDER_DIR="   ", SYMSKILLS_CACHE_DIR="\t", SYMSKILLS_PROFILES_DIR="\u00a0", SYMSKILLS_BASE_DIR="x")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_relative_and_unclean_values_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="rel/../library//", SYMSKILLS_RENDER_DIR="./render", SYMSKILLS_CACHE_DIR="{root}/a/./b/../c/", SYMSKILLS_BASE_DIR="~/base")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_special_chars_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR='{root}/q"uote\\back<an>&amp', SYMSKILLS_RENDER_DIR="{root}/tab\there", SYMSKILLS_CACHE_DIR="{root}/ctl\x01\x1f\x7f", SYMSKILLS_BASE_DIR="{root}/caf\u00e9 \U0001f600 \u2603")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_special_chars_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/line\nbreak", SYMSKILLS_RENDER_DIR="{root}/q\"uote <a>&", SYMSKILLS_BASE_DIR="{root}/caf\u00e9")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_symbrain_vars_ignored_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMBRAIN_SKILLS_LIBRARY_DIR="{root}/alt/library", SYMBRAIN_SKILLS_BASE_DIR="{root}/alt/base")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_env_symbrain_vars_ignored_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_env(SYMBRAIN_SKILLS_LIBRARY_DIR="{root}/alt/library", SYMBRAIN_SKILLS_BASE_DIR="{root}/alt/base", SYMSKILLS_BASE_DIR="{root}/alt/base")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_is_directory_resets_env_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_dir_as_config_toml, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used", SYMSKILLS_VCS_ENABLED="false")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_is_directory_resets_env_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_status_cfg_dir_as_config_toml, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_is_directory_no_env_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_dir_as_config_toml),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_project_config_is_directory_resets_env_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_dir_as_project_config, _doctor_env(SYMSKILLS_BASE_DIR="{root}/alt/never-used", SYMSKILLS_VCS_ENABLED="false")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_project_config_is_directory_after_regular_global_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml"), _status_cfg_dir_as_project_config, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_project_config_is_directory_after_malformed_global_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml", "this is [not valid toml\n= = =\n"), _status_cfg_dir_as_project_config, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_directory_before_regular_project_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_dir_as_config_toml, _doctor_regular_config("project/.symskills.toml"), _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_dir_is_file_resets_env_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_dir_is_file, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_symlink_loop_resets_env_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_symlink_loop, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_dangling_symlink_is_absent_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_dangling_symlink, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_config_dir_without_file_is_absent_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_empty_config_dir, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_xdg_relative_ignored_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(XDG_CONFIG_HOME="relative/config", XDG_DATA_HOME="relative/data", XDG_CACHE_HOME="relative/cache")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_xdg_empty_ignored_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_env(XDG_CONFIG_HOME="", XDG_DATA_HOME="", XDG_CACHE_HOME="")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_xdg_unset_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(lambda root, env: [env.pop(k) for k in ("XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME")]),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_xdg_absolute_alternate_roots_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_alt_xdg),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_xdg_absolute_alternate_roots_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_alt_xdg, _doctor_env(SYMSKILLS_PROFILES_DIR="{root}/alt/profiles")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_legacy_data_and_cache_roots_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_legacy_roots),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_current_data_and_cache_roots_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_current_roots),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_flag_target_ignored_json",
+        ('skills', 'doctor', '--target', 'claude', '--json'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_flag_target_inline_ignored_json",
+        ('skills', 'doctor', '-target=bogus', '--json'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_flag_scope_ignored_table",
+        ('skills', 'doctor', '--scope', 'team'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_flag_scope_inline_ignored_json",
+        ('skills', 'doctor', '--scope=project', '--json'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_flag_with_env_json",
+        ('skills', 'doctor', '--target', 'opencode', '--scope', 'user', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_pwd_physical_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_pwd_physical),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_pwd_stale_is_ignored_by_go_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_pwd_stale),
+        env_overrides=DOCTOR_ENV,
+        native=True, read_only=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_global_config_regular_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_global_config_regular_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml", 'library_dir = "/cfg/library"\n'), _doctor_env(SYMSKILLS_BASE_DIR="{root}/alt/base")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_global_config_malformed_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml", "this is [not valid toml\n= = =\n")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_global_config_empty_file_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml", "")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_project_config_regular_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_regular_config("project/.symskills.toml", 'profiles_dir = "/proj/profiles"\n')),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_project_config_regular_with_env_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_regular_config("project/.symskills.toml"), _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_both_configs_regular_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml"), _doctor_regular_config("project/.symskills.toml", 'cache_dir = "/proj/cache"\n')),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_unknown_flag",
+        ('skills', 'doctor', '--bogus'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_unknown_flag_with_env_json",
+        ('skills', 'doctor', '--bogus', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_target_without_value",
+        ('skills', 'doctor', '--target'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_positional_argument",
+        ('skills', 'doctor', 'extra'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_flag_terminator",
+        ('skills', 'doctor', '--', '--json'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_help_flag",
+        ('skills', 'doctor', '--help'),
+        setup=doctor_setup(),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_home_unset_with_env_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_home_unset, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_home_empty_with_env_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_status_cfg_home_empty, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_home_unclean_doubled_slash_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_home_suffix("//"), _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_home_trailing_slash_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_home_suffix("/")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_home_dot_segment_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_home_suffix("/./")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_home_relative_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(HOME="relative-home")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_xdg_config_unclean_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(XDG_CONFIG_HOME="{root}/config//")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_xdg_data_dotdot_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(XDG_DATA_HOME="{root}/data/../data")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_xdg_cache_trailing_slash_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(XDG_CACHE_HOME="{root}/cache/")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_env_line_separator_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/line\u2028sep")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_env_paragraph_separator_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_env(SYMSKILLS_BASE_DIR="{root}/para\u2029sep")),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_env_non_utf8_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_non_utf8_env),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_pwd_symlink_json",
+        ('skills', 'doctor', '--json'),
+        setup=doctor_setup(_doctor_pwd_symlink),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_config_doctor_fallback_pwd_symlink_table",
+        ('skills', 'doctor'),
+        setup=doctor_setup(_doctor_pwd_symlink),
+        env_overrides=DOCTOR_ENV,
+        expect_fallback=True,
+        posix_only=True,
+    ),
+    *(
+        (
+            Case(
+                "skills_status_config_doctor_config_dir_unreadable_resets_env_json",
+                ("skills", "doctor", "--json"),
+                setup=doctor_setup(_doctor_unreadable_config_dir, _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+                env_overrides=DOCTOR_ENV,
+                native=True, read_only=True,
+                posix_only=True,
+            ),
+        )
+        if hasattr(os, "geteuid") and os.geteuid() != 0
+        else ()
     ),
     *(
         (

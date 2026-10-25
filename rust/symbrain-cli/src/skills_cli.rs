@@ -20,6 +20,8 @@ use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
 
+#[path = "skills_doctor_config.rs"]
+mod doctor_config;
 #[path = "skills_sync_flags.rs"]
 mod sync_flags;
 
@@ -213,7 +215,16 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             parse_scope_flag(&args[1..]).is_err() || !go_home_defined()
         }
         Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
-        Some(verb) if verb == "doctor" => args.len() != 1 || has_dynamic_config(),
+        // `skills doctor` prints the merged symskills config, which native code
+        // rebuilds from the environment and Go's whole-config reset on a
+        // failing load (see `doctor_config`). Flag-package errors, an
+        // undefined home and every shape the module cannot reproduce stay on
+        // Go.
+        Some(verb) if verb == "doctor" => {
+            parse_list_flags(&args[1..]).is_err()
+                || !go_home_defined()
+                || doctor_config::resolve().is_none()
+        }
         _ => false,
     }
 }
@@ -254,7 +265,7 @@ struct SkillsDoctorReport {
 
 fn has_skill_log() -> bool {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let current = home.join(".local/share/symskills/events.jsonl");
+    let current = skills_log_path(&home);
     log_path_requires_go(&current)
         || log_path_requires_go(&current.with_file_name("events.1.jsonl"))
 }
@@ -863,7 +874,7 @@ pub fn run(
         "targets" => run_targets(rest, stdout, stderr, format),
         "log" => run_log(rest, stdout, stderr, format),
         "sync" => run_sync(rest, stdout, stderr, format),
-        "doctor" => run_doctor(rest, stdout, stderr, format),
+        "doctor" => return run_doctor(stdout, format),
         _ => {
             let _ = writeln!(stderr, "symbrain skills: unknown subcommand {verb:?}\n");
             let _ = write!(stderr, "{SKILLS_USAGE}");
@@ -881,7 +892,7 @@ fn run_list(args: &[OsString], stdout: &mut dyn Write, format: OutputFormat) -> 
     }
 
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let log_path = skills_log_path(&home);
     let metadata_options = MetadataOptions {
         events: read_events_log(&log_path),
         log_path,
@@ -1286,7 +1297,7 @@ fn run_log(
         }
     };
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let path = home.join(".local/share/symskills/events.jsonl");
+    let path = skills_log_path(&home);
     let skill = parsed
         .skill
         .as_deref()
@@ -1408,13 +1419,11 @@ fn run_sync(
     exit::OK
 }
 
-fn run_doctor(
-    _args: &[OsString],
-    stdout: &mut dyn Write,
-    _stderr: &mut dyn Write,
-    format: OutputFormat,
-) -> u8 {
-    let (report, pairs) = skills_doctor_report();
+/// `symbrain skills doctor`. Returns `None` when the invocation is Go's, so
+/// the routing decision and the report share one config resolution.
+fn run_doctor(stdout: &mut dyn Write, format: OutputFormat) -> Option<u8> {
+    let config = doctor_config::resolve()?;
+    let (report, pairs) = skills_doctor_report(config);
 
     match format {
         OutputFormat::Json => {
@@ -1422,37 +1431,31 @@ fn run_doctor(
         }
         OutputFormat::Table => {
             for (name, value) in pairs {
-                let _ = writeln!(stdout, "{name:<11} {value}");
+                let _ = writeln!(stdout, "{name:<11} {}", or_dash(&value));
             }
         }
     }
 
-    exit::OK
+    Some(exit::OK)
 }
 
-fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
+fn skills_doctor_report(
+    config: doctor_config::DoctorConfig,
+) -> (SkillsDoctorReport, [(&'static str, String); 9]) {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let project_dir = current_project_dir();
     let config_path = skills_config_path();
-    let profiles_dir = config_path
-        .parent()
-        .map_or_else(|| PathBuf::from("profiles"), |path| path.join("profiles"));
-    let data_root = symbrain_core::paths::skills_data_dir()
-        .map_or_else(|| PathBuf::from("."), |location| location.dir);
-    let cache_root = symbrain_core::paths::skills_cache_dir()
-        .map_or_else(|| PathBuf::from("."), |location| location.dir);
-    let library_dir = data_root.join("library");
-    let render_dir = data_root.join("rendered");
-    let base_dir = data_root.join("base");
-    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let log_path = skills_log_path(&home);
     let config = SkillsDoctorConfig {
-        library_dir: library_dir.display().to_string(),
-        render_dir: render_dir.display().to_string(),
-        cache_dir: cache_root.display().to_string(),
-        profiles_dir: profiles_dir.display().to_string(),
-        base_dir: base_dir.display().to_string(),
+        library_dir: config.library_dir,
+        render_dir: config.render_dir,
+        cache_dir: config.cache_dir,
+        profiles_dir: config.profiles_dir,
+        base_dir: config.base_dir,
         targets: None,
-        vcs: SkillsDoctorVcs { enabled: true },
+        vcs: SkillsDoctorVcs {
+            enabled: config.vcs_enabled,
+        },
     };
     let targets = symbrain_skills::default_targets()
         .into_iter()
@@ -1467,10 +1470,10 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
         })
         .collect();
     let report = SkillsDoctorReport {
+        profiles_dir: config.profiles_dir.clone(),
         config,
         config_path: config_path.display().to_string(),
         log_path: log_path.display().to_string(),
-        profiles_dir: profiles_dir.display().to_string(),
         project_dir: project_dir.display().to_string(),
         targets,
     };
@@ -1488,6 +1491,12 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
     (report, pairs)
 }
 
+/// Go `filepath.Join(home, ".local", "share", "symskills", "events.jsonl")`:
+/// native separators on Windows, which `Path::join` of a `/` literal keeps.
+fn skills_log_path(home: &std::path::Path) -> PathBuf {
+    native_join(home, ".local/share/symskills/events.jsonl")
+}
+
 fn skills_config_path() -> PathBuf {
     let root = std::env::var_os("XDG_CONFIG_HOME")
         .filter(|value| !value.is_empty())
@@ -1495,7 +1504,12 @@ fn skills_config_path() -> PathBuf {
         .filter(|path| path.is_absolute())
         .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
         .unwrap_or_else(|| PathBuf::from(".config"));
-    root.join("symskills/config.toml")
+    config_path_under(&root)
+}
+
+/// Go `filepath.Join(root, "symskills", "config.toml")` for a resolved config root.
+fn config_path_under(root: &std::path::Path) -> PathBuf {
+    native_join(root, "symskills/config.toml")
 }
 
 fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<PathBuf> {
@@ -1514,8 +1528,9 @@ mod tests {
     #[cfg(unix)]
     use super::override_dir_is_plain;
     use super::{
-        current_project_dir, has_dot_segment, is_lexically_clean, library_needs_go,
-        target_status_missing_root_needs_go_at, windows_code_is_not_exist, windows_path_needs_go,
+        config_path_under, current_project_dir, has_dot_segment, is_lexically_clean,
+        library_needs_go, skills_log_path, target_status_missing_root_needs_go_at,
+        windows_code_is_not_exist, windows_path_needs_go,
     };
     use std::fs;
 
@@ -1585,6 +1600,41 @@ mod tests {
             r"C:\dir\CONIN",
         ] {
             assert!(!windows_path_needs_go(native), "{native}");
+        }
+    }
+
+    #[test]
+    fn doctor_derived_paths_use_native_separators() {
+        // Go's `filepath.Join` emits one native separator everywhere; a `/`
+        // literal inside `Path::join` survives on Windows (SKL-015). Comparing
+        // against component-wise joins is separator agnostic.
+        #[cfg(windows)]
+        let base = std::path::Path::new(r"C:\Users\daniel");
+        #[cfg(not(windows))]
+        let base = std::path::Path::new("/Users/daniel");
+        assert_eq!(
+            skills_log_path(base),
+            base.join(".local")
+                .join("share")
+                .join("symskills")
+                .join("events.jsonl")
+        );
+        assert_eq!(
+            config_path_under(&base.join(".config")),
+            base.join(".config").join("symskills").join("config.toml")
+        );
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                skills_log_path(base).display().to_string(),
+                r"C:\Users\daniel\.local\share\symskills\events.jsonl"
+            );
+            assert_eq!(
+                config_path_under(&base.join(".config"))
+                    .display()
+                    .to_string(),
+                r"C:\Users\daniel\.config\symskills\config.toml"
+            );
         }
     }
 
