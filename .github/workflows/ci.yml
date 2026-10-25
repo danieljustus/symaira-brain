@@ -86,6 +86,9 @@ jobs:
           fi
           echo "All actions are pinned to SHA."
 
+      - name: Check native Guard uploads retain every standalone report
+        run: python3 -m unittest discover -s scripts/guard-standalone-oracle -p test_upload_inventory.py -v
+
   macos-release-verification-contract:
     runs-on: ubuntu-latest
     steps:
@@ -362,6 +365,7 @@ jobs:
             ${{ runner.temp }}/guard-standalone-config-warnings.json
             ${{ runner.temp }}/guard-standalone-config-paths.json
             ${{ runner.temp }}/guard-standalone-command-tree.json
+            ${{ runner.temp }}/guard-standalone-scan-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
             ${{ runner.temp }}/guard-standalone-windows-path-reference.json
             ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
@@ -681,7 +685,10 @@ jobs:
             ${{ runner.temp }}/guard-standalone-config-warnings.json
             ${{ runner.temp }}/guard-standalone-config-paths.json
             ${{ runner.temp }}/guard-standalone-command-tree.json
+            ${{ runner.temp }}/guard-standalone-scan-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
             ${{ runner.temp }}/guard-standalone-binaries/
           if-no-files-found: error
           retention-days: 14
@@ -1019,7 +1026,10 @@ jobs:
             ${{ runner.temp }}/guard-standalone-config-warnings.json
             ${{ runner.temp }}/guard-standalone-config-paths.json
             ${{ runner.temp }}/guard-standalone-command-tree.json
+            ${{ runner.temp }}/guard-standalone-scan-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
             ${{ runner.temp }}/guard-standalone-binaries/
           if-no-files-found: error
           retention-days: 14

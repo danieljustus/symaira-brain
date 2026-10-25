@@ -29,7 +29,7 @@ pub(super) fn run_list(
     } else {
         parsed.limit.min(1000)
     };
-    let store = match open_store(stderr, Some(&parsed.raw("db"))) {
+    let store = match open_store(stderr, "list", Some(&parsed.raw("db"))) {
         Ok(store) => store,
         Err(code) => return code,
     };

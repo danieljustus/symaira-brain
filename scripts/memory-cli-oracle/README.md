@@ -29,7 +29,7 @@ shared current/legacy roots, current precedence and directory-versus-file type.
 Reflection executed against Go verifies that the Rust descriptor covers exactly
 the immutable 86-field typed schema, including `bm25_weight`.
 
-Linux/macOS execute 621 cases; Windows executes 584 because 37 argv byte cases
+Linux/macOS execute 655 cases; Windows executes 584 because 37 argv byte cases
 require Unix. `controls.py` compiles a disposable process wrapper that runs the
 actual Rust candidate and then changes one semantic stdout token or its success
 exit code. Both real replays must fail for the intended comparison assertion,
@@ -64,9 +64,10 @@ rewrites can invalidate admission before hydration; malformed JSON still errors,
 but exact Go diagnostics and null/type semantics are not an atomic concurrent
 mutation guarantee in this slice.
 
+`--family store_creation` (`creation_cases.py`, 48 Unix scenarios, 51 on macOS where the root-owned `/tmp` link is exercised, fewer on Windows) replays missing-store creation and every directory/open failure shape for list, rules, query-log, set and delete, plus `--db /dev/null` and a FIFO for all six verbs (Go never blocks on them; a CLI timeout is a mismatch). The SQLite code printed for these is environment-dependent and is never hard-coded: `/dev/null` is `unable to open database file (14)` on the local macOS 27 host but `attempt to write a readonly database (1544)` on Linux as a non-root user (the extended code of the WAL pragma, which the shipped driver prints because it enables extended result codes after `sqlite3_open_v2`), a FIFO is `disk I/O error (10)` (primary code: the failure is inside the open call); only the live Go comparison asserts the exact bytes per OS, `memory_store_creation.rs` pins the `<text> (<code>)` shape and compares stdout, stderr, exit and the whole created tree with permission bits (directories `0700`, database `0600` under umask 022). `creation_controls.py` runs three real-process mutants (directory mode, stderr byte, exit status) that the family must reject through exactly their own field.
+
 This increment proves parser/config and seeded read behavior. It does not certify
-governed writes, missing/corrupt/unwritable database error strings, database file
-creation modes, configured Hamming prefilter, evidence JSONL decoding or MCP
+governed writes, corrupt database error strings, configured Hamming prefilter, evidence JSONL decoding or MCP
 cutover. Those remain open #758 acceptance work. No Go source or frozen fixture
 is modified. Native Ubuntu/macOS/Windows workflow receipts are required; local
 Linux execution alone does not satisfy the release gate.

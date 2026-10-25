@@ -92,6 +92,7 @@ jobs:
           umask 022
           cargo test -p symbrain-cli --lib --all-features --locked memory_cli:: 2>&1 | tee "$TEST_LOG"
           cargo test -p symbrain-cli --test memory_set_sigpipe --all-features --locked 2>&1 | tee -a "$TEST_LOG"
+          cargo test -p symbrain-cli --test memory_store_creation --all-features --locked 2>&1 | tee -a "$TEST_LOG"
           cargo test -p symbrain-memory --all-targets --all-features --locked 2>&1 | tee -a "$TEST_LOG"
       - name: Execute immutable Go subprocess parity
         env:
@@ -131,6 +132,13 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/controls.py --report "$REPORT"
+      - name: Require store-creation failure controls
+        env:
+          REPORT: ${{ runner.temp }}/memory-cli-creation-controls.json
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/creation_controls.py --report "$REPORT"
       - name: Record native SDK and exact head
         if: always()
         env:

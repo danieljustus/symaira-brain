@@ -33,7 +33,7 @@ pub(super) fn run_query_log(
     })
     .unwrap_or(1000);
     let actor = parsed.text("actor");
-    let store = match open_store(stderr, Some(&parsed.raw("db"))) {
+    let store = match open_store(stderr, "query-log", Some(&parsed.raw("db"))) {
         Ok(store) => store,
         Err(code) => return code,
     };
