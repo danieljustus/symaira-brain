@@ -580,6 +580,50 @@ kept on Go rather than classified. Native three-OS CI at the candidate head rema
 required.
 
 
+### Skills targets config independence (#764 slice d)
+
+`symbrain skills targets [--scope user|project]` no longer routes to Go when a
+`symskills` configuration is present. Go's `cmdSkillsTargets` calls
+`loadSkillsEnv()` only to obtain the home and working directories and hands
+nothing else to `harness.ListStatus`; the `[[targets]]` tables are decoded by
+`config.LoadTargets` and registered by `render.RegisterCustomTargets`, and neither
+has a production caller, so the target table is static. Environment overrides
+(`SYMSKILLS_*` valid, invalid, empty or relative, including `SYMSKILLS_CACHE_DIR`;
+`SYMBRAIN_SKILLS_*`) and config files of any shape (custom `[[targets]]`,
+malformed TOML, a directory, a dangling or looping symlink, a file used as the
+config directory, an unreadable config directory, a relative `XDG_CONFIG_HOME`)
+cannot change a byte of the report, with or without `--json`. `has_dynamic_config`
+therefore no longer gates this verb; the remaining gates are an unknown `--scope`
+value, flag-package errors (Go owns those bytes) and an undefined or empty
+`HOME`/`USERPROFILE` (Go's `os.UserHomeDir` fails and the roots are built against an
+empty home, which native code would replace with `.`). The previous source comment
+statement that a custom config "can still register additional targets" was a
+conservative assumption; the Go source and the differential below show it does not.
+
+Evidence: 26 `skills_status_config_targets_*` cases in `scripts/rust-differential.py`
+(22 native, 4 must-fallback; the unreadable-config-directory case needs a non-root
+user) compare the Go binary built from `HEAD` 2828231a9 with Go 1.26.7 (no Go source
+changed) with the Rust binary. Native cases run Rust with `SYMBRAIN_GO_BINARY`
+unset and a Go-free `PATH`, assert the fixture root is unchanged, and pin `PATH`
+to `/usr/bin:/bin` on both sides because the report embeds `binary:<path>`
+evidence. The cases reuse the SKL-013 harness and mutant runner (the whole
+`skills_status_config_*` family: 104 cases, 55 native, 49 fallback, all matching
+Go). Three new source mutants in `scripts/skills-status-config-oracle/run.py` are
+killed: `targets-gated-on-config` (the old `has_dynamic_config` gate returns; 7
+expected cases fail), `targets-ignores-home` (the home gate is removed; 4 cases)
+and `targets-accepts-bad-flags` (flag/scope errors replayed natively; 2 cases); the
+existing `dynamic-config-ignores-home` mutant now expects only its two `doctor`
+cases. The full differential (608 cases) passes. The Rust-side test
+`skills_targets_native.rs` now asserts native output equal to the unconfigured run
+for an env override and a custom-target config file, and keeps the fallback for flag,
+scope and missing-home shapes.
+
+Still on Go: `skills doctor` (it prints the merged config), `skills list` and
+`skills sync` with any config; every `skills status` shape listed under #764
+slice c. The Windows run of this slice rests on `cargo clippy --target
+x86_64-pc-windows-gnu` and a `cfg` review (the probe helpers are no longer on this
+verb's path); native Linux/macOS/Windows CI at the candidate head remains required.
+
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 
 Salvaged from the unmerged PR #813 (head 578d201f5) and adapted to current main:

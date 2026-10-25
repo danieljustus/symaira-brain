@@ -1801,6 +1801,80 @@ def _status_cfg_xdg_dotdot_through_symlink(root: Path, env: dict[str, str]) -> N
 
 
 
+# --- skills targets: config independence -----------------------------------
+#
+# Go's `cmdSkillsTargets` loads the symskills config only to obtain the home and
+# project directories and hands nothing else to `harness.ListStatus`; the
+# `[[targets]]` tables are decoded by `config.LoadTargets`, which has no
+# production caller. Every config shape below must therefore leave the report
+# byte-identical to Go's, whatever it contains. The pinned Go binary is the
+# expected side, and PATH is pinned on both sides because the report embeds
+# `binary:<path>` evidence from `exec.LookPath`.
+TARGETS_CONFIG_PREFIX = "skills_status_config_targets_"
+TARGETS_ENV = {"PATH": "/usr/bin:/bin"} if os.name == "posix" else None
+
+
+def targets_config(
+    *mutators: Callable[[Path, dict[str, str]], None],
+    base: Callable[[Path, dict[str, str]], None] = setup_skills_targets_mixed,
+) -> Callable[[Path, dict[str, str]], None]:
+    """A populated harness tree, then the config shape under test."""
+
+    def wrapped(root: Path, env: dict[str, str]) -> None:
+        base(root, env)
+        for mutate in mutators:
+            mutate(root, env)
+
+    return wrapped
+
+
+def _targets_cfg_env(**values: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        for key, value in values.items():
+            env[key] = value.replace("{root}", str(root))
+
+    return mutate
+
+
+def _targets_cfg_custom_target(location: str) -> Callable[[Path, dict[str, str]], None]:
+    """A custom `[[targets]]` whose skill root exists and holds a skill: if Go
+    ever honoured it, the report would grow a row or change evidence."""
+
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        skills = root / "home/custom-harness/skills"
+        (skills / "extra").mkdir(parents=True, exist_ok=True)
+        _write_text(skills / "extra/SKILL.md", "extra\n", encoding="utf-8")
+        body = (
+            "[[targets]]\n"
+            'name = "custom"\n'
+            'binary_name = "custom-harness"\n'
+            f'skill_root_user = "{skills}"\n'
+            f'skill_root_project = "{root / "project/.custom/skills"}"\n'
+            "\n"
+            'vcs = { enabled = false }\n'
+        )
+        _status_cfg_write(root / location, body)
+
+    return mutate
+
+
+def _targets_cfg_malformed(location: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        _status_cfg_write(root / location, "this is [not valid toml\n= = =\n")
+
+    return mutate
+
+
+def _targets_cfg_unreadable_config(root: Path, env: dict[str, str]) -> None:
+    _status_cfg_write(root / "config/symskills/config.toml", 'vcs = { enabled = false }\n')
+    (root / "config/symskills").chmod(0o000)
+
+
+def _targets_cfg_xdg_relative_with_config(root: Path, env: dict[str, str]) -> None:
+    env["XDG_CONFIG_HOME"] = "relative/config"
+    _targets_cfg_custom_target("home/.config/symskills/config.toml")(root, env)
+
+
 @dataclass(frozen=True)
 class Case:
     name: str
@@ -3711,6 +3785,204 @@ CASES = (
                 ("skills", "status", "--target", "opencode", "--json"),
                 setup=managed_config_then(_status_cfg_library_mode_444),
                 expect_fallback=True,
+                posix_only=True,
+            ),
+        )
+        if hasattr(os, "geteuid") and os.geteuid() != 0
+        else ()
+    ),
+    Case(
+        "skills_status_config_targets_env_library_dir_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_all_overrides_table",
+        ("skills", "targets"),
+        setup=targets_config(
+            _targets_cfg_env(
+                SYMSKILLS_LIBRARY_DIR="{root}/alt/library",
+                SYMSKILLS_RENDER_DIR="{root}/alt/render",
+                SYMSKILLS_CACHE_DIR="{root}/alt/cache",
+                SYMSKILLS_PROFILES_DIR="{root}/alt/profiles",
+                SYMSKILLS_BASE_DIR="{root}/alt/base",
+                SYMSKILLS_VCS_ENABLED="false",
+            )
+        ),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_cache_dir_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_CACHE_DIR="{root}/alt/cache")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_invalid_vcs_bool_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_VCS_ENABLED="maybe", SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_empty_vcs_bool",
+        ("skills", "targets"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_VCS_ENABLED="")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_relative_library_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_LIBRARY_DIR="rel/library", SYMSKILLS_BASE_DIR="../base")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_empty_library_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_LIBRARY_DIR="", SYMSKILLS_BASE_DIR="")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_symbrain_vars_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_env(SYMBRAIN_SKILLS_LIBRARY_DIR="{root}/alt/library", SYMBRAIN_SKILLS_BASE_DIR="{root}/alt/base")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_env_project_scope_json",
+        ("skills", "targets", "--scope", "project", "--json"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library", SYMSKILLS_BASE_DIR="{root}/alt/base"), base=setup_skills_targets_project_scope),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_custom_target_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_custom_target("config/symskills/config.toml")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_custom_target_table",
+        ("skills", "targets"),
+        setup=targets_config(_targets_cfg_custom_target("config/symskills/config.toml")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_custom_target_with_env_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_custom_target("config/symskills/config.toml"), _targets_cfg_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_malformed_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_malformed("config/symskills/config.toml")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_is_directory_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_status_cfg_dir_as_config_toml),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_dir_is_file_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_status_cfg_dir_is_file),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_project_config_custom_target_project_scope_json",
+        ("skills", "targets", "--scope", "project", "--json"),
+        setup=targets_config(_targets_cfg_custom_target("project/.symskills.toml"), base=setup_skills_targets_project_scope),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_project_config_malformed_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_malformed("project/.symskills.toml")),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_project_config_is_directory_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_status_cfg_dir_as_project_config),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_dangling_symlink_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_status_cfg_dangling_symlink),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_config_symlink_loop_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_status_cfg_symlink_loop),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_xdg_relative_with_home_config_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_targets_cfg_xdg_relative_with_config),
+        env_overrides=TARGETS_ENV,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_fallback_unknown_scope_with_env",
+        ("skills", "targets", "--scope", "team"),
+        setup=targets_config(_targets_cfg_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=TARGETS_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_targets_fallback_unknown_flag_with_config",
+        ("skills", "targets", "--bogus"),
+        setup=targets_config(_targets_cfg_custom_target("config/symskills/config.toml")),
+        env_overrides=TARGETS_ENV,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_targets_fallback_home_empty_with_env_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_status_cfg_home_empty, _targets_cfg_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
+        env_overrides=TARGETS_ENV,
+        expect_fallback=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_targets_fallback_home_unset_with_config_json",
+        ("skills", "targets", "--json"),
+        setup=targets_config(_status_cfg_home_unset, _targets_cfg_custom_target("config/symskills/config.toml")),
+        env_overrides=TARGETS_ENV,
+        expect_fallback=True, posix_only=True,
+    ),
+    *(
+        (
+            Case(
+                "skills_status_config_targets_config_dir_unreadable_json",
+                ("skills", "targets", "--json"),
+                setup=targets_config(_targets_cfg_unreadable_config),
+                env_overrides=TARGETS_ENV,
+                native=True, read_only=True,
                 posix_only=True,
             ),
         )

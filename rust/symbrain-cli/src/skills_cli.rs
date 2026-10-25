@@ -198,15 +198,19 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
                 Some(_) => true,
             }
         }
-        // The native targets slice is deliberately only the no-argument,
-        // user-scope/default-config contract. Keep every parsed or dynamic
-        // variant on Go until its bytes are frozen independently.
-        // The native targets inventory observes the harness roots itself, so
-        // dynamic target state no longer forces Go. A custom symskills config
-        // can still register additional targets, and malformed flags belong to
-        // the Go flag package.
+        // `skills targets` never reads the symskills configuration: Go's
+        // `cmdSkillsTargets` loads it only for the home and project
+        // directories and passes just those to `harness.ListStatus`, whose
+        // static target table is not extended by `[[targets]]` (that decode,
+        // `config.LoadTargets`, has no production caller). Environment
+        // overrides and config files of any shape (valid, malformed, a
+        // directory, a custom target) therefore cannot change a byte of the
+        // report and do not need Go. What stays on Go: flag-package errors,
+        // unknown scopes, and an undefined home, where `os.UserHomeDir` fails
+        // and Go lists the roots against an empty home instead of the `.`
+        // native code would substitute.
         Some(verb) if verb == "targets" => {
-            parse_scope_flag(&args[1..]).is_err() || has_dynamic_config()
+            parse_scope_flag(&args[1..]).is_err() || !go_home_defined()
         }
         Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
         Some(verb) if verb == "doctor" => args.len() != 1 || has_dynamic_config(),

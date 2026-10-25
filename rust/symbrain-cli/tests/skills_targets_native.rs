@@ -182,9 +182,10 @@ fn target_binary_is_reported_as_evidence_natively() {
 }
 
 #[test]
-fn scope_flag_is_native_but_config_stays_on_go() {
+fn scope_flag_is_native_and_symskills_config_is_ignored() {
     // `--scope user` is the default scan, `--scope project` resolves the
-    // workspace roots; only a dynamic symskills config still needs Go.
+    // workspace roots. Go never reads the symskills config for this report
+    // (differential: `skills_status_config_targets_*`).
     let root = TempDir::new().unwrap();
     let user = run(&root, &["skills", "targets", "--json"]).stdout;
     let explicit = run(&root, &["skills", "targets", "--scope", "user", "--json"]);
@@ -211,18 +212,25 @@ fn scope_flag_is_native_but_config_stays_on_go() {
             .to_string()
     );
 
+    let default_table = run(&root, &["skills", "targets"]).stdout;
     let mut command = command(&root, &["skills", "targets"]);
     let configured = command
         .env("SYMSKILLS_LIBRARY_DIR", "/different/library")
         .output()
         .unwrap();
-    assert_eq!(configured.status.code(), Some(1));
-    assert!(String::from_utf8_lossy(&configured.stderr).contains("no Go fallback was found"));
+    assert!(
+        configured.status.success(),
+        "stderr: {:?}",
+        configured.stderr
+    );
+    assert_eq!(configured.stdout, default_table);
+    assert!(configured.stderr.is_empty());
 }
 
 #[test]
-fn config_file_targets_variant_keeps_go_fallback_before_output() {
+fn config_file_targets_variant_is_ignored_like_go() {
     let root = TempDir::new().unwrap();
+    let default_output = run(&root, &["skills", "targets"]);
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
     std::fs::write(
         root.path().join("config/symskills/config.toml"),
@@ -230,7 +238,30 @@ fn config_file_targets_variant_keeps_go_fallback_before_output() {
     )
     .unwrap();
     let output = run(&root, &["skills", "targets"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert_eq!(output.stdout, default_output.stdout);
+    assert!(output.stderr.is_empty());
+    assert!(!String::from_utf8_lossy(&output.stdout).contains("custom"));
+}
+
+#[test]
+fn unknown_flag_or_scope_and_missing_home_keep_go_fallback() {
+    let root = TempDir::new().unwrap();
+    for args in [
+        &["skills", "targets", "--bogus"][..],
+        &["skills", "targets", "--scope", "team"][..],
+    ] {
+        let output = run(&root, args);
+        assert_eq!(output.status.code(), Some(1), "{args:?}");
+        assert!(output.stdout.is_empty());
+        assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    }
+    #[cfg(unix)]
+    {
+        let mut missing_home = command(&root, &["skills", "targets"]);
+        let output = missing_home.env_remove("HOME").output().unwrap();
+        assert_eq!(output.status.code(), Some(1));
+        assert!(output.stdout.is_empty());
+        assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    }
 }
