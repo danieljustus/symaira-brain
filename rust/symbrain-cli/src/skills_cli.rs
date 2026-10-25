@@ -265,7 +265,7 @@ struct SkillsDoctorReport {
 
 fn has_skill_log() -> bool {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let current = home.join(".local/share/symskills/events.jsonl");
+    let current = skills_log_path(&home);
     log_path_requires_go(&current)
         || log_path_requires_go(&current.with_file_name("events.1.jsonl"))
 }
@@ -892,7 +892,7 @@ fn run_list(args: &[OsString], stdout: &mut dyn Write, format: OutputFormat) -> 
     }
 
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let log_path = skills_log_path(&home);
     let metadata_options = MetadataOptions {
         events: read_events_log(&log_path),
         log_path,
@@ -1297,7 +1297,7 @@ fn run_log(
         }
     };
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let path = home.join(".local/share/symskills/events.jsonl");
+    let path = skills_log_path(&home);
     let skill = parsed
         .skill
         .as_deref()
@@ -1445,7 +1445,7 @@ fn skills_doctor_report(
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let project_dir = current_project_dir();
     let config_path = skills_config_path();
-    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let log_path = skills_log_path(&home);
     let config = SkillsDoctorConfig {
         library_dir: config.library_dir,
         render_dir: config.render_dir,
@@ -1491,6 +1491,12 @@ fn skills_doctor_report(
     (report, pairs)
 }
 
+/// Go `filepath.Join(home, ".local", "share", "symskills", "events.jsonl")`:
+/// native separators on Windows, which `Path::join` of a `/` literal keeps.
+fn skills_log_path(home: &std::path::Path) -> PathBuf {
+    native_join(home, ".local/share/symskills/events.jsonl")
+}
+
 fn skills_config_path() -> PathBuf {
     let root = std::env::var_os("XDG_CONFIG_HOME")
         .filter(|value| !value.is_empty())
@@ -1498,7 +1504,12 @@ fn skills_config_path() -> PathBuf {
         .filter(|path| path.is_absolute())
         .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
         .unwrap_or_else(|| PathBuf::from(".config"));
-    root.join("symskills/config.toml")
+    config_path_under(&root)
+}
+
+/// Go `filepath.Join(root, "symskills", "config.toml")` for a resolved config root.
+fn config_path_under(root: &std::path::Path) -> PathBuf {
+    native_join(root, "symskills/config.toml")
 }
 
 fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<PathBuf> {
@@ -1517,8 +1528,9 @@ mod tests {
     #[cfg(unix)]
     use super::override_dir_is_plain;
     use super::{
-        current_project_dir, has_dot_segment, is_lexically_clean, library_needs_go,
-        target_status_missing_root_needs_go_at, windows_code_is_not_exist, windows_path_needs_go,
+        config_path_under, current_project_dir, has_dot_segment, is_lexically_clean,
+        library_needs_go, skills_log_path, target_status_missing_root_needs_go_at,
+        windows_code_is_not_exist, windows_path_needs_go,
     };
     use std::fs;
 
@@ -1588,6 +1600,41 @@ mod tests {
             r"C:\dir\CONIN",
         ] {
             assert!(!windows_path_needs_go(native), "{native}");
+        }
+    }
+
+    #[test]
+    fn doctor_derived_paths_use_native_separators() {
+        // Go's `filepath.Join` emits one native separator everywhere; a `/`
+        // literal inside `Path::join` survives on Windows (SKL-015). Comparing
+        // against component-wise joins is separator agnostic.
+        #[cfg(windows)]
+        let base = std::path::Path::new(r"C:\Users\daniel");
+        #[cfg(not(windows))]
+        let base = std::path::Path::new("/Users/daniel");
+        assert_eq!(
+            skills_log_path(base),
+            base.join(".local")
+                .join("share")
+                .join("symskills")
+                .join("events.jsonl")
+        );
+        assert_eq!(
+            config_path_under(&base.join(".config")),
+            base.join(".config").join("symskills").join("config.toml")
+        );
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                skills_log_path(base).display().to_string(),
+                r"C:\Users\daniel\.local\share\symskills\events.jsonl"
+            );
+            assert_eq!(
+                config_path_under(&base.join(".config"))
+                    .display()
+                    .to_string(),
+                r"C:\Users\daniel\.config\symskills\config.toml"
+            );
         }
     }
 

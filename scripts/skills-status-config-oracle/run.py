@@ -242,8 +242,8 @@ MUTANTS = {
         ],
     ),
     "doctor-directory-config-is-absent": (
-        "        Ok(metadata) if cfg!(unix) && metadata.is_dir() => Probe::Fails,\n",
-        "        Ok(metadata) if cfg!(unix) && metadata.is_dir() => Probe::Absent,\n",
+        "        Ok(metadata) if metadata.is_dir() => Probe::Fails,\n",
+        "        Ok(metadata) if metadata.is_dir() => Probe::Absent,\n",
         [
             "skills_status_config_doctor_config_is_directory_resets_env_json",
             "skills_status_config_doctor_config_is_directory_resets_env_table",

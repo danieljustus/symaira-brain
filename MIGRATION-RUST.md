@@ -682,7 +682,10 @@ output, the reset and the remaining fallbacks.
 
 Residual: a config file with content stays on Go until a TOML decode with
 BurntSushi/`configkit` acceptance is ported (the minimal prerequisite for the last
-`skills doctor` fallback); Windows branches (`windows_path_needs_go`, stat-error
+`skills doctor` fallback); `config_path`/`log_path` are built with `native_join`/`filepath.Join` semantics and a
+directory config probe resets to the defaults on every platform (Windows CI run
+40215584258 showed `/`-joined paths and a Go fallback for the directory cases);
+Windows branches (`windows_path_needs_go`, stat-error
 classification is Unix-only) rest on `cargo clippy --target x86_64-pc-windows-gnu`
 and a `cfg` review; native Linux/macOS/Windows CI at the candidate head remains
 required.

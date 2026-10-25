@@ -131,8 +131,10 @@ fn probe(path: &Path) -> Probe {
         // Stat fails with ENOTDIR/EACCES/ELOOP/...: `os.IsNotExist` is false,
         // so Go opens the path and the open fails the same way.
         Err(_) if cfg!(unix) => Probe::Fails,
-        // `toml.DecodeFile` reads the directory and fails with EISDIR.
-        Ok(metadata) if cfg!(unix) && metadata.is_dir() => Probe::Fails,
+        // `toml.DecodeFile` reads the directory and fails (EISDIR on Unix,
+        // "Incorrect function" on Windows; CI run 40215584258 shows Go on
+        // Windows resetting to the defaults for these shapes too).
+        Ok(metadata) if metadata.is_dir() => Probe::Fails,
         Ok(metadata) if metadata.is_file() => Probe::Regular,
         _ => Probe::Other,
     }
@@ -281,6 +283,17 @@ mod tests {
         assert_eq!(load_fails(Regular, Regular), None);
         assert_eq!(load_fails(Other, Fails), None);
         assert_eq!(load_fails(Absent, Other), None);
+    }
+
+    #[test]
+    fn probe_directory_fails_and_missing_is_absent_on_every_platform() {
+        // Go's `toml.DecodeFile` fails on a directory on Windows as well
+        // (SKL-015 CI run 40215584258), so the doctor must stay native there.
+        let root = tempfile::TempDir::new().unwrap();
+        let dir = root.path().join("dir");
+        fs::create_dir(&dir).unwrap();
+        assert_eq!(probe(&dir), Probe::Fails);
+        assert_eq!(probe(&root.path().join("missing")), Probe::Absent);
     }
 
     #[cfg(unix)]
