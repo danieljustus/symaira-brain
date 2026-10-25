@@ -729,6 +729,70 @@ Still on Go: `skills sync` with any config, `skills status` shapes listed under 
 not exist in Rust; `skills doctor` is SKL-015, merged in #950). The Windows run of this slice rests on a
 `cfg` review; native Linux/macOS/Windows CI at the candidate head remains required.
 
+### Skills config TOML decode foundation (#764 slice f, SKL-018)
+
+Every config-file shape of `skills status/doctor/list/sync` still routes to Go because
+no Rust decoder reproduced Go's TOML handling. `symbrain_skills::config_toml` is that
+decoder; this slice delivers it, its Go oracle and a negative-control runner, and **does
+not change CLI routing** (the consumers in `skills_cli.rs`/`skills_doctor_config.rs`
+still treat any config file with content as Go).
+
+Go reads the files in two independent ways, both reproduced:
+
+- `config.Load` (corekit `configkit.mergeFile`): `toml.DecodeFile` (BurntSushi/toml
+  v1.6.0, TOML 1.1) into `map[string]interface{}`, then an exact, case-sensitive copy by
+  `json` tag in struct order `library_dir`, `render_dir`, `cache_dir`, `profiles_dir`,
+  `base_dir`, `vcs`. A non-string value is `field "k": cannot convert <%T> to string`
+  (`int64`, `float64`, `bool`, `time.Time` for all four datetime kinds, `[]interface {}`,
+  `map[string]interface {}`, `[]map[string]interface {}` for `[[k]]`); a non-table `vcs`
+  is ignored silently; `vcs.enabled` accepts a bool or a `strconv.ParseBool` string
+  (`field "vcs": field "enabled": cannot parse "yes" as bool: strconv.ParseBool: ...`).
+  The first failing file ends the load: `global config error: failed to apply <path>: ...`,
+  then `project config error: ...`. `targets` has no `json` tag and is skipped here.
+- `config.LoadTargets`/`LoadCapabilities`: typed `toml.DecodeFile` into `targetsFile`
+  with case-insensitive field folding (`strings.EqualFold`, so U+017F and U+212A fold to
+  `s`/`k`), `[[targets]]` or an inline array of tables, a `map[string]bool` that
+  silently ignores a non-table value (and a `capabilities.<t> = true` creating an empty
+  `<t>` map), per-file merge (non-empty `targets` replaces, capabilities merge per name).
+
+Decisions:
+
+- **Parser = `toml_edit` plus post-checks**, not a hand-written grammar. The result is a
+  three-way classification: `Loaded`/`Error` only when the replay proves Go agrees, and
+  `NeedsGo(reason)` for everything else. Every syntax error, invalid UTF-8, typed-decode
+  type error (messages embed TOML key paths and lines) and every document Go decodes
+  differently is `NeedsGo`; Go keeps owning those messages.
+- Post-checks found by the oracle (documents `toml_edit` accepts and Go rejects): a
+  second leading BOM, the `:60` leap second (any datetime anywhere in the document) and
+  multi-line inline tables (BurntSushi tolerates a newline only after `{`, after a comma
+  and before `}`, `toml_edit` also between a key and `=`).
+- Known Go-accepts/Rust-asks-Go set (28, pinned in the test): BurntSushi lets a value
+  redefine a dotted table or a table extend an inline table, accepts datetime offsets
+  `+24:00`/`+00:60`, has no `toml_edit` nesting cap, and `%q` of a non-ASCII `vcs.enabled`
+  string is not reproduced. Two typed-decode cases are map-iteration-order dependent in
+  Go (two keys folding onto one field); the generator repeats each typed decode 40 times
+  and records such a case as `nondeterministic`, which Rust must send to Go.
+
+Evidence: `scripts/skills-config-toml-oracle` runs the real `config.Load`,
+`config.LoadTargets` and `config.LoadCapabilities` over 6769 cases in a disposable
+HOME/cwd (one per line in `rust/symbrain-skills/tests/fixtures/config_toml_oracle.json`;
+`make skills-config-toml-oracle-check` regenerates and compares, ignoring provenance).
+`tests/config_toml_oracle.rs` replays it without Go: 1262 `Load` values and 188 exact
+apply errors native, 5291 Go parse errors left to Go (never answered natively), plus 1417
+native typed decodes. A soak mode (`SYMSKILLS_CONFIG_TOML_ORACLE_FIXTURE`, generator
+`-out/-mutations/-seed`) replayed two further seeds of 40769 cases each (81538 cases) at the final code with
+zero mismatches.
+`scripts/skills-config-toml-oracle/mutants.py` applies 16 single-line mutants of
+`config_toml.rs` (type names, ParseBool spelling, BOM, leap second, multi-line inline
+table, inline `vcs`, error label, both fold characters, collision, empty-targets
+override, capability merge, non-table map, `%q` width): 16 of 16 killed.
+
+Residual: routing. `skills_cli.rs`/`skills_doctor_config.rs` must still (1) read the
+config bytes through the same stat/`os.IsNotExist` gates, (2) call `config_toml::load`
+and fall back on `NeedsGo`, (3) apply `SYMSKILLS_*` and the discard-to-defaults rule, and
+(4) for `status`/`list`/`sync` feed `LoadTargets` into the native verbs, each with its own
+Go-vs-Rust differential. Native three-OS CI at the final head remains required.
+
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 
 Salvaged from the unmerged PR #813 (head 578d201f5) and adapted to current main:
