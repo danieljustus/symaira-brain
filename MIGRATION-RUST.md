@@ -729,6 +729,58 @@ Still on Go: `skills sync` with any config, `skills status` shapes listed under 
 not exist in Rust; `skills doctor` is SKL-015, merged in #950). The Windows run of this slice rests on a
 `cfg` review; native Linux/macOS/Windows CI at the candidate head remains required.
 
+### Skills log read shapes (#764 slice g)
+
+`symbrain skills log` no longer routes to Go for symlinked, missing or unreadable log paths, and
+its line decoding now follows `encoding/json` instead of a derived serde struct. Go's
+`cmdSkillsLog` takes the path from `events.DefaultPath()` (`~/.local/share/symskills/events.jsonl`
+plus the rotated `events.1.jsonl`, `.` when there is no home), reads both with `os.ReadFile`,
+decodes each line with `json.Unmarshal` and skips a line on any error; the loaded config is only
+used for the home directory, so no config file or `SYMSKILLS_*`/`SYMBRAIN_SKILLS_*` variable can
+change a byte. Native therefore covers every config shape and:
+
+- **Symlinks** at the file or any ancestor follow the kernel like `os.ReadFile` (valid link,
+  dangling link or ancestor = absent segment, link to a directory).
+- **Read failures** replay Go's `*PathError` text on POSIX: `open <p>: permission denied |
+  not a directory | too many levels of symbolic links`, `read <p>: is a directory`
+  (`symbrain skills log: read operation log: ...`, exit 1). Only when the printed path is what Go
+  prints: defined, lexically clean UTF-8 home (Go cleans `filepath.Join`, falls back to `.`).
+- **Flags** mirror Go's `normalizeFlags` + `flag` for `-skill/-target/-scope/-limit/-l` in both
+  spellings; limits are plain decimals only (Go parses with base 0, so `010`, `0x2`, `1_0` stay on
+  Go), as are `-h`, unknown flags, positionals, `--`, a missing value and non-UTF-8 arguments.
+- **Line decoding** (`install/event_decode.rs`): a Go-grammar scan decides each line. Invalid JSON,
+  trailing data, non-objects and whitespace-only lines are skipped as in Go; known fields must be
+  strings. Lines whose Go outcome is not certain are handed to Go: case-folded or non-ASCII keys,
+  duplicate keys, `null`/non-string values, a top-level `null`, lone surrogates, invalid UTF-8,
+  nesting deeper than 200, and a device/FIFO segment.
+
+Two existing defects in the previous native path are fixed by this slice: the old reader accepted
+arrays as events (serde tuple form), dropped `null`/duplicate/case-folded lines that Go keeps and
+did not repair invalid UTF-8; and the shared `go_json` helper did not escape U+2028/U+2029 like Go's
+`json.Encoder` (it now does, which also corrects other native reports that carry those characters).
+`skills list` still reads the same log through the lax `read_events`; that residual is separate.
+
+Stays on Go: the shapes above plus a home with `.`/`..` segments (`filepath.Join` cleans them
+lexically, the kernel resolves `..` through symlinks), an unclean or undefined home when a
+read error text is needed, and any errno whose Go text is not in the table.
+
+Evidence: 80 `skills_status_config_log_*` cases in `scripts/rust-differential.py` (56 native with
+the Go route removed and the fixture root asserted unchanged, 24 must-fallback) match the Go 1.26.7
+binary built from `HEAD` 033f1b2fa; the whole `skills_status_config_*` family (285 cases: 169
+native, 116 fallback) and the full differential (789 cases, `make parity-smoke`) pass.
+`readonly_snapshot` now records an unreadable (mode 000) fixture file instead of crashing so
+`chmod 000` log shapes can be native cases. 22 new source mutants in
+`scripts/skills-status-config-oracle/run.py` (`log-*`; the oracle now mutates four source files)
+are killed (61 of 61 mutants of the whole oracle killed). Rust tests: `skills_log_exact_native.rs` (new), `skills_log_native.rs` (the symlink,
+parent-is-file and unreadable tests now assert native Go text instead of fallback) and
+`event_tests.rs` (`read_events_go_exact`).
+
+Still on Go: `skills sync` with any config, `skills status` shapes listed under #764 slice c, and
+every config-file shape that needs a TOML parse (a Go-exact TOML parser does not exist in Rust).
+The Windows run of this slice rests on `cargo clippy --target x86_64-pc-windows-gnu` and a `cfg`
+review (read-error replay is POSIX-only; every Windows read failure stays on Go); native
+Linux/macOS/Windows CI at the candidate head remains required.
+
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 
 Salvaged from the unmerged PR #813 (head 578d201f5) and adapted to current main:
