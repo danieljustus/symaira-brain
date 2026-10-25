@@ -6,7 +6,9 @@ for `--target opencode`).
 Usage: run.py GO_BINARY RUST_BINARY [--mutants MUTANT_TARGET_DIR]
               [--evidence-dir DIR]
 
-1. Runs every `skills_status_config_*` case of scripts/rust-differential.py:
+1. Runs every `skills_status_config_*` case of scripts/rust-differential.py
+   (this includes `skills_status_config_targets_*`: `skills targets` is
+   config-independent in Go, so every env/config shape is native there):
    native cases run the Rust binary with every Go fallback route removed and
    must leave the fixture root untouched; `fallback` cases must reach the
    missing-fallback diagnostic when no Go route exists.
@@ -203,8 +205,39 @@ MUTANTS = {
         [
             "skills_status_config_fallback_doctor_home_unset_abs_xdg_json",
             "skills_status_config_fallback_doctor_home_unset_abs_xdg",
+            # `skills targets` no longer consults `has_dynamic_config`: its own
+            # home gate is covered by the `targets-ignores-home` mutant.
+        ],
+    ),
+    "targets-gated-on-config": (
+        "parse_scope_flag(&args[1..]).is_err() || !go_home_defined()",
+        "parse_scope_flag(&args[1..]).is_err() || has_dynamic_config()",
+        [
+            "skills_status_config_targets_env_library_dir_json",
+            "skills_status_config_targets_env_all_overrides_table",
+            "skills_status_config_targets_env_invalid_vcs_bool_json",
+            "skills_status_config_targets_config_custom_target_json",
+            "skills_status_config_targets_config_malformed_json",
+            "skills_status_config_targets_config_is_directory_json",
+            "skills_status_config_targets_project_config_custom_target_project_scope_json",
+        ],
+    ),
+    "targets-ignores-home": (
+        "parse_scope_flag(&args[1..]).is_err() || !go_home_defined()",
+        "parse_scope_flag(&args[1..]).is_err()",
+        [
             "skills_status_config_fallback_targets_home_unset_abs_xdg_json",
             "skills_status_config_fallback_targets_home_unset_abs_xdg",
+            "skills_status_config_targets_fallback_home_empty_with_env_json",
+            "skills_status_config_targets_fallback_home_unset_with_config_json",
+        ],
+    ),
+    "targets-accepts-bad-flags": (
+        "parse_scope_flag(&args[1..]).is_err() || !go_home_defined()",
+        "!go_home_defined()",
+        [
+            "skills_status_config_targets_fallback_unknown_scope_with_env",
+            "skills_status_config_targets_fallback_unknown_flag_with_config",
         ],
     ),
     "home-gate-after-unsafe-marker": (
