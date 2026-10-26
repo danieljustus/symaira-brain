@@ -85,7 +85,7 @@ final class FreeformBoardReaderTests: XCTestCase {
         XCTAssertEqual(items.first { $0.id == first }?.text, "Alpha")
         XCTAssertEqual(items.first { $0.id == first }?.geometry, RectValue(x: 10, y: 20, width: 140, height: 70))
         XCTAssertEqual(Set(items.first { $0.id == line }!.endpointIDs), [first, second])
-        XCTAssertEqual(try reader.read(snapshotPath: path).count, 4)
+        XCTAssertThrowsError(try reader.read(snapshotPath: path), "Unscoped object contents must fail closed")
         XCTAssertEqual(try reader.read(snapshotPath: path, boardIdentifier: UUID()).count, 0)
         XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: path)), before, "Read-only reader must leave the file byte-identical")
     }

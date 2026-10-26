@@ -1,4 +1,5 @@
 import XCTest
+import SQLite3
 import SymOperateMCP
 @testable import SymOperateCore
 
@@ -74,7 +75,88 @@ private final class MockFreeformPasteboard: FreeformPasteboardProtocol {
     }
 }
 
+private final class MockSnapshotService: FreeformSnapshotServiceProtocol {
+    var helperInstalled = true
+    var lastStatus: FreeformHelperStatus? = FreeformHelperStatus(ok: false, created_at: 1, error: "FDA denied")
+    var calls = 0
+    var result: FreeformSnapshotResult?
+    func snapshot(timeout: TimeInterval) -> FreeformSnapshotResult {
+        calls += 1
+        return result ?? FreeformSnapshotResult(ok: false, snapshot_path: nil, created_at: 1, error: "FDA denied")
+    }
+}
+
 final class FreeformAdapterTests: XCTestCase {
+    func testSnapshotMCPValidatesPermissionAndBoardBeforeStartingAndDoctorIsPassive() async throws {
+        let log = FreeformCallLog()
+        let snapshot = MockSnapshotService()
+        let controller = AutomationController(permissions: MockPermissionService(), screen: MockScreenService(),
+            apps: MockAppService(), accessibility: MockAccessibilityService(), input: MockInputService())
+        let adapter = FreeformAdapter(environment: MockFreeformEnvironment(log), pasteboard: MockFreeformPasteboard(log),
+                                      snapshotService: snapshot)
+        let server = SymOperateMCP.MCPServer(controller: controller, freeform: adapter)
+        let doctor = try await server.dispatch(method: "tools/call", params: ["name": "freeform_doctor"])
+        let content = try XCTUnwrap(doctor["structuredContent"] as? [String: Any])
+        XCTAssertEqual(content["helper_installed"] as? Bool, true)
+        XCTAssertEqual((content["helper_last_status"] as? [String: Any])?["error"] as? String, "FDA denied")
+        XCTAssertEqual(snapshot.calls, 0)
+        for arguments: [String: Any] in [["read": true], ["read": "true"], ["timeout": true], ["timeout": -1]] {
+            do {
+                _ = try await server.dispatch(method: "tools/call", params: ["name": "freeform_snapshot", "arguments": arguments])
+                XCTFail("Invalid snapshot request must fail before launchd")
+            } catch {}
+        }
+        XCTAssertEqual(snapshot.calls, 0)
+        controller.actionPolicy = ActionPolicy(grantedPermissions: [])
+        for name in ["freeform_snapshot", "freeform_list_boards", "freeform_read_board"] {
+            do {
+                _ = try await server.dispatch(method: "tools/call", params: ["name": name])
+                XCTFail("Capture permission required")
+            } catch let error as AutomationError {
+                XCTAssertEqual(error.code, AutomationError.permissionDenied("").code)
+            }
+        }
+        XCTAssertEqual(snapshot.calls, 0)
+        controller.actionPolicy = ActionPolicy()
+        let failed = try await server.dispatch(method: "tools/call", params: ["name": "freeform_snapshot"])
+        XCTAssertEqual((failed["structuredContent"] as? [String: Any])?["ok"] as? Bool, false)
+        XCTAssertEqual(snapshot.calls, 1)
+        XCTAssertEqual(log.calls, ["doctor"], "No focus, clipboard or GUI writes")
+    }
+
+    func testSnapshotMCPReadUsesOnlyFreshSnapshotAndExplicitBoard() async throws {
+        let directory = operateTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let path = directory.appendingPathComponent("boards.db").path
+        var database: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(path, &database), SQLITE_OK)
+        let board = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        let other = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+        XCTAssertEqual(sqlite3_exec(database, """
+            CREATE TABLE board_items (item_uuid BLOB, board_identifier BLOB, item_type INT, common_data BLOB, specific_data BLOB, tombstoned INT);
+            INSERT INTO board_items VALUES (X'11111111111111111111111111111111',X'\(board)',3,X'',X'',0);
+            INSERT INTO board_items VALUES (X'22222222222222222222222222222222',X'\(other)',3,X'',X'',0);
+            """, nil, nil, nil), SQLITE_OK)
+        sqlite3_close(database)
+        let snapshot = MockSnapshotService()
+        snapshot.result = FreeformSnapshotResult(ok: true, snapshot_path: path, created_at: 2, error: nil)
+        let log = FreeformCallLog()
+        let controller = AutomationController(permissions: MockPermissionService(), screen: MockScreenService(),
+            apps: MockAppService(), accessibility: MockAccessibilityService(), input: MockInputService())
+        let server = SymOperateMCP.MCPServer(controller: controller, freeform: FreeformAdapter(
+            environment: MockFreeformEnvironment(log), pasteboard: MockFreeformPasteboard(log), snapshotService: snapshot))
+        let result = try await server.dispatch(method: "tools/call", params: ["name": "freeform_snapshot",
+            "arguments": ["read": true, "board_identifier": "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"]])
+        // Arrays are wrapped by the shared encoder under result; compare with the existing read tool wire shape.
+        let direct = try await server.dispatch(method: "tools/call", params: ["name": "freeform_read_board",
+            "arguments": ["snapshot_path": path, "board_identifier": "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"]])
+        XCTAssertEqual(try JSONSerialization.data(withJSONObject: result, options: .sortedKeys),
+                       try JSONSerialization.data(withJSONObject: direct, options: .sortedKeys))
+        XCTAssertEqual(snapshot.calls, 1)
+        XCTAssertTrue(log.calls.isEmpty)
+    }
+
     func testMenuShortcutMatchingIgnoresLocalizationAndRejectsWrongModifierMasks() {
         for command in ["v", "c", "a"] {
             XCTAssertTrue(FreeformMenuShortcut.matches(character: command.uppercased(), mask: 0,
@@ -242,7 +324,7 @@ final class FreeformAdapterTests: XCTestCase {
                     freeform: FreeformAdapter(environment: MockFreeformEnvironment(log), pasteboard: MockFreeformPasteboard(log)))
         let catalog = try await server.dispatch(method: "tools/list", params: [:])["tools"] as! [[String: Any]]
         XCTAssertEqual(Set(catalog.compactMap { $0["name"] as? String }.filter { $0.hasPrefix("freeform_") }),
-                       ["freeform_doctor", "freeform_insert", "freeform_move", "freeform_connect", "freeform_read_board"])
+                       ["freeform_doctor", "freeform_insert", "freeform_move", "freeform_connect", "freeform_read_board", "freeform_list_boards", "freeform_snapshot"])
         let board = try JSONSerialization.jsonObject(with: JSONEncoder().encode(freeformTestBoard()))
         for tool in ["freeform_insert", "freeform_connect"] {
             let result = try await server.dispatch(method: "tools/call", params: ["name": tool, "arguments": ["board": board, "board_title": "Test Board", "dry_run": true]])

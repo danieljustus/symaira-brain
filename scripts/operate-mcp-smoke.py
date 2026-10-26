@@ -51,6 +51,8 @@ EXPECTED_TOOLS = [
     "freeform_connect",
     "freeform_move",
     "freeform_read_board",
+    "freeform_list_boards",
+    "freeform_snapshot",
 ]
 OUTPUT_LIMIT = 1 << 20
 CLEANUP_TIMEOUT = 1.0

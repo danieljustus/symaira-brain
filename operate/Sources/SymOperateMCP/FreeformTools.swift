@@ -68,14 +68,14 @@ extension MCPServer {
             name: "freeform_read_board",
             description: """
                 Read a caller-provided existing SQLite snapshot, never Freeform live storage.
-                Optional board_identifier UUID filters board_items. First text line only;
+                Required board_identifier UUID filters board_items. First text line only;
                 connection endpoints are UUID occurrence evidence, not ordered head/tail.
-                Requires capture. No TCC helper in Phase 1.
+                Requires capture. Use freeform_list_boards for metadata without object contents.
                 """,
             inputSchema: { _ in [
                 "type": "object", "additionalProperties": false,
                 "properties": ["snapshot_path": ["type": "string"], "board_identifier": ["type": "string", "format": "uuid"]],
-                "required": ["snapshot_path"],
+                "required": ["snapshot_path", "board_identifier"],
             ] }, outputSchema: nil,
             handler: { server, arguments in
                 guard server.freeformPolicy.firstViolation(requiredPermission: .capture,
@@ -95,7 +95,72 @@ extension MCPServer {
                 return try FreeformBoardReader().read(snapshotPath: path, boardIdentifier: identifier)
             }
         ),
+        ToolDefinition(
+            name: "freeform_list_boards",
+            description: "List snapshot board IDs, stored last_activity_time and non-tombstoned item counts only. No object contents or inferred titles. Requires capture.",
+            inputSchema: { _ in [
+                "type": "object", "additionalProperties": false,
+                "properties": ["snapshot_path": ["type": "string"]], "required": ["snapshot_path"],
+            ] }, outputSchema: nil,
+            handler: { server, arguments in
+                try server.requireFreeformCapture()
+                guard let path = arguments["snapshot_path"] as? String else {
+                    throw AutomationError.invalidArgument("snapshot_path is required.")
+                }
+                return try FreeformBoardReader().listBoards(snapshotPath: path)
+            }
+        ),
+        ToolDefinition(
+            name: "freeform_snapshot",
+            description: "Create a private snapshot of ALL Freeform boards via the independently FDA-authorized launchd helper. Requires capture. read:true requires board_identifier and returns that board's fresh contents. Never launches Freeform.",
+            inputSchema: { _ in [
+                "type": "object", "additionalProperties": false,
+                "properties": [
+                    "timeout": ["type": "number", "exclusiveMinimum": 0, "maximum": 60, "default": 15],
+                    "read": ["type": "boolean"], "board_identifier": ["type": "string", "format": "uuid"],
+                ],
+            ] }, outputSchema: nil,
+            handler: { server, arguments in
+                try server.requireFreeformCapture()
+                let shouldRead = try boolean(arguments, key: "read")
+                let identifier: UUID?
+                if shouldRead {
+                    guard let raw = arguments["board_identifier"] as? String, let id = UUID(uuidString: raw) else {
+                        throw AutomationError.invalidArgument("read:true requires a board_identifier UUID.")
+                    }
+                    identifier = id
+                } else { identifier = nil }
+                var timeout: Double = 15
+                if let raw = arguments["timeout"] {
+                    guard let value = raw as? NSNumber, CFGetTypeID(value) != CFBooleanGetTypeID(),
+                          value.doubleValue.isFinite, value.doubleValue > 0, value.doubleValue <= 60 else {
+                        throw AutomationError.invalidArgument("timeout must be > 0 and <= 60 seconds.")
+                    }
+                    timeout = value.doubleValue
+                }
+                let result = server.freeform.snapshotService.snapshot(timeout: timeout)
+                if result.ok, let path = result.snapshot_path, let identifier {
+                    return try FreeformBoardReader().read(snapshotPath: path, boardIdentifier: identifier)
+                }
+                return result
+            }
+        ),
     ]
+
+    private func requireFreeformCapture() throws {
+        guard freeformPolicy.firstViolation(requiredPermission: .capture,
+              scope: PolicyScope(application: FreeformDescriptor.bundleID)) == nil else {
+            throw AutomationError.permissionDenied("Freeform snapshot and listing require capture permission.")
+        }
+    }
+
+    private static func boolean(_ arguments: [String: Any], key: String) throws -> Bool {
+        guard let raw = arguments[key] else { return false }
+        guard let value = raw as? NSNumber, CFGetTypeID(value) == CFBooleanGetTypeID() else {
+            throw AutomationError.invalidArgument("\(key) must be a boolean.")
+        }
+        return value.boolValue
+    }
 
     private func freeformInsert(_ arguments: [String: Any], requireConnection: Bool) throws -> any Encodable {
         guard let value = arguments["board"] as? [String: Any] else {

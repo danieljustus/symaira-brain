@@ -26,7 +26,7 @@ final class MCPServerTests: XCTestCase {
     func testToolsListReturnsAllTools() async throws {
         let result = try await server.dispatch(method: "tools/list", params: [:])
         let tools = result["tools"] as? [[String: Any]]
-        XCTAssertEqual(tools?.count, 25)
+        XCTAssertEqual(tools?.count, 27)
         let names = tools?.compactMap { $0["name"] as? String }
         XCTAssertTrue(names?.contains("snapshot") ?? false)
         XCTAssertTrue(names?.contains("click") ?? false)
@@ -345,7 +345,7 @@ extension MCPServerTests {
             #"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#,
         ])
         let tools = (responses[0]["result"] as? [String: Any])?["tools"] as? [[String: Any]]
-        XCTAssertEqual(tools?.count, 25)
+        XCTAssertEqual(tools?.count, 27)
     }
 
     func testWireToolsCallKeepsNumericStructuredContent() async throws {
@@ -438,7 +438,7 @@ extension MCPServerTests {
     func testToolCatalogNamesMatchExposedToolsInOrder() async throws {
         let definitions = SymOperateMCP.MCPServer.toolDefinitions
         let catalogNames = definitions.map(\.name)
-        XCTAssertEqual(definitions.count, 25)
+        XCTAssertEqual(definitions.count, 27)
         XCTAssertEqual(Set(catalogNames).count, catalogNames.count, "Tool catalog names must be unique")
         XCTAssertTrue(definitions.allSatisfy { !$0.description.isEmpty })
 

@@ -45,8 +45,11 @@ public struct FreeformDoctor: Codable, Sendable {
     public let processID: Int32?
     /// AX titles of Freeform's windows; the board title a write tool must name.
     public let windowTitles: [String]
+    public var helperInstalled = false
+    public var helperLastStatus: FreeformHelperStatus?
 
     enum CodingKeys: String, CodingKey {
+        case helperInstalled = "helper_installed", helperLastStatus = "helper_last_status"
         case running, accessibility
         case windowCount = "window_count", processID = "process_id", windowTitles = "window_titles"
     }
@@ -156,17 +159,23 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
     private let environment: any FreeformEnvironmentProtocol
     private let pasteboard: any FreeformPasteboardProtocol
     private let lock = NSLock()
+    public let snapshotService: any FreeformSnapshotServiceProtocol
 
     public init(environment: any FreeformEnvironmentProtocol = NativeFreeformEnvironment(),
-                pasteboard: any FreeformPasteboardProtocol = NativeFreeformPasteboard()) {
+                pasteboard: any FreeformPasteboardProtocol = NativeFreeformPasteboard(),
+                snapshotService: any FreeformSnapshotServiceProtocol = FreeformSnapshotService()) {
         self.environment = environment
         self.pasteboard = pasteboard
+        self.snapshotService = snapshotService
     }
 
     public func doctor() -> FreeformDoctor {
         lock.lock()
         defer { lock.unlock() }
-        return environment.doctor()
+        var result = environment.doctor()
+        result.helperInstalled = snapshotService.helperInstalled
+        result.helperLastStatus = snapshotService.lastStatus
+        return result
     }
 
     public func plan(policy: ActionPolicy, name: String) -> DryRunPlan {

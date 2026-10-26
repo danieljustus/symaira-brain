@@ -30,6 +30,9 @@ public struct FreeformBoardReader: Sendable {
     public init() {}
 
     public func read(snapshotPath: String, boardIdentifier: UUID? = nil) throws -> [FreeformBoardItem] {
+        guard boardIdentifier != nil else {
+            throw AutomationError.invalidArgument("board_identifier is required for object contents. Use freeform_list_boards first.")
+        }
         guard snapshotPath.hasPrefix("/") else { throw AutomationError.invalidArgument("snapshot_path must be absolute.") }
         let url = URL(fileURLWithPath: snapshotPath).standardizedFileURL.resolvingSymlinksInPath()
         // Refuse the known live storage tree, also through a symlink. The caller owns snapshot provenance.
@@ -101,6 +104,59 @@ public struct FreeformBoardReader: Sendable {
                                      geometry: try FreeformCRDT.geometry(row.common),
                                      text: row.type == 4 ? "" : try FreeformCRDT.text(row.specific), endpointIDs: endpoints)
         }
+    }
+
+    public struct BoardSummary: Codable, Sendable {
+        public let id: UUID
+        /// Stored SQLite value, without guessing an epoch or unit.
+        public let last_activity_time: Double?
+        public let item_count: Int
+    }
+
+    /// Metadata only. Never select object blobs or infer a title from an arbitrary string in boards.data.
+    public func listBoards(snapshotPath: String) throws -> [BoardSummary] {
+        guard snapshotPath.hasPrefix("/") else { throw AutomationError.invalidArgument("snapshot_path must be absolute.") }
+        let url = URL(fileURLWithPath: snapshotPath).standardizedFileURL.resolvingSymlinksInPath()
+        guard !url.path.contains("/Library/Group Containers/group.com.apple.freeform/"),
+              FileManager.default.fileExists(atPath: url.path) else {
+            throw AutomationError.invalidArgument("Supply an existing snapshot outside Freeform live storage.")
+        }
+        var database: OpaquePointer?
+        let opened = sqlite3_open_v2(url.path, &database, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX, nil)
+        guard opened == SQLITE_OK, let database else {
+            if let database { sqlite3_close(database) }
+            throw AutomationError.unavailable("Cannot open SQLite snapshot read-only.")
+        }
+        defer { sqlite3_close(database) }
+        sqlite3_busy_timeout(database, 500)
+        sqlite3_limit(database, SQLITE_LIMIT_LENGTH, 16 * 1024 * 1024)
+        // Older synthetic/observed variants may omit activity metadata. Never invent a value.
+        var probe: OpaquePointer?
+        let hasActivity = sqlite3_prepare_v2(database, "SELECT last_activity_time FROM boards LIMIT 0", -1, &probe, nil) == SQLITE_OK
+        if let probe { sqlite3_finalize(probe) }
+        let sql = """
+            SELECT b.board_identifier, \(hasActivity ? "b.last_activity_time" : "NULL"),
+              (SELECT count(*) FROM board_items i WHERE i.board_identifier=b.board_identifier AND i.tombstoned=0)
+            FROM boards b ORDER BY b.board_identifier LIMIT 10001
+            """
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
+            throw AutomationError.invalidArgument("Cannot query boards metadata in snapshot.")
+        }
+        defer { sqlite3_finalize(statement) }
+        var boards: [BoardSummary] = []
+        var status = sqlite3_step(statement)
+        while status == SQLITE_ROW {
+            guard boards.count < 10000, let id = Self.uuid(blob(statement, column: 0)) else {
+                throw AutomationError.invalidArgument("Invalid board identifier or more than 10000 boards.")
+            }
+            let activity = sqlite3_column_type(statement, 1) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 1)
+            guard activity?.isFinite != false else { throw AutomationError.invalidArgument("Invalid board activity time.") }
+            boards.append(BoardSummary(id: id, last_activity_time: activity, item_count: Int(sqlite3_column_int64(statement, 2))))
+            status = sqlite3_step(statement)
+        }
+        guard status == SQLITE_DONE else { throw AutomationError.unavailable("SQLite board listing failed.") }
+        return boards
     }
 
     private func blob(_ statement: OpaquePointer, column: Int32) -> Data {
