@@ -63,13 +63,26 @@ public struct NativeFreeformEnvironment: FreeformEnvironmentProtocol {
         return FreeformDoctor(running: pid != nil, accessibility: granted, windowCount: windows.count, processID: pid)
     }
 
-    public func frontmostPID() -> Int32? { apps.frontmostApp()?.processIdentifier }
+    /// NSWorkspace.frontmostApplication only refreshes when the main run loop spins, which a
+    /// stdio CLI does not do, so it goes stale after the first focus change (observed live).
+    /// AXFrontmost on the application element is read fresh from the target process.
+    public func frontmostPID() -> Int32? {
+        if let hint = apps.frontmostApp()?.processIdentifier, isFrontmost(pid: hint) { return hint }
+        return NSWorkspace.shared.runningApplications
+            .filter { $0.activationPolicy == .regular }
+            .map(\.processIdentifier)
+            .first { isFrontmost(pid: $0) }
+    }
+
+    private func isFrontmost(pid: Int32) -> Bool {
+        axBoolify(axCopyAttribute(AXUIElementCreateApplication(pid), attribute: kAXFrontmostAttribute)) == true
+    }
 
     public func bringToFront(pid: Int32) throws {
         let app = AXUIElementCreateApplication(pid)
         try check(AXUIElementSetAttributeValue(app, kAXFrontmostAttribute as CFString, kCFBooleanTrue), "AXFrontmost")
         for _ in 0..<20 {
-            if frontmostPID() == pid { return }
+            if isFrontmost(pid: pid) { return }
             pause(seconds: 0.025)
         }
         throw AutomationError.unavailable("AXFrontmost did not focus the requested PID.")

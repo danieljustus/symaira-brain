@@ -204,9 +204,20 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
             failure = error.localizedDescription
         }
         // Cleanup is unconditional and independent: a focus error must not skip clipboard restoration.
-        do { try environment.bringToFront(pid: previousPID) }
-        catch { failure = [failure, "Focus restoration: " + error.localizedDescription].compactMap { $0 }.joined(separator: "; ") }
-        let focusRestored = environment.frontmostPID() == previousPID
+        // Freeform can re-activate itself shortly after a paste lands (observed live), so the
+        // restore is re-asserted until the previous app is still frontmost after a settle delay.
+        var focusRestored = false
+        var focusError: String?
+        for _ in 0..<3 {
+            do { try environment.bringToFront(pid: previousPID); focusError = nil }
+            catch { focusError = error.localizedDescription }
+            environment.pause(seconds: 0.25)
+            if environment.frontmostPID() == previousPID { focusRestored = true; break }
+        }
+        if !focusRestored {
+            failure = [failure, "Focus restoration: " + (focusError ?? "previous app did not stay frontmost.")]
+                .compactMap { $0 }.joined(separator: "; ")
+        }
         let pasteboardRestored = pasteboard.restore(backup)
         return FreeformInsertResult(submitted: submitted, objects: submitted ? board.objects.map(\.id) : [],
                                     connectionCount: submitted ? board.connections.count : 0,

@@ -15,6 +15,8 @@ private final class MockFreeformEnvironment: FreeformEnvironmentProtocol {
     var positions = ["Alpha": PointValue(x: 110, y: 220), "Beta": PointValue(x: 400, y: 400)]
     var firstMoveOffset = 0.0
     var moves = 0
+    /// Number of times Freeform re-activates itself right after focus is handed back (observed live).
+    var stealBacks = 0
 
     init(_ log: FreeformCallLog) { self.log = log }
     func doctor() -> FreeformDoctor {
@@ -26,6 +28,7 @@ private final class MockFreeformEnvironment: FreeformEnvironmentProtocol {
         log.calls.append("focus:\(pid)")
         if failAt == "focus:\(pid)" { throw AutomationError.unavailable("focus failed") }
         self.pid = pid
+        if pid != 42, log.calls.contains("paste"), stealBacks > 0 { stealBacks -= 1; self.pid = 42 }
     }
     func pasteEnabled() throws -> Bool { log.calls.append("enabled"); polls += 1; return polls > readyAfter }
     func deselectIfAvailable() throws { log.calls.append("deselect") }
@@ -98,7 +101,29 @@ final class FreeformAdapterTests: XCTestCase {
         XCTAssertEqual(result.effect, "unverifiable")
         XCTAssertEqual(clipboard.contents, original)
         XCTAssertEqual(log.calls, ["doctor", "frontmost", "backup", "write", "focus:42", "enabled", "deselect", "paste",
-                                  "wait:0.3", "focus:7", "frontmost", "restore"])
+                                  "wait:0.3", "focus:7", "wait:0.25", "frontmost", "restore"])
+    }
+
+    func testFocusRestoreIsReassertedWhenFreeformStealsFocusBack() throws {
+        let log = FreeformCallLog()
+        let env = MockFreeformEnvironment(log)
+        env.stealBacks = 1
+        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log)).insert(freeformTestBoard(), policy: ActionPolicy())
+        XCTAssertTrue(result.focusRestored)
+        XCTAssertNil(result.error)
+        XCTAssertEqual(Array(log.calls.suffix(7)), ["focus:7", "wait:0.25", "frontmost", "focus:7", "wait:0.25", "frontmost", "restore"])
+    }
+
+    func testFocusRestoreReportsFailureWhenPreviousAppNeverStaysFrontmost() throws {
+        let log = FreeformCallLog()
+        let env = MockFreeformEnvironment(log)
+        env.stealBacks = 99
+        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log)).insert(freeformTestBoard(), policy: ActionPolicy())
+        XCTAssertTrue(result.submitted)
+        XCTAssertFalse(result.focusRestored)
+        XCTAssertTrue(result.pasteboardRestored)
+        XCTAssertEqual(log.calls.filter { $0 == "focus:7" }.count, 3)
+        XCTAssertTrue(result.error?.contains("Focus restoration") == true)
     }
 
     func testPollingAndTimeoutStillRestoreFocusAndClipboard() throws {
@@ -113,7 +138,7 @@ final class FreeformAdapterTests: XCTestCase {
         XCTAssertEqual(env.polls, 40)
         XCTAssertFalse(log.calls.contains("paste"))
         XCTAssertNotNil(result.error)
-        XCTAssertEqual(Array(log.calls.suffix(3)), ["focus:7", "frontmost", "restore"])
+        XCTAssertEqual(Array(log.calls.suffix(4)), ["focus:7", "wait:0.25", "frontmost", "restore"])
     }
 
     func testEveryFailurePathRestoresClipboardEvenIfFocusFails() throws {
