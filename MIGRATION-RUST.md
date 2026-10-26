@@ -1092,6 +1092,49 @@ with exit 0 where Go exits 1 (pre-existing, #909). (5) `$PWD`-reached symlinked
 working directories are modelled (`go_getwd`) but not oracle-covered. Still
 routed to Go under #769: the setup/doctor/usage/memory/skills predicates.
 
+### `memory sync` argument checks without a Go fallback (#762 slice 1)
+
+`memory sync <args>` was routed to Go wholesale. The shipped command refuses a
+large family of invocations before it opens the database or touches the
+network: the Go flag set, a positional, a missing `--remote`, the relay
+passphrase precheck and `syncclient.ValidateRemoteURL`. Those refusals are now
+native (`memory_cli/sync.rs`); the gate returns "Go" only for an invocation that
+would really synchronise and for remote spellings outside the ported subset.
+
+* Flag set: `remote token relay-passphrase db` (strings), `pull push
+  encrypted-relay allow-insecure-http` (Go booleans) and `timeout` (Go
+  `time.ParseDuration`; the flag package reports every failure as `parse
+  error`, so only acceptance is ported, including the nanosecond overflow
+  boundary and the `µ`/`μ` units). The shared memory flag parser gained the
+  `sync` definitions and a duration kind; other verbs are unchanged.
+* Order (as in Go): parse errors, unexpected positional, missing remote (message
+  plus help), relay passphrase (flag, else non-empty
+  `SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE`), then the URL guard.
+* URL guard: a port of `net/url.Parse` for plain ASCII (no `% @ [ ] \\ " < > ^
+  \` { | }`, controls or non-ASCII): `getScheme`, opaque URLs, the
+  colon-in-first-segment error, fragment-trimmed `*url.Error` text, the
+  `invalid port` check — strict at the first colon for `http`/`https`, last
+  colon for other schemes (Go >= 1.26 `urlstrictcolons`; the oracle caught the
+  first port using the last colon) — then scheme, loopback (`localhost`
+  case-insensitively, dotted-quad 127/8 without leading zeros) and
+  `--allow-insecure-http`. Anything else stays on Go instead of guessing its
+  wording.
+
+Evidence (`scripts/memory-cli-oracle/replay.py --family sync_preflight`, also
+part of `all`): 193 cases against the immutable Go `dcddcef0` — 168 refusals
+compared on stdout, stderr, exit and the created tree (empty: neither process
+may write anything before refusing; 40 duration spellings, 45 URL shapes, 83
+grammar/order shapes), 7 unproven spellings Go refuses but native must leave on
+Go, and 18 gates where Go (run against a closed loopback port) must pass every
+validation and the native process with the Go fallback absent must stop at the
+owned absent-binary diagnostic (exit 1, empty stdout, OS error 2, empty tree).
+`sync_controls.py` (wired into `memory-cli-native.yml`) runs three
+real-process mutants (stdout byte, stderr byte, failing exit status) that are
+each rejected through exactly their own field; a source mutant that ignores
+`--allow-insecure-http` was rejected by `gate-008`. Contract row MEM-CLI-004.
+Local macOS evidence only; native three-OS CI is pending. Still on Go: the
+sync client itself (#762), `memory serve` (#759) and non-ASCII URL diagnostics.
+
 ### `memory` store creation and `sync` dead route without a Go fallback (#769 slice 4)
 
 Three Go routes are gone. (1) `sync_cli::requires_go_fallback` was a constant

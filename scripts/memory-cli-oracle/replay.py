@@ -20,6 +20,7 @@ import cases
 import corrupt_reads
 import creation_cases
 import path_cases
+import sync_cases
 
 ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
 CONFIGKIT_SHA = "bd812ed747352c76b9f223a19ec64970b61fda59050f7ed436f5b2e74b997218"
@@ -234,7 +235,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--go", type=Path, help="optional prebuilt immutable oracle; SHA recorded")
     parser.add_argument("--rust", type=Path)
-    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths", "corrupt_reads", "store_creation"), default="all")
+    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths", "corrupt_reads", "store_creation", "sync_preflight"), default="all")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
@@ -279,6 +280,8 @@ def main():
             records.extend(corrupt_reads.run(go, rust, output, snapshot, isolated_env))
         if args.family in ("all", "store_creation"):
             records.extend(creation_cases.run(go, rust, output, snapshot, isolated_env))
+        if args.family in ("all", "sync_preflight"):
+            records.extend(sync_cases.run(go, rust, output, isolated_env))
         candidate_files = set(run(["git", "ls-files", "--cached", "--others", "--exclude-standard",
                                    "rust/symbrain-cli", "rust/symbrain-memory", "Cargo.toml", "Cargo.lock",
                                    "scripts/memory-cli-oracle", ".github/workflows/memory-cli-native.yml"], repo)

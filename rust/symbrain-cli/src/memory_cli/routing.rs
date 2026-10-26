@@ -14,7 +14,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         verb,
         "list" | "rules" | "query-log" | "search" | "set" | "delete"
     ) {
-        return verb == "serve" || (verb == "sync" && !rest.is_empty());
+        return verb == "serve" || (verb == "sync" && super::sync::needs_go(rest));
     }
     if flags::has_help(rest) {
         return false;

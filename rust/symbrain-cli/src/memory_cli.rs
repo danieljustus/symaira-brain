@@ -24,9 +24,10 @@ mod kind;
 use help::{
     MEMORY_DELETE_USAGE, MEMORY_DELETE_USAGE_ERROR, MEMORY_LIST_USAGE, MEMORY_RULES_USAGE,
     MEMORY_SEARCH_USAGE, MEMORY_SEARCH_USAGE_ERROR, MEMORY_SET_USAGE, MEMORY_SET_USAGE_ERROR,
-    MEMORY_SYNC_REMOTE_REQUIRED, MEMORY_SYNC_USAGE, MEMORY_USAGE, QUERY_LOG_USAGE,
+    MEMORY_USAGE, QUERY_LOG_USAGE,
 };
 mod routing;
+mod sync;
 pub(crate) use routing::requires_go_fallback;
 mod paths;
 use paths::{open_store, resolve_db_path};
@@ -78,13 +79,10 @@ pub(super) fn run_with_stdout(
         "delete" => run_delete(rest, stdout, stderr, format),
         "rules" => run_rules(rest, stdout, stderr, format),
         "query-log" => run_query_log(rest, stdout, stderr, format),
-        // The bare `memory sync` shape. The shipped implementation refuses
-        // without a remote and prints its help; real synchronisation work never
-        // arrives here, because the gate keeps it on Go.
-        "sync" => {
-            let _ = write!(stderr, "{MEMORY_SYNC_REMOTE_REQUIRED}{MEMORY_SYNC_USAGE}");
-            exit::USAGE
-        }
+        // Only the argument checks that precede the shipped implementation's
+        // database and network work run here; real synchronisation never
+        // arrives, because the gate keeps it on Go.
+        "sync" => sync::run(rest, stderr),
         _ => {
             let _ = writeln!(
                 stderr,

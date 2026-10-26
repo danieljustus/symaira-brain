@@ -139,6 +139,13 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/creation_controls.py --report "$REPORT"
+      - name: Require sync-preflight failure controls
+        env:
+          REPORT: ${{ runner.temp }}/memory-cli-sync-controls.json
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/sync_controls.py --report "$REPORT"
       - name: Record native SDK and exact head
         if: always()
         env:
