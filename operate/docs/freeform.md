@@ -1,8 +1,9 @@
-# Freeform adapter, Phase 1
+# Freeform adapter
 
-This is an optional, local Operate adapter for Freeform 5.0. It does not start
-Freeform, create boards, access the live database, request TCC permissions or
-install a helper. All new tests use injected services and synthetic data.
+This optional, local Operate adapter supports Freeform 5.0. GUI writes are
+explicitly gated. The Phase 2 helper creates private snapshots of the live store
+only when requested through the user-registered launchd job. It never starts
+Freeform, requests TCC permissions or installs itself. All tests use synthetic data.
 
 ## Tools and grants
 
@@ -17,10 +18,12 @@ install a helper. All new tests use injected services and synthetic data.
   explicit `zoom: 100`. Labels are unique object texts without the localized type
   suffix. Duplicate matches fail closed. The reference coordinate is its board
   top-left, not center. There is no multi-selection move.
-* `freeform_read_board`: absolute `snapshot_path`, optional `board_identifier`
-  UUID. The caller supplies an already-created SQLite snapshot. Requires
-  `capture`. Known Freeform live-storage paths, including symlink targets, are
-  refused. The caller remains responsible for snapshot provenance.
+* `freeform_read_board`: absolute `snapshot_path` and required `board_identifier`
+  UUID. Requires `capture`. Known Freeform live-storage paths, including symlink
+  targets, are refused. The caller remains responsible for snapshot provenance.
+* `freeform_list_boards`: absolute `snapshot_path`; metadata only, with `id`, raw
+  `last_activity_time` when present and non-tombstoned `item_count`. Requires `capture`.
+* `freeform_snapshot`: one-shot launchd helper backup; requires `capture`. See Phase 2.
 
 Every write tool (`freeform_insert`, `freeform_connect`, `freeform_move`) requires
 `board_title`. The call fails closed before any pasteboard, focus or AX write unless
@@ -95,8 +98,8 @@ AXLayoutItem before setting AXPosition; background movement does not focus an ap
 The correction threshold is 0.5 pt on either axis. A failed readback is not success.
 
 The reader opens SQLite with READONLY and a read transaction. It does not create a
-snapshot or touch the live store. It filters tombstones and optionally a board
-UUID, parses `crdt` + uint32 LE 6, extracts the observed two float-pair geometry,
+snapshot or touch the live store itself. It filters tombstones and requires a board
+UUID for object contents, parses `crdt` + uint32 LE 6, extracts the observed two float-pair geometry,
 and returns only the first user-looking text line. This is a bounded heuristic,
 not a complete attributed-text decoder; later lines and runs are intentionally
 omitted to avoid attribute debris. Connections report unordered UUID occurrence
@@ -104,8 +107,93 @@ evidence, not proven head/tail orientation. Containers and unknown item types ar
 reported without inventing semantics. Limits: 10,000 items, 16 MiB per blob/row,
 64 MiB total selected blob bytes, protobuf nesting depth 8.
 
-The Developer-ID-signed, independently TCC-authorized snapshot helper, launchd,
-live DB backup, signing and distribution belong to Phase 2.
+## Phase 2: independently authorized snapshot helper
+
+The separate `symoperate-freeform-snapshot` executable links only Foundation and
+SQLite3 through `FreeformSnapshotCore`. It accepts no arguments, reads only
+`~/Library/Group Containers/group.com.apple.freeform/Boards/boards.db` via a
+read-only SQLite URI and the SQLite backup API, including committed WAL content.
+It does not copy the DB file blindly, write the source, start Freeform or use the
+network. One invocation creates one snapshot, then exits.
+
+The fixed destination is
+`~/Library/Caches/com.symaira.operate/freeform-snapshot/` (0700).
+A private temporary DB is converted to `journal_mode=DELETE` and must pass
+`PRAGMA quick_check` before an atomic rename publishes `boards.db` (0600).
+Only then is `status.json` (0600) atomically published. It contains `ok`, Unix
+`created_at` seconds, source DB `source_mtime`/`source_size`, snapshot `bytes`,
+`helper_version`, and an error on failure. Source metadata describes the main DB,
+not the WAL. A failed backup preserves the old snapshot but publishes failure;
+callers must not mistake that old file for fresh success. A failure to create the
+cache/status file itself is reported on stderr and produces a nonzero exit.
+
+### Packaging and user registration
+
+Run from the repository root yourself:
+
+```bash
+export SYMAIRA_EXTERNAL_RUNTIME_ROOT=/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/.worktrees/freeform-961/runtime
+operate/scripts/freeform-snapshot-helper.sh \
+  --sign 'Developer ID Application: Daniel Justus (M4744F3TAA)'
+launchctl bootstrap gui/$(id -u) "$HOME/Library/LaunchAgents/com.symaira.operate.freeform-snapshot.plist"
+```
+
+The script builds Release, installs the app at
+`~/Applications/Symaira/Symaira Operate Freeform Snapshot.app`, and writes the
+LaunchAgent plist. It only **prints** the bootstrap command and never runs it.
+In System Settings > Privacy & Security > Full Disk Access, add and enable that
+exact app. The helper needs FDA, not the agent host. Stable Developer ID signing
+preserves the helper identity across updates. Signing uses hardened runtime and
+a timestamp, but not notarization. Unsigned packaging is supported for CI/tests;
+Swift tests never require a signing identity.
+
+The on-demand job label and bundle ID are
+`com.symaira.operate.freeform-snapshot`; `AssociatedBundleIdentifiers` names that
+bundle, and `ProgramArguments` contains only its installed executable. There is
+no RunAtLoad or KeepAlive. Launching as an agent child, with `open`, or by sending
+AppleScript to Terminal does not provide independent FDA authorization and is
+not a supported fallback. The user must register the job themselves once.
+
+`--dest /absolute/build/path` stages the app and `LaunchAgents/*.plist` entirely
+there, without installation or any launchctl call. `--uninstall` boots out the
+registered job and removes only the installed bundle/plist; snapshots remain
+until explicitly deleted. `--dest DIR --uninstall` removes only staged artifacts
+and never calls launchctl.
+
+### MCP and privacy contract
+
+`freeform_snapshot` invokes `/bin/launchctl kickstart -p
+ gui/<uid>/com.symaira.operate.freeform-snapshot` using the bounded process runner,
+not a shell. It then waits for `status.json.created_at >= request start`.
+The default total deadline is 15 seconds; `timeout` accepts >0 through 60 seconds.
+Missing registration returns setup instructions, helper failure reports FDA/error
+status, and stale/missing status produces a timeout. The success response has
+`ok`, `snapshot_path`, `created_at`; failure has `ok:false` and `error`.
+`freeform_doctor` passively adds `helper_installed` (plist existence, not proof of
+registration) and `helper_last_status` when a bounded, valid status file exists.
+It never starts a job.
+
+**The snapshot contains ALL boards, including content not selected for output.**
+It is local private cache data, not a per-board export. `capture` and the scoped
+Freeform grant apply before starting the helper or reading metadata/content.
+Use `freeform_list_boards` with the returned path to choose an ID, then
+`freeform_read_board` with an explicit `board_identifier`. Unscoped object reads
+now fail closed, a deliberate privacy-breaking change from Phase 1. Alternatively,
+`freeform_snapshot` with `read:true` and `board_identifier` returns the existing
+read-board result directly after fresh successful backup; a failed backup returns
+its error rather than old content.
+
+Board listing selects IDs/activity/counts only and includes empty boards. Missing
+activity metadata is omitted rather than guessed; activity values retain SQLite's
+stored units. No board title is returned: the `boards.data` title field/encoding
+has not been evidenced, and arbitrary CRDT text must not be presented as a title.
+Synthetic fixtures ensure content blobs and plausible strings never leak through
+listing. No production database or private board contents are fixtures.
+
+Freeform can take approximately 10 seconds to persist inserted objects. A fresh
+SQLite snapshot proves committed store state, not that pending UI changes have
+already reached the store. Retry after persistence when necessary. Mock runner,
+synthetic WAL, bundle structure and signing checks are not live TCC acceptance.
 
 ## Verification safety
 
