@@ -43,17 +43,20 @@ public struct FreeformDoctor: Codable, Sendable {
     public let accessibility: Bool
     public let windowCount: Int
     public let processID: Int32?
+    /// AX titles of Freeform's windows; the board title a write tool must name.
+    public let windowTitles: [String]
 
     enum CodingKeys: String, CodingKey {
         case running, accessibility
-        case windowCount = "window_count", processID = "process_id"
+        case windowCount = "window_count", processID = "process_id", windowTitles = "window_titles"
     }
 
-    public init(running: Bool, accessibility: Bool, windowCount: Int, processID: Int32?) {
+    public init(running: Bool, accessibility: Bool, windowCount: Int, processID: Int32?, windowTitles: [String] = []) {
         self.running = running
         self.accessibility = accessibility
         self.windowCount = windowCount
         self.processID = processID
+        self.windowTitles = windowTitles
     }
 }
 
@@ -172,7 +175,17 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
             .plan([DryRunAction(name: name, permission: Self.writePermissions)])
     }
 
-    public func insert(_ board: FreeformBoardIR, policy: ActionPolicy) throws -> FreeformInsertResult {
+    /// Writes act on whatever board is open, so the caller must name it. Exactly one Freeform window
+    /// with exactly this title is required; anything else fails closed before any side effect.
+    /// (A live test once pasted into a user's real board because this check was missing.)
+    static func requireBoard(_ title: String, in status: FreeformDoctor) throws {
+        guard !title.isEmpty, status.windowTitles == [title] else {
+            throw AutomationError.invalidArgument(
+                "Expected exactly one open Freeform board titled \"\(title)\"; open windows: \(status.windowTitles).")
+        }
+    }
+
+    public func insert(_ board: FreeformBoardIR, boardTitle: String, policy: ActionPolicy) throws -> FreeformInsertResult {
         try authorize(policy)
         let payload = try FreeformContentLanguage.build(board)
         lock.lock()
@@ -181,6 +194,7 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
         guard status.accessibility, let freeformPID = status.processID, status.windowCount > 0 else {
             throw AutomationError.unavailable("Freeform needs Accessibility permission and an open board window.")
         }
+        try Self.requireBoard(boardTitle, in: status)
         guard let previousPID = environment.frontmostPID() else {
             throw AutomationError.unavailable("Cannot identify the previous frontmost process.")
         }
@@ -224,7 +238,7 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
                                     focusRestored: focusRestored, pasteboardRestored: pasteboardRestored, error: failure)
     }
 
-    public func move(_ request: FreeformMoveRequest, policy: ActionPolicy) throws -> FreeformMoveResult {
+    public func move(_ request: FreeformMoveRequest, boardTitle: String, policy: ActionPolicy) throws -> FreeformMoveResult {
         try authorize(policy)
         guard !request.label.isEmpty, !request.referenceLabel.isEmpty,
               [request.x, request.y, request.referenceX, request.referenceY].allSatisfy(\.isFinite) else {
@@ -232,6 +246,7 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
         }
         lock.lock()
         defer { lock.unlock() }
+        try Self.requireBoard(boardTitle, in: environment.doctor())
         let reference = try environment.position(label: request.referenceLabel)
         let transform = FreeformBoardTransform(board: PointValue(x: request.referenceX, y: request.referenceY), screen: reference)
         let expected = transform.screen(PointValue(x: request.x, y: request.y))

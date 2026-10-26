@@ -60,7 +60,9 @@ public struct NativeFreeformEnvironment: FreeformEnvironmentProtocol {
         let pid = apps.listApps().first { $0.bundleIdentifier == FreeformDescriptor.bundleID }?.processIdentifier
         let granted = permissions.status().accessibilityGranted
         let windows = pid.flatMap { axCopyElements(AXUIElementCreateApplication($0), attribute: kAXWindowsAttribute) } ?? []
-        return FreeformDoctor(running: pid != nil, accessibility: granted, windowCount: windows.count, processID: pid)
+        let titles = windows.map { axCopyString($0, attribute: kAXTitleAttribute) ?? "" }
+        return FreeformDoctor(running: pid != nil, accessibility: granted, windowCount: windows.count, processID: pid,
+                              windowTitles: titles)
     }
 
     /// NSWorkspace.frontmostApplication only refreshes when the main run loop spins, which a

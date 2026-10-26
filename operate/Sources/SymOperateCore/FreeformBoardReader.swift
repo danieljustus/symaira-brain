@@ -59,7 +59,11 @@ public struct FreeformBoardReader: Sendable {
             """
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
-            throw AutomationError.invalidArgument("Snapshot lacks the observed Freeform board_items schema.")
+            // Surface SQLite's reason: a WAL-mode snapshot without its -shm sidecar fails here too
+            // (observed live) and is not a schema problem.
+            let reason = String(cString: sqlite3_errmsg(database))
+            throw AutomationError.invalidArgument(
+                "Cannot query board_items in snapshot (\(reason)). Expected the observed Freeform schema in a non-WAL snapshot.")
         }
         defer { sqlite3_finalize(statement) }
         if let boardIdentifier {

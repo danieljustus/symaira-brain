@@ -41,13 +41,14 @@ extension MCPServer {
             inputSchema: { _ in [
                 "type": "object", "additionalProperties": false,
                 "properties": [
+                    "board_title": ["type": "string", "minLength": 1],
                     "label": ["type": "string", "minLength": 1],
                     "reference_label": ["type": "string", "minLength": 1],
                     "reference_x": ["type": "number"], "reference_y": ["type": "number"],
                     "x": ["type": "number"], "y": ["type": "number"],
                     "zoom": ["type": "number", "const": 100], "dry_run": ["type": "boolean"],
                 ],
-                "required": ["label", "reference_label", "reference_x", "reference_y", "x", "y", "zoom"],
+                "required": ["board_title", "label", "reference_label", "reference_x", "reference_y", "x", "y", "zoom"],
             ] }, outputSchema: nil,
             handler: { server, arguments in
                 guard (arguments["zoom"] as? NSNumber)?.doubleValue == 100 else {
@@ -58,8 +59,9 @@ extension MCPServer {
                       [request.x, request.y, request.referenceX, request.referenceY].allSatisfy(\.isFinite) else {
                     throw AutomationError.invalidArgument("Move requires nonempty labels and finite coordinates.")
                 }
+                let title = try boardTitle(arguments)
                 if try dryRun(arguments) { return server.freeform.plan(policy: server.freeformPolicy, name: "freeform_move") }
-                return try server.freeform.move(request, policy: server.freeformPolicy)
+                return try server.freeform.move(request, boardTitle: title, policy: server.freeformPolicy)
             }
         ),
         ToolDefinition(
@@ -104,15 +106,23 @@ extension MCPServer {
         if requireConnection && board.connections.isEmpty {
             throw AutomationError.invalidArgument("freeform_connect requires at least one connection in the board IR.")
         }
+        let title = try Self.boardTitle(arguments)
         if try Self.dryRun(arguments) {
             return freeform.plan(policy: freeformPolicy, name: requireConnection ? "freeform_connect" : "freeform_insert")
         }
-        return try freeform.insert(board, policy: freeformPolicy)
+        return try freeform.insert(board, boardTitle: title, policy: freeformPolicy)
     }
 
     private static func decode<Value: Decodable>(_ value: [String: Any]) throws -> Value {
         do { return try JSONDecoder().decode(Value.self, from: JSONSerialization.data(withJSONObject: value)) }
         catch { throw AutomationError.invalidArgument("Invalid Freeform IR: \(error.localizedDescription)") }
+    }
+
+    private static func boardTitle(_ arguments: [String: Any]) throws -> String {
+        guard let title = arguments["board_title"] as? String, !title.isEmpty else {
+            throw AutomationError.invalidArgument("board_title is required: the exact title of the open Freeform board (see freeform_doctor window_titles).")
+        }
+        return title
     }
 
     private static func dryRun(_ arguments: [String: Any]) throws -> Bool {
@@ -152,9 +162,10 @@ extension MCPServer {
                     "objects": ["type": "array", "minItems": 1, "maxItems": 500, "items": object],
                     "connections": ["type": "array", "maxItems": 1000, "items": connection],
                 ], "required": ["objects"]],
+                "board_title": ["type": "string", "minLength": 1],
                 "dry_run": ["type": "boolean"],
             ],
-            "required": ["board"],
+            "required": ["board", "board_title"],
         ]
     }
 }

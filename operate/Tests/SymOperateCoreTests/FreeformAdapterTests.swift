@@ -17,11 +17,13 @@ private final class MockFreeformEnvironment: FreeformEnvironmentProtocol {
     var moves = 0
     /// Number of times Freeform re-activates itself right after focus is handed back (observed live).
     var stealBacks = 0
+    var windowTitles = ["Test Board"]
 
     init(_ log: FreeformCallLog) { self.log = log }
     func doctor() -> FreeformDoctor {
         log.calls.append("doctor")
-        return FreeformDoctor(running: true, accessibility: true, windowCount: 1, processID: 42)
+        return FreeformDoctor(running: true, accessibility: true, windowCount: windowTitles.count, processID: 42,
+                              windowTitles: windowTitles)
     }
     func frontmostPID() -> Int32? { log.calls.append("frontmost"); return pid }
     func bringToFront(pid: Int32) throws {
@@ -91,7 +93,7 @@ final class FreeformAdapterTests: XCTestCase {
         let env = MockFreeformEnvironment(log)
         let clipboard = MockFreeformPasteboard(log)
         let original = clipboard.contents
-        let result = try FreeformAdapter(environment: env, pasteboard: clipboard).insert(freeformTestBoard(), policy: ActionPolicy())
+        let result = try FreeformAdapter(environment: env, pasteboard: clipboard).insert(freeformTestBoard(), boardTitle: "Test Board", policy: ActionPolicy())
         XCTAssertTrue(result.submitted)
         XCTAssertTrue(result.focusRestored)
         XCTAssertTrue(result.pasteboardRestored)
@@ -108,7 +110,7 @@ final class FreeformAdapterTests: XCTestCase {
         let log = FreeformCallLog()
         let env = MockFreeformEnvironment(log)
         env.stealBacks = 1
-        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log)).insert(freeformTestBoard(), policy: ActionPolicy())
+        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log)).insert(freeformTestBoard(), boardTitle: "Test Board", policy: ActionPolicy())
         XCTAssertTrue(result.focusRestored)
         XCTAssertNil(result.error)
         XCTAssertEqual(Array(log.calls.suffix(7)), ["focus:7", "wait:0.25", "frontmost", "focus:7", "wait:0.25", "frontmost", "restore"])
@@ -118,7 +120,7 @@ final class FreeformAdapterTests: XCTestCase {
         let log = FreeformCallLog()
         let env = MockFreeformEnvironment(log)
         env.stealBacks = 99
-        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log)).insert(freeformTestBoard(), policy: ActionPolicy())
+        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log)).insert(freeformTestBoard(), boardTitle: "Test Board", policy: ActionPolicy())
         XCTAssertTrue(result.submitted)
         XCTAssertFalse(result.focusRestored)
         XCTAssertTrue(result.pasteboardRestored)
@@ -131,7 +133,7 @@ final class FreeformAdapterTests: XCTestCase {
         let env = MockFreeformEnvironment(log)
         env.readyAfter = 100
         let clipboard = MockFreeformPasteboard(log)
-        let result = try FreeformAdapter(environment: env, pasteboard: clipboard).insert(freeformTestBoard(), policy: ActionPolicy())
+        let result = try FreeformAdapter(environment: env, pasteboard: clipboard).insert(freeformTestBoard(), boardTitle: "Test Board", policy: ActionPolicy())
         XCTAssertFalse(result.submitted)
         XCTAssertTrue(result.focusRestored)
         XCTAssertTrue(result.pasteboardRestored)
@@ -148,7 +150,7 @@ final class FreeformAdapterTests: XCTestCase {
             env.failAt = failure
             let clipboard = MockFreeformPasteboard(log)
             clipboard.failWrite = failure == "write"
-            let result = try FreeformAdapter(environment: env, pasteboard: clipboard).insert(freeformTestBoard(), policy: ActionPolicy())
+            let result = try FreeformAdapter(environment: env, pasteboard: clipboard).insert(freeformTestBoard(), boardTitle: "Test Board", policy: ActionPolicy())
             XCTAssertTrue(clipboard.restored, failure)
             XCTAssertTrue(result.pasteboardRestored, failure)
             XCTAssertNotNil(result.error, failure)
@@ -161,7 +163,7 @@ final class FreeformAdapterTests: XCTestCase {
         let clipboard = MockFreeformPasteboard(log)
         clipboard.restoreOK = false
         let result = try FreeformAdapter(environment: MockFreeformEnvironment(log), pasteboard: clipboard)
-            .insert(freeformTestBoard(), policy: ActionPolicy())
+            .insert(freeformTestBoard(), boardTitle: "Test Board", policy: ActionPolicy())
         XCTAssertFalse(result.pasteboardRestored)
     }
 
@@ -170,7 +172,7 @@ final class FreeformAdapterTests: XCTestCase {
         var board = freeformTestBoard()
         board.connections = [FreeformConnection(tail: board.objects[0].id, head: board.objects[1].id, lineEnd: "arrow")]
         XCTAssertThrowsError(try FreeformAdapter(environment: MockFreeformEnvironment(log), pasteboard: MockFreeformPasteboard(log))
-            .insert(board, policy: ActionPolicy()))
+            .insert(board, boardTitle: "Test Board", policy: ActionPolicy()))
         XCTAssertEqual(log.calls, [])
     }
 
@@ -179,7 +181,7 @@ final class FreeformAdapterTests: XCTestCase {
             let log = FreeformCallLog()
             let adapter = FreeformAdapter(environment: MockFreeformEnvironment(log), pasteboard: MockFreeformPasteboard(log))
             let policy = ActionPolicy(grantedPermissions: PermissionFlags.all.subtracting(removed))
-            XCTAssertThrowsError(try adapter.insert(freeformTestBoard(), policy: policy))
+            XCTAssertThrowsError(try adapter.insert(freeformTestBoard(), boardTitle: "Test Board", policy: policy))
             XCTAssertFalse(adapter.plan(policy: policy, name: "insert").executable)
             XCTAssertEqual(log.calls, [])
         }
@@ -191,7 +193,7 @@ final class FreeformAdapterTests: XCTestCase {
         let scoped = ActionPolicy(scopedGrants: [ScopedPermissionGrant(scope: PolicyScope(application: FreeformDescriptor.bundleID),
                                                                      permissions: FreeformAdapter.writePermissions)])
         XCTAssertTrue(adapter.plan(policy: scoped, name: "insert").executable)
-        XCTAssertTrue(try adapter.insert(freeformTestBoard(), policy: scoped).submitted)
+        XCTAssertTrue(try adapter.insert(freeformTestBoard(), boardTitle: "Test Board", policy: scoped).submitted)
     }
 
     func testMoveUsesReferenceTransformAndSingleSelectionWithoutFocusOrPasteboard() throws {
@@ -199,12 +201,12 @@ final class FreeformAdapterTests: XCTestCase {
         let env = MockFreeformEnvironment(log)
         let adapter = FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log))
         let result = try adapter.move(FreeformMoveRequest(label: "Beta", referenceLabel: "Alpha", referenceX: 10,
-                                                        referenceY: 20, x: 250, y: 350), policy: ActionPolicy())
+                                                        referenceY: 20, x: 250, y: 350), boardTitle: "Test Board", policy: ActionPolicy())
         XCTAssertTrue(result.confirmed)
         XCTAssertFalse(result.corrected)
         XCTAssertEqual(result.screenPosition, PointValue(x: 350, y: 550))
         XCTAssertEqual(result.boardPosition, PointValue(x: 250, y: 350))
-        XCTAssertEqual(log.calls, ["position:Alpha", "deselect", "select:Beta", "move:Beta", "wait:0.3", "position:Beta"])
+        XCTAssertEqual(log.calls, ["doctor", "position:Alpha", "deselect", "select:Beta", "move:Beta", "wait:0.3", "position:Beta"])
         XCTAssertEqual(env.pid, 7)
     }
 
@@ -214,7 +216,7 @@ final class FreeformAdapterTests: XCTestCase {
         env.firstMoveOffset = 0.5
         let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log))
             .move(FreeformMoveRequest(label: "Beta", referenceLabel: "Alpha", referenceX: 10,
-                                      referenceY: 20, x: 250, y: 350), policy: ActionPolicy())
+                                      referenceY: 20, x: 250, y: 350), boardTitle: "Test Board", policy: ActionPolicy())
         XCTAssertTrue(result.corrected)
         XCTAssertTrue(result.confirmed)
         XCTAssertEqual(env.moves, 2)
@@ -243,15 +245,35 @@ final class FreeformAdapterTests: XCTestCase {
                        ["freeform_doctor", "freeform_insert", "freeform_move", "freeform_connect", "freeform_read_board"])
         let board = try JSONSerialization.jsonObject(with: JSONEncoder().encode(freeformTestBoard()))
         for tool in ["freeform_insert", "freeform_connect"] {
-            let result = try await server.dispatch(method: "tools/call", params: ["name": tool, "arguments": ["board": board, "dry_run": true]])
+            let result = try await server.dispatch(method: "tools/call", params: ["name": tool, "arguments": ["board": board, "board_title": "Test Board", "dry_run": true]])
             XCTAssertEqual((result["structuredContent"] as? [String: Any])?["executable"] as? Bool, true)
         }
         XCTAssertEqual(log.calls, [])
         controller.actionPolicy = ActionPolicy(grantedPermissions: [])
         do {
-            _ = try await server.dispatch(method: "tools/call", params: ["name": "freeform_insert", "arguments": ["board": board]])
+            _ = try await server.dispatch(method: "tools/call", params: ["name": "freeform_insert", "arguments": ["board": board, "board_title": "Test Board"]])
             XCTFail("Missing permission should refuse")
         } catch let error as AutomationError { XCTAssertEqual(error.code, AutomationError.permissionDenied("").code) }
         XCTAssertEqual(log.calls, [])
+        controller.actionPolicy = ActionPolicy()
+        do {
+            _ = try await server.dispatch(method: "tools/call", params: ["name": "freeform_insert", "arguments": ["board": board]])
+            XCTFail("Missing board_title should refuse")
+        } catch let error as AutomationError { XCTAssertEqual(error.code, AutomationError.invalidArgument("").code) }
+        XCTAssertEqual(log.calls, [])
+    }
+
+    func testWritesFailClosedUnlessExactlyTheNamedBoardIsOpen() throws {
+        for titles in [["Prozessmanagement"], ["Test Board", "Other"], [], ["test board"]] {
+            let log = FreeformCallLog()
+            let env = MockFreeformEnvironment(log)
+            env.windowTitles = titles
+            let adapter = FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log))
+            XCTAssertThrowsError(try adapter.insert(freeformTestBoard(), boardTitle: "Test Board", policy: ActionPolicy()))
+            XCTAssertThrowsError(try adapter.move(FreeformMoveRequest(label: "Beta", referenceLabel: "Alpha", referenceX: 10,
+                                                                      referenceY: 20, x: 250, y: 350),
+                                                  boardTitle: "Test Board", policy: ActionPolicy()))
+            XCTAssertEqual(log.calls, ["doctor", "doctor"], "no pasteboard, focus or AX write for \(titles)")
+        }
     }
 }

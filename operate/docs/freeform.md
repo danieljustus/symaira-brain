@@ -22,6 +22,12 @@ install a helper. All new tests use injected services and synthetic data.
   `capture`. Known Freeform live-storage paths, including symlink targets, are
   refused. The caller remains responsible for snapshot provenance.
 
+Every write tool (`freeform_insert`, `freeform_connect`, `freeform_move`) requires
+`board_title`. The call fails closed before any pasteboard, focus or AX write unless
+Freeform has exactly one window and its title equals `board_title` exactly. Use
+`freeform_doctor` (`window_titles`) to read it. Without this check a live test once
+pasted into the user's real board instead of the disposable one.
+
 All writes require `input`, `app_control` and `menu_action`, intersected with the
 startup ceiling and application-scoped grants. A dry run reports denial rather
 than bypassing the grant. No capability descriptor grants execution authority.
@@ -39,6 +45,7 @@ Example `freeform_insert` arguments:
       {"tail":"11111111-1111-1111-1111-111111111111","head":"22222222-2222-2222-2222-222222222222","line_end":"none"}
     ]
   },
+  "board_title": "Disposable test board",
   "dry_run": true
 }
 ```
