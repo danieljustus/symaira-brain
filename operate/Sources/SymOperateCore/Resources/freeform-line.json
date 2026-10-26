@@ -1,0 +1,70 @@
+[
+  {
+    "aspect_ratio_locked": false,
+    "description": "",
+    "head": {
+      "end_point": {
+        "type_identifier": "com.apple.apps.content-language.position",
+        "version": "1.0",
+        "x": 0,
+        "y": 0
+      },
+      "line_end": "none",
+      "outset": 0,
+      "type_identifier": "com.apple.apps.content-language.connection-line.end",
+      "version": "1.0"
+    },
+    "line_type": {
+      "curved": {
+        "type_identifier": "com.apple.apps.content-language.position",
+        "version": "1.0",
+        "x": 0,
+        "y": 0
+      },
+      "primary_case": "curved",
+      "type_identifier": "com.apple.apps.content-language.connection-line.line-type",
+      "version": "1.0"
+    },
+    "opacity": 1,
+    "stroke": {
+      "line": {
+        "color": {
+          "primary_case": "rgba",
+          "rgba": {
+            "alpha": 1,
+            "blue": 0,
+            "color_space": "srgb",
+            "green": 0,
+            "headroom": 1,
+            "red": 0,
+            "type_identifier": "com.apple.apps.content-language.color.rgba",
+            "version": "1.1"
+          },
+          "type_identifier": "com.apple.apps.content-language.color",
+          "version": "1.0"
+        },
+        "pattern": "solid",
+        "type_identifier": "com.apple.apps.content-language.stroke.line",
+        "version": "1.0",
+        "width": 3
+      },
+      "primary_case": "line",
+      "type_identifier": "com.apple.apps.content-language.stroke",
+      "version": "1.0"
+    },
+    "tail": {
+      "end_point": {
+        "type_identifier": "com.apple.apps.content-language.position",
+        "version": "1.0",
+        "x": 0,
+        "y": 0
+      },
+      "line_end": "none",
+      "outset": 0,
+      "type_identifier": "com.apple.apps.content-language.connection-line.end",
+      "version": "1.0"
+    },
+    "type_identifier": "com.apple.apps.content-language.connection-line",
+    "version": "1.0"
+  }
+]

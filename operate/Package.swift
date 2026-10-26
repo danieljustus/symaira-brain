@@ -11,19 +11,25 @@ let package = Package(
         .library(name: "SymOperateMCP", targets: ["SymOperateMCP"]),
         .library(name: "SymOperateCLI", targets: ["SymOperateCLI"]),
         .executable(name: "symoperate", targets: ["symoperate"]),
+        .executable(name: "symoperate-freeform-snapshot", targets: ["symoperate-freeform-snapshot"]),
     ],
     dependencies: [
         .package(url: "https://github.com/danieljustus/symaira-appkit.git", exact: "0.15.1"),
         .package(path: "../history"),
     ],
     targets: [
+        .target(name: "FreeformSnapshotCore", linkerSettings: [.linkedLibrary("sqlite3")]),
+        .executableTarget(name: "symoperate-freeform-snapshot", dependencies: ["FreeformSnapshotCore"]),
         .target(
             name: "SymOperateCore",
             dependencies: [
+                "FreeformSnapshotCore",
                 .product(name: "SymCockpitHistory", package: "history"),
                 .product(name: "SymairaUpdateCheck", package: "symaira-appkit"),
             ],
+            resources: [.process("Resources")],
             linkerSettings: [
+                .linkedLibrary("sqlite3"),
                 .linkedFramework("AppKit"),
                 .linkedFramework("ApplicationServices"),
             ]

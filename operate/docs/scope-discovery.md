@@ -45,7 +45,7 @@ symoperate permissions status
 
 When registered, `symoperate` exposes these capabilities:
 
-- **Tools**: 20 tools (snapshot, query_ui, find_ui, click, type_text, etc.)
+- **Tools**: 27 tools (snapshot, query_ui, find_ui, click, type_text, freeform_*, etc.)
 - **Protocol**: MCP 2024-11-05
 - **Transport**: stdio (JSON-RPC)
 
