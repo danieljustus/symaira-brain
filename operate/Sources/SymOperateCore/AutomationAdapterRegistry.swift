@@ -8,6 +8,7 @@ public enum AutomationAdapterKind: String, Codable, CaseIterable, Equatable, Has
     case appIntents = "app_intents"
     case shortcuts
     case appleScript = "apple_script"
+    case accessibility
 }
 
 /// Stable capability names exposed by an automation adapter.
@@ -31,6 +32,7 @@ public enum AutomationPermission: String, Codable, CaseIterable, Equatable, Hash
     case automation
     case shortcuts
     case appIntents = "app_intents"
+    case accessibility
 }
 
 /// An explicit application target for native automation.
@@ -263,6 +265,7 @@ public struct AutomationAdapterRegistry: Sendable {
         .appIntents,
         .shortcuts,
         .appleScript,
+        .accessibility,
     ]
 
     public let adapters: [any AutomationAdapter]
@@ -276,6 +279,7 @@ public struct AutomationAdapterRegistry: Sendable {
         MetadataAutomationAdapter(metadata: .appIntents),
         MetadataAutomationAdapter(metadata: .shortcuts),
         MetadataAutomationAdapter(metadata: .appleScript),
+        FreeformAdapter(),
     ])
 
     /// Compatibility spelling for callers that call the built-in catalog default.

@@ -23,7 +23,9 @@ let package = Package(
                 .product(name: "SymCockpitHistory", package: "history"),
                 .product(name: "SymairaUpdateCheck", package: "symaira-appkit"),
             ],
+            resources: [.process("Resources")],
             linkerSettings: [
+                .linkedLibrary("sqlite3"),
                 .linkedFramework("AppKit"),
                 .linkedFramework("ApplicationServices"),
             ]

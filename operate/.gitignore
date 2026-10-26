@@ -2,7 +2,8 @@
 .DS_Store
 
 # Xcode / Swift
-.build/
+# Also ignore an external-build symlink, not only a real directory.
+.build
 DerivedData/
 *.xcodeproj
 !project.yml
