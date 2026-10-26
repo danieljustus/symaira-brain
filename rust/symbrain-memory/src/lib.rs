@@ -26,6 +26,7 @@ mod schema_inspection;
 mod search_rows;
 mod store;
 mod store_dir;
+mod sync_apply;
 mod sync_state;
 mod wal_open;
 mod write;
@@ -45,6 +46,7 @@ pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};
 pub use schema_inspection::missing_required_columns;
 pub use search_rows::{SearchHit, SearchRow};
+pub use sync_apply::{PullApplied, PulledDelete, PulledMemory, PulledPage};
 pub use sync_state::{StoredCursor, parse_cursor, render_cursor, zero_time};
 
 pub use evidence_store::{EvidenceSpan, reparent_memory_evidence_tx, save_memory_evidence_tx};

@@ -215,7 +215,6 @@ def build():
     # after the first read-only GET
     memories = '{"memories":[{"id":"remote-1","content":"c","scope":"global","created_at":"2026-10-26T01:00:00Z","updated_at":"2026-10-26T01:00:00Z"}],"deleted":[],"server_time":"%s"}' % OK_TIME
     for name, data in [("memories", memories),
-                       ("tombstones", '{"memories":[],"deleted":[{"id":"gone","deleted_at":"2026-10-26T01:00:00Z"}],"server_time":"%s"}' % OK_TIME),
                        ("offset-server-time", '{"server_time":"2026-10-26T03:02:03+02:00"}'),
                        ("bad-server-time", '{"server_time":"bad"}'),
                        ("numeric-server-time", '{"server_time":5}'),
@@ -227,9 +226,6 @@ def build():
                        ("time-year-zero", '{"server_time":"0000-01-01T00:00:00Z"}'),
                        ("time-ten-digit-fraction", '{"server_time":"2026-10-26T01:02:03.1234567890Z"}')]:
         post("handoff-reply-" + name, step(), static(json_reply(200, data)))
-    post("handoff-reply-next-cursor", step(),
-         lambda request: reply(json_reply(200, '{"next_cursor":"c1"}' if "cursor=" not in request["target"]
-                                          else ok_body())))
     post("handoff-reply-gzip", step(), static(http(200, gzip.compress(ok_body().encode()),
                                                    {"Content-Encoding": "gzip"})))
     for status in (301, 302, 303, 307, 308):
@@ -247,6 +243,9 @@ def build():
     post("handoff-reply-nesting-1001", step(),
          static(json_reply(200, b'{"x":' + b"[" * 1001 + b"]" * 1001 + b'}')))
     post("handoff-error-leading-bad-byte", step(), static(json_reply(500, b'\xff{"error":"x"}')))
+    import sync_pull_cases  # imported here: that module imports this one
+
+    cases.extend(sync_pull_cases.build())
     if not POSIX:
         # The refusal wording is the POSIX errno text (Windows words it differently): skip visibly.
         skipped = [case["name"] for case in cases if case["name"].startswith("connection-refused")]
@@ -274,6 +273,12 @@ def seed_database(go, root, env, db, port, items, output):
                     "INSERT INTO memories(id,content,scope,kind,created_at,updated_at,metadata,embedding) "
                     "VALUES(?,?,'global','reference',?,?,?,X'')",
                     (f"seed-{number}", f"content {number}", OLD, item[1], item[2]))
+            elif item[0] == "memory-id":  # (kind, id, updated_at text, content, metadata)
+                database.execute(
+                    "INSERT INTO memories(id,content,scope,kind,created_at,updated_at,metadata,embedding) "
+                    "VALUES(?,?,'global','reference',?,?,?,X'')", (item[1], item[3], OLD, item[2], item[4]))
+            elif item[0] == "tombstone-id":  # (kind, id, ts text)
+                database.execute("INSERT INTO sync_oplog(op,memory_id,ts) VALUES('delete',?,?)", (item[1], item[2]))
             elif item[0] == "tombstone":
                 database.execute("INSERT INTO sync_oplog(op,memory_id,ts) VALUES('delete',?,?)",
                                  (f"gone-{number}", item[1]))
@@ -289,13 +294,19 @@ def tree_listing(root):
     return listing
 
 
+def fresh(responder):
+    """Stateful responders (see ``sync_pull_cases.Nth``) restart for every execution."""
+    return responder.fresh() if hasattr(responder, "fresh") else responder
+
+
 def execute(binary, case, go, output, snapshot, isolated_env):
     """Runs every step of `case` with `binary`; returns normalised observations."""
     with tempfile.TemporaryDirectory(prefix="memory-cli-relay-") as temporary:
         root = Path(temporary)
         env = isolated_env(root)
         database = root / "x.db"
-        current = {"responder": case["responder"]}
+        case_responder = fresh(case["responder"])
+        current = {"responder": case_responder}
         relay = Relay(lambda request: current["responder"](request))
         port = relay.port
         try:
@@ -304,7 +315,7 @@ def execute(binary, case, go, output, snapshot, isolated_env):
             seeded_state = snapshot(root)
             steps = []
             for item in case["steps"]:
-                current["responder"] = item.get("responder") or case["responder"]
+                current["responder"] = fresh(item["responder"]) if item.get("responder") else case_responder
                 if item.get("close_relay"):
                     relay.close()
                     relay.assert_refusing()  # the scenario is only meaningful if the port really refuses
@@ -330,6 +341,8 @@ def execute(binary, case, go, output, snapshot, isolated_env):
 
 def normalise(observation, port):
     stamp = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$")
+    shipped = re.compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,9})? \+0000 UTC$")
+    uuid = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
     for key in ("state", "seeded_state"):
         for tables in observation[key].values():
             for row in tables.get("schema_migrations", []):
@@ -337,14 +350,24 @@ def normalise(observation, port):
             for row in tables.get("sync_oplog", []):
                 # oplog triggers stamp rows with the wall clock; seeded tombstones keep fixed times
                 row[:] = ["wall-clock" if isinstance(cell, str) and stamp.match(cell) else cell for cell in row]
+            # audit rows carry a random id and the wall clock (columns id, ..., created_at);
+            # only values in the shipped spelling are replaced, so a different shape still differs
+            audit = tables.get("audit_log", [])
+            for row in audit:
+                if isinstance(row[0], str) and uuid.match(row[0]):
+                    row[0] = "uuid"
+                if isinstance(row[7], str) and shipped.match(row[7]):
+                    row[7] = "wall-clock"
+            audit.sort(key=lambda row: json.dumps(row, sort_keys=True))
     text = json.dumps(observation, sort_keys=True)
-    # stdout/stderr are base64; decode them so the port inside can be replaced.
+    # stdout/stderr are base64; decode them so the port inside can be replaced. Only ``:<port>`` is
+    # replaced: a bare digit run can occur inside a content hash and would differ between two runs.
     data = json.loads(text)
+    pattern = rb":%d(?!\d)" % port
     for record in data["steps"]:
         for key in ("stdout", "stderr"):
-            record[key] = base64.b64encode(
-                base64.b64decode(record[key]).replace(str(port).encode(), b"PORT")).decode()
-    return json.loads(json.dumps(data, sort_keys=True).replace(str(port), "PORT"))
+            record[key] = base64.b64encode(re.sub(pattern, b":PORT", base64.b64decode(record[key]))).decode()
+    return json.loads(re.sub(":%d(?!\\d)" % port, ":PORT", json.dumps(data, sort_keys=True)))
 
 
 def stopped_at_absent_go(record):
@@ -353,13 +376,25 @@ def stopped_at_absent_go(record):
             and b"(os error 2)" in stderr)
 
 
-def cursors(state):
-    return sorted(row for tables in state.values() for row in tables.get("sync_state", []))
+LOCAL_TABLES = ("memories", "audit_log", "sync_oplog", "sync_state", "entities", "memory_entities", "memory_evidence")
+
+
+def unchanged_locally(state, seeded):
+    """No cursor, memory, audit, oplog or entity row differs from the seeded database (or from none)."""
+    for path, tables in state.items():
+        before = seeded.get(path, {})
+        for name in LOCAL_TABLES:
+            if tables.get(name, []) != before.get(name, []):
+                return False
+    return True
 
 
 def run(go, rust, output, snapshot, isolated_env):
     records = []
+    only = os.environ.get("SYNC_RELAY_ONLY")  # regex over scenario names (source-mutant controls only)
     for index, case in enumerate(build()):
+        if only and not re.search(only, case["name"]):
+            continue
         if os.environ.get("SYNC_RELAY_TRACE"):
             print("case", index, case["name"], flush=True)
         first = execute(go, case, go, output, snapshot, isolated_env)
@@ -374,13 +409,16 @@ def run(go, rust, output, snapshot, isolated_env):
             rust_requests = [step["requests"] for step in second["steps"]]
             stopped = all(stopped_at_absent_go(step) for step in second["steps"])
             if case["post_get"]:
-                requests_ok = (len(go_requests[0]) >= 1 and len(rust_requests[0]) == 1
-                               and rust_requests[0][0] == go_requests[0][0])
+                # only read-only GETs, each one a request Go sent too, in Go's order
+                sent = rust_requests[0]
+                requests_ok = (len(go_requests[0]) >= 1 and len(sent) >= 1
+                               and sent == go_requests[0][:len(sent)]
+                               and all(request["method"] == "GET" for request in sent))
             else:
                 requests_ok = all(not requests for requests in rust_requests)
             # Go did the real work: it is the oracle for what stays on Go.
             go_worked = bool(go_requests[0]) if case["post_get"] else True
-            untouched = cursors(second["state"]) == cursors(second["seeded_state"])
+            untouched = unchanged_locally(second["state"], second["seeded_state"])
             record.update(match=stopped and requests_ok and untouched and go_worked,
                           rust_stopped_at_absent_go=stopped, requests_as_expected=requests_ok,
                           cursor_untouched=untouched, go=first, rust=second)

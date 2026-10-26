@@ -153,6 +153,15 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/sync_relay_controls.py --report "$REPORT"
+      - name: Require sync-pull source-mutant controls
+        if: runner.os == 'Linux'
+        env:
+          REPORT: ${{ runner.temp }}/memory-cli-sync-pull-controls.json
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/sync_pull_controls.py --report "$REPORT"
       - name: Record native SDK and exact head
         if: always()
         env:

@@ -29,8 +29,10 @@ use help::{
 mod routing;
 mod sync;
 mod sync_decode;
+mod sync_entry;
 mod sync_http;
 mod sync_native;
+mod sync_pull;
 pub(crate) use routing::requires_go_fallback;
 mod paths;
 use paths::{open_store, resolve_db_path};
@@ -114,6 +116,8 @@ pub(super) fn run_with_stdout(
     }
 }
 
+#[cfg(test)]
+mod sync_pull_tests;
 #[cfg(test)]
 mod sync_tests;
 #[cfg(test)]
