@@ -46,6 +46,11 @@ EXPECTED_TOOLS = [
     "get_policy",
     "set_policy",
     "version",
+    "freeform_doctor",
+    "freeform_insert",
+    "freeform_connect",
+    "freeform_move",
+    "freeform_read_board",
 ]
 OUTPUT_LIMIT = 1 << 20
 CLEANUP_TIMEOUT = 1.0
