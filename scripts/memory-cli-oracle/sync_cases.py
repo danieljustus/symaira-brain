@@ -6,11 +6,14 @@ CLI in identical fresh disposable roots with the Go fallback path absent and
 compare stdout, stderr, exit status and the created filesystem tree.
 
 Gate scenarios name a remote that the shipped implementation accepts (or a URL
-spelling outside the ported `net/url` subset). Real synchronisation must keep
-running on Go, so these are not compared byte for byte: Go is run against a
-closed loopback port and must get *past* validation, while the native process
-with the Go fallback absent must stop at the owned absent-binary diagnostic
-(exit 1, empty stdout, OS error 2) without creating anything.
+spelling outside the ported `net/url` subset) and that the native client does
+not run itself (https, `localhost`, other loopback addresses, URL spellings
+outside the ported subset, the encrypted relay). They are not compared byte for
+byte: Go is run against a closed loopback port and must get *past* validation,
+while the native process with the Go fallback absent must stop at the owned
+absent-binary diagnostic (exit 1, empty stdout, OS error 2) without creating
+anything. Plain `http://127.0.0.1:<port>` remotes run natively and are
+compared against Go by the `sync_relay` family (`sync_relay_cases.py`).
 """
 import os
 from pathlib import Path
@@ -76,7 +79,6 @@ GATES = [
     (["--remote", f"HTTPS://{CLOSED}"], {}),
     (["--remote", f"https://{CLOSED}/path?x=1#frag"], {}),
     (["--remote", "https:opaque"], {}),
-    (["--remote", f"http://{CLOSED}"], {}),
     (["--remote", "http://localhost:1"], {}),
     (["--remote", "http://LOCALHOST:1"], {}),
     (["--remote", "http://127.9.9.9:1"], {}),
