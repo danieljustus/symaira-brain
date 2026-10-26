@@ -29,6 +29,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"unicode/utf8"
 
@@ -173,6 +174,15 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "generate: %v\n", err)
 		os.Exit(1)
+	}
+	if *check && runtime.GOOS == "windows" {
+		// The capture is POSIX-shaped: it isolates the home directory through
+		// HOME (Windows Go reads USERPROFILE) and records slash-separated
+		// $ROOT paths, so a Windows regeneration can never equal it. The TOML
+		// decode itself is OS-independent; the Linux and macOS legs check
+		// fixture freshness against the real Go decoders.
+		fmt.Println("SKIP skills-config-toml oracle check on windows: POSIX HOME/path capture; Linux and macOS legs check fixture freshness")
+		return
 	}
 	if *check {
 		data, err := os.ReadFile(fixturePath)
@@ -368,7 +378,7 @@ func provenanceNow() provenance {
 		Corekit:      goModVersion("github.com/danieljustus/symaira-corekit"),
 		ConfigSource: hex.EncodeToString(sum[:]),
 		Note: "Captured from this working tree. A squash merge destroys the recorded revision; " +
-			"scripts/run-go-oracle.sh -check compares every case and ignores provenance.",
+			"the oracle's check mode compares every case and ignores provenance.",
 	}
 }
 
