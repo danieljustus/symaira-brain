@@ -168,9 +168,15 @@ fn open_of_current_store_does_not_wait_for_a_retained_writer() {
     let outcome = receiver.recv_timeout(Duration::from_secs(3));
     // Release the writer on every path so a failing assertion cannot hang.
     writer.execute_batch("ROLLBACK").unwrap();
+    // Close the retained connection before cleanup: Windows refuses to delete
+    // memory.db/-wal/-shm while any handle is open (os error 32).
+    drop(writer);
     thread.join().unwrap();
     let (result, elapsed) = outcome.expect("open waited on the retained writer instead of reading");
-    assert!(result.unwrap(), "stored row must be readable");
+    assert!(
+        result.as_ref().is_ok_and(|readable| *readable),
+        "stored row must be readable; open returned {result:?} after {elapsed:?}"
+    );
     assert!(elapsed < Duration::from_secs(3), "open took {elapsed:?}");
     std::fs::remove_dir_all(directory).unwrap();
 }
