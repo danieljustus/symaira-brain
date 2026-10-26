@@ -42,10 +42,35 @@ class Relay:
 
     def close(self):
         self._closing = True
+        # close() alone leaves a listening socket open on Linux while another thread is blocked in
+        # accept(): the kernel keeps the file alive, so the "closed" port still completes handshakes.
+        # shutdown() drops the listener (waking accept); macOS reports ENOTCONN, which is harmless.
+        try:
+            self._socket.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
         try:
             self._socket.close()
         except OSError:
             pass
+
+    def assert_refusing(self):
+        """Fails loudly unless nothing accepts connections on this relay's port any more."""
+        deadline = time.monotonic() + 2
+        while True:
+            probe = socket.socket()
+            probe.settimeout(1)
+            try:
+                probe.connect(("127.0.0.1", self.port))
+            except ConnectionRefusedError:
+                return
+            except OSError:
+                pass
+            finally:
+                probe.close()
+            if time.monotonic() > deadline:
+                raise AssertionError(f"relay port {self.port} still accepts connections after close()")
+            time.sleep(0.02)
 
     def _accept(self):
         while not self._closing:

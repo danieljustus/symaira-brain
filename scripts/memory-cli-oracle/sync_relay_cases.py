@@ -307,6 +307,7 @@ def execute(binary, case, go, output, snapshot, isolated_env):
                 current["responder"] = item.get("responder") or case["responder"]
                 if item.get("close_relay"):
                     relay.close()
+                    relay.assert_refusing()  # the scenario is only meaningful if the port really refuses
                 args = []
                 for argument in item["args"]:
                     if argument == "--no-db":
