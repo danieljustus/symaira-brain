@@ -116,11 +116,7 @@ def build():
     add = cases.append
 
     def native(name, steps, responder=None, **kw):
-        known_defect = kw.pop("known_go_defect", None)
-        case = scenario(name, steps, responder, **kw)
-        if known_defect is not None:
-            case["known_go_defect"] = known_defect
-        add(case)
+        add(scenario(name, steps, responder, **kw))
 
     def hand(name, steps, responder=None, post_get=True, **kw):
         add(scenario(name, steps, responder, kind="handoff", post_get=post_get, **kw))
@@ -277,10 +273,7 @@ def build():
             ("nano-newer", "2026-10-26 02:00:00.500000001 +0000 UTC", "2026-10-26T02:00:00.5Z"),
             ("zero-deleted-at", L1, "0001-01-01T00:00:00Z")]:
         native("delete-" + name, [pull_json, pull], one(body([], [gone("a", deleted_at)])), seed=[local("a", local_time)])
-    # dcddcef0 loses absent-row tombstones (#854, fixed by Go PR #970).
-    # Keep all observations exact except for the one required retained event.
-    native("delete-missing-id", pull_json, one(body([], [gone("nope")])),
-           known_go_defect="854-absent-tombstone")
+    native("delete-missing-id", pull_json, one(body([], [gone("nope")])))
     native("delete-missing-deleted-at", pull_json, one(body([], ['{"id":"a"}'])), seed=[local("a", L0)])
     native("delete-unicode-id", pull_json, one(body([], [gone("\u00fcn\u00ef\u20ac")])),
            seed=[local("\u00fcn\u00ef\u20ac", L0)])

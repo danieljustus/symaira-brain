@@ -7,7 +7,7 @@ way a faulty port would and rebuild the CLI from a scratch copy of the tree:
 
 * ``conflict``: an equal timestamp overwrites the local memory (``<=`` -> ``<``);
 * ``tombstone``: an equal-aged tombstone no longer blocks a pulled memory;
-* ``delete``: a remote delete removes a memory that is strictly newer (``>`` -> ``>=`` flipped);
+* ``delete``: an equal-timestamp remote delete no longer removes the local memory (``>`` -> ``>=``);
 * ``pagination``: only the first page is fetched (``next_cursor`` ignored);
 * ``cursor``: the pagination cursor is never sent, every page repeats the first request;
 * ``clock``: the stored cursor ignores the timestamps of pulled entries;
@@ -40,7 +40,7 @@ MUTANTS = [
      'if op == "delete" && memory.updated_at <= ts {', 'if op == "delete" && memory.updated_at < ts {',
      r"^tombstone-", r"^tombstone-"),
     ("delete", "rust/symbrain-memory/src/sync_apply.rs",
-     "if stored_time(&local)? > delete.deleted_at {", "if stored_time(&local)? >= delete.deleted_at {",
+     "&& stored_time(local)? > delete.deleted_at", "&& stored_time(local)? >= delete.deleted_at",
      r"^(delete-|mixed-)", r"^(delete-|mixed-)"),
     ("pagination", "rust/symbrain-cli/src/memory_cli/sync_pull.rs",
      "Some(cursor) => next = Some(cursor),", "Some(_) => return Some(Pull::Pages(pages)),",

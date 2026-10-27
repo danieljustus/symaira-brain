@@ -14,7 +14,6 @@ normalised; nothing here connects to a non-loopback host.
   or exactly the first request Go sent (a read-only GET).
 """
 import base64
-from copy import deepcopy
 from contextlib import closing
 import gzip
 import json
@@ -390,24 +389,6 @@ def unchanged_locally(state, seeded):
     return True
 
 
-def native_matches(case, go, rust):
-    """One explicit #854 divergence, not a normalization of other scenarios."""
-    defect = case.get("known_go_defect")
-    if defect is None:
-        return go == rust
-    if defect != "854-absent-tombstone" or case["name"] != "delete-missing-id":
-        raise AssertionError("unqualified Go defect: " + str(defect))
-    expected = deepcopy(go)
-    tables = expected["state"]["x.db"]
-    # Fail closed if the pinned oracle changes (including acquiring the fix).
-    assert tables["sync_oplog"] == []
-    assert not any(row[0] == "sync_oplog" for row in tables["sqlite_sequence"])
-    tables["sync_oplog"] = [[1, "delete", "nope", "2026-10-26 02:00:00 +0000 UTC"]]
-    tables["sqlite_sequence"].append(["sync_oplog", 1])
-    tables["sqlite_sequence"].sort(key=lambda row: json.dumps(row, sort_keys=True))
-    return expected == rust
-
-
 def run(go, rust, output, snapshot, isolated_env):
     records = []
     only = os.environ.get("SYNC_RELAY_ONLY")  # regex over scenario names (source-mutant controls only)
@@ -421,10 +402,8 @@ def run(go, rust, output, snapshot, isolated_env):
         record = dict(family="sync_relay", kind=case["kind"], index=index, name=case["name"])
         if case["kind"] == "native":
             went_native = not any(stopped_at_absent_go(step) for step in second["steps"])
-            record.update(match=native_matches(case, first, second) and went_native, went_native=went_native,
+            record.update(match=first == second and went_native, went_native=went_native,
                           go_requests=sum(len(step["requests"]) for step in first["steps"]), go=first, rust=second)
-            if case.get("known_go_defect"):
-                record["known_go_defect"] = case["known_go_defect"]
         else:
             go_requests = [step["requests"] for step in first["steps"]]
             rust_requests = [step["requests"] for step in second["steps"]]

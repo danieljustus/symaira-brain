@@ -2,10 +2,20 @@
 
 Run `cargo build -p symbrain-cli --locked`, then
 `python3 scripts/memory-cli-oracle/replay.py --report /tmp/memory-cli-process.json`.
-The harness archives and builds immutable Go `dcddcef0`, verifies pinned CoreKit
-v0.17.0 configkit, and records both executable hashes and candidate source hashes.
-`--go` permits reuse of an explicitly supplied immutable local oracle; its SHA
-is recorded. `--family arguments|configuration|seeded_reads|corrupt_reads` supports focused diagnosis.
+The harness archives and builds immutable Go `dcddcef0` with pinned CoreKit
+v0.17.0 configkit for non-sync families. Only `sync_preflight` and `sync_relay`
+(including every sync-pull case) use `56ef5353ee3d4d23271fa6d74885c256a0d80b5c`
+with independently hash-verified CoreKit v0.18.2 configkit: this revision contains
+#970's fix for #854. No fixtures are rewritten. Both builds explicitly use
+`GOTOOLCHAIN=go1.26.7`, matching `memory-cli-native.yml` rather than ambient Go.
+The report retains both executable, immutable source, SDK and candidate source
+hash sets in `oracle_provenance`; each record names its `go_oracle_revision`.
+The top-level legacy Go fields describe the first selected oracle, not every
+family. `--go` permits reuse of one explicitly supplied immutable local oracle
+for a single revision's families; its SHA is recorded. It is refused with `all`
+because one executable cannot bind two revisions. `CARGO_TARGET_DIR` is honored
+when finding the default Rust binary.
+`--family arguments|configuration|seeded_reads|corrupt_reads` supports focused diagnosis.
 
 Every case uses a disposable HOME, USERPROFILE, cwd, and XDG directories. Runtime
 PATH is empty and the explicit Go fallback path is absent, except for the
@@ -68,15 +78,29 @@ mutation guarantee in this slice.
 
 `--family sync_preflight` (`sync_cases.py`, 192 cases) covers the `memory sync` argument checks that precede database and network work; `sync_controls.py` runs three real-process mutants. `--family sync_relay` (`sync_relay_cases.py`, `sync_pull_cases.py`, `sync_relay_server.py`, 590 scenarios) runs the immutable Go CLI and the native CLI against their own loopback fake relay (bytes of every response are scripted; nothing leaves 127.0.0.1) and compares stdout, stderr and exit of every step, every request the relay received (method, target, all headers) and the full database state (audit-log ids and wall-clock stamps are normalised only where they have the shipped spelling). 424 native scenarios must match with the Go fallback absent - empty exchanges, and since slice 3 relay replies with memories, tombstones, pagination and server-time handling; 166 hand-off scenarios must stop at the owned absent-binary diagnostic, leave every local table (memories, audit, oplog, cursors, entities) exactly as seeded, and have sent no request or only read-only GETs that Go sent too, in Go's order. `SYNC_RELAY_ONLY=<regex>` restricts the family to matching scenario names (used by the source-mutant controls). `sync_relay_controls.py` (Unix only) runs five real-process mutants (stdout, stderr, exit, an extra request, an extra database row) that must each be rejected through exactly their own observation key. `sync_pull_controls.py` (Unix only) rebuilds the CLI from a scratch copy of the tree with nine source mutants of the pull path (equal-timestamp overwrite, tombstone and delete comparison, only the first page, the pagination cursor never sent, cursor ignoring entry times, no audit row, no push probe, a failing statement skipped instead of rolled back; `--cargo` takes a cargo command prefix) and requires the scenarios exercising each to reject it, with no rejection the mutation cannot explain. On Windows the connection-refused wording scenarios are skipped with a printed notice and the created-tree mode comparison is not made.
 
-`delete-missing-id` is an explicitly labeled #854 known-Go-defect divergence:
-immutable Go `dcddcef0` drops its tombstone. The comparison requires exactly the
-remote-timestamp delete event and its SQLite sequence entry in native state;
-all output, requests, cursors and other tables stay exact. Mutation unit tests
-reject the old no-tombstone behavior, wrong event fields and unrelated changes.
-Other scenarios and source-mutant controls are unchanged. In particular, this
-exception does not claim full parity with the old oracle for the repaired
-remote-delete behavior; other delete scenarios need qualification against the
-fixed Go implementation before the complete differential gate can pass.
+## Relay mismatch diagnosis (#958)
+
+On macOS 27.2, an unmodified `7f5b98c1a` Rust binary against the original
+`dcddcef0` Go oracle reproduces the seven failures with ambient Go 1.27.3:
+`body-12`, `decode-failure-14`, `-15`, `-19`, `-20`, `-21`, `-26`.
+The changed bytes are only JSON syntax-error diagnostics: Go 1.27 decodes
+UTF-8 runes (BOM and multibyte characters) instead of quoting the first byte,
+and quotes Latin-1 nonprintable characters with `\\xNN` instead of `\\u00NN`.
+The same eight-case probe (these seven plus
+`pull-same-run-twice-is-idempotent`) passes 1/8 with Go 1.27.3 and 8/8 with
+CI's Go 1.26.7. This is toolchain drift, not a macOS-specific defect and not
+caused by the Rust tombstone fix `b23d25805`. The oracle now pins its build
+and reflected-schema toolchain explicitly; no comparison is weakened.
+
+`pull-same-run-twice-is-idempotent` is separate: the old Rust binary matches
+the old Go oracle but lacks the absent-row `c` tombstone when compared with
+fixed Go. The retained Rust tombstone regression fix makes it match fixed Go;
+it is part of #854, not one of the seven diagnostic failures.
+`delete-missing-id` now uses ordinary strict equality, with no known-defect
+marker, expected-state rewrite or special-case comparison. Against fixed Go,
+the repaired candidate passes all 590 relay scenarios and all 1454 process
+cases (including 192 sync-preflight cases) on this host. These are local
+macOS results, not new Linux/Windows CI receipts.
 
 This increment proves parser/config and seeded read behavior. It does not certify
 governed writes, corrupt database error strings, configured Hamming prefilter, evidence JSONL decoding or MCP
