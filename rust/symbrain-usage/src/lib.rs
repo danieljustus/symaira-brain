@@ -101,11 +101,11 @@ impl Service {
             .iter()
             .map(ProviderUsage::from_provider)
             .collect();
-        let configured: Vec<usize> = self
+        let configured: Vec<usize> = report
             .providers
             .iter()
             .enumerate()
-            .filter_map(|(i, p)| p.configured.then_some(i))
+            .filter_map(|(i, p)| (p.configured && p.error.is_none()).then_some(i))
             .collect();
         for (batch_index, batch) in configured.chunks(self.max_concurrency).enumerate() {
             // Recheck before starting each batch so cancellation or the

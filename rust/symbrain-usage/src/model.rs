@@ -43,13 +43,19 @@ pub struct ProviderUsage {
 
 impl ProviderUsage {
     pub(crate) fn from_provider(provider: &Provider) -> Self {
+        // Match Go's report boundary: explicit reference failures represent
+        // configured intent, but must never enter a provider's fetch chain.
+        let resolution_failed = provider
+            .auth_status
+            .detail
+            .starts_with("credential resolution failed: ");
         Self {
             id: provider.id.clone(),
             display_name: provider.display_name.clone(),
-            configured: provider.configured,
+            configured: provider.configured || resolution_failed,
             auth_status: provider.auth_status.clone(),
             snapshot: None,
-            error: None,
+            error: resolution_failed.then(|| provider.auth_status.detail.clone()),
         }
     }
 }

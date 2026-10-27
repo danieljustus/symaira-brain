@@ -60,6 +60,7 @@ cd "$repo_root"
 run_stage native-constructors cargo test --locked -p symbrain-usage --test credential_reference_tests -- --ignored --nocapture
 mkdir -p "$(dirname "$output")"
 run_stage native-build cargo build --locked -p symbrain-cli
+run_stage cli-unit python3 "$repo_root/scripts/usage-credential-oracle/cli_test.py"
 run_stage cli python3 "$repo_root/scripts/usage-credential-oracle/cli.py" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )" "$scratch/bin/symvault$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )" "$scratch/cli.json"
 run_stage controls python3 "$repo_root/scripts/usage-credential-oracle/controls.py" "$scratch" "${CARGO_TARGET_DIR:-target}/debug/symbrain$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )"
 python3 "$repo_root/scripts/usage-credential-oracle/receipt.py" "$scratch/go.json" "$scratch/native.json" "$output" "$oracle_commit"

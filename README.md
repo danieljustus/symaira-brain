@@ -583,7 +583,11 @@ filtered:
   Copilot, Cursor, Kimi, Moonshot, Nous Portal, OpenCode, OpenRouter,
   Antigravity) and returns the same schema-versioned report as
   `symbrain usage --output json`. Read-only; unconfigured providers are
-  reported as not set up, never as errors.
+  reported as not set up, never as errors. Credential environment variables
+  accept `symvault://<path>` references (`vault://` remains a deprecated alias).
+  A reference that cannot be resolved is reported as `configured: true` with
+  a credential-resolution error, not as an absent credential; no provider
+  request is started for that failure.
 
 ### Migration from `recipes`
 
