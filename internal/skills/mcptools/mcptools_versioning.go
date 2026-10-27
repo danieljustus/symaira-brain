@@ -106,6 +106,10 @@ func registerVersioningTools(ctx *serverContext) {
 			if args.Name == "" || args.Rev == "" {
 				return nil, exitcodes.Wrap(fmt.Errorf("name and rev are required"), exitcodes.ExitData, exitcodes.KindValidation, "restore skill")
 			}
+			// Validate before repository access or temporary extraction, including dry-run.
+			if err := skill.ValidateSkillName(args.Name); err != nil {
+				return nil, exitcodes.Wrap(err, exitcodes.ExitData, exitcodes.KindValidation, "restore skill")
+			}
 			dryRun := true
 			if args.DryRun != nil {
 				dryRun = *args.DryRun
