@@ -48,7 +48,15 @@ fn nous() -> Provider {
         |_| "https://portal.nousresearch.com".into(),
         |value| validated_base(&value, "https://portal.nousresearch.com"),
     );
-    nous_from_resolved(value, error, base_url)
+    let mut provider = nous_from_resolved(value, error, base_url);
+    if !provider.configured && provider.auth_status.status == "missing" && path.exists() {
+        provider.auth_status = AuthStatus {
+            status: "expired".into(),
+            detail: "Hermes Nous login missing/expired — sign in again with the Hermes CLI".into(),
+            source: Some("file".into()),
+        };
+    }
+    provider
 }
 
 pub(crate) fn nous_from_resolved(
