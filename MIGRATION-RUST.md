@@ -850,10 +850,48 @@ were rewritten accordingly.
 Residuals: `skills sync` with a config file (needs `LoadTargets` fed into the install path)
 and `skills status` for targets other than `opencode` still go to Go whenever a config file
 exists; Windows is cfg-reviewed only; native three-OS CI at the final head remains
-required. Found, not fixed: native `skills status` already reported `in-sync` where Go
-reports `stale` when `SYMSKILLS_LIBRARY_DIR` points away from the default library while the
-default `base` directory does not exist (reproducible with the environment alone, before this
-slice); the new cases avoid that shape.
+required. The pre-existing in-sync/stale divergence found while building this slice is fixed by SKL-020 below (#955).
+
+
+### Skills status coarse comparison (#955, SKL-020)
+
+Bug: native `skills status` printed `in-sync` where Go printed `stale` when
+`SYMSKILLS_LIBRARY_DIR` (or a `library_dir` config file) moved the library and the default
+`base` snapshot directory did not exist. Reproducible with the environment alone.
+
+Root cause (traced through `cmdSkillsStatus` -> `install.Status`): Go's `skills status`/`skills sync`
+pass `cfg.CacheDir` in `StatusOptions`, so `install.Status` renders through
+`render.CachedStagingRender`. That path writes the staging marker with the `sourceFingerprint`
+hash (every file, `SKILL.md` included, plus metadata-template fingerprints), not the
+install-time tree hash `install` stores in the managed marker. With a base snapshot the
+three-way per-file classification decides and the hash is never compared; **without** one the
+coarse `marker.SourceHash == fresh.hash` comparison runs and the two hashes never match, so Go
+reports `stale` for every managed install lacking a base snapshot. Rust compared the marker with
+the install-time hash and so reported `in-sync`. It was not specific to a moved library:
+the moved library merely made the base snapshot (looked up under the default `base` dir) disappear
+in the reported shape; the default layout with the snapshot dir removed diverged identically.
+
+Fix (one shared place, `install::status_compare::compare_one`): a new
+`StatusOptions::cached_render_hash` makes the coarse comparison use
+`materialize::status_cache_source_hash` (a port of `sourceFingerprint` fed through the same
+`sourceHash` mix). `skills status` (CLI) and `install::sync` (the Go `skills sync` status scan) set
+it; the MCP restore resync (`skills_tools.rs`, Go passes no `CacheDir` there) keeps the install-time
+hash. The empty-marker-hash content fallback is unchanged (Go's `Diff` path does not use the cache).
+Sibling verbs: `skills list`/`doctor`/`targets` never compare hashes; `skills sync` shares the status
+scan and now agrees by construction (checked by hand: default layout, base missing, `--dry-run`
+plans the same reinstall as Go).
+
+Evidence: 11 new `skills_status_config_*` differential cases against the real Go binary
+(`scripts/run-go-oracle.sh`, HEAD 46b0a7e13 build): 6 environment shapes (library moved + base
+missing in JSON/table, copy-mode install, base override pointing nowhere, library not moved + base
+missing, relocated base as a control) and 5 config-file shapes (global/project `library_dir`, table
+output, `[vcs]` table, `base_dir` pointing nowhere). Before the fix 9 of the 11 failed with
+`stale` vs `in-sync` (the copy-mode install and the relocated-base control already matched);
+after the fix all 11 pass. `skills_status_config_` is now 297 cases (203 native, 94 fallback), the full
+differential 801, all passing. `scripts/skills-status-config-oracle/run.py` gained two source mutants
+(`status-without-cache-hash`, `coarse-hash-install-time`; the runner now mutates
+`install/status_compare.rs` too): 46 of 46 killed. Rust test
+`coarse_comparison_uses_cached_render_hash_only_when_requested` pins both comparison modes.
 
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)

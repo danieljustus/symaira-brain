@@ -102,6 +102,14 @@ pub struct StatusOptions {
     pub base_dir: Option<PathBuf>,
     /// Optional trusted render cache root for an additional read-only comparison.
     pub render_dir: Option<PathBuf>,
+    /// Compare against Go's cached status render.
+    ///
+    /// Go's `skills status`/`skills sync` pass a cache directory, which makes the
+    /// coarse source-hash comparison (used when no base snapshot exists) read the
+    /// cached render's fingerprint-based hash instead of the install-time hash.
+    /// Callers that mirror those verbs set this; the MCP restore path, which
+    /// passes no cache directory in Go, leaves it unset.
+    pub cached_render_hash: bool,
     /// Optional exact names to scan.
     pub skills: Vec<String>,
 }

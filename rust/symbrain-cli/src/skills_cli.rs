@@ -1098,6 +1098,8 @@ fn run_status(
         base_dir: Some(base_dir),
         skills: Vec::new(),
         render_dir,
+        // Go hands `install.Status` the config cache directory here (#955).
+        cached_render_hash: true,
     };
 
     let statuses = match install::status(&opts) {

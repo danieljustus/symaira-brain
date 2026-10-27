@@ -191,6 +191,9 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
             // Render drift is an observational report. Sync's three-way policy
             // and stored installation modes must retain their existing meaning.
             render_dir: None,
+            // `skills sync` scans with the same cache-backed options as
+            // `skills status` in Go (#955).
+            cached_render_hash: true,
         },
         &loader,
     )?;
