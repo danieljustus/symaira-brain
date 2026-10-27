@@ -202,7 +202,7 @@ pub(crate) fn cursor_from_resolved(
 
 fn kimi() -> Provider {
     let cli_home = kimi_cli_home();
-    let (cli_token, device_id) = kimi_store(&cli_home);
+    let (cli_token, device_id, expiry) = kimi_store(&cli_home);
     let api_key = resolve_env("KIMI_CODE_API_KEY");
     let auth_token = resolve_env("KIMI_AUTH_TOKEN");
     let (api_value, api_failure) = match api_key {
@@ -217,7 +217,7 @@ fn kimi() -> Provider {
         |_| "https://api.kimi.com".into(),
         |value| validated_base(&value, "https://api.kimi.com"),
     );
-    kimi_from_resolved(
+    let mut provider = kimi_from_resolved(
         api_value,
         api_failure,
         cli_token.as_deref(),
@@ -225,7 +225,9 @@ fn kimi() -> Provider {
         auth_failure,
         base_url,
         device_id,
-    )
+    );
+    provider.kimi_cli_expires_at = expiry;
+    provider
 }
 
 pub(crate) fn kimi_from_resolved(

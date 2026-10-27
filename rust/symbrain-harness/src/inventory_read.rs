@@ -11,18 +11,20 @@ pub(super) fn inspect(
     let Some(path) = path else {
         return ConfigInventory {
             path: String::new(),
+            raw_path: PathBuf::new(),
             exists: false,
             parsed: false,
             error: Some("resolve config path".into()),
             servers: Vec::new(),
         };
     };
-    let path_string = path.to_string_lossy().into_owned();
+    let path_string = path_json_text(&path);
     let bytes = match crate::go_read::read_config(&path, capability) {
         Ok(bytes) => bytes,
         Err(ReadFailure::NotFound) => {
             return ConfigInventory {
                 path: path_string,
+                raw_path: path,
                 exists: false,
                 parsed: false,
                 error: None,
@@ -33,6 +35,7 @@ pub(super) fn inspect(
             // Go sets `Exists` only after a successful read.
             return ConfigInventory {
                 path: path_string,
+                raw_path: path,
                 exists: false,
                 parsed: false,
                 error: Some(message),
@@ -45,6 +48,7 @@ pub(super) fn inspect(
         Err(detail) => {
             return ConfigInventory {
                 path: path_string,
+                raw_path: path,
                 exists: true,
                 parsed: false,
                 error: Some(crate::inventory::parse_error_message(harness, &detail)),
@@ -54,11 +58,39 @@ pub(super) fn inspect(
     };
     ConfigInventory {
         path: path_string,
+        raw_path: path,
         exists: true,
         parsed: true,
         error: None,
         servers,
     }
+}
+
+/// Go's JSON encoder replaces each invalid byte, not each invalid sequence.
+fn path_json_text(path: &Path) -> String {
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::OsStrExt;
+        let mut bytes = path.as_os_str().as_bytes();
+        let mut text = String::new();
+        while !bytes.is_empty() {
+            match std::str::from_utf8(bytes) {
+                Ok(valid) => {
+                    text.push_str(valid);
+                    break;
+                }
+                Err(error) => {
+                    let valid = error.valid_up_to();
+                    text.push_str(&String::from_utf8_lossy(&bytes[..valid]));
+                    text.push('\u{fffd}');
+                    bytes = &bytes[valid + 1..];
+                }
+            }
+        }
+        text
+    }
+    #[cfg(not(unix))]
+    path.to_string_lossy().into_owned()
 }
 
 /// Decodes a config exactly like Go's `Parse` and lists its servers.
