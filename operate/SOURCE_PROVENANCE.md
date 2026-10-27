@@ -18,6 +18,31 @@ The source/consumer cutover completed on 2026-09-13. Brain owns and managed-buil
 
 **Verification contract:** the receiving tree was compared against `symaira-cockpit` `08077447eb88f9c06ab16b2cee14c4eba2ba60b0` programmatically by tracked path, file mode, and blob hash. The historical source comparison is provenance evidence; it does not make the retired Cockpit package a supported ownership route.
 
+## Freeform parser attribution
+
+`Sources/SymOperateCore/FreeformCRDT.swift` is adapted from
+[soso-song/freeform-to-markdown](https://github.com/soso-song/freeform-to-markdown),
+`src/freeform_to_markdown/parsing.py` at `b1269308fcf4966297b56ae497ec5bec41330429`,
+licensed under Apache-2.0 (repository root `LICENSE`). The Swift adaptation adds
+strict CRDT v6 header checks, bounded traversal, and first-line-only text extraction.
+The upstream NOTICE is reproduced here:
+
+> freeform-to-markdown
+> Copyright 2026 Soso Song
+>
+> This product is an independent interoperability tool and is not affiliated with,
+> endorsed by, or supported by Apple Inc. Apple and Freeform are trademarks of
+> Apple Inc., registered in the U.S. and other countries and regions.
+
+The Content-Language templates in `Sources/SymOperateCore/Resources/freeform-*.json`
+are structural interoperability references from Freeform 5.0 exports `ref1` and
+`ref-line`. All text and positions were cleared. Only formatting archives and schema
+fields are retained. Anchor construction follows the separately live-verified `s6b`
+spike. `freeform-image.json` comes from a Freeform 5.1 (macOS 27.2) export of a
+synthetic test image; resource identifier, filename, description and geometry were
+cleared and the optional mask was dropped (live-verified to paste without it).
+No private database snapshots or board contents are included.
+
 ## Resync history
 
 - **2026-09-11, first pass:** pinned `528985cc21efbd5318e781954c29aec0680a3874` (`test(operate): make permission probes injectable (#265)`); 80 files, none adapted.

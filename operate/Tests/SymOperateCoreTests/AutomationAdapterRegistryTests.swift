@@ -73,7 +73,7 @@ final class AutomationAdapterRegistryTests: XCTestCase {
         XCTAssertNil(decision.adapterIdentifier)
         XCTAssertFalse(decision.isExecutable)
         XCTAssertTrue(decision.reason.contains("automation"))
-        XCTAssertEqual(decision.rejections.count, 3)
+        XCTAssertEqual(decision.rejections.count, 4)
     }
 
     func testSelectionRequiresExplicitTargetIdentityAndRejectsMismatches() {
