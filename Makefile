@@ -25,7 +25,7 @@ endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash "$(CURDIR)/scripts/run-external-env.sh"
 
-.PHONY: rust-coverage build build-rust parity-smoke rust-go-printable-check usage-oracle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-raw-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint actionlint fmt-check fmt vet clean
+.PHONY: rust-coverage build build-rust parity-smoke rust-go-printable-check usage-oracle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-config-toml-oracle-check skills-raw-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint actionlint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
@@ -178,6 +178,10 @@ managed-oracle-check:
 skills-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/skills-oracle -check
 
+## skills-config-toml-oracle-check: Ensure the symskills config TOML decode fixture matches the real Go decoders
+skills-config-toml-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/skills-config-toml-oracle -check
+
 ## skills-raw-oracle-check: Ensure the recorded MCP raw-Skills replies still equal the real Go binary's (needs full git history and Go 1.26.7)
 skills-raw-oracle-check:
 	python3 scripts/skills-native-oracle/raw_layer_oracle.py check
@@ -250,7 +254,7 @@ rust-fast:
 # in scripts/cli-oracle and in the cli_tree_tests.rs consumer) are fixed and
 # all four pass locally; per #631 they are wired back in this same change so
 # CI proves them before merge, rather than being re-added on faith.
-rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check usage-gateway-lifecycle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
+rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check usage-gateway-lifecycle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-config-toml-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
