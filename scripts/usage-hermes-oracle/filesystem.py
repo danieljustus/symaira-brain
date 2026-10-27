@@ -7,6 +7,9 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'usage-provider-files-oracle'))
+from reference_parity import reference_resolution_divergence
+
 output=pathlib.Path(sys.argv[3])
 if os.name!='posix':
     output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':[],'native_windows_capability_root':'requires native Windows constructor/CI proof'})+'\n', encoding='utf-8')
@@ -39,6 +42,6 @@ with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
         report=json.loads(base64.b64decode(native['stdout_b64']))
         assert next(row for row in report['providers']if row['id']=='nous')['configured']is False
         if kind=='fifo':assert observations[0]['timed_out'],'immutable Go FIFO behavior changed; reassess native-only contract'
-        else:assert observations[0]==native,(kind,observations)
+        else:assert observations[0]==native or reference_resolution_divergence(observations[0],native),(kind,observations)
         records.append({'id':kind,'go':observations[0],'rust':native,'native_only_safety_contract':kind=='fifo'})
 output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':records},indent=2)+'\n', encoding='utf-8')

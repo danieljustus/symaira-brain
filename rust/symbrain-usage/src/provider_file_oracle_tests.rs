@@ -153,9 +153,24 @@ fn compare_record(record: &serde_json::Value) -> bool {
     };
     let transport = Arc::new(Unauthorized(Mutex::new(Vec::new())));
     let report = Service::with_transport(vec![provider], transport.clone()).report();
+    let actual = serde_json::to_value(report).expect("report");
+    let mut expected = record["report"].clone();
+    // Fresh evidence is rebuilt from the immutable pre-#930 Go revision.
+    // Promote only its explicit resolution failure; retain the exact diagnostic
+    // and compare every other report field, request and filesystem observation.
+    for provider in expected["providers"].as_array_mut().expect("providers") {
+        if let Some(detail) = provider["auth_status"]["detail"].as_str()
+            && detail.starts_with("credential resolution failed: ")
+        {
+            let detail = detail.to_owned();
+            assert_eq!(provider["configured"], false);
+            assert!(provider.get("error").is_none());
+            provider["configured"] = true.into();
+            provider["error"] = detail.into();
+        }
+    }
     assert_eq!(
-        serde_json::to_value(report).expect("report"),
-        record["report"],
+        actual, expected,
         "{}: complete provider file report",
         record["id"]
     );
