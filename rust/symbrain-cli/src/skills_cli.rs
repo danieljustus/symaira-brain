@@ -20,6 +20,8 @@ use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
 
+#[path = "skills_doctor_config.rs"]
+mod doctor_config;
 #[path = "skills_sync_flags.rs"]
 mod sync_flags;
 
@@ -138,17 +140,29 @@ fn current_project_dir() -> PathBuf {
 
 /// Keeps the native status slice limited to the `OpenCode` static contract.
 ///
-/// Custom config, other targets, and every dynamic target state stay on the Go
-/// implementation until their byte contract is independently frozen.
+/// Custom config files, other targets, and every dynamic target state stay on
+/// the Go implementation until their byte contract is independently frozen.
+/// The one custom-config shape replayed natively is the environment-only
+/// override of `skills status --target opencode` (see [`status_env_config`]).
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     match args.first().map(|arg| arg.to_string_lossy()) {
         Some(verb) if verb == "status" => {
             let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
                 return true;
             };
-            let opencode_needs_go = if target.as_deref() == Some("opencode")
-                && matches!(scope.as_str(), "user" | "project")
-            {
+            if !matches!(scope.as_str(), "user" | "project") {
+                return true;
+            }
+            if !go_home_defined() {
+                // Go's `os.UserHomeDir` fails: `config.Load()` falls back to
+                // the defaults and the install scan exits 1 with
+                // `$HOME is not defined`, which native code would turn into
+                // an empty report. This gate precedes the unsafe-marker rule
+                // below: Go reports the missing home before it ever scans a
+                // skill root.
+                return true;
+            }
+            let opencode_needs_go = if target.as_deref() == Some("opencode") {
                 match opencode_status_needs_go(&scope) {
                     Ok(needs_go) => Some(needs_go),
                     // Classified unsafe marker input must not reach Go, even
@@ -158,7 +172,12 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             } else {
                 None
             };
-            if has_dynamic_config() || !matches!(scope.as_str(), "user" | "project") {
+            if has_dynamic_config()
+                && !(target.as_deref() == Some("opencode") && status_env_config().is_some())
+            {
+                // Only the environment-only override shape of the OpenCode
+                // static contract is replayed natively (#770 residual
+                // fallback); every other custom-config shape stays on Go.
                 return true;
             }
             match target.as_deref() {
@@ -181,18 +200,31 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
                 Some(_) => true,
             }
         }
-        // The native targets slice is deliberately only the no-argument,
-        // user-scope/default-config contract. Keep every parsed or dynamic
-        // variant on Go until its bytes are frozen independently.
-        // The native targets inventory observes the harness roots itself, so
-        // dynamic target state no longer forces Go. A custom symskills config
-        // can still register additional targets, and malformed flags belong to
-        // the Go flag package.
+        // `skills targets` never reads the symskills configuration: Go's
+        // `cmdSkillsTargets` loads it only for the home and project
+        // directories and passes just those to `harness.ListStatus`, whose
+        // static target table is not extended by `[[targets]]` (that decode,
+        // `config.LoadTargets`, has no production caller). Environment
+        // overrides and config files of any shape (valid, malformed, a
+        // directory, a custom target) therefore cannot change a byte of the
+        // report and do not need Go. What stays on Go: flag-package errors,
+        // unknown scopes, and an undefined home, where `os.UserHomeDir` fails
+        // and Go lists the roots against an empty home instead of the `.`
+        // native code would substitute.
         Some(verb) if verb == "targets" => {
-            parse_scope_flag(&args[1..]).is_err() || has_dynamic_config()
+            parse_scope_flag(&args[1..]).is_err() || !go_home_defined()
         }
         Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
-        Some(verb) if verb == "doctor" => args.len() != 1 || has_dynamic_config(),
+        // `skills doctor` prints the merged symskills config, which native code
+        // rebuilds from the environment and Go's whole-config reset on a
+        // failing load (see `doctor_config`). Flag-package errors, an
+        // undefined home and every shape the module cannot reproduce stay on
+        // Go.
+        Some(verb) if verb == "doctor" => {
+            parse_list_flags(&args[1..]).is_err()
+                || !go_home_defined()
+                || doctor_config::resolve().is_none()
+        }
         _ => false,
     }
 }
@@ -233,7 +265,7 @@ struct SkillsDoctorReport {
 
 fn has_skill_log() -> bool {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let current = home.join(".local/share/symskills/events.jsonl");
+    let current = skills_log_path(&home);
     log_path_requires_go(&current)
         || log_path_requires_go(&current.with_file_name("events.1.jsonl"))
 }
@@ -332,6 +364,277 @@ fn parse_skill_log_args(args: &[OsString]) -> Result<SkillLogArgs, &'static str>
     Ok(parsed)
 }
 
+/// Environment overrides of the Go `symskills` config that `skills status`
+/// either reads (`LIBRARY_DIR`, `BASE_DIR`) or provably ignores.
+const STATUS_INERT_ENV: &[&str] = &["SYMSKILLS_RENDER_DIR", "SYMSKILLS_PROFILES_DIR"];
+
+/// Whether Go's `os.UserHomeDir` succeeds: `$HOME` (`%USERPROFILE%` on
+/// Windows) must be set and non-empty. Without it `config.Load()` and the
+/// install scan both fail in Go, so the report is Go's to produce.
+fn go_home_defined() -> bool {
+    let name = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
+    std::env::var_os(name).is_some_and(|value| !value.is_empty())
+}
+
+/// Whether `value` has a `.` or `..` path element. Go's `filepath.Join` cleans
+/// those lexically, while the kernel resolves `..` through symlinks, so the
+/// two spellings of one path can name different files.
+fn has_dot_segment(value: &str) -> bool {
+    value
+        .split(std::path::is_separator)
+        .any(|segment| segment == "." || segment == "..")
+}
+
+/// Whether `value` is already in `filepath.Clean` form: no `.`/`..` element,
+/// no empty element (doubled or trailing separator) other than the leading
+/// root separator.
+fn is_lexically_clean(value: &str) -> bool {
+    if has_dot_segment(value) {
+        return false;
+    }
+    let body = value.strip_prefix(std::path::is_separator).unwrap_or(value);
+    body.is_empty() || !body.split(std::path::is_separator).any(str::is_empty)
+}
+
+/// Windows path shapes where Rust's `Path::is_absolute` and Go's
+/// `filepath.IsAbs` disagree or that name devices rather than files: UNC and
+/// verbatim/device prefixes (`\\host\share`, `\\?\`, `\\.\`), drive-relative
+/// and rooted-without-drive paths, and reserved device names. They stay on Go.
+/// Pure so every platform exercises it.
+fn windows_path_needs_go(value: &str) -> bool {
+    let normalized = value.replace('/', "\\");
+    if normalized.starts_with("\\\\") {
+        return true;
+    }
+    let bytes = normalized.as_bytes();
+    let drive_absolute =
+        bytes.len() >= 3 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' && bytes[2] == b'\\';
+    if !drive_absolute {
+        return true;
+    }
+    normalized[3..].split('\\').any(windows_reserved_element)
+}
+
+/// Mirror of Go's `internal/filepathlite.isReservedName` (go1.26): the device
+/// base name is the element cut at its first `:` or `.`, trailing spaces
+/// dropped. `CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`, the
+/// superscript forms `COM¹`/`COM²`/`COM³` and `LPT¹`/`LPT²`/`LPT³`, `CONIN$`
+/// and `CONOUT$` are reserved; `COM0` is not. Whether an element with a
+/// suffix is still reserved depends on the Windows build, so every such
+/// shape stays on Go.
+fn windows_reserved_element(element: &str) -> bool {
+    let base = element.split([':', '.']).next().unwrap_or("");
+    let base = base.trim_end_matches([' ', '\u{a0}']);
+    let upper = base.to_ascii_uppercase();
+    if matches!(
+        upper.as_str(),
+        "CON" | "PRN" | "AUX" | "NUL" | "CONIN$" | "CONOUT$"
+    ) {
+        return true;
+    }
+    if let Some(suffix) = upper
+        .strip_prefix("COM")
+        .or_else(|| upper.strip_prefix("LPT"))
+    {
+        return matches!(suffix.as_bytes(), [b'1'..=b'9'])
+            || matches!(suffix, "\u{b2}" | "\u{b3}" | "\u{b9}");
+    }
+    false
+}
+
+/// Go's `syscall.Errno.Is(ErrNotExist)` on Windows: exactly the raw codes
+/// `ERROR_FILE_NOT_FOUND` (2), `ERROR_PATH_NOT_FOUND` (3) and
+/// `ERROR_BAD_NETPATH` (53). Rust's `ErrorKind::NotFound` is wider
+/// (`ERROR_INVALID_DRIVE` 15, `ERROR_BAD_PATHNAME` 161 and others), and for
+/// those Go's TOML decode fails instead of skipping the file. Pure so every
+/// platform exercises it.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn windows_code_is_not_exist(code: i32) -> bool {
+    matches!(code, 2 | 3 | 53)
+}
+
+/// Go's `os.IsNotExist` for a stat error: plain `ENOENT` on Unix, the raw
+/// Windows codes of [`windows_code_is_not_exist`] elsewhere. `ENOTDIR`,
+/// `EACCES`, `ELOOP` and every other failure make Go's TOML decode fail
+/// instead of skipping the file.
+fn is_go_not_exist(error: &std::io::Error) -> bool {
+    #[cfg(unix)]
+    {
+        error.raw_os_error() == Some(2)
+    }
+    #[cfg(not(unix))]
+    {
+        error.raw_os_error().is_some_and(windows_code_is_not_exist)
+    }
+}
+
+/// `true` only when `os.Stat(path)` would report "does not exist" (following
+/// symlinks, so a dangling link is absent exactly as in Go).
+fn config_probe_absent(path: &std::path::Path) -> bool {
+    matches!(fs::metadata(path), Err(error) if is_go_not_exist(&error))
+}
+
+/// A config-file source (`config.toml` or `.symskills.toml`) that Go merges
+/// before the environment, or any shape in which Go's probe of it is not a
+/// plain "does not exist".
+///
+/// Go's `configkit.mergeFile` skips a source only when `os.Stat` reports
+/// `ENOENT`; a directory, an unreadable or non-directory parent, a symlink loop
+/// or any other stat/decode error makes `config.Load()` fail, and the caller
+/// then replaces the whole config, environment overrides included, with the
+/// defaults. So the native path requires both probes to be a verified absence
+/// and every other outcome stays on Go; it also owns the TOML decoding.
+fn config_files_need_go() -> bool {
+    // Go's `configkit.DefaultPath` honours `XDG_CONFIG_HOME` only when absolute.
+    let root = match std::env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .filter(|path| path.is_absolute())
+    {
+        Some(xdg) => xdg,
+        None => match symbrain_core::xdg::home_dir() {
+            Some(home) => home.join(".config"),
+            None => return true,
+        },
+    };
+    let text = root.to_string_lossy();
+    if has_dot_segment(&text) || (cfg!(windows) && windows_path_needs_go(&text)) {
+        return true;
+    }
+    let Ok(cwd) = std::env::current_dir() else {
+        return true;
+    };
+    !(config_probe_absent(&root.join("symskills/config.toml"))
+        && config_probe_absent(&cwd.join(".symskills.toml")))
+}
+
+/// Go `strconv.ParseBool`: the only spellings `SYMSKILLS_VCS_ENABLED` accepts.
+fn go_parse_bool(value: &std::ffi::OsStr) -> bool {
+    const SPELLINGS: &[&str] = &[
+        "1", "t", "T", "TRUE", "true", "True", "0", "f", "F", "FALSE", "false", "False",
+    ];
+    value.to_str().is_some_and(|text| SPELLINGS.contains(&text))
+}
+
+/// A shape native `skills status` cannot replay exactly.
+#[derive(Debug)]
+struct GoOnlyConfig;
+
+/// Whether every existing component of `path` is a real directory the
+/// process can enter **and list**, and the final directory (when present) can
+/// be traversed. A symlinked ancestor, a non-directory ancestor, a mode-000
+/// directory, a search-only (`--x`) ancestor or any stat failure other than
+/// "absent" makes the Rust install layer fail where Go succeeds: the stat walk
+/// below needs only search permission on the parents, but the capability-based
+/// install layer opens every ancestor read-only, which also needs read
+/// permission. Those paths stay on Go.
+fn override_dir_is_plain(path: &std::path::Path) -> bool {
+    let mut prefix = PathBuf::new();
+    let mut present = true;
+    for component in path.components() {
+        prefix.push(component);
+        if matches!(component, std::path::Component::Prefix(_)) {
+            continue;
+        }
+        if matches!(component, std::path::Component::RootDir) {
+            if fs::read_dir(&prefix).is_err() {
+                return false;
+            }
+            continue;
+        }
+        match fs::symlink_metadata(&prefix) {
+            Ok(metadata) if metadata.is_dir() => {
+                if fs::read_dir(&prefix).is_err() {
+                    return false;
+                }
+            }
+            Err(error) if is_go_not_exist(&error) => {
+                present = false;
+                break;
+            }
+            _ => return false,
+        }
+    }
+    // The listing of every existing component, the leaf included, was checked
+    // above; the leaf must also be searchable.
+    !present || fs::metadata(path.join(".")).is_ok()
+}
+
+/// An absolute, lexically clean override directory whose existing ancestors
+/// are plain directories. Relative values resolve against the working
+/// directory in Go; `.`/`..`/doubled-separator spellings and symlinked
+/// ancestors resolve differently in the capability-based install layer; a
+/// linked or special-file root is reported with cap-std diagnostics; an
+/// unreadable directory is an error natively but not in Go. All stay on Go.
+fn status_override_dir(name: &str) -> Result<Option<PathBuf>, GoOnlyConfig> {
+    let Some(value) = std::env::var_os(name) else {
+        return Ok(None);
+    };
+    let Some(text) = value.to_str() else {
+        return Err(GoOnlyConfig);
+    };
+    let path = PathBuf::from(&value);
+    if !path.is_absolute()
+        || !is_lexically_clean(text)
+        || (cfg!(windows) && windows_path_needs_go(text))
+        || !override_dir_is_plain(&path)
+    {
+        return Err(GoOnlyConfig);
+    }
+    Ok(Some(path))
+}
+
+/// Library and base-snapshot directories configured purely through
+/// `SYMSKILLS_*` environment variables.
+#[derive(Debug, Default)]
+struct StatusEnvConfig {
+    library_dir: Option<PathBuf>,
+    base_dir: Option<PathBuf>,
+}
+
+/// Returns the environment-only config native `skills status` replays, or
+/// `None` when the shape must stay on Go.
+///
+/// Go builds its status options from `config.Load()`: defaults, then
+/// `config.toml`, then `.symskills.toml`, then `SYMSKILLS_*` variables. Go
+/// status reads only `LibraryDir`, `BaseDir` and `CacheDir`; `RenderDir`,
+/// `ProfilesDir` and `VCS.Enabled` never reach it, and a variable that fails
+/// config decoding (an invalid `SYMSKILLS_VCS_ENABLED` bool) makes Go discard
+/// the whole config and use defaults. A `CacheDir` override moves the status
+/// render cache Go writes, any config file carries TOML Go owns, and the
+/// native-only `SYMBRAIN_SKILLS_*` variables are not Go config, so all three
+/// stay on Go.
+fn status_env_config() -> Option<StatusEnvConfig> {
+    if config_files_need_go()
+        || std::env::var_os("SYMSKILLS_CACHE_DIR").is_some()
+        || std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
+        || std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR").is_some()
+    {
+        return None;
+    }
+    if let Some(value) = std::env::var_os("SYMSKILLS_VCS_ENABLED")
+        && !go_parse_bool(&value)
+    {
+        return None;
+    }
+    Some(StatusEnvConfig {
+        library_dir: status_override_dir("SYMSKILLS_LIBRARY_DIR").ok()?,
+        base_dir: status_override_dir("SYMSKILLS_BASE_DIR").ok()?,
+    })
+}
+
+/// Whether any `SYMSKILLS_*` variable is present, in which case the status
+/// report must be exactly Go's bytes with none of the #621 render extension.
+fn status_env_active() -> bool {
+    [
+        "SYMSKILLS_LIBRARY_DIR",
+        "SYMSKILLS_BASE_DIR",
+        "SYMSKILLS_VCS_ENABLED",
+    ]
+    .iter()
+    .chain(STATUS_INERT_ENV)
+    .any(|name| std::env::var_os(name).is_some())
+}
+
 fn has_dynamic_config() -> bool {
     const CONFIG_OVERRIDES: &[&str] = &[
         "SYMSKILLS_LIBRARY_DIR",
@@ -349,12 +652,42 @@ fn has_dynamic_config() -> bool {
     {
         return true;
     }
-    let config_root = std::env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
-        .unwrap_or_else(|| PathBuf::from(".config"));
-    config_root.join("symskills/config.toml").is_file()
-        || current_project_dir().join(".symskills.toml").is_file()
+    // Without a home Go's `config.Load()` fails and every report is built from
+    // defaults resolved against an undefined home (`.claude/skills` rather
+    // than `./.claude/skills`), which native code cannot reproduce.
+    !go_home_defined() || config_files_need_go()
+}
+
+/// The library `skills list` scans, or `None` when the configuration forces
+/// the Go implementation.
+///
+/// Go's `cmdSkillsList` reads exactly one config field: `LibraryDir` goes to
+/// `skill.ListLibrary`; the events log and the install scan hang off the home
+/// directory, and `BaseDir`, `CacheDir`, `RenderDir`, `ProfilesDir` and
+/// `VCS.Enabled` never reach it. An environment-only configuration is
+/// therefore replayed natively with `SYMSKILLS_LIBRARY_DIR` moving the scan
+/// and the other overrides inert. Everything native cannot reproduce stays on
+/// Go: any config file (the TOML decode is Go's), an undefined home, the
+/// native-only `SYMBRAIN_SKILLS_*` variables (Go ignores them), an invalid
+/// `SYMSKILLS_VCS_ENABLED` bool (Go then discards the whole config) and a
+/// library override that [`status_override_dir`] does not accept.
+fn list_library_dir() -> Option<PathBuf> {
+    if !go_home_defined()
+        || config_files_need_go()
+        || std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
+        || std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR").is_some()
+    {
+        return None;
+    }
+    if let Some(value) = std::env::var_os("SYMSKILLS_VCS_ENABLED")
+        && !go_parse_bool(&value)
+    {
+        return None;
+    }
+    match status_override_dir("SYMSKILLS_LIBRARY_DIR").ok()? {
+        Some(path) => Some(path),
+        None => Some(resolve_skills_dirs().0),
+    }
 }
 
 /// Reports whether the native `skills list` scan has to stay on Go for this
@@ -573,7 +906,7 @@ pub fn run(
         "targets" => run_targets(rest, stdout, stderr, format),
         "log" => run_log(rest, stdout, stderr, format),
         "sync" => run_sync(rest, stdout, stderr, format),
-        "doctor" => run_doctor(rest, stdout, stderr, format),
+        "doctor" => return run_doctor(stdout, format),
         _ => {
             let _ = writeln!(stderr, "symbrain skills: unknown subcommand {verb:?}\n");
             let _ = write!(stderr, "{SKILLS_USAGE}");
@@ -584,14 +917,20 @@ pub fn run(
 
 fn run_list(args: &[OsString], stdout: &mut dyn Write, format: OutputFormat) -> Option<u8> {
     parse_list_flags(args).ok()?;
-    let (library_dir, _, _) = resolve_skills_dirs();
+    // A configuration native code cannot replay still scans the default
+    // library: classified input rejections are reported natively even then
+    // (they must never re-enter the legacy Go loader), everything else is Go's.
+    let (library_dir, dynamic_config) = match list_library_dir() {
+        Some(path) => (path, false),
+        None => (resolve_skills_dirs().0, true),
+    };
     let (entries, issues) = list_library(&library_dir);
-    if library_needs_go(&issues, has_dynamic_config()) {
+    if library_needs_go(&issues, dynamic_config) {
         return None;
     }
 
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let log_path = skills_log_path(&home);
     let metadata_options = MetadataOptions {
         events: read_events_log(&log_path),
         log_path,
@@ -676,6 +1015,28 @@ fn table_content(value: &str) -> String {
     value.replace(['\t', '\r', '\n'], " ")
 }
 
+/// Library, base, home and render roots for one status scan.
+///
+/// Any `SYMSKILLS_*` override reproduces Go's bytes exactly: the configured
+/// directories replace the defaults and the #621 render extension, which Go
+/// never prints, stays off.
+fn status_dirs() -> (PathBuf, PathBuf, PathBuf, Option<PathBuf>) {
+    let (mut library_dir, mut base_dir, home_dir) = resolve_skills_dirs();
+    if !status_env_active() {
+        return (
+            library_dir,
+            base_dir,
+            home_dir,
+            Some(skills_data_root().join("rendered")),
+        );
+    }
+    if let Some(config) = status_env_config() {
+        library_dir = config.library_dir.unwrap_or(library_dir);
+        base_dir = config.base_dir.unwrap_or(base_dir);
+    }
+    (library_dir, base_dir, home_dir, None)
+}
+
 fn run_status(
     args: &[OsString],
     stdout: &mut dyn Write,
@@ -705,7 +1066,7 @@ fn run_status(
         return exit::USAGE;
     }
 
-    let (library_dir, base_dir, home_dir) = resolve_skills_dirs();
+    let (library_dir, base_dir, home_dir, render_dir) = status_dirs();
     let project_dir = current_project_dir();
     let targets = target.into_iter().collect();
 
@@ -717,7 +1078,7 @@ fn run_status(
         library_dir,
         base_dir: Some(base_dir),
         skills: Vec::new(),
-        render_dir: Some(skills_data_root().join("rendered")),
+        render_dir,
     };
 
     let statuses = match install::status(&opts) {
@@ -974,7 +1335,7 @@ fn run_log(
         }
     };
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let path = home.join(".local/share/symskills/events.jsonl");
+    let path = skills_log_path(&home);
     let skill = parsed
         .skill
         .as_deref()
@@ -1096,13 +1457,11 @@ fn run_sync(
     exit::OK
 }
 
-fn run_doctor(
-    _args: &[OsString],
-    stdout: &mut dyn Write,
-    _stderr: &mut dyn Write,
-    format: OutputFormat,
-) -> u8 {
-    let (report, pairs) = skills_doctor_report();
+/// `symbrain skills doctor`. Returns `None` when the invocation is Go's, so
+/// the routing decision and the report share one config resolution.
+fn run_doctor(stdout: &mut dyn Write, format: OutputFormat) -> Option<u8> {
+    let config = doctor_config::resolve()?;
+    let (report, pairs) = skills_doctor_report(config);
 
     match format {
         OutputFormat::Json => {
@@ -1110,37 +1469,31 @@ fn run_doctor(
         }
         OutputFormat::Table => {
             for (name, value) in pairs {
-                let _ = writeln!(stdout, "{name:<11} {value}");
+                let _ = writeln!(stdout, "{name:<11} {}", or_dash(&value));
             }
         }
     }
 
-    exit::OK
+    Some(exit::OK)
 }
 
-fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
+fn skills_doctor_report(
+    config: doctor_config::DoctorConfig,
+) -> (SkillsDoctorReport, [(&'static str, String); 9]) {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let project_dir = current_project_dir();
     let config_path = skills_config_path();
-    let profiles_dir = config_path
-        .parent()
-        .map_or_else(|| PathBuf::from("profiles"), |path| path.join("profiles"));
-    let data_root = symbrain_core::paths::skills_data_dir()
-        .map_or_else(|| PathBuf::from("."), |location| location.dir);
-    let cache_root = symbrain_core::paths::skills_cache_dir()
-        .map_or_else(|| PathBuf::from("."), |location| location.dir);
-    let library_dir = data_root.join("library");
-    let render_dir = data_root.join("rendered");
-    let base_dir = data_root.join("base");
-    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let log_path = skills_log_path(&home);
     let config = SkillsDoctorConfig {
-        library_dir: library_dir.display().to_string(),
-        render_dir: render_dir.display().to_string(),
-        cache_dir: cache_root.display().to_string(),
-        profiles_dir: profiles_dir.display().to_string(),
-        base_dir: base_dir.display().to_string(),
+        library_dir: config.library_dir,
+        render_dir: config.render_dir,
+        cache_dir: config.cache_dir,
+        profiles_dir: config.profiles_dir,
+        base_dir: config.base_dir,
         targets: None,
-        vcs: SkillsDoctorVcs { enabled: true },
+        vcs: SkillsDoctorVcs {
+            enabled: config.vcs_enabled,
+        },
     };
     let targets = symbrain_skills::default_targets()
         .into_iter()
@@ -1155,10 +1508,10 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
         })
         .collect();
     let report = SkillsDoctorReport {
+        profiles_dir: config.profiles_dir.clone(),
         config,
         config_path: config_path.display().to_string(),
         log_path: log_path.display().to_string(),
-        profiles_dir: profiles_dir.display().to_string(),
         project_dir: project_dir.display().to_string(),
         targets,
     };
@@ -1176,6 +1529,12 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
     (report, pairs)
 }
 
+/// Go `filepath.Join(home, ".local", "share", "symskills", "events.jsonl")`:
+/// native separators on Windows, which `Path::join` of a `/` literal keeps.
+fn skills_log_path(home: &std::path::Path) -> PathBuf {
+    native_join(home, ".local/share/symskills/events.jsonl")
+}
+
 fn skills_config_path() -> PathBuf {
     let root = std::env::var_os("XDG_CONFIG_HOME")
         .filter(|value| !value.is_empty())
@@ -1183,7 +1542,12 @@ fn skills_config_path() -> PathBuf {
         .filter(|path| path.is_absolute())
         .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
         .unwrap_or_else(|| PathBuf::from(".config"));
-    root.join("symskills/config.toml")
+    config_path_under(&root)
+}
+
+/// Go `filepath.Join(root, "symskills", "config.toml")` for a resolved config root.
+fn config_path_under(root: &std::path::Path) -> PathBuf {
+    native_join(root, "symskills/config.toml")
 }
 
 fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<PathBuf> {
@@ -1199,8 +1563,187 @@ fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<
 
 #[cfg(test)]
 mod tests {
-    use super::{current_project_dir, library_needs_go, target_status_missing_root_needs_go_at};
+    #[cfg(unix)]
+    use super::override_dir_is_plain;
+    use super::{
+        config_path_under, current_project_dir, has_dot_segment, is_lexically_clean,
+        library_needs_go, skills_log_path, target_status_missing_root_needs_go_at,
+        windows_code_is_not_exist, windows_path_needs_go,
+    };
     use std::fs;
+
+    #[test]
+    fn dot_segments_and_lexical_cleanliness() {
+        for dotted in ["/a/../b", "/a/./b", "/a/..", "/a/.", "/.."] {
+            assert!(has_dot_segment(dotted), "{dotted}");
+            assert!(!is_lexically_clean(dotted), "{dotted}");
+        }
+        for clean in ["/", "/a", "/a/b", "/a/.hidden", "/a/..x/b", "/a/b.c"] {
+            assert!(!has_dot_segment(clean), "{clean}");
+            assert!(is_lexically_clean(clean), "{clean}");
+        }
+        for unclean in ["/a//b", "/a/b/", "//a"] {
+            assert!(!has_dot_segment(unclean), "{unclean}");
+            assert!(!is_lexically_clean(unclean), "{unclean}");
+        }
+    }
+
+    #[test]
+    fn windows_shapes_that_must_stay_on_go() {
+        for go_only in [
+            r"\\host\share",
+            r"\\host\share\dir",
+            r"\\?\C:\dir",
+            r"\\.\COM1",
+            "//host/share",
+            r"C:dir",
+            r"\dir",
+            "dir",
+            r"C:\NUL",
+            r"C:\dir\con.txt",
+            r"c:\dir\Aux",
+            r"C:\dir\COM1",
+            r"C:\dir\lpt9.log",
+            r"C:\dir\nul ",
+            r"C:\dir\CON:x",
+            r"C:\dir\con:stream:$DATA",
+            r"C:\dir\com1:",
+            r"C:\dir\NUL.txt:x",
+            r"C:\dir\aux .txt",
+            "C:\\dir\\COM\u{b9}",
+            "C:\\dir\\com\u{b2}",
+            "C:\\dir\\COM\u{b3}",
+            "C:\\dir\\LPT\u{b9}",
+            "C:\\dir\\lpt\u{b2}",
+            "C:\\dir\\LPT\u{b3}.txt",
+            "C:\\dir\\COM\u{b2}:x",
+            r"C:\dir\CONIN$",
+            r"C:\dir\conout$",
+        ] {
+            assert!(windows_path_needs_go(go_only), "{go_only}");
+        }
+        for native in [
+            r"C:\Users\dev",
+            "C:/Users/dev",
+            r"d:\a\b.c",
+            r"C:\dir\COM0",
+            r"C:\dir\console",
+            r"C:\dir\com10",
+            r"C:\dir\COM0:x",
+            r"C:\dir\LPT0",
+            "C:\\dir\\COM\u{b9}x",
+            "C:\\dir\\COM\u{2074}",
+            "C:\\dir\\\u{b9}COM",
+            r"C:\dir\xCON:y",
+            r"C:\dir\CONIN",
+        ] {
+            assert!(!windows_path_needs_go(native), "{native}");
+        }
+    }
+
+    #[test]
+    fn doctor_derived_paths_use_native_separators() {
+        // Go's `filepath.Join` emits one native separator everywhere; a `/`
+        // literal inside `Path::join` survives on Windows (SKL-015). Comparing
+        // against component-wise joins is separator agnostic.
+        #[cfg(windows)]
+        let base = std::path::Path::new(r"C:\Users\daniel");
+        #[cfg(not(windows))]
+        let base = std::path::Path::new("/Users/daniel");
+        assert_eq!(
+            skills_log_path(base),
+            base.join(".local")
+                .join("share")
+                .join("symskills")
+                .join("events.jsonl")
+        );
+        assert_eq!(
+            config_path_under(&base.join(".config")),
+            base.join(".config").join("symskills").join("config.toml")
+        );
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                skills_log_path(base).display().to_string(),
+                r"C:\Users\daniel\.local\share\symskills\events.jsonl"
+            );
+            assert_eq!(
+                config_path_under(&base.join(".config"))
+                    .display()
+                    .to_string(),
+                r"C:\Users\daniel\.config\symskills\config.toml"
+            );
+        }
+    }
+
+    #[test]
+    fn windows_not_exist_codes_match_go_errno_is() {
+        // ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND, _ERROR_BAD_NETPATH.
+        for code in [2, 3, 53] {
+            assert!(windows_code_is_not_exist(code), "{code}");
+        }
+        // ERROR_ACCESS_DENIED, ERROR_INVALID_DRIVE, ERROR_DIRECTORY,
+        // ERROR_BAD_PATHNAME, ERROR_INVALID_NAME, ERROR_CANT_RESOLVE_FILENAME.
+        for code in [0, 5, 15, 123, 267, 161, 1921] {
+            assert!(!windows_code_is_not_exist(code), "{code}");
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn override_dir_requires_listable_ancestors() {
+        use std::os::unix::fs::PermissionsExt;
+        let root = tempfile::tempdir().expect("temporary root");
+        let base = fs::canonicalize(root.path()).expect("canonical root");
+        let xonly = base.join("xonly");
+        fs::create_dir_all(xonly.join("library")).expect("library");
+        fs::create_dir_all(xonly.join("mid/library")).expect("nested library");
+        for mode in [0o311, 0o111] {
+            fs::set_permissions(&xonly, fs::Permissions::from_mode(mode)).expect("chmod");
+            let listable = fs::read_dir(&xonly).is_ok();
+            let leaf = override_dir_is_plain(&xonly.join("library"));
+            let absent = override_dir_is_plain(&xonly.join("absent/deeper"));
+            let nested = override_dir_is_plain(&xonly.join("mid/library"));
+            fs::set_permissions(&xonly, fs::Permissions::from_mode(0o755)).expect("restore");
+            if !listable {
+                assert!(!leaf, "search-only ancestor {mode:o}");
+                assert!(!absent, "absent leaf below search-only ancestor {mode:o}");
+                assert!(!nested, "nested leaf below search-only ancestor {mode:o}");
+            }
+        }
+        assert!(override_dir_is_plain(&xonly.join("library")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn override_dir_requires_plain_ancestors() {
+        use std::os::unix::fs::{PermissionsExt, symlink};
+        let root = tempfile::tempdir().expect("temporary root");
+        let base = fs::canonicalize(root.path()).expect("canonical root");
+        let real = base.join("real");
+        fs::create_dir_all(real.join("lib")).expect("real library");
+        symlink(&real, base.join("link")).expect("symlink");
+        fs::write(base.join("file"), "x").expect("file");
+
+        assert!(override_dir_is_plain(&real.join("lib")));
+        assert!(override_dir_is_plain(&real.join("absent/deeper")));
+        assert!(!override_dir_is_plain(&base.join("link/lib")));
+        assert!(!override_dir_is_plain(&base.join("link")));
+        assert!(!override_dir_is_plain(&base.join("file")));
+        assert!(!override_dir_is_plain(&base.join("file/child")));
+
+        let locked = real.join("locked");
+        fs::create_dir(&locked).expect("locked dir");
+        fs::set_permissions(&locked, fs::Permissions::from_mode(0o000)).expect("chmod");
+        let readable = fs::read_dir(&locked).is_ok();
+        let plain = override_dir_is_plain(&locked);
+        let nested = override_dir_is_plain(&locked.join("child"));
+        fs::set_permissions(&locked, fs::Permissions::from_mode(0o755)).expect("restore");
+        if !readable {
+            assert!(!plain, "mode-000 directory");
+            assert!(!nested, "child of mode-000 directory");
+        }
+    }
 
     #[test]
     fn list_fallback_uses_cached_typed_inventory_issues() {

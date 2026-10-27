@@ -86,12 +86,26 @@ jobs:
           fi
           echo "All actions are pinned to SHA."
 
+      - name: Check native Guard uploads retain every standalone report
+        run: python3 -m unittest discover -s scripts/guard-standalone-oracle -p test_upload_inventory.py -v
+
   macos-release-verification-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Prove notarization failures prevent publication
         run: python3 -m unittest discover -s scripts -p test_macos_release_verification.py -v
+
+  # Unit tests for the differential harness and the skills-status mutant
+  # runner: timeouts must stay failures and keep earlier diagnostics (#940).
+  differential-harness-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Differential harness timeout handling
+        run: python3 -m unittest discover -s scripts -p test_rust_differential.py -v
+      - name: Skills-status mutant classification
+        run: python3 -m unittest discover -s scripts/skills-status-config-oracle -p test_run.py -v
 
   # golangci-lint has a known incompatibility with Go 1.26 in this
   # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
@@ -351,6 +365,7 @@ jobs:
             ${{ runner.temp }}/guard-standalone-config-warnings.json
             ${{ runner.temp }}/guard-standalone-config-paths.json
             ${{ runner.temp }}/guard-standalone-command-tree.json
+            ${{ runner.temp }}/guard-standalone-scan-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
             ${{ runner.temp }}/guard-standalone-windows-path-reference.json
             ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
@@ -670,7 +685,10 @@ jobs:
             ${{ runner.temp }}/guard-standalone-config-warnings.json
             ${{ runner.temp }}/guard-standalone-config-paths.json
             ${{ runner.temp }}/guard-standalone-command-tree.json
+            ${{ runner.temp }}/guard-standalone-scan-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
             ${{ runner.temp }}/guard-standalone-binaries/
           if-no-files-found: error
           retention-days: 14
@@ -1008,7 +1026,10 @@ jobs:
             ${{ runner.temp }}/guard-standalone-config-warnings.json
             ${{ runner.temp }}/guard-standalone-config-paths.json
             ${{ runner.temp }}/guard-standalone-command-tree.json
+            ${{ runner.temp }}/guard-standalone-scan-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
             ${{ runner.temp }}/guard-standalone-binaries/
           if-no-files-found: error
           retention-days: 14
@@ -2145,7 +2166,7 @@ jobs:
 
       - name: goreleaser release --snapshot --clean
         id: snapshot
-        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           distribution: goreleaser
           version: '~> v2'

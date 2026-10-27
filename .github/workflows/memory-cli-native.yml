@@ -26,7 +26,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read
@@ -52,7 +52,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up the pinned SQLite checker interpreter
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.13.7'
       - name: Verify portable checker provider preparation contracts
@@ -92,6 +92,7 @@ jobs:
           umask 022
           cargo test -p symbrain-cli --lib --all-features --locked memory_cli:: 2>&1 | tee "$TEST_LOG"
           cargo test -p symbrain-cli --test memory_set_sigpipe --all-features --locked 2>&1 | tee -a "$TEST_LOG"
+          cargo test -p symbrain-cli --test memory_store_creation --all-features --locked 2>&1 | tee -a "$TEST_LOG"
           cargo test -p symbrain-memory --all-targets --all-features --locked 2>&1 | tee -a "$TEST_LOG"
       - name: Execute immutable Go subprocess parity
         env:
@@ -131,6 +132,13 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/controls.py --report "$REPORT"
+      - name: Require store-creation failure controls
+        env:
+          REPORT: ${{ runner.temp }}/memory-cli-creation-controls.json
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/creation_controls.py --report "$REPORT"
       - name: Record native SDK and exact head
         if: always()
         env:

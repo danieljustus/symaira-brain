@@ -47,17 +47,15 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         return true;
     }
     let path = resolve_db_path(Some(&parsed.raw("db")));
-    if !database_path_is_usable(&path) {
-        return true;
+    // A database that does not exist yet (or is not a regular file) has no
+    // rows to hydrate: the native opener creates it with the shipped modes or
+    // reports the shipped open error, so no Go admission applies to it.
+    if !path.is_file() {
+        return false;
     }
     if matches!(verb, "list" | "rules" | "search")
-        && path.is_file()
         && !symbrain_memory::direct_reads_supported(&path, verb)
     {
-        return true;
-    }
-    // File/directory modes for newly created stores are still a release gate.
-    if matches!(verb, "set" | "delete") && !path.is_file() {
         return true;
     }
     if verb == "set" {
@@ -81,35 +79,4 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         }
     }
     false
-}
-
-/// Reports whether the resolved database path can be opened.
-///
-/// A missing database is fine as long as its directory (or the nearest
-/// existing ancestor) is writable; otherwise the shipped implementation's
-/// directory-creation error is the contract, and the command stays on Go.
-pub(super) fn database_path_is_usable(path: &std::path::Path) -> bool {
-    if path.is_file() {
-        return true;
-    }
-    let mut current = path.parent();
-    while let Some(directory) = current {
-        match std::fs::metadata(directory) {
-            Ok(metadata) => return is_writable(&metadata),
-            Err(_) => current = directory.parent(),
-        }
-    }
-    false
-}
-
-#[cfg(unix)]
-pub(super) fn is_writable(metadata: &std::fs::Metadata) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-
-    metadata.permissions().mode() & 0o200 != 0
-}
-
-#[cfg(not(unix))]
-pub(super) fn is_writable(metadata: &std::fs::Metadata) -> bool {
-    !metadata.permissions().readonly()
 }

@@ -483,6 +483,315 @@ existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
 three-OS CI at the final candidate head remains required. Dynamic config and
 unqualified multi-target CLI fallback remain part of #764.
 
+### Skills status environment-only config (#764 slice c)
+
+`symbrain skills status --target opencode [--scope user|project]` is native when
+the only custom `symskills` config is environment variables: `SYMSKILLS_LIBRARY_DIR`
+and `SYMSKILLS_BASE_DIR` (absolute, lexically clean, an existing directory or absent, with no symlinked
+ancestor) move the library and the frozen base snapshots, and
+`SYMSKILLS_RENDER_DIR`, `SYMSKILLS_PROFILES_DIR` and a valid
+`SYMSKILLS_VCS_ENABLED` bool are accepted because Go's status never reads them.
+Any of these variables makes the report exactly Go's bytes: the #621
+render-drift extension (RENDER column, `render_status`, `linked` presentation
+mode) stays off. Go decodes `config.Load()` as defaults, `config.toml`,
+`.symskills.toml`, then env; an env value that fails decoding (an invalid
+`SYMSKILLS_VCS_ENABLED`) makes Go discard the whole config, so that shape stays on Go
+rather than being re-derived. `XDG_CONFIG_HOME` is now honoured only when
+absolute, like `configkit.DefaultPath`, for every skills verb's config-file probe.
+
+Config probe and override hardening (review round 1). Go's `configkit.mergeFile`
+skips a config source only when `os.IsNotExist` accepts the `os.Stat` error:
+`ENOENT` on POSIX, or Windows codes 2, 3 and 53 (`ERROR_FILE_NOT_FOUND`,
+`ERROR_PATH_NOT_FOUND`, `_ERROR_BAD_NETPATH`). Other failed probes or a directory
+used as a config file make `config.Load()` fail and `loadSkillsEnv` replace the
+whole config, env overrides included, with the defaults. Native therefore
+requires both `$XDG_CONFIG_HOME|$HOME/.config/symskills/config.toml` and
+`./.symskills.toml` to be verified absent with those platform-specific codes
+through `fs::metadata` (symlinks followed, so dangling links are absent as in Go).
+A file used as a config directory is absent on Windows but returns `ENOTDIR` on
+POSIX. Any other probe outcome, a `.`/`..` element in the config root (Go cleans
+those lexically, the kernel does not), an unresolvable home or an unreadable
+working directory stays on Go. This
+also hardens the default-config probe shared by `list`, `targets`, `doctor` and
+`sync`. A `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` override is native only if it is absolute,
+lexically clean (no `.`/`..`/empty element, no trailing separator), every existing
+ancestor is a real directory (no symlinked or non-directory ancestor, no stat
+failure other than `ENOENT`), and an existing leaf can be listed and traversed
+(the Rust install layer opens roots capability-style and fails where Go succeeds
+for a symlinked ancestor such as macOS `/tmp`, for `..` through a symlink and for a
+mode-000 directory). An undefined or empty `$HOME` (`%USERPROFILE%` on Windows)
+makes Go exit 1 (`scan installs: $HOME is not defined`), so `skills status` with
+no resolvable home is routed to Go for every target, with or without `SYMSKILLS_*`
+variables. On Windows any UNC/verbatim/device, drive-relative, rooted-without-drive or
+reserved-device-name path (`windows_path_needs_go`, a pure function unit-tested on every
+OS) stays on Go because `Path::is_absolute` and `filepath.IsAbs` disagree there.
+
+Still on Go for `skills status`: any `config.toml`/`.symskills.toml` and any config probe
+not accepted by Go's platform-specific `os.IsNotExist`; `SYMSKILLS_CACHE_DIR` (Go writes its status render cache
+there; native never does); relative, empty, symlinked, non-clean or non-directory
+`SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` and overrides below a symlinked or unreadable
+ancestor; empty or invalid `SYMSKILLS_VCS_ENABLED`; the native-only
+`SYMBRAIN_SKILLS_*` variables; every non-OpenCode target or unqualified multi-target
+scan with config; unknown scope; flag errors; and the previously documented
+marker/symlink states. Known, unchanged side-effect difference: Go status writes a
+`status-render` cache under the skills cache directory for managed installs;
+native status writes nothing.
+
+Evidence: 33 native cases and 45 must-fallback cases (`skills_status_config_*` in
+`scripts/rust-differential.py`; 78 in total, 7 of the fallback cases need a non-root
+user because they rely on `chmod`: unreadable config dir, mode-000 and mode-444
+library leaf, and search-only `0311`/`0111` ancestors of the library and the base) compare the Go binary (built with Go 1.26.7 from
+base revision 90f0bbac6; this change touches no Go source) with the Rust binary. Native cases
+run Rust with `SYMBRAIN_GO_BINARY` unset and a Go-free `PATH`, and assert the fixture
+root (type, mode, size, mtime, link targets, content hashes) is unchanged;
+fallback cases assert the missing-fallback diagnostic when no Go route exists.
+Managed installs are genuine Go artifacts relocated verbatim. The 21 source mutants in
+`scripts/skills-status-config-oracle/run.py --mutants` (probe `is_file`, any-error-is-absent,
+symlink-following ancestor walk, unclean paths, unlistable ancestor, unsearchable leaf,
+HOME guard, HOME check in `has_dynamic_config`, HOME gate ordered after the
+unsafe-marker rule, XDG dot segment and relative XDG, among others) are each killed by
+the expected cases; the one shape covered by two independent layers (`skills status`
+with HOME unset and no `--target`) is deliberately not claimed by either single-line
+mutant.
+Each replay is classified KILLED, SURVIVED or INCONCLUSIVE(timeout|build|harness); only an
+all-KILLED run exits 0. Every replay keeps its own evidence folder (full streams, mutant
+executable sha256, a distinct differential-journal root with per-case timeout events), and a
+child that hits the 10 s deadline is reported as `TIMEOUT case=<id>` without discarding
+earlier comparison failures (#940).
+
+Review-delta hardening: every existing override-directory component must be
+*listable*, not merely searchable (the Rust install layer opens each ancestor
+read-only, so a `0311`/`0111` ancestor that Go traverses by path stays on Go);
+`has_dynamic_config` now includes the undefined-`HOME` check, so `skills list`,
+`targets`, `doctor` and `sync` also stay on Go without a home (their defaults
+derive from the home directory, e.g. `.claude/skills` versus `./.claude/skills`);
+the HOME gate of `skills status` runs before the classified-unsafe-marker rule
+(Go fails on `$HOME is not defined` before scanning a skill root); the Windows
+reserved-name check mirrors Go 1.26 `isReservedName` (`:`/`.` suffixes, trailing
+spaces, superscript `COM¹²³`/`LPT¹²³`, `COM0` not reserved), and the non-Unix
+not-exist test uses Go's `Errno.Is(ErrNotExist)` raw codes 2, 3 and 53
+(`ERROR_FILE_NOT_FOUND`, `ERROR_PATH_NOT_FOUND`, `_ERROR_BAD_NETPATH`) instead of
+`ErrorKind::NotFound`. Residuals: the Windows branches (`cfg!(windows)` guards,
+non-Unix not-exist mapping) are covered by the pure-function unit tests and a `cfg`
+review only; the local `cargo check --target x86_64-pc-windows-msvc` could not run
+because `aws-lc-sys` needs a Windows C toolchain. Reserved device names with an
+extension or stream suffix depend on `RtlIsDosDeviceName_U`, so all such shapes are
+kept on Go rather than classified. Native three-OS CI at the candidate head remains
+required.
+
+
+### Skills targets config independence (#764 slice d)
+
+`symbrain skills targets [--scope user|project]` no longer routes to Go when a
+`symskills` configuration is present. Go's `cmdSkillsTargets` calls
+`loadSkillsEnv()` only to obtain the home and working directories and hands
+nothing else to `harness.ListStatus`; the `[[targets]]` tables are decoded by
+`config.LoadTargets` and registered by `render.RegisterCustomTargets`, and neither
+has a production caller, so the target table is static. Environment overrides
+(`SYMSKILLS_*` valid, invalid, empty or relative, including `SYMSKILLS_CACHE_DIR`;
+`SYMBRAIN_SKILLS_*`) and config files of any shape (custom `[[targets]]`,
+malformed TOML, a directory, a dangling or looping symlink, a file used as the
+config directory, an unreadable config directory, a relative `XDG_CONFIG_HOME`)
+cannot change a byte of the report, with or without `--json`. `has_dynamic_config`
+therefore no longer gates this verb; the remaining gates are an unknown `--scope`
+value, flag-package errors (Go owns those bytes) and an undefined or empty
+`HOME`/`USERPROFILE` (Go's `os.UserHomeDir` fails and the roots are built against an
+empty home, which native code would replace with `.`). The previous source comment
+statement that a custom config "can still register additional targets" was a
+conservative assumption; the Go source and the differential below show it does not.
+
+Evidence: 26 `skills_status_config_targets_*` cases in `scripts/rust-differential.py`
+(22 native, 4 must-fallback; the unreadable-config-directory case needs a non-root
+user) compare the Go binary built from `HEAD` 2828231a9 with Go 1.26.7 (no Go source
+changed) with the Rust binary. Native cases run Rust with `SYMBRAIN_GO_BINARY`
+unset and a Go-free `PATH`, assert the fixture root is unchanged, and pin `PATH`
+to `/usr/bin:/bin` on both sides because the report embeds `binary:<path>`
+evidence. The cases reuse the SKL-013 harness and mutant runner (the whole
+`skills_status_config_*` family: 104 cases, 55 native, 49 fallback, all matching
+Go). Three new source mutants in `scripts/skills-status-config-oracle/run.py` are
+killed: `targets-gated-on-config` (the old `has_dynamic_config` gate returns; 7
+expected cases fail), `targets-ignores-home` (the home gate is removed; 4 cases)
+and `targets-accepts-bad-flags` (flag/scope errors replayed natively; 2 cases); the
+existing `dynamic-config-ignores-home` mutant now expects only its two `doctor`
+cases. The full differential (608 cases) passes. The Rust-side test
+`skills_targets_native.rs` now asserts native output equal to the unconfigured run
+for an env override and a custom-target config file, and keeps the fallback for flag,
+scope and missing-home shapes.
+
+Still on Go: `skills doctor` with a config file that has content (the SKL-015
+slice below narrows the rest), `skills list` and `skills sync` with any config; every `skills status` shape listed under #764
+slice c. The Windows run of this slice rests on `cargo clippy --target
+x86_64-pc-windows-gnu` and a `cfg` review (the probe helpers are no longer on this
+verb's path); native Linux/macOS/Windows CI at the candidate head remains required.
+
+### Skills doctor merged-config replay (#764 slice e)
+
+`symbrain skills doctor [--json]` no longer routes to Go for the symskills
+environment or for flags. Unlike `targets`, the report prints the merged config, so
+the shapes are replayed from Go's `config.Load()` (`configkit.Loader.loadOnce`):
+`config.Defaults()`, then the global `config.toml`, then `./.symskills.toml`, then
+`SYMSKILLS_*`; `loadSkillsEnv` replaces the **whole** result with `Defaults()` when
+`Load` returns any error (`cmd/symbrain/cmd_skills.go:66`). Native code reproduces:
+
+- both files absent (`os.Stat` reports `ENOENT`): `SYMSKILLS_{LIBRARY,RENDER,CACHE,
+  PROFILES,BASE}_DIR` replace their field verbatim (empty and relative values
+  included, no path cleaning); `SYMSKILLS_VCS_ENABLED` goes through
+  `strconv.ParseBool`, and an invalid or empty value makes `Load` fail and the whole
+  config, overrides included, reset to the defaults; `SYMBRAIN_SKILLS_*` is not Go
+  config and changes nothing;
+- a config path whose stat fails with anything but `ENOENT` (`ENOTDIR`, `EACCES`,
+  `ELOOP`) or that is a directory (`toml.DecodeFile` fails with `EISDIR`): the same
+  reset to defaults. The global file is merged first, so its failure ends the load;
+  a failing project path resets whatever the global file contains (a decode error
+  there resets too), so that outcome needs no TOML decoder;
+- `--target`/`--scope` (value ignored, never validated, unlike `status`) in the
+  forms `parse_list_flags` already accepts; the table output applies `orDash` to
+  every value, so an empty or whitespace-only path prints `-`.
+
+What stays on Go: a config file with content (the TOML decoder, also an empty
+regular file), any other file type at a config path, flag-package errors,
+positionals, `--`, `--help`, an undefined, empty, relative or non-clean `HOME` and
+non-clean absolute `XDG_{CONFIG,DATA,CACHE}_HOME` (`filepath.Join` cleans,
+`PathBuf::join` does not), a `$PWD` that names the working directory under another
+spelling (`os.Getwd` returns it; an unrelated or relative `$PWD` is ignored by both),
+non-UTF-8 override values and U+2028/U+2029 (Go's JSON encoder escapes them,
+`serde_json` does not). `has_dynamic_config` no longer gates this verb; it still
+gates `list`/`status`/`sync`.
+
+Evidence: 70 `skills_status_config_doctor_*` cases in `scripts/rust-differential.py`
+(43 native with the Go route removed and the fixture root asserted unchanged, 27
+must-fallback; the unreadable-config-directory case needs a non-root user) compare
+the Go binary built from `HEAD` e92baa02d (Go 1.26.7, no Go source changed) with the
+Rust binary in per-scenario HOME/XDG roots with `PATH` pinned to `/usr/bin:/bin`.
+They include the previously unproven default report, `legacy` and current data/cache
+roots, relative/empty/unset/alternate XDG roots, directory/looping/dangling/file-as-
+directory config probes with a live environment override that Go drops, regular
+global/project config files (fallback), and the home/XDG/PWD/encoding gates above.
+The whole `skills_status_config_*` family (174 cases: 98 native, 76 fallback) matches
+Go. Nine new mutants in `scripts/skills-status-config-oracle/run.py`
+(`doctor-gated-on-config`, `doctor-ignores-home`, `doctor-accepts-bad-flags`,
+`doctor-invalid-bool-applies-env`, `doctor-directory-config-is-absent`,
+`doctor-stat-error-is-absent`, `doctor-accepts-unclean-base`, `doctor-ignores-pwd`,
+`doctor-accepts-line-separator`) are killed together with the affected `targets-*`,
+`missing-home-guard`, `home-gate-after-unsafe-marker` and `write-a-file` mutants (15
+of 15, new `--only` selector); `dynamic-config-ignores-home` is replaced by
+`doctor-ignores-home` because doctor no longer reads `has_dynamic_config`. The
+mutant runner now accepts patterns in either `skills_cli.rs` or
+`skills_doctor_config.rs`. `skills_doctor_native.rs` asserts the native env/flag
+output, the reset and the remaining fallbacks.
+
+Residual: a config file with content stays on Go until a TOML decode with
+BurntSushi/`configkit` acceptance is ported (the minimal prerequisite for the last
+`skills doctor` fallback); `config_path`/`log_path` are built with `native_join`/`filepath.Join` semantics and a
+directory config probe resets to the defaults on every platform (Windows CI run
+40215584258 showed `/`-joined paths and a Go fallback for the directory cases);
+Windows branches (`windows_path_needs_go`, stat-error
+classification is Unix-only) rest on `cargo clippy --target x86_64-pc-windows-gnu`
+and a `cfg` review; native Linux/macOS/Windows CI at the candidate head remains
+required.
+### Skills list environment-only config (#764 slice f)
+
+`symbrain skills list` no longer routes to Go for an environment-only `symskills`
+configuration. Go's `cmdSkillsList` takes exactly one field from the loaded config,
+`LibraryDir`, for `skill.ListLibrary`; the events log and the per-skill install scan are
+derived from the home directory, and `BaseDir`, `CacheDir`, `RenderDir`, `ProfilesDir` and
+`VCS.Enabled` never reach the report (nothing is written, unlike `skills status` with a
+`CacheDir`). `SYMSKILLS_LIBRARY_DIR` therefore moves the scanned library and the other
+`SYMSKILLS_*` overrides plus a valid `SYMSKILLS_VCS_ENABLED` are inert. The override must pass
+the same gate as the SKL-013 status overrides (`status_override_dir`: absolute, lexically clean,
+real-directory ancestors that can be listed); the whole shape is also gated on a defined
+`HOME`, a verified absence of both config files and no native-only `SYMBRAIN_SKILLS_*`
+variable (Go ignores those, native code would honour them).
+
+Stays on Go: any `config.toml`/`.symskills.toml` and any config probe that is not a plain
+`ENOENT` (the TOML decode is Go's), `SYMBRAIN_SKILLS_LIBRARY_DIR`/`SYMBRAIN_SKILLS_BASE_DIR`,
+an invalid `SYMSKILLS_VCS_ENABLED` bool (Go then discards the whole config for the defaults),
+relative, empty, symlinked, non-clean, non-directory or unlistable library overrides, an
+undefined or empty `HOME`, libraries with entries Go reports through cap-std diagnostics, and
+flag-package errors. Classified input rejections (`skill_input_rejected`,
+`library_input_bound`) stay native with any configuration, as before.
+
+Evidence: 31 `skills_status_config_list_*` cases in `scripts/rust-differential.py` (15 native
+with the Go route removed and the fixture root asserted unchanged, 16 must-fallback) compare
+the Go binary built from `HEAD` 128f73e1d (Go 1.26.7, no Go source changed) with the Rust
+binary. Native cases cover populated, categorised, managed (real Go-generated installs),
+`last_used`, empty and missing libraries in table and JSON form, ignored `--target`/`--scope`,
+inert base/render/cache/profiles/VCS variables, a relative or empty `XDG_CONFIG_HOME` and an
+empty config directory. The whole `skills_status_config_*` family (135 cases: 70 native, 65
+fallback) matches Go. Seven new source mutants in `scripts/skills-status-config-oracle/run.py`
+(`list-ignores-library-env`, `list-accepts-config-file`, `list-ignores-home`,
+`list-accepts-native-only-env`, `list-accepts-invalid-bool`, `list-override-unchecked`,
+`list-accepts-bad-flags`) are killed (31 of 31 mutants of the family killed); the full differential (639 cases) passes. Three Rust tests in `skills_list_native.rs` pin the
+override, the inert variables and the fallback shapes.
+
+Still on Go: `skills sync` with any config, `skills status` shapes listed under #764 slice c,
+`skills log` (log-path symlink shapes) and every config-file shape (a Go-exact TOML parser does
+not exist in Rust; `skills doctor` is SKL-015, merged in #950). The Windows run of this slice rests on a
+`cfg` review; native Linux/macOS/Windows CI at the candidate head remains required.
+
+### Skills config TOML decode foundation (#764 slice f, SKL-018)
+
+Every config-file shape of `skills status/doctor/list/sync` still routes to Go because
+no Rust decoder reproduced Go's TOML handling. `symbrain_skills::config_toml` is that
+decoder; this slice delivers it, its Go oracle and a negative-control runner, and **does
+not change CLI routing** (the consumers in `skills_cli.rs`/`skills_doctor_config.rs`
+still treat any config file with content as Go).
+
+Go reads the files in two independent ways, both reproduced:
+
+- `config.Load` (corekit `configkit.mergeFile`): `toml.DecodeFile` (BurntSushi/toml
+  v1.6.0, TOML 1.1) into `map[string]interface{}`, then an exact, case-sensitive copy by
+  `json` tag in struct order `library_dir`, `render_dir`, `cache_dir`, `profiles_dir`,
+  `base_dir`, `vcs`. A non-string value is `field "k": cannot convert <%T> to string`
+  (`int64`, `float64`, `bool`, `time.Time` for all four datetime kinds, `[]interface {}`,
+  `map[string]interface {}`, `[]map[string]interface {}` for `[[k]]`); a non-table `vcs`
+  is ignored silently; `vcs.enabled` accepts a bool or a `strconv.ParseBool` string
+  (`field "vcs": field "enabled": cannot parse "yes" as bool: strconv.ParseBool: ...`).
+  The first failing file ends the load: `global config error: failed to apply <path>: ...`,
+  then `project config error: ...`. `targets` has no `json` tag and is skipped here.
+- `config.LoadTargets`/`LoadCapabilities`: typed `toml.DecodeFile` into `targetsFile`
+  with case-insensitive field folding (`strings.EqualFold`, so U+017F and U+212A fold to
+  `s`/`k`), `[[targets]]` or an inline array of tables, a `map[string]bool` that
+  silently ignores a non-table value (and a `capabilities.<t> = true` creating an empty
+  `<t>` map), per-file merge (non-empty `targets` replaces, capabilities merge per name).
+
+Decisions:
+
+- **Parser = `toml_edit` plus post-checks**, not a hand-written grammar. The result is a
+  three-way classification: `Loaded`/`Error` only when the replay proves Go agrees, and
+  `NeedsGo(reason)` for everything else. Every syntax error, invalid UTF-8, typed-decode
+  type error (messages embed TOML key paths and lines) and every document Go decodes
+  differently is `NeedsGo`; Go keeps owning those messages.
+- Post-checks found by the oracle (documents `toml_edit` accepts and Go rejects): a
+  second leading BOM, the `:60` leap second (any datetime anywhere in the document) and
+  multi-line inline tables (BurntSushi tolerates a newline only after `{`, after a comma
+  and before `}`, `toml_edit` also between a key and `=`).
+- Known Go-accepts/Rust-asks-Go set (28, pinned in the test): BurntSushi lets a value
+  redefine a dotted table or a table extend an inline table, accepts datetime offsets
+  `+24:00`/`+00:60`, has no `toml_edit` nesting cap, and `%q` of a non-ASCII `vcs.enabled`
+  string is not reproduced. Two typed-decode cases are map-iteration-order dependent in
+  Go (two keys folding onto one field); the generator repeats each typed decode 40 times
+  and records such a case as `nondeterministic`, which Rust must send to Go.
+
+Evidence: `scripts/skills-config-toml-oracle` runs the real `config.Load`,
+`config.LoadTargets` and `config.LoadCapabilities` over 6769 cases in a disposable
+HOME/cwd (one per line in `rust/symbrain-skills/tests/fixtures/config_toml_oracle.json`;
+`make skills-config-toml-oracle-check` regenerates and compares, ignoring provenance).
+`tests/config_toml_oracle.rs` replays it without Go: 1262 `Load` values and 188 exact
+apply errors native, 5291 Go parse errors left to Go (never answered natively), plus 1417
+native typed decodes. A soak mode (`SYMSKILLS_CONFIG_TOML_ORACLE_FIXTURE`, generator
+`-out/-mutations/-seed`) replayed two further seeds of 40769 cases each (81538 cases) at the final code with
+zero mismatches.
+`scripts/skills-config-toml-oracle/mutants.py` applies 16 single-line mutants of
+`config_toml.rs` (type names, ParseBool spelling, BOM, leap second, multi-line inline
+table, inline `vcs`, error label, both fold characters, collision, empty-targets
+override, capability merge, non-table map, `%q` width): 16 of 16 killed.
+
+Residual: routing. `skills_cli.rs`/`skills_doctor_config.rs` must still (1) read the
+config bytes through the same stat/`os.IsNotExist` gates, (2) call `config_toml::load`
+and fall back on `NeedsGo`, (3) apply `SYMSKILLS_*` and the discard-to-defaults rule, and
+(4) for `status`/`list`/`sync` feed `LoadTargets` into the native verbs, each with its own
+Go-vs-Rust differential. Native three-OS CI at the final head remains required.
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 
@@ -846,3 +1155,115 @@ follows a symlinked `CLAUDE.md`: Rust then reports `dry-run (would update)`
 with exit 0 where Go exits 1 (pre-existing, #909). (5) `$PWD`-reached symlinked
 working directories are modelled (`go_getwd`) but not oracle-covered. Still
 routed to Go under #769: the setup/doctor/usage/memory/skills predicates.
+
+### `memory` store creation and `sync` dead route without a Go fallback (#769 slice 4)
+
+Three Go routes are gone. (1) `sync_cli::requires_go_fallback` was a constant
+`false`; the `"sync" if ... => None` arm in `lib.rs` is removed. (2) `memory`
+no longer keeps Go when the database path cannot be created: `Store::open`
+now reproduces `sqlitekit.Open`'s `SafeMkdirAll(dir, 0700)` (`store_dir.rs`):
+`filepath.Dir`/`Abs`/`Clean` semantics (`d/` and `a/../b` included), a
+root-to-leaf walk, mode `0700` under the process umask, existing directories
+untouched, non-root-owned symlinks refused with `too many levels of symbolic
+links`, non-directories with `not a directory`, and `mkdir PATH: <errno>` text
+from the platform `strerror` (lower-cased like Go's errno table). A failure in the
+connect phase (file open plus the busy-timeout, foreign-key and WAL pragmas the
+Go DSN applies on its first ping) reports Go's doubled `failed to open sqlite
+database: failed to open sqlite database: <fixed SQLite description> (<primary
+code>)`; later-phase errors (secure-delete, migrations) are not remapped. Every
+memory verb now prints Go's `symbrain memory <verb>: open memory database: ...`
+prefix instead of the earlier Rust-only `symbrain memory: open database:`.
+(3) `set`/`delete` (and the reads) on a database path that does not exist, or
+exists but is not a regular file, are native: a fresh store has no rows to
+hydrate, so no Go admission applies; directories get `0700` and the new
+database `0600`, as in Go. Non-regular existing paths (`/dev/null`, a FIFO)
+are opened by SQLite without blocking and fail while connecting; the native
+opener maps that to Go's doubled wording, so no routing exception is needed.
+The printed SQLite code depends on the environment, and Go and Rust agree in
+each one (live replay): `/dev/null` is `unable to open database file (14)` on
+the local macOS 27 host but `attempt to write a readonly database (1544)` on
+Linux as a non-root user (and on the GitHub macOS runner, where the failed
+check showed the masked `(8)`); a FIFO is `disk I/O error (10)` on macOS and
+Linux. The rule behind the codes: the shipped driver enables SQLite extended
+result codes only after `sqlite3_open_v2` returned, so a failure inside the
+open call (FIFO header read, directory as database) prints the primary code,
+while a failure of the DSN pragmas that follow (busy-timeout, foreign keys,
+WAL) prints the extended code SQLite returned (`1544` =
+`SQLITE_READONLY_DIRECTORY`). `go_open_failure` takes the phase for this
+reason; `rusqlite` enables extended codes for the open call as well, so the
+open phase masks to the primary code. Native `cargo test` pins only the shape
+`<text> (<code>)`, never a code list. A directory as database
+path keeps `unable to open database file (14)`. A regular non-SQLite file under
+`set`/`query-log` now also prints Go's doubled `file is not a database (26)`.
+The code rendering is proven only for these observed cases (and read-only
+DELETE-mode `(8)`, malformed `(11)`). Go prints a suffix in other
+connect-phase cases, which is not claimed: a locked database gives Go
+`(5) (SQLITE_BUSY)` versus Rust `(5)` (Rust also waits about 11 s against Go's
+5 s). A WAL database in a read-only directory is a pragma-phase failure like
+Linux `/dev/null`, so the phase rule above now renders its extended code
+`1544` too; that scenario is not in the replayed families.
+
+Evidence: `scripts/memory-cli-oracle/creation_cases.py` (new `store_creation`
+family of `replay.py`, part of `--family all`, so the existing three-OS
+`memory-cli-native.yml` replay runs it) compares 48 scenarios on Linux (51 on macOS, which adds three
+through the root-owned `/tmp` link; Windows: the creation scenarios without POSIX
+modes) between the immutable Go `dcddcef0`
+CLI and the Rust CLI with an absent `SYMBRAIN_GO_BINARY`: stdout, stderr, exit
+and the full created tree including permission bits. The original 34 matched on macOS/APFS and on
+Linux/ext4-overlay in Docker `rust:1.98-bookworm` as `--user 1000:1000` against the
+Go oracle. After the CI failure of the first review fix (Linux and GitHub macOS
+printed `(8)` for `/dev/null` where the test expected 14 or 10) the Linux run
+of the whole family found a real parity bug: Go prints `(1544)` there, Rust
+`(8)`, six scenarios differing (42/48). The pragma-phase extended-code rule above
+fixes it: `store_creation` is 48/48 on Linux/arm64 in Docker (`go1.26.7`,
+`--user 1000:1000`) and 51/51 on macOS; `--family all` is 672/672 on macOS. Go
+itself does not differ between the two platforms except for a symlink's own
+mode (0755 APFS, 0777 ext4), which is excluded from the comparison; no per-OS
+fixtures are needed because the live Go replay runs on every runner. Before the
+change the same probe showed 34 differences (Go fallback required, or `0755`
+directories instead of `0700`, and Rust-only error text). Negative controls
+(`creation_controls.py`, wired into CI): three real-process mutants wrapping the
+native CLI (directory mode `0700`->`0755`, one stderr byte, a success exit
+rewritten to 7) are each rejected by the replay through exactly their own field
+(18, 51 and 15 rejected of 51 cases on macOS). `rust/symbrain-cli/tests/memory_store_creation.rs`
+holds the Go-recorded bytes and modes natively for plain `cargo test`. The
+retired `new-file` delegation case of `write_boundaries.py` is removed because
+the route is now native. Contract row MEM-CLI-003.
+
+Review fix (#769 slice 4): `/dev/null` and a FIFO as `--db` were routed native
+by `routing.rs` (`!path.is_file()`) but printed bare SQLite text; the connect
+phase now maps to Go's wording and 12 scenarios (`<verb>-database-is-dev-null`,
+`<verb>-database-is-fifo` for list/rules/query-log/set/delete/search; Go never
+blocks on them, and the harness additionally treats a CLI timeout as a
+mismatch) plus `set`/`query-log` on a non-SQLite regular file are in the
+family. The root-owned-symlink trust branch of `safe_mkdir_all` (macOS
+`/tmp` -> `private/tmp`) is covered by three macOS-only scenarios and a macOS
+unit test; the mutant "refuse every symlink" is rejected by 3 scenarios.
+
+Ledger honesty: only the open/connect-phase failures listed above
+(`unable to open database file (14)`, `disk I/O error (10)`, `file is not a
+database (26)` for `set`/`query-log`) are proven byte-equal. Other failures are
+NOT claimed: `list`/`rules`/`delete`/`search` on an existing non-SQLite regular
+file still go to Go through the admission gate, busy/locked, read-only-media,
+later-phase (secure-delete, migration) and Windows error wording are not
+compared. The FIFO/`/dev/null` codes are observed on macOS 27 and Linux/arm64
+only; Windows has no such scenario.
+
+Local evidence only; exact-head native Linux/macOS/Windows CI is pending. The
+Windows branch of `safe_mkdir_all` is a code port of the Windows `SafeMkdirAll`
+and its error wording is not compared. Windows CI fix: the first port inspected
+every `std::path::Component`, including the volume prefix. `canonicalize`
+returns `\\?\D:\...` there, and a metadata call on the bare `\\?\D:` names the
+volume device rather than its root directory, so it was not a directory and
+`activity status` (and every other native `Store::open` on a canonicalized
+path) failed with `path is not a regular file`. Go's `SafeMkdirAll` starts at
+`VolumeName + separator` and walks only the names below it; the port now plans
+the walk in the pure `walk_plan` (prefix/root parts are never inspected, `.`/`..`
+follow the lexical clean), covered by platform-independent unit tests and
+type-checked for `x86_64-pc-windows-msvc`. The cause is derived from the
+std/Win32 semantics and the Go source, not observed on a Windows host; the
+activity oracle test now prints exit, stdout and stderr on any mismatch so a
+remaining Windows failure is diagnosable from the CI log. Still routed to Go (#769 open):
+`memory serve`, `memory sync <args>`, `set` with unsupported write shapes,
+`search` with `prefilter`, reads/deletes on a database outside the native
+decoder domain, and the usage/skills/setup/doctor routes.

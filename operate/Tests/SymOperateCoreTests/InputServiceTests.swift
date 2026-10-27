@@ -9,28 +9,36 @@ final class InputServiceTests: XCTestCase {
 
     // MARK: - click
 
+    func testInputEventsStayBehindInjectedDeliveryBoundary() throws {
+        var types: [CGEventType] = []
+        let service = InputService(eventPoster: { event, _, _ in types.append(event.type) })
+        try service.pressKeys(["cmd", "a"])
+        try service.typeText("hi")
+        XCTAssertEqual(types, [.keyDown, .keyUp, .keyDown, .keyUp, .keyDown, .keyUp])
+    }
+
     func testClickLeftButtonSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.click(at: offscreen, button: "left"))
     }
 
     func testClickRightButtonSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.click(at: offscreen, button: "right"))
     }
 
     func testClickCaseInsensitiveButton() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.click(at: offscreen, button: "LEFT"))
     }
 
     func testClickDoubleClickSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.click(at: offscreen, button: "left", doubleClick: true))
     }
 
     func testClickInvalidButtonThrows() {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertThrowsError(try service.click(at: offscreen, button: "middle")) { error in
             guard let automationError = error as? AutomationError, case .invalidArgument = automationError else {
                 return XCTFail("expected invalidArgument, got \(error)")
@@ -41,35 +49,35 @@ final class InputServiceTests: XCTestCase {
     // MARK: - drag
 
     func testDragSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.drag(from: offscreen, to: PointValue(x: -9000, y: -9000), steps: 3))
     }
 
     func testDragClampsStepsBelowMinimum() throws {
         // steps < 2 is clamped to 2 internally — must not crash on a degenerate range.
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.drag(from: offscreen, to: PointValue(x: -9000, y: -9000), steps: 0))
     }
 
     // MARK: - scroll
 
     func testScrollSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.scroll(deltaX: 1, deltaY: 10))
     }
 
     func testScrollDefaultDeltaXSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.scroll(deltaY: -5))
     }
 
     func testScrollAcceptsInRangeFractionalDeltas() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.scroll(deltaX: 12.75, deltaY: -34.5))
     }
 
     func testScrollRejectsOutOfInt32RangeDeltas() {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         let values = [
             Double(Int32.max) + 1,
             Double(Int32.min) - 1,
@@ -94,7 +102,7 @@ final class InputServiceTests: XCTestCase {
     }
 
     func testScrollRejectsNonFiniteDeltas() {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         let values = [Double.nan, Double.infinity, -Double.infinity]
 
         for value in values {
@@ -116,19 +124,19 @@ final class InputServiceTests: XCTestCase {
     // MARK: - typeText
 
     func testTypeTextSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.typeText("hi"))
     }
 
     func testTypeTextEmptyStringSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.typeText(""))
     }
 
     // MARK: - pressKeys
 
     func testPressKeysEmptyArrayThrows() {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertThrowsError(try service.pressKeys([])) { error in
             guard let automationError = error as? AutomationError, case .invalidArgument = automationError else {
                 return XCTFail("expected invalidArgument, got \(error)")
@@ -137,12 +145,12 @@ final class InputServiceTests: XCTestCase {
     }
 
     func testPressKeysKnownKeyCodeSucceeds() throws {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertNoThrow(try service.pressKeys(["cmd", "a"]))
     }
 
     func testPressKeysUnknownKeyThrowsInvalidArgument() {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertThrowsError(try service.pressKeys(["f5x"])) { error in
             guard let automationError = error as? AutomationError,
                   case let .invalidArgument(message) = automationError else {
@@ -153,7 +161,7 @@ final class InputServiceTests: XCTestCase {
     }
 
     func testPressKeysMultipleTerminalKeysThrowsInvalidArgument() {
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertThrowsError(try service.pressKeys(["a", "b"])) { error in
             guard let automationError = error as? AutomationError,
                   case .invalidArgument = automationError else {
@@ -164,7 +172,7 @@ final class InputServiceTests: XCTestCase {
 
     func testPressKeysModifierOnlyThrowsUnresolvable() {
         // A pure modifier list with no terminal key can't be resolved to a key code.
-        let service = InputService()
+        let service = InputService(eventPoster: { _, _, _ in })
         XCTAssertThrowsError(try service.pressKeys(["cmd", "ctrl", "alt", "shift"])) { error in
             guard let automationError = error as? AutomationError, case .invalidArgument = automationError else {
                 return XCTFail("expected invalidArgument, got \(error)")
