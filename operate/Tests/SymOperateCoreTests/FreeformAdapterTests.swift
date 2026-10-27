@@ -62,9 +62,9 @@ private final class MockFreeformPasteboard: FreeformPasteboardProtocol {
     var failWrite = false
     init(_ log: FreeformCallLog) { self.log = log }
     func snapshot() throws -> FreeformPasteboardSnapshot { log.calls.append("backup"); return contents }
-    func write(_ data: Data, type: String) throws {
+    func write(_ types: [String: Data]) throws {
         log.calls.append("write")
-        contents = [[type: data]]
+        contents = [types]
         if failWrite { throw AutomationError.unavailable("write failed") }
     }
     func restore(_ snapshot: FreeformPasteboardSnapshot) -> Bool {

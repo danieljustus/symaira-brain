@@ -203,13 +203,16 @@ extension MCPServer {
             "type": "object", "additionalProperties": false,
             "properties": [
                 "id": ["type": "string", "format": "uuid"],
-                "kind": ["type": "string", "enum": ["shape", "text", "sticky_note"]],
+                "kind": ["type": "string", "enum": ["shape", "text", "sticky_note", "image"]],
                 "text": ["type": "string"], "x": ["type": "number"], "y": ["type": "number"],
                 "width": ["type": "number", "exclusiveMinimum": 0], "height": ["type": "number", "exclusiveMinimum": 0],
                 "rgb": ["type": "array", "minItems": 3, "maxItems": 3,
-                        "items": ["type": "number", "minimum": 0, "maximum": 1]],
+                        "items": ["type": "number", "minimum": 0, "maximum": 1],
+                        "description": "Fill; required for shape and sticky_note, ignored otherwise."],
+                "image_path": ["type": "string", "minLength": 1,
+                               "description": "Absolute path to a PNG or JPEG (max 25 MB); required for kind image only. text becomes the image description and AX label."],
             ],
-            "required": ["id", "kind", "text", "x", "y", "width", "height", "rgb"],
+            "required": ["id", "kind", "text", "x", "y", "width", "height"],
         ]
         let connection: [String: Any] = [
             "type": "object", "additionalProperties": false,

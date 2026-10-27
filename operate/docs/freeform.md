@@ -53,11 +53,19 @@ Example `freeform_insert` arguments:
 }
 ```
 
-Object kinds: `shape`, `sticky_note`, `text`. The sticky-note representation is
+Object kinds: `shape`, `sticky_note`, `text`, `image`. The sticky-note representation is
 the observed exported shape plus curved shadow, not a newly invented native
 sticky-note type. Text uses the exported unfilled shape variant. RGB is normalized
 0...1 and affects shape/note fill; free text has no fill. Width/height for free text
 retain the reference's automatic-sizing flags and may be recomputed by Freeform.
+
+`image` objects need `image_path`, an absolute path to a PNG or JPEG (magic bytes
+checked, at most 25 MB each, 100 MB per call); `rgb` is ignored. `text` becomes the
+image description, which Freeform exposes as the AX label, so a unique `text` makes
+the image addressable by `freeform_move`. Mirroring the Freeform 5.1 export, the
+payload references the bytes through `resource.indirect.identifier`; the bytes are
+written as that extra type on the same pasteboard item. Live-verified on macOS 27.2
+with PNG and JPEG, including an image as connection endpoint.
 
 ## Content-Language and paste transaction
 

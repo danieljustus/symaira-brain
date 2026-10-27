@@ -38,7 +38,10 @@ The Content-Language templates in `Sources/SymOperateCore/Resources/freeform-*.j
 are structural interoperability references from Freeform 5.0 exports `ref1` and
 `ref-line`. All text and positions were cleared. Only formatting archives and schema
 fields are retained. Anchor construction follows the separately live-verified `s6b`
-spike. No private database snapshots or board contents are included.
+spike. `freeform-image.json` comes from a Freeform 5.1 (macOS 27.2) export of a
+synthetic test image; resource identifier, filename, description and geometry were
+cleared and the optional mask was dropped (live-verified to paste without it).
+No private database snapshots or board contents are included.
 
 ## Resync history
 

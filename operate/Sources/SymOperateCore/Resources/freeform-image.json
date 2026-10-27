@@ -1,0 +1,72 @@
+[
+  {
+    "aspect_ratio_locked": true,
+    "description": "",
+    "geometry": {
+      "angle": 0,
+      "flip_horizontally": false,
+      "height_valid": true,
+      "position": {
+        "type_identifier": "com.apple.apps.content-language.position",
+        "version": "1.0",
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "height": 1,
+        "type_identifier": "com.apple.apps.content-language.size",
+        "version": "1.0",
+        "width": 1
+      },
+      "type_identifier": "com.apple.apps.content-language.geometry",
+      "version": "1.0",
+      "width_valid": true
+    },
+    "is_placeholder": false,
+    "opacity": 1,
+    "resource": {
+      "indirect": {
+        "encoding_format": "passthrough",
+        "filename": "",
+        "identifier": "",
+        "type_identifier": "com.apple.apps.content-language.resource.indirect-resource",
+        "version": "2.0"
+      },
+      "primary_case": "indirect",
+      "type_identifier": "com.apple.apps.content-language.resource",
+      "version": "1.0"
+    },
+    "shadow": {
+      "dropShadow": {
+        "angle": 90,
+        "color": {
+          "primary_case": "rgba",
+          "rgba": {
+            "alpha": 1,
+            "blue": 0,
+            "color_space": "srgb",
+            "green": 0,
+            "headroom": 1,
+            "red": 0,
+            "type_identifier": "com.apple.apps.content-language.color.rgba",
+            "version": "1.1"
+          },
+          "type_identifier": "com.apple.apps.content-language.color",
+          "version": "1.0"
+        },
+        "offset": 2,
+        "opacity": 0.25,
+        "radius": 3,
+        "type_identifier": "com.apple.apps.content-language.drop-shadow",
+        "version": "1.0"
+      },
+      "primary_case": "dropShadow",
+      "type_identifier": "com.apple.apps.content-language.shadow",
+      "version": "1.0"
+    },
+    "stroke": "empty",
+    "type_identifier": "com.apple.apps.content-language.image",
+    "version": "1.0",
+    "was_media_replaced": false
+  }
+]
