@@ -33,7 +33,8 @@ public typealias FreeformPasteboardSnapshot = [[String: Data]]
 
 public protocol FreeformPasteboardProtocol {
     func snapshot() throws -> FreeformPasteboardSnapshot
-    func write(_ data: Data, type: String) throws
+    /// Replaces the pasteboard with one item carrying every given type.
+    func write(_ types: [String: Data]) throws
     /// Returns true only after readback equals the saved items and types.
     func restore(_ snapshot: FreeformPasteboardSnapshot) -> Bool
 }
@@ -196,7 +197,7 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
 
     public func insert(_ board: FreeformBoardIR, boardTitle: String, policy: ActionPolicy) throws -> FreeformInsertResult {
         try authorize(policy)
-        let payload = try FreeformContentLanguage.build(board)
+        let payload = try FreeformContentLanguage.pasteboardItem(board)
         lock.lock()
         defer { lock.unlock() }
         let status = environment.doctor()
@@ -211,7 +212,7 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
         var submitted = false
         var failure: String?
         do {
-            try pasteboard.write(payload, type: FreeformContentLanguage.pasteboardType)
+            try pasteboard.write(payload)
             try environment.bringToFront(pid: freeformPID)
             var ready = false
             for _ in 0..<40 {

@@ -26,9 +26,15 @@ public struct NativeFreeformPasteboard: FreeformPasteboardProtocol {
         }
     }
 
-    public func write(_ data: Data, type: String) throws {
+    public func write(_ types: [String: Data]) throws {
+        let item = NSPasteboardItem()
+        for (type, data) in types {
+            guard item.setData(data, forType: NSPasteboard.PasteboardType(type)) else {
+                throw AutomationError.unavailable("Could not stage Freeform pasteboard type \(type).")
+            }
+        }
         NSPasteboard.general.clearContents()
-        guard NSPasteboard.general.setData(data, forType: NSPasteboard.PasteboardType(type)) else {
+        guard NSPasteboard.general.writeObjects([item]) else {
             throw AutomationError.unavailable("Could not write Freeform pasteboard payload.")
         }
     }

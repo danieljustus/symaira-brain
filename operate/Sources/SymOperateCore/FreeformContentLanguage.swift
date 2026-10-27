@@ -23,18 +23,27 @@ public struct FreeformBoardIR: Codable, Sendable {
 }
 
 public struct FreeformObject: Codable, Sendable {
-    public enum Kind: String, Codable, Sendable { case shape, text, stickyNote = "sticky_note" }
+    public enum Kind: String, Codable, Sendable { case shape, text, stickyNote = "sticky_note", image }
     public let id: UUID
     public let kind: Kind
+    /// For images this becomes the image description, which Freeform exposes as the AX label.
     public let text: String
     public let x: Double
     public let y: Double
     public let width: Double
     public let height: Double
+    /// Fill for shapes and notes; ignored for text and images.
     public let rgb: [Double]
+    /// Local PNG or JPEG file; required for `image`, rejected for every other kind.
+    public let imagePath: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, kind, text, x, y, width, height, rgb
+        case imagePath = "image_path"
+    }
 
     public init(id: UUID = UUID(), kind: Kind = .shape, text: String, x: Double, y: Double,
-                width: Double, height: Double, rgb: [Double]) {
+                width: Double, height: Double, rgb: [Double] = [], imagePath: String? = nil) {
         self.id = id
         self.kind = kind
         self.text = text
@@ -43,6 +52,20 @@ public struct FreeformObject: Codable, Sendable {
         self.width = width
         self.height = height
         self.rgb = rgb
+        self.imagePath = imagePath
+    }
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        id = try values.decode(UUID.self, forKey: .id)
+        kind = try values.decode(Kind.self, forKey: .kind)
+        text = try values.decode(String.self, forKey: .text)
+        x = try values.decode(Double.self, forKey: .x)
+        y = try values.decode(Double.self, forKey: .y)
+        width = try values.decode(Double.self, forKey: .width)
+        height = try values.decode(Double.self, forKey: .height)
+        rgb = try values.decodeIfPresent([Double].self, forKey: .rgb) ?? []
+        imagePath = try values.decodeIfPresent(String.self, forKey: .imagePath)
     }
 }
 
@@ -71,12 +94,21 @@ public struct FreeformConnection: Codable, Sendable {
 }
 
 /// Schema copied from Freeform 5.0 exports ref1/ref-line, with anchors from live-tested s6b.
+/// The image template is a Freeform 5.1 export (macOS 27.2): image bytes travel as a separate
+/// pasteboard type named by `resource.indirect.identifier` on the same pasteboard item.
 /// Templates contain only formatting metadata, never exported board content or identities.
 public enum FreeformContentLanguage {
     public static let pasteboardType = "com.apple.apps.content-language.canvas-object-1.0"
     static let prefix = "com.apple.apps.content-language."
+    static let maxImageBytes = 25 * 1024 * 1024
 
+    /// Canvas payload only. Image resources are loaded and validated but not returned.
     public static func build(_ board: FreeformBoardIR) throws -> Data {
+        try pasteboardItem(board)[pasteboardType]!
+    }
+
+    /// All types for one pasteboard item: the canvas payload plus one entry per image resource.
+    public static func pasteboardItem(_ board: FreeformBoardIR) throws -> [String: Data] {
         guard !board.objects.isEmpty, board.objects.count <= 500, board.connections.count <= 1000 else {
             throw AutomationError.invalidArgument("Expected 1...500 objects and at most 1000 connections.")
         }
@@ -84,13 +116,22 @@ public enum FreeformContentLanguage {
         guard ids.count == board.objects.count else {
             throw AutomationError.invalidArgument("Object UUIDs must be unique.")
         }
+        var resources: [UUID: (type: String, data: Data, ext: String)] = [:]
         for object in board.objects {
+            let isImage = object.kind == .image
             guard [object.x, object.y, object.width, object.height].allSatisfy(\.isFinite),
-                  object.width > 0, object.height > 0, object.rgb.count == 3,
+                  object.width > 0, object.height > 0, isImage || object.rgb.count == 3,
                   object.rgb.allSatisfy({ $0.isFinite && (0...1).contains($0) }),
-                  object.text.utf8.count <= 100_000 else {
-                throw AutomationError.invalidArgument("Invalid object geometry, text size or RGB fill.")
+                  object.text.utf8.count <= 100_000, isImage == (object.imagePath != nil) else {
+                throw AutomationError.invalidArgument("Invalid object geometry, text size, RGB fill or image_path.")
             }
+            if isImage, let path = object.imagePath {
+                let image = try loadImage(path)
+                resources[object.id] = (prefix + "resource-" + UUID().uuidString, image.data, image.ext)
+            }
+        }
+        guard resources.values.reduce(0, { $0 + $1.data.count }) <= 4 * maxImageBytes else {
+            throw AutomationError.invalidArgument("Images exceed 100 MB in total.")
         }
         for line in board.connections {
             guard ids.contains(line.tail), ids.contains(line.head), line.tail != line.head,
@@ -103,14 +144,25 @@ public enum FreeformContentLanguage {
         }
         let templates = try template("freeform-shapes")
         let lineTemplate = try template("freeform-line")[0]
+        let imageTemplate = try template("freeform-image")[0]
         var payload = board.objects.map { object -> [String: Any] in
+            if let resource = resources[object.id] {
+                var image = imageTemplate
+                image["identifier"] = object.id.uuidString
+                image["description"] = object.text
+                image["geometry"] = geometry(image["geometry"], object)
+                var wrapper = image["resource"] as? [String: Any] ?? [:]
+                var indirect = wrapper["indirect"] as? [String: Any] ?? [:]
+                indirect["identifier"] = resource.type
+                indirect["filename"] = "image." + resource.ext
+                wrapper["indirect"] = indirect
+                image["resource"] = wrapper
+                return image
+            }
             let index = object.kind == .stickyNote ? 1 : (object.kind == .text ? 2 : 0)
             var shape = templates[index]
             shape["identifier"] = object.id.uuidString
-            var geometry = shape["geometry"] as? [String: Any] ?? [:]
-            geometry["position"] = typed("position", ["x": object.x, "y": object.y])
-            geometry["size"] = typed("size", ["width": object.width, "height": object.height])
-            shape["geometry"] = geometry
+            shape["geometry"] = geometry(shape["geometry"], object)
             if object.kind != .text {
                 shape["fill"] = typed("fill", ["primary_case": "color", "color": color(object.rgb)])
             }
@@ -138,7 +190,31 @@ public enum FreeformContentLanguage {
         }
         // Validate the final payload too: an accidental template edit must never reach Freeform.
         try validateEnums(payload)
-        return try JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys])
+        var item = [pasteboardType: try JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys])]
+        for resource in resources.values { item[resource.type] = resource.data }
+        return item
+    }
+
+    private static func geometry(_ template: Any?, _ object: FreeformObject) -> [String: Any] {
+        var geometry = template as? [String: Any] ?? [:]
+        geometry["position"] = typed("position", ["x": object.x, "y": object.y])
+        geometry["size"] = typed("size", ["width": object.width, "height": object.height])
+        return geometry
+    }
+
+    /// Only PNG and JPEG, identified by magic bytes; the file extension is not trusted.
+    static func loadImage(_ path: String) throws -> (data: Data, ext: String) {
+        let expanded = (path as NSString).expandingTildeInPath
+        let url = URL(fileURLWithPath: expanded)
+        guard (expanded as NSString).isAbsolutePath,
+              let size = (try? url.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])),
+              size.isRegularFile == true, let bytes = size.fileSize, bytes > 0, bytes <= maxImageBytes,
+              let data = try? Data(contentsOf: url) else {
+            throw AutomationError.invalidArgument("image_path must be an absolute path to a readable file of at most 25 MB: \(path)")
+        }
+        if data.starts(with: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) { return (data, "png") }
+        if data.starts(with: [0xFF, 0xD8, 0xFF]) { return (data, "jpg") }
+        throw AutomationError.invalidArgument("image_path must be a PNG or JPEG file: \(path)")
     }
 
     private static func template(_ name: String) throws -> [[String: Any]] {
@@ -176,7 +252,8 @@ public enum FreeformContentLanguage {
             let enums: [String: Set<String>] = [
                 "line_end": ["none"], "magnet": ["center"], "pattern": ["solid"],
                 "color_space": ["srgb"], "vertical_alignment": ["center"],
-                "primary_case": ["color", "rgba", "attributed_string", "line", "curved", "curvedShadow"],
+                "primary_case": ["color", "rgba", "attributed_string", "line", "curved", "curvedShadow",
+                                 "indirect", "dropShadow"],
             ]
             for (key, child) in object {
                 if let allowed = enums[key] {
