@@ -1,18 +1,12 @@
 """Verify the narrow #933 exception without running any CLI or real credentials."""
-import ast
 import base64
 import copy
 import json
-from pathlib import Path
-from typing import Any
 import unittest
 
-source = ast.parse(Path(__file__).with_name("cli.py").read_text())
-helper = next(node for node in source.body if isinstance(node, ast.FunctionDef)
-              and node.name == "hermes_login_divergence")
-namespace: dict[str, Any] = {"json": json, "base64": base64}
-exec(compile(ast.Module(body=[helper], type_ignores=[]), "cli.py", "exec"), namespace)
-compare = namespace["hermes_login_divergence"]
+from hermes_compare import filesystem_matches, hermes_login_divergence
+
+compare = hermes_login_divergence
 OLD = "No Nous Portal credentials found — sign in with the Hermes CLI"
 NEW = "Hermes Nous login missing/expired — sign in again with the Hermes CLI"
 
@@ -52,6 +46,31 @@ class HermesDivergenceTests(unittest.TestCase):
     def test_table_exception(self):
         self.assertTrue(compare(observed("nous\t"+OLD), observed("nous\t"+NEW), "table", True))
         self.assertFalse(compare(observed("nous\t"+OLD), observed("other\t"+NEW), "table", True))
+
+
+    def test_filesystem_diagnostic_only(self):
+        go = dict(observed(self.old), timed_out=False)
+        native = dict(observed(self.new), timed_out=False)
+        self.assertTrue(filesystem_matches(go, native, True))
+        self.assertTrue(filesystem_matches(go, go, False))
+        self.assertFalse(filesystem_matches(go, native, False))
+        for mutation in [lambda r: r.update(schema_version=99),
+                         lambda r: r['providers'][0].update(configured=True),
+                         lambda r: r['providers'][0].update(error='other'),
+                         lambda r: r['providers'].append({'id': 'other', 'configured': True})]:
+            changed = copy.deepcopy(self.new)
+            mutation(changed)
+            self.assertFalse(filesystem_matches(go, dict(observed(changed), timed_out=False), True))
+
+    def test_filesystem_exit_stderr_and_timeout_rejected(self):
+        go = dict(observed(self.old), timed_out=False)
+        native = dict(observed(self.new), timed_out=False)
+        for patch in [{'exit': 42}, {'stderr_b64': 'eA=='}, {'timed_out': True}]:
+            self.assertFalse(filesystem_matches(go, dict(native, **patch), True))
+            self.assertFalse(filesystem_matches(dict(go, **patch), native, True))
+        timed_out = {'timed_out': True, 'stdout_b64': '', 'stderr_b64': ''}
+        self.assertFalse(filesystem_matches(timed_out, native, True))
+        self.assertFalse(filesystem_matches(timed_out, timed_out, True))
 
 
 if __name__ == "__main__":
