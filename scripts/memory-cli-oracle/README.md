@@ -68,6 +68,16 @@ mutation guarantee in this slice.
 
 `--family sync_preflight` (`sync_cases.py`, 192 cases) covers the `memory sync` argument checks that precede database and network work; `sync_controls.py` runs three real-process mutants. `--family sync_relay` (`sync_relay_cases.py`, `sync_pull_cases.py`, `sync_relay_server.py`, 590 scenarios) runs the immutable Go CLI and the native CLI against their own loopback fake relay (bytes of every response are scripted; nothing leaves 127.0.0.1) and compares stdout, stderr and exit of every step, every request the relay received (method, target, all headers) and the full database state (audit-log ids and wall-clock stamps are normalised only where they have the shipped spelling). 424 native scenarios must match with the Go fallback absent - empty exchanges, and since slice 3 relay replies with memories, tombstones, pagination and server-time handling; 166 hand-off scenarios must stop at the owned absent-binary diagnostic, leave every local table (memories, audit, oplog, cursors, entities) exactly as seeded, and have sent no request or only read-only GETs that Go sent too, in Go's order. `SYNC_RELAY_ONLY=<regex>` restricts the family to matching scenario names (used by the source-mutant controls). `sync_relay_controls.py` (Unix only) runs five real-process mutants (stdout, stderr, exit, an extra request, an extra database row) that must each be rejected through exactly their own observation key. `sync_pull_controls.py` (Unix only) rebuilds the CLI from a scratch copy of the tree with nine source mutants of the pull path (equal-timestamp overwrite, tombstone and delete comparison, only the first page, the pagination cursor never sent, cursor ignoring entry times, no audit row, no push probe, a failing statement skipped instead of rolled back; `--cargo` takes a cargo command prefix) and requires the scenarios exercising each to reject it, with no rejection the mutation cannot explain. On Windows the connection-refused wording scenarios are skipped with a printed notice and the created-tree mode comparison is not made.
 
+`delete-missing-id` is an explicitly labeled #854 known-Go-defect divergence:
+immutable Go `dcddcef0` drops its tombstone. The comparison requires exactly the
+remote-timestamp delete event and its SQLite sequence entry in native state;
+all output, requests, cursors and other tables stay exact. Mutation unit tests
+reject the old no-tombstone behavior, wrong event fields and unrelated changes.
+Other scenarios and source-mutant controls are unchanged. In particular, this
+exception does not claim full parity with the old oracle for the repaired
+remote-delete behavior; other delete scenarios need qualification against the
+fixed Go implementation before the complete differential gate can pass.
+
 This increment proves parser/config and seeded read behavior. It does not certify
 governed writes, corrupt database error strings, configured Hamming prefilter, evidence JSONL decoding or MCP
 cutover. Those remain open #758 acceptance work. No Go source or frozen fixture

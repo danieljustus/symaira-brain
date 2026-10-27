@@ -149,6 +149,63 @@ fn a_failing_second_page_keeps_the_first_page_and_the_old_cursor() {
 }
 
 #[test]
+fn absent_row_delete_blocks_resurrection_in_later_pages_and_pulls() {
+    for later_pull in [false, true] {
+        let directory = tempdir().expect("directory");
+        let database = directory.path().join("memory.db");
+        let delete = page(
+            "",
+            r#"{"id":"gone","deleted_at":"2026-10-26T02:00:00Z"}"#,
+            "2026-10-26T03:00:00Z",
+            if later_pull { "" } else { "p2" },
+        );
+        let stale = page(
+            r#"{"id":"gone","content":"stale","updated_at":"2026-10-26T01:00:00Z"}"#,
+            "",
+            "2026-10-26T03:00:00Z",
+            "",
+        );
+        let fresh = page(
+            r#"{"id":"gone","content":"fresh","updated_at":"2026-10-26T02:00:01Z"}"#,
+            "",
+            "2026-10-26T03:00:00Z",
+            "",
+        );
+        let (port, targets) = relay(vec![delete, stale, fresh]);
+        for _ in 0..if later_pull { 2 } else { 1 } {
+            let (code, stdout, stderr) = run(port, &database, &["--pull"]);
+            assert_eq!((code, stderr.as_str()), (Some(exit::OK), ""), "{stdout}");
+            assert!(
+                stdout.contains(r#""pulled_memories_applied":0,"pulled_deletes_applied":0"#),
+                "{stdout}"
+            );
+        }
+        assert_eq!(
+            scalar(&database, "SELECT CAST(COUNT(*) AS TEXT) FROM memories"),
+            "0"
+        );
+        assert_eq!(
+            scalar(
+                &database,
+                "SELECT ts FROM sync_oplog WHERE memory_id='gone' ORDER BY event_id DESC LIMIT 1"
+            ),
+            "2026-10-26 02:00:00 +0000 UTC"
+        );
+        let (code, stdout, stderr) = run(port, &database, &["--pull"]);
+        assert_eq!((code, stderr.as_str()), (Some(exit::OK), ""), "{stdout}");
+        assert!(
+            stdout.contains(r#""pulled_memories_applied":1,"pulled_deletes_applied":0"#),
+            "{stdout}"
+        );
+        assert_eq!(
+            scalar(&database, "SELECT content FROM memories WHERE id='gone'"),
+            "fresh"
+        );
+        assert_eq!(targets.join().expect("relay").len(), 3);
+    }
+}
+
+#[test]
 fn a_pull_that_provokes_a_push_is_rolled_back_and_handed_off() {
     let directory = tempdir().expect("directory");
     let database = directory.path().join("memory.db");

@@ -1,7 +1,7 @@
 //! Applying the changes a relay returned to the local store (#762).
 //!
 //! Mirrors the shipped `SyncUpsertMemoryIfNewer` (tombstone check, then
-//! `UpsertMemoryIfNewer`) and `ApplyRemoteDelete`, statement for statement:
+//! `UpsertMemoryIfNewer`) and the #854 `ApplyRemoteDelete` repair in Go PR #970:
 //! the same columns and defaults, the stored timestamps rendered the way the
 //! shipped driver binds a `time.Time`, and the same best-effort audit rows.
 //!
@@ -373,13 +373,27 @@ fn apply_remote_delete(conn: &Connection, delete: &PulledDelete) -> Option<bool>
         )
         .optional()
         .ok()?;
-    let Some(local) = local else {
-        return Some(false);
-    };
-    if stored_time(&local)? > delete.deleted_at {
+    if let Some(local) = &local
+        && stored_time(local)? > delete.deleted_at
+    {
         return Some(false);
     }
-    // `DeleteMemory`: identity for the audit row, the delete, then the audit.
+    let latest: Option<(String, Value)> = conn
+        .query_row(
+            "SELECT op, ts FROM sync_oplog WHERE memory_id = ? ORDER BY event_id DESC LIMIT 1",
+            [&delete.id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .optional()
+        .ok()?;
+    if local.is_none()
+        && let Some((op, ts)) = latest
+        && op == "delete"
+        && stored_time(&ts)? >= delete.deleted_at
+    {
+        return Some(false);
+    }
+    // Capture the existing row's identity for its best-effort audit.
     let identity: Option<(Option<String>, Option<String>, Option<String>)> = conn
         .query_row(
             "SELECT scope, created_by, created_session FROM memories WHERE id = ?",
@@ -388,19 +402,29 @@ fn apply_remote_delete(conn: &Connection, delete: &PulledDelete) -> Option<bool>
         )
         .optional()
         .ok()?;
-    let (scope, created_by, created_session) = identity?;
-    conn.execute("DELETE FROM memories WHERE id = ?", [&delete.id])
-        .ok()?;
-    audit(
-        conn,
-        "delete",
-        &delete.id,
-        &scope.unwrap_or_default(),
-        &created_session.unwrap_or_default(),
-        &created_by.unwrap_or_default(),
-        "",
-    );
-    Some(true)
+    if local.is_some() {
+        conn.execute("DELETE FROM memories WHERE id = ?", [&delete.id])
+            .ok()?;
+    }
+    // The DELETE trigger uses the local clock; the latest event must instead
+    // retain the remote instant, including for a row that never existed here.
+    conn.execute(
+        "INSERT INTO sync_oplog (op, memory_id, ts) VALUES ('delete', ?, ?)",
+        params![delete.id, render_cursor(delete.deleted_at)],
+    )
+    .ok()?;
+    if let Some((scope, created_by, created_session)) = identity {
+        audit(
+            conn,
+            "delete",
+            &delete.id,
+            &scope.unwrap_or_default(),
+            &created_session.unwrap_or_default(),
+            &created_by.unwrap_or_default(),
+            "",
+        );
+    }
+    Some(local.is_some())
 }
 
 #[cfg(test)]
@@ -515,6 +539,127 @@ mod tests {
             .apply_pulled(&[page(vec![fresh], vec![])], None)
             .unwrap();
         assert_eq!(applied.memories, 1);
+    }
+
+    #[test]
+    fn absent_remote_tombstone_blocks_stale_upserts_across_pages_and_pulls() {
+        for later_pull in [false, true] {
+            let store = Store::open_in_memory().unwrap();
+            let delete = page(
+                vec![],
+                vec![PulledDelete {
+                    id: "gone".into(),
+                    deleted_at: at("2026-10-26 02:00:00.123456789 +0000 UTC"),
+                }],
+            );
+            let stale = page(
+                vec![memory("gone", "2026-10-26 02:00:00 +0000 UTC")],
+                vec![],
+            );
+            let applied = if later_pull {
+                assert_eq!(
+                    store.apply_pulled(&[delete], None).unwrap(),
+                    PullApplied::default()
+                );
+                store.apply_pulled(&[stale], None).unwrap()
+            } else {
+                store.apply_pulled(&[delete, stale], None).unwrap()
+            };
+            assert_eq!(applied, PullApplied::default());
+            assert_eq!(count(&store, "SELECT COUNT(*) FROM memories"), 0);
+            // Equal and older delete replays must not weaken the retained tombstone.
+            for deleted_at in [
+                "2026-10-26 02:00:00.123456789 +0000 UTC",
+                "2026-10-26 01:00:00 +0000 UTC",
+            ] {
+                assert_eq!(
+                    store
+                        .apply_pulled(
+                            &[page(
+                                vec![],
+                                vec![PulledDelete {
+                                    id: "gone".into(),
+                                    deleted_at: at(deleted_at),
+                                }]
+                            )],
+                            None
+                        )
+                        .unwrap(),
+                    PullApplied::default()
+                );
+            }
+            assert_eq!(count(&store, "SELECT COUNT(*) FROM sync_oplog"), 1);
+            assert_eq!(count(&store, "SELECT COUNT(*) FROM audit_log"), 0);
+            let equal = memory("gone", "2026-10-26 02:00:00.123456789 +0000 UTC");
+            assert_eq!(
+                store
+                    .apply_pulled(&[page(vec![equal], vec![])], None)
+                    .unwrap()
+                    .memories,
+                0
+            );
+            let fresh = memory("gone", "2026-10-26 02:00:00.123456790 +0000 UTC");
+            assert_eq!(
+                store
+                    .apply_pulled(&[page(vec![fresh], vec![])], None)
+                    .unwrap()
+                    .memories,
+                1
+            );
+        }
+    }
+
+    #[test]
+    fn absent_delete_is_visible_immediately_and_rolls_back_atomically() {
+        let store = Store::open_in_memory().unwrap();
+        let conn = store.lock().unwrap();
+        let transaction = conn.unchecked_transaction().unwrap();
+        let delete = PulledDelete {
+            id: "gone".into(),
+            deleted_at: at("2026-10-26 02:00:00 +0000 UTC"),
+        };
+        assert_eq!(apply_remote_delete(&transaction, &delete), Some(false));
+        // Even before a page/transaction boundary, the upsert sees the delete.
+        assert_eq!(
+            upsert_if_newer(
+                &transaction,
+                &memory("gone", "2026-10-26 01:00:00 +0000 UTC")
+            ),
+            Some(false)
+        );
+        transaction.rollback().unwrap();
+        drop(conn);
+        assert_eq!(count(&store, "SELECT COUNT(*) FROM sync_oplog"), 0);
+        // Same-page memories precede deletes: the final state must still be gone.
+        assert_eq!(
+            store
+                .apply_pulled(
+                    &[page(
+                        vec![memory("gone", "2026-10-26 01:00:00 +0000 UTC")],
+                        vec![delete]
+                    )],
+                    None
+                )
+                .unwrap(),
+            PullApplied {
+                memories: 1,
+                deletes: 1
+            }
+        );
+        assert_eq!(count(&store, "SELECT COUNT(*) FROM memories"), 0);
+        assert_eq!(
+            store
+                .apply_pulled(
+                    &[page(
+                        vec![memory("gone", "2026-10-26 02:00:01 +0000 UTC")],
+                        vec![]
+                    )],
+                    None
+                )
+                .unwrap()
+                .memories,
+            1
+        );
     }
 
     #[test]
