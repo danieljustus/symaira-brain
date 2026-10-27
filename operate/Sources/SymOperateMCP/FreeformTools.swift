@@ -97,7 +97,7 @@ extension MCPServer {
         ),
         ToolDefinition(
             name: "freeform_list_boards",
-            description: "List snapshot board IDs, stored last_activity_time and non-tombstoned item counts only. No object contents or inferred titles. Requires capture.",
+            description: "List snapshot board IDs, stored last_activity_time, non-tombstoned item counts and the decoded board title (null when the stored layout is not recognized). No object contents. Requires capture.",
             inputSchema: { _ in [
                 "type": "object", "additionalProperties": false,
                 "properties": ["snapshot_path": ["type": "string"]], "required": ["snapshot_path"],
