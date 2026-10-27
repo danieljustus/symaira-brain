@@ -1,4 +1,12 @@
 // Go root maps replace duplicate entries; typed entry fields merge in order.
+#[test]
+fn current_copilot_selected_account() {
+    assert_eq!(copilot_cli_account(br#"{// comment
+      "loggedInUsers":[{"host":"https://github.com","login":"first"},{"host":"https://github.com","login":"second"}],
+      "lastLoggedInUser":{"host":"https://github.com","login":"second"},
+    }"#).as_deref(), Some("https://github.com:second"));
+}
+
 fn copilot_file_token_candidate_in(dir: &Path) -> Result<Option<String>, ()> {
     for name in ["apps.json", "hosts.json"] {
         let Some(contents) = read_optional_credential_file(&credential_join(dir, name))? else {

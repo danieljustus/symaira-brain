@@ -50,6 +50,7 @@ include!("provider_config/files.rs");
 include!("provider_config/claude_file.rs");
 include!("provider_config/codex_file.rs");
 include!("provider_config/copilot_file.rs");
+include!("provider_config/copilot_cli.rs");
 include!("provider_config/kimi_nous.rs");
 include!("provider_config/hermes.rs");
 include!("provider_config/jwt.rs");
