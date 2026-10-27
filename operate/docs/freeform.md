@@ -173,6 +173,22 @@ preserves the helper identity across updates. Signing uses hardened runtime and
 a timestamp, but not notarization. Unsigned packaging is supported for CI/tests;
 Swift tests never require a signing identity.
 
+**Module archive (release path).** `scripts/build-module-packages.sh` puts the
+helper bundle and this installer next to `symoperate` in
+`symoperate_<version>_darwin_<arch>.tar.gz`. With `SYMAIRA_CODESIGN_IDENTITY` set
+to a Developer ID Application identity the bundle is signed (hardened runtime,
+timestamp). Install from an extracted archive without building:
+
+```bash
+./freeform-snapshot-helper.sh --bundle "./Symaira Operate Freeform Snapshot.app"
+```
+
+`--bundle` refuses a bundle whose signature fails `codesign --verify --strict` or
+whose identifier is not the helper's, and warns when it has no Developer ID team.
+Verified on macOS 27.2: replacing the installed helper with the signed archive
+bundle kept its Full Disk Access (same designated requirement); a modified or
+unsigned bundle is rejected.
+
 The on-demand job label and bundle ID are
 `com.symaira.operate.freeform-snapshot`; `AssociatedBundleIdentifiers` names that
 bundle, and `ProgramArguments` contains only its installed executable. There is
