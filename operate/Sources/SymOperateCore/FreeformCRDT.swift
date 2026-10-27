@@ -56,6 +56,53 @@ public enum FreeformCRDT {
         return ""
     }
 
+    /// Board title from `boards.data`. Observed on Freeform 5.1 (macOS 27.2) for all 36 boards of a real
+    /// library: the top-level field 6 holds a string table whose field-2 entries are the schema keys
+    /// "a", "b", then the title, then "c"..."g" (boards with scenes append scene names). The title is
+    /// only returned when it sits exactly between the keys "b" and "c"; any other layout yields nil.
+    public static func boardTitle(_ data: Data) throws -> String? {
+        let bytes = try body(data)
+        var offset = 0
+        var table: [UInt8]?
+        while offset < bytes.count {
+            let tag = try readVarint(bytes, offset: &offset)
+            switch tag & 7 {
+            case 0: _ = try readVarint(bytes, offset: &offset)
+            case 1: try skip(8, bytes: bytes, offset: &offset)
+            case 5: try skip(4, bytes: bytes, offset: &offset)
+            case 2:
+                let length = try readVarint(bytes, offset: &offset)
+                guard length <= UInt64(bytes.count - offset) else { throw invalid("Truncated protobuf field") }
+                if tag >> 3 == 6 { table = Array(bytes[offset..<(offset + Int(length))]) }
+                offset += Int(length)
+            default: throw invalid("Unsupported protobuf wire type")
+            }
+        }
+        guard let table else { return nil }
+        var strings: [String] = []
+        offset = 0
+        while offset < table.count, strings.count < 5 {
+            let tag = try readVarint(table, offset: &offset)
+            switch tag & 7 {
+            case 0: _ = try readVarint(table, offset: &offset)
+            case 1: try skip(8, bytes: table, offset: &offset)
+            case 5: try skip(4, bytes: table, offset: &offset)
+            case 2:
+                let length = try readVarint(table, offset: &offset)
+                guard length <= UInt64(table.count - offset) else { throw invalid("Truncated protobuf field") }
+                let chunk = table[offset..<(offset + Int(length))]
+                offset += Int(length)
+                if tag >> 3 == 2 {
+                    guard let string = String(bytes: chunk, encoding: .utf8) else { return nil }
+                    strings.append(string)
+                }
+            default: throw invalid("Unsupported protobuf wire type")
+            }
+        }
+        guard strings.count == 5, strings[0] == "a", strings[1] == "b", strings[3] == "c", strings[4] == "d" else { return nil }
+        return strings[2]
+    }
+
     private static func body(_ data: Data) throws -> [UInt8] {
         guard data.count <= 16 * 1024 * 1024 else { throw invalid("CRDT blob exceeds limit") }
         let bytes = Array(data)
