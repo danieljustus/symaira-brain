@@ -1,5 +1,8 @@
 #![cfg(unix)]
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::ffi::{OsStr, OsString};
 use std::os::unix::ffi::OsStringExt;
 use std::process::{Command, Output};
@@ -8,6 +11,7 @@ fn run(binary: &OsStr, home: &OsStr, args: &[&str]) -> Output {
     Command::new(binary)
         .args(args)
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", home)
         .env("UNRELATED", OsString::from_vec(vec![0xff]))
         .env(OsString::from_vec(vec![0xfe]), "invalid-name")

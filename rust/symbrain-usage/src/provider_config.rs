@@ -61,6 +61,10 @@ include!("provider_config/accounts.rs");
 include!("provider_config/other_accounts.rs");
 
 #[cfg(test)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
+#[cfg(test)]
 #[path = "kimi_expiry_tests.rs"]
 mod kimi_expiry_tests;
 
