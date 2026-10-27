@@ -6,6 +6,22 @@ import (
 	"time"
 )
 
+// kimiCredentialExpiry accepts CLI Unix seconds or RFC3339 timestamps.
+// Unknown/missing metadata must not turn an otherwise usable token into an
+// expired login; let the endpoint validate those tokens as before.
+func kimiCredentialExpiry(raw json.RawMessage) *time.Time {
+	var timestamp string
+	if json.Unmarshal(raw, &timestamp) == nil {
+		return kimiParseResetTime(timestamp)
+	}
+	var seconds float64
+	if len(raw) == 0 || string(raw) == "null" || json.Unmarshal(raw, &seconds) != nil || seconds < -62135596800 || seconds >= 253402300800 {
+		return nil
+	}
+	expires := time.Unix(int64(seconds), int64((seconds-float64(int64(seconds)))*1e9))
+	return &expires
+}
+
 func kimiSnapshotFromUsageResponse(data []byte, source string) (*UsageSnapshot, error) {
 	var payload kimiUsageResponse
 	if err := json.Unmarshal(data, &payload); err != nil {

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 	kimiDisplayName    = "Kimi Code"
 	kimiDefaultAPIBase = "https://api.kimi.com"
 	kimiWebUsagesURL   = "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages"
+	kimiExpiredLogin   = "Kimi Code CLI login expired — run the Kimi CLI once to refresh it"
 )
 
 // KimiProvider — Kimi For Coding usage provider.
@@ -29,11 +31,15 @@ const (
 // (KIMI_AUTH_TOKEN env). All three sources are portable (env vars and
 // plain file reads); the Keychain fallback the Swift original also has for
 // api/web is not ported, consistent with every other provider in this pass.
+// Both API keys and CLI OAuth tokens currently use /coding/v1/usages.
+// Which key products this endpoint accepts is not proven offline (#931);
+// do not infer API-key compatibility from CLI OAuth fixture success.
 // Mirrors symaira-cockpit's KimiUsageProvider.
 type KimiProvider struct {
 	apiKey         string
 	apiErr         error
 	apiSource      string
+	cliExpiresAt   *time.Time
 	cliAccessToken string
 	cliDeviceID    string
 	authToken      string
@@ -55,11 +61,13 @@ func NewKimiProvider(client *http.Client) *KimiProvider {
 	baseURL := validatedUsageBase(os.Getenv("KIMI_CODE_BASE_URL"), kimiDefaultAPIBase)
 	apiKey, apiSource, apiErr := resolveEnv("KIMI_CODE_API_KEY")
 	authToken, authSource, authErr := resolveEnv("KIMI_AUTH_TOKEN")
+	cliToken, cliExpiry := store.readCredential()
 	return &KimiProvider{
 		apiKey:         apiKey,
 		apiErr:         apiErr,
 		apiSource:      apiSource,
-		cliAccessToken: store.readAccessToken(),
+		cliAccessToken: cliToken,
+		cliExpiresAt:   cliExpiry,
 		cliDeviceID:    store.readDeviceID(),
 		authToken:      authToken,
 		authErr:        authErr,
@@ -102,6 +110,7 @@ func (p *KimiProvider) Strategies() []Strategy {
 	if p.cliAccessToken != "" {
 		strategies = append(strategies, &kimiCLIStrategy{
 			accessToken:     p.cliAccessToken,
+			expiresAt:       p.cliExpiresAt,
 			identityHeaders: kimiCLIIdentityHeaders(p.cliDeviceID),
 			baseURL:         p.baseURL,
 			client:          p.client,
@@ -138,17 +147,23 @@ func (p *KimiProvider) AuthStatus() AuthStatus {
 type kimiCLICredentialStore struct{ home string }
 
 func (s kimiCLICredentialStore) readAccessToken() string {
+	token, _ := s.readCredential()
+	return token
+}
+
+func (s kimiCLICredentialStore) readCredential() (string, *time.Time) {
 	data, err := readCredentialFile(filepath.Join(s.home, "credentials", "kimi-code.json"))
 	if err != nil {
-		return ""
+		return "", nil
 	}
 	var root struct {
-		AccessToken string `json:"access_token"`
+		AccessToken string          `json:"access_token"`
+		ExpiresAt   json.RawMessage `json:"expires_at"`
 	}
 	if err := json.Unmarshal(data, &root); err != nil {
-		return ""
+		return "", nil
 	}
-	return root.AccessToken
+	return root.AccessToken, kimiCredentialExpiry(root.ExpiresAt)
 }
 
 func (s kimiCLICredentialStore) readDeviceID() string {
@@ -285,6 +300,7 @@ func (s *kimiAPIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) {
 // and the same device identity headers the official CLI sends.
 type kimiCLIStrategy struct {
 	accessToken     string
+	expiresAt       *time.Time
 	identityHeaders map[string]string
 	baseURL         string
 	client          *http.Client
@@ -293,8 +309,14 @@ type kimiCLIStrategy struct {
 func (s *kimiCLIStrategy) Source() string { return "cli" }
 
 func (s *kimiCLIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) {
+	if s.expiresAt != nil && !time.Now().Before(*s.expiresAt) {
+		return nil, fmt.Errorf("%s", kimiExpiredLogin)
+	}
 	data, err := kimiPerformGET(ctx, s.baseURL, s.accessToken, s.identityHeaders, s.client)
 	if err != nil {
+		if statusErr, ok := err.(*kimiError); ok && statusErr.status == http.StatusUnauthorized && s.expiresAt != nil && !time.Now().Before(*s.expiresAt) {
+			return nil, fmt.Errorf("%s", kimiExpiredLogin)
+		}
 		return nil, err
 	}
 	return kimiSnapshotFromUsageResponse(data, s.Source())

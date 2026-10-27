@@ -357,7 +357,11 @@ fn kimi_store_reads_token_and_trims_the_device_id() {
     write(directory.path(), "device_id", "device-42\n");
     assert_eq!(
         kimi_store(directory.path()),
-        (Some("kimi-token".to_owned()), Some("device-42".to_owned()))
+        (
+            Some("kimi-token".to_owned()),
+            Some("device-42".to_owned()),
+            None
+        )
     );
 }
 
