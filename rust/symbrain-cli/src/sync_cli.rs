@@ -1,8 +1,7 @@
 //! Native `symbrain sync` CLI implementation.
 
 use std::ffi::OsString;
-use std::fs;
-use std::io::Write;
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 use serde::{Serialize, Serializer};
@@ -319,7 +318,39 @@ pub fn run(
         let target_path = clean_path(&target_path);
         let display_path = GoBytes::from_path(&target_path);
 
-        let existing_bytes = fs::read(&target_path).unwrap_or_default();
+        // Retain the no-follow capability from the read through the write.
+        // Only absent targets/parents count as empty, even during a dry run.
+        let file = match AtomicFile::open(&project_dir, Path::new(target.relative_path()), false) {
+            Ok(file) => Some(file),
+            Err(err) if err.kind() == io::ErrorKind::NotFound => None,
+            Err(err) => {
+                target_statuses.push(target_read_error(
+                    name,
+                    &display_path,
+                    "open",
+                    &err,
+                    target.relative_path(),
+                ));
+                continue;
+            }
+        };
+        let existing_bytes = match file.as_ref().map(AtomicFile::read_bounded) {
+            Some(Ok(bytes)) => Some(bytes),
+            None => None,
+            Some(Err(err)) if err.kind() == io::ErrorKind::NotFound => None,
+            Some(Err(err)) => {
+                target_statuses.push(target_read_error(
+                    name,
+                    &display_path,
+                    "read",
+                    &err,
+                    target.relative_path(),
+                ));
+                continue;
+            }
+        };
+        let existed = existing_bytes.is_some();
+        let existing_bytes = existing_bytes.unwrap_or_default();
         let rendered = match target.render(&existing_bytes, &instruction_content, &project_dir) {
             Ok(r) => r,
             Err(err) => {
@@ -348,10 +379,12 @@ pub fn run(
                 message: Some("would update".to_string().into()),
             });
         } else {
-            let existed = target_path.exists();
-            // Go opens the target for writing first, then writes it; the two
-            // failures are worded differently.
-            let written = AtomicFile::open(&project_dir, Path::new(target.relative_path()), true)
+            // Missing parents are created only once a write is necessary.
+            let written = file
+                .map_or_else(
+                    || AtomicFile::open(&project_dir, Path::new(target.relative_path()), true),
+                    Ok,
+                )
                 .map_err(|err| (&b" for write"[..], err))
                 .and_then(|file| file.write(&rendered.output).map_err(|err| (&b""[..], err)));
             match written {
@@ -453,6 +486,35 @@ pub fn run(
     }
 
     if has_error { exit::GENERIC } else { exit::OK }
+}
+
+/// Go leaves the path field empty on target errors, but includes the raw path
+/// in the diagnostic. Adapter validation errors name only the target basename.
+fn target_read_error(
+    name: &str,
+    path: &GoBytes,
+    operation: &str,
+    error: &io::Error,
+    relative: &str,
+) -> TargetStatus {
+    let basename = relative.rsplit('/').next().unwrap_or(relative);
+    let detail = match error.to_string().as_str() {
+        "adapter target is not a regular file" => format!("{basename} is not a regular file"),
+        "adapter target exceeds maximum size" => {
+            format!("{basename} exceeds maximum size of 1048576 bytes")
+        }
+        _ => symbrain_instructions::go_io_text(error),
+    };
+    let mut message = format!("{operation} ").into_bytes();
+    message.extend_from_slice(path.bytes());
+    message.extend_from_slice(b": ");
+    message.extend_from_slice(detail.as_bytes());
+    TargetStatus {
+        name: name.to_owned(),
+        path: GoBytes::default(),
+        status: "error".to_owned(),
+        message: Some(GoBytes(message)),
+    }
 }
 
 /// Runs the ported skills runner and maps its results onto the sync payload.
