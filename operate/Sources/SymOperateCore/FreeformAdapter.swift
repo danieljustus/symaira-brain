@@ -75,7 +75,28 @@ public protocol FreeformEnvironmentProtocol {
     func pause(seconds: Double)
     func position(label: String) throws -> PointValue
     func selectOnly(label: String) throws
+    /// Raw AXPosition write. Freeform moves the item by (point - current) × zoom, not to `point`.
     func setPosition(label: String, point: PointValue) throws
+    /// Zoom, canvas origin and scroll state of the board window.
+    func viewport() throws -> FreeformViewport
+    /// Scroll bar values 0...1; x is horizontal, y vertical.
+    func scroll(to position: PointValue) throws
+}
+
+/// AX only exposes canvas items that intersect the visible area (plus the selection).
+public struct FreeformViewport: Equatable, Sendable {
+    /// 1.0 is 100 %.
+    public var zoom: Double
+    /// Scroll bar values 0...1.
+    public var scroll: PointValue
+    /// Scroll positions per axis needed to cover the content (ceil(content / visible)).
+    public var pages: PointValue
+
+    public init(zoom: Double, scroll: PointValue = PointValue(x: 0, y: 0), pages: PointValue = PointValue(x: 1, y: 1)) {
+        self.zoom = zoom
+        self.scroll = scroll
+        self.pages = pages
+    }
 }
 
 public struct FreeformInsertResult: Codable, Sendable {
@@ -102,19 +123,23 @@ public struct FreeformMoveRequest: Codable, Sendable {
     public let referenceY: Double
     public let x: Double
     public let y: Double
+    /// Optional assertion in percent. The adapter always measures the real zoom.
+    public let zoom: Double?
 
     enum CodingKeys: String, CodingKey {
-        case label, x, y
+        case label, x, y, zoom
         case referenceLabel = "reference_label", referenceX = "reference_x", referenceY = "reference_y"
     }
 
-    public init(label: String, referenceLabel: String, referenceX: Double, referenceY: Double, x: Double, y: Double) {
+    public init(label: String, referenceLabel: String, referenceX: Double, referenceY: Double, x: Double, y: Double,
+                zoom: Double? = nil) {
         self.label = label
         self.referenceLabel = referenceLabel
         self.referenceX = referenceX
         self.referenceY = referenceY
         self.x = x
         self.y = y
+        self.zoom = zoom
     }
 }
 
@@ -123,27 +148,35 @@ public struct FreeformMoveResult: Codable, Sendable {
     public let screenPosition: PointValue
     public let boardPosition: PointValue
     public let corrected: Bool
+    /// Measured zoom in percent.
+    public let zoom: Double
+    /// True when the board had to be scrolled to reach the reference or the target.
+    public let scrolled: Bool
 
     enum CodingKeys: String, CodingKey {
-        case confirmed, corrected
+        case confirmed, corrected, zoom, scrolled
         case screenPosition = "screen_position", boardPosition = "board_position"
     }
 }
 
-/// Explicit 100% zoom transform calibrated from an object with a known board position.
+/// Board/screen transform calibrated from an object with a known board position at a measured zoom.
 public struct FreeformBoardTransform: Sendable {
-    public let offset: PointValue
+    public let board: PointValue
+    public let screen: PointValue
+    public let zoom: Double
 
-    public init(board: PointValue, screen: PointValue) {
-        offset = PointValue(x: screen.x - board.x, y: screen.y - board.y)
+    public init(board: PointValue, screen: PointValue, zoom: Double = 1) {
+        self.board = board
+        self.screen = screen
+        self.zoom = zoom
     }
 
     public func screen(_ point: PointValue) -> PointValue {
-        PointValue(x: point.x + offset.x, y: point.y + offset.y)
+        PointValue(x: screen.x + (point.x - board.x) * zoom, y: screen.y + (point.y - board.y) * zoom)
     }
 
     public func board(_ point: PointValue) -> PointValue {
-        PointValue(x: point.x - offset.x, y: point.y - offset.y)
+        PointValue(x: board.x + (point.x - screen.x) / zoom, y: board.y + (point.y - screen.y) / zoom)
     }
 }
 
@@ -252,28 +285,70 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
         try authorize(policy)
         guard !request.label.isEmpty, !request.referenceLabel.isEmpty,
               [request.x, request.y, request.referenceX, request.referenceY].allSatisfy(\.isFinite) else {
-            throw AutomationError.invalidArgument("Move requires labels and finite board coordinates at 100% zoom.")
+            throw AutomationError.invalidArgument("Move requires labels and finite board coordinates.")
         }
         lock.lock()
         defer { lock.unlock() }
         try Self.requireBoard(boardTitle, in: environment.doctor())
-        let reference = try environment.position(label: request.referenceLabel)
-        let transform = FreeformBoardTransform(board: PointValue(x: request.referenceX, y: request.referenceY), screen: reference)
-        let expected = transform.screen(PointValue(x: request.x, y: request.y))
+        let start = try environment.viewport()
+        let zoom = start.zoom
+        guard zoom.isFinite, zoom > 0 else { throw AutomationError.unavailable("Freeform reported an invalid zoom.") }
+        if let asserted = request.zoom, abs(asserted / 100 - zoom) > 0.0005 {
+            throw AutomationError.invalidArgument("Board zoom is \(zoom * 100)%, not the asserted \(asserted)%.")
+        }
+        var scrolled = false
+        // The user's view is restored on every path; a move must not leave the board scrolled elsewhere.
+        defer { if scrolled { try? environment.scroll(to: start.scroll) } }
+        let referenceBoard = PointValue(x: request.referenceX, y: request.referenceY)
+        let target = PointValue(x: request.x, y: request.y)
+        // Reference first: once the target is selected it stays in the AX tree while scrolling.
+        _ = try reveal(request.referenceLabel, pages: start.pages, scrolled: &scrolled)
+        try reveal(request.label, pages: start.pages, scrolled: &scrolled)
         try environment.deselectIfAvailable()
         try environment.selectOnly(label: request.label)
-        try environment.setPosition(label: request.label, point: expected)
-        environment.pause(seconds: 0.3)
+        var transform = FreeformBoardTransform(board: referenceBoard, screen: try reveal(
+            request.referenceLabel, pages: start.pages, scrolled: &scrolled), zoom: zoom)
+        var expected = transform.screen(target)
         var actual = try environment.position(label: request.label)
+        try environment.setPosition(label: request.label, point: Self.axTarget(from: actual, to: expected, zoom: zoom))
+        environment.pause(seconds: 0.3)
+        transform = FreeformBoardTransform(board: referenceBoard, screen: try reveal(
+            request.referenceLabel, pages: start.pages, scrolled: &scrolled), zoom: zoom)
+        expected = transform.screen(target)
+        actual = try environment.position(label: request.label)
         let corrected = abs(actual.x - expected.x) >= 0.5 || abs(actual.y - expected.y) >= 0.5
         if corrected {
-            try environment.setPosition(label: request.label, point: PointValue(
-                x: expected.x + expected.x - actual.x, y: expected.y + expected.y - actual.y))
+            // The residual is treated as a repeatable bias (as observed at 100%), so it is compensated twice:
+            // at zoom 1 this is the previously live-verified write of expected + (expected - actual).
+            let compensated = PointValue(x: 2 * expected.x - actual.x, y: 2 * expected.y - actual.y)
+            try environment.setPosition(label: request.label, point: Self.axTarget(from: actual, to: compensated, zoom: zoom))
             environment.pause(seconds: 0.3)
             actual = try environment.position(label: request.label)
         }
         return FreeformMoveResult(confirmed: abs(actual.x - expected.x) < 0.5 && abs(actual.y - expected.y) < 0.5,
-                                  screenPosition: actual, boardPosition: transform.board(actual), corrected: corrected)
+                                  screenPosition: actual, boardPosition: transform.board(actual), corrected: corrected,
+                                  zoom: zoom * 100, scrolled: scrolled)
+    }
+
+    /// Live-measured on macOS 27.2: an AXPosition write moves the item by (written - current) × zoom.
+    static func axTarget(from current: PointValue, to expected: PointValue, zoom: Double) -> PointValue {
+        PointValue(x: current.x + (expected.x - current.x) / zoom, y: current.y + (expected.y - current.y) / zoom)
+    }
+
+    /// Returns the label's screen position, scrolling through the board grid when it is off-screen.
+    @discardableResult
+    private func reveal(_ label: String, pages: PointValue, scrolled: inout Bool) throws -> PointValue {
+        if let position = try? environment.position(label: label) { return position }
+        let columns = max(1, min(20, Int(pages.x.rounded(.up)))), rows = max(1, min(20, Int(pages.y.rounded(.up))))
+        for row in 0...rows {
+            for column in 0...columns {
+                try environment.scroll(to: PointValue(x: Double(column) / Double(columns), y: Double(row) / Double(rows)))
+                scrolled = true
+                environment.pause(seconds: 0.15)
+                if let position = try? environment.position(label: label) { return position }
+            }
+        }
+        return try environment.position(label: label)
     }
 
     private func authorize(_ policy: ActionPolicy) throws {

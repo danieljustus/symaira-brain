@@ -19,6 +19,12 @@ private final class MockFreeformEnvironment: FreeformEnvironmentProtocol {
     /// Number of times Freeform re-activates itself right after focus is handed back (observed live).
     var stealBacks = 0
     var windowTitles = ["Test Board"]
+    var zoom = 1.0
+    var pages = PointValue(x: 1, y: 1)
+    var scrollPosition = PointValue(x: 0.3, y: 0.7)
+    /// Labels only exposed by AX while the board is scrolled to the given position.
+    var visibleOnlyAt: [String: PointValue] = [:]
+    var scrolls: [PointValue] = []
 
     init(_ log: FreeformCallLog) { self.log = log }
     func doctor() -> FreeformDoctor {
@@ -42,14 +48,29 @@ private final class MockFreeformEnvironment: FreeformEnvironmentProtocol {
     func pause(seconds: Double) { log.calls.append("wait:\(seconds)") }
     func position(label: String) throws -> PointValue {
         log.calls.append("position:\(label)")
+        if let only = visibleOnlyAt[label], only != scrollPosition { throw AutomationError.notFound("off-screen") }
         guard let value = positions[label] else { throw AutomationError.notFound("label") }
         return value
     }
-    func selectOnly(label: String) throws { log.calls.append("select:\(label)") }
+    func selectOnly(label: String) throws {
+        log.calls.append("select:\(label)")
+        visibleOnlyAt[label] = nil // the selection stays exposed while scrolling
+    }
+    /// Mirrors live Freeform: the item moves by (written - current) × zoom.
     func setPosition(label: String, point: PointValue) throws {
         log.calls.append("move:\(label)")
         moves += 1
-        positions[label] = PointValue(x: point.x + firstMoveOffset, y: point.y)
+        let old = positions[label]!
+        positions[label] = PointValue(x: old.x + (point.x - old.x) * zoom + firstMoveOffset * zoom,
+                                      y: old.y + (point.y - old.y) * zoom)
+    }
+    func viewport() throws -> FreeformViewport {
+        log.calls.append("viewport")
+        return FreeformViewport(zoom: zoom, scroll: scrollPosition, pages: pages)
+    }
+    func scroll(to position: PointValue) throws {
+        scrolls.append(position)
+        scrollPosition = position
     }
 }
 
@@ -288,8 +309,70 @@ final class FreeformAdapterTests: XCTestCase {
         XCTAssertFalse(result.corrected)
         XCTAssertEqual(result.screenPosition, PointValue(x: 350, y: 550))
         XCTAssertEqual(result.boardPosition, PointValue(x: 250, y: 350))
-        XCTAssertEqual(log.calls, ["doctor", "position:Alpha", "deselect", "select:Beta", "move:Beta", "wait:0.3", "position:Beta"])
+        XCTAssertEqual(log.calls, ["doctor", "viewport", "position:Alpha", "position:Beta", "deselect", "select:Beta",
+                                   "position:Alpha", "position:Beta", "move:Beta", "wait:0.3", "position:Alpha", "position:Beta"])
         XCTAssertEqual(env.pid, 7)
+        XCTAssertFalse(result.scrolled)
+        XCTAssertEqual(result.zoom, 100)
+        XCTAssertTrue(env.scrolls.isEmpty)
+    }
+
+    func testMoveAtFiftyPercentScalesTransformAndAXWrite() throws {
+        let log = FreeformCallLog()
+        let env = MockFreeformEnvironment(log)
+        env.zoom = 0.5
+        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log))
+            .move(FreeformMoveRequest(label: "Beta", referenceLabel: "Alpha", referenceX: 10, referenceY: 20,
+                                      x: 250, y: 350, zoom: 50), boardTitle: "Test Board", policy: ActionPolicy())
+        XCTAssertTrue(result.confirmed)
+        XCTAssertFalse(result.corrected)
+        XCTAssertEqual(result.screenPosition, PointValue(x: 230, y: 385))
+        XCTAssertEqual(result.boardPosition, PointValue(x: 250, y: 350))
+        XCTAssertEqual(result.zoom, 50)
+    }
+
+    func testZoomAssertionMismatchFailsBeforeAnySelection() {
+        let log = FreeformCallLog()
+        let env = MockFreeformEnvironment(log)
+        env.zoom = 0.75
+        XCTAssertThrowsError(try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log))
+            .move(FreeformMoveRequest(label: "Beta", referenceLabel: "Alpha", referenceX: 10, referenceY: 20,
+                                      x: 250, y: 350, zoom: 100), boardTitle: "Test Board", policy: ActionPolicy()))
+        XCTAssertEqual(log.calls, ["doctor", "viewport"])
+    }
+
+    func testOffScreenTargetIsFoundByScrollingAndViewIsRestored() throws {
+        let log = FreeformCallLog()
+        let env = MockFreeformEnvironment(log)
+        env.pages = PointValue(x: 2, y: 1)
+        env.visibleOnlyAt["Beta"] = PointValue(x: 1, y: 0)
+        let result = try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log))
+            .move(FreeformMoveRequest(label: "Beta", referenceLabel: "Alpha", referenceX: 10, referenceY: 20,
+                                      x: 250, y: 350), boardTitle: "Test Board", policy: ActionPolicy())
+        XCTAssertTrue(result.confirmed)
+        XCTAssertTrue(result.scrolled)
+        XCTAssertEqual(env.scrolls, [PointValue(x: 0, y: 0), PointValue(x: 0.5, y: 0), PointValue(x: 1, y: 0),
+                                     PointValue(x: 0.3, y: 0.7)])
+    }
+
+    func testUnreachableLabelFailsWithoutMovingAndRestoresView() {
+        let log = FreeformCallLog()
+        let env = MockFreeformEnvironment(log)
+        env.visibleOnlyAt["Beta"] = PointValue(x: 9, y: 9)
+        XCTAssertThrowsError(try FreeformAdapter(environment: env, pasteboard: MockFreeformPasteboard(log))
+            .move(FreeformMoveRequest(label: "Beta", referenceLabel: "Alpha", referenceX: 10, referenceY: 20,
+                                      x: 250, y: 350), boardTitle: "Test Board", policy: ActionPolicy()))
+        XCTAssertEqual(env.moves, 0)
+        XCTAssertFalse(log.calls.contains("select:Beta"))
+        XCTAssertEqual(env.scrolls.last, PointValue(x: 0.3, y: 0.7))
+    }
+
+    func testZoomPercentParsing() {
+        XCTAssertEqual(NativeFreeformEnvironment.zoomPercent("75 %"), 75)
+        XCTAssertEqual(NativeFreeformEnvironment.zoomPercent("100%"), 100)
+        XCTAssertEqual(NativeFreeformEnvironment.zoomPercent("12,5 %"), 12.5)
+        XCTAssertNil(NativeFreeformEnvironment.zoomPercent("Content Hub durchsuchen"))
+        XCTAssertNil(NativeFreeformEnvironment.zoomPercent("0 %"))
     }
 
     func testMoveCorrectionAtHalfPoint() throws {
