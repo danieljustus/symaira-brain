@@ -146,6 +146,13 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/sync_controls.py --report "$REPORT"
+      - name: Require sync-relay failure controls
+        env:
+          REPORT: ${{ runner.temp }}/memory-cli-sync-relay-controls.json
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/sync_relay_controls.py --report "$REPORT"
       - name: Record native SDK and exact head
         if: always()
         env:

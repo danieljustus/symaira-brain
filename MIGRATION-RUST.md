@@ -1133,7 +1133,93 @@ real-process mutants (stdout byte, stderr byte, failing exit status) that are
 each rejected through exactly their own field; a source mutant that ignores
 `--allow-insecure-http` was rejected by `gate-008`. Contract row MEM-CLI-004.
 Local macOS evidence only; native three-OS CI is pending. Still on Go: the
-sync client itself (#762), `memory serve` (#759) and non-ASCII URL diagnostics.
+sync client itself (loopback exchanges moved native in #762 slice 2, below),
+`memory serve` (#759) and non-ASCII URL diagnostics.
+
+### `memory sync` loopback exchanges without a Go fallback (#762 slice 2)
+
+Slice 1 left every valid invocation on Go. The sync client now runs natively
+for the exchanges whose whole behaviour is proven against the shipped client;
+everything else is handed to Go. `memory_cli::requires_go_fallback` no longer
+gates `sync` (only `serve`): `memory_cli::run_sync` decides, and returns `None`
+to hand an invocation to Go with nothing written to the output streams.
+
+Native subset (`sync_native.rs`, `sync_http.rs`, `sync_decode.rs`; store side
+in `symbrain-memory/src/sync_state.rs`):
+
+* plain mode against `http://127.0.0.1:<port>[/prefix]` only (explicit port,
+  not 80, no leading zero; prefix segments `[A-Za-z0-9._-]`, never `.`/`..`/empty;
+  no query, fragment or userinfo; lower-case scheme), `--pull`/`--push`/both,
+  `--json`/`--output`, `--allow-insecure-http` (the shipped warning is printed
+  after the database is opened, in the shipped order), `--token`/
+  `SYMBRAIN_MEMORY_SYNC_TOKEN` for printable ASCII without spaces, `--timeout`
+  of `Ns` (1..=60) or `1m` (default 60 s). The database is opened (created and
+  migrated) before any network traffic, as in Go.
+* request: one `GET <base>/api/sync/changes?limit=500[&since=<cursor, UTC,
+  whole seconds, ':' as %3A>]` with exactly the headers Go sends (`Host`,
+  `User-Agent: Go-http-client/1.1`, `Accept-Encoding: gzip`, `Authorization:
+  Bearer ...` when a token is set; no `Accept`), no proxy, no redirects. A push
+  half sends nothing when nothing is pending: the probe uses the shipped
+  predicates (`updated_at > cursor` without `sync_exclude`; latest oplog entry
+  a newer delete) with the shipped bound rendering.
+* replies: statuses above 300 print `remote returned <code> (<status>): <msg>`
+  or `remote returned status <status>: <msg>` from the first JSON value of at
+  most 64 KiB (case-insensitive `error`/`code` keys, last duplicate wins,
+  non-string values and non-objects leave the field empty, truncated or stalled
+  bodies decode as far as they were read); 300 and 2xx are decoded as a
+  `ChangesResponse`: `{}`, `null`, empty `memories`/`deleted`, empty or null
+  `next_cursor`, unknown keys and a `server_time` of
+  `YYYY-MM-DDTHH:MM:SS[.f]Z` (zero time allowed) are an empty exchange; an
+  empty body prints `decode remote response: EOF`, a leading non-value byte
+  `invalid character 'x' looking for beginning of value` (Go `quoteChar`
+  rules), a truncated value `unexpected EOF`; a short body reports
+  `unexpected EOF`, a stalled one `context deadline exceeded`.
+* transport: connection refused (POSIX wording) and the run deadline
+  (`Get "<url>": context deadline exceeded`, also for a header stall or a
+  silent 1xx).
+* effect: the cursor becomes the relay clock (`max(server_time, zero)`), stored
+  as `YYYY-MM-DD HH:MM:SS[.nnnnnnnnn] +0000 UTC`; a push-only run reports no
+  relay clock and therefore stores the zero cursor (the shipped quirk, kept); a
+  failing exchange leaves the cursor untouched. Stored cursors in any other
+  spelling (the shipped driver cannot read them either) go to Go.
+
+Handed to Go (`None`), each proven by a scenario: https, `localhost`, any other
+host or loopback address, the encrypted relay, tokens with spaces or non-ASCII,
+timeouts outside the claimed spellings, unreadable stored cursors, pending
+local memories or tombstones (the push half), and, after the first read-only
+GET, any reply that carries memories, tombstones or a pagination cursor, a
+`server_time` in another spelling or with a bad value, non-object or wrongly
+typed JSON, folded (`Server_Time`) keys, bodies of 1 MiB and more, nesting
+deeper than 1000 levels, gzip-encoded bodies, redirects, malformed status
+lines or chunking, a connection closed before the reply, and error bodies that
+are not valid UTF-8. The post-GET hand-off makes the shipped client repeat the
+idempotent GET; no local state has changed by then.
+
+Evidence (`scripts/memory-cli-oracle/replay.py --family sync_relay`, also part
+of `all`; fake relay `sync_relay_server.py`, scenarios `sync_relay_cases.py`):
+267 scenarios against the immutable Go `dcddcef0`, each in its own disposable
+root with its own loopback relay. 189 native scenarios (238 steps, 226 relay
+requests) must match stdout, stderr and exit status of every step, every
+request the relay received (method, target, all headers) and the complete
+database state, with the Go fallback absent; 78 hand-off scenarios must stop at
+the owned absent-binary diagnostic, leave the cursor untouched and have sent
+either no request or exactly Go's first request. `sync_relay_controls.py`
+(wired into `memory-cli-native.yml`) runs five real-process mutants (stdout,
+stderr, exit, an extra request, an extra database row), each rejected through
+exactly its own observation key; four one-off source mutants (User-Agent, page
+limit, skipped cursor write, upper-cased error message) were each rejected by
+the family. The `sync_preflight` family dropped its `http://127.0.0.1:1` gate
+(now a native scenario of the new family): 192 cases. Unit tests:
+`memory_cli::sync_decode`, `memory_cli::sync_tests` and
+`symbrain-memory::sync_state`. Contract row MEM-CLI-005. Local macOS evidence
+only; native three-OS CI is pending (on Windows the connection-refused wording
+scenarios are skipped visibly and the native client hands that failure to Go;
+the created-tree mode comparison is POSIX only).
+
+Still on Go (#762): the encrypted relay, https/TLS and non-loopback remotes,
+replies with data to apply, push batches (`/api/sync/apply`, relay push),
+pagination, redirects and gzip, and the cases above. The #762 acceptance
+(`requires_go_fallback` removed entirely) is therefore not met.
 
 ### `memory` store creation and `sync` dead route without a Go fallback (#769 slice 4)
 

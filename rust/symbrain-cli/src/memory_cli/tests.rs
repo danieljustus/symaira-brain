@@ -279,31 +279,21 @@ fn hand_written_usage_shapes_stay_native() {
     }
 }
 
-/// Real synchronisation work must never run natively: only the argument
-/// checks that precede the shipped database and network work are ported,
-/// every valid invocation (and every remote spelling outside the proven URL
-/// subset) keeps the shipped implementation.
+/// `memory sync` is decided inside `run_sync` (it can hand an invocation to
+/// the shipped implementation after a read-only request), never by the
+/// pre-run routing gate.
 #[test]
-fn memory_sync_with_a_valid_remote_stays_on_go() {
+fn memory_sync_is_routed_by_run_sync_not_the_gate() {
     for case in [
         vec!["sync", "--remote", "https://example.test"],
         vec!["sync", "--remote=https://example.test", "--push"],
-        vec![
-            "sync",
-            "--remote",
-            "http://localhost:8080",
-            "--timeout",
-            "1m",
-        ],
-        vec!["sync", "--remote", "https://user@example.test"],
-        vec!["sync", "--remote", "https://example.test/%zz"],
+        vec!["sync", "--remote", "http://127.0.0.1:8080"],
     ] {
         let args = case.iter().map(OsString::from).collect::<Vec<_>>();
-        assert!(
-            requires_go_fallback(&args),
-            "{case:?} would synchronise and must go to Go"
-        );
+        assert!(is_sync(&args));
+        assert!(!requires_go_fallback(&args), "{case:?}");
     }
+    assert!(requires_go_fallback(&[OsString::from("serve")]));
 }
 
 /// Everything the shipped implementation refuses before it opens the database

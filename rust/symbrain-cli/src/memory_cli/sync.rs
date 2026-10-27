@@ -1,33 +1,37 @@
-//! `memory sync` argument checks that precede the shipped implementation's
-//! database and network work: flag grammar, positional refusal, the missing
-//! remote, the relay passphrase and the remote URL guard. A valid invocation
-//! (or a remote spelling outside the proven URL subset) is not handled here;
-//! the routing gate keeps it on the shipped implementation.
+//! `memory sync`: the argument checks that precede the shipped
+//! implementation's database and network work (flag grammar, positional
+//! refusal, the missing remote, the relay passphrase and the remote URL
+//! guard), then the native exchange for the proven loopback subset
+//! (`sync_native`). Every other valid invocation (or a remote spelling
+//! outside the proven URL subset) returns `None` and stays on Go.
 
 use super::help::{MEMORY_SYNC_REMOTE_REQUIRED, MEMORY_SYNC_USAGE};
-use super::{OsString, flags};
+use super::{OsString, flags, sync_native};
 use std::io::Write;
 use symbrain_core::config::format_go_quoted;
 use symbrain_core::exit;
+use symbrain_core::output::OutputFormat;
 
 const PASSPHRASE_ENV: &str = "SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE";
 
 enum Outcome {
     /// The invocation fails before any database or network work.
     Refused(u8),
-    /// Real synchronisation (or an unproven URL spelling): stays on Go.
-    Proceed,
+    /// A valid invocation (or an unproven URL spelling).
+    Proceed(flags::Args),
 }
 
-pub(super) fn needs_go(args: &[OsString]) -> bool {
-    matches!(preflight(args, &mut Vec::new()), Outcome::Proceed)
-}
-
-pub(super) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
+/// Runs `memory sync`; `None` leaves the invocation to the shipped
+/// implementation (nothing has been written to the streams then).
+pub(super) fn run(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+) -> Option<u8> {
     match preflight(args, stderr) {
-        Outcome::Refused(code) => code,
-        // Unreachable through the gate; fail closed instead of syncing.
-        Outcome::Proceed => exit::GENERIC,
+        Outcome::Refused(code) => Some(code),
+        Outcome::Proceed(parsed) => sync_native::run(&parsed, stdout, stderr, format),
     }
 }
 
@@ -59,7 +63,7 @@ fn preflight(args: &[OsString], stderr: &mut dyn Write) -> Outcome {
         return Outcome::Refused(exit::USAGE);
     }
     match validate_remote(remote, parsed.flag("allow-insecure-http")) {
-        Verdict::Valid | Verdict::Unproven => Outcome::Proceed,
+        Verdict::Valid | Verdict::Unproven => Outcome::Proceed(parsed),
         Verdict::Rejected(message) => {
             let _ = writeln!(stderr, "symbrain memory sync: {message}");
             Outcome::Refused(exit::USAGE)
