@@ -158,6 +158,7 @@ authority grant.
 
 - Brain root `README.md` — optional-module configuration, managed installation and profile exposure.
 - `SOURCE_PROVENANCE.md` — source receipt and the completed ownership cutover.
+- `docs/freeform.md` — Freeform IR, grants, paste/placement, snapshot reader and Phase 2 signed helper setup.
 - `docs/macos-agent-guide.md` — direct macOS registration, permission and safety guidance.
 
 ## License

@@ -83,8 +83,11 @@ final class CLITests: XCTestCase {
         XCTAssertTrue(r.stderr.contains("Unknown"), "Error should mention unknown target")
     }
 
-    func testPermissionsGrantEmitsValidJSON() {
-        // "screen" will either prompt or report already granted — either way, output must be valid JSON.
+    func testPermissionsGrantEmitsValidJSON() throws {
+        guard ProcessInfo.processInfo.environment["SYMOPERATE_LIVE_PERMISSION_TESTS"] == "1" else {
+            throw XCTSkip("Permission prompts are opt-in; set SYMOPERATE_LIVE_PERMISSION_TESTS=1 on a dedicated test desktop.")
+        }
+        // This explicitly opted-in test may prompt on the test desktop.
         let r = run(["permissions", "grant", "screen"])
         guard let data = r.stdout.data(using: .utf8) else {
             XCTFail("No stdout from permissions grant screen")
