@@ -81,6 +81,43 @@ public protocol FreeformEnvironmentProtocol {
     func viewport() throws -> FreeformViewport
     /// Scroll bar values 0...1; x is horizontal, y vertical.
     func scroll(to position: PointValue) throws
+    /// Screen frame of the visible object with this unique label.
+    func frame(label: String) throws -> RectValue
+    /// End handle of the single selected connection line, in screen coordinates.
+    func selectedLineEnd(_ end: FreeformLineEnd) throws -> PointValue
+    /// Raw AXPosition write on that handle; moves by (point - current) × zoom like items.
+    func setSelectedLineEnd(_ end: FreeformLineEnd, to point: PointValue) throws
+    /// AX description of the single selected line; it names both anchored objects once connected.
+    func selectedLineDescription() throws -> String
+}
+
+public enum FreeformLineEnd: Sendable { case tail, head }
+
+public struct FreeformConnectExistingRequest: Codable, Sendable {
+    public let tailLabel: String
+    public let headLabel: String
+
+    enum CodingKeys: String, CodingKey { case tailLabel = "tail_label", headLabel = "head_label" }
+
+    public init(tailLabel: String, headLabel: String) {
+        self.tailLabel = tailLabel
+        self.headLabel = headLabel
+    }
+}
+
+public struct FreeformConnectExistingResult: Codable, Sendable {
+    public let submitted: Bool
+    /// Freeform's own AX description names both objects as the line's endpoints.
+    public let anchored: Bool
+    public let focusRestored: Bool
+    public let pasteboardRestored: Bool
+    public let scrolled: Bool
+    public let error: String?
+
+    enum CodingKeys: String, CodingKey {
+        case submitted, anchored, scrolled, error
+        case focusRestored = "focus_restored", pasteboardRestored = "pasteboard_restored"
+    }
 }
 
 /// AX only exposes canvas items that intersect the visible area (plus the selection).
@@ -233,6 +270,70 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
         let payload = try FreeformContentLanguage.pasteboardItem(board)
         lock.lock()
         defer { lock.unlock() }
+        let paste = try pasteTransaction(payload, boardTitle: boardTitle)
+        return FreeformInsertResult(submitted: paste.submitted, objects: paste.submitted ? board.objects.map(\.id) : [],
+                                    connectionCount: paste.submitted ? board.connections.count : 0,
+                                    focusRestored: paste.focusRestored, pasteboardRestored: paste.pasteboardRestored,
+                                    error: paste.error)
+    }
+
+    /// Connects two objects already on the board. Paste-time anchors only resolve inside the pasted
+    /// payload (live-verified), so a free line is pasted and its two AX end handles are then set onto
+    /// the object centers; Freeform anchors an end dropped onto an object, like a drag would.
+    public func connectExisting(_ request: FreeformConnectExistingRequest, boardTitle: String,
+                                policy: ActionPolicy) throws -> FreeformConnectExistingResult {
+        try authorize(policy)
+        guard !request.tailLabel.isEmpty, !request.headLabel.isEmpty, request.tailLabel != request.headLabel else {
+            throw AutomationError.invalidArgument("Connecting requires two different nonempty labels.")
+        }
+        let payload = try FreeformContentLanguage.freeLine()
+        lock.lock()
+        defer { lock.unlock() }
+        try Self.requireBoard(boardTitle, in: environment.doctor())
+        let start = try environment.viewport()
+        let zoom = start.zoom
+        guard zoom.isFinite, zoom > 0 else { throw AutomationError.unavailable("Freeform reported an invalid zoom.") }
+        var scrolled = false
+        defer { if scrolled { try? environment.scroll(to: start.scroll) } }
+        // Both objects must be reachable before anything is pasted.
+        _ = try reveal(request.tailLabel, pages: start.pages, scrolled: &scrolled)
+        _ = try reveal(request.headLabel, pages: start.pages, scrolled: &scrolled)
+        if scrolled { try environment.scroll(to: start.scroll) }
+        let paste = try pasteTransaction(payload, boardTitle: boardTitle)
+        guard paste.submitted else {
+            return FreeformConnectExistingResult(submitted: false, anchored: false, focusRestored: paste.focusRestored,
+                                                 pasteboardRestored: paste.pasteboardRestored, scrolled: scrolled,
+                                                 error: paste.error)
+        }
+        var failure = paste.error
+        var anchored = false
+        do {
+            for (end, label) in [(FreeformLineEnd.tail, request.tailLabel), (.head, request.headLabel)] {
+                _ = try reveal(label, pages: start.pages, scrolled: &scrolled)
+                let frame = try environment.frame(label: label)
+                let center = PointValue(x: frame.x + frame.width / 2, y: frame.y + frame.height / 2)
+                let current = try environment.selectedLineEnd(end)
+                try environment.setSelectedLineEnd(end, to: Self.axTarget(from: current, to: center, zoom: zoom))
+                environment.pause(seconds: 0.3)
+            }
+            let description = try environment.selectedLineDescription()
+            anchored = description.contains(request.tailLabel + ",") && description.contains(request.headLabel + ",")
+            if !anchored { failure = [failure, "Line ends were set but Freeform did not report both anchors."]
+                .compactMap { $0 }.joined(separator: "; ") }
+        } catch {
+            failure = [failure, error.localizedDescription].compactMap { $0 }.joined(separator: "; ")
+        }
+        return FreeformConnectExistingResult(submitted: true, anchored: anchored, focusRestored: paste.focusRestored,
+                                             pasteboardRestored: paste.pasteboardRestored, scrolled: scrolled,
+                                             error: failure)
+    }
+
+    private struct PasteOutcome {
+        let submitted: Bool, focusRestored: Bool, pasteboardRestored: Bool, error: String?
+    }
+
+    /// Caller holds `lock`. Clipboard and focus are restored on every path.
+    private func pasteTransaction(_ payload: [String: Data], boardTitle: String) throws -> PasteOutcome {
         let status = environment.doctor()
         guard status.accessibility, let freeformPID = status.processID, status.windowCount > 0 else {
             throw AutomationError.unavailable("Freeform needs Accessibility permission and an open board window.")
@@ -276,9 +377,8 @@ public final class FreeformAdapter: AutomationAdapter, @unchecked Sendable {
                 .compactMap { $0 }.joined(separator: "; ")
         }
         let pasteboardRestored = pasteboard.restore(backup)
-        return FreeformInsertResult(submitted: submitted, objects: submitted ? board.objects.map(\.id) : [],
-                                    connectionCount: submitted ? board.connections.count : 0,
-                                    focusRestored: focusRestored, pasteboardRestored: pasteboardRestored, error: failure)
+        return PasteOutcome(submitted: submitted, focusRestored: focusRestored, pasteboardRestored: pasteboardRestored,
+                            error: failure)
     }
 
     public func move(_ request: FreeformMoveRequest, boardTitle: String, policy: ActionPolicy) throws -> FreeformMoveResult {
