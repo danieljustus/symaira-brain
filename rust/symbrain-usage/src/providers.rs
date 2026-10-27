@@ -70,6 +70,7 @@ pub struct Provider {
     /// CLI strategy's requests.
     device_id: Option<String>,
     enterprise_host: Option<String>,
+    kimi_cli_expires_at: Option<f64>,
 }
 
 impl std::fmt::Debug for Provider {
@@ -113,6 +114,7 @@ impl Provider {
             fixture: false,
             device_id: None,
             enterprise_host: None,
+            kimi_cli_expires_at: None,
         }
     }
 
@@ -245,9 +247,29 @@ impl Provider {
     ) -> Result<UsageSnapshot, UsageError> {
         let mut errors = Vec::new();
         for (source, credential) in &self.credentials {
+            let cli_expired = || {
+                source == "cli"
+                    && self.kimi_cli_expires_at.is_some_and(|expiry| {
+                        std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .is_ok_and(|now| now.as_secs_f64() >= expiry)
+                    })
+            };
+            let expired_error = || {
+                UsageError::exact(
+                    "Kimi Code CLI login expired — run the Kimi CLI once to refresh it",
+                )
+            };
+            if cli_expired() {
+                errors.push(expired_error());
+                continue;
+            }
             let req = request_for(self, source, credential, None);
             match fetch_one(self, transport, cancel, source, req) {
                 Ok(v) => return Ok(v),
+                Err(e) if matches!(&e, UsageError::Status { status: 401, .. }) && cli_expired() => {
+                    errors.push(expired_error());
+                }
                 Err(e) => errors.push(e),
             }
         }
