@@ -1,5 +1,7 @@
 //! Issue #930: isolated subprocess fixtures, never the operator's vault or network.
 #![cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use std::{collections::BTreeMap, fs, os::unix::fs::PermissionsExt, process::Command, sync::Arc};
 use symbrain_usage::{FixtureTransport, Response, Service, all_providers};
 
@@ -39,6 +41,7 @@ fn reference_report() {
             child
                 .args(["--exact", "reference_report_child", "--nocapture"])
                 .env_clear()
+                .envs(coverage::profile_environment())
                 .env("PATH", dir.path())
                 .env("HOME", dir.path())
                 .env("REFERENCE_MODE", mode);
