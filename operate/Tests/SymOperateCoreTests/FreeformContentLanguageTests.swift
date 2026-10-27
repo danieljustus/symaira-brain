@@ -102,4 +102,44 @@ final class FreeformContentLanguageTests: XCTestCase {
         }
         XCTAssertThrowsError(try JSONDecoder().decode(FreeformBoardIR.self, from: Data(#"{"objects":[{"kind":"unknown"}]}"#.utf8)))
     }
+
+    private func tempFile(_ bytes: [UInt8]) throws -> String {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try Data(bytes).write(to: url)
+        addTeardownBlock { try? FileManager.default.removeItem(at: url) }
+        return url.path
+    }
+
+    /// Mirrors the Freeform 5.1 image export: payload references a resource type carrying the raw bytes.
+    func testImageTravelsAsIndirectResourceOnTheSameItem() throws {
+        let png: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3]
+        let image = FreeformObject(kind: .image, text: "Logo", x: 5, y: 6, width: 160, height: 90,
+                                   imagePath: try tempFile(png))
+        let item = try FreeformContentLanguage.pasteboardItem(FreeformBoardIR(objects: [image]))
+        let payload = try JSONSerialization.jsonObject(with: item[FreeformContentLanguage.pasteboardType]!) as! [[String: Any]]
+        XCTAssertEqual(payload[0]["type_identifier"] as? String, "com.apple.apps.content-language.image")
+        XCTAssertEqual(payload[0]["description"] as? String, "Logo")
+        XCTAssertNil(payload[0]["fill"])
+        let indirect = (payload[0]["resource"] as! [String: Any])["indirect"] as! [String: Any]
+        let type = indirect["identifier"] as! String
+        XCTAssertTrue(type.hasPrefix("com.apple.apps.content-language.resource-"))
+        XCTAssertEqual(indirect["filename"] as? String, "image.png")
+        XCTAssertEqual(item[type], Data(png))
+        XCTAssertEqual(item.count, 2)
+    }
+
+    func testImageRequiresAbsolutePNGOrJPEGPathAndOnlyForImages() throws {
+        let gif = try tempFile(Array("GIF89a".utf8))
+        for path in [gif, "relative.png", "/nonexistent/x.png"] {
+            let image = FreeformObject(kind: .image, text: "", x: 0, y: 0, width: 1, height: 1, imagePath: path)
+            XCTAssertThrowsError(try FreeformContentLanguage.build(FreeformBoardIR(objects: [image])))
+        }
+        let jpeg = try tempFile([0xFF, 0xD8, 0xFF, 0xE0])
+        XCTAssertThrowsError(try FreeformContentLanguage.build(FreeformBoardIR(objects: [
+            FreeformObject(kind: .image, text: "", x: 0, y: 0, width: 1, height: 1)])))
+        XCTAssertThrowsError(try FreeformContentLanguage.build(FreeformBoardIR(objects: [
+            FreeformObject(text: "", x: 0, y: 0, width: 1, height: 1, rgb: [0, 0, 0], imagePath: jpeg)])))
+        XCTAssertNoThrow(try FreeformContentLanguage.build(FreeformBoardIR(objects: [
+            FreeformObject(kind: .image, text: "", x: 0, y: 0, width: 1, height: 1, imagePath: jpeg)])))
+    }
 }

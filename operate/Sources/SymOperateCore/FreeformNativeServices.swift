@@ -26,9 +26,15 @@ public struct NativeFreeformPasteboard: FreeformPasteboardProtocol {
         }
     }
 
-    public func write(_ data: Data, type: String) throws {
+    public func write(_ types: [String: Data]) throws {
+        let item = NSPasteboardItem()
+        for (type, data) in types {
+            guard item.setData(data, forType: NSPasteboard.PasteboardType(type)) else {
+                throw AutomationError.unavailable("Could not stage Freeform pasteboard type \(type).")
+            }
+        }
         NSPasteboard.general.clearContents()
-        guard NSPasteboard.general.setData(data, forType: NSPasteboard.PasteboardType(type)) else {
+        guard NSPasteboard.general.writeObjects([item]) else {
             throw AutomationError.unavailable("Could not write Freeform pasteboard payload.")
         }
     }
@@ -148,6 +154,54 @@ public struct NativeFreeformEnvironment: FreeformEnvironmentProtocol {
         try check(AXUIElementSetAttributeValue(target, kAXPositionAttribute as CFString, value), "AXPosition")
     }
 
+    public func viewport() throws -> FreeformViewport {
+        let window = try boardWindow()
+        let elements = descendants(window, maxDepth: 4)
+        let zooms = elements.filter { axCopyString($0, attribute: kAXRoleAttribute) == kAXMenuButtonRole }
+            .compactMap { axCopyString($0, attribute: kAXValueAttribute).flatMap(Self.zoomPercent) }
+        guard zooms.count == 1 else { throw AutomationError.unavailable("Cannot read a unique Freeform zoom value.") }
+        let scroll = try scrollArea(in: elements)
+        func bar(_ attribute: String) -> Double {
+            axCopyElement(scroll, attribute: attribute)
+                .flatMap { (axCopyAttribute($0, attribute: kAXValueAttribute) as? NSNumber)?.doubleValue } ?? 0
+        }
+        var pages = PointValue(x: 1, y: 1)
+        if let visible = axCopyFrame(scroll), visible.width > 0, visible.height > 0,
+           let raw = axCopyAttribute(scroll, attribute: "AXContentSize"), CFGetTypeID(raw) == AXValueGetTypeID() {
+            var content = CGSize.zero
+            if AXValueGetValue(raw as! AXValue, .cgSize, &content) { // swiftlint:disable:this force_cast
+                pages = PointValue(x: (Double(content.width) / visible.width).rounded(.up),
+                                   y: (Double(content.height) / visible.height).rounded(.up))
+            }
+        }
+        return FreeformViewport(zoom: zooms[0] / 100, scroll: PointValue(x: bar(kAXHorizontalScrollBarAttribute),
+                                y: bar(kAXVerticalScrollBarAttribute)), pages: pages)
+    }
+
+    public func scroll(to position: PointValue) throws {
+        let scroll = try scrollArea(in: descendants(try boardWindow(), maxDepth: 4))
+        for (attribute, value) in [(kAXHorizontalScrollBarAttribute, position.x), (kAXVerticalScrollBarAttribute, position.y)] {
+            guard let bar = axCopyElement(scroll, attribute: attribute) else { continue }
+            try check(AXUIElementSetAttributeValue(bar, kAXValueAttribute as CFString,
+                                                   NSNumber(value: min(1, max(0, value)))), "Scroll")
+        }
+    }
+
+    /// The zoom pop-up shows e.g. "75 %" or "75%"; the digits are locale-independent here.
+    static func zoomPercent(_ value: String) -> Double? {
+        let trimmed = value.trimmingCharacters(in: .whitespaces)
+        guard trimmed.hasSuffix("%") else { return nil }
+        let number = trimmed.dropLast().trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: ".")
+        guard let percent = Double(number), percent > 0, percent <= 10_000 else { return nil }
+        return percent
+    }
+
+    private func scrollArea(in elements: [AXUIElement]) throws -> AXUIElement {
+        let areas = elements.filter { axCopyString($0, attribute: kAXRoleAttribute) == kAXScrollAreaRole }
+        guard areas.count == 1 else { throw AutomationError.notFound("No unique Freeform canvas scroll area.") }
+        return areas[0]
+    }
+
     private func application() throws -> AXUIElement {
         guard permissions.status().accessibilityGranted else {
             throw AutomationError.permissionDenied("Freeform requires Accessibility permission.")
@@ -177,13 +231,17 @@ public struct NativeFreeformEnvironment: FreeformEnvironmentProtocol {
     }
 
     /// Only the focused board window, or the sole window. Never guess between multiple boards.
-    private func canvasItems() throws -> [AXUIElement] {
+    private func boardWindow() throws -> AXUIElement {
         let app = try application()
         let windows = axCopyElements(app, attribute: kAXWindowsAttribute) ?? []
         guard let window = axCopyElement(app, attribute: kAXFocusedWindowAttribute) ?? (windows.count == 1 ? windows[0] : nil) else {
             throw AutomationError.notFound("No unambiguous Freeform board window.")
         }
-        let areas = descendants(window, maxDepth: 5).filter { axCopyString($0, attribute: kAXRoleAttribute) == "AXLayoutArea" }
+        return window
+    }
+
+    private func canvasItems() throws -> [AXUIElement] {
+        let areas = descendants(try boardWindow(), maxDepth: 5).filter { axCopyString($0, attribute: kAXRoleAttribute) == "AXLayoutArea" }
         guard areas.count == 1 else { throw AutomationError.notFound("No unique Freeform canvas.") }
         return (axCopyElements(areas[0], attribute: kAXChildrenAttribute) ?? []).filter {
             axCopyString($0, attribute: kAXRoleAttribute) == "AXLayoutItem"

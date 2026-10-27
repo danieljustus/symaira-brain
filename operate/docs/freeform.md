@@ -14,10 +14,11 @@ Freeform, requests TCC permissions or installs itself. All tests use synthetic d
   Both endpoint objects must be newly inserted in the same IR. Connecting an
   existing object by UUID is deliberately not supported.
 * `freeform_move`: single-object AX movement with readback and one correction.
-  Supply `label`, `reference_label`, `reference_x`, `reference_y`, `x`, `y` and
-  explicit `zoom: 100`. Labels are unique object texts without the localized type
-  suffix. Duplicate matches fail closed. The reference coordinate is its board
-  top-left, not center. There is no multi-selection move.
+  Supply `label`, `reference_label`, `reference_x`, `reference_y`, `x` and `y`.
+  The zoom is measured from the window; an optional `zoom` (percent) only asserts
+  it and fails closed on mismatch. Labels are unique object texts without the
+  localized type suffix. Duplicate matches fail closed. The reference coordinate
+  is its board top-left, not center. There is no multi-selection move.
 * `freeform_read_board`: absolute `snapshot_path` and required `board_identifier`
   UUID. Requires `capture`. Known Freeform live-storage paths, including symlink
   targets, are refused. The caller remains responsible for snapshot provenance.
@@ -53,11 +54,19 @@ Example `freeform_insert` arguments:
 }
 ```
 
-Object kinds: `shape`, `sticky_note`, `text`. The sticky-note representation is
+Object kinds: `shape`, `sticky_note`, `text`, `image`. The sticky-note representation is
 the observed exported shape plus curved shadow, not a newly invented native
 sticky-note type. Text uses the exported unfilled shape variant. RGB is normalized
 0...1 and affects shape/note fill; free text has no fill. Width/height for free text
 retain the reference's automatic-sizing flags and may be recomputed by Freeform.
+
+`image` objects need `image_path`, an absolute path to a PNG or JPEG (magic bytes
+checked, at most 25 MB each, 100 MB per call); `rgb` is ignored. `text` becomes the
+image description, which Freeform exposes as the AX label, so a unique `text` makes
+the image addressable by `freeform_move`. Mirroring the Freeform 5.1 export, the
+payload references the bytes through `resource.indirect.identifier`; the bytes are
+written as that extra type on the same pasteboard item. Live-verified on macOS 27.2
+with PNG and JPEG, including an image as connection endpoint.
 
 ## Content-Language and paste transaction
 
@@ -92,10 +101,23 @@ clipboard replaced by the saved contents, as required by the restore contract.
 
 Freeform centers pasted groups in the visible viewport. Relative distances survive,
 but paste is not absolute placement. Use a previously calibrated reference object
-and `freeform_move` afterwards. Only a focused/sole board window and visible
-objects at 100% zoom are supported. The adapter verifies exactly one selected
-AXLayoutItem before setting AXPosition; background movement does not focus an app.
-The correction threshold is 0.5 pt on either axis. A failed readback is not success.
+and `freeform_move` afterwards. Only a focused/sole board window is supported. The
+adapter verifies exactly one selected AXLayoutItem before setting AXPosition;
+background movement does not focus an app. The correction threshold is 0.5 screen
+pt on either axis (1 board pt at 50 %). A failed readback is not success.
+
+Zoom: the zoom pop-up's AX value (e.g. `75 %`) is parsed; the board transform is
+`screen = reference_screen + (board - reference_board) × zoom`. Live-measured on
+macOS 27.2: an AXPosition write moves an item by `(written - current) × zoom`, so the
+adapter writes `current + (expected - current) / zoom`.
+
+Scrolling: AX only exposes canvas items intersecting the visible area, plus the
+current selection. A label that is not visible is searched by stepping the scroll
+bars over a grid sized from `AXContentSize` / visible size (max 20 × 20 steps). The
+original scroll position is restored afterwards (`scrolled: true` in the result).
+Uniqueness can only be checked among visible items, so labels must be unique on
+the whole board. Verified live on macOS 27.2 at 50 % and 75 %, with reference and
+target off-screen at 75 %; the 50 % result matched the snapshot geometry exactly.
 
 The reader opens SQLite with READONLY and a read transaction. It does not create a
 snapshot or touch the live store itself. It filters tombstones and requires a board
@@ -207,5 +229,5 @@ test is opt-in via `SYMOPERATE_LIVE_PERMISSION_TESTS=1` on a dedicated desktop.
 
 Live acceptance is separate and intentionally not run by unit tests. On a disposable
 board, the parent can insert two shapes and an anchored line, move the objects at
-100% zoom, inspect a separately supplied snapshot, and compare clipboard and focus
+several zoom levels and with off-screen targets, inspect a separately supplied snapshot, and compare clipboard and focus
 before/after. Passing mock tests is not live Freeform acceptance.

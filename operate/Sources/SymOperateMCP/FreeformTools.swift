@@ -14,7 +14,7 @@ extension MCPServer {
             name: "freeform_insert",
             description: """
                 Insert validated board IR using AX menu Paste; restores all pasteboard items/types and prior PID focus.
-                Positions are relative on paste, centered by Freeform. Use freeform_move for absolute placement at 100% zoom.
+                Positions are relative on paste, centered by Freeform. Use freeform_move for absolute placement.
                 AXPress is submission, not document verification. Requires input, app_control, menu_action.
                 dry_run makes no system calls.
                 """,
@@ -33,9 +33,11 @@ extension MCPServer {
         ToolDefinition(
             name: "freeform_move",
             description: """
-                Move exactly one object by unique text label at 100% zoom, using a reference object with known board x/y.
+                Move exactly one object by unique text label, using a reference object with known board x/y.
+                Works at any zoom (measured from the window; optional zoom asserts it in percent) and scrolls
+                to off-screen reference/target objects, restoring the view afterwards.
                 Works in background via AXSelected/AXPosition, with readback and one correction.
-                Labels exclude the localized type suffix. Only visible board objects are supported.
+                Labels exclude the localized type suffix and must be unique on the whole board.
                 Requires input, app_control, menu_action.
                 """,
             inputSchema: { _ in [
@@ -46,18 +48,16 @@ extension MCPServer {
                     "reference_label": ["type": "string", "minLength": 1],
                     "reference_x": ["type": "number"], "reference_y": ["type": "number"],
                     "x": ["type": "number"], "y": ["type": "number"],
-                    "zoom": ["type": "number", "const": 100], "dry_run": ["type": "boolean"],
+                    "zoom": ["type": "number", "exclusiveMinimum": 0], "dry_run": ["type": "boolean"],
                 ],
-                "required": ["board_title", "label", "reference_label", "reference_x", "reference_y", "x", "y", "zoom"],
+                "required": ["board_title", "label", "reference_label", "reference_x", "reference_y", "x", "y"],
             ] }, outputSchema: nil,
             handler: { server, arguments in
-                guard (arguments["zoom"] as? NSNumber)?.doubleValue == 100 else {
-                    throw AutomationError.invalidArgument("freeform_move requires explicit zoom: 100.")
-                }
                 let request: FreeformMoveRequest = try decode(arguments)
                 guard !request.label.isEmpty, !request.referenceLabel.isEmpty,
-                      [request.x, request.y, request.referenceX, request.referenceY].allSatisfy(\.isFinite) else {
-                    throw AutomationError.invalidArgument("Move requires nonempty labels and finite coordinates.")
+                      [request.x, request.y, request.referenceX, request.referenceY].allSatisfy(\.isFinite),
+                      request.zoom.map({ $0.isFinite && $0 > 0 }) ?? true else {
+                    throw AutomationError.invalidArgument("Move requires nonempty labels, finite coordinates and a positive zoom.")
                 }
                 let title = try boardTitle(arguments)
                 if try dryRun(arguments) { return server.freeform.plan(policy: server.freeformPolicy, name: "freeform_move") }
@@ -203,13 +203,16 @@ extension MCPServer {
             "type": "object", "additionalProperties": false,
             "properties": [
                 "id": ["type": "string", "format": "uuid"],
-                "kind": ["type": "string", "enum": ["shape", "text", "sticky_note"]],
+                "kind": ["type": "string", "enum": ["shape", "text", "sticky_note", "image"]],
                 "text": ["type": "string"], "x": ["type": "number"], "y": ["type": "number"],
                 "width": ["type": "number", "exclusiveMinimum": 0], "height": ["type": "number", "exclusiveMinimum": 0],
                 "rgb": ["type": "array", "minItems": 3, "maxItems": 3,
-                        "items": ["type": "number", "minimum": 0, "maximum": 1]],
+                        "items": ["type": "number", "minimum": 0, "maximum": 1],
+                        "description": "Fill; required for shape and sticky_note, ignored otherwise."],
+                "image_path": ["type": "string", "minLength": 1,
+                               "description": "Absolute path to a PNG or JPEG (max 25 MB); required for kind image only. text becomes the image description and AX label."],
             ],
-            "required": ["id", "kind", "text", "x", "y", "width", "height", "rgb"],
+            "required": ["id", "kind", "text", "x", "y", "width", "height"],
         ]
         let connection: [String: Any] = [
             "type": "object", "additionalProperties": false,
