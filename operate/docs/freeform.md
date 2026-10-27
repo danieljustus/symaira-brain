@@ -11,8 +11,16 @@ Freeform, requests TCC permissions or installs itself. All tests use synthetic d
 * `freeform_insert`: insert a `board` IR object. `dry_run: true` validates and
   returns a `DryRunPlan` without calling any system service.
 * `freeform_connect`: the same transaction, requiring at least one connection.
-  Both endpoint objects must be newly inserted in the same IR. Connecting an
-  existing object by UUID is deliberately not supported.
+  Both endpoint objects must be newly inserted in the same IR.
+* `freeform_connect_existing`: connect two objects already on the board by unique
+  `tail_label` / `head_label`. Paste-time anchors only resolve inside the pasted
+  payload (live-verified: a line anchored to existing item UUIDs pastes as a free
+  line), so the adapter pastes one free line, which Freeform leaves selected, and
+  sets its AX end handles (`AXHandles` order: curvature, tail, head) onto the object
+  centers with the same zoom compensation as `freeform_move`. Freeform anchors an
+  end dropped onto an object; `anchored` is true only when the line's AX description
+  names both labels. Live-verified on macOS 27.2 at 50 % zoom; the snapshot lists both
+  object UUIDs among the line's endpoints. Off-screen objects are scrolled to.
 * `freeform_move`: single-object AX movement with readback and one correction.
   Supply `label`, `reference_label`, `reference_x`, `reference_y`, `x` and `y`.
   The zoom is measured from the window; an optional `zoom` (percent) only asserts
@@ -105,6 +113,11 @@ and `freeform_move` afterwards. Only a focused/sole board window is supported. T
 adapter verifies exactly one selected AXLayoutItem before setting AXPosition;
 background movement does not focus an app. The correction threshold is 0.5 screen
 pt on either axis (1 board pt at 50 %). A failed readback is not success.
+
+Canvas AX tree: a board opened while Freeform runs in the background can expose no
+`AXLayoutArea` at all (observed live after a background relaunch). Setting
+`AXEnhancedUserInterface` on the app makes it appear even though the call reports an
+error; the adapter does this once when the canvas is missing and resets the flag.
 
 Zoom: the zoom pop-up's AX value (e.g. `75 %`) is parsed; the board transform is
 `screen = reference_screen + (board - reference_board) × zoom`. Live-measured on

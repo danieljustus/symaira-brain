@@ -25,10 +25,40 @@ extension MCPServer {
             name: "freeform_connect",
             description: """
                 Insert new objects and their anchored connections together. Same IR as freeform_insert, with at least one connection.
-                Cannot attach a pasted line to an existing board object. Requires input, app_control, menu_action.
+                For objects already on the board use freeform_connect_existing. Requires input, app_control, menu_action.
                 """,
             inputSchema: { _ in insertSchema }, outputSchema: nil,
             handler: { server, arguments in try server.freeformInsert(arguments, requireConnection: true) }
+        ),
+        ToolDefinition(
+            name: "freeform_connect_existing",
+            description: """
+                Connect two objects already on the board, addressed by unique text labels (without the localized type
+                suffix). Pastes one free line, then sets its two AX end handles onto the object centers so Freeform anchors
+                them; scrolls to off-screen objects and restores the view. anchored reports Freeform's own confirmation.
+                Requires input, app_control, menu_action. dry_run makes no system calls.
+                """,
+            inputSchema: { _ in [
+                "type": "object", "additionalProperties": false,
+                "properties": [
+                    "board_title": ["type": "string", "minLength": 1],
+                    "tail_label": ["type": "string", "minLength": 1],
+                    "head_label": ["type": "string", "minLength": 1],
+                    "dry_run": ["type": "boolean"],
+                ],
+                "required": ["board_title", "tail_label", "head_label"],
+            ] }, outputSchema: nil,
+            handler: { server, arguments in
+                let request: FreeformConnectExistingRequest = try decode(arguments)
+                guard !request.tailLabel.isEmpty, !request.headLabel.isEmpty, request.tailLabel != request.headLabel else {
+                    throw AutomationError.invalidArgument("tail_label and head_label must be different nonempty labels.")
+                }
+                let title = try boardTitle(arguments)
+                if try dryRun(arguments) {
+                    return server.freeform.plan(policy: server.freeformPolicy, name: "freeform_connect_existing")
+                }
+                return try server.freeform.connectExisting(request, boardTitle: title, policy: server.freeformPolicy)
+            }
         ),
         ToolDefinition(
             name: "freeform_move",
