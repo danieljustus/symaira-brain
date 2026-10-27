@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 
+from hermes_compare import filesystem_matches
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'usage-provider-files-oracle'))
 from reference_parity import reference_resolution_divergence
 
@@ -17,7 +18,7 @@ if os.name!='posix':
 records=[]
 with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
     root=pathlib.Path(scratch)
-    for kind in ['symlink-outside','symlink-inside','directory','fifo']:
+    for kind in ['symlink-outside','symlink-inside','symlink-outside-home','symlink-dangling','directory','fifo']:
         home=root/kind
         store=home/'hermes'
         store.mkdir(parents=True)
@@ -26,7 +27,9 @@ with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
         elif kind=='directory':auth.mkdir()
         else:
             target=(home/'outside.json')if kind=='symlink-outside'else(store/'inside.json')
-            target.write_text('{"providers":[{"id":"nous","access_token":"synthetic-owned-file"}]}', encoding='utf-8')
+            if kind=='symlink-outside-home':target=root/'outside-home.json'
+            if kind!='symlink-dangling':
+                target.write_text('{"providers":[{"id":"nous","access_token":"synthetic-owned-file"}]}', encoding='utf-8')
             auth.symlink_to(target)
         env={key:value for key,value in os.environ.items()if key in ['TMPDIR','TMP','TEMP']}
         env.update({'HOME':str(home),'USERPROFILE':str(home),'HERMES_HOME':str(store),'XDG_CONFIG_HOME':str(home/'config'),'XDG_DATA_HOME':str(home/'data'),'XDG_CACHE_HOME':str(home/'cache'),'PATH':'','ANTHROPIC_OAUTH_TOKEN':'env://USAGE_HERMES_ABSENT','SYMBRAIN_GO_BINARY':str(home/'absent-go')})
@@ -42,6 +45,6 @@ with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
         report=json.loads(base64.b64decode(native['stdout_b64']))
         assert next(row for row in report['providers']if row['id']=='nous')['configured']is False
         if kind=='fifo':assert observations[0]['timed_out'],'immutable Go FIFO behavior changed; reassess native-only contract'
-        else:assert observations[0]==native or reference_resolution_divergence(observations[0],native),(kind,observations)
-        records.append({'id':kind,'go':observations[0],'rust':native,'native_only_safety_contract':kind=='fifo'})
+        else:assert filesystem_matches(observations[0],native,auth.exists()) or reference_resolution_divergence(observations[0],native),(kind,observations)
+        records.append({'id':kind,'go':observations[0],'rust':native,'native_only_safety_contract':kind=='fifo', **({'known_divergence':'#933/#930 diagnostic'} if kind!='fifo' and observations[0]!=native else {})})
 output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':records},indent=2)+'\n', encoding='utf-8')

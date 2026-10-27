@@ -20,13 +20,11 @@ const (
 
 // CopilotProvider — GitHub Copilot usage provider.
 //
-// Primary source: an existing Copilot OAuth token from the local Copilot
-// config (~/.config/github-copilot/apps.json or hosts.json), then the
-// copilot_internal/user usage endpoint. The GitHub Device Flow that Codex's
-// Swift original exposes for interactive sign-in is intentionally not
-// ported here: it is a user-initiated write action, not part of read-only
-// usage reporting, and this pass only ports read paths. Mirrors
-// symaira-cockpit's CopilotUsageProvider.
+// Primary source: an explicit token or the selected current Copilot CLI
+// account (~/.copilot/config.json and macOS Keychain), with legacy
+// ~/.config/github-copilot/{apps,hosts}.json retained when no current account
+// is selected. Only read-only copilot_internal/user usage requests are made;
+// sign-in and refresh flows remain the responsibility of the Copilot CLI.
 type CopilotProvider struct {
 	accessToken    string
 	credErr        error
@@ -35,21 +33,9 @@ type CopilotProvider struct {
 	client         *http.Client
 }
 
-// NewCopilotProvider reads the token from the local Copilot config
-// (~/.config/github-copilot/{apps,hosts}.json).
+// NewCopilotProvider reads the selected current CLI account or legacy config.
 func NewCopilotProvider(client *http.Client) *CopilotProvider {
-	if client == nil {
-		client = newProviderHTTPClient()
-	}
-	accessToken, credSource, credErr := resolveFileCredential("COPILOT_ACCESS_TOKEN", func() string {
-		return readCopilotToken(copilotConfigDir())
-	})
-	return &CopilotProvider{
-		accessToken: accessToken,
-		credErr:     credErr,
-		credSource:  credSource,
-		client:      client,
-	}
+	return newCopilotProvider(client, readCopilotKeychain)
 }
 
 func copilotConfigDir() string {

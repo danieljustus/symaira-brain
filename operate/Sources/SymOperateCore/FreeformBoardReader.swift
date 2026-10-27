@@ -111,9 +111,11 @@ public struct FreeformBoardReader: Sendable {
         /// Stored SQLite value, without guessing an epoch or unit.
         public let last_activity_time: Double?
         public let item_count: Int
+        /// Decoded only from the observed string-table layout (see FreeformCRDT.boardTitle); nil otherwise.
+        public let title: String?
     }
 
-    /// Metadata only. Never select object blobs or infer a title from an arbitrary string in boards.data.
+    /// Metadata only. Never select object blobs; the title is decoded structurally, never guessed.
     public func listBoards(snapshotPath: String) throws -> [BoardSummary] {
         guard snapshotPath.hasPrefix("/") else { throw AutomationError.invalidArgument("snapshot_path must be absolute.") }
         let url = URL(fileURLWithPath: snapshotPath).standardizedFileURL.resolvingSymlinksInPath()
@@ -136,7 +138,8 @@ public struct FreeformBoardReader: Sendable {
         if let probe { sqlite3_finalize(probe) }
         let sql = """
             SELECT b.board_identifier, \(hasActivity ? "b.last_activity_time" : "NULL"),
-              (SELECT count(*) FROM board_items i WHERE i.board_identifier=b.board_identifier AND i.tombstoned=0)
+              (SELECT count(*) FROM board_items i WHERE i.board_identifier=b.board_identifier AND i.tombstoned=0),
+              b.data
             FROM boards b ORDER BY b.board_identifier LIMIT 10001
             """
         var statement: OpaquePointer?
@@ -152,7 +155,10 @@ public struct FreeformBoardReader: Sendable {
             }
             let activity = sqlite3_column_type(statement, 1) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 1)
             guard activity?.isFinite != false else { throw AutomationError.invalidArgument("Invalid board activity time.") }
-            boards.append(BoardSummary(id: id, last_activity_time: activity, item_count: Int(sqlite3_column_int64(statement, 2))))
+            // A malformed or unknown blob only loses the title, never the listing.
+            let title = (try? FreeformCRDT.boardTitle(blob(statement, column: 3))) ?? nil
+            boards.append(BoardSummary(id: id, last_activity_time: activity, item_count: Int(sqlite3_column_int64(statement, 2)),
+                                       title: title))
             status = sqlite3_step(statement)
         }
         guard status == SQLITE_DONE else { throw AutomationError.unavailable("SQLite board listing failed.") }

@@ -23,7 +23,11 @@ Freeform, requests TCC permissions or installs itself. All tests use synthetic d
   UUID. Requires `capture`. Known Freeform live-storage paths, including symlink
   targets, are refused. The caller remains responsible for snapshot provenance.
 * `freeform_list_boards`: absolute `snapshot_path`; metadata only, with `id`, raw
-  `last_activity_time` when present and non-tombstoned `item_count`. Requires `capture`.
+  `last_activity_time` when present, non-tombstoned `item_count` and `title`. Requires `capture`.
+  The title comes from the `boards.data` CRDT: its top-level field 6 string table reads
+  `a`, `b`, title, `c`, `d`, ... on Freeform 5.1 (all 36 boards of a real library,
+  user-renamed ones included; two checked against live window titles). Any other
+  layout yields no `title` instead of a guess.
 * `freeform_snapshot`: one-shot launchd helper backup; requires `capture`. See Phase 2.
 
 Every write tool (`freeform_insert`, `freeform_connect`, `freeform_move`) requires
@@ -168,6 +172,22 @@ exact app. The helper needs FDA, not the agent host. Stable Developer ID signing
 preserves the helper identity across updates. Signing uses hardened runtime and
 a timestamp, but not notarization. Unsigned packaging is supported for CI/tests;
 Swift tests never require a signing identity.
+
+**Module archive (release path).** `scripts/build-module-packages.sh` puts the
+helper bundle and this installer next to `symoperate` in
+`symoperate_<version>_darwin_<arch>.tar.gz`. With `SYMAIRA_CODESIGN_IDENTITY` set
+to a Developer ID Application identity the bundle is signed (hardened runtime,
+timestamp). Install from an extracted archive without building:
+
+```bash
+./freeform-snapshot-helper.sh --bundle "./Symaira Operate Freeform Snapshot.app"
+```
+
+`--bundle` refuses a bundle whose signature fails `codesign --verify --strict` or
+whose identifier is not the helper's, and warns when it has no Developer ID team.
+Verified on macOS 27.2: replacing the installed helper with the signed archive
+bundle kept its Full Disk Access (same designated requirement); a modified or
+unsigned bundle is rejected.
 
 The on-demand job label and bundle ID are
 `com.symaira.operate.freeform-snapshot`; `AssociatedBundleIdentifiers` names that

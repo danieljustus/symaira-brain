@@ -71,6 +71,9 @@ func (p *NousPortalProvider) AuthStatus() AuthStatus {
 	if p.credErr != nil {
 		return authErrStatus(p.credErr)
 	}
+	if _, err := os.Stat(nousAuthStorePath()); err == nil {
+		return AuthStatus{Status: "expired", Detail: "Hermes Nous login missing/expired — sign in again with the Hermes CLI", Source: "file"}
+	}
 	return AuthStatus{Status: "missing", Detail: "No Nous Portal credentials found — sign in with the Hermes CLI"}
 }
 
@@ -86,13 +89,16 @@ func nousAuthStorePath() string {
 
 // readNousAccessToken opens path with a plain read-only file read — no
 // locks, no writes, no token rotation — and returns the Nous provider's
-// access token (prefers the scoped invoke JWT), or "" when absent/expired.
-//
-// Shape: {"version": 1, "providers": [{"id": "nous", ...state...}]}.
+// access token, or "" when absent/expired. The current provider-map layout
+// uses the Portal access token; the historical provider array keeps its
+// scoped invoke-JWT preference for backwards compatibility.
 func readNousAccessToken(path string) string {
 	data, err := readCredentialFile(path)
 	if err != nil {
 		return ""
+	}
+	if token, current := currentHermesNousToken(data); current {
+		return token
 	}
 	var root struct {
 		Providers []struct {
