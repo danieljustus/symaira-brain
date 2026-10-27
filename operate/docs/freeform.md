@@ -31,7 +31,11 @@ Freeform, requests TCC permissions or installs itself. All tests use synthetic d
   UUID. Requires `capture`. Known Freeform live-storage paths, including symlink
   targets, are refused. The caller remains responsible for snapshot provenance.
 * `freeform_list_boards`: absolute `snapshot_path`; metadata only, with `id`, raw
-  `last_activity_time` when present and non-tombstoned `item_count`. Requires `capture`.
+  `last_activity_time` when present, non-tombstoned `item_count` and `title`. Requires `capture`.
+  The title comes from the `boards.data` CRDT: its top-level field 6 string table reads
+  `a`, `b`, title, `c`, `d`, ... on Freeform 5.1 (all 36 boards of a real library,
+  user-renamed ones included; two checked against live window titles). Any other
+  layout yields no `title` instead of a guess.
 * `freeform_snapshot`: one-shot launchd helper backup; requires `capture`. See Phase 2.
 
 Every write tool (`freeform_insert`, `freeform_connect`, `freeform_move`) requires
