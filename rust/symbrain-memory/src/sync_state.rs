@@ -124,27 +124,36 @@ impl Store {
     /// Returns a `StoreError` when a probe query fails (for example on
     /// malformed metadata), in which case the shipped client would fail too.
     pub fn has_pending_sync_changes(&self, since: DateTime<Utc>) -> Result<bool, StoreError> {
-        let bound = render_cursor(since);
         let conn = self.lock()?;
-        let memories: Option<i64> = conn
-            .query_row(
-                "SELECT 1 FROM memories WHERE (updated_at > ?) AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true' LIMIT 1",
-                [&bound],
-                |row| row.get(0),
-            )
-            .optional()?;
-        if memories.is_some() {
-            return Ok(true);
-        }
-        let deleted: Option<i64> = conn
-            .query_row(
-                "SELECT 1 FROM sync_oplog o WHERE o.op = 'delete' AND o.ts > ? AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id) LIMIT 1",
-                [&bound],
-                |row| row.get(0),
-            )
-            .optional()?;
-        Ok(deleted.is_some())
+        pending_changes(&conn, since)
     }
+}
+
+/// The probe behind [`Store::has_pending_sync_changes`], usable inside a
+/// transaction.
+pub(crate) fn pending_changes(
+    conn: &rusqlite::Connection,
+    since: DateTime<Utc>,
+) -> Result<bool, StoreError> {
+    let bound = render_cursor(since);
+    let memories: Option<i64> = conn
+        .query_row(
+            "SELECT 1 FROM memories WHERE (updated_at > ?) AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true' LIMIT 1",
+            [&bound],
+            |row| row.get(0),
+        )
+        .optional()?;
+    if memories.is_some() {
+        return Ok(true);
+    }
+    let deleted: Option<i64> = conn
+        .query_row(
+            "SELECT 1 FROM sync_oplog o WHERE o.op = 'delete' AND o.ts > ? AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id) LIMIT 1",
+            [&bound],
+            |row| row.get(0),
+        )
+        .optional()?;
+    Ok(deleted.is_some())
 }
 
 #[cfg(test)]

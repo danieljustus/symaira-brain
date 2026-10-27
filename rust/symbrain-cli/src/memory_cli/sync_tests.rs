@@ -158,8 +158,8 @@ fn error_statuses_use_the_shipped_wording_and_keep_the_cursor_unwritten() {
 #[test]
 fn replies_that_carry_data_are_handed_off_without_output() {
     for body in [
-        r#"{"memories":[{"id":"a"}]}"#,
-        r#"{"next_cursor":"c1"}"#,
+        r#"{"memories":[{"id":5}]}"#,
+        r#"{"memories":[{"id":"a","embedding":[0.5]}]}"#,
         r#"{"server_time":"2026-10-26T03:02:03+02:00"}"#,
     ] {
         let directory = tempdir().expect("directory");

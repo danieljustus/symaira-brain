@@ -1217,9 +1217,93 @@ scenarios are skipped visibly and the native client hands that failure to Go;
 the created-tree mode comparison is POSIX only).
 
 Still on Go (#762): the encrypted relay, https/TLS and non-loopback remotes,
-replies with data to apply, push batches (`/api/sync/apply`, relay push),
-pagination, redirects and gzip, and the cases above. The #762 acceptance
+push batches (`/api/sync/apply`, relay push), redirects and gzip, and the cases
+above (replies with data and pagination moved native in slice 3, below). The #762 acceptance
 (`requires_go_fallback` removed entirely) is therefore not met.
+
+### `memory sync` pulls that carry data without a Go fallback (#762 slice 3)
+
+Slice 2 handed every reply with memories, tombstones or a pagination cursor to
+Go. The pull half now applies them natively, over any number of pages, with the
+shipped `SyncUpsertMemoryIfNewer` / `ApplyRemoteDelete` semantics. Everything
+that is not proven below still reaches Go, and always before the first local
+write.
+
+* Request: unchanged for the first page; later pages send
+  `GET <base>/api/sync/changes?cursor=<url.QueryEscape(next_cursor)>&limit=500`
+  (no `since`: the cursor takes precedence, keys in `url.Values.Encode` order).
+  A `next_cursor` of at most 2048 bytes is echoed; more than 64 pages go to Go.
+* Entries (`sync_entry.rs`, a `db.Memory` / `db.DeletedMemory` reading): objects
+  whose known keys are spelled exactly (a case-folded or repeated known key is
+  not claimed) and typed as the shipped decoder reads them: strings without NUL,
+  `null` as the zero value, `Z`-spelled times (`created_at`, `updated_at`,
+  `valid_*`, `expires_at`, `retired_at`, `last_access`, `prev_access`),
+  `importance` / `decay_factor` as finite `float64` literals, `access_count` as
+  an `int64` literal, `metadata` as `null` or an object of strings, `embedding` as
+  absent, `null` or `[]`, `entities` / `evidence` only when they are `null`, empty
+  (or, for `entities`, strings). A missing or empty `id` is not claimed; unknown
+  keys are ignored (JSON syntax only). Tombstones need a string `id` and an
+  optional `deleted_at`.
+* Application (`symbrain-memory::sync_apply`): one transaction per run, memories
+  before tombstones page by page, applying the shipped SQL: tombstone check
+  (`sync_oplog` latest row `delete` and `updated_at <= ts` skips), insert with
+  the shipped defaults (`consolidation_status` `raw`, `review_status`
+  `approved`, `decay_factor` outside `(0,1]` -> `1`, `content_hash` computed when
+  empty, nil metadata `null`, NULL for empty `consolidated_into_id` /
+  `superseded_by`, no `embedding_binary`, `lsh_hash` 0) or update (strictly newer
+  only; `created_*`, `valid_*` and `superseded_by` stay), the best-effort
+  `audit_log` rows (`set` / `update` / `delete`), and `ApplyRemoteDelete`'s
+  `local updated_at > deleted_at` guard. Times are stored as `YYYY-MM-DD
+  HH:MM:SS[.nnnnnnnnn] +0000 UTC` (nanoseconds, trailing zeros trimmed, as the
+  cursor is). A stored `updated_at` / oplog `ts` in any other spelling than the
+  driver's own or the oplog trigger's `...T...fffZ` is not claimed.
+* Effect: counters `pulled_memories_applied` / `pulled_deletes_applied`; the cursor
+  becomes the newest of every `updated_at`, `deleted_at` and `server_time` of all
+  pages (`maxSeen`); all pages are fetched before anything is written. If page
+  `k` fails with a proven wording (error status, decode failure, short or stalled
+  body, deadline) pages `1..k-1` are applied, the failure is printed and the
+  cursor stays, exactly what the shipped client leaves behind.
+* Both directions: after the pull the push stream is probed with the shipped
+  predicates (`updated_at > cursor` without `sync_exclude`; latest oplog entry a
+  newer delete). A pull that would make the shipped client push (`/api/sync/apply`)
+  is rolled back and handed to Go; data older than the stored cursor, excluded
+  memories and pulls that failed (the shipped client stops before pushing) stay
+  native.
+
+Handed to Go with the batch rolled back (the scenario proves no memory, audit,
+oplog, entity or cursor row differs afterwards): malformed or unproven entries
+(null / non-object entries, wrong types, offset or odd time spellings, year 0,
+folded / duplicate keys, non-empty embeddings, NUL, lone surrogates, invalid
+UTF-8, control characters inside strings), a repeated `memories` / `deleted` /
+`next_cursor` key that carried data, cursors above 2048 bytes, more than 64
+pages, redirects / gzip / closed connections on a later page, a statement the
+store rejects (for example a `consolidated_into_id` without a parent, where the
+shipped client keeps the memories applied before it), and a pull that provokes a
+push. The shipped client then repeats the read-only `GET`s.
+
+Evidence (`scripts/memory-cli-oracle/replay.py --family sync_relay`, also part of
+`all`; scenarios `sync_relay_cases.py` + `sync_pull_cases.py`): 590 scenarios against the immutable Go `dcddcef0`, each in its own disposable root with its own loopback relay (325 new). 424 native scenarios (511 steps, 571 relay requests) must match stdout, stderr and exit status of every step, every request the relay received and the complete database state with the Go fallback absent; 166 hand-off scenarios (90 new) must stop at the owned absent-binary diagnostic. `--family all` is 1454/1454 on macOS (go1.26.7).
+Comparison rules: native scenarios compare stdout, stderr, exit, every relay
+request and the complete database (audit ids and wall-clock stamps normalised
+only where they have the shipped spelling; audit rows sorted afterwards); the
+hand-off scenarios now require that the requests the native process sent are
+a prefix of Go's (all `GET`) and that no local table differs from the seeded
+state. Controls: `sync_relay_controls.py` (five real-process mutants) still
+rejects every mutant through exactly its own key; the new
+`sync_pull_controls.py` builds nine source mutants from a scratch copy
+(equal-timestamp overwrite, tombstone and delete comparison, only the first
+page, the pagination cursor never sent, cursor ignoring entry times, no audit
+row, no push probe, a failing statement skipped instead of rolled back), replays
+the scenarios that exercise each and requires the family to reject it (11, 1, 2,
+39, 13, 5, 13, 5, 1 scenarios), wired into `memory-cli-native.yml` on Linux.
+Unit tests: `memory_cli::sync_entry`, `sync_decode`, `sync_pull`,
+`sync_pull_tests` and `symbrain-memory::sync_apply`. Contract row MEM-CLI-006.
+Local macOS evidence only; native three-OS CI is pending.
+
+Still on Go (#762): the encrypted relay, https/TLS and non-loopback remotes, push
+batches (`/api/sync/apply`, relay push), non-empty embeddings in pulled memories
+(`embedding_binary` / LSH pipeline), redirects and gzip, and the cases above.
+The #762 acceptance (`requires_go_fallback` removed entirely) is therefore not met.
 
 ### `memory` store creation and `sync` dead route without a Go fallback (#769 slice 4)
 

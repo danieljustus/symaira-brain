@@ -1,34 +1,31 @@
 //! Native `memory sync` for the exchanges whose whole behaviour is proven
 //! against the shipped client (#762): a plain (non-relay) run against a
-//! loopback `http://127.0.0.1:<port>[/prefix]` relay that has nothing to
-//! transfer in either direction.
+//! loopback `http://127.0.0.1:<port>[/prefix]` relay with nothing to push.
+//! The relay's replies may carry memories and tombstones to apply, over any
+//! number of pages.
 //!
 //! Everything else returns `None` and the invocation stays on the shipped
 //! implementation: https and non-loopback remotes, the encrypted relay,
-//! local changes to push, replies that carry memories, tombstones or a
-//! pagination cursor, odd stored cursors, timeouts outside 1 s..=60 s and
-//! transport or protocol failures without a proven wording. The only
-//! hand-off after network traffic is a read-only `GET`, which the shipped
-//! client then repeats; no local state has changed by then.
+//! local changes to push (before the pull, or provoked by it), entries or
+//! replies without a proven reading, odd stored cursors, timeouts outside
+//! 1 s..=60 s and transport or protocol failures without a proven wording.
+//! The only hand-offs after network traffic are read-only `GET`s, which the
+//! shipped client then repeats; a pulled batch that cannot be applied is
+//! rolled back as a whole, so no local state has changed by then.
 
 use super::flags::Args;
-use super::sync_decode::{self, Decoded};
-use super::sync_http::{self, Fetched, ReadStop};
+use super::sync_decode;
+use super::sync_http;
+use super::sync_pull::{self, Pull, Source};
 use super::{Write, exit, resolve_db_path};
 use chrono::{DateTime, Timelike, Utc};
 use serde::Serialize;
 use std::net::Ipv4Addr;
 use std::time::Instant;
 use symbrain_core::output::OutputFormat;
-use symbrain_memory::{Store, StoredCursor, zero_time};
+use symbrain_memory::{PullApplied, PulledPage, Store, StoredCursor, zero_time};
 
 const TOKEN_ENV: &str = "SYMBRAIN_MEMORY_SYNC_TOKEN";
-const PAGE_LIMIT: usize = 500;
-/// Success replies this native path can accept are tiny; a larger one carries
-/// data and is handed off.
-const SUCCESS_BODY_LIMIT: usize = 1 << 20;
-/// `io.LimitReader(resp.Body, 1<<16)` of the shipped error decoder.
-const ERROR_BODY_LIMIT: usize = 1 << 16;
 
 struct Plan {
     remote: String,
@@ -95,15 +92,42 @@ pub(super) fn run(
         return None;
     }
     let mut server_time = zero_time();
+    let mut applied = PullApplied::default();
     if plan.pull {
-        match pull(&plan, cursor, deadline)? {
-            Pulled::Time(time) => server_time = time,
-            Pulled::Failed(message) => {
-                let _ = writeln!(diagnostics, "symbrain memory sync: {message}");
-                let _ = stderr.write_all(&diagnostics);
-                return Some(exit::GENERIC);
-            }
+        let source = Source {
+            remote: &plan.remote,
+            base: &plan.base,
+            token: plan.token.as_deref(),
+        };
+        let (pages, failure) = match sync_pull::pull_pages(&source, cursor, deadline)? {
+            Pull::Pages(pages) => (pages, None),
+            Pull::Failed { pages, message } => (pages, Some(message)),
+        };
+        // The pull's own failure ends the run before any push, so the push
+        // stream is probed only after a pull that succeeded.
+        let pending_since = (plan.push && failure.is_none()).then_some(cursor);
+        if pages
+            .iter()
+            .any(|page| !page.memories.is_empty() || !page.deleted.is_empty())
+        {
+            let batch: Vec<PulledPage> = pages
+                .iter()
+                .map(|page| PulledPage {
+                    memories: page.memories.clone(),
+                    deleted: page.deleted.clone(),
+                })
+                .collect();
+            applied = store.apply_pulled(&batch, pending_since)?;
         }
+        if let Some(message) = failure {
+            let _ = writeln!(diagnostics, "symbrain memory sync: {message}");
+            let _ = stderr.write_all(&diagnostics);
+            return Some(exit::GENERIC);
+        }
+        server_time = pages
+            .iter()
+            .map(sync_decode::Page::newest)
+            .fold(zero_time(), Ord::max);
     }
     // A push-only run reports no relay clock, so it stores the zero cursor.
     store.set_sync_cursor(&plan.remote, server_time).ok()?;
@@ -119,8 +143,8 @@ pub(super) fn run(
         encrypted_relay: false,
         cursor: rfc3339_nano(server_time),
         server_time: rfc3339_nano(server_time),
-        pulled_memories_applied: 0,
-        pulled_deletes_applied: 0,
+        pulled_memories_applied: applied.memories,
+        pulled_deletes_applied: applied.deletes,
         pushed_memories: 0,
         pushed_deletes: 0,
         relay_blobs_fetched: 0,
@@ -132,60 +156,6 @@ pub(super) fn run(
     };
     let _ = stdout.write_all(rendered.as_bytes());
     Some(exit::OK)
-}
-
-enum Pulled {
-    Time(DateTime<Utc>),
-    Failed(String),
-}
-
-fn pull(plan: &Plan, cursor: DateTime<Utc>, deadline: Instant) -> Option<Pulled> {
-    let mut url = format!("{}/api/sync/changes?limit={PAGE_LIMIT}", plan.base);
-    if cursor != zero_time() {
-        // `url.Values.Encode` escapes the colons of the RFC 3339 form.
-        url = format!("{url}&since={}", cursor.format("%Y-%m-%dT%H%%3A%M%%3A%SZ"));
-    }
-    let failed = |inner: String| Pulled::Failed(format!("pull from {}: {inner}", plan.remote));
-    let transport = |cause: &str| failed(format!("request {}: Get \"{url}\": {cause}", plan.base));
-    let body_limit = SUCCESS_BODY_LIMIT.max(ERROR_BODY_LIMIT);
-    match sync_http::get(&url, plan.token.as_deref(), deadline, body_limit) {
-        Fetched::Handoff => None,
-        Fetched::Transport(cause) => Some(transport(&cause)),
-        Fetched::Reply {
-            status,
-            body,
-            stopped,
-        } if status > 300 => {
-            let body = &body[..body.len().min(ERROR_BODY_LIMIT)];
-            // A stalled or cut body is decoded as far as it was read.
-            let _ = stopped;
-            let (message, code) = sync_decode::api_error(body)?;
-            Some(failed(if code.is_empty() {
-                format!("remote returned status {status}: {message}")
-            } else {
-                format!("remote returned {code} ({status}): {message}")
-            }))
-        }
-        Fetched::Reply { body, stopped, .. } => {
-            if let Some(stop) = stopped {
-                let cause = match stop {
-                    ReadStop::Deadline => "context deadline exceeded",
-                    ReadStop::UnexpectedEof => "unexpected EOF",
-                };
-                return Some(failed(format!("decode remote response: {cause}")));
-            }
-            if body.len() >= SUCCESS_BODY_LIMIT {
-                return None;
-            }
-            match sync_decode::changes(&body) {
-                Decoded::Value(time) => Some(Pulled::Time(time)),
-                Decoded::Failure(message) => {
-                    Some(failed(format!("decode remote response: {message}")))
-                }
-                Decoded::Handoff => None,
-            }
-        }
-    }
 }
 
 fn plan(parsed: &Args) -> Option<Plan> {

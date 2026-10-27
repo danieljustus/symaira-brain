@@ -1,15 +1,42 @@
 //! Decoding of the relay's `/api/sync/changes` reply, limited to the shapes
 //! whose shipped (`encoding/json`) behaviour is reproduced exactly.
 //!
-//! A reply that carries data to apply (memories, tombstones, a pagination
-//! cursor), a time spelling other than `...Z`, or JSON the shipped decoder
-//! words differently is [`Decoded::Handoff`]: the whole invocation stays on
-//! the shipped implementation.
+//! A reply with an entry that has no proven reading (see `sync_entry`), a time
+//! spelling other than `...Z`, or JSON the shipped decoder words differently
+//! is [`Decoded::Handoff`]: the whole invocation stays on the shipped
+//! implementation.
 
+use super::sync_entry;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, TimeZone, Timelike, Utc};
 use serde::de::{self, Deserialize, Deserializer, IgnoredAny, MapAccess, SeqAccess, Visitor};
 use serde_json::error::Category;
-use symbrain_memory::zero_time;
+use serde_json::value::RawValue;
+use symbrain_memory::{PulledDelete, PulledMemory, zero_time};
+
+/// Longest pagination cursor that is echoed back; longer ones stay on Go.
+const CURSOR_LIMIT: usize = 2048;
+
+/// One decoded `ChangesResponse`.
+#[derive(Debug, Default)]
+pub(super) struct Page {
+    pub server_time: Option<DateTime<Utc>>,
+    pub next_cursor: String,
+    pub memories: Vec<PulledMemory>,
+    pub deleted: Vec<PulledDelete>,
+}
+
+impl Page {
+    /// The newest timestamp the reply mentions: its clock, its memories'
+    /// `updated_at` and its tombstones' `deleted_at` (`plainPull`'s `maxSeen`).
+    pub(super) fn newest(&self) -> DateTime<Utc> {
+        self.memories
+            .iter()
+            .map(|memory| memory.updated_at)
+            .chain(self.deleted.iter().map(|delete| delete.deleted_at))
+            .chain(self.server_time)
+            .fold(zero_time(), Ord::max)
+    }
+}
 
 pub(super) enum Decoded<T> {
     Value(T),
@@ -23,6 +50,7 @@ enum Slot {
     Null,
     Text(String),
     EmptyList,
+    List(Vec<Box<RawValue>>),
     Other,
 }
 
@@ -56,11 +84,15 @@ impl<'de> Visitor<'de> for SlotVisitor {
         Ok(Slot::Other)
     }
     fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Slot, A::Error> {
-        let mut empty = true;
-        while seq.next_element::<IgnoredAny>()?.is_some() {
-            empty = false;
+        let mut items = Vec::new();
+        while let Some(item) = seq.next_element::<Box<RawValue>>()? {
+            items.push(item);
         }
-        Ok(if empty { Slot::EmptyList } else { Slot::Other })
+        Ok(if items.is_empty() {
+            Slot::EmptyList
+        } else {
+            Slot::List(items)
+        })
     }
     fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Slot, A::Error> {
         while map.next_entry::<IgnoredAny, IgnoredAny>()?.is_some() {}
@@ -102,7 +134,7 @@ impl<'de> Deserialize<'de> for Pairs {
 
 /// Go's case folding for the ASCII field names used here: the long s and the
 /// Kelvin sign fold onto `s` and `k`.
-fn fold(key: &str) -> String {
+pub(super) fn fold(key: &str) -> String {
     key.chars()
         .map(|c| match c {
             '\u{17f}' => 's',
@@ -166,8 +198,8 @@ fn quote_char(byte: u8) -> String {
     }
 }
 
-/// Decodes a success reply into the relay's clock (`ChangesResponse.ServerTime`).
-pub(super) fn changes(body: &[u8]) -> Decoded<DateTime<Utc>> {
+/// Decodes a success reply (`ChangesResponse`).
+pub(super) fn changes(body: &[u8]) -> Decoded<Page> {
     let start = body
         .iter()
         .position(|byte| !matches!(byte, b' ' | b'\t' | b'\n' | b'\r'));
@@ -176,7 +208,7 @@ pub(super) fn changes(body: &[u8]) -> Decoded<DateTime<Utc>> {
     };
     let trimmed = &body[start..];
     match trimmed[0] {
-        b'n' if trimmed.trim_ascii_end() == b"null" => return Decoded::Value(zero_time()),
+        b'n' if trimmed.trim_ascii_end() == b"null" => return Decoded::Value(Page::default()),
         b'{' => {}
         b'[' | b'"' | b'-' | b'0'..=b'9' | b'n' | b't' | b'f' => return Decoded::Handoff,
         byte => {
@@ -196,29 +228,59 @@ pub(super) fn changes(body: &[u8]) -> Decoded<DateTime<Utc>> {
         }
         Err(_) => return Decoded::Handoff,
     };
-    let mut server_time = zero_time();
+    match page(pairs) {
+        Some(page) => Decoded::Value(page),
+        None => Decoded::Handoff,
+    }
+}
+
+fn page(pairs: Vec<(String, Slot)>) -> Option<Page> {
+    let mut page = Page::default();
+    // A key that already delivered data is never repeated: the shipped
+    // decoder would merge or replace it in ways that are not ported.
+    let mut delivered: Vec<&str> = Vec::new();
     for (key, slot) in pairs {
         let folded = fold(&key);
         let known =
             ["memories", "deleted", "server_time", "next_cursor"].contains(&folded.as_str());
         if known && folded != key {
-            return Decoded::Handoff;
+            return None;
+        }
+        if delivered.contains(&key.as_str()) {
+            return None;
         }
         match (key.as_str(), slot) {
             ("memories" | "deleted", Slot::Null | Slot::EmptyList)
             | ("next_cursor" | "server_time", Slot::Null) => {}
-            ("next_cursor", Slot::Text(text)) if text.is_empty() => {}
-            ("server_time", Slot::Text(text)) => match parse_server_time(&text) {
-                Some(time) => server_time = time,
-                None => return Decoded::Handoff,
-            },
-            ("memories" | "deleted" | "next_cursor" | "server_time", _) => {
-                return Decoded::Handoff;
+            ("memories", Slot::List(items)) => {
+                page.memories = items
+                    .iter()
+                    .map(|item| sync_entry::memory(item))
+                    .collect::<Option<_>>()?;
+                delivered.push("memories");
             }
+            ("deleted", Slot::List(items)) => {
+                page.deleted = items
+                    .iter()
+                    .map(|item| sync_entry::tombstone(item))
+                    .collect::<Option<_>>()?;
+                delivered.push("deleted");
+            }
+            ("next_cursor", Slot::Text(text)) => {
+                if text.len() > CURSOR_LIMIT {
+                    return None;
+                }
+                if !text.is_empty() {
+                    delivered.push("next_cursor");
+                }
+                page.next_cursor = text;
+            }
+            ("server_time", Slot::Text(text)) => page.server_time = Some(parse_server_time(&text)?),
+            ("memories" | "deleted" | "next_cursor" | "server_time", _) => return None,
             _ => {}
         }
     }
-    Decoded::Value(server_time)
+    Some(page)
 }
 
 /// `time.Time.UnmarshalJSON` for the canonical UTC spelling
@@ -327,7 +389,7 @@ mod tests {
             let Decoded::Value(actual) = changes(body) else {
                 panic!("not decoded: {}", String::from_utf8_lossy(body));
             };
-            assert_eq!(actual, expected);
+            assert_eq!(actual.newest(), expected);
         }
     }
 
@@ -390,9 +452,14 @@ mod tests {
     #[test]
     fn everything_else_is_handed_off() {
         for body in [
-            &br#"{"memories":[{"id":"a"}]}"#[..],
-            br#"{"deleted":[{"id":"a"}]}"#,
-            br#"{"next_cursor":"abc"}"#,
+            &br#"{"memories":[{"id":5}]}"#[..],
+            br#"{"memories":[null]}"#,
+            br#"{"memories":[{"id":"a","embedding":[0.5]}]}"#,
+            br#"{"memories":[{"id":"a"}],"memories":[{"id":"b"}]}"#,
+            br#"{"deleted":[{"id":"a","deleted_at":"bad"}]}"#,
+            br#"{"deleted":[null]}"#,
+            br#"{"next_cursor":"a","next_cursor":"b"}"#,
+            br#"{"next_cursor":5}"#,
             br#"{"server_time":"2026-10-26T03:02:03+02:00"}"#,
             br#"{"server_time":"bad"}"#,
             br#"{"server_time":5}"#,
@@ -410,6 +477,21 @@ mod tests {
                 String::from_utf8_lossy(body)
             );
         }
+    }
+
+    #[test]
+    fn pages_carry_entries_cursor_and_the_newest_time() {
+        let body = br#"{
+            "memories":[{"id":"a","content":"c","updated_at":"2026-10-26T01:00:00Z","metadata":{"k":"v"}}],
+            "deleted":[{"id":"b","deleted_at":"2026-10-26T02:00:00.5Z"}],
+            "server_time":"2026-10-26T01:30:00Z","next_cursor":"p2"}"#;
+        let Decoded::Value(page) = changes(body) else {
+            panic!("not decoded");
+        };
+        assert_eq!((page.memories.len(), page.deleted.len()), (1, 1));
+        assert_eq!(page.next_cursor, "p2");
+        assert_eq!(page.newest(), time("2026-10-26T02:00:00.5Z"));
+        assert_eq!(page.memories[0].id, "a");
     }
 
     #[test]
