@@ -125,6 +125,63 @@ fn concurrent_public_opens_and_writes_preserve_data_without_snapshot_upgrade() {
 }
 
 #[test]
+fn open_of_current_store_does_not_wait_for_a_retained_writer() {
+    // Go's shipped opener only reads `schema_migrations` once every embedded
+    // migration is recorded, so concurrent openers of a current database never
+    // queue on the single SQLite writer. A retained writer (for example another
+    // opener's `set`, slowed by Windows file locking) must not make an open of
+    // an already-current store wait out, or exhaust, the five-second budget.
+    use std::sync::mpsc;
+    use std::time::Duration;
+    let mut entropy = [0_u8; 8];
+    getrandom::fill(&mut entropy).unwrap();
+    let directory = std::env::temp_dir().join(format!(
+        "symbrain-schema-writer-{:016x}",
+        u64::from_le_bytes(entropy),
+    ));
+    std::fs::create_dir(&directory).unwrap();
+    let path = directory.join("memory.db");
+    let id = {
+        let store = Store::open(&path).unwrap();
+        store
+            .set(
+                "current store row",
+                "global",
+                "user",
+                serde_json::Map::new(),
+                false,
+            )
+            .unwrap()
+            .id
+    };
+    let writer = Connection::open(&path).unwrap();
+    writer.execute_batch("BEGIN IMMEDIATE").unwrap();
+    let (sender, receiver) = mpsc::channel();
+    let thread = {
+        let path = path.clone();
+        std::thread::spawn(move || {
+            let started = std::time::Instant::now();
+            let opened = Store::open(&path).map(|store| store.get(&id).unwrap().is_some());
+            let _ = sender.send((opened, started.elapsed()));
+        })
+    };
+    let outcome = receiver.recv_timeout(Duration::from_secs(3));
+    // Release the writer on every path so a failing assertion cannot hang.
+    writer.execute_batch("ROLLBACK").unwrap();
+    // Close the retained connection before cleanup: Windows refuses to delete
+    // memory.db/-wal/-shm while any handle is open (os error 32).
+    drop(writer);
+    thread.join().unwrap();
+    let (result, elapsed) = outcome.expect("open waited on the retained writer instead of reading");
+    assert!(
+        result.as_ref().is_ok_and(|readable| *readable),
+        "stored row must be readable; open returned {result:?} after {elapsed:?}"
+    );
+    assert!(elapsed < Duration::from_secs(3), "open took {elapsed:?}");
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
 fn later_ddl_failure_rolls_back_columns_and_migration_entries() {
     let mut entropy = [0_u8; 8];
     getrandom::fill(&mut entropy).unwrap();

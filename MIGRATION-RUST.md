@@ -69,6 +69,22 @@ complete historical repair or close #649/#758. See
 `docs/adr/memory-wal-open-race-803.md` and the preserved `memory-open-race-803`
 evidence.
 
+#907 (Windows `Store::open` BUSY in the concurrent-open test): Go's opener takes
+no writer for a current store (`sqlitekit.Migrate` only reads `schema_migrations`
+once every migration is recorded), while the native opener ran the whole
+migration under `BEGIN IMMEDIATE` on every open, so concurrent openers queued on
+the single SQLite writer and could exhaust the five-second budget on a slow
+Windows runner (the failing job's suite took 362 s). `configure` now first proves
+the migration is a no-op under `PRAGMA query_only` in a deferred read snapshot
+and reserves the writer only for pending or repairable state; any failure falls
+back to the unchanged `BEGIN IMMEDIATE` path, which reproduces the real result.
+The FTS integrity-check (itself a write) is replaced in that read-only admission
+by an exact `memories`/`memories_fts_docsize` rowid-parity check; stores that
+fail it still take the integrity-check/rebuild path. Control:
+`open_of_current_store_does_not_wait_for_a_retained_writer` (red before, green
+after). The Windows failure itself was never reproduced on macOS; native
+three-OS CI is the remaining evidence.
+
 The isolated historical/default/WAL integration normally merges main 5e and the
 independently approved 2fe WAL prerequisite. At source `1fc5910`, the full
 allocated Linux driver passes 392 tests with no failures/ignores, all 28
