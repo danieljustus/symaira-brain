@@ -300,6 +300,16 @@ names. Go structs use idiomatic CamelCase with `json:"snake_case"` tags.
 - No tenant, billing, or hosted-sync code in this repository. There is no Pro
   edition; multi-device sync is out of scope, not deferred elsewhere.
 
+### Native UI
+
+`Sources/SymBrainApp` and `Sources/SymBrainMobile` follow the Symaira
+Interface Guidelines shipped with the pinned `symaira-appkit`: read its
+`GUIDELINES.md`, then `DESIGN.md` and `docs/workspace-foundation.md`, and
+review a UI change with `python3 <symaira-appkit>/scripts/gui-review.py
+Sources/SymBrainApp` plus the manual checklist in GUIDELINES.md section 13.
+iOS keeps native `NavigationSplitView` and `TabView`; the drag-resizable
+workspace is macOS only (GUIDELINES.md section 12).
+
 ---
 
 ## Documentation
