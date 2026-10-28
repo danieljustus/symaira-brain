@@ -25,11 +25,7 @@ def git(root, *args):
 def inventory(root):
     paths = git(root, 'ls-files').splitlines()
     return {p: digest((root / p).read_bytes()) for p in paths
-            if p not in ('scripts/usage-contract-v2/accepted.json',)
-            and (p.endswith(('.go', '.rs')) or p.startswith('scripts/usage-contract-v2/')
-                 or p in ('go.mod', 'go.sum', 'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml')
-                 or p.endswith('/Cargo.toml') or '/fixtures/' in p
-                 or p.startswith('internal/usage/testdata/') or p.startswith('scripts/openrouter-oracle-v1/'))}
+            if p != 'scripts/usage-contract-v2/accepted.json'}
 
 
 def require_clean(root, revision):
@@ -69,7 +65,7 @@ def main(revision, evidence, build):
     (evidence / 'inputs-before.json').write_text(json.dumps(before, indent=2) + '\n')
     env = os.environ.copy()
     env.update(CGO_ENABLED='0', GOPROXY='off', GOTOOLCHAIN='go1.26.7',
-               CARGO_TARGET_DIR=str(build.parent / 'cargo'))
+               CARGO_TARGET_DIR=str(build / 'cargo'))
     sandbox = build / 'test-home'
     sandbox.mkdir()
     runner = source / 'scripts/usage-contract-v2/test-runner.py'
