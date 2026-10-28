@@ -5,8 +5,10 @@ use super::provider_config::{
     openrouter_from_resolved,
 };
 use super::provider_identity::{KIMI_COMPATIBILITY_VERSION, hostname, platform_label};
+use crate::legacy_openrouter;
 use crate::{FixtureTransport, Provider, Report, Response, Service};
 use serde_json::{Value, json};
+
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -16,7 +18,7 @@ const PROCESS_LIST: &str = "123 /Applications/Antigravity/language_server --app_
 
 fn execute(provider: Provider, response: Response) -> (Report, FixtureTransport) {
     if provider.id != "antigravity" {
-        let transport = FixtureTransport::new([(provider.id.clone(), response)].into());
+        let transport = legacy_openrouter::transport([(provider.id.clone(), response)].into());
         let report = Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
         return (report, transport);
     }
@@ -135,7 +137,7 @@ fn usage_fetch_620_reports_and_all_identity_headers_match_go() {
             case["report"],
             "{id}: full report"
         );
-        let requests = transport.requests();
+        let requests = legacy_openrouter::requests(&transport);
         let expected = case["requests"].as_array().expect("Go requests");
         assert_eq!(requests.len(), expected.len(), "{id}: full request walk");
         let mut actual_requests = Vec::new();

@@ -54,7 +54,7 @@ func (p *OpenRouterProvider) Strategies() []Strategy {
 	if p.apiKey == "" {
 		return nil
 	}
-	return []Strategy{&openRouterAPIStrategy{apiKey: p.apiKey, baseURL: p.baseURL, client: p.client}}
+	return []Strategy{&openRouterCreditsStrategy{legacy: &openRouterAPIStrategy{apiKey: p.apiKey, baseURL: p.baseURL, client: p.client}}}
 }
 
 func (p *OpenRouterProvider) AuthStatus() AuthStatus {

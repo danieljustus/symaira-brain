@@ -3,10 +3,18 @@ use serde_json::Value;
 
 use crate::{UsageError, UsageMeter, UsageSnapshot};
 
+#[path = "parser_claude.rs"]
+mod parser_claude;
 #[path = "parser_extra.rs"]
 mod parser_extra;
+#[path = "parser_grok.rs"]
+mod parser_grok;
 #[path = "parser_opencode.rs"]
 mod parser_opencode;
+#[path = "parser_openrouter.rs"]
+pub(crate) mod parser_openrouter;
+#[path = "parser_quota.rs"]
+mod parser_quota;
 #[cfg(test)]
 #[path = "parser_unit_tests.rs"]
 mod unit_tests;
@@ -17,6 +25,15 @@ pub(crate) fn parse_snapshot(
     body: &[u8],
     now: DateTime<Utc>,
 ) -> Result<UsageSnapshot, UsageError> {
+    if id == "grok" {
+        return parser_grok::parse(body, now);
+    }
+    if id == "ollama" {
+        return crate::providers::provider_ollama::parse_balance(body, now);
+    }
+    if id == "zai" || id == "devin" {
+        return parser_quota::parse(id, body, now);
+    }
     if id == "opencode" {
         return parser_opencode::parse(body, now);
     }
@@ -48,7 +65,7 @@ pub(crate) fn parse_snapshot(
     };
     match id {
         "claude" => {
-            parse_claude(&value, &mut snapshot);
+            parser_claude::parse_claude(&value, &mut snapshot);
             if source == "api" {
                 // The shipped Admin API strategy always reports USD, even
                 // when the cost response has no totals.
@@ -80,6 +97,7 @@ pub(crate) fn parse_snapshot(
             parser_extra::parse_nous(&value, &mut snapshot);
             Ok(())
         }
+        "openrouter" if source == "credits" => parser_openrouter::credits(&value, &mut snapshot),
         "openrouter" => parser_extra::parse_openrouter(&value, &mut snapshot),
         "antigravity" => parser_extra::parse_antigravity(&value, &mut snapshot),
         _ => Err(UsageError::parse(id, "unknown provider")),
@@ -164,50 +182,6 @@ fn whole_f64(value: f64) -> Option<i64> {
 }
 fn percent(v: f64) -> f64 {
     v.clamp(0.0, 100.0)
-}
-
-fn parse_claude(v: &Value, s: &mut UsageSnapshot) {
-    if let Some(v) = number(obj(v, "total_cost_usd")) {
-        s.meters
-            .push(meter("Spend (7d)", Some(fmt_num(v)), None, "USD", None));
-        s.currency = Some("USD".into());
-    }
-    if let Some(v) = number(obj(v, "total_messages")) {
-        s.meters.push(meter(
-            "Messages (7d)",
-            Some(fmt_num(v)),
-            None,
-            "requests",
-            None,
-        ));
-    }
-    for (key, label) in [("five_hour", "five_hour"), ("seven_day", "seven_day")] {
-        let window = obj(v, key).and_then(|window| {
-            Some((
-                window,
-                number(window.get("limit"))?,
-                number(window.get("utilized").or_else(|| window.get("used")))?,
-            ))
-        });
-        if let Some((window, limit, used)) = window {
-            s.meters.push(meter(
-                label,
-                Some(fmt_num(used)),
-                Some(fmt_num(limit)),
-                "%",
-                parse_time(window.get("resets_at")),
-            ));
-        }
-    }
-    if let Some(extra) = obj(v, "extra_usage") {
-        let used = number(extra.get("used")).map(fmt_num);
-        let limit = number(extra.get("limit")).map(fmt_num);
-        if used.is_some() || limit.is_some() {
-            s.meters
-                .push(meter("Extra usage", used, limit, "USD", None));
-            s.currency = Some("USD".into());
-        }
-    }
 }
 
 fn parse_codex(v: &Value, s: &mut UsageSnapshot) {
@@ -352,3 +326,7 @@ fn parse_copilot(v: &Value, s: &mut UsageSnapshot) {
         ));
     }
 }
+
+#[cfg(test)]
+#[path = "parser_current_tests.rs"]
+mod current_tests;

@@ -1,0 +1,145 @@
+{
+  "provenance": "Synthetic fixtures derived from pinned OpenUsage scanner shape, no user data",
+  "now": "2026-10-28T12:00:00+02:00",
+  "timezone": "+02:00",
+  "cases": [
+    {
+      "name": "replays-subagents-forks-resume",
+      "files": {
+        "p/main/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"child\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":200,\"outputTokens\":30,\"costUsdTicks\":10000000000}}}}}}\n",
+        "p/main/subagents/s/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"child\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":200,\"outputTokens\":30,\"costUsdTicks\":10000000000}}}}}}\n",
+        "p/fork/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n",
+        "p/resume/updates.jsonl": "{\"timestamp\":\"2026-10-26T23:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"resume\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n",
+        "p/debug.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"debug\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "true-zero",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-zero\":{\"inputTokens\":0,\"outputTokens\":0,\"costUsdTicks\":0}}}}}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "missing-measurements",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-unknown\":{\"inputTokens\":2}}}}}}\n"
+      },
+      "status": "partial",
+      "excluded": 0
+    },
+    {
+      "name": "malformed-tail",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{broken\n{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"partial\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}"
+      },
+      "status": "partial",
+      "excluded": 2
+    },
+    {
+      "name": "conflicting-copy",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":101,\"outputTokens\":20,\"costUsdTicks\":2357158800}}}}}}\n"
+      },
+      "status": "partial",
+      "excluded": 1
+    },
+    {
+      "name": "no-id",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n"
+      },
+      "status": "partial",
+      "excluded": 1
+    },
+    {
+      "name": "no-data",
+      "files": {},
+      "status": "no_data",
+      "excluded": 0
+    },
+    {
+      "name": "calendar-boundaries",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-09-28T21:59:59Z\",\"params\":{\"_meta\":{\"eventId\":\"0\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-09-28T22:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"1\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-09-29T22:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"2\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-10-26T21:59:59Z\",\"params\":{\"_meta\":{\"eventId\":\"3\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-10-26T22:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"4\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-10-27T22:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"5\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n{\"timestamp\":\"2026-10-28T11:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"6\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "multi-model-no-top-cost-attribution",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-a\":{\"inputTokens\":1,\"outputTokens\":2},\"grok-b\":{\"inputTokens\":3,\"outputTokens\":4,\"costUsdTicks\":1}},\"costUsdTicks\":10000000000}}}}\n"
+      },
+      "status": "partial",
+      "excluded": 0
+    },
+    {
+      "name": "single-top-cost",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":1,\"outputTokens\":2}},\"costUsdTicks\":1250000000}}}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "millisecond-timestamp",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2000-01-01T00:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\",\"agentTimestampMs\":1793178000456},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "outer-envelope",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "numeric-timestamp",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":1793178000,\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "invalid-numbers",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":true,\"outputTokens\":-1,\"costUsdTicks\":1e+100}}}}}}\n"
+      },
+      "status": "partial",
+      "excluded": 0
+    },
+    {
+      "name": "reject-path-shaped-model",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"/synthetic/private/path\":{\"inputTokens\":1,\"outputTokens\":0,\"costUsdTicks\":0}}}}}}\n"
+      },
+      "status": "partial",
+      "excluded": 1
+    },
+    {
+      "name": "unicode-content-is-not-jsonl-delimiter",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\": \"2026-10-28T09:00:00Z\", \"params\": {\"_meta\": {\"eventId\": \"a\"}, \"update\": {\"sessionUpdate\": \"turn_completed\", \"usage\": {\"modelUsage\": {\"grok-build\": {\"inputTokens\": 100, \"outputTokens\": 20, \"reasoningTokens\": 5, \"cachedReadTokens\": 70, \"costUsdTicks\": 2357158800}}}}, \"prompt\": \"synthetic\u2028content\u2029never-output\"}}\n"
+      },
+      "status": "available",
+      "excluded": 0
+    },
+    {
+      "name": "not-completed",
+      "files": {
+        "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_started\",\"usage\":{\"modelUsage\":{\"grok-build\":{\"inputTokens\":100,\"outputTokens\":20,\"reasoningTokens\":5,\"cachedReadTokens\":70,\"costUsdTicks\":2357158800}}}}}}\n"
+      },
+      "status": "no_data",
+      "excluded": 0
+    }
+  ]
+}

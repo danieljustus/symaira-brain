@@ -164,7 +164,7 @@ pub(super) fn status_error(
         ("antigravity", _) => format!("Antigravity local server returned HTTP {status}."),
         (_, 401 | 403) => format!("AI usage provider \"{provider}\" is not configured"),
         ("opencode", 429) => "OpenCode API error: HTTP 429".into(),
-        ("claude" | "codex" | "copilot" | "cursor" | "kimi" | "moonshot" | "nous" | "openrouter", 429) => {
+        ("claude" | "codex" | "copilot" | "cursor" | "kimi" | "moonshot" | "nous" | "openrouter" | "zai" | "devin" | "grok", 429) => {
             format!("AI usage provider \"{provider}\" is rate limited{retry_text}")
         }
         _ => match error_name(provider) {

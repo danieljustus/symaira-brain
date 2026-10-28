@@ -1,0 +1,268 @@
+[
+  {
+    "name": "current zero and missing weekly",
+    "body": {
+      "five_hour": {
+        "utilization": 0,
+        "resets_at": "2026-10-28T12:00:00Z"
+      },
+      "seven_day": {}
+    },
+    "meters": [
+      {
+        "label": "five_hour",
+        "used": "0",
+        "limit": "100",
+        "unit": "%",
+        "resets_at": "2026-10-28T12:00:00Z"
+      }
+    ]
+  },
+  {
+    "name": "current percentages take precedence",
+    "body": {
+      "five_hour": {
+        "utilization": 45.25,
+        "utilized": 99,
+        "limit": 400
+      },
+      "seven_day": {
+        "utilization": 110
+      }
+    },
+    "meters": [
+      {
+        "label": "five_hour",
+        "used": "45.25",
+        "limit": "100",
+        "unit": "%"
+      },
+      {
+        "label": "seven_day",
+        "used": "110",
+        "limit": "100",
+        "unit": "%"
+      }
+    ]
+  },
+  {
+    "name": "legacy absent is not zero",
+    "body": {
+      "five_hour": {
+        "limit": 400
+      },
+      "seven_day": {
+        "utilized": 0,
+        "limit": 100
+      }
+    },
+    "meters": [
+      {
+        "label": "five_hour",
+        "limit": "400",
+        "unit": "%"
+      },
+      {
+        "label": "seven_day",
+        "used": "0",
+        "limit": "100",
+        "unit": "%"
+      }
+    ]
+  },
+  {
+    "name": "legacy values and current null",
+    "body": {
+      "five_hour": {
+        "utilization": null,
+        "utilized": 120,
+        "limit": 400
+      },
+      "seven_day": {
+        "utilized": 99,
+        "limit": 0
+      }
+    },
+    "meters": [
+      {
+        "label": "five_hour",
+        "used": "120",
+        "limit": "400",
+        "unit": "%"
+      }
+    ]
+  },
+  {
+    "name": "scoped models supersede legacy only for same model",
+    "body": {
+      "five_hour": {
+        "utilization": 10
+      },
+      "seven_day_sonnet": {
+        "utilization": 80
+      },
+      "seven_day_opus": {
+        "utilization": 0
+      },
+      "limits": [
+        {
+          "kind": "weekly_scoped",
+          "scope": {
+            "model": {
+              "display_name": "Fable"
+            }
+          },
+          "percent": 25,
+          "resets_at": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kind": "weekly_scoped",
+          "scope": {
+            "model": {
+              "display_name": "Sonnet"
+            }
+          },
+          "percent": 0
+        },
+        {
+          "kind": "daily",
+          "scope": {
+            "model": {
+              "display_name": "Fable"
+            }
+          },
+          "percent": 99
+        },
+        {
+          "kind": "weekly_scoped",
+          "scope": {
+            "model": {
+              "display_name": "Sonnet"
+            }
+          },
+          "percent": 99
+        }
+      ]
+    },
+    "meters": [
+      {
+        "label": "five_hour",
+        "used": "10",
+        "limit": "100",
+        "unit": "%"
+      },
+      {
+        "label": "Fable",
+        "used": "25",
+        "limit": "100",
+        "unit": "%",
+        "resets_at": "2026-11-01T00:00:00Z"
+      },
+      {
+        "label": "Sonnet",
+        "used": "0",
+        "limit": "100",
+        "unit": "%"
+      },
+      {
+        "label": "Opus",
+        "used": "0",
+        "limit": "100",
+        "unit": "%"
+      }
+    ]
+  },
+  {
+    "name": "extra cents converted",
+    "body": {
+      "extra_usage": {
+        "is_enabled": true,
+        "used_credits": 125,
+        "monthly_limit": 10000
+      }
+    },
+    "meters": [
+      {
+        "label": "Extra usage",
+        "used": "1.25",
+        "limit": "100",
+        "unit": "USD"
+      }
+    ]
+  },
+  {
+    "name": "extra zero no cap",
+    "body": {
+      "extra_usage": {
+        "is_enabled": true,
+        "used_credits": 0,
+        "monthly_limit": 0
+      }
+    },
+    "meters": [
+      {
+        "label": "Extra usage",
+        "used": "0",
+        "unit": "USD"
+      }
+    ]
+  },
+  {
+    "name": "disabled extra omitted and invalid negative quota",
+    "body": {
+      "five_hour": {
+        "utilization": -1
+      },
+      "seven_day": {
+        "utilization": 20
+      },
+      "extra_usage": {
+        "is_enabled": false,
+        "used_credits": 100
+      }
+    },
+    "meters": [
+      {
+        "label": "seven_day",
+        "used": "20",
+        "limit": "100",
+        "unit": "%"
+      }
+    ]
+  },
+  {
+    "name": "legacy extra dollars",
+    "body": {
+      "extra_usage": {
+        "used": 1.5,
+        "limit": 20
+      }
+    },
+    "meters": [
+      {
+        "label": "Extra usage",
+        "used": "1.5",
+        "limit": "20",
+        "unit": "USD"
+      }
+    ]
+  },
+  {
+    "name": "nonfinite string is not a quota",
+    "body": {
+      "five_hour": {
+        "utilization": "NaN"
+      }
+    },
+    "error": true
+  },
+  {
+    "name": "infinite string is not a quota",
+    "body": {
+      "five_hour": {
+        "utilization": "Infinity"
+      }
+    },
+    "error": true
+  }
+]

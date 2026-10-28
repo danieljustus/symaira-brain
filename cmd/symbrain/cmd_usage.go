@@ -24,6 +24,7 @@ func cmdUsage(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 func cmdUsageWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("usage", flag.ContinueOnError)
 	fs.SetOutput(stderr)
+	selector := fs.String("providers", "", "comma-separated provider IDs (default: historical ten)")
 	fs.Usage = func() { printUsageUsage(stderr) }
 	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
@@ -33,10 +34,28 @@ func cmdUsageWithFormat(args []string, stdout, stderr io.Writer, format output.F
 		return exitcodes.ExitNoInput
 	}
 
+	var providers []usage.Provider
+	selected := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "providers" {
+			selected = true
+		}
+	})
+	if selected {
+		var err error
+		providers, err = usage.SelectedProviders(nil, *selector)
+		if err != nil {
+			fmt.Fprintf(stderr, "symbrain usage: %v\n", err)
+			return exitcodes.ExitNoInput
+		}
+	} else {
+		providers = usage.AllProviders(nil)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	report := usage.BuildReport(ctx, usage.AllProviders(nil))
+	report := usage.BuildReport(ctx, providers)
 	rows := output.Rows{
 		JSON: report,
 		Table: func(w io.Writer) error {
@@ -55,7 +74,12 @@ func printUsageUsage(w io.Writer) {
 	fmt.Fprint(w, `symbrain usage — AI subscription/token usage per provider
 
 Usage:
-  symbrain usage
+  symbrain usage [--providers ID,ID]
+
+--providers selects only those providers before credential discovery.
+Default IDs: claude,codex,copilot,cursor,kimi,moonshot,nous,opencode,openrouter,antigravity.
+Opt-in IDs: zai (ZAI_API_KEY), devin (DEVIN_API_KEY, Codeium-compatible),
+grok (GROK_ACCESS_TOKEN or GROK_HOME/auth.json), ollama (local signing key only).
 
 The global --output table|json flag (or --json) selects the output format.
 
@@ -84,6 +108,21 @@ func printUsageReport(w io.Writer, report usage.Report) {
 			}
 		default:
 			fmt.Fprintln(w, "unknown")
+		}
+		if h := p.History; h != nil {
+			fmt.Fprintf(w, "  local history	%s	scope=%s attribution=%s\n", h.Status, h.Scope, h.Attribution)
+			for _, period := range h.Periods {
+				for _, model := range period.Models {
+					tokens, cost := "?", "?"
+					if model.Tokens != nil {
+						tokens = *model.Tokens
+					}
+					if model.RecordedCost != nil {
+						cost = *model.RecordedCost
+					}
+					fmt.Fprintf(w, "  %s	%s	%s tokens	%s %s recorded\n", period.Key, model.Model, tokens, cost, h.Currency)
+				}
+			}
 		}
 	}
 }

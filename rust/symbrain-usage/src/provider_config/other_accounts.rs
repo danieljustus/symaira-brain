@@ -87,6 +87,9 @@ pub(crate) fn nous_from_resolved(
 }
 
 fn opencode() -> Provider {
+    if let Some(provider) = opencode_api_provider() {
+        return provider;
+    }
     let resolved = resolve_env("OPENCODE_COOKIE");
     let (value, error) = match resolved {
         Ok(found) => (found, None),

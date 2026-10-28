@@ -9,12 +9,22 @@ use crate::transport::{Cancellation, Response, Transport};
 use chrono::Utc;
 use std::sync::Arc;
 
+#[path = "provider_opencode_api.rs"]
+mod api;
+
 impl Provider {
     pub(super) fn fetch_opencode(
         &self,
         transport: &Arc<dyn Transport>,
         cancel: &Cancellation,
     ) -> Result<UsageSnapshot, UsageError> {
+        if let Some((_, key)) = self
+            .credentials
+            .iter()
+            .find(|(source, _)| source == "go_api")
+        {
+            return api::fetch(key, transport, cancel);
+        }
         // Go's OpenCodeProvider.Strategies() returns nil without
         // OPENCODE_COOKIE — a workspace override alone marks the provider
         // configured but yields no strategy — so the shipped chain fails with

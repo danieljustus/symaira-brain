@@ -4,13 +4,15 @@ use std::io::Write;
 use symbrain_core::config::format_go_quoted;
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
-use symbrain_usage::{Report, Service, UsageMeter};
+use symbrain_usage::{ProviderSelection, Report, Service, UsageMeter};
 
-const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
+const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage [--providers ID,ID]\n\n--providers selects only those providers before credential discovery.\nDefault IDs: claude,codex,copilot,cursor,kimi,moonshot,nous,opencode,openrouter,antigravity.\nOpt-in IDs: zai (ZAI_API_KEY), devin (DEVIN_API_KEY, Codeium-compatible),\ngrok (GROK_ACCESS_TOKEN or GROK_HOME/auth.json), ollama (local signing key only).\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
 /// A Usage invocation classified before any credential admission or reads.
 pub(crate) enum Invocation {
-    Report,
+    Report(ProviderSelection),
+    SelectionError(String),
+    MissingProviders,
     Help,
     BadSyntax(Vec<u8>),
     UndefinedFlag(Vec<u8>),
@@ -19,32 +21,56 @@ pub(crate) enum Invocation {
 
 pub(crate) fn classify(args: &[OsString]) -> Invocation {
     let args = crate::normalize_flags(args);
-    // Usage has no local flags. Normalize once, then retain FlagSet's first
-    // positional/terminator/help precedence independently of credentials.
-    let positional = if let Some(arg) = args.first() {
+    let selection = ProviderSelection::default();
+    let mut selector = None;
+    let mut index = 0;
+    while let Some(arg) = args.get(index) {
         let bytes = arg.as_encoded_bytes();
         if bytes == b"--" {
-            args.get(1)
-        } else if bytes.len() < 2 || !bytes.starts_with(b"-") {
-            Some(arg)
-        } else {
-            let name = &bytes[if bytes[1] == b'-' { 2 } else { 1 }..];
-            if name.is_empty() || matches!(name[0], b'-' | b'=') {
-                return Invocation::BadSyntax(bytes.to_vec());
-            }
-            let name = name.split(|byte| *byte == b'=').next().unwrap_or_default();
-            return if matches!(name, b"h" | b"help") {
-                Invocation::Help
-            } else {
-                Invocation::UndefinedFlag(name.to_vec())
-            };
+            return args.get(index + 1).map_or_else(
+                || selected_invocation(selector, selection),
+                |arg| Invocation::Unexpected(arg.clone()),
+            );
         }
-    } else {
-        None
-    };
-    positional.map_or(Invocation::Report, |arg| {
-        Invocation::Unexpected(arg.clone())
-    })
+        if bytes.len() < 2 || !bytes.starts_with(b"-") {
+            return Invocation::Unexpected(arg.clone());
+        }
+        let name = &bytes[if bytes[1] == b'-' { 2 } else { 1 }..];
+        if name.is_empty() || matches!(name[0], b'-' | b'=') {
+            return Invocation::BadSyntax(bytes.to_vec());
+        }
+        let mut parts = name.splitn(2, |byte| *byte == b'=');
+        let name = parts.next().unwrap_or_default();
+        if matches!(name, b"h" | b"help") {
+            return Invocation::Help;
+        }
+        if name != b"providers" {
+            return Invocation::UndefinedFlag(name.to_vec());
+        }
+        let value = if let Some(value) = parts.next() {
+            value
+        } else {
+            index += 1;
+            let Some(value) = args.get(index) else {
+                return Invocation::MissingProviders;
+            };
+            value.as_encoded_bytes()
+        };
+        selector = Some(String::from_utf8_lossy(value).into_owned());
+        index += 1;
+    }
+    // Match FlagSet: the final repeated flag wins, then validate all IDs.
+    selected_invocation(selector, selection)
+}
+
+fn selected_invocation(selector: Option<String>, default: ProviderSelection) -> Invocation {
+    match selector {
+        None => Invocation::Report(default),
+        Some(value) => match ProviderSelection::parse(&value) {
+            Ok(selection) => Invocation::Report(selection),
+            Err(error) => Invocation::SelectionError(error),
+        },
+    }
 }
 
 // Free-function entry points keep `lib.rs` byte-identical to the inherited
@@ -64,7 +90,7 @@ pub fn run(
 
 impl Invocation {
     pub(crate) fn requires_go_fallback(&self) -> bool {
-        matches!(self, Self::Report) && symbrain_usage::needs_go_fallback()
+        matches!(self, Self::Report(selection) if symbrain_usage::needs_go_fallback_for_selection(selection))
     }
 
     pub(crate) fn run(
@@ -74,7 +100,14 @@ impl Invocation {
         format: OutputFormat,
     ) -> u8 {
         match self {
-            Self::Report => run_report(stdout, stderr, format),
+            Self::Report(selection) => run_report(&selection, stdout, stderr, format),
+            Self::SelectionError(error) => {
+                let _ = writeln!(stderr, "symbrain usage: {error}");
+                exit::USAGE
+            }
+            Self::MissingProviders => {
+                flag_error(stderr, b"flag needs an argument: -", b"providers")
+            }
             Self::Help => {
                 let _ = stderr.write_all(HELP.as_bytes());
                 exit::USAGE
@@ -95,8 +128,13 @@ impl Invocation {
     }
 }
 
-fn run_report(stdout: &mut dyn Write, stderr: &mut dyn Write, format: OutputFormat) -> u8 {
-    let report = Service::new().report();
+fn run_report(
+    selection: &ProviderSelection,
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+) -> u8 {
+    let report = Service::with_selection(selection).report();
     let result = output::render(stdout, format, &report, |writer| {
         render_report_table(writer, &report)
     });
@@ -135,6 +173,26 @@ fn render_report_table(writer: &mut dyn Write, report: &Report) -> std::io::Resu
             }
         } else {
             writeln!(writer, "unknown")?;
+        }
+        if let Some(h) = &provider.history {
+            writeln!(
+                writer,
+                "  local history\t{}\tscope={} attribution={}",
+                h.status, h.scope, h.attribution
+            )?;
+            for period in &h.periods {
+                for model in &period.models {
+                    writeln!(
+                        writer,
+                        "  {}\t{}\t{} tokens\t{} {} recorded",
+                        period.key,
+                        model.model,
+                        model.tokens.as_deref().unwrap_or("?"),
+                        model.recorded_cost.as_deref().unwrap_or("?"),
+                        h.currency
+                    )?;
+                }
+            }
         }
     }
     Ok(())
@@ -196,6 +254,7 @@ mod tests {
                     fetched_at: chrono::DateTime::UNIX_EPOCH,
                     source: "api".into(),
                 }),
+                history: None,
                 error: None,
             }],
         };

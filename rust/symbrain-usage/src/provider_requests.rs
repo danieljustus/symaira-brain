@@ -26,10 +26,12 @@ pub(super) fn request_for(
         ("codex", _) => ("GET", "https://chatgpt.com/backend-api/wham/usage".into(), None),
         ("copilot", _) => ("GET", copilot_url(provider.enterprise_host.as_deref()), None),
         ("cursor", _) => ("GET", "https://cursor.com/api/usage-summary".into(), None),
+        ("grok", _) => ("GET", "https://cli-chat-proxy.grok.com/v1/billing?format=credits".into(), None),
         ("kimi", "web") => ("POST", "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages".into(), None),
         ("kimi", _) => ("GET", format!("{}/coding/v1/usages", validated_base(provider.base_url.as_deref().unwrap_or("https://api.kimi.com"), "https://api.kimi.com")), None),
         ("moonshot", _) => ("GET", format!("https://api.moonshot.{}/v1/users/me/balance", provider.region), None),
         ("nous", _) => ("GET", format!("{}/api/oauth/account", validated_base(provider.base_url.as_deref().unwrap_or("https://portal.nousresearch.com"), "https://portal.nousresearch.com")), None),
+        ("openrouter", "credits" | "key") => ("GET", format!("{}/{}", validated_base(provider.base_url.as_deref().unwrap_or("https://openrouter.ai/api/v1"), "https://openrouter.ai/api/v1"), source), None),
         ("openrouter", _) => ("GET", format!("{}/auth/key", validated_base(provider.base_url.as_deref().unwrap_or("https://openrouter.ai/api/v1"), "https://openrouter.ai/api/v1")), None),
         ("opencode", "workspace_get") => ("GET", "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f".into(), None),
         ("opencode", "workspace_post") => ("POST", "https://opencode.ai/_server".into(), Some("[]".into())),
@@ -62,6 +64,10 @@ pub(super) fn request_for(
     }
     if id == "kimi" && source == "cli" {
         headers.extend(kimi_headers(provider.device_id.as_deref()));
+    }
+    if id == "grok" {
+        headers.insert("X-XAI-Token-Auth".into(), "xai-grok-cli".into());
+        headers.insert("User-Agent".into(), "symbrain".into());
     }
     if id == "openrouter" {
         headers.insert("X-Title".into(), "symbrain".into());
