@@ -166,6 +166,49 @@ fn configured_status_decodes_valid_config_and_keeps_go_for_the_rest() {
 }
 
 #[test]
+fn windows_path_in_a_basic_string_resets_the_config_natively_on_every_host() {
+    // `"C:\Users\me"` is not valid TOML (`\U` needs eight hex digits), so Go's
+    // `config.Load` fails and `loadSkillsEnv` falls back to the defaults. The
+    // decision depends on the bytes, not the platform: no Go binary is needed.
+    let root = TempDir::new().unwrap();
+    std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
+    let config = root.path().join("config/symskills/config.toml");
+    std::fs::write(
+        &config,
+        b"library_dir = \"C:\\Users\\me\\library\"\nbase_dir = \"D:\\a\\_temp\\base\"\n",
+    )
+    .unwrap();
+    let list = run(&root, &["skills", "list", "--json"]);
+    assert!(list.status.success(), "list stderr: {:?}", list.stderr);
+    assert_eq!(
+        String::from_utf8_lossy(&list.stdout),
+        "{\"skills\":[],\"category_counts\":{},\"issues\":[]}\n"
+    );
+    let status = run(&root, &["skills", "status", "--target", "opencode"]);
+    assert!(
+        status.status.success(),
+        "status stderr: {:?}",
+        status.stderr
+    );
+    assert_eq!(status.stdout, b"No installed skills found.\n");
+    let doctor = run(&root, &["skills", "doctor", "--json"]);
+    assert!(
+        doctor.status.success(),
+        "doctor stderr: {:?}",
+        doctor.stderr
+    );
+    let report: serde_json::Value = serde_json::from_slice(&doctor.stdout).unwrap();
+    let library = report["config"]["library_dir"].as_str().unwrap();
+    assert!(
+        std::path::Path::new(library).starts_with(root.path().join("data")),
+        "default library expected, got {library}"
+    );
+    // A multi-line string keeps its Go-owned diagnostic.
+    std::fs::write(&config, b"library_dir = \"\"\"C:\\Users\"\"\"\n").unwrap();
+    assert_go_fallback(&run(&root, &["skills", "list", "--json"]), "multi-line");
+}
+
+#[test]
 fn default_status_with_dynamic_target_state_keeps_go_fallback() {
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("home/.config/opencode/skills")).unwrap();

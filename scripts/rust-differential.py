@@ -2314,6 +2314,11 @@ def file_list_setup(
 
 
 FILE_LIB = 'library_dir = "{root}/alt/library"\n'
+# An unescaped Windows path in a basic string: `\U` needs eight hex digits and
+# `\a`/`\_` are no escape, so Go's TOML decode fails and `loadSkillsEnv`
+# resets the whole config to the defaults. The shape is platform independent.
+FILE_WIN_PATH = 'library_dir = "C:\\Users\\sym\\library"\n'
+FILE_WIN_TEMP = 'library_dir = "D:\\a\\_temp\\alt\\library"\nbase_dir = "D:\\a\\_temp\\alt\\base"\n'
 
 
 def file_list(name: str, *mutators, args=("skills", "list", "--json"), fallback=False, **kwargs) -> "Case":
@@ -5716,6 +5721,11 @@ CASES = (
         file_list("crlf_comments_json", file_cfg(FILE_GLOBAL, lambda root: b"# header\r\nlibrary_dir = \"" + str(root / "alt/library").encode() + b"\" # tail\r\n")),
         file_list("literal_and_multiline_strings_json", file_cfg(FILE_GLOBAL, "library_dir = '{root}/alt/library'\nrender_dir = \"\"\"\nmulti\nline\"\"\"\n")),
         file_list("unicode_escape_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/libr\\u0061ry"\n')),
+        file_list("windows_path_basic_string_resets_json", file_cfg(FILE_GLOBAL, FILE_WIN_PATH)),
+        file_list("windows_path_basic_string_resets_table", file_cfg(FILE_GLOBAL, FILE_WIN_TEMP), args=("skills", "list")),
+        file_list("windows_path_project_resets_json", file_cfg(FILE_GLOBAL, FILE_LIB), file_cfg(FILE_PROJECT, FILE_WIN_PATH)),
+        file_list("windows_path_ignores_env_json", file_cfg(FILE_GLOBAL, FILE_WIN_PATH), lambda root, env: env.__setitem__("SYMSKILLS_LIBRARY_DIR", str(root / "alt/library"))),
+        file_list("fallback_windows_path_multiline_json", file_cfg(FILE_GLOBAL, 'library_dir = """C:\\Users\\sym"""\n'), fallback=True),
         file_list("dotted_vcs_key_json", file_cfg(FILE_GLOBAL, FILE_LIB + "vcs.enabled = false\n")),
         file_list("non_table_vcs_ignored_json", file_cfg(FILE_GLOBAL, 'vcs = 5\n' + FILE_LIB)),
         file_list("inert_keys_json", file_cfg(FILE_GLOBAL, FILE_LIB + 'render_dir = "rel"\ncache_dir = ""\nprofiles_dir = "/x//y/"\nunknown = [1, 2, {a = 1}]\n[[targets]]\nname = "x"\nskill_root_user = "/tmp/x"\n[capabilities.x]\nfoo = true\n')),
@@ -5735,6 +5745,8 @@ CASES = (
     ),
     *(
         file_doctor("global_all_keys_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL)),
+        file_doctor("windows_path_basic_string_resets_json", file_cfg(FILE_GLOBAL, FILE_WIN_PATH)),
+        file_doctor("windows_path_basic_string_resets_table", file_cfg(FILE_GLOBAL, FILE_WIN_TEMP), args=("skills", "doctor")),
         file_doctor("global_all_keys_table", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), args=("skills", "doctor")),
         file_doctor("project_over_global_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), file_cfg(FILE_PROJECT, 'library_dir = "{root}/proj/library"\ncache_dir = "{root}/proj/cache"\nvcs.enabled = true\n')),
         file_doctor("env_over_file_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), _doctor_env(SYMSKILLS_RENDER_DIR="{root}/env/render", SYMSKILLS_VCS_ENABLED="T", SYMSKILLS_BASE_DIR="")),
@@ -5773,6 +5785,8 @@ CASES = (
         file_status("env_over_file_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\nbase_dir = "{root}/alt/nowhere-base"\n'), lambda root, env: env.update(SYMSKILLS_LIBRARY_DIR=str(root / "alt/library"), SYMSKILLS_BASE_DIR=str(root / "alt/base"))),
         file_status("invalid_type_resets_env_json", file_cfg(FILE_GLOBAL, "library_dir = 5\n"), lambda root, env: env.update(SYMSKILLS_LIBRARY_DIR=str(root / "alt/library"), SYMSKILLS_BASE_DIR=str(root / "alt/base"))),
         file_status("invalid_vcs_string_resets_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS + 'vcs = { enabled = "maybe" }\n')),
+        file_status("windows_path_basic_string_resets_json", file_cfg(FILE_GLOBAL, FILE_WIN_TEMP)),
+        file_status("windows_path_project_resets_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), file_cfg(FILE_PROJECT, FILE_WIN_PATH)),
         file_status("global_error_short_circuits_project_json", file_cfg(FILE_GLOBAL, "cache_dir = true\n"), file_cfg(FILE_PROJECT, FILE_STATUS_PATHS)),
         file_status("bom_json", file_cfg(FILE_GLOBAL, FILE_BOM + FILE_STATUS_PATHS)),
         file_status("empty_file_json", file_cfg(FILE_GLOBAL, "")),

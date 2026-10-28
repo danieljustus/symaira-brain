@@ -285,7 +285,9 @@ pub(super) fn merged(
     ) {
         LoadOutcome::Loaded(config) => DoctorConfig::from(config),
         // Go's apply error: `loadSkillsEnv` discards the config for the defaults.
-        LoadOutcome::Error(_) => return Some(defaults.clone()),
+        // A decode failure Go reports with a position-bound message the report
+        // never prints (an unescaped Windows path in a basic string is one).
+        LoadOutcome::Error(_) | LoadOutcome::Rejected => return Some(defaults.clone()),
         LoadOutcome::NeedsGo(_) => return None,
     };
     let config = apply_env(base, defaults)?;
