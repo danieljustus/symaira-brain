@@ -351,18 +351,107 @@ fn inert_symskills_overrides_do_not_change_the_report() {
 }
 
 #[test]
+fn config_file_library_is_listed_natively_with_go_precedence() {
+    // SKL-019: `library_dir` of a valid config file moves the scan, the
+    // project file overrides the global one, the environment overrides both,
+    // and an apply error or an invalid VCS bool resets to the default library.
+    let root = TempDir::new().unwrap();
+    write_library_skill(&root, "default-skill", "");
+    #[cfg(windows)]
+    let base = root.path().to_path_buf();
+    #[cfg(not(windows))]
+    let base = root.path().canonicalize().unwrap();
+    let make_library = |name: &str| {
+        let dir = base.join(name);
+        std::fs::create_dir_all(dir.join(name)).unwrap();
+        std::fs::write(
+            dir.join(name).join("SKILL.md"),
+            format!("---\nname: {name}\ndescription: {name} skill\nlicense: Apache-2.0\n---\n\n# {name}\n"),
+        )
+        .unwrap();
+        dir
+    };
+    let (global, project, from_env) = (
+        make_library("global"),
+        make_library("project"),
+        make_library("fromenv"),
+    );
+    let names = |output: Output| -> Vec<String> {
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        value["skills"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|skill| skill["name"].as_str().unwrap().to_owned())
+            .collect()
+    };
+    std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
+    let config = root.path().join("config/symskills/config.toml");
+    let project_config = root.path().join("project/.symskills.toml");
+    let toml_path = |dir: &std::path::Path| dir.display().to_string().replace('\\', "/");
+    std::fs::write(
+        &config,
+        format!("library_dir = \"{}\"\n", toml_path(&global)),
+    )
+    .unwrap();
+    assert_eq!(names(run(&root, &["skills", "list", "--json"])), ["global"]);
+
+    std::fs::write(
+        &project_config,
+        format!("library_dir = \"{}\"\n", toml_path(&project)),
+    )
+    .unwrap();
+    assert_eq!(
+        names(run(&root, &["skills", "list", "--json"])),
+        ["project"]
+    );
+
+    let overridden = command(&root, &["skills", "list", "--json"])
+        .env("SYMSKILLS_LIBRARY_DIR", &from_env)
+        .output()
+        .unwrap();
+    assert_eq!(names(overridden), ["fromenv"]);
+
+    // Wrong type: Go resets everything, the environment included.
+    std::fs::write(&config, "cache_dir = 5\n").unwrap();
+    let reset = command(&root, &["skills", "list", "--json"])
+        .env("SYMSKILLS_LIBRARY_DIR", &from_env)
+        .output()
+        .unwrap();
+    assert_eq!(names(reset), ["default-skill"]);
+    std::fs::remove_file(&config).unwrap();
+    std::fs::remove_file(&project_config).unwrap();
+    let invalid_bool = command(&root, &["skills", "list", "--json"])
+        .env("SYMSKILLS_LIBRARY_DIR", &from_env)
+        .env("SYMSKILLS_VCS_ENABLED", "maybe")
+        .output()
+        .unwrap();
+    assert_eq!(names(invalid_bool), ["default-skill"]);
+}
+
+#[test]
 fn config_file_native_only_env_and_bad_overrides_keep_go_fallback() {
     let root = TempDir::new().unwrap();
     write_library_skill(&root, "demo", "");
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
+    // Syntax errors are the decoder's hand-off to Go (which owns the message).
     std::fs::write(
         root.path().join("config/symskills/config.toml"),
-        "vcs = { enabled = false }\n",
+        "library_dir = \n",
     )
     .unwrap();
     let output = run(&root, &["skills", "list", "--json"]);
     assert_eq!(output.status.code(), Some(1), "config file");
     assert!(output.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    std::fs::write(
+        root.path().join("config/symskills/config.toml"),
+        "library_dir = \"relative/library\"\n",
+    )
+    .unwrap();
+    let output = run(&root, &["skills", "list", "--json"]);
+    assert_eq!(output.status.code(), Some(1), "relative library in a file");
     assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
 
     let clean = TempDir::new().unwrap();
@@ -372,7 +461,6 @@ fn config_file_native_only_env_and_bad_overrides_keep_go_fallback() {
         ("SYMBRAIN_SKILLS_BASE_DIR", "/different/base"),
         ("SYMSKILLS_LIBRARY_DIR", "relative/library"),
         ("SYMSKILLS_LIBRARY_DIR", ""),
-        ("SYMSKILLS_VCS_ENABLED", "maybe"),
     ] {
         let output = command(&clean, &["skills", "list", "--json"])
             .env(name, value)

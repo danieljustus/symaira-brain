@@ -91,6 +91,58 @@ fn materialize_stage(
 
 fn source_hash(bundle: &Bundle, rendered: &Rendered) -> Result<String, SkillError> {
     let tree_hash = source_tree_hash(bundle)?;
+    Ok(source_hash_with_tree(&tree_hash, rendered))
+}
+
+/// Hash Go's cached status render writes into its staging marker.
+///
+/// `skills status` and `skills sync` hand Go a cache directory, which switches
+/// `install.Status` to `render.CachedStagingRender`. That path keys the marker
+/// on `sourceFingerprint` (every file, `SKILL.md` included, plus the metadata
+/// template fingerprints) instead of the install-time tree hash, so the same
+/// bundle yields a different `source_hash` than the one `install` stores.
+/// Without a base snapshot the coarse comparison therefore never matches an
+/// installed marker (#955). Registered targets carry no metadata template, so
+/// only the file part of the fingerprint exists here.
+pub(crate) fn status_cache_source_hash(
+    bundle: &Bundle,
+    rendered: &Rendered,
+) -> Result<String, SkillError> {
+    let fingerprint = source_fingerprint(bundle)?;
+    Ok(source_hash_with_tree(&fingerprint, rendered))
+}
+
+fn source_fingerprint(bundle: &Bundle) -> Result<String, SkillError> {
+    let mut modes: BTreeMap<&str, &str> = BTreeMap::new();
+    let mut paths: Vec<&str> = vec!["SKILL.md"];
+    for resource in &bundle.resources {
+        paths.push(resource.path.as_str());
+        modes.insert(resource.path.as_str(), resource.mode.as_str());
+    }
+    paths.sort_unstable();
+    let mut hasher = Sha256::new();
+    for path in paths {
+        let limit = if path == "SKILL.md" || path == "symskills.toml" {
+            MAX_INPUT_SIZE
+        } else {
+            MAX_RESOURCE_SIZE
+        };
+        let bytes = if path == "SKILL.md" {
+            read_skill_md_bytes(bundle, limit)?
+        } else {
+            read_bundle_bytes(bundle, Path::new(path), path, limit)?
+        };
+        hasher.update(path.as_bytes());
+        hasher.update([0]);
+        hasher.update(modes.get(path).copied().unwrap_or("").as_bytes());
+        hasher.update([0]);
+        hasher.update(&bytes);
+        hasher.update([0]);
+    }
+    Ok(format!("{:x}", hasher.finalize()))
+}
+
+fn source_hash_with_tree(tree_hash: &str, rendered: &Rendered) -> String {
     let mut hasher = Sha256::new();
     hasher.update(tree_hash.as_bytes());
     hasher.update([0]);
@@ -101,7 +153,7 @@ fn source_hash(bundle: &Bundle, rendered: &Rendered) -> Result<String, SkillErro
         hasher.update([0]);
         hasher.update(files_hash.as_bytes());
     }
-    Ok(format!("{:x}", hasher.finalize()))
+    format!("{:x}", hasher.finalize())
 }
 
 fn source_tree_hash(bundle: &Bundle) -> Result<String, SkillError> {
