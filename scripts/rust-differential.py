@@ -2271,6 +2271,10 @@ class Case:
 # defaults on an apply error; shapes the decoder hands back to Go (syntax,
 # invalid UTF-8, leap seconds, duplicate keys) and values native code does not
 # scan (relative, unclean or empty library) must keep routing to Go.
+# A rooted path without a drive (`/nonexistent`) is relative to the current
+# drive on Windows: `windows_path_needs_go` leaves it to Go, so the cases that
+# spell a library that way are native proofs on POSIX and fallback proofs there.
+ROOTED_LIBRARY_ROUTE = {"expect_fallback": True} if os.name == "nt" else {"native": True, "read_only": True}
 FILE_CONFIG_PREFIX = "skills_status_config_file_"
 FILE_GLOBAL = "config/symskills/config.toml"
 FILE_PROJECT = "project/.symskills.toml"
@@ -3980,7 +3984,7 @@ CASES = (
             lambda root, env: _write_text(root / "project/.symskills.toml", 'library_dir = "/nonexistent"\n', encoding="utf-8"),
             SYMSKILLS_VCS_ENABLED="true",
         ),
-        native=True, read_only=True,
+        **ROOTED_LIBRARY_ROUTE,
     ),
     Case(
         "skills_status_config_file_status_invalid_vcs_bool_json",
@@ -5126,13 +5130,13 @@ CASES = (
         "skills_status_config_list_file_missing_library_json",
         ("skills", "list", "--json"),
         setup=lambda root, env: (setup_skills_library_fixture(root, env), write_symskills_config(root, 'library_dir = "/nonexistent/library"\n')),
-        native=True, read_only=True,
+        **ROOTED_LIBRARY_ROUTE,
     ),
     Case(
         "skills_status_config_list_file_project_missing_library",
         ("skills", "list"),
         setup=lambda root, env: (setup_skills_library_fixture(root, env), _write_text(root / "project/.symskills.toml", 'library_dir = "/nonexistent"\n', encoding="utf-8")),
-        native=True, read_only=True,
+        **ROOTED_LIBRARY_ROUTE,
     ),
     Case(
         "skills_status_config_list_file_directory_resets_json",

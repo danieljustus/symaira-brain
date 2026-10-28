@@ -18,15 +18,15 @@ fn defaults() -> SkillsConfig {
     }
 }
 
-fn file(content: &[u8]) -> Option<ConfigFile<'_>> {
-    Some(ConfigFile {
+fn file(content: &[u8]) -> ConfigFile<'_> {
+    ConfigFile {
         path: "config.toml",
         content,
-    })
+    }
 }
 
 fn global(text: &str) -> LoadOutcome {
-    load(&defaults(), file(text.as_bytes()), None)
+    load(&defaults(), Some(file(text.as_bytes())), None)
 }
 
 #[test]
@@ -56,17 +56,21 @@ fn rejection_follows_the_global_then_project_merge() {
     let valid = b"library_dir = \"/x/library\"\n";
     let windows = b"library_dir = \"C:\\Users\\me\"\n";
     assert_eq!(
-        load(&defaults(), file(windows), file(valid)),
+        load(&defaults(), Some(file(windows)), Some(file(valid))),
         LoadOutcome::Rejected
     );
     assert_eq!(
-        load(&defaults(), file(valid), file(windows)),
+        load(&defaults(), Some(file(valid)), Some(file(windows))),
         LoadOutcome::Rejected
     );
     // An apply error in the global file ends the load before the project file
     // is parsed, so the unreadable project file never matters.
     assert!(matches!(
-        load(&defaults(), file(b"cache_dir = true\n"), file(windows)),
+        load(
+            &defaults(),
+            Some(file(b"cache_dir = true\n")),
+            Some(file(windows))
+        ),
         LoadOutcome::Error(_)
     ));
 }
