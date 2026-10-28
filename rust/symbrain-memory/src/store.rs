@@ -81,6 +81,8 @@ impl Store {
     }
 
     fn configure(conn: Connection) -> Result<Self, StoreError> {
+        // Go registers `symbrain_sync_time` before opening any connection.
+        crate::sync_time::register(&conn)?;
         crate::migration::configure(conn)
     }
 

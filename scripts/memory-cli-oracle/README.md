@@ -4,9 +4,15 @@ Run `cargo build -p symbrain-cli --locked`, then
 `python3 scripts/memory-cli-oracle/replay.py --report /tmp/memory-cli-process.json`.
 The harness archives and builds immutable Go `dcddcef0` with pinned CoreKit
 v0.17.0 configkit for non-sync families. Only `sync_preflight` and `sync_relay`
-(including every sync-pull case) use `56ef5353ee3d4d23271fa6d74885c256a0d80b5c`
-with independently hash-verified CoreKit v0.18.2 configkit: this revision contains
-#970's fix for #854. No fixtures are rewritten. Both builds explicitly use
+(including every sync-pull case) use `fc5252d2e88c0ac2f8fe945113f9494084916558`
+(main's #980 squash commit) with independently hash-verified CoreKit v0.18.2
+configkit: this revision contains #970's fix for #854 and #980's chronological
+`symbrain_sync_time` cursor comparisons. Its `cmd/` and `go.mod`/`go.sum` bytes are
+identical to the former pin `56ef5353`; only `internal/memory` changed, so the
+move is exactly the #980 behavior. The native store registers the same SQL
+function (`rust/symbrain-memory/src/sync_time.rs`) and
+`python3 scripts/memory-cli-oracle/sync_time_fixture.py --check` proves its
+normalization against vectors recorded from the Go function at that revision. No fixtures are rewritten. Both builds explicitly use
 `GOTOOLCHAIN=go1.26.7`, matching `memory-cli-native.yml` rather than ambient Go.
 The report retains both executable, immutable source, SDK and candidate source
 hash sets in `oracle_provenance`; each record names its `go_oracle_revision`.

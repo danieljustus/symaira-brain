@@ -1436,6 +1436,27 @@ batches (`/api/sync/apply`, relay push), non-empty embeddings in pulled memories
 (`embedding_binary` / LSH pipeline), redirects and gzip, and the cases above.
 The #762 acceptance (`requires_go_fallback` removed entirely) is therefore not met.
 
+### `memory sync` cursor comparisons follow main's #980 (`symbrain_sync_time`)
+
+Main's #980 changed the shipped Go store so that every sync cursor predicate compares
+`symbrain_sync_time(<column>)` (fixed-width UTC text with nanoseconds, chronological across the
+driver, trigger and legacy layouts) instead of raw text. The native pending-change probe
+(`symbrain-memory::sync_state::pending_changes`, memories and tombstones) mirrored the old text
+predicate, so merging main made it diverge. `symbrain-memory::sync_time` ports
+`normalizeSyncTime` (Go `time.Parse` rules: fixed two-digit fields, one- or two-digit hour, any
+number of fraction digits with nine kept, runs of spaces, range and calendar checks, `Z`/numeric
+offsets) and registers the deterministic scalar function on every native connection (rusqlite
+`functions` feature); non-text arguments and unparsable values fail like Go's, which the sync
+client hands off to Go. 106 vectors recorded from the Go function at main's #980 commit
+(`rust/symbrain-memory/tests/fixtures/sync_time_go.json`, produced and byte-checked by
+`scripts/memory-cli-oracle/sync_time_fixture.py [--check]`, run in `memory-cli-native.yml`) are
+replayed in Rust both through the library function and through the registered SQL function
+(55 accepted, 51 rejected). The sync families of `scripts/memory-cli-oracle/replay.py` moved from
+`56ef5353` to `fc5252d2e` (#980); `cmd/` and `go.mod`/`go.sum` are byte-identical between the two,
+only `internal/memory` changed, and the full replay (1,454 cases: sync_preflight 192, sync_relay
+590 across both pins) is 1,454/1,454 on macOS. The pull path (`sync_apply`) never compares
+cursors in SQL and is unchanged.
+
 ### `memory` store creation and `sync` dead route without a Go fallback (#769 slice 4)
 
 Three Go routes are gone. (1) `sync_cli::requires_go_fallback` was a constant

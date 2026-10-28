@@ -28,6 +28,7 @@ mod store;
 mod store_dir;
 mod sync_apply;
 mod sync_state;
+mod sync_time;
 mod wal_open;
 mod write;
 

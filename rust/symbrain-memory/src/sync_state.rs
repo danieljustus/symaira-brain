@@ -117,8 +117,9 @@ impl Store {
 
     /// Whether the shipped push stream would send anything after `since`:
     /// memories (not marked `sync_exclude`) updated later, or a tombstone
-    /// recorded later. Uses the shipped predicates with the shipped bound
-    /// rendering, so the string comparisons agree with the shipped queries.
+    /// recorded later. Uses the shipped predicates, including the
+    /// `symbrain_sync_time` normalization of main's #980, with the shipped
+    /// bound rendering.
     ///
     /// # Errors
     /// Returns a `StoreError` when a probe query fails (for example on
@@ -138,7 +139,7 @@ pub(crate) fn pending_changes(
     let bound = render_cursor(since);
     let memories: Option<i64> = conn
         .query_row(
-            "SELECT 1 FROM memories WHERE (updated_at > ?) AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true' LIMIT 1",
+            "SELECT 1 FROM memories WHERE (symbrain_sync_time(updated_at) > symbrain_sync_time(?)) AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true' LIMIT 1",
             [&bound],
             |row| row.get(0),
         )
@@ -148,7 +149,7 @@ pub(crate) fn pending_changes(
     }
     let deleted: Option<i64> = conn
         .query_row(
-            "SELECT 1 FROM sync_oplog o WHERE o.op = 'delete' AND o.ts > ? AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id) LIMIT 1",
+            "SELECT 1 FROM sync_oplog o WHERE o.op = 'delete' AND symbrain_sync_time(o.ts) > symbrain_sync_time(?) AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id) LIMIT 1",
             [&bound],
             |row| row.get(0),
         )

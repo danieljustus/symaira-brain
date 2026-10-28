@@ -75,6 +75,10 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.7'
+      - name: Check the recorded Go sync timestamp normalization vectors
+        run: |
+          set -euo pipefail
+          python3 scripts/memory-cli-oracle/sync_time_fixture.py --check
       - name: Build and verify native CLI
         env:
           CLIPPY_LOG: ${{ runner.temp }}/memory-cli-clippy.log
