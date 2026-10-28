@@ -5934,7 +5934,15 @@ def normalize_fixture_root(data: bytes, root: Path) -> bytes:
     json_root = json_text.encode("ascii")
     # Go's quoted executable path is itself escaped by the outer JSON string.
     quoted_json_root = json.dumps(json_text, ensure_ascii=True)[1:-1].encode("ascii")
-    return data.replace(quoted_json_root, b"<root>").replace(json_root, b"<root>").replace(raw_root, b"<root>")
+    # `{posix_root}` bodies echo the forward-slash spelling back on Windows; on
+    # POSIX it equals raw_root and this replacement is a no-op.
+    posix_root = root.as_posix().encode()
+    return (
+        data.replace(quoted_json_root, b"<root>")
+        .replace(json_root, b"<root>")
+        .replace(raw_root, b"<root>")
+        .replace(posix_root, b"<root>")
+    )
 
 
 def normalize_atomic_tempfile(data: bytes) -> bytes:
