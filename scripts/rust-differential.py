@@ -2036,6 +2036,209 @@ def _list_cfg_library_mode_000(root: Path, env: dict[str, str]) -> None:
 
 
 
+# --- skills log: operation-log read shapes --------------------------------
+#
+# Go's `cmdSkillsLog` reads `events.DefaultPath()` (`~/.local/share/symskills/
+# events.jsonl`, plus the rotated `events.1.jsonl`) with `os.ReadFile` and
+# decodes each line with `json.Unmarshal`; it never consults the loaded config.
+# Native therefore covers every config/environment shape, follows symlinks the
+# way the kernel does, replays the `PathError` text of the open/read failures a
+# log path can produce, and decodes only the lines whose `encoding/json`
+# outcome is certain. Case-folded or duplicate keys, `null` values, lone
+# surrogates, invalid UTF-8, over-deep nesting, non-decimal limits, flag-package
+# diagnostics and paths Go prints differently stay on Go.
+LOG_CONFIG_PREFIX = "skills_status_config_log_"
+LOG_DIR = "home/.local/share/symskills"
+
+
+def _log_ev(ts: str, event: str = "install", skill: str = "demo", target: str = "opencode",
+            outcome: str = "ok", **extra: str) -> bytes:
+    record = {"ts": ts, "event": event}
+    if skill:
+        record["skill"] = skill
+    if target:
+        record["target"] = target
+    record["outcome"] = outcome
+    record.update(extra)
+    return (json.dumps(record, ensure_ascii=False) + "\n").encode("utf-8")
+
+
+def _log_write(root: Path, data: bytes, name: str = "events.jsonl") -> None:
+    path = root / LOG_DIR / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+
+
+def log_with(*lines: bytes, rotated: tuple[bytes, ...] = ()) -> Callable[[Path, dict[str, str]], None]:
+    def setup(root: Path, env: dict[str, str]) -> None:
+        if rotated:
+            _log_write(root, b"".join(rotated), "events.1.jsonl")
+        if lines:
+            _log_write(root, b"".join(lines))
+
+    return setup
+
+
+def log_then(
+    base: Callable[[Path, dict[str, str]], None],
+    *mutators: Callable[[Path, dict[str, str]], None],
+) -> Callable[[Path, dict[str, str]], None]:
+    def setup(root: Path, env: dict[str, str]) -> None:
+        base(root, env)
+        for mutate in mutators:
+            mutate(root, env)
+
+    return setup
+
+
+def _log_populated(root: Path, env: dict[str, str]) -> None:
+    log_with(
+        _log_ev("2026-01-02T00:00:00Z", skill="beta", target="claude"),
+        _log_ev("2026-01-02T00:00:00Z", event="uninstall", skill="gamma", target="opencode"),
+        _log_ev("2026-01-04T08:00:00Z", event="render", skill="", target=""),
+        _log_ev("2026-01-03T00:00:00Z", skill="  ", target="codex", outcome="error", error="boom: <b>&</b> \u2028 caf\u00e9 \U0001F600",
+                skill_version="1.2.3", scope="user", mode="symlink", path="/x/y", source_hash="abc", tool_version="dev", actor="cli"),
+        rotated=(
+            _log_ev("2026-01-01T00:00:00Z", skill="alpha", target="claude"),
+            _log_ev("2026-01-02T00:00:00Z", skill="alpha", target="opencode"),
+        ),
+    )(root, env)
+
+
+def _log_many(root: Path, env: dict[str, str]) -> None:
+    log_with(*(_log_ev(f"2026-02-{day:02d}T00:00:00Z", skill=f"s{day}") for day in range(1, 13)))(root, env)
+
+
+def _log_with_dash_skill(root: Path, env: dict[str, str]) -> None:
+    log_with(
+        _log_ev("2026-01-01T00:00:00Z", skill="-demo"),
+        _log_ev("2026-01-02T00:00:00Z", skill="--demo"),
+    )(root, env)
+
+
+def _log_dir_path(root: Path) -> Path:
+    path = root / LOG_DIR
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _log_symlink_file(name: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        (root / "elsewhere").mkdir(exist_ok=True)
+        (root / "elsewhere" / name).write_bytes(_log_ev("2026-03-01T00:00:00Z", skill="linked"))
+        os.symlink(root / "elsewhere" / name, _log_dir_path(root) / name)
+
+    return mutate
+
+
+def _log_symlinked_ancestor(root: Path, env: dict[str, str]) -> None:
+    real = root / "real-local"
+    (real / "share/symskills").mkdir(parents=True)
+    (real / "share/symskills/events.jsonl").write_bytes(_log_ev("2026-03-02T00:00:00Z", skill="ancestor"))
+    (root / "home").mkdir(exist_ok=True)
+    os.symlink(real, root / "home/.local")
+
+
+def _log_symlink_to_dir(root: Path, env: dict[str, str]) -> None:
+    (root / "elsewhere-dir").mkdir()
+    os.symlink(root / "elsewhere-dir", _log_dir_path(root) / "events.jsonl")
+
+
+def _log_dangling(name: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        os.symlink(root / "nowhere", _log_dir_path(root) / name)
+
+    return mutate
+
+
+def _log_loop(name: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        os.symlink(name, _log_dir_path(root) / name)
+
+    return mutate
+
+
+def _log_dir_as(name: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        (_log_dir_path(root) / name).mkdir()
+
+    return mutate
+
+
+def _log_parent_is_file(root: Path, env: dict[str, str]) -> None:
+    (root / "home/.local/share").mkdir(parents=True)
+    (root / "home/.local/share/symskills").write_bytes(b"not a directory\n")
+
+
+def _log_dangling_ancestor(root: Path, env: dict[str, str]) -> None:
+    (root / "home").mkdir(exist_ok=True)
+    os.symlink(root / "nowhere", root / "home/.local")
+
+
+def _log_mode(name: str, mode: int) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        (_log_dir_path(root) / name).chmod(mode)
+
+    return mutate
+
+
+def _log_dir_mode(mode: int) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        _log_dir_path(root).chmod(mode)
+
+    return mutate
+
+
+def _log_home_doubled_slash(root: Path, env: dict[str, str]) -> None:
+    env["HOME"] = str(root / "home").replace("/home", "//home")
+
+
+def _log_home_unset_log(root: Path, env: dict[str, str]) -> None:
+    # Go falls back to the working directory (`.`) when there is no home.
+    env.pop("HOME", None)
+    path = root / "project/.local/share/symskills"
+    path.mkdir(parents=True)
+    (path / "events.jsonl").write_bytes(_log_ev("2026-03-03T00:00:00Z", skill="cwd-relative"))
+
+
+def _log_home_unset_dir(root: Path, env: dict[str, str]) -> None:
+    env.pop("HOME", None)
+    (root / "project/.local/share/symskills/events.jsonl").mkdir(parents=True)
+
+
+def _log_home_dotdot_symlink(root: Path, env: dict[str, str]) -> None:
+    # `link/..` is `real/` for the kernel but `root/` for Go's lexical clean.
+    (root / "real/sub").mkdir(parents=True)
+    os.symlink(root / "real/sub", root / "link")
+    for base, skill in ((root / "x", "lexical"), (root / "real/x", "kernel")):
+        (base / ".local/share/symskills").mkdir(parents=True)
+        (base / ".local/share/symskills/events.jsonl").write_bytes(_log_ev("2026-03-04T00:00:00Z", skill=skill))
+    env["HOME"] = str(root / "link/../x")
+
+
+def _log_env(**values: str) -> Callable[[Path, dict[str, str]], None]:
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        for key, value in values.items():
+            env[key] = value.replace("{root}", str(root))
+
+    return mutate
+
+
+def _log_config_files(root: Path, env: dict[str, str]) -> None:
+    write_symskills_config(root, 'library_dir = "/nonexistent/library"\nvcs = { enabled = false }\n')
+    _write_text(root / "project/.symskills.toml", 'cache_dir = "/nonexistent/cache"\n', encoding="utf-8")
+
+
+def _log_config_malformed(root: Path, env: dict[str, str]) -> None:
+    write_symskills_config(root, "this is [not valid toml\n= = =\n")
+
+
+def _log_deep(depth: int) -> bytes:
+    nested = "[" * depth + "]" * depth
+    return ('{"ts":"2026-03-05T00:00:00Z","event":"install","outcome":"ok","extra":' + nested + "}\n").encode()
+
+
+
 @dataclass(frozen=True)
 class Case:
     name: str
@@ -5012,6 +5215,486 @@ CASES = (
         setup=list_relocated(setup_skills_library_fixture),
         expect_fallback=True,
     ),
+    Case(
+        "skills_status_config_log_env_populated_json",
+        ('skills', 'log', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_populated",
+        ('skills', 'log'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_json",
+        ('skills', 'log', '--limit', '3', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_short_equals",
+        ('skills', 'log', '-l=2'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_equals_json",
+        ('skills', 'log', '--limit=1', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_zero_json",
+        ('skills', 'log', '--limit', '0', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_negative_json",
+        ('skills', 'log', '--limit=-2', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_plus_json",
+        ('skills', 'log', '-limit=+2', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_over_json",
+        ('skills', 'log', '--limit', '99', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_limit_decimal_ten_json",
+        ('skills', 'log', '--limit', '10', '--json'),
+        setup=_log_many,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_skill_filter_json",
+        ('skills', 'log', '--skill', 'alpha', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_skill_filter_trimmed",
+        ('skills', 'log', '--skill', '  alpha  '),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_skill_filter_empty_value",
+        ('skills', 'log', '--skill=', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_target_filter_json",
+        ('skills', 'log', '--target', 'claude', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_skill_and_target_json",
+        ('skills', 'log', '-skill', 'alpha', '-target', 'opencode', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_filter_no_match",
+        ('skills', 'log', '--skill', 'absent'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_filter_limit_json",
+        ('skills', 'log', '--target', 'opencode', '--limit', '1', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_scope_flag_ignored_json",
+        ('skills', 'log', '--scope', 'bogus', '--json'),
+        setup=_log_populated,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_double_dash_value_json",
+        ('skills', 'log', '--skill', '--demo', '--json'),
+        setup=_log_with_dash_skill,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_absent_table",
+        ('skills', 'log'),
+        setup=None,
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_rotated_only_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(rotated=(_log_ev('2026-01-01T00:00:00Z', skill='old'),)),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_current_only_table",
+        ('skills', 'log'),
+        setup=log_with(_log_ev('2026-01-01T00:00:00Z', skill='new')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_empty_file_table",
+        ('skills', 'log'),
+        setup=log_with(b''),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_blank_and_crlf_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'\r\n\n  \t \x0b\x0c\n' + _log_ev('2026-01-01T00:00:00Z').rstrip(b'\n') + b'\r\n   \n'),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_no_trailing_newline_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(_log_ev('2026-01-01T00:00:00Z', skill='tail').rstrip(b'\n')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_skipped_lines_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'not json\n[1,2]\n"s"\n42\ntrue\n{"ts":\n{"ts":"x"} trailing\n01\n{"a":01}\n' + _log_ev('2026-01-01T00:00:00Z', skill='kept')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_unknown_and_nested_fields_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"ts":"2026-01-01T00:00:00Z","event":"install","outcome":"ok","extra":{"a":[1,2.5e3,-0,true,false,null,"\\u00e9"]},"big":1e999,"ts2":null}\n'),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_deep_nesting_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(_log_deep(150)),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_unicode_escapes_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"ts":"2026-01-01T00:00:00Z","event":"inst\\u0061ll\\u00e9\\ud83d\\ude00\\/","outcome":"ok","k\\u0065y":1}\n'),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_unicode_whitespace_line_json",
+        ('skills', 'log', '--json'),
+        setup=log_with('\u00a0\u2003\n'.encode() + _log_ev('2026-01-01T00:00:00Z')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_sort_ties_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(_log_ev('2026-05-01T00:00:00Z', skill='b'), _log_ev('2026-05-01T00:00:00Z', skill='a'), rotated=(_log_ev('2026-05-01T00:00:00Z', skill='r'),)),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_ts_not_rfc3339_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(_log_ev('b'), _log_ev('a'), _log_ev('B'), _log_ev('')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_config_files_ignored_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(_log_populated, _log_config_files),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_config_malformed_ignored",
+        ('skills', 'log'),
+        setup=log_then(_log_populated, _log_config_malformed),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_config_toml_is_directory_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(_log_populated, _status_cfg_dir_as_config_toml),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symskills_vars_ignored_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(_log_populated, _log_env(SYMSKILLS_LIBRARY_DIR='relative/library', SYMSKILLS_BASE_DIR='', SYMSKILLS_CACHE_DIR='{root}/never', SYMSKILLS_VCS_ENABLED='maybe')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symbrain_vars_ignored_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(_log_populated, _log_env(SYMBRAIN_SKILLS_LIBRARY_DIR='{root}/never', SYMBRAIN_SKILLS_BASE_DIR='{root}/never')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_xdg_relative_ignored_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(_log_populated, _log_env(XDG_CONFIG_HOME='relative/config', XDG_DATA_HOME='relative/data')),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symlink_log_file_json",
+        ('skills', 'log', '--json'),
+        setup=_log_symlink_file('events.jsonl'),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symlink_rotated_file_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(log_with(_log_ev('2026-01-01T00:00:00Z', skill='cur')), _log_symlink_file('events.1.jsonl')),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symlinked_ancestor_json",
+        ('skills', 'log', '--json'),
+        setup=_log_symlinked_ancestor,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_dangling_log_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(log_with(rotated=(_log_ev('2026-01-01T00:00:00Z', skill='old'),)), _log_dangling('events.jsonl')),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_dangling_rotated_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(log_with(_log_ev('2026-01-01T00:00:00Z', skill='cur')), _log_dangling('events.1.jsonl')),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_dangling_ancestor_json",
+        ('skills', 'log', '--json'),
+        setup=_log_dangling_ancestor,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symlink_to_directory",
+        ('skills', 'log'),
+        setup=_log_symlink_to_dir,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symlink_loop_log",
+        ('skills', 'log'),
+        setup=_log_loop('events.jsonl'),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_symlink_loop_rotated",
+        ('skills', 'log', '--json'),
+        setup=log_then(log_with(_log_ev('2026-01-01T00:00:00Z')), _log_loop('events.1.jsonl')),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_log_is_directory",
+        ('skills', 'log'),
+        setup=_log_dir_as('events.jsonl'),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_rotated_is_directory_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(log_with(_log_ev('2026-01-01T00:00:00Z')), _log_dir_as('events.1.jsonl')),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_parent_is_file",
+        ('skills', 'log'),
+        setup=_log_parent_is_file,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_log_mode_000",
+        ('skills', 'log'),
+        setup=log_then(_log_populated, _log_mode('events.jsonl', 0)),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_rotated_mode_000_json",
+        ('skills', 'log', '--json'),
+        setup=log_then(_log_populated, _log_mode('events.1.jsonl', 0)),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_dir_mode_000",
+        ('skills', 'log'),
+        setup=log_then(_log_populated, _log_dir_mode(0)),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_dir_search_only",
+        ('skills', 'log', '--json'),
+        setup=log_then(_log_populated, _log_dir_mode(0o111)),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_home_unset_cwd_log_json",
+        ('skills', 'log', '--json'),
+        setup=_log_home_unset_log,
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_env_home_empty_cwd_log",
+        ('skills', 'log'),
+        setup=log_then(_log_home_unset_log, _log_env(HOME='')),
+        native=True, read_only=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_uppercase_keys_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"TS":"2026-01-01T00:00:00Z","Event":"install","OUTCOME":"ok"}\n'),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_duplicate_key_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"ts":"a","ts":"b","event":"x","outcome":"ok"}\n'),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_null_value_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"ts":"a","event":null,"outcome":"ok"}\n'),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_number_value_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"ts":"a","event":5,"outcome":"ok"}\n'),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_top_level_null_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b' null \n'),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_lone_surrogate_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"ts":"a","event":"x\\ud800","outcome":"ok"}\n'),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_invalid_utf8_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(b'{"ts":"a","event":"x\xff","outcome":"ok"}\n'),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_non_ascii_key_json",
+        ('skills', 'log', '--json'),
+        setup=log_with('{"ts":"a","\u017fkill":"x","outcome":"ok"}\n'.encode()),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_too_deep_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(_log_deep(300)),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_rotated_ambiguous_line_json",
+        ('skills', 'log', '--json'),
+        setup=log_with(_log_ev('2026-01-01T00:00:00Z'), rotated=(b'{"ts":"a","event":null}\n',)),
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_limit_octal_json",
+        ('skills', 'log', '--limit', '010', '--json'),
+        setup=_log_many,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_limit_hex_json",
+        ('skills', 'log', '--limit=0x2', '--json'),
+        setup=_log_many,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_limit_underscore_json",
+        ('skills', 'log', '--limit=1_0', '--json'),
+        setup=_log_many,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_limit_not_a_number",
+        ('skills', 'log', '--limit', 'many'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_limit_overflow",
+        ('skills', 'log', '--limit', '99999999999999999999'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_unknown_flag",
+        ('skills', 'log', '--bogus'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_positional",
+        ('skills', 'log', 'extra', '--limit', '1'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_help_flag",
+        ('skills', 'log', '-h'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_terminator",
+        ('skills', 'log', '--', '--limit', '1'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_missing_value",
+        ('skills', 'log', '--skill'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_triple_dash",
+        ('skills', 'log', '---limit', '1'),
+        setup=_log_populated,
+        expect_fallback=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_unclean_home_error",
+        ('skills', 'log'),
+        setup=log_then(_log_dir_as('events.jsonl'), _log_home_doubled_slash),
+        expect_fallback=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_home_unset_error",
+        ('skills', 'log'),
+        setup=_log_home_unset_dir,
+        expect_fallback=True, posix_only=True,
+    ),
+    Case(
+        "skills_status_config_log_fallback_home_dotdot_through_symlink_json",
+        ('skills', 'log', '--json'),
+        setup=_log_home_dotdot_symlink,
+        expect_fallback=True, posix_only=True,
+    ),
     *(
         file_list("global_library_json", file_cfg(FILE_GLOBAL, FILE_LIB)),
         file_list("global_library_table", file_cfg(FILE_GLOBAL, FILE_LIB), args=("skills", "list")),
@@ -5326,10 +6009,12 @@ def readonly_snapshot(root: Path) -> dict[str, tuple]:
         elif path.is_dir():
             snapshot[rel] = ("dir", st.st_mode & 0o777, st.st_mtime_ns, "")
         elif path.is_file():
-            snapshot[rel] = (
-                "file", st.st_mode & 0o777, st.st_mtime_ns,
-                hashlib.sha256(path.read_bytes()).hexdigest(),
-            )
+            try:
+                digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            except OSError:
+                # A mode-000 fixture file: type, mode and mtime still pin it.
+                digest = "unreadable"
+            snapshot[rel] = ("file", st.st_mode & 0o777, st.st_mtime_ns, digest)
     return snapshot
 
 

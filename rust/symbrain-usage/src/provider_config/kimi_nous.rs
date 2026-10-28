@@ -16,21 +16,48 @@ fn kimi_cli_home() -> PathBuf {
     current
 }
 
-/// The CLI's stored access token and device id.
-fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>) {
-    let token = kimi_file_token_candidate(&credential_join(cli_home, "credentials/kimi-code.json"));
+/// The CLI's stored access token, device id and optional expiry.
+/// API keys and CLI OAuth currently share /coding/v1/usages; which API-key
+/// products it accepts remains unproven offline (#931).
+fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>, Option<f64>) {
+    let (token, expiry) = kimi_file_credential(&credential_join(cli_home, "credentials/kimi-code.json"));
     let device_id = read_limited(&credential_join(cli_home, "device_id"))
         .and_then(|data| String::from_utf8(data).ok())
         .map(|value| value.trim().to_owned())
         .filter(|value| !value.is_empty());
-    (token, device_id)
+    (token, device_id, expiry)
 }
 
 fn kimi_file_token_candidate(path: &Path) -> Option<String> {
-    let text = go_json_compatible_text(&read_provider_credentials(path)?);
-    go_json_credential_limits(&text, false)
+    kimi_file_credential(path).0
+}
+
+#[derive(Deserialize)]
+struct KimiExpiryMetadata {
+    #[serde(default)]
+    expires_at: serde_json::Value,
+}
+
+fn kimi_file_credential(path: &Path) -> (Option<String>, Option<f64>) {
+    let Some(bytes) = read_provider_credentials(path) else { return (None, None) };
+    let text = go_json_compatible_text(&bytes);
+    let token = go_json_credential_limits(&text, false)
         .then(|| decode_typed_credential(&text, "access_token"))
-        .flatten()
+        .flatten();
+    let expiry = serde_json::from_str::<KimiExpiryMetadata>(&text).ok()
+        .and_then(|metadata| kimi_expiry_seconds(&metadata.expires_at));
+    (token, expiry)
+}
+
+// Unix seconds and RFC3339 metadata are advisory; unknown shapes still go to
+// the endpoint. No refresh-token decoding, token rotation or file writes.
+#[allow(clippy::cast_precision_loss)] // Subsecond precision is sufficient for expiry.
+fn kimi_expiry_seconds(value: &serde_json::Value) -> Option<f64> {
+    if let Some(text) = value.as_str() {
+        return chrono::DateTime::parse_from_rfc3339(text).ok()
+            .map(|time| time.timestamp_millis() as f64 / 1000.0);
+    }
+    value.as_f64().filter(|seconds| (-62_135_596_800.0..253_402_300_800.0).contains(seconds))
 }
 
 // Invalid regular JSON is native missing credentials. Unsafe file access is

@@ -14,10 +14,15 @@
 #
 # Output layout (default external NVMe artifact root locally, <repo>/dist/modules/ in CI):
 #   symbrowse_<version>_<os>_<arch>.tar.gz
-#   symoperate_<version>_<os>_<arch>.tar.gz   (macOS only)
+#   symoperate_<version>_<os>_<arch>.tar.gz   (macOS only; also contains the Freeform snapshot
+#                                             helper bundle and its installer script)
 #   symscope_<version>_<os>_<arch>.tar.gz     (macOS only)
 #   checksums.txt                             (SHA-256 over every archive)
 #   provenance.json                           (origin, commit, toolchain)
+#
+# Signing: set SYMAIRA_CODESIGN_IDENTITY (a Developer ID Application identity) to sign the
+# Freeform snapshot helper with hardened runtime. Unsigned helpers are packaged with a
+# warning; Full Disk Access grants only survive updates with a stable Developer ID.
 #
 # Repeatability: the Go module builds with -trimpath and CGO_ENABLED=0.
 # SwiftPM builds are not bit-for-bit reproducible across toolchains; the
@@ -123,16 +128,21 @@ module_selected() {
     esac
 }
 
-# package_binary <module-dir> <binary-name> <builder-string> <built-binary-path>
+# package_binary <module-dir> <binary-name> <builder-string> <built-binary-path> [extra-dir]
+# Every entry of extra-dir is added to the archive next to the binary.
 package_binary() {
-    dir=$1; name=$2; builder=$3; bin=$4
+    dir=$1; name=$2; builder=$3; bin=$4; extra=${5:-}
     version=$("$bin" version --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')
     case "$version" in v*) ;; *) version="v$version" ;; esac
     base="${name}_${version#v}_${OS}_${ARCH}"
     stage=$(mktemp -d "${TMPDIR:-/tmp}/symbrain-module.XXXXXX")
     cp "$bin" "$stage/$name"
     chmod 755 "$stage/$name"
-    tar -C "$stage" -czf "$OUT/$base.tar.gz" "$name"
+    if [ -n "$extra" ]; then
+        # ditto keeps code signatures and extended attributes of app bundles intact.
+        for entry in "$extra"/*; do ditto "$entry" "$stage/$(basename "$entry")"; done
+    fi
+    (cd "$stage" && tar -czf "$OUT/$base.tar.gz" *)
     rm -rf "$stage"
     sha=$(shasum -a 256 "$OUT/$base.tar.gz" | awk '{print $1}')
     echo "$sha  $base.tar.gz" >> "$OUT/checksums.txt"
@@ -166,7 +176,21 @@ if [ "$OS" = "darwin" ]; then
             echo "==> building $bin from $ROOT/$mod (release)"
             swift build --package-path "$ROOT/$mod" -c release --scratch-path "$OUT/.build/$mod-scratch" --cache-path "$OUT/.build/swift-cache" >/dev/null
             BINPATH=$(swift build --package-path "$ROOT/$mod" -c release --scratch-path "$OUT/.build/$mod-scratch" --cache-path "$OUT/.build/swift-cache" --show-bin-path)
-            package_binary "$mod" "$bin" "$(swift --version | head -n 1)" "$BINPATH/$bin"
+            extra=""
+            if [ "$mod" = operate ]; then
+                # Ship the Freeform snapshot helper as a ready bundle plus its installer
+                # (install with: freeform-snapshot-helper.sh --bundle "Symaira Operate Freeform Snapshot.app").
+                extra="$OUT/.build/operate-extra"
+                helper_stage="$OUT/.build/operate-helper"
+                mkdir -p "$extra" "$helper_stage"
+                set -- --dest "$helper_stage"
+                if [ -n "${SYMAIRA_CODESIGN_IDENTITY:-}" ]; then set -- "$@" --sign "$SYMAIRA_CODESIGN_IDENTITY"; fi
+                bash "$ROOT/operate/scripts/freeform-snapshot-helper.sh" "$@" >/dev/null
+                ditto "$helper_stage/Symaira Operate Freeform Snapshot.app" "$extra/Symaira Operate Freeform Snapshot.app"
+                cp "$ROOT/operate/scripts/freeform-snapshot-helper.sh" "$extra/"
+                chmod 755 "$extra/freeform-snapshot-helper.sh"
+            fi
+            package_binary "$mod" "$bin" "$(swift --version | head -n 1)" "$BINPATH/$bin" "$extra"
         fi
     done
 else

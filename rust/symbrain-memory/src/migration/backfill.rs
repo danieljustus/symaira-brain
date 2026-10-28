@@ -7,11 +7,21 @@ use rusqlite::{Connection, params};
 pub(super) fn relations(
     conn: &Connection,
     initial: &Initial,
+    check_only: bool,
     statements: &[String],
 ) -> Result<(), StoreError> {
     let blank = conn.prepare("SELECT from_entity_id,to_entity_id,relation_type FROM entity_relations WHERE id='' ORDER BY from_entity_id,to_entity_id,relation_type")?
         .query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?)))?
         .collect::<Result<Vec<_>, _>>()?;
+    if check_only {
+        // The UUID and timestamp updates are no-ops without blank identities
+        // or a pending timestamp repair, so a read-only admission may skip them.
+        return if blank.is_empty() && !initial.relation_timestamps() {
+            Ok(())
+        } else {
+            Err(StoreError::Invalid("entity relations need repair".into()))
+        };
+    }
     // Preserve Go's operation order and exact UUIDv4 SQL before timestamps.
     let identity = statements
         .iter()

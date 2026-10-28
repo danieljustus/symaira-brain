@@ -10,7 +10,10 @@ Usage: run.py GO_BINARY RUST_BINARY [--mutants MUTANT_TARGET_DIR]
    (this includes `skills_status_config_targets_*`: `skills targets` is
    config-independent in Go, so every env/config shape is native there, and
    `skills_status_config_list_*`: `skills list` reads only LibraryDir from the
-   config, so an environment-only config is native):
+   config, so an environment-only config is native, and
+   `skills_status_config_log_*`: `skills log` reads only the operation log under
+   the home directory, so every config is irrelevant and the symlink, read
+   error and line-decode shapes are what the cases pin):
    native cases run the Rust binary with every Go fallback route removed and
    must leave the fixture root untouched; `fallback` cases must reach the
    missing-fallback diagnostic when no Go route exists.
@@ -53,6 +56,8 @@ SOURCES = (
     SOURCE,
     ROOT / "rust/symbrain-cli/src/skills_doctor_config.rs",
     ROOT / "rust/symbrain-skills/src/install/status_compare.rs",
+    ROOT / "rust/symbrain-skills/src/install/event.rs",
+    ROOT / "rust/symbrain-skills/src/install/event_decode.rs",
 )
 PREFIX = "skills_status_config_"
 
@@ -68,6 +73,10 @@ UNPRIVILEGED_ONLY = {
     "skills_status_config_fallback_library_mode_444_json",
     "skills_status_config_doctor_config_dir_unreadable_resets_env_json",
     "skills_status_config_file_doctor_fallback_unreadable_file_json",
+    "skills_status_config_log_env_log_mode_000",
+    "skills_status_config_log_env_rotated_mode_000_json",
+    "skills_status_config_log_env_dir_mode_000",
+    "skills_status_config_log_env_dir_search_only",
 }
 PRIVILEGED = hasattr(os, "geteuid") and os.geteuid() == 0
 
@@ -428,6 +437,177 @@ MUTANTS = {
         "    parse_list_flags(args).ok()?;\n",
         "    let _ = parse_list_flags(args);\n",
         ["skills_status_config_list_fallback_unknown_flag_with_env"],
+    ),
+    'log-accepts-octal-limit': (
+        "|| (digits.starts_with(|c: char| ('1'..='9').contains(&c))",
+        '|| (digits.starts_with(|c: char| c.is_ascii_digit())',
+        [
+            'skills_status_config_log_fallback_limit_octal_json',
+        ],
+    ),
+    'log-skips-flag-normalization': (
+        'Some(rest) if !rest.is_empty() => format!("-{rest}"),',
+        'Some(rest) if false => format!("-{rest}"),',
+        [
+            'skills_status_config_log_env_skill_filter_json',
+            'skills_status_config_log_env_double_dash_value_json',
+            'skills_status_config_log_env_limit_json',
+        ],
+    ),
+    'log-keeps-symlinks-on-go': (
+        'match fs::metadata(&segment) {',
+        'match fs::symlink_metadata(&segment) {',
+        [
+            'skills_status_config_log_env_symlink_log_file_json',
+            'skills_status_config_log_env_symlink_rotated_file_json',
+            'skills_status_config_log_env_symlink_to_directory',
+            'skills_status_config_log_env_dangling_log_json',
+            'skills_status_config_log_env_dangling_rotated_json',
+            'skills_status_config_log_env_symlink_loop_log',
+        ],
+    ),
+    'log-wrong-read-op': (
+        'op: "read",',
+        'op: "open",',
+        [
+            'skills_status_config_log_env_log_is_directory',
+            'skills_status_config_log_env_rotated_is_directory_json',
+            'skills_status_config_log_env_symlink_to_directory',
+        ],
+    ),
+    'log-wrong-directory-text': (
+        '21 => "is a directory",',
+        '21 => "is a dir",',
+        [
+            'skills_status_config_log_env_log_is_directory',
+            'skills_status_config_log_env_rotated_is_directory_json',
+            'skills_status_config_log_env_symlink_to_directory',
+        ],
+    ),
+    'log-wrong-notdir-text': (
+        '20 => "not a directory",',
+        '20 => "not a dir",',
+        [
+            'skills_status_config_log_env_parent_is_file',
+        ],
+    ),
+    'log-wrong-loop-text': (
+        '62 if cfg!(target_os = "macos") => "too many levels of symbolic links",',
+        '62 if cfg!(target_os = "macos") => "too many symlinks",',
+        [
+            'skills_status_config_log_env_symlink_loop_log',
+            'skills_status_config_log_env_symlink_loop_rotated',
+        ],
+    ),
+    'log-wrong-eacces-text': (
+        '13 => "permission denied",',
+        '13 => "denied",',
+        [
+            'skills_status_config_log_env_log_mode_000',
+            'skills_status_config_log_env_rotated_mode_000_json',
+            'skills_status_config_log_env_dir_mode_000',
+        ],
+    ),
+    'log-accepts-unclean-home-error': (
+        '|| !is_lexically_clean(home.to_str()?)',
+        '|| home.to_str().is_none()',
+        [
+            'skills_status_config_log_fallback_unclean_home_error',
+        ],
+    ),
+    'log-accepts-dotdot-home': (
+        'if go_home_defined() && home.to_str().is_none_or(has_dot_segment) {',
+        'if false {',
+        [
+            'skills_status_config_log_fallback_home_dotdot_through_symlink_json',
+        ],
+    ),
+    'log-sorts-oldest-first': (
+        'records.sort_by(|left, right| right.ts.cmp(&left.ts));',
+        'records.sort_by(|left, right| left.ts.cmp(&right.ts));',
+        [
+            'skills_status_config_log_env_populated_json',
+            'skills_status_config_log_env_populated',
+        ],
+    ),
+    'log-limit-zero-truncates': (
+        'if parsed.limit > 0 {',
+        'if parsed.limit >= 0 {',
+        [
+            'skills_status_config_log_env_populated_json',
+            'skills_status_config_log_env_limit_zero_json',
+        ],
+    ),
+    'log-skill-filter-untrimmed': (
+        '        .skill\n        .as_deref()\n        .map(str::trim)\n',
+        '        .skill\n        .as_deref()\n        .map(|value| value)\n',
+        [
+            'skills_status_config_log_env_skill_filter_trimmed',
+        ],
+    ),
+    'log-reads-current-before-rotated': (
+        'for segment in [rotated_event_path(path), path.to_owned()] {\n        match fs::metadata',
+        'for segment in [path.to_owned(), rotated_event_path(path)] {\n        match fs::metadata',
+        [
+            'skills_status_config_log_env_populated_json',
+            'skills_status_config_log_env_sort_ties_json',
+        ],
+    ),
+    'log-decodes-case-folded-keys': (
+        '} else if !key.is_ascii() || FIELDS.iter().any(|field| field.eq_ignore_ascii_case(&key)) {',
+        '} else if !key.is_ascii() {',
+        [
+            'skills_status_config_log_fallback_uppercase_keys_json',
+        ],
+    ),
+    'log-decodes-non-ascii-keys': (
+        '} else if !key.is_ascii() || FIELDS',
+        '} else if FIELDS',
+        [
+            'skills_status_config_log_fallback_non_ascii_key_json',
+        ],
+    ),
+    'log-decodes-duplicate-keys': (
+        'if seen[slot] {\n                return LineDecode::Unsure;',
+        'if false {\n                return LineDecode::Unsure;',
+        [
+            'skills_status_config_log_fallback_duplicate_key_json',
+        ],
+    ),
+    'log-decodes-top-level-null': (
+        'if bytes[start..].starts_with(b"null") {',
+        'if false {',
+        [
+            'skills_status_config_log_fallback_top_level_null_json',
+        ],
+    ),
+    'log-decodes-invalid-utf8': (
+        'let Ok(text) = std::str::from_utf8(line) else {\n        return LineDecode::Unsure;',
+        'let Ok(text) = std::str::from_utf8(line) else {\n        return LineDecode::Skip;',
+        [
+            'skills_status_config_log_fallback_invalid_utf8_json',
+        ],
+    ),
+    'log-decodes-lone-surrogates': (
+        'let Ok(value) = serde_json::from_str::<String>(raw) else {\n                return LineDecode::Unsure;',
+        'let Ok(value) = serde_json::from_str::<String>(raw) else {\n                return LineDecode::Skip;',
+        [
+            'skills_status_config_log_fallback_lone_surrogate_json',
+        ],
+    ),
+    'log-accepts-deep-nesting': (
+        'const MAX_DEPTH: usize = 200;',
+        'const MAX_DEPTH: usize = 2000;',
+        [
+            'skills_status_config_log_fallback_too_deep_json',
+        ],
+    ),
+    'log-accepts-trailing-garbage': (
+        '    if index != bytes.len() {\n        return LineDecode::Skip;\n    }\n    build_event(text, &members)',
+        '    build_event(text, &members)',
+        [
+            'skills_status_config_log_env_skipped_lines_json',
+        ],
     ),
     "write-a-file": (
         "    let (library_dir, base_dir, home_dir, render_dir) = status_dirs();\n",

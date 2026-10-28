@@ -3,7 +3,14 @@ import ApplicationServices
 import Foundation
 
 public struct InputService: InputServiceProtocol {
-    public init() {}
+    private let eventPoster: ((CGEvent, DeliveryMode, Int32?) throws -> Void)?
+
+    public init() { eventPoster = nil }
+
+    /// Internal event-delivery seam so unit tests never send input to a live desktop.
+    init(eventPoster: @escaping (CGEvent, DeliveryMode, Int32?) throws -> Void) {
+        self.eventPoster = eventPoster
+    }
 
     public func click(at point: PointValue, button: String = "left", doubleClick: Bool = false) throws {
         try click(at: point, button: button, doubleClick: doubleClick, deliveryMode: .automatic, targetProcessID: nil)
@@ -179,6 +186,13 @@ public struct InputService: InputServiceProtocol {
     }
 
     private func post(_ event: CGEvent, deliveryMode: DeliveryMode, targetProcessID: Int32?) throws {
+        if deliveryMode == .background && (targetProcessID == nil || targetProcessID! <= 0) {
+            throw AutomationError.unsupported("Background delivery requires a verified target process.")
+        }
+        if let eventPoster {
+            try eventPoster(event, deliveryMode, targetProcessID)
+            return
+        }
         switch deliveryMode {
         case .automatic, .foreground:
             event.post(tap: .cghidEventTap)

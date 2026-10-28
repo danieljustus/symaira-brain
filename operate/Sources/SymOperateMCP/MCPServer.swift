@@ -31,10 +31,13 @@ import SymairaMCP
 /// module's minimal `MCPTool` schema shape.
 public final class MCPServer: @unchecked Sendable {
     private let controller: AutomationController
+    let freeform: FreeformAdapter
+    var freeformPolicy: ActionPolicy { controller.actionPolicy }
     private let server: SymairaMCP.MCPServer
 
-    public init(controller: AutomationController = AutomationController()) {
+    public init(controller: AutomationController = AutomationController(), freeform: FreeformAdapter = FreeformAdapter()) {
         self.controller = controller
+        self.freeform = freeform
         self.server = SymairaMCP.MCPServer(name: "symoperate", version: SymOperateVersion.current)
         registerHandlers()
     }
@@ -588,7 +591,7 @@ public final class MCPServer: @unchecked Sendable {
             outputSchema: nil,
             handler: { _, _ in await UpdateChecker().checkForUpdate() }
         ),
-    ]
+    ] + freeformToolDefinitions
 
     private func tools() -> [[String: Any]] {
         Self.toolDefinitions.map { tool($0) }

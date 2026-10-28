@@ -50,6 +50,7 @@ include!("provider_config/files.rs");
 include!("provider_config/claude_file.rs");
 include!("provider_config/codex_file.rs");
 include!("provider_config/copilot_file.rs");
+include!("provider_config/copilot_cli.rs");
 include!("provider_config/kimi_nous.rs");
 include!("provider_config/hermes.rs");
 include!("provider_config/jwt.rs");
@@ -58,6 +59,14 @@ include!("provider_config/registry.rs");
 include!("provider_config/routing.rs");
 include!("provider_config/accounts.rs");
 include!("provider_config/other_accounts.rs");
+
+#[cfg(test)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
+#[cfg(test)]
+#[path = "kimi_expiry_tests.rs"]
+mod kimi_expiry_tests;
 
 #[cfg(test)]
 #[path = "provider_config_tests.rs"]

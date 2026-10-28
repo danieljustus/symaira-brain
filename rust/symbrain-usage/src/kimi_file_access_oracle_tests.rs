@@ -10,7 +10,7 @@
 //! Run as a non-root user; root bypasses the mode-000 cases.
 #![cfg(target_os = "macos")]
 
-use super::{kimi, needs_go_fallback};
+use super::{coverage, kimi, needs_go_fallback};
 use serde_json::{Value, json};
 use std::fs;
 use std::os::unix::fs::{PermissionsExt, symlink};
@@ -92,6 +92,7 @@ fn probe(home: &Path, env: &serde_json::Map<String, Value>) -> Value {
     command
         .args(["--exact", &name, "--nocapture", "--test-threads=1"])
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", home)
         .env(PROBE_MARKER, "1")
         // Short-circuits the automatic Claude Keychain listing: no host state.

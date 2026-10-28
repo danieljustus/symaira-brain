@@ -8,6 +8,18 @@ use crate::{
 use rusqlite::Connection;
 
 pub(super) fn apply(conn: &Connection) -> Result<(), StoreError> {
+    run(conn, false)
+}
+
+/// Succeeds only if the full migration would change nothing. Intended for a
+/// `query_only` connection: every write path is either skipped here or rejected
+/// by SQLite, and any failure sends the caller to the writer-admitted `apply`,
+/// which reproduces the real result or error.
+pub(super) fn check_current(conn: &Connection) -> Result<(), StoreError> {
+    run(conn, true)
+}
+
+fn run(conn: &Connection, check_only: bool) -> Result<(), StoreError> {
     if !catalog::STEPS
         .iter()
         .map(|(version, _)| *version)
@@ -34,19 +46,26 @@ pub(super) fn apply(conn: &Connection) -> Result<(), StoreError> {
     for (version, resource) in catalog::STEPS {
         let statements = sql::statements(resource)?;
         if *version == "027_fts5_porter" {
-            fts::porter(conn, resource, !initial.applied.contains(*version))?;
+            fts::porter(
+                conn,
+                resource,
+                !initial.applied.contains(*version),
+                check_only,
+            )?;
         } else {
             for statement in &statements {
-                apply_statement(conn, statement, version, &initial)?;
+                apply_statement(conn, statement, version, &initial, check_only)?;
             }
         }
         // Every statement's named objects are checked before publishing its
         // entry; final constraints/indexes/triggers are checked before commit.
         verify_step(conn, &statements)?;
-        conn.execute(
-            "INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)",
-            [version],
-        )?;
+        if !check_only {
+            conn.execute(
+                "INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)",
+                [version],
+            )?;
+        }
         let recorded: bool = conn.query_row(
             "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=?)",
             [version],
@@ -70,6 +89,7 @@ fn apply_statement(
     statement: &str,
     version: &str,
     initial: &Initial,
+    check_only: bool,
 ) -> Result<(), StoreError> {
     let start = statement.trim_start();
     if let Some((table, column)) = sql::alter(statement) {
@@ -130,6 +150,7 @@ fn apply_statement(
             return backfill::relations(
                 conn,
                 initial,
+                check_only,
                 &sql::statements(
                     catalog::STEPS
                         .iter()
