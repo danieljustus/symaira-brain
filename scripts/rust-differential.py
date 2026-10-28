@@ -2282,7 +2282,15 @@ FILE_BOM = "\ufeff"
 
 
 def file_cfg(location: str, body: str | bytes | Callable[[Path], bytes]) -> Callable[[Path, dict[str, str]], None]:
-    """Write a config file; `{root}` expands to the fixture root in text bodies."""
+    """Write a config file; `{root}` expands to the fixture root in text bodies.
+
+    `{posix_root}` expands to the same root with forward slashes. On Windows the
+    native spelling (`D:\\a\\_temp\\...`) puts invalid TOML escapes into a basic
+    string, so BurntSushi rejects the file at the first line and Go resets to the
+    defaults: a case whose point is a *later* defect (syntax error, duplicate
+    key, unclean path, ...) must use `{posix_root}` to reach that defect on
+    every host. POSIX bytes are identical for both spellings.
+    """
 
     def mutate(root: Path, env: dict[str, str]) -> None:
         path = root / location
@@ -2292,7 +2300,7 @@ def file_cfg(location: str, body: str | bytes | Callable[[Path], bytes]) -> Call
         elif isinstance(body, bytes):
             data = body
         else:
-            data = body.replace("{root}", str(root)).encode("utf-8")
+            data = body.replace("{posix_root}", root.as_posix()).replace("{root}", str(root)).encode("utf-8")
         path.write_bytes(data)
 
     return mutate
@@ -2318,6 +2326,9 @@ def file_list_setup(
 
 
 FILE_LIB = 'library_dir = "{root}/alt/library"\n'
+# Same as FILE_LIB with a forward-slash root, for the fallback cases whose
+# intended defect would otherwise be masked by the Windows escape reset.
+FILE_LIB_POSIX = FILE_LIB.replace("{root}", "{posix_root}")
 # An unescaped Windows path in a basic string: `\U` needs eight hex digits and
 # `\a`/`\_` are no escape, so Go's TOML decode fails and `loadSkillsEnv`
 # resets the whole config to the defaults. The shape is platform independent.
@@ -2378,6 +2389,7 @@ def file_status(name: str, *mutators, args=("skills", "status", "--target", "ope
 
 
 FILE_STATUS_PATHS = 'library_dir = "{root}/alt/library"\nbase_dir = "{root}/alt/base"\n'
+FILE_STATUS_PATHS_POSIX = FILE_STATUS_PATHS.replace("{root}", "{posix_root}")
 
 
 FILE_DOCTOR_ALL = (
@@ -2385,6 +2397,7 @@ FILE_DOCTOR_ALL = (
     'cache_dir = "{root}/cfg/cache"\nprofiles_dir = "{root}/cfg/profiles"\n'
     'base_dir = "{root}/cfg/base"\n[vcs]\nenabled = false\n'
 )
+FILE_DOCTOR_ALL_POSIX = FILE_DOCTOR_ALL.replace("{root}", "{posix_root}")
 
 
 CASES = (
@@ -5737,14 +5750,14 @@ CASES = (
     ),
     *(
         file_list("fallback_syntax_error_global_json", file_cfg(FILE_GLOBAL, "library_dir = \n"), fallback=True),
-        file_list("fallback_syntax_error_project", file_cfg(FILE_GLOBAL, FILE_LIB), file_cfg(FILE_PROJECT, "[unclosed\n"), args=("skills", "list"), fallback=True),
+        file_list("fallback_syntax_error_project", file_cfg(FILE_GLOBAL, FILE_LIB_POSIX), file_cfg(FILE_PROJECT, "[unclosed\n"), args=("skills", "list"), fallback=True),
         file_list("fallback_invalid_utf8_json", file_cfg(FILE_GLOBAL, b'library_dir = "\xff"\n'), fallback=True),
-        file_list("fallback_duplicate_key_json", file_cfg(FILE_GLOBAL, FILE_LIB + FILE_LIB), fallback=True),
-        file_list("fallback_leap_second_json", file_cfg(FILE_GLOBAL, FILE_LIB + "when = 1979-05-27T07:32:60Z\n"), fallback=True),
+        file_list("fallback_duplicate_key_json", file_cfg(FILE_GLOBAL, FILE_LIB_POSIX + FILE_LIB_POSIX), fallback=True),
+        file_list("fallback_leap_second_json", file_cfg(FILE_GLOBAL, FILE_LIB_POSIX + "when = 1979-05-27T07:32:60Z\n"), fallback=True),
         file_list("fallback_relative_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "alt/library"\n'), fallback=True),
-        file_list("fallback_unclean_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/library/"\n'), fallback=True),
+        file_list("fallback_unclean_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "{posix_root}/alt/library/"\n'), fallback=True),
         file_list("fallback_empty_library_json", file_cfg(FILE_GLOBAL, 'library_dir = ""\n'), fallback=True),
-        file_list("fallback_dotdot_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/../alt/library"\n'), fallback=True),
+        file_list("fallback_dotdot_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "{posix_root}/alt/../alt/library"\n'), fallback=True),
         file_list("fallback_native_only_env_json", file_cfg(FILE_GLOBAL, FILE_LIB), lambda root, env: env.__setitem__("SYMBRAIN_SKILLS_LIBRARY_DIR", str(root / "alt/library")), fallback=True),
     ),
     *(
@@ -5767,10 +5780,10 @@ CASES = (
         file_doctor("targets_and_capabilities_inert_json", file_cfg(FILE_GLOBAL, '[[targets]]\nname = "x"\nskill_root_user = "/tmp/x"\n[capabilities.x]\nfoo = true\n' + 'base_dir = "{root}/cfg/base"\n')),
         file_doctor("no_files_default_json"),
         file_doctor("fallback_syntax_error_global_json", file_cfg(FILE_GLOBAL, "library_dir = \n"), _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used"), fallback=True),
-        file_doctor("fallback_syntax_error_project_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), file_cfg(FILE_PROJECT, "[unclosed\n"), fallback=True),
+        file_doctor("fallback_syntax_error_project_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL_POSIX), file_cfg(FILE_PROJECT, "[unclosed\n"), fallback=True),
         file_doctor("fallback_invalid_utf8_json", file_cfg(FILE_GLOBAL, b'library_dir = "\xff"\n'), fallback=True),
         file_doctor("fallback_leap_second_json", file_cfg(FILE_GLOBAL, "when = 1979-05-27T07:32:60Z\n"), fallback=True),
-        file_doctor("fallback_line_separator_value_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/a\\u2028b"\n'), fallback=True),
+        file_doctor("fallback_line_separator_value_json", file_cfg(FILE_GLOBAL, 'library_dir = "{posix_root}/a\\u2028b"\n'), fallback=True),
         file_doctor("fallback_unknown_flag_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), args=("skills", "doctor", "--bogus"), fallback=True),
     ),
     *(
@@ -5800,9 +5813,9 @@ CASES = (
         file_status("directory_config_no_env_json", _status_cfg_dir_as_config_toml, unrelocated=True),
         file_status("dir_is_file_config_no_env_json", _status_cfg_dir_is_file, unrelocated=True, posix_only=True),
         file_status("fallback_syntax_error_json", file_cfg(FILE_GLOBAL, "library_dir = \n"), fallback=True),
-        file_status("fallback_syntax_error_project", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), file_cfg(FILE_PROJECT, "[unclosed\n"), args=("skills", "status", "--target", "opencode"), fallback=True),
+        file_status("fallback_syntax_error_project", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS_POSIX), file_cfg(FILE_PROJECT, "[unclosed\n"), args=("skills", "status", "--target", "opencode"), fallback=True),
         file_status("fallback_invalid_utf8_json", file_cfg(FILE_GLOBAL, b'library_dir = "\xff"\n'), fallback=True),
-        file_status("cache_dir_moved_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS + 'cache_dir = "{root}/alt/cache"\n'), fallback=True),
+        file_status("cache_dir_moved_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS_POSIX + 'cache_dir = "{posix_root}/alt/cache"\n'), fallback=True),
         file_status("fallback_relative_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "alt/library"\n'), fallback=True),
         file_status("fallback_other_target_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), args=("skills", "status", "--target", "claude", "--json"), fallback=True),
         file_status("fallback_no_target_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), args=("skills", "status", "--json"), fallback=True),
