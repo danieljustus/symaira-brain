@@ -14,6 +14,7 @@ import json
 import os
 import platform
 import re
+import stat
 import subprocess
 import sys
 import time
@@ -30,6 +31,21 @@ legacy = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = legacy
 spec.loader.exec_module(legacy)
 from harness_health_contract import SEEDED_HEALTH_PREFIX  # noqa: E402  (needs scripts/ on sys.path)
+
+ORIGINAL_MANIFEST = legacy.get_fs_manifest
+
+
+def get_fs_manifest(root):
+    """Include FIFOs without opening them; replacement/removal must be visible."""
+    manifest = ORIGINAL_MANIFEST(root)
+    for path in root.rglob("*"):
+        metadata = path.lstat()
+        if stat.S_ISFIFO(metadata.st_mode):
+            manifest[path.relative_to(root).as_posix()] = ("fifo", metadata.st_mode & 0o777, b"")
+    return manifest
+
+
+legacy.get_fs_manifest = get_fs_manifest
 
 # Seeded cases bound every probe: a hang must fail instead of waiting for the
 # shared harness timeout. Rust itself caps a probe at 5 s.
@@ -150,6 +166,16 @@ def project_corpus_cases():
             cases.append(legacy.Case(
                 name, project_cases.expand_inline(template, value),
                 setup=project_cases.make_setup(ops, seed_dir, seeded), mutating=True, posix_only=True))
+    for label, ops in project_cases.SYNC_TARGET_SHAPES:
+        for suffix, flags in [("plain", ()), ("json", ("--json",)),
+                              ("dry", ("--dry-run",)),
+                              ("dry-json", ("--dry-run", "--json"))]:
+            name = f"cfgh-sync-target-{label}-{suffix}"
+            PROJECT_RECORD[name] = (ops, None, False)
+            cases.append(legacy.Case(
+                name, ("sync", *flags, "--project", ".", "claude"),
+                setup=project_cases.make_setup(ops, None, False),
+                mutating=True, posix_only=True))
     return cases
 
 
@@ -292,6 +318,11 @@ def main():
     # replay the legacy suite instead of this corpus, then exit 0 with no report.
     legacy.ensure_external_environment(__file__)
     args = sys.argv[1:]
+    case_prefix = None
+    if "--case-prefix" in args:
+        at = args.index("--case-prefix")
+        case_prefix = args[at + 1]
+        del args[at:at + 2]
     fixture_path = None
     if "--record-fixture" in args:
         at = args.index("--record-fixture")
@@ -308,11 +339,14 @@ def main():
         project_fixture_path = args[at + 1]
         del args[at:at + 2]
     if len(args) != 3:
-        raise SystemExit("usage: replay.py GO_BINARY RUST_BINARY REPORT_JSON [--record-fixture PATH] [--record-parse-fixture PATH] [--record-project-fixture PATH]")
+        raise SystemExit("usage: replay.py GO_BINARY RUST_BINARY REPORT_JSON [--record-fixture PATH] [--record-parse-fixture PATH] [--record-project-fixture PATH] [--case-prefix PREFIX]")
     go, rust, report = args
     cases = selected_cases()
     assert len({case.name for case in cases}) == len(cases)
     assert sum(case.name.startswith("cfgh-") for case in cases) >= 100, "new corpus shrank"
+    if case_prefix is not None:
+        cases = [case for case in cases if case.name.startswith(case_prefix)]
+        assert cases, f"no cases match {case_prefix!r}"
     legacy.CASES = tuple(replace(case, env_overrides={
         **(case.env_overrides or {}), "SYMBRAIN_GO_BINARY": str(ROOT / "absent-go-fallback")
     }) for case in cases)
@@ -353,18 +387,21 @@ def main():
     assert not mismatched or code, "byte mismatch not reflected in the harness verdict"
     seeded_elapsed = [o["elapsed_s"] for case, pair in zip(executed, pairs) for o in pair
                       if case.name.startswith("cfgh-seeded-")]
-    assert seeded_elapsed, "seeded harness cases did not run"
-    assert max(seeded_elapsed) < SEEDED_PROBE_BUDGET_S, f"seeded probe took {max(seeded_elapsed):.2f}s"
+    if case_prefix is None:
+        assert seeded_elapsed, "seeded harness cases did not run"
+    if seeded_elapsed:
+        assert max(seeded_elapsed) < SEEDED_PROBE_BUDGET_S, f"seeded probe took {max(seeded_elapsed):.2f}s"
     data = {
         "go_oracle_ref": ORACLE_REF,
         "candidate_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "candidate_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT)),
         "runtime": platform.platform(), "selected": len(cases), "executed": len(executed),
+        "case_prefix": case_prefix,
         "skipped": skip_report, "exit": code, "matches": code == 0, "mismatched": mismatched,
         "new_cases": sum(case.name.startswith("cfgh-") for case in executed),
         "parse_cases": sum(case.name.startswith("cfgh-parse-") for case in executed),
         "seeded_cases": sum(case.name.startswith("cfgh-seeded-") for case in executed),
-        "max_seeded_elapsed_s": round(max(seeded_elapsed), 3),
+        "max_seeded_elapsed_s": round(max(seeded_elapsed, default=0), 3),
         "legacy_cases": sum(not case.name.startswith("cfgh-") for case in executed),
         "observations": [{"binary": o["binary"], "exit": o["exit"],
                           "stdout_sha256": hashlib.sha256(o["stdout"]).hexdigest(),

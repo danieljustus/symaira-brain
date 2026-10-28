@@ -21,7 +21,7 @@ mod coverage;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::os::unix::fs::{MetadataExt, PermissionsExt, symlink};
+use std::os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt, symlink};
 use std::path::Path;
 use std::process::Command;
 
@@ -103,6 +103,16 @@ fn build_layout(project: &Path, case: &Value) {
                 std::fs::create_dir_all(path.parent().unwrap()).unwrap();
                 symlink(op[2].as_str().unwrap(), &path).unwrap();
             }
+            "fifo" => {
+                assert!(
+                    Command::new("mkfifo")
+                        .arg(&path)
+                        .status()
+                        .unwrap()
+                        .success()
+                );
+                std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
+            }
             "mode" => {}
             other => panic!("unknown layout op {other}"),
         }
@@ -160,6 +170,8 @@ fn manifest(root: &Path) -> BTreeMap<Vec<u8>, (String, u32, String)> {
                     out.insert(rel, ("dir".into(), mode, String::new()));
                 }
                 walk(root, &path, out);
+            } else if file_type.is_fifo() {
+                out.insert(rel, ("fifo".into(), mode, String::new()));
             } else if file_type.is_file() {
                 let content = std::fs::read(&path)
                     .unwrap_or_else(|error| format!("<read error: {error}>").into_bytes());
@@ -222,6 +234,22 @@ fn go_recorded_project_path_shapes_are_native_without_a_go_fallback() {
         names(other_cases),
         "darwin and linux fixtures must cover the same cases"
     );
+    replay_cases(cases);
+}
+
+#[test]
+fn go_recorded_sync_targets_reject_symlinks_and_special_files() {
+    let fixture: Value =
+        serde_json::from_str(include_str!("fixtures/sync_target_go_shapes.json")).unwrap();
+    let project_fixture: Value = serde_json::from_str(FIXTURE).unwrap();
+    assert_eq!(fixture["go_oracle_ref"], project_fixture["go_oracle_ref"]);
+    let cases = fixture["cases"].as_array().unwrap();
+    assert_eq!(cases.len(), 16);
+    assert!(cases.iter().all(|case| case["exit"] == 1));
+    replay_cases(cases);
+}
+
+fn replay_cases(cases: &[Value]) {
     for case in cases {
         let name = case["name"].as_str().unwrap();
         let root = TempDir::new().unwrap();
@@ -250,8 +278,21 @@ fn go_recorded_project_path_shapes_are_native_without_a_go_fallback() {
             .env("TZ", "UTC")
             .current_dir(root_path.join("project"))
             .args(&args)
-            .output()
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
             .unwrap();
+        let mut child = output;
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(8);
+        while child.try_wait().unwrap().is_none() {
+            if std::time::Instant::now() >= deadline {
+                child.kill().unwrap();
+                let output = child.wait_with_output().unwrap();
+                panic!("{name}: process timed out (possible FIFO read): {output:?}");
+            }
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        let output = child.wait_with_output().unwrap();
         let actual = manifest(&root_path);
         restore_modes(&root_path);
         assert_eq!(
