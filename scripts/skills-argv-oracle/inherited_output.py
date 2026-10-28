@@ -46,12 +46,13 @@ SOURCE_HASHES = {
     # and its Go-fallback route are gone). `run_native`'s early output return,
     # `peek_command` and `is_output_command` are untouched and qualify() still
     # compares them byte-for-byte with the parent.
-    # Reviewed after #764 SKL-017: the only change to symbrain-cli/src/lib.rs is
-    # `go_json`, which additionally escapes U+2028/U+2029 like Go's
-    # encoding/json (string content only). `run_native`'s early output return,
-    # `peek_command` and `is_output_command` are untouched; qualify() still
-    # compares them byte-for-byte with the parent.
-    CLI: "dd3d87c90446e1e1d83c436551a0f446290bf723c9d4757f8566b672ceb8c89b",
+    # Reviewed after MEM-CLI-005 (#959) and #764 SKL-017 together: lib.rs only
+    # adds the guarded native memory-sync dispatch arm and changes `go_json`,
+    # which additionally escapes U+2028/U+2029 like Go's encoding/json (string
+    # content only). `early_output_return`, `peek_command` and
+    # `is_output_command` remain byte-identical to the immutable parent;
+    # qualify() still checks that equality after the complete owner digests.
+    CLI: "9c8cf5e04f54bbe9590c0e95d652f479f9d44bbad6682ec16814e0c109fbb25c",
     # Reviewed after #764 slice a: symbrain-core/src/lib.rs only gains
     # `pub mod go_json_float;` (the Go float64 parser used by the raw Skills
     # layer). No owner early-output block or inherited error text changes.
