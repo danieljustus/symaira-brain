@@ -35,7 +35,10 @@ fn fixture() -> (Vec<u8>, Vec<u8>) {
 }
 fn pem(blob: &[u8]) -> Vec<u8> {
     format!(
-        concat!("-----BEGIN OPENSSH ", "PRIVATE KEY-----\n{}\n-----END OPENSSH PRIVATE KEY-----\n"),
+        concat!(
+            "-----BEGIN OPENSSH ",
+            "PRIVATE KEY-----\n{}\n-----END OPENSSH PRIVATE KEY-----\n"
+        ),
         STANDARD.encode(blob)
     )
     .into_bytes()

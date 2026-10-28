@@ -13,7 +13,7 @@ import (
 // own key decoding, public-key derivation and signatures.
 func parseOllamaKey(data []byte) (ed25519.PrivateKey, []byte, error) {
 	fail := func() (ed25519.PrivateKey, []byte, error) { return nil, nil, ollamaKeyError() }
-	if len(data) > maxCredentialFileBytes || !bytes.HasPrefix(data, []byte("-----BEGIN OPENSSH " + "PRIVATE KEY-----\n")) {
+	if len(data) > maxCredentialFileBytes || !bytes.HasPrefix(data, []byte("-----BEGIN OPENSSH "+"PRIVATE KEY-----\n")) {
 		return fail()
 	}
 	block, rest := pem.Decode(data)
