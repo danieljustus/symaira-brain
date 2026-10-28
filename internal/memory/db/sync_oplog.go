@@ -18,7 +18,7 @@ func (db *DB) GetDeletedSince(since time.Time) ([]DeletedMemory, error) {
 	rows, err := db.conn.Query(`
 		SELECT o.memory_id, o.ts FROM sync_oplog o
 		WHERE o.op = 'delete'
-		  AND o.ts > ?
+		  AND symbrain_sync_time(o.ts) > symbrain_sync_time(?)
 		  AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id)`,
 		since)
 	if err != nil {
@@ -50,17 +50,17 @@ func (db *DB) GetDeletedSinceCursorID(since time.Time, lastID string, limit int)
 	if lastID == "" {
 		query = `SELECT o.memory_id, o.ts FROM sync_oplog o
 			WHERE o.op = 'delete'
-			  AND o.ts > ?
+			  AND symbrain_sync_time(o.ts) > symbrain_sync_time(?)
 			  AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id)
-			ORDER BY o.ts ASC, o.memory_id ASC
+			ORDER BY symbrain_sync_time(o.ts) ASC, o.memory_id ASC
 			LIMIT ?`
 		args = []any{since, limit}
 	} else {
 		query = `SELECT o.memory_id, o.ts FROM sync_oplog o
 			WHERE o.op = 'delete'
-			  AND (o.ts > ? OR (o.ts = ? AND o.memory_id > ?))
+			  AND (symbrain_sync_time(o.ts) > symbrain_sync_time(?) OR (symbrain_sync_time(o.ts) = symbrain_sync_time(?) AND o.memory_id > ?))
 			  AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id)
-			ORDER BY o.ts ASC, o.memory_id ASC
+			ORDER BY symbrain_sync_time(o.ts) ASC, o.memory_id ASC
 			LIMIT ?`
 		args = []any{since, since, lastID, limit}
 	}
@@ -199,7 +199,7 @@ func (db *DB) GetRelayBlobsSince(since time.Time, limit int) ([]RelayBlob, error
 		limit = 50000
 	}
 	rows, err := db.conn.Query(
-		"SELECT id, updated_at, blob FROM sync_relay WHERE updated_at > ? ORDER BY updated_at ASC LIMIT ?",
+		"SELECT id, updated_at, blob FROM sync_relay WHERE symbrain_sync_time(updated_at) > symbrain_sync_time(?) ORDER BY symbrain_sync_time(updated_at) ASC LIMIT ?",
 		since, limit)
 	if err != nil {
 		return nil, err

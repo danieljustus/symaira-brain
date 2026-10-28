@@ -1,4 +1,6 @@
 //! Offline CLI expiry regressions; child HOME never sees owner credentials.
+use super::coverage;
+
 use crate::transport::{FixtureTransport, Response};
 use std::sync::Arc;
 
@@ -57,6 +59,7 @@ fn kimi_cli_expiry() {
                 "--nocapture",
             ])
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", home.path())
             .env("USERPROFILE", home.path())
             .env(

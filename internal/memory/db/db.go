@@ -53,6 +53,9 @@ func Open(cfg *config.Config) (*DB, error) {
 		}
 	}
 
+	if err := registerSyncTime(); err != nil {
+		return nil, fmt.Errorf("register sync timestamp comparison: %w", err)
+	}
 	conn, err := sqlitekit.Open(dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open sqlite database: %w", err)

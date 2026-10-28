@@ -69,6 +69,22 @@ complete historical repair or close #649/#758. See
 `docs/adr/memory-wal-open-race-803.md` and the preserved `memory-open-race-803`
 evidence.
 
+#907 (Windows `Store::open` BUSY in the concurrent-open test): Go's opener takes
+no writer for a current store (`sqlitekit.Migrate` only reads `schema_migrations`
+once every migration is recorded), while the native opener ran the whole
+migration under `BEGIN IMMEDIATE` on every open, so concurrent openers queued on
+the single SQLite writer and could exhaust the five-second budget on a slow
+Windows runner (the failing job's suite took 362 s). `configure` now first proves
+the migration is a no-op under `PRAGMA query_only` in a deferred read snapshot
+and reserves the writer only for pending or repairable state; any failure falls
+back to the unchanged `BEGIN IMMEDIATE` path, which reproduces the real result.
+The FTS integrity-check (itself a write) is replaced in that read-only admission
+by an exact `memories`/`memories_fts_docsize` rowid-parity check; stores that
+fail it still take the integrity-check/rebuild path. Control:
+`open_of_current_store_does_not_wait_for_a_retained_writer` (red before, green
+after). The Windows failure itself was never reproduced on macOS; native
+three-OS CI is the remaining evidence.
+
 The isolated historical/default/WAL integration normally merges main 5e and the
 independently approved 2fe WAL prerequisite. At source `1fc5910`, the full
 allocated Linux driver passes 392 tests with no failures/ignores, all 28
@@ -729,6 +745,57 @@ Still on Go: `skills sync` with any config, `skills status` shapes listed under 
 not exist in Rust; `skills doctor` is SKL-015, merged in #950). The Windows run of this slice rests on a
 `cfg` review; native Linux/macOS/Windows CI at the candidate head remains required.
 
+### Skills log read shapes (#764 slice g)
+
+`symbrain skills log` no longer routes to Go for symlinked, missing or unreadable log paths, and
+its line decoding now follows `encoding/json` instead of a derived serde struct. Go's
+`cmdSkillsLog` takes the path from `events.DefaultPath()` (`~/.local/share/symskills/events.jsonl`
+plus the rotated `events.1.jsonl`, `.` when there is no home), reads both with `os.ReadFile`,
+decodes each line with `json.Unmarshal` and skips a line on any error; the loaded config is only
+used for the home directory, so no config file or `SYMSKILLS_*`/`SYMBRAIN_SKILLS_*` variable can
+change a byte. Native therefore covers every config shape and:
+
+- **Symlinks** at the file or any ancestor follow the kernel like `os.ReadFile` (valid link,
+  dangling link or ancestor = absent segment, link to a directory).
+- **Read failures** replay Go's `*PathError` text on POSIX: `open <p>: permission denied |
+  not a directory | too many levels of symbolic links`, `read <p>: is a directory`
+  (`symbrain skills log: read operation log: ...`, exit 1). Only when the printed path is what Go
+  prints: defined, lexically clean UTF-8 home (Go cleans `filepath.Join`, falls back to `.`).
+- **Flags** mirror Go's `normalizeFlags` + `flag` for `-skill/-target/-scope/-limit/-l` in both
+  spellings; limits are plain decimals only (Go parses with base 0, so `010`, `0x2`, `1_0` stay on
+  Go), as are `-h`, unknown flags, positionals, `--`, a missing value and non-UTF-8 arguments.
+- **Line decoding** (`install/event_decode.rs`): a Go-grammar scan decides each line. Invalid JSON,
+  trailing data, non-objects and whitespace-only lines are skipped as in Go; known fields must be
+  strings. Lines whose Go outcome is not certain are handed to Go: case-folded or non-ASCII keys,
+  duplicate keys, `null`/non-string values, a top-level `null`, lone surrogates, invalid UTF-8,
+  nesting deeper than 200, and a device/FIFO segment.
+
+Two existing defects in the previous native path are fixed by this slice: the old reader accepted
+arrays as events (serde tuple form), dropped `null`/duplicate/case-folded lines that Go keeps and
+did not repair invalid UTF-8; and the shared `go_json` helper did not escape U+2028/U+2029 like Go's
+`json.Encoder` (it now does, which also corrects other native reports that carry those characters).
+`skills list` still reads the same log through the lax `read_events`; that residual is separate.
+
+Stays on Go: the shapes above plus a home with `.`/`..` segments (`filepath.Join` cleans them
+lexically, the kernel resolves `..` through symlinks), an unclean or undefined home when a
+read error text is needed, and any errno whose Go text is not in the table.
+
+Evidence: 80 `skills_status_config_log_*` cases in `scripts/rust-differential.py` (56 native with
+the Go route removed and the fixture root asserted unchanged, 24 must-fallback) match the Go 1.26.7
+binary built from `HEAD` 033f1b2fa; the whole `skills_status_config_*` family (285 cases: 169
+native, 116 fallback) and the full differential (789 cases, `make parity-smoke`) pass.
+`readonly_snapshot` now records an unreadable (mode 000) fixture file instead of crashing so
+`chmod 000` log shapes can be native cases. 22 new source mutants in
+`scripts/skills-status-config-oracle/run.py` (`log-*`; the oracle now mutates four source files)
+are killed (61 of 61 mutants of the whole oracle killed). Rust tests: `skills_log_exact_native.rs` (new), `skills_log_native.rs` (the symlink,
+parent-is-file and unreadable tests now assert native Go text instead of fallback) and
+`event_tests.rs` (`read_events_go_exact`).
+
+Still on Go: `skills sync` with any config, `skills status` shapes listed under #764 slice c, and
+every config-file shape that needs a TOML parse (a Go-exact TOML parser does not exist in Rust).
+The Windows run of this slice rests on `cargo clippy --target x86_64-pc-windows-gnu` and a `cfg`
+review (read-error replay is POSIX-only; every Windows read failure stays on Go); native
+Linux/macOS/Windows CI at the candidate head remains required.
 ### Skills config TOML decode foundation (#764 slice f, SKL-018)
 
 Every config-file shape of `skills status/doctor/list/sync` still routes to Go because

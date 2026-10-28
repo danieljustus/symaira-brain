@@ -5,8 +5,8 @@ use std::time::{Duration, Instant};
 
 use fs2::FileExt;
 use symbrain_skills::install::{
-    EVENT_MAX_BYTES, InstallOptions, OperationEvent, install_copy, read_events, record_event_at,
-    uninstall,
+    EVENT_MAX_BYTES, EventReadFailure, InstallOptions, OperationEvent, install_copy, read_events,
+    read_events_go_exact, record_event_at, uninstall,
 };
 
 const FIXED_TIMESTAMP: &str = "2026-09-07T12:34:56Z";
@@ -255,5 +255,79 @@ fn install_and_uninstall_success_and_refusal_events_are_recorded() {
                 .unwrap_or_default()
                 .is_empty()
         );
+    }
+}
+
+fn exact(lines: &[&[u8]]) -> Result<Vec<OperationEvent>, EventReadFailure> {
+    let dir = tempfile::tempdir().expect("event directory");
+    let path = dir.path().join("events.jsonl");
+    fs::write(&path, lines.join(&b'\n')).expect("event log");
+    read_events_go_exact(&path, None, None)
+}
+
+#[test]
+fn go_exact_reader_skips_what_go_skips() {
+    let records = exact(&[
+        b"",
+        b" \x0b\x0c ",
+        b"not json",
+        b"[1,2]",
+        b"\"text\"",
+        b"7",
+        b"true",
+        b"{\"ts\":\"x\"} trailing",
+        b"{\"ts\":",
+        b"{\"a\":01}",
+        b"{\"ts\":\"a\",\"nested\":{\"k\":[1,2.5e999,-0,null,\"\\u00e9\"]}}",
+    ])
+    .expect("decidable lines");
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].ts, "a");
+}
+
+#[test]
+fn go_exact_reader_hands_ambiguous_lines_to_go() {
+    for line in [
+        &b"{\"TS\":\"a\"}"[..],
+        b"{\"ts\":\"a\",\"ts\":\"b\"}",
+        b"{\"ts\":null}",
+        b"{\"ts\":5}",
+        b"null",
+        b"{\"ts\":\"\\ud800\"}",
+        b"{\"ts\":\"\xff\"}",
+        "{\"\u{17f}kill\":\"a\"}".as_bytes(),
+    ] {
+        assert!(
+            matches!(exact(&[line]), Err(EventReadFailure::Divergent)),
+            "{}",
+            String::from_utf8_lossy(line)
+        );
+    }
+    let deep = format!("{{\"x\":{}{}}}", "[".repeat(300), "]".repeat(300));
+    assert!(matches!(
+        exact(&[deep.as_bytes()]),
+        Err(EventReadFailure::Divergent)
+    ));
+}
+
+#[test]
+fn go_exact_reader_reports_the_failing_operation() {
+    let dir = tempfile::tempdir().expect("event directory");
+    let path = dir.path().join("events.jsonl");
+    fs::create_dir(&path).expect("directory as log");
+    match read_events_go_exact(&path, None, None) {
+        #[cfg(unix)]
+        Err(EventReadFailure::Io {
+            op, path: failed, ..
+        }) => {
+            assert_eq!(op, "read");
+            assert_eq!(failed, path);
+        }
+        other => {
+            #[cfg(not(unix))]
+            let _ = other;
+            #[cfg(unix)]
+            panic!("unexpected {other:?}");
+        }
     }
 }

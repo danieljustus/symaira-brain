@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 
 use super::core::install_path_for;
 use super::destination::{effective_mode, scope_name};
+use super::event_decode::LineDecode;
 use super::{InstallOptions, InstallResult};
 use crate::model::SkillError;
 use fs2::FileExt;
@@ -84,6 +85,84 @@ pub fn read_events(
             }
             let Ok(event) = serde_json::from_slice::<OperationEvent>(line) else {
                 continue;
+            };
+            if skill.is_some_and(|value| event.skill != value)
+                || target.is_some_and(|value| event.target != value)
+            {
+                continue;
+            }
+            events.push(event);
+        }
+    }
+    Ok(events)
+}
+
+/// Why [`read_events_go_exact`] could not reproduce the Go reader.
+#[derive(Debug)]
+pub enum EventReadFailure {
+    /// Go's `os.ReadFile` fails the same way: `op` is `open` or `read`.
+    Io {
+        /// Go `PathError` operation.
+        op: &'static str,
+        /// Segment that failed.
+        path: PathBuf,
+        /// Underlying operating-system error.
+        source: std::io::Error,
+    },
+    /// The input holds a shape whose Go outcome is not reproduced natively
+    /// (device or FIFO segment, ambiguous JSON line); use the Go reader.
+    Divergent,
+}
+
+/// Reads the rotated segment followed by the current segment exactly like
+/// Go's `events.Logger.Read`: symlinks are followed, a missing segment is
+/// skipped, any other open or read failure is reported with its operation,
+/// and every line is decoded with `encoding/json` semantics (see
+/// `event_decode`).
+///
+/// # Errors
+///
+/// [`EventReadFailure::Io`] for the failure Go reports and
+/// [`EventReadFailure::Divergent`] when the outcome is not certain.
+pub fn read_events_go_exact(
+    path: &Path,
+    skill: Option<&str>,
+    target: Option<&str>,
+) -> Result<Vec<OperationEvent>, EventReadFailure> {
+    use std::io::Read;
+    let mut events = Vec::new();
+    for segment in [rotated_event_path(path), path.to_owned()] {
+        match fs::metadata(&segment) {
+            Ok(metadata) if !metadata.is_file() && !metadata.is_dir() => {
+                return Err(EventReadFailure::Divergent);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+            _ => {}
+        }
+        let mut file = match fs::File::open(&segment) {
+            Ok(file) => file,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(source) => {
+                return Err(EventReadFailure::Io {
+                    op: "open",
+                    path: segment,
+                    source,
+                });
+            }
+        };
+        let mut bytes = Vec::new();
+        if let Err(source) = file.read_to_end(&mut bytes) {
+            return Err(EventReadFailure::Io {
+                op: "read",
+                path: segment,
+                source,
+            });
+        }
+        for line in bytes.split(|byte| *byte == b'\n') {
+            let event = match super::event_decode::decode_line(line) {
+                LineDecode::Skip => continue,
+                LineDecode::Unsure => return Err(EventReadFailure::Divergent),
+                LineDecode::Event(event) => *event,
             };
             if skill.is_some_and(|value| event.skill != value)
                 || target.is_some_and(|value| event.target != value)

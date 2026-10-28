@@ -31,11 +31,31 @@ pub(super) fn recognize(conn: &Connection) -> Result<(), StoreError> {
     Ok(())
 }
 
-pub(super) fn porter(conn: &Connection, resource: &str, pending: bool) -> Result<(), StoreError> {
+pub(super) fn porter(
+    conn: &Connection,
+    resource: &str,
+    pending: bool,
+    check_only: bool,
+) -> Result<(), StoreError> {
     recognize(conn)?;
     let current = sql::object(conn, "memories_fts")?.is_some_and(|(_, definition)| {
         sql::canonical(&definition).contains("tokenize='porter unicode61'")
     });
+    if check_only {
+        // FTS5's integrity-check is itself a write, so the read-only admission
+        // proves the index covers exactly the content rows through its
+        // docsize shadow instead. Anything else is repaired under the writer.
+        let covered: bool = conn.query_row(
+            "SELECT NOT EXISTS(SELECT 1 FROM memories WHERE rowid NOT IN (SELECT id FROM memories_fts_docsize)) AND NOT EXISTS(SELECT 1 FROM memories_fts_docsize WHERE id NOT IN (SELECT rowid FROM memories))",
+            [],
+            |row| row.get(0),
+        )?;
+        return if !pending && current && covered {
+            Ok(())
+        } else {
+            Err(StoreError::Invalid("memories_fts needs repair".into()))
+        };
+    }
     if pending || !current {
         conn.execute_batch(resource)?;
     }
