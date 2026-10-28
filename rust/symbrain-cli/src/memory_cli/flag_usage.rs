@@ -88,6 +88,7 @@ pub(super) fn write(verb: &str, stderr: &mut dyn Write) {
                 "    \tdatabase path override (default: the configured memory database)\n",
             )
         }
+        "sync" => super::help::MEMORY_SYNC_USAGE,
         _ => unreachable!("known memory verb"),
     };
     let _ = write!(stderr, "{text}");

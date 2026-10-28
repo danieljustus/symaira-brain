@@ -24,9 +24,15 @@ mod kind;
 use help::{
     MEMORY_DELETE_USAGE, MEMORY_DELETE_USAGE_ERROR, MEMORY_LIST_USAGE, MEMORY_RULES_USAGE,
     MEMORY_SEARCH_USAGE, MEMORY_SEARCH_USAGE_ERROR, MEMORY_SET_USAGE, MEMORY_SET_USAGE_ERROR,
-    MEMORY_SYNC_REMOTE_REQUIRED, MEMORY_SYNC_USAGE, MEMORY_USAGE, QUERY_LOG_USAGE,
+    MEMORY_USAGE, QUERY_LOG_USAGE,
 };
 mod routing;
+mod sync;
+mod sync_decode;
+mod sync_entry;
+mod sync_http;
+mod sync_native;
+mod sync_pull;
 pub(crate) use routing::requires_go_fallback;
 mod paths;
 use paths::{open_store, resolve_db_path};
@@ -50,6 +56,22 @@ pub fn run(
     format: OutputFormat,
 ) -> u8 {
     run_with_stdout(args, stdout, stderr, format, false)
+}
+
+/// Whether `args` are a `memory sync` invocation.
+pub(crate) fn is_sync(args: &[OsString]) -> bool {
+    args.first().is_some_and(|verb| verb == "sync")
+}
+
+/// Runs `memory sync`; `None` leaves the invocation to the shipped
+/// implementation.
+pub(crate) fn run_sync(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+) -> Option<u8> {
+    sync::run(&args[1..], stdout, stderr, format)
 }
 
 pub(super) fn run_with_stdout(
@@ -78,13 +100,10 @@ pub(super) fn run_with_stdout(
         "delete" => run_delete(rest, stdout, stderr, format),
         "rules" => run_rules(rest, stdout, stderr, format),
         "query-log" => run_query_log(rest, stdout, stderr, format),
-        // The bare `memory sync` shape. The shipped implementation refuses
-        // without a remote and prints its help; real synchronisation work never
-        // arrives here, because the gate keeps it on Go.
-        "sync" => {
-            let _ = write!(stderr, "{MEMORY_SYNC_REMOTE_REQUIRED}{MEMORY_SYNC_USAGE}");
-            exit::USAGE
-        }
+        // Reached only through direct calls: the CLI routes `sync` through
+        // `run_sync`, which can hand an invocation to the shipped
+        // implementation. Fail closed instead of synchronising here.
+        "sync" => sync::run(rest, stdout, stderr, format).unwrap_or(exit::GENERIC),
         _ => {
             let _ = writeln!(
                 stderr,
@@ -97,5 +116,9 @@ pub(super) fn run_with_stdout(
     }
 }
 
+#[cfg(test)]
+mod sync_pull_tests;
+#[cfg(test)]
+mod sync_tests;
 #[cfg(test)]
 mod tests;
