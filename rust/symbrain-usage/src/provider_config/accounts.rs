@@ -136,11 +136,51 @@ pub(crate) fn codex_from_resolved(
 }
 
 fn copilot() -> Provider {
-    let resolved = resolve_env_or_file("COPILOT_ACCESS_TOKEN", copilot_file_token);
+    copilot_with_keychain(copilot_keychain)
+}
+
+fn copilot_with_keychain(read_keychain: impl Fn(&str) -> Option<String>) -> Provider {
+    let cli_failed = std::cell::Cell::new(false);
+    let from_keychain = std::cell::Cell::new(false);
+    let resolved = resolve_env_or_file("COPILOT_ACCESS_TOKEN", || {
+        let path = copilot_cli_path();
+        if !matches!(fs::symlink_metadata(&path), Err(error) if error.kind() == std::io::ErrorKind::NotFound)
+        {
+            let data = read_provider_credentials(&path);
+            if data
+                .as_ref()
+                .is_some_and(|data| !copilot_cli_has_login(data))
+            {
+                return copilot_file_token();
+            }
+            let token = data
+                .and_then(|data| copilot_cli_token_with(&data, &read_keychain))
+                .map(|(token, keychain)| {
+                    from_keychain.set(keychain);
+                    token
+                });
+            cli_failed.set(token.is_none());
+            return token;
+        }
+        copilot_file_token()
+    });
     let (value, error) = match resolved {
-        Ok(found) => (found, None),
+        Ok(found) => (
+            found,
+            cli_failed.get().then(|| COPILOT_CLI_LOGIN_ERROR.to_owned()),
+        ),
         Err(error) => (None, Some(error)),
     };
+    let value = value.map(|(source, token)| {
+        (
+            if from_keychain.get() {
+                "keychain".into()
+            } else {
+                source
+            },
+            token,
+        )
+    });
     copilot_from_resolved(value, error)
 }
 
@@ -202,7 +242,7 @@ pub(crate) fn cursor_from_resolved(
 
 fn kimi() -> Provider {
     let cli_home = kimi_cli_home();
-    let (cli_token, device_id) = kimi_store(&cli_home);
+    let (cli_token, device_id, expiry) = kimi_store(&cli_home);
     let api_key = resolve_env("KIMI_CODE_API_KEY");
     let auth_token = resolve_env("KIMI_AUTH_TOKEN");
     let (api_value, api_failure) = match api_key {
@@ -217,7 +257,7 @@ fn kimi() -> Provider {
         |_| "https://api.kimi.com".into(),
         |value| validated_base(&value, "https://api.kimi.com"),
     );
-    kimi_from_resolved(
+    let mut provider = kimi_from_resolved(
         api_value,
         api_failure,
         cli_token.as_deref(),
@@ -225,7 +265,9 @@ fn kimi() -> Provider {
         auth_failure,
         base_url,
         device_id,
-    )
+    );
+    provider.kimi_cli_expires_at = expiry;
+    provider
 }
 
 pub(crate) fn kimi_from_resolved(

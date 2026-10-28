@@ -49,10 +49,32 @@ pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
     // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and
     // busy_timeout does not retry that invalid snapshot. IMMEDIATE makes the
     // existing bounded timeout wait before any schema inspection instead.
-    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
-    runner::apply(&tx)?;
-    tx.commit()?;
+    //
+    // Go's opener only reads `schema_migrations` once every embedded migration
+    // is recorded, so concurrent openers of a current store never queue on the
+    // single writer. Admit a current store through a read snapshot first, and
+    // reserve the writer only when the migration has something to change.
+    if !current_without_writer(&mut conn) {
+        let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        runner::apply(&tx)?;
+        tx.commit()?;
+    }
     Ok(Store {
         conn: std::sync::Mutex::new(conn),
     })
+}
+
+/// Reports whether the full migration is a no-op, proven under `query_only` in
+/// a deferred read snapshot. Any failure (pending work, busy, incompatible
+/// objects) is "not proven" and the caller takes the writer-admitted path.
+fn current_without_writer(conn: &mut Connection) -> bool {
+    if conn.execute_batch("PRAGMA query_only=ON;").is_err() {
+        return false;
+    }
+    let current = conn
+        .transaction_with_behavior(TransactionBehavior::Deferred)
+        .is_ok_and(|tx| runner::check_current(&tx).is_ok());
+    // The guard rolled back on drop; the connection must be writable again
+    // before any caller (or the fallback migration) uses it.
+    conn.execute_batch("PRAGMA query_only=OFF;").is_ok() && current
 }

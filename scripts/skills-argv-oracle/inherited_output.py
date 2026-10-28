@@ -46,7 +46,12 @@ SOURCE_HASHES = {
     # and its Go-fallback route are gone). `run_native`'s early output return,
     # `peek_command` and `is_output_command` are untouched and qualify() still
     # compares them byte-for-byte with the parent.
-    CLI: "34d8435b6a095e151b6a723b22404a9788a55ba9484ebfd164737477f274dc66",
+    # Reviewed after #764 SKL-017: the only change to symbrain-cli/src/lib.rs is
+    # `go_json`, which additionally escapes U+2028/U+2029 like Go's
+    # encoding/json (string content only). `run_native`'s early output return,
+    # `peek_command` and `is_output_command` are untouched; qualify() still
+    # compares them byte-for-byte with the parent.
+    CLI: "dd3d87c90446e1e1d83c436551a0f446290bf723c9d4757f8566b672ceb8c89b",
     # Reviewed after #764 slice a: symbrain-core/src/lib.rs only gains
     # `pub mod go_json_float;` (the Go float64 parser used by the raw Skills
     # layer). No owner early-output block or inherited error text changes.

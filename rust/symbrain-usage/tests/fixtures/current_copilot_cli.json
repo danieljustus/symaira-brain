@@ -1,0 +1,13 @@
+[
+ {"id":"plain","data":"{\"loggedInUsers\":[{\"host\":\"https://github.com\",\"login\":\"first\"}],\"copilotTokens\":{\"https://github.com:first\":\"fixture-first\"}}","account":"https://github.com:first","token":"fixture-first"},
+ {"id":"auth-tokens","data":"{\"loggedInUsers\":[{\"host\":\"https://github.com\",\"login\":\"first\"}],\"authTokens\":{\"https://github.com:first:github\":{\"token\":\"fixture-current\"}},\"copilotTokens\":{\"https://github.com:first\":\"fixture-old\"}}","account":"https://github.com:first","token":"fixture-current"},
+ {"id":"selected-other-token","data":"{\"loggedInUsers\":[{\"host\":\"https://github.com\",\"login\":\"first\"},{\"host\":\"https://github.com\",\"login\":\"second\"}],\"lastLoggedInUser\":{\"host\":\"https://github.com\",\"login\":\"second\"},\"copilotTokens\":{\"https://github.com:first\":\"fixture-wrong\"}}","account":"https://github.com:second","token":""},
+ {"id":"jsonc","data":"﻿{/* block */\"loggedInUsers\":[{\"host\":\"https://github.com\",\"login\":\"first\",},], // line\n\"ignored\":\"escaped \\\" quote // /* intact */\",\"copilotTokens\":{\"https://github.com:first\":\"fixture-jsonc\",},}","account":"https://github.com:first","token":"fixture-jsonc"},
+ {"id":"ambiguous","data":"{\"loggedInUsers\":[{\"host\":\"https://github.com\",\"login\":\"first\"},{\"host\":\"https://github.com\",\"login\":\"second\"}]}","account":"","token":""},
+ {"id":"unlisted","data":"{\"loggedInUsers\":[{\"host\":\"https://github.com\",\"login\":\"first\"}],\"lastLoggedInUser\":{\"host\":\"https://github.com\",\"login\":\"absent\"}}","account":"","token":""},
+ {"id":"enterprise","data":"{\"loggedInUsers\":[{\"host\":\"https://untrusted.example\",\"login\":\"first\"}]}","account":"","token":""},
+ {"id":"bad-login","data":"{\"loggedInUsers\":[{\"host\":\"https://github.com\",\"login\":\"-a injected\"}]}","account":"","token":""},
+ {"id":"unterminated-comment","data":"{\"loggedInUsers\":[] /* broken","account":"","token":""},
+ {"id":"wrong-type","data":"{\"loggedInUsers\":true}","account":"","token":""},
+ {"id":"signed-out","data":"{}","account":"","token":""}
+]

@@ -36,8 +36,14 @@ process, no `symskills` binary.
    absolute `name` aim `skills_restore`/`skills_history` at any repository the
    caller can write (extraction runs before the dry-run return). Every
    name-derived path therefore goes through `gotext::join`; there is no
-   `Path::join` on a caller-controlled element. The Go quirk for relative `..`
-   names is kept as is (see residuals).
+   `Path::join` on a caller-controlled element. **#918 supersedes restore's
+   deliberate reproduction of relative `..` traversal:** restore now calls the
+   existing skill-name validator before any filesystem access, including dry-run.
+   This requires a lowercase alphanumeric-dash slug (at most 64 bytes, no leading,
+   trailing or consecutive hyphens), rejecting empty, dot, parent, slash,
+   backslash, NUL and absolute names without normalizing them. Absolute restore
+   names are rejected, not re-rooted or allowed to select an outside repository.
+   History retains the original Go join semantics.
 5. **Git exactly as Go.** All repository access goes through `git` on `PATH`
    with `GIT_TERMINAL_PROMPT=0`, `LC_ALL=C`, combined stdout+stderr, the
    `symskills <symskills@localhost>` identity and `commit.gpgsign=false`.
@@ -66,17 +72,24 @@ process, no `symskills` binary.
 * The shared install layer writes `output_digest`/`output_manifest` into
   `.symskills.json` and names its lock files differently from Go; the replay
   compares every other marker field and ignores lock files.
-* **Known Go vulnerability kept for parity (#918).** A relative traversing
-  name (`../` repeated, e.g. `"../"*40 + "<absolute repo path>"`) is cleaned by
-  `filepath.Join(library, name)` and `filepath.Join(tmp, name)` to the same
-  directory outside both. `skills_restore` then extracts the revision over the
-  working tree of any git repository the user can write, even with
-  `dry_run:true`, and with `dry_run:false` commits there; `skills_history`
-  reads that repository's log. Go and Rust have identical filesystem effects
-  (independent review probe, 81b594a01); Rust writes nowhere Go cannot. Any MCP
-  client allowed to call these tools can trigger it. The fix (reject a `name`
-  that is not a single local path segment, before any filesystem access) must
-  land in Go and Rust together and is not part of this slice.
+* **Frozen Go defect superseded by #918.** The original port deliberately
+  reproduced relative-name traversal during restore, even with `dry_run:true`.
+  Go and Rust now reject invalid names together before repository access or
+  extraction. Rust uses Go `%q` quoting in the shared validator so control-byte
+  (including NUL) errors match exactly. The existing required-arguments error
+  retains precedence for an empty name or revision.
+  The 197-case oracle stays pinned at
+  `3d9a89e7a2ee201d93c74501a10eb2af3f87e620`; its recorded bytes are unchanged.
+  Following the migration's explicit security-contract exception pattern (not a
+  silent repin or a skipped case), `tests/common/skills_restore_contract.rs`
+  enumerates 13 affected cases: one relative traversal and twelve absolute
+  restore names. Each now requires the exact validation reply and an unchanged
+  pre-call filesystem/git snapshot. One subsequent history reply omits only the
+  refused restore's forward commit; the remaining recorded history bytes stay
+  exact. Negative controls reject writes and error-class changes. Other cases
+  keep the original byte/side-effect comparison. `skills_history` can still
+  read a repository selected by relative parent components; changing its
+  read-only name contract is outside #918's restore fix.
 * Rust adds input bounds Go lacks (16 MiB profile, entry and git-output
   limits). Invalid UTF-8 in git output is decoded lossily where Go escapes it.
 * Windows path cleaning is unix-style lexical; the replay is `cfg(unix)`.

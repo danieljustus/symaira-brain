@@ -711,9 +711,9 @@ func (db *DB) GetMemoriesSinceCursor(since time.Time, limit int, includeEmbeddin
 
 	var query string
 	if includeEmb {
-		query = "SELECT " + memoryColumns + " FROM memories WHERE updated_at > ? ORDER BY updated_at ASC LIMIT ?"
+		query = "SELECT " + memoryColumns + " FROM memories WHERE symbrain_sync_time(updated_at) > symbrain_sync_time(?) ORDER BY symbrain_sync_time(updated_at) ASC LIMIT ?"
 	} else {
-		query = "SELECT " + memoryColumnsLite + " FROM memories WHERE updated_at > ? ORDER BY updated_at ASC LIMIT ?"
+		query = "SELECT " + memoryColumnsLite + " FROM memories WHERE symbrain_sync_time(updated_at) > symbrain_sync_time(?) ORDER BY symbrain_sync_time(updated_at) ASC LIMIT ?"
 	}
 
 	rows, err := db.conn.Query(query, since, limit)
@@ -764,14 +764,14 @@ func (db *DB) getMemoriesSinceCursorID(since time.Time, lastID string, limit int
 	if includeEmb {
 		columns = memoryColumns
 	}
-	predicate := "updated_at > ?"
+	predicate := "symbrain_sync_time(updated_at) > symbrain_sync_time(?)"
 	if lastID != "" {
-		predicate = "(updated_at > ? OR (updated_at = ? AND id > ?))"
+		predicate = "(symbrain_sync_time(updated_at) > symbrain_sync_time(?) OR (symbrain_sync_time(updated_at) = symbrain_sync_time(?) AND id > ?))"
 	}
 	if excludeSync {
 		predicate = "(" + predicate + ") AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true'"
 	}
-	query := "SELECT " + columns + " FROM memories WHERE " + predicate + " ORDER BY updated_at ASC, id ASC LIMIT ?"
+	query := "SELECT " + columns + " FROM memories WHERE " + predicate + " ORDER BY symbrain_sync_time(updated_at) ASC, id ASC LIMIT ?"
 	args := []any{since}
 	if lastID != "" {
 		args = append(args, since, lastID)

@@ -171,16 +171,19 @@ fn run_native(
 }
 
 /// Encodes JSON the way Go's `json.Encoder` does: compact output with `&`,
-/// `<` and `>` escaped, and no trailing newline.
+/// `<`, `>`, U+2028 and U+2029 escaped, and no trailing newline.
 ///
 /// Go renders every CLI report through `encoding/json`, so a report that must
-/// match its bytes has to escape those three characters too.
+/// match its bytes has to escape those characters too. They can only occur
+/// inside string content, so a global replace never touches structure.
 pub(crate) fn go_json<T: serde::Serialize>(value: &T) -> String {
     serde_json::to_string(value)
         .unwrap_or_default()
         .replace('&', "\\u0026")
         .replace('<', "\\u003c")
         .replace('>', "\\u003e")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
 }
 
 fn is_output_command(cmd: &str) -> bool {

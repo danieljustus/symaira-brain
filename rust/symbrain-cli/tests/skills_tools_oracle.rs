@@ -17,6 +17,9 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+#[path = "common/skills_restore_contract.rs"]
+mod skills_restore_contract;
+
 const FIXTURE: &str = include_str!("fixtures/skills_tools_go_oracle.json");
 const GATEWAY_PARENTS: [&str; 2] = ["config/symbrain", "data/symbrain"];
 const LOCK_PREFIX: &str = ".symskills-lock-";
@@ -378,6 +381,7 @@ fn snapshot(oracle: &Value, root: &Path) -> Value {
 
 struct Observed {
     replies: Vec<String>,
+    before: Value,
     after: Value,
     root: PathBuf,
     _temp: tempfile::TempDir,
@@ -411,6 +415,16 @@ fn replay(oracle: &Value, case: &Value, requests: &[String]) -> Observed {
     materialize(oracle, case, &root);
     write_profile(&root);
     let root_text = root.display().to_string();
+    let before = if skills_restore_contract::CASES.contains(&case["id"].as_str().unwrap()) {
+        serde_json::from_str(
+            &snapshot(oracle, &root)
+                .to_string()
+                .replace(&root_text, "<ROOT>"),
+        )
+        .unwrap()
+    } else {
+        Value::Null
+    };
     let replies = requests
         .iter()
         .map(|request| {
@@ -428,6 +442,7 @@ fn replay(oracle: &Value, case: &Value, requests: &[String]) -> Observed {
     .unwrap();
     Observed {
         replies,
+        before,
         after,
         root,
         _temp: temp,
@@ -518,7 +533,9 @@ fn fixture() -> Value {
 }
 
 fn run_case(oracle: &Value, case: &Value) -> Result<(), String> {
-    compare(case, &replay(oracle, case, &requests(case)))
+    let observed = replay(oracle, case, &requests(case));
+    let expected = skills_restore_contract::expected(case, &observed.before, &observed.root);
+    compare(&expected, &observed)
 }
 
 #[test]

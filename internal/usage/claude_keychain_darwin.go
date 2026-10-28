@@ -28,7 +28,7 @@ var claudeKeychainTimeout = 20 * time.Second
 // securityCommand builds the `security` invocation; a var so tests can
 // substitute a fake without a keychain.
 var securityCommand = func(ctx context.Context, args ...string) *exec.Cmd {
-	return exec.CommandContext(ctx, "/usr/bin/security", args...) // #nosec G204 -- validSecurityArgs admits only the two fixed security subcommands and a validated Claude service name.
+	return exec.CommandContext(ctx, "/usr/bin/security", args...) // #nosec G204 -- validSecurityArgs permits only fixed read-only subcommands, validated Claude services, or the exact Copilot service and selected account.
 }
 
 // readClaudeKeychainCredential returns the Claude Code OAuth access token
@@ -119,6 +119,9 @@ func validClaudeServiceName(name string) bool {
 }
 
 func validSecurityArgs(args []string) bool {
+	if len(args) == 6 && args[0] == "find-generic-password" && args[1] == "-w" && args[2] == "-s" && args[3] == "copilot-cli" && args[4] == "-a" {
+		return validCopilotAccount(args[5])
+	}
 	if len(args) == 1 {
 		return args[0] == "dump-keychain"
 	}

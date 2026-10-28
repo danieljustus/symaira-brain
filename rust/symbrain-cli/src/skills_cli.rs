@@ -214,7 +214,14 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         Some(verb) if verb == "targets" => {
             parse_scope_flag(&args[1..]).is_err() || !go_home_defined()
         }
-        Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
+        // `skills log` reads only the operation log under the home directory:
+        // Go's `cmdSkillsLog` takes the path from `events.DefaultPath()` and
+        // never consults the loaded config, so config files and `SYMSKILLS_*`
+        // variables of any shape cannot change a byte. What stays on Go is
+        // decided while reading (`run_log`): flag-package errors, a device or
+        // FIFO segment, a log line whose `json.Unmarshal` outcome is not
+        // certain, and a read error whose Go text cannot be reproduced.
+        Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err(),
         // `skills doctor` prints the merged symskills config, which native code
         // rebuilds from the environment and Go's whole-config reset on a
         // failing load (see `doctor_config`). Flag-package errors, an
@@ -263,52 +270,6 @@ struct SkillsDoctorReport {
     targets: Vec<SkillsDoctorTarget>,
 }
 
-fn has_skill_log() -> bool {
-    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let current = skills_log_path(&home);
-    log_path_requires_go(&current)
-        || log_path_requires_go(&current.with_file_name("events.1.jsonl"))
-}
-
-fn log_path_requires_go(path: &std::path::Path) -> bool {
-    let mut current = path;
-    loop {
-        match fs::symlink_metadata(current) {
-            Ok(metadata) => {
-                if metadata.is_symlink() {
-                    return true;
-                }
-                if current == path {
-                    if !metadata.is_file() || fs::File::open(path).is_err() {
-                        return true;
-                    }
-                    #[cfg(unix)]
-                    {
-                        use std::os::unix::fs::PermissionsExt;
-                        if metadata.permissions().mode() & 0o444 == 0 {
-                            return true;
-                        }
-                    }
-                } else if !metadata.is_dir() {
-                    return true;
-                }
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-                // The missing segment itself is fine; existing ancestors still
-                // need validation for symlinked or non-directory components.
-            }
-            Err(_) => return true,
-        }
-        let Some(parent) = current.parent() else {
-            return false;
-        };
-        if parent == current {
-            return false;
-        }
-        current = parent;
-    }
-}
-
 #[derive(Debug, Default)]
 struct SkillLogArgs {
     skill: Option<String>,
@@ -316,48 +277,69 @@ struct SkillLogArgs {
     limit: i64,
 }
 
+/// Go `normalizeFlags`: every `--name` argument (values included) becomes
+/// `-name`; a bare `--` and everything after it stay untouched.
+fn normalize_flag(arg: &str, terminated: &mut bool) -> String {
+    if *terminated {
+        return arg.to_owned();
+    }
+    if arg == "--" {
+        *terminated = true;
+        return arg.to_owned();
+    }
+    match arg.strip_prefix("--") {
+        Some(rest) if !rest.is_empty() => format!("-{rest}"),
+        _ => arg.to_owned(),
+    }
+}
+
+/// `strconv.ParseInt(value, 0, 64)` restricted to the plain decimal spelling
+/// (`0`, `7`, `-3`, `+12`): prefixes, underscores and leading zeros change the
+/// radix in Go and stay on the Go path.
+fn parse_plain_decimal(value: &str) -> Result<i64, &'static str> {
+    let digits = value.strip_prefix(['+', '-']).unwrap_or(value);
+    let plain = digits == "0"
+        || (digits.starts_with(|c: char| ('1'..='9').contains(&c))
+            && digits.bytes().all(|byte| byte.is_ascii_digit()));
+    if !plain {
+        return Err("invalid limit");
+    }
+    value.parse().map_err(|_| "invalid limit")
+}
+
+/// The Go `flag` subset `skills log` accepts natively: `-skill`, `-target`,
+/// `-scope` (parsed, never used), `-limit` and `-l`, in `-name value` or
+/// `-name=value` spelling after `normalizeFlags`. Anything else (positionals,
+/// `--`, help flags, unknown names, malformed numbers, non-UTF-8 bytes) is a
+/// Go-owned diagnostic.
 fn parse_skill_log_args(args: &[OsString]) -> Result<SkillLogArgs, &'static str> {
+    let mut terminated = false;
+    let mut normalized = Vec::with_capacity(args.len());
+    for arg in args {
+        let arg = arg.to_str().ok_or("non-UTF-8 log argument")?;
+        normalized.push(normalize_flag(arg, &mut terminated));
+    }
     let mut parsed = SkillLogArgs::default();
     let mut index = 0;
-    while index < args.len() {
-        let arg = args[index].to_string_lossy();
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+    while index < normalized.len() {
+        let arg = &normalized[index];
+        index += 1;
+        let name = arg
+            .strip_prefix('-')
+            .filter(|name| !name.is_empty() && !name.starts_with(['-', '=']))
+            .ok_or("unsupported log argument")?;
+        let (name, value) = if let Some((name, value)) = name.split_once('=') {
+            (name, value.to_owned())
+        } else {
+            let value = normalized.get(index).ok_or("missing log value")?.clone();
+            index += 1;
+            (name, value)
+        };
         match name {
-            "-skill" | "--skill" => {
-                let value = inline
-                    .map(str::to_owned)
-                    .or_else(|| {
-                        args.get(index + 1)
-                            .map(|value| value.to_string_lossy().into_owned())
-                    })
-                    .ok_or("missing skill value")?;
-                parsed.skill = Some(value);
-                index += usize::from(inline.is_none()) + 1;
-            }
-            "-target" | "--target" => {
-                let value = inline
-                    .map(str::to_owned)
-                    .or_else(|| {
-                        args.get(index + 1)
-                            .map(|value| value.to_string_lossy().into_owned())
-                    })
-                    .ok_or("missing target value")?;
-                parsed.target = Some(value);
-                index += usize::from(inline.is_none()) + 1;
-            }
-            "-limit" | "--limit" | "-l" => {
-                let value = inline
-                    .map(str::to_owned)
-                    .or_else(|| {
-                        args.get(index + 1)
-                            .map(|value| value.to_string_lossy().into_owned())
-                    })
-                    .ok_or("missing limit value")?;
-                parsed.limit = value.parse().map_err(|_| "invalid limit")?;
-                index += usize::from(inline.is_none()) + 1;
-            }
+            "skill" => parsed.skill = Some(value),
+            "target" => parsed.target = Some(value),
+            "scope" => {}
+            "limit" | "l" => parsed.limit = parse_plain_decimal(&value)?,
             _ => return Err("unsupported log argument"),
         }
     }
@@ -904,7 +886,7 @@ pub fn run(
         "list" => return run_list(rest, stdout, format),
         "status" => run_status(rest, stdout, stderr, format),
         "targets" => run_targets(rest, stdout, stderr, format),
-        "log" => run_log(rest, stdout, stderr, format),
+        "log" => return run_log(rest, stdout, stderr, format),
         "sync" => run_sync(rest, stdout, stderr, format),
         "doctor" => return run_doctor(stdout, format),
         _ => {
@@ -1321,20 +1303,22 @@ fn binary_path_exists(target: &str) -> bool {
     })
 }
 
+/// Native `skills log`. Returns `None` for every outcome whose Go bytes are
+/// not reproduced here (see [`requires_go_fallback`]); the read has no side
+/// effect, so handing over after it is safe.
 fn run_log(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> u8 {
-    let parsed = match parse_skill_log_args(args) {
-        Ok(parsed) => parsed,
-        Err(error) => {
-            let _ = writeln!(stderr, "symbrain skills log: {error}");
-            return exit::USAGE;
-        }
-    };
+) -> Option<u8> {
+    let parsed = parse_skill_log_args(args).ok()?;
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    if go_home_defined() && home.to_str().is_none_or(has_dot_segment) {
+        // Go's `filepath.Join` cleans `.`/`..` lexically while the kernel
+        // resolves `..` through symlinks: the two can name different logs.
+        return None;
+    }
     let path = skills_log_path(&home);
     let skill = parsed
         .skill
@@ -1346,12 +1330,14 @@ fn run_log(
         .as_deref()
         .map(str::trim)
         .filter(|value| !value.is_empty());
-    let mut records = match install::read_events(&path, skill, target) {
+    let mut records = match install::read_events_go_exact(&path, skill, target) {
         Ok(records) => records,
-        Err(error) => {
-            let _ = writeln!(stderr, "symbrain skills log: read operation log: {error}");
-            return exit::GENERIC;
+        Err(install::EventReadFailure::Io { op, path, source }) => {
+            let text = log_read_error_text(&home, op, &path, &source)?;
+            let _ = writeln!(stderr, "symbrain skills log: read operation log: {text}");
+            return Some(exit::GENERIC);
         }
+        Err(install::EventReadFailure::Divergent) => return None,
     };
     records.sort_by(|left, right| right.ts.cmp(&left.ts));
     if parsed.limit > 0 {
@@ -1367,26 +1353,47 @@ fn run_log(
             } else {
                 let _ = writeln!(stdout, "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME");
                 for event in &records {
-                    let skill = if event.skill.is_empty() {
-                        "-"
-                    } else {
-                        &event.skill
-                    };
-                    let target = if event.target.is_empty() {
-                        "-"
-                    } else {
-                        &event.target
-                    };
                     let _ = writeln!(
                         stdout,
                         "{}\t{}\t{}\t{}\t{}",
-                        event.ts, event.event, skill, target, event.outcome
+                        event.ts,
+                        event.event,
+                        or_dash(&event.skill),
+                        or_dash(&event.target),
+                        event.outcome
                     );
                 }
             }
         }
     }
-    exit::OK
+    Some(exit::OK)
+}
+
+/// Go's `*PathError` text (`open <path>: <errno>`) for a failed log read.
+/// POSIX only, and only when the path is what Go prints: a defined,
+/// lexically clean UTF-8 home (Go cleans `filepath.Join` and falls back to
+/// `.` for an undefined one) and a lower-case errno text. Anything else is
+/// Go's to report.
+fn log_read_error_text(
+    home: &std::path::Path,
+    op: &str,
+    path: &std::path::Path,
+    source: &std::io::Error,
+) -> Option<String> {
+    if !cfg!(unix) || !go_home_defined() || !is_lexically_clean(home.to_str()?) {
+        return None;
+    }
+    let errno = source.raw_os_error()?;
+    // Go's `syscall.Errno` texts for the failures a log path can produce.
+    let text = match errno {
+        13 => "permission denied",
+        20 => "not a directory",
+        21 => "is a directory",
+        40 if cfg!(target_os = "linux") => "too many levels of symbolic links",
+        62 if cfg!(target_os = "macos") => "too many levels of symbolic links",
+        _ => return None,
+    };
+    Some(format!("{op} {}: {text}", path.to_str()?))
 }
 
 fn run_sync(

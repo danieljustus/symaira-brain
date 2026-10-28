@@ -210,4 +210,19 @@ final class FreeformSnapshotTests: XCTestCase {
         XCTAssertNil(try FreeformBoardReader().listBoards(snapshotPath: path)[0].last_activity_time)
         XCTAssertThrowsError(try FreeformBoardReader().read(snapshotPath: path))
     }
+
+    /// Field 6 string table as observed on Freeform 5.1: "a", "b", title, "c", "d", ...
+    private func boardData(_ strings: [String]) -> Data {
+        var table: [UInt8] = []
+        for string in strings { table += [0x12, UInt8(string.utf8.count)] + Array(string.utf8) }
+        return Data([0x63, 0x72, 0x64, 0x74, 6, 0, 0, 0, 0x08, 0x01, 0x32, UInt8(table.count)] + table)
+    }
+
+    func testBoardTitleIsDecodedOnlyFromTheObservedStringTableLayout() throws {
+        XCTAssertEqual(try FreeformCRDT.boardTitle(boardData(["a", "b", "Fußbodenheizung", "c", "d", "e"])), "Fußbodenheizung")
+        XCTAssertNil(try FreeformCRDT.boardTitle(boardData(["a", "Secret", "c", "d", "e"])))
+        XCTAssertNil(try FreeformCRDT.boardTitle(boardData(["x", "b", "Title", "c", "d"])))
+        XCTAssertNil(try FreeformCRDT.boardTitle(Data()))
+        XCTAssertThrowsError(try FreeformCRDT.boardTitle(Data("notcrdt!".utf8)))
+    }
 }

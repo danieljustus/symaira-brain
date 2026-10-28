@@ -4,6 +4,7 @@
 #![deny(missing_docs)]
 
 mod cap_root;
+pub mod config_toml;
 pub mod context_profile;
 pub mod discover;
 mod encode;

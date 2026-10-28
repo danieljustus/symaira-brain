@@ -89,16 +89,16 @@ impl From<toml_edit::TomlError> for HarnessError {
 }
 
 /// Resolves the trusted root for a registry path kind.
-pub(crate) fn trusted_root(
+pub(crate) fn trusted_root<T: AsRef<std::ffi::OsStr>>(
     kind: registry::PathKind,
     target_os: &str,
-    env: &[(String, String)],
+    env: &[(T, T)],
 ) -> Result<std::path::PathBuf, HarnessError> {
     let get = |key: &str| {
         env.iter()
             .rev()
-            .find(|(name, _)| name == key)
-            .map(|(_, value)| value.as_str())
+            .find(|(name, _)| name.as_ref() == key)
+            .map(|(_, value)| value.as_ref())
             .filter(|value| !value.is_empty())
     };
     let home = || {

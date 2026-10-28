@@ -69,6 +69,22 @@ complete historical repair or close #649/#758. See
 `docs/adr/memory-wal-open-race-803.md` and the preserved `memory-open-race-803`
 evidence.
 
+#907 (Windows `Store::open` BUSY in the concurrent-open test): Go's opener takes
+no writer for a current store (`sqlitekit.Migrate` only reads `schema_migrations`
+once every migration is recorded), while the native opener ran the whole
+migration under `BEGIN IMMEDIATE` on every open, so concurrent openers queued on
+the single SQLite writer and could exhaust the five-second budget on a slow
+Windows runner (the failing job's suite took 362 s). `configure` now first proves
+the migration is a no-op under `PRAGMA query_only` in a deferred read snapshot
+and reserves the writer only for pending or repairable state; any failure falls
+back to the unchanged `BEGIN IMMEDIATE` path, which reproduces the real result.
+The FTS integrity-check (itself a write) is replaced in that read-only admission
+by an exact `memories`/`memories_fts_docsize` rowid-parity check; stores that
+fail it still take the integrity-check/rebuild path. Control:
+`open_of_current_store_does_not_wait_for_a_retained_writer` (red before, green
+after). The Windows failure itself was never reproduced on macOS; native
+three-OS CI is the remaining evidence.
+
 The isolated historical/default/WAL integration normally merges main 5e and the
 independently approved 2fe WAL prerequisite. At source `1fc5910`, the full
 allocated Linux driver passes 392 tests with no failures/ignores, all 28
@@ -728,6 +744,121 @@ Still on Go: `skills sync` with any config, `skills status` shapes listed under 
 `skills log` (log-path symlink shapes) and every config-file shape (a Go-exact TOML parser does
 not exist in Rust; `skills doctor` is SKL-015, merged in #950). The Windows run of this slice rests on a
 `cfg` review; native Linux/macOS/Windows CI at the candidate head remains required.
+
+### Skills log read shapes (#764 slice g)
+
+`symbrain skills log` no longer routes to Go for symlinked, missing or unreadable log paths, and
+its line decoding now follows `encoding/json` instead of a derived serde struct. Go's
+`cmdSkillsLog` takes the path from `events.DefaultPath()` (`~/.local/share/symskills/events.jsonl`
+plus the rotated `events.1.jsonl`, `.` when there is no home), reads both with `os.ReadFile`,
+decodes each line with `json.Unmarshal` and skips a line on any error; the loaded config is only
+used for the home directory, so no config file or `SYMSKILLS_*`/`SYMBRAIN_SKILLS_*` variable can
+change a byte. Native therefore covers every config shape and:
+
+- **Symlinks** at the file or any ancestor follow the kernel like `os.ReadFile` (valid link,
+  dangling link or ancestor = absent segment, link to a directory).
+- **Read failures** replay Go's `*PathError` text on POSIX: `open <p>: permission denied |
+  not a directory | too many levels of symbolic links`, `read <p>: is a directory`
+  (`symbrain skills log: read operation log: ...`, exit 1). Only when the printed path is what Go
+  prints: defined, lexically clean UTF-8 home (Go cleans `filepath.Join`, falls back to `.`).
+- **Flags** mirror Go's `normalizeFlags` + `flag` for `-skill/-target/-scope/-limit/-l` in both
+  spellings; limits are plain decimals only (Go parses with base 0, so `010`, `0x2`, `1_0` stay on
+  Go), as are `-h`, unknown flags, positionals, `--`, a missing value and non-UTF-8 arguments.
+- **Line decoding** (`install/event_decode.rs`): a Go-grammar scan decides each line. Invalid JSON,
+  trailing data, non-objects and whitespace-only lines are skipped as in Go; known fields must be
+  strings. Lines whose Go outcome is not certain are handed to Go: case-folded or non-ASCII keys,
+  duplicate keys, `null`/non-string values, a top-level `null`, lone surrogates, invalid UTF-8,
+  nesting deeper than 200, and a device/FIFO segment.
+
+Two existing defects in the previous native path are fixed by this slice: the old reader accepted
+arrays as events (serde tuple form), dropped `null`/duplicate/case-folded lines that Go keeps and
+did not repair invalid UTF-8; and the shared `go_json` helper did not escape U+2028/U+2029 like Go's
+`json.Encoder` (it now does, which also corrects other native reports that carry those characters).
+`skills list` still reads the same log through the lax `read_events`; that residual is separate.
+
+Stays on Go: the shapes above plus a home with `.`/`..` segments (`filepath.Join` cleans them
+lexically, the kernel resolves `..` through symlinks), an unclean or undefined home when a
+read error text is needed, and any errno whose Go text is not in the table.
+
+Evidence: 80 `skills_status_config_log_*` cases in `scripts/rust-differential.py` (56 native with
+the Go route removed and the fixture root asserted unchanged, 24 must-fallback) match the Go 1.26.7
+binary built from `HEAD` 033f1b2fa; the whole `skills_status_config_*` family (285 cases: 169
+native, 116 fallback) and the full differential (789 cases, `make parity-smoke`) pass.
+`readonly_snapshot` now records an unreadable (mode 000) fixture file instead of crashing so
+`chmod 000` log shapes can be native cases. 22 new source mutants in
+`scripts/skills-status-config-oracle/run.py` (`log-*`; the oracle now mutates four source files)
+are killed (61 of 61 mutants of the whole oracle killed). Rust tests: `skills_log_exact_native.rs` (new), `skills_log_native.rs` (the symlink,
+parent-is-file and unreadable tests now assert native Go text instead of fallback) and
+`event_tests.rs` (`read_events_go_exact`).
+
+Still on Go: `skills sync` with any config, `skills status` shapes listed under #764 slice c, and
+every config-file shape that needs a TOML parse (a Go-exact TOML parser does not exist in Rust).
+The Windows run of this slice rests on `cargo clippy --target x86_64-pc-windows-gnu` and a `cfg`
+review (read-error replay is POSIX-only; every Windows read failure stays on Go); native
+Linux/macOS/Windows CI at the candidate head remains required.
+### Skills config TOML decode foundation (#764 slice f, SKL-018)
+
+Every config-file shape of `skills status/doctor/list/sync` still routes to Go because
+no Rust decoder reproduced Go's TOML handling. `symbrain_skills::config_toml` is that
+decoder; this slice delivers it, its Go oracle and a negative-control runner, and **does
+not change CLI routing** (the consumers in `skills_cli.rs`/`skills_doctor_config.rs`
+still treat any config file with content as Go).
+
+Go reads the files in two independent ways, both reproduced:
+
+- `config.Load` (corekit `configkit.mergeFile`): `toml.DecodeFile` (BurntSushi/toml
+  v1.6.0, TOML 1.1) into `map[string]interface{}`, then an exact, case-sensitive copy by
+  `json` tag in struct order `library_dir`, `render_dir`, `cache_dir`, `profiles_dir`,
+  `base_dir`, `vcs`. A non-string value is `field "k": cannot convert <%T> to string`
+  (`int64`, `float64`, `bool`, `time.Time` for all four datetime kinds, `[]interface {}`,
+  `map[string]interface {}`, `[]map[string]interface {}` for `[[k]]`); a non-table `vcs`
+  is ignored silently; `vcs.enabled` accepts a bool or a `strconv.ParseBool` string
+  (`field "vcs": field "enabled": cannot parse "yes" as bool: strconv.ParseBool: ...`).
+  The first failing file ends the load: `global config error: failed to apply <path>: ...`,
+  then `project config error: ...`. `targets` has no `json` tag and is skipped here.
+- `config.LoadTargets`/`LoadCapabilities`: typed `toml.DecodeFile` into `targetsFile`
+  with case-insensitive field folding (`strings.EqualFold`, so U+017F and U+212A fold to
+  `s`/`k`), `[[targets]]` or an inline array of tables, a `map[string]bool` that
+  silently ignores a non-table value (and a `capabilities.<t> = true` creating an empty
+  `<t>` map), per-file merge (non-empty `targets` replaces, capabilities merge per name).
+
+Decisions:
+
+- **Parser = `toml_edit` plus post-checks**, not a hand-written grammar. The result is a
+  three-way classification: `Loaded`/`Error` only when the replay proves Go agrees, and
+  `NeedsGo(reason)` for everything else. Every syntax error, invalid UTF-8, typed-decode
+  type error (messages embed TOML key paths and lines) and every document Go decodes
+  differently is `NeedsGo`; Go keeps owning those messages.
+- Post-checks found by the oracle (documents `toml_edit` accepts and Go rejects): a
+  second leading BOM, the `:60` leap second (any datetime anywhere in the document) and
+  multi-line inline tables (BurntSushi tolerates a newline only after `{`, after a comma
+  and before `}`, `toml_edit` also between a key and `=`).
+- Known Go-accepts/Rust-asks-Go set (28, pinned in the test): BurntSushi lets a value
+  redefine a dotted table or a table extend an inline table, accepts datetime offsets
+  `+24:00`/`+00:60`, has no `toml_edit` nesting cap, and `%q` of a non-ASCII `vcs.enabled`
+  string is not reproduced. Two typed-decode cases are map-iteration-order dependent in
+  Go (two keys folding onto one field); the generator repeats each typed decode 40 times
+  and records such a case as `nondeterministic`, which Rust must send to Go.
+
+Evidence: `scripts/skills-config-toml-oracle` runs the real `config.Load`,
+`config.LoadTargets` and `config.LoadCapabilities` over 6769 cases in a disposable
+HOME/cwd (one per line in `rust/symbrain-skills/tests/fixtures/config_toml_oracle.json`;
+`make skills-config-toml-oracle-check` regenerates and compares, ignoring provenance).
+`tests/config_toml_oracle.rs` replays it without Go: 1262 `Load` values and 188 exact
+apply errors native, 5291 Go parse errors left to Go (never answered natively), plus 1417
+native typed decodes. A soak mode (`SYMSKILLS_CONFIG_TOML_ORACLE_FIXTURE`, generator
+`-out/-mutations/-seed`) replayed two further seeds of 40769 cases each (81538 cases) at the final code with
+zero mismatches.
+`scripts/skills-config-toml-oracle/mutants.py` applies 16 single-line mutants of
+`config_toml.rs` (type names, ParseBool spelling, BOM, leap second, multi-line inline
+table, inline `vcs`, error label, both fold characters, collision, empty-targets
+override, capability merge, non-table map, `%q` width): 16 of 16 killed.
+
+Residual: routing. `skills_cli.rs`/`skills_doctor_config.rs` must still (1) read the
+config bytes through the same stat/`os.IsNotExist` gates, (2) call `config_toml::load`
+and fall back on `NeedsGo`, (3) apply `SYMSKILLS_*` and the discard-to-defaults rule, and
+(4) for `status`/`list`/`sync` feed `LoadTargets` into the native verbs, each with its own
+Go-vs-Rust differential. Native three-OS CI at the final head remains required.
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 

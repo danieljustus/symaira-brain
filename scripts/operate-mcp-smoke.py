@@ -49,6 +49,7 @@ EXPECTED_TOOLS = [
     "freeform_doctor",
     "freeform_insert",
     "freeform_connect",
+    "freeform_connect_existing",
     "freeform_move",
     "freeform_read_board",
     "freeform_list_boards",

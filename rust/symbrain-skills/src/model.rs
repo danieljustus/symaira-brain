@@ -215,12 +215,14 @@ pub fn validate_skill_name(name: &str) -> Result<(), SkillError> {
     }
     if name.len() > MAX_NAME_LENGTH {
         return Err(SkillError(format!(
-            "skill name {name:?} exceeds maximum length of {MAX_NAME_LENGTH} characters"
+            "skill name {} exceeds maximum length of {MAX_NAME_LENGTH} characters",
+            crate::gotext::quote(name)
         )));
     }
     if !valid_slug(name, '-') {
         return Err(SkillError(format!(
-            "skill name {name:?} must be a single lowercase alphanumeric-dash segment without consecutive, leading, or trailing hyphens"
+            "skill name {} must be a single lowercase alphanumeric-dash segment without consecutive, leading, or trailing hyphens",
+            crate::gotext::quote(name)
         )));
     }
     Ok(())

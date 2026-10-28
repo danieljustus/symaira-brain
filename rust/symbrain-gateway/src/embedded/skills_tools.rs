@@ -457,6 +457,9 @@ fn restore(dirs: &Dirs, raw: Option<&RawValue>) -> Outcome {
             "name and rev are required",
         ));
     }
+    // Validate before repository access or temporary extraction, including dry-run.
+    symbrain_skills::validate_skill_name(&name)
+        .map_err(|error| ToolError::validation("restore skill", error))?;
     let dry_run = flag(&args, "dry_run", true);
     let dir = skill_dir(dirs, &name);
     if !vcs::is_repo(&dir) {
@@ -582,3 +585,7 @@ fn resync(dirs: &Dirs, name: &str) -> Result<Value, ToolError> {
         .collect();
     Ok(json!(rows))
 }
+
+#[cfg(test)]
+#[path = "skills_restore_tests.rs"]
+mod restore_tests;
