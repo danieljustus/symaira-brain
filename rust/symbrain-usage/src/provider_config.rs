@@ -60,6 +60,7 @@ include!("provider_config/routing.rs");
 include!("provider_config/accounts.rs");
 include!("provider_config/other_accounts.rs");
 include!("provider_config/opencode_api.rs");
+include!("provider_config/opencode_history.rs");
 include!("provider_config/quota.rs");
 include!("provider_grok.rs");
 

@@ -25,6 +25,18 @@ fn opencode_directory(dir: &Path) -> std::io::Result<std::fs::File> {
 
 #[cfg(unix)]
 fn opencode_database_key(dir: &Path, name: &str) -> Result<(Option<String>, bool), &'static str> {
+    with_opencode_database(dir, name, |db| {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        opencode_database_sql(db, move || std::time::Instant::now() >= deadline)
+    })
+}
+
+#[cfg(unix)]
+fn with_opencode_database<T>(
+    dir: &Path,
+    name: &str,
+    consume: impl FnOnce(&rusqlite::Connection) -> Result<T, &'static str>,
+) -> Result<T, &'static str> {
     use rustix::fs::{Mode, OFlags, openat};
     let root = opencode_directory(dir).map_err(|_| OPENCODE_DB_ERROR)?;
     let read = |name: &str, limit: u64| -> Result<Option<Vec<u8>>, &'static str> {
@@ -98,7 +110,7 @@ fn opencode_database_key(dir: &Path, name: &str) -> Result<(Option<String>, bool
     .map_err(|_| OPENCODE_DB_ERROR)?;
     // SQL-only budget: admission, regular-file copying and connection open are not timed.
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
-    let result = opencode_database_sql(&db, move || std::time::Instant::now() >= deadline);
+    let result = consume(&db);
     if std::time::Instant::now() >= deadline {
         return Err(OPENCODE_DB_ERROR);
     }

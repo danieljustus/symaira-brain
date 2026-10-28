@@ -11,8 +11,12 @@ mod go_float;
 mod go_float_tests;
 #[cfg(test)]
 use crate as usage;
+mod claude_history;
+mod codex_history;
+pub use codex_history::scan_codex_history;
 mod history;
 mod history_files;
+pub use claude_history::scan_claude_history;
 #[cfg(test)]
 #[path = "../tests/support/legacy_openrouter.rs"]
 mod legacy_openrouter;
@@ -46,6 +50,9 @@ pub struct Service {
     transport: Arc<dyn Transport>,
     provider_timeout: Duration,
     max_concurrency: usize,
+    opencode_history_selected: bool,
+    claude_history_selected: bool,
+    codex_history_selected: bool,
 }
 
 impl Service {
@@ -57,6 +64,9 @@ impl Service {
     pub fn with_selection(selection: &ProviderSelection) -> Self {
         Self {
             providers: selected_providers(selection),
+            opencode_history_selected: selection.explicit_opencode(),
+            claude_history_selected: selection.explicit_claude(),
+            codex_history_selected: selection.explicit_codex(),
             transport: Arc::new(UreqTransport::default()),
             provider_timeout: DEFAULT_PROVIDER_TIMEOUT,
             max_concurrency: MAX_CONCURRENT_PROVIDERS,
@@ -65,6 +75,9 @@ impl Service {
     #[must_use]
     pub fn with_transport(providers: Vec<Provider>, transport: Arc<dyn Transport>) -> Self {
         Self {
+            opencode_history_selected: providers.iter().any(|p| p.id == "opencode"),
+            claude_history_selected: providers.iter().any(|p| p.id == "claude"),
+            codex_history_selected: providers.iter().any(|p| p.id == "codex"),
             providers,
             transport,
             provider_timeout: DEFAULT_PROVIDER_TIMEOUT,
@@ -90,6 +103,28 @@ impl Service {
         self.report_with_cancel(|| false)
     }
 
+    fn collect_history(
+        &self,
+        report: &mut Report,
+        cancelled: &impl Fn() -> bool,
+        report_deadline: Option<Instant>,
+    ) {
+        codex_history::collect_enabled(
+            report,
+            self.codex_history_selected,
+            cancelled,
+            report_deadline,
+        );
+        let selected = self.opencode_history_selected;
+        history::collect_enabled(report, cancelled, report_deadline, selected);
+        claude_history::collect_enabled(
+            report,
+            self.claude_history_selected,
+            cancelled,
+            report_deadline,
+        );
+    }
+
     /// Runs bounded worker batches. `thread::scope` guarantees every worker is
     /// joined before return; cancellation is propagated before the join so a
     /// cooperative transport never survives a report call.
@@ -113,7 +148,7 @@ impl Service {
             .iter()
             .map(ProviderUsage::from_provider)
             .collect();
-        history::collect_enabled(&mut report, &cancelled, report_deadline);
+        self.collect_history(&mut report, &cancelled, report_deadline);
         let configured: Vec<usize> = self
             .providers
             .iter()

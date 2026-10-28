@@ -69,7 +69,23 @@ func openCodeDBFile(dir *os.File, name string, limit int64) (data []byte, err er
 // SQLite only opens a private copy. Immutable mode would silently ignore a live WAL.
 // A changing source fails closed rather than combining checkpoint generations.
 func openCodeDatabaseKey(dir, name string) (key string, authoritative bool, err error) {
-	fail := func() (string, bool, error) { return "", true, errOpenCodeDatabase }
+	err = withOpenCodeDatabase(context.Background(), dir, name, func(ctx context.Context, db *sql.DB) error {
+		var e error
+		key, authoritative, e = openCodeCredentialRow(ctx, db)
+		return e
+	})
+	if err != nil {
+		return "", true, errOpenCodeDatabase
+	}
+	return key, authoritative, nil
+}
+
+// Shared by credential discovery and opt-in recorded history; never opens the source with SQLite.
+func withOpenCodeDatabase(parent context.Context, dir, name string, read func(context.Context, *sql.DB) error) error {
+	fail := func() error { return errOpenCodeDatabase }
+	if parent.Err() != nil {
+		return fail()
+	}
 	root, err := openCodeDirectory(dir)
 	if err != nil {
 		return fail()
@@ -119,7 +135,7 @@ func openCodeDatabaseKey(dir, name string) (key string, authoritative bool, err 
 	}
 	defer db.Close()
 	db.SetMaxOpenConns(1)
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(parent, 2*time.Second)
 	defer cancel()
 	if _, err = db.ExecContext(ctx, "PRAGMA query_only=ON; PRAGMA trusted_schema=OFF;"); err != nil {
 		return fail()
@@ -128,11 +144,10 @@ func openCodeDatabaseKey(dir, name string) (key string, authoritative bool, err 
 	if db.QueryRowContext(ctx, "PRAGMA quick_check(1)").Scan(&integrity) != nil || integrity != "ok" {
 		return fail()
 	}
-	key, authoritative, err = openCodeCredentialRow(ctx, db)
-	if err != nil {
+	if read(ctx, db) != nil || ctx.Err() != nil {
 		return fail()
 	}
-	return key, authoritative, nil
+	return nil
 }
 
 func openCodeCredentialRow(ctx context.Context, db *sql.DB) (string, bool, error) {

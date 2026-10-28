@@ -8,13 +8,23 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"golang.org/x/sys/unix"
 )
 
 func readHistoryFiles(ctx context.Context, path string) ([]historyEvent, int, error) {
+	return readJSONHistoryFiles(ctx, path, false, parseHistoryLine)
+}
+
+func readJSONHistoryFiles(ctx context.Context, path string, claude bool, parse func([]byte) ([]historyEvent, bool)) ([]historyEvent, int, error) {
+	return readJSONHistoryFilesReset(ctx, path, claude, parse, func(string) bool { return true })
+}
+
+func readJSONHistoryFilesReset(ctx context.Context, path string, claude bool, parse func([]byte) ([]historyEvent, bool), reset func(string) bool) ([]historyEvent, int, error) {
 	root, err := openCodeDirectory(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, 0, nil
@@ -26,8 +36,8 @@ func readHistoryFiles(ctx context.Context, path string) ([]historyEvent, int, er
 	deadline := time.Now().Add(2 * time.Second)
 	var events []historyEvent
 	excluded, entries, files, total, lines := 0, 0, 0, 0, 0
-	var walk func(*os.File, int) error
-	walk = func(dir *os.File, depth int) error {
+	var walk func(*os.File, int, string) error
+	walk = func(dir *os.File, depth int, relative string) error {
 		if depth > 12 || ctx.Err() != nil || time.Now().After(deadline) {
 			return os.ErrInvalid
 		}
@@ -53,7 +63,7 @@ func readHistoryFiles(ctx context.Context, path string) ([]historyEvent, int, er
 					return err
 				}
 				sub := os.NewFile(uintptr(fd), "history directory")
-				err = walk(sub, depth+1)
+				err = walk(sub, depth+1, filepath.Join(relative, child.Name()))
 				closeErr := sub.Close()
 				if err != nil {
 					return err
@@ -61,7 +71,10 @@ func readHistoryFiles(ctx context.Context, path string) ([]historyEvent, int, er
 				if closeErr != nil {
 					return closeErr
 				}
-			} else if child.Name() == "updates.jsonl" {
+			} else if (!claude && child.Name() == "updates.jsonl") || (claude && strings.HasSuffix(child.Name(), ".jsonl")) {
+				if !reset(filepath.Join(relative, child.Name())) {
+					continue
+				}
 				files++
 				if files > 128 {
 					return os.ErrInvalid
@@ -86,7 +99,7 @@ func readHistoryFiles(ctx context.Context, path string) ([]historyEvent, int, er
 					if lines > 20000 || len(line) > 256<<10 || ctx.Err() != nil || time.Now().After(deadline) {
 						return os.ErrInvalid
 					}
-					parsed, ok := parseHistoryLine(line)
+					parsed, ok := parse(line)
 					if !ok {
 						excluded++
 					}
@@ -99,6 +112,6 @@ func readHistoryFiles(ctx context.Context, path string) ([]historyEvent, int, er
 		}
 		return nil
 	}
-	err = walk(root, 0)
+	err = walk(root, 0, "")
 	return events, excluded, err
 }

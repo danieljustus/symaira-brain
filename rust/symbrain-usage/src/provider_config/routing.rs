@@ -28,8 +28,8 @@ fn selected_fallback_with_probes(
     keychain_present: impl FnOnce() -> bool,
     kimi_home: impl FnOnce() -> PathBuf,
 ) -> bool {
-    let claude_oauth_env = selection
-        .contains("claude")
+    let claude_selected = selection.contains("claude") && !claude_history_only(selection);
+    let claude_oauth_env = claude_selected
         .then(|| env_raw("ANTHROPIC_OAUTH_TOKEN"))
         .flatten();
     let opencode_env = selection
@@ -51,7 +51,7 @@ fn selected_fallback_with_probes(
     // provider can silently miss a file-backed credential.
     if ["claude", "codex", "copilot", "kimi", "nous"]
         .iter()
-        .any(|id| selection.contains(id))
+        .any(|id| selection.contains(id) && (*id != "claude" || claude_selected))
         && usage_home_mismatch_requires_go()
     {
         return true;
@@ -69,11 +69,10 @@ fn selected_fallback_with_probes(
         return true;
     }
     let claude_file_path = home().join(".claude/.credentials.json");
-    let claude_file_token = selection
-        .contains("claude")
+    let claude_file_token = claude_selected
         .then(|| claude_file_token_in(&claude_file_path))
         .flatten();
-    if selection.contains("claude") && claude_file_requires_go(&claude_file_path) {
+    if claude_selected && claude_file_requires_go(&claude_file_path) {
         // Go iterates the account map in unspecified order. Retain its route
         // only when multiple distinct nondefault tokens can be selected.
         return true;
@@ -127,7 +126,7 @@ fn selected_fallback_with_probes(
         // Go skips its Keychain read when either the OAuth environment source
         // is present (even if resolving it fails) or the file supplied a
         // token. Avoid listing Keychain attributes in either case.
-        local_provider_present: selection.contains("claude")
+        local_provider_present: claude_selected
             && claude_oauth_env.is_none()
             && claude_file_token.is_none()
             && keychain_present(),

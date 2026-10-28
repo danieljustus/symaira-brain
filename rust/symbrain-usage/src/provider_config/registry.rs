@@ -37,7 +37,7 @@ fn available(detail: &str, source: String) -> AuthStatus {
 
 /// Validated provider IDs in stable catalog order; parsing performs no I/O.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ProviderSelection(Vec<&'static str>);
+pub struct ProviderSelection(Vec<&'static str>, bool);
 
 type ProviderFactory = (&'static str, fn() -> Provider);
 const PROVIDER_FACTORIES: [ProviderFactory; 14] = [
@@ -59,7 +59,10 @@ const PROVIDER_FACTORIES: [ProviderFactory; 14] = [
 
 impl Default for ProviderSelection {
     fn default() -> Self {
-        Self(PROVIDER_FACTORIES[..10].iter().map(|(id, _)| *id).collect())
+        Self(
+            PROVIDER_FACTORIES[..10].iter().map(|(id, _)| *id).collect(),
+            false,
+        )
     }
 }
 
@@ -78,7 +81,20 @@ impl ProviderSelection {
                 .iter()
                 .filter_map(|(id, _)| ids.contains(id).then_some(*id))
                 .collect(),
+            true,
         ))
+    }
+
+    pub(crate) fn explicit_codex(&self) -> bool {
+        self.1 && self.contains("codex")
+    }
+
+    pub(crate) fn explicit_claude(&self) -> bool {
+        self.1 && self.contains("claude")
+    }
+
+    pub(crate) fn explicit_opencode(&self) -> bool {
+        self.1 && self.contains("opencode")
     }
 
     fn contains(&self, id: &str) -> bool {
@@ -96,6 +112,26 @@ pub fn selected_providers(selection: &ProviderSelection) -> Vec<Provider> {
     PROVIDER_FACTORIES
         .iter()
         .filter(|(id, _)| selection.contains(id))
-        .map(|(_, constructor)| constructor())
+        .map(|(id, constructor)| {
+            if *id == "claude" && claude_history_only(selection) {
+                claude_from_resolved(None, None, None, None, None)
+            } else if *id == "codex" && codex_history_only(selection) {
+                codex_from_resolved(None, None, false)
+            } else {
+                constructor()
+            }
+        })
         .collect()
+}
+
+fn codex_history_only(selection: &ProviderSelection) -> bool {
+    selection.explicit_codex()
+        && env::var("SYMBRAIN_USAGE_CODEX_HISTORY").as_deref() == Ok("1")
+        && env::var("SYMBRAIN_USAGE_CODEX_HISTORY_ONLY").as_deref() == Ok("1")
+}
+
+fn claude_history_only(selection: &ProviderSelection) -> bool {
+    selection.explicit_claude()
+        && env::var("SYMBRAIN_USAGE_CLAUDE_HISTORY").as_deref() == Ok("1")
+        && env::var("SYMBRAIN_USAGE_CLAUDE_HISTORY_ONLY").as_deref() == Ok("1")
 }

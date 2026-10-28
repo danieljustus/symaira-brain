@@ -90,7 +90,18 @@ func providersForIDs(client *http.Client, ids []string, readClaudeKeychain func(
 				continue
 			}
 		}
-		providers = append(providers, factory())
+		var p Provider
+		if ids != nil && contractProviders[i].ID == "claude" && os.Getenv("SYMBRAIN_USAGE_CLAUDE_HISTORY") == "1" && os.Getenv("SYMBRAIN_USAGE_CLAUDE_HISTORY_ONLY") == "1" {
+			p = &ClaudeProvider{client: client}
+		} else if ids != nil && contractProviders[i].ID == "codex" && os.Getenv("SYMBRAIN_USAGE_CODEX_HISTORY") == "1" && os.Getenv("SYMBRAIN_USAGE_CODEX_HISTORY_ONLY") == "1" {
+			p = &CodexProvider{client: client, localHistoryOnly: true}
+		} else {
+			p = factory()
+		}
+		if ids != nil && (p.ID() == "opencode" || p.ID() == "claude" || p.ID() == "codex") {
+			p = selectedHistoryProvider{p}
+		}
+		providers = append(providers, p)
 	}
 	for _, factory := range []struct {
 		id   string
@@ -110,6 +121,8 @@ func providersForIDs(client *http.Client, ids []string, readClaudeKeychain func(
 	}
 	return providers
 }
+
+type selectedHistoryProvider struct{ Provider }
 
 // BuildReport fetches usage for every configured provider. At most
 // MaxConcurrentProviders provider chains run at once, each chain has a
@@ -131,6 +144,15 @@ func BuildReport(ctx context.Context, providers []Provider) Report {
 		}
 		if p.ID() == "grok" && os.Getenv("SYMBRAIN_USAGE_GROK_HISTORY") == "1" {
 			pu.History = ScanGrokHistory(ctx, grokHistoryHome(), time.Now())
+		}
+		if _, selected := p.(selectedHistoryProvider); selected && p.ID() == "opencode" && os.Getenv("SYMBRAIN_USAGE_OPENCODE_HISTORY") == "1" {
+			pu.History = ScanOpenCodeHistory(ctx, openCodeHistoryHome(), time.Now())
+		}
+		if _, selected := p.(selectedHistoryProvider); selected && p.ID() == "claude" && os.Getenv("SYMBRAIN_USAGE_CLAUDE_HISTORY") == "1" {
+			pu.History = ScanClaudeHistory(ctx, claudeHistoryHome(), time.Now())
+		}
+		if _, selected := p.(selectedHistoryProvider); selected && p.ID() == "codex" && os.Getenv("SYMBRAIN_USAGE_CODEX_HISTORY") == "1" {
+			pu.History = ScanCodexHistory(ctx, codexHomeDir(), time.Now())
 		}
 		if !pu.Configured {
 			report.Providers[i] = pu

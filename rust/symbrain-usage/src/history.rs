@@ -12,6 +12,8 @@ pub struct LocalHistory {
     pub attribution: String,
     pub currency: String,
     pub cost_basis: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_snapshot: Option<String>,
     pub timezone: String,
     pub status: String,
     pub excluded_events: usize,
@@ -31,16 +33,24 @@ pub struct HistoryModel {
     pub tokens: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recorded_cost: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub estimated_cost: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_basis: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recorded_events: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub estimated_events: Option<usize>,
     pub missing_tokens: usize,
     pub missing_cost: usize,
 }
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct Event {
-    id: String,
-    model: String,
-    at: DateTime<Utc>,
-    tokens: Option<u64>,
-    ticks: Option<u64>,
+    pub(crate) id: String,
+    pub(crate) model: String,
+    pub(crate) at: DateTime<Utc>,
+    pub(crate) tokens: Option<u64>,
+    pub(crate) ticks: Option<u64>,
 }
 fn count(value: &Value) -> Option<u64> {
     value.as_u64().filter(|n| *n <= 1_000_000_000_000_000)
@@ -124,6 +134,7 @@ pub fn scan_grok_history<T: TimeZone>(
         attribution: "unattributed".into(),
         currency: "USD".into(),
         cost_basis: "recorded".into(),
+        price_snapshot: None,
         timezone: timezone.into(),
         status: "no_data".into(),
         excluded_events: 0,
@@ -147,12 +158,34 @@ pub(crate) fn collect_enabled(
     report: &mut crate::Report,
     cancelled: &impl Fn() -> bool,
     deadline: Option<std::time::Instant>,
+    opencode_selected: bool,
 ) {
-    if std::env::var("SYMBRAIN_USAGE_GROK_HISTORY").as_deref() != Ok("1") {
-        return;
-    }
     for provider in &mut report.providers {
-        if provider.id != "grok" {
+        if opencode_selected
+            && provider.id == "opencode"
+            && std::env::var("SYMBRAIN_USAGE_OPENCODE_HISTORY").as_deref() == Ok("1")
+        {
+            let home = std::path::PathBuf::from(std::env::var_os("HOME").unwrap_or_default());
+            let base = std::env::var_os("XDG_DATA_HOME")
+                .map_or_else(|| home.join(".local/share"), std::path::PathBuf::from);
+            let dir = std::env::var_os("OPENCODE_DATA_DIR")
+                .filter(|v| !v.to_string_lossy().trim().is_empty())
+                .map_or_else(|| base.join("opencode"), std::path::PathBuf::from);
+            let cancel = deadline.map_or_else(Cancellation::default, Cancellation::with_deadline);
+            if cancelled() {
+                cancel.cancel();
+            }
+            provider.history = Some(crate::providers::provider_config::scan_opencode_history(
+                &dir,
+                &chrono::Local::now(),
+                "local",
+                &cancel,
+            ));
+            continue;
+        }
+        if provider.id != "grok"
+            || std::env::var("SYMBRAIN_USAGE_GROK_HISTORY").as_deref() != Ok("1")
+        {
             continue;
         }
         let home = std::env::var_os("GROK_HOME")
@@ -185,7 +218,7 @@ fn safe_home(home: &Path) -> bool {
             .split(|b| *b == b'/')
             .any(|c| c == b"." || c == b"..")
 }
-fn aggregate<T: TimeZone>(h: &mut LocalHistory, events: Vec<Event>, now: &DateTime<T>) {
+pub(crate) fn aggregate<T: TimeZone>(h: &mut LocalHistory, events: Vec<Event>, now: &DateTime<T>) {
     let mut unique = BTreeMap::new();
     let mut conflicts = BTreeSet::new();
     for e in events {
@@ -278,6 +311,10 @@ fn sum(model: String, events: &[Event]) -> HistoryModel {
         events: events.len(),
         tokens,
         recorded_cost,
+        estimated_cost: None,
+        cost_basis: None,
+        recorded_events: None,
+        estimated_events: None,
         missing_tokens,
         missing_cost,
     }

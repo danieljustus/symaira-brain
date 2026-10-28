@@ -17,6 +17,7 @@ type LocalHistory struct {
 	Attribution    string          `json:"attribution"`
 	Currency       string          `json:"currency"`
 	CostBasis      string          `json:"cost_basis"`
+	PriceSnapshot  *string         `json:"price_snapshot,omitempty"`
 	Timezone       string          `json:"timezone"`
 	Status         string          `json:"status"`
 	ExcludedEvents int             `json:"excluded_events"`
@@ -29,14 +30,19 @@ type HistoryBucket struct {
 	Models []HistoryModel `json:"models"`
 }
 
-// Amounts are absent unless every accepted contribution has that measurement.
+// Tokens require complete measurements. Recorded-only backends also require complete cost;
+// Claude explicitly labels subtotal coverage through recorded_events/estimated_events.
 type HistoryModel struct {
-	Model         string  `json:"model"`
-	Events        int     `json:"events"`
-	Tokens        *string `json:"tokens,omitempty"`
-	RecordedCost  *string `json:"recorded_cost,omitempty"`
-	MissingTokens int     `json:"missing_tokens"`
-	MissingCost   int     `json:"missing_cost"`
+	Model           string  `json:"model"`
+	Events          int     `json:"events"`
+	Tokens          *string `json:"tokens,omitempty"`
+	RecordedCost    *string `json:"recorded_cost,omitempty"`
+	EstimatedCost   *string `json:"estimated_cost,omitempty"`
+	CostBasis       *string `json:"cost_basis,omitempty"`
+	RecordedEvents  *int    `json:"recorded_events,omitempty"`
+	EstimatedEvents *int    `json:"estimated_events,omitempty"`
+	MissingTokens   int     `json:"missing_tokens"`
+	MissingCost     int     `json:"missing_cost"`
 }
 
 type historyEvent struct {
@@ -162,6 +168,10 @@ func ScanGrokHistory(ctx context.Context, home string, now time.Time) *LocalHist
 		h.Status = "unavailable"
 		return h
 	}
+	return aggregateHistory(h, events, excluded, now)
+}
+
+func aggregateHistory(h *LocalHistory, events []historyEvent, excluded int, now time.Time) *LocalHistory {
 	h.ExcludedEvents = excluded
 	unique := map[string]historyEvent{}
 	conflicts := map[string]bool{}

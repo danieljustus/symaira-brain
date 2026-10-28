@@ -42,7 +42,7 @@ mod usage_fetch_oracle_tests;
 use provider_fetch::fetch_one;
 
 #[path = "provider_config.rs"]
-mod provider_config;
+pub(crate) mod provider_config;
 pub use provider_config::{
     ProviderSelection, all_providers, is_secret_reference, is_vault_uri, needs_go_fallback,
     needs_go_fallback_for_selection, resolve_reference, resolve_reference_or_env,

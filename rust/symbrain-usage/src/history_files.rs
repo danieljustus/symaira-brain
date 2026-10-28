@@ -11,6 +11,43 @@ pub(crate) fn read(_: &Path, _: &Cancellation) -> Result<(Vec<Event>, usize), ()
 
 #[cfg(unix)]
 pub(crate) fn read(home: &Path, cancel: &Cancellation) -> Result<(Vec<Event>, usize), ()> {
+    read_json(home, "sessions", false, cancel, parse_line)
+}
+
+#[cfg(not(unix))]
+pub(crate) fn read_json_reset(
+    _: &Path,
+    _: &str,
+    _: bool,
+    _: &Cancellation,
+    _: Option<std::time::Instant>,
+    _: impl FnMut(Option<&[u8]>, &Path) -> Result<Option<Vec<Event>>, ()>,
+) -> Result<(Vec<Event>, usize), ()> {
+    Err(())
+}
+
+pub(crate) fn read_json(
+    home: &Path,
+    subdir: &str,
+    claude: bool,
+    cancel: &Cancellation,
+    mut parse: impl FnMut(&[u8]) -> Result<Vec<Event>, ()>,
+) -> Result<(Vec<Event>, usize), ()> {
+    read_json_reset(home, subdir, claude, cancel, None, |line, _| match line {
+        Some(line) => parse(line).map(Some),
+        None => Ok(Some(vec![])),
+    })
+}
+
+#[cfg(unix)]
+pub(crate) fn read_json_reset(
+    home: &Path,
+    subdir: &str,
+    claude: bool,
+    cancel: &Cancellation,
+    deadline: Option<std::time::Instant>,
+    mut parse: impl FnMut(Option<&[u8]>, &Path) -> Result<Option<Vec<Event>>, ()>,
+) -> Result<(Vec<Event>, usize), ()> {
     use cap_std::fs::Dir;
     use rustix::fs::{Mode, OFlags, open, openat};
     let flags =
@@ -29,14 +66,17 @@ pub(crate) fn read(home: &Path, cancel: &Cancellation) -> Result<(Vec<Event>, us
             _ => return Err(()),
         }
     }
-    let sessions = match openat(&root, "sessions", flags, Mode::empty()) {
+    let sessions = match openat(&root, subdir, flags, Mode::empty()) {
         Ok(fd) => fd,
         Err(rustix::io::Errno::NOENT) => return Ok((vec![], 0)),
         Err(_) => return Err(()),
     };
     let mut state = State {
         cancel,
-        deadline: std::time::Instant::now() + std::time::Duration::from_secs(2),
+        claude,
+        parse: &mut parse,
+        deadline: deadline
+            .unwrap_or_else(|| std::time::Instant::now() + std::time::Duration::from_secs(2)),
         entries: 0,
         files: 0,
         bytes: 0,
@@ -44,11 +84,13 @@ pub(crate) fn read(home: &Path, cancel: &Cancellation) -> Result<(Vec<Event>, us
         excluded: 0,
         events: vec![],
     };
-    state.walk(&Dir::from_std_file(sessions.into()), 0)?;
+    state.walk(&Dir::from_std_file(sessions.into()), 0, Path::new(""))?;
     Ok((state.events, state.excluded))
 }
 #[cfg(unix)]
-struct State<'a> {
+struct State<'a, F> {
+    claude: bool,
+    parse: &'a mut F,
     cancel: &'a Cancellation,
     deadline: std::time::Instant,
     entries: usize,
@@ -59,7 +101,7 @@ struct State<'a> {
     events: Vec<Event>,
 }
 #[cfg(unix)]
-impl State<'_> {
+impl<F: FnMut(Option<&[u8]>, &Path) -> Result<Option<Vec<Event>>, ()>> State<'_, F> {
     fn check(&self) -> Result<(), ()> {
         if self.cancel.is_cancelled() || std::time::Instant::now() >= self.deadline {
             Err(())
@@ -67,7 +109,7 @@ impl State<'_> {
             Ok(())
         }
     }
-    fn walk(&mut self, dir: &cap_std::fs::Dir, depth: usize) -> Result<(), ()> {
+    fn walk(&mut self, dir: &cap_std::fs::Dir, depth: usize, relative: &Path) -> Result<(), ()> {
         self.check()?;
         if depth > 12 {
             return Err(());
@@ -102,15 +144,28 @@ impl State<'_> {
                 )
                 .map_err(|_| ())?;
                 let sub = cap_std::fs::Dir::from_std_file(fd.into());
-                self.walk(&sub, depth + 1)?;
-            } else if child.file_name() == "updates.jsonl" {
-                self.file(dir, &child.file_name())?;
+                self.walk(&sub, depth + 1, &relative.join(child.file_name()))?;
+            } else if (!self.claude && child.file_name() == "updates.jsonl")
+                || (self.claude
+                    && Path::new(&child.file_name())
+                        .extension()
+                        .is_some_and(|e| e == "jsonl"))
+            {
+                self.file(dir, &child.file_name(), &relative.join(child.file_name()))?;
             }
         }
         Ok(())
     }
-    fn file(&mut self, dir: &cap_std::fs::Dir, name: &std::ffi::OsStr) -> Result<(), ()> {
+    fn file(
+        &mut self,
+        dir: &cap_std::fs::Dir,
+        name: &std::ffi::OsStr,
+        relative: &Path,
+    ) -> Result<(), ()> {
         use std::io::Read;
+        if (self.parse)(None, relative)?.is_none() {
+            return Ok(());
+        }
         self.files += 1;
         if self.files > 128 {
             return Err(());
@@ -150,8 +205,9 @@ impl State<'_> {
             if self.lines > 20000 || line.len() > 256 << 10 {
                 return Err(());
             }
-            match parse_line(line) {
-                Ok(events) => self.events.extend(events),
+            match (self.parse)(Some(line), relative) {
+                Ok(Some(events)) => self.events.extend(events),
+                Ok(None) => (),
                 Err(()) => self.excluded += 1,
             }
             if self.events.len() > 10000 {

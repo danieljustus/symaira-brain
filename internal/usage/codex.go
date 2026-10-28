@@ -22,11 +22,12 @@ const (
 // opened strictly read-only — never written, never refreshed by this
 // provider. Mirrors symaira-cockpit's CodexUsageProvider.
 type CodexProvider struct {
-	accessToken string
-	credErr     error
-	credSource  string
-	homeDir     string
-	client      *http.Client
+	localHistoryOnly bool
+	accessToken      string
+	credErr          error
+	credSource       string
+	homeDir          string
+	client           *http.Client
 }
 
 // NewCodexProvider reads the OAuth token from $CODEX_HOME/auth.json (or
@@ -91,6 +92,9 @@ func (p *CodexProvider) Strategies() []Strategy {
 }
 
 func (p *CodexProvider) AuthStatus() AuthStatus {
+	if p.localHistoryOnly {
+		return AuthStatus{Status: "missing", Detail: "No Codex credentials found — sign in with the Codex CLI"}
+	}
 	if p.accessToken != "" {
 		return AuthStatus{Status: "available", Detail: "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)", Source: p.credSource}
 	}
