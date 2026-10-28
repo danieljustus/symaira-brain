@@ -140,7 +140,14 @@ fn configured_status_decodes_valid_config_and_keeps_go_for_the_rest() {
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
     let config = root.path().join("config/symskills/config.toml");
-    std::fs::write(&config, b"library_dir = \"/different/library\"\n").unwrap();
+    // A drive-less "/different/library" is relative on Windows, where Go
+    // keeps such values on the fallback path; use a host-absolute directory.
+    let library = root.path().join("different").join("library");
+    let body = format!(
+        "library_dir = \"{}\"\n",
+        library.to_string_lossy().replace('\\', "/")
+    );
+    std::fs::write(&config, body).unwrap();
     let output = run(&root, &["skills", "status", "--target", "opencode"]);
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert_eq!(output.stdout, b"No installed skills found.\n");
