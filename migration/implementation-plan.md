@@ -1,5 +1,8 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+> **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
+
+
 
 ## Guard doctor approved deviations — 2026-10-19
 

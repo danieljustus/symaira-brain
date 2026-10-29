@@ -1,5 +1,8 @@
 # A complete portable Linux loader simulation for the owned checker (#803)
 
+> **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
+
+
 Status: source correction prepared; different-author source review and genuine
 native three-platform/official CSDK acceptance remain pending. No production
 loader, runtime flags, source-ID/address/version guard, workflow or SQL changes.

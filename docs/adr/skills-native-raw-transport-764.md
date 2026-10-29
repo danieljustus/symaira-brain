@@ -1,5 +1,8 @@
 # Skills MCP raw JSON/EOF transport layer (#764, slice a)
 
+> **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
+
+
 Status: implemented and locally verified on a branch from main `9bf83c3f2`.
 Native Linux/macOS/Windows CI is pending. Salvaged from PR #813 (head
 `578d201f5`); that PR's longer ADR series (`skills-native-json-depth-float-764`,
