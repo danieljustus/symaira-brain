@@ -30,8 +30,19 @@ func checkCandidateArtifacts(cfg *goreleaserConfig, version, assetsDir string) e
 	}
 
 	expectedArchives := make(map[string][]string)
+	ignored := 0
 	for _, goos := range build.GOOS {
 		for _, goarch := range build.GOARCH {
+			skip := false
+			for _, exclusion := range build.Ignore {
+				if exclusion.GOOS == goos && exclusion.GOARCH == goarch {
+					skip = true
+				}
+			}
+			if skip {
+				ignored++
+				continue
+			}
 			name := renderTemplate(archive.NameTemplate, cfg.ProjectName, version, goos, goarch)
 			format := formatFor(archive, goos)
 			if hasUnrenderedTokens(name) || format == "" {
@@ -45,7 +56,7 @@ func checkCandidateArtifacts(cfg *goreleaserConfig, version, assetsDir string) e
 			expectedArchives[name+"."+format] = members
 		}
 	}
-	if len(expectedArchives) != len(build.GOOS)*len(build.GOARCH) {
+	if len(expectedArchives) != len(build.GOOS)*len(build.GOARCH)-ignored {
 		return fmt.Errorf("config has duplicate goos/goarch archive names")
 	}
 	checksumName := renderTemplate(cfg.Checksum.NameTemplate, cfg.ProjectName, version, "", "")
@@ -142,7 +153,7 @@ var hybridCandidateMembers = []string{
 
 // hybridPlatforms is every release target of .goreleaser.yml.
 var hybridPlatforms = []string{
-	"darwin/amd64", "darwin/arm64", "linux/amd64", "linux/arm64", "windows/amd64", "windows/arm64",
+	"darwin/arm64", "linux/amd64", "linux/arm64",
 }
 
 // parseHybridPlatforms accepts "all" or a comma-separated list of os/arch pairs.
