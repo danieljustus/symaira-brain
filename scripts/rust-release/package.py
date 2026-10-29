@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DOCS = ["AGENTS.md", "LICENSE", "README.md"]
-PLATFORMS = [(goos, goarch) for goos in ["darwin", "linux", "windows"] for goarch in ["amd64", "arm64"]]
+PLATFORMS = [("darwin", "arm64"), ("linux", "amd64"), ("linux", "arm64")]
 VERSION = re.compile(r"^[0-9A-Za-z.+-]+$")
 ZIP_EPOCH = 315532800  # 1980-01-01, the earliest ZIP timestamp
 
@@ -96,6 +96,8 @@ def main(argv: list[str]) -> int:
         return 0
     if not VERSION.fullmatch(args.version) or args.version.startswith("v"):
         raise SystemExit(f"invalid version {args.version!r} (no leading v)")
+    if (args.os, args.arch) not in PLATFORMS:
+        raise SystemExit(f"unsupported release platform: {args.os}/{args.arch}")
     epoch = int(os.environ.get("SOURCE_DATE_EPOCH", "0"))
     args.out.mkdir(parents=True, exist_ok=True)
     path = args.out / archive_name(args.version, args.os, args.arch)
