@@ -1191,6 +1191,9 @@ func BuildCombinedNativeAuthenticatedReportOracle(fixtures map[string][]byte) (R
 	combinedFixtures["kimi"] = fixtures["kimi-stable"]
 	combinedFixtures["moonshot"] = fixtures["moonshot-cn"]
 	transport := &oracleTransport{bodies: combinedFixtures}
+	// Account credits answer 404 so OpenRouter keeps covering the legacy key fixture.
+	transport.sequences = map[string][][]byte{"openrouter": {[]byte(`{"error":{"code":404}}`), combinedFixtures["openrouter"]}}
+	transport.statuses = map[string][]int{"openrouter": {http.StatusNotFound, http.StatusOK}}
 	client := &http.Client{Transport: roundTripFixture{transport}}
 	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
 	if len(providers) != 10 {
@@ -1221,8 +1224,8 @@ func BuildCombinedNativeAuthenticatedReportOracle(fixtures map[string][]byte) (R
 		}
 		report.Providers[index].Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
 	}
-	if len(transport.requests) != 5 {
-		return Report{}, fmt.Errorf("combined oracle made %d fixture requests, want five", len(transport.requests))
+	if len(transport.requests) != 6 {
+		return Report{}, fmt.Errorf("combined oracle made %d fixture requests, want six", len(transport.requests))
 	}
 	findRequest := func(match func(*http.Request) bool) *http.Request {
 		for _, request := range transport.requests {
@@ -1265,6 +1268,14 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 		transportID = "claude"
 	}
 	transport := &oracleTransport{bodies: map[string][]byte{transportID: body}}
+	wantRequests := 1
+	if providerID == "openrouter" {
+		// The account-credits endpoint answers 404 here so the pinned key
+		// fixture keeps exercising the documented legacy fallback byte for byte.
+		transport.sequences = map[string][][]byte{"openrouter": {[]byte(`{"error":{"code":404}}`), body}}
+		transport.statuses = map[string][]int{"openrouter": {http.StatusNotFound, http.StatusOK}}
+		wantRequests = 2
+	}
 	client := &http.Client{Transport: roundTripFixture{transport}}
 	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
 	if len(providers) != 10 {
@@ -1300,7 +1311,7 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 	if len(report.Providers) != 10 || report.Providers[index].Snapshot == nil {
 		return Report{}, fmt.Errorf("%s report oracle did not produce a snapshot", providerID)
 	}
-	if len(transport.requests) != 1 {
+	if len(transport.requests) != wantRequests {
 		return Report{}, fmt.Errorf("usage report oracle made %d fixture requests, want only %s", len(transport.requests), providerID)
 	}
 	report.Providers[index].Snapshot = canonicalOracleSnapshot(report.Providers[index].Snapshot)
