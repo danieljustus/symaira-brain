@@ -113,11 +113,11 @@ func printUsageReport(w io.Writer, report usage.Report) {
 			fmt.Fprintf(w, "  local history	%s	scope=%s attribution=%s\n", h.Status, h.Scope, h.Attribution)
 			for _, period := range h.Periods {
 				for _, model := range period.Models {
-					tokens := "?"
+					count := "?"
 					if model.Tokens != nil {
-						tokens = *model.Tokens
+						count = *model.Tokens
 					}
-					fmt.Fprintf(w, "  %s\t%s\t%s tokens\n", period.Key, model.Model, tokens)
+					fmt.Fprintf(w, "  %s\t%s\t%s tokens\n", period.Key, model.Model, count)
 				}
 			}
 		}

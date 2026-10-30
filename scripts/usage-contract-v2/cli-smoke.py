@@ -54,7 +54,8 @@ for lang,binary in [('go',B/'symbrain-go'),('rust',C/'debug/symbrain')]:
             assert not run.stderr,(lang,case,run.stderr)
             if case=='table':
                 assert b'local history\tavailable\tscope=local_machine attribution=unattributed' in run.stdout
-                assert b'120 tokens\t0.23571588 USD recorded' in run.stdout
+                assert b'120 tokens' in run.stdout
+                assert b'USD recorded' not in run.stdout
             else:
                 report=json.loads(run.stdout);assert report['schema_version']==1 and len(report['providers'])==1
                 p=report['providers'][0];assert p['id']==selector
@@ -63,15 +64,15 @@ for lang,binary in [('go',B/'symbrain-go'),('rust',C/'debug/symbrain')]:
                 assert ('error' in p)==(case=='api-network-denied')
                 if case in ['disabled','unselected']: assert 'history' not in p
                 else:
-                    h=p['history'];assert h['scope']=='local_machine' and h['attribution']=='unattributed' and h['cost_basis']=='recorded' and h['currency']=='USD'
-                    expected='no_data' if case=='no-data' else 'unavailable' if case in ['symlink','fifo'] else 'partial' if case in ['missing-cost','conflict','tail'] else 'available'
+                    h=p['history'];assert h['scope']=='local_machine' and h['attribution']=='unattributed'
+                    assert not ({'cost_basis','currency','recorded_cost','missing_cost'} & set(h))
+                    expected='no_data' if case=='no-data' else 'unavailable' if case in ['symlink','fifo'] else 'partial' if case in ['conflict','tail'] else 'available'
                     assert h['status']==expected,(lang,case,h)
                     if case in ['no-data','conflict','symlink','fifo']: assert not h['daily'] and not h['periods']
                     else:
                         m=h['periods'][0]['models'][0]
                         assert m['tokens']==('0' if case=='true-zero' else '120')
-                        if case=='missing-cost':assert 'recorded_cost' not in m and m['missing_cost']==1
-                        else:assert m['recorded_cost']==('0' if case=='true-zero' else '0.23571588')
+                        assert not ({'cost_basis','currency','recorded_cost','missing_cost'} & set(m))
                 outputs[(lang,case)]=report
         for private in ['synthetic-private-event-id','synthetic-never-output','synthetic-offline-token',str(root)]:assert private.encode() not in run.stdout
         after=inventory(root);assert before==after,(lang,case,'input mutation');assert not marker.exists();assert not list(runtime.iterdir())
