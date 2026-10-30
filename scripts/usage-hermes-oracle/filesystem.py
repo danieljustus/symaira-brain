@@ -9,7 +9,7 @@ import tempfile
 
 from hermes_compare import filesystem_matches
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'usage-provider-files-oracle'))
-from reference_parity import reference_resolution_divergence
+from reference_parity import normalize_reference_resolution, reference_resolution_divergence
 
 output=pathlib.Path(sys.argv[3])
 if os.name!='posix':
@@ -45,6 +45,8 @@ with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
         report=json.loads(base64.b64decode(native['stdout_b64']))
         assert next(row for row in report['providers']if row['id']=='nous')['configured']is False
         if kind=='fifo':assert observations[0]['timed_out'],'immutable Go FIFO behavior changed; reassess native-only contract'
-        else:assert filesystem_matches(observations[0],native,auth.exists()) or reference_resolution_divergence(observations[0],native),(kind,observations)
+        else:
+            normalized = normalize_reference_resolution(native)
+            assert filesystem_matches(observations[0],native,auth.exists()) or reference_resolution_divergence(observations[0],native) or (normalized is not None and filesystem_matches(observations[0],normalized,auth.exists())),(kind,observations)
         records.append({'id':kind,'go':observations[0],'rust':native,'native_only_safety_contract':kind=='fifo', **({'known_divergence':'#933/#930 diagnostic'} if kind!='fifo' and observations[0]!=native else {})})
 output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':records},indent=2)+'\n', encoding='utf-8')

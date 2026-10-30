@@ -3,13 +3,8 @@ import base64
 import json
 
 
-def reference_resolution_divergence(go, native):
-    """Undo only reference-failure promotions, then compare all remaining bytes."""
-    if {k: v for k, v in go.items() if k != 'stdout_b64'} != {
-        k: v for k, v in native.items() if k != 'stdout_b64'
-    }:
-        return False
-    expected = base64.b64decode(go['stdout_b64'])
+def normalize_reference_resolution(native):
+    """Undo only reference-failure promotions, preserving all other bytes."""
     actual = base64.b64decode(native['stdout_b64'])
     original = actual
     try:
@@ -32,6 +27,14 @@ def reference_resolution_divergence(go, native):
                 del provider['error']
                 after = json.dumps(provider, ensure_ascii=False, separators=(',', ':')).encode()
                 if actual.count(before) != 1:
-                    return False
+                    return None
                 actual = actual.replace(before, after, 1)
-    return original != actual and expected == actual
+    if original == actual:
+        return None
+    return {**native, 'stdout_b64': base64.b64encode(actual).decode()}
+
+
+def reference_resolution_divergence(go, native):
+    """Compare all remaining bytes after the narrow promotion reversal."""
+    normalized = normalize_reference_resolution(native)
+    return normalized is not None and go == normalized
