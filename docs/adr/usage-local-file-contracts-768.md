@@ -1,5 +1,8 @@
 # Remaining usage file contracts: reference baseline for #768
 
+> **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
+
+
 Status: baseline only. No additional production source, native routing or native
 parity is accepted by this decision. The parent candidate remains immutable at
 `5111d8b66246f1c397fc9f962cece73c10929ad2` during independent review.

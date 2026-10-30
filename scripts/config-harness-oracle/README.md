@@ -1,6 +1,6 @@
 `run.sh OUTPUT_JSON [--record-fixture PATH] [--record-parse-fixture PATH]` compiles the production Go CLI from
 immutable `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #769 base, with CoreKit v0.18.2,
-as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 1915 cases in
+as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 1931 cases in
 disposable per-case HOME/XDG/project roots:
 
 * 116 new argv-grammar shapes for `config`, `harness`, `harness list` and
@@ -65,7 +65,7 @@ Linux/macOS/Windows runs are still pending, so no three-OS claim is made.
 
 #### `--project` path shapes for install, uninstall and sync (#769 slice 3)
 
-`project_cases.py` adds 975 `cfgh-project-*` cases (1915 in total): 78 shapes
+`project_cases.py` adds 975 `cfgh-project-*` cases (plus the 16 target cases below): 78 shapes
 (`.`, `./`, `./x/../`, `../project`, `..`, `a/b/../../..`, `a//b`, `a/./b`,
 trailing slashes, missing and deep directories, symlinked directories,
 symlink chains/loops/dangling links, a symlink inside the path, a file or a
@@ -96,3 +96,29 @@ directory shapes) inside Docker, with the Go oracle built in
 `golang:1.26` and the Rust binary in `rust:1.98-bookworm`:
 `python3 scripts/config-harness-oracle/replay.py symbrain-go symbrain-rust
 report.json --record-project-fixture project_path_go_shapes.linux.json`.
+
+#### Existing sync instruction targets (#909)
+
+The 16 POSIX-only `cfgh-sync-target-*` cases cover `CLAUDE.md` as a symlink
+(to existing notes), dangling symlink, directory and FIFO, each in normal and
+`--dry-run`, table and JSON modes. All must exit 1 with Go's exact read error;
+filesystem comparison includes FIFOs without opening them. The native
+`project_path_native` sibling test replays `fixtures/sync_target_go_shapes.json`
+and bounds each child to 8 seconds so a blocking FIFO regression fails.
+This shared fixture was recorded on macOS: these cases use Go's own
+platform-independent non-regular-file diagnostic, not OS errno text. Linux
+execution remains a separate CI gate.
+
+Record only these additions, without changing either existing OS fixture or
+the pinned Go revision/toolchain, using the same replay/recording machinery:
+
+```sh
+python3 scripts/config-harness-oracle/replay.py symbrain-go symbrain-rust report.json \
+  --case-prefix cfgh-sync-target- \
+  --record-project-fixture rust/symbrain-cli/tests/fixtures/sync_target_go_shapes.json
+python3 -m unittest discover -s scripts/config-harness-oracle
+```
+
+`--case-prefix` fails if it selects no cases and reports the applied filter;
+it is for focused regression runs/recording, not a replacement for the full
+unfiltered oracle gate.

@@ -410,8 +410,9 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
         r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_ai_usage","arguments":{}}}"#,
         "\n"
     );
+    install_synthetic_claude_file(&root);
     let mut child = command(&root, &["mcp", "--profile-file", profile.to_str().unwrap()])
-        // Make provider discovery fail before its macOS Keychain fallback. The
+        // Make provider discovery fail before file or macOS Keychain fallback. The
         // test exercises the MCP route and report shape, not real credentials.
         .env(
             "ANTHROPIC_OAUTH_TOKEN",
@@ -462,7 +463,11 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
                     .contains("Antigravity is not running")
             );
         } else {
-            assert_eq!(provider["configured"], false, "provider: {provider}");
+            assert_eq!(
+                provider["configured"],
+                provider["id"] == "claude",
+                "provider: {provider}"
+            );
         }
     }
     let claude = report["providers"]
@@ -471,14 +476,9 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
         .iter()
         .find(|provider| provider["id"] == "claude")
         .expect("Claude provider");
-    assert_eq!(claude["configured"], false);
-    assert!(claude["snapshot"].is_null());
-    assert!(
-        claude["auth_status"]["detail"]
-            .as_str()
-            .unwrap()
-            .contains("secret resolution failed")
-    );
+    assert_unresolved_claude_reference(claude);
+    // An unresolved explicit reference must not fall back to or expose the file token.
+    assert!(!report.to_string().contains("synthetic-claude-file"));
     let audit_path = root
         .path()
         .join("home/.local/share/symbrain/audit/usage.jsonl");
@@ -497,6 +497,18 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
         }),
         "audit records: {records:?}"
     );
+}
+
+fn assert_unresolved_claude_reference(claude: &serde_json::Value) {
+    assert_eq!(claude["configured"], true);
+    assert!(claude["snapshot"].is_null());
+    let detail = claude["auth_status"]["detail"].as_str().unwrap();
+    assert!(detail.starts_with(
+        "credential resolution failed: resolve ANTHROPIC_OAUTH_TOKEN: secret resolution failed for env://SYMBRAIN_USAGE_TEST_MISSING_TOKEN:"
+    ));
+    assert_eq!(claude["auth_status"]["status"], "missing");
+    assert_eq!(claude["auth_status"]["source"], "vault");
+    assert_eq!(claude["error"], detail);
 }
 
 #[test]

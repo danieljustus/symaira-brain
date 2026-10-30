@@ -10,8 +10,8 @@ release is the cutover in #782.
 
 | Job | Output |
 |---|---|
-| `build` (six native runners) | `symbrain_<version>_<os>_<arch>.tar.gz` (`.zip` on Windows) for darwin, linux and windows on amd64 and arm64. Each archive contains `symbrain`, the `symbrain-go` fallback, `AGENTS.md`, `LICENSE` and `README.md`, and is smoke-tested on its own platform. |
-| `bundle` | `checksums.txt`, the six-archive contract check, one CycloneDX SBOM per archive, and the Homebrew formula and Scoop manifest rendered from the checksums. |
+| `build` (three native runners) | `symbrain_<version>_<os>_<arch>.tar.gz` for macOS arm64 and Linux amd64/arm64. Each archive contains `symbrain`, the `symbrain-go` fallback, `AGENTS.md`, `LICENSE` and `README.md`, and is smoke-tested on its own platform. |
+| `bundle` | `checksums.txt`, the three-archive contract check, one CycloneDX SBOM per archive, and the Homebrew formula rendered from the checksums. |
 | `sign` (only with `sign=true`) | Developer ID signed and notarized darwin binaries, repackaged archives, refreshed checksums, SBOMs and tap files, and a keyless cosign signature and certificate for every file. |
 
 Candidate versions are `<workspace version>-candidate.<commit>`. Unsigned
@@ -43,13 +43,14 @@ codesign --verify --strict --check-notarization -R '=anchor apple generic and ce
 
 The notary receipts (`notary-*-info.json`) must all report `Accepted`.
 
-## Homebrew and Scoop
+## Homebrew
 
 `scripts/rust-release/manifests.py` renders `symbrain.rb` (for
-`danieljustus/homebrew-tap`, `Formula/`) and `symbrain.json` (for
-`danieljustus/scoop-bucket`, repository root) from a `checksums.txt`. Both
-install `symbrain` and `symbrain-go`, so the fallback is on `PATH`. They are
-review artifacts only; the cutover publishes them.
+`danieljustus/homebrew-tap`, `Formula/`) from a `checksums.txt`. It
+installs `symbrain` and `symbrain-go`, so the fallback is on `PATH`. It is
+a review artifact only; the cutover publishes it. New candidates exclude
+Windows and macOS Intel. Scoop generation is retained only for the explicit
+`--legacy-go` historical rollback mode; no workflow publishes Scoop.
 
 ## Rolling back to v0.12.x
 
@@ -67,3 +68,10 @@ GoReleaser published (`scripts/rust-release/test_manifests.py` checks this
 against the recorded copy). After the tap and bucket are updated, users run
 `brew update && brew reinstall symbrain`; Scoop users install or update
 `symaira/symbrain` from the bucket.
+
+## Historical distribution evidence
+
+`go run ./scripts/dist-oracle -check` retains the immutable v0.11.0 manifest
+and the pre-#990 configuration snapshot. It is a historical contract check,
+not current platform support. Candidate checks use the current `.goreleaser.yml`
+and require only the three supported CLI targets.

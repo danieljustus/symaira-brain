@@ -150,9 +150,23 @@ fn copilot_kimi_oracle_matches_fresh_go() {
             };
             let transport = Arc::new(Unauthorized(Mutex::new(Vec::new())));
             let report = Service::with_transport(vec![provider], transport.clone()).report();
+            let actual = serde_json::to_value(report).unwrap();
+            let mut expected = record["report"].clone();
+            // The fresh Go process uses the immutable pre-#930 revision.
+            // Preserve its diagnostic and every unrelated field verbatim.
+            for provider in expected["providers"].as_array_mut().expect("providers") {
+                if let Some(detail) = provider["auth_status"]["detail"].as_str()
+                    && detail.starts_with("credential resolution failed: ")
+                {
+                    let detail = detail.to_owned();
+                    assert_eq!(provider["configured"], false);
+                    assert!(provider.get("error").is_none());
+                    provider["configured"] = true.into();
+                    provider["error"] = detail.into();
+                }
+            }
             assert_eq!(
-                serde_json::to_value(report).unwrap(),
-                record["report"],
+                actual, expected,
                 "{}: complete Copilot/Kimi report",
                 record["id"]
             );

@@ -1,5 +1,8 @@
 # Memory MCP metadata stays with its embedded owner
 
+> **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
+
+
 The frozen Go implementation exposes Memory tools through `symbrain mcp`
 (and its deprecated `serve` alias). `symbrain memory serve` owns the separate
 HTTP synchronization/Web Console listener. Issue759's shorthand must not move

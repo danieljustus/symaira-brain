@@ -89,7 +89,7 @@ func TestRustReleaseWorkflowBuildsAllTargetsWithoutPublishing(t *testing.T) {
 		platforms = append(platforms, entry["os"]+"/"+entry["arch"])
 	}
 	slices.Sort(platforms)
-	want := []string{"darwin/amd64", "darwin/arm64", "linux/amd64", "linux/arm64", "windows/amd64", "windows/arm64"}
+	want := []string{"darwin/arm64", "linux/amd64", "linux/arm64"}
 	if !slices.Equal(platforms, want) {
 		t.Errorf("build platforms = %v, want %v", platforms, want)
 	}

@@ -44,6 +44,7 @@ fn usage_credential_768_matches_fresh_go_constructors_and_requests() {
         "nonzero complete 11-provider-source × 4-reference corpus"
     );
     validate_corpus(&records);
+    let mut known_divergences = 0;
     for record in &records {
         for name in [
             "ANTHROPIC_ADMIN_KEY",
@@ -84,12 +85,25 @@ fn usage_credential_768_matches_fresh_go_constructors_and_requests() {
             .collect();
         let transport = Arc::new(UnauthorizedTransport(Mutex::new(Vec::new())));
         let report = Service::with_transport(providers, transport.clone()).report();
-        assert_eq!(
-            serde_json::to_value(report).expect("report"),
-            record["report"],
-            "{}: full report",
-            record["id"]
-        );
+        let actual = serde_json::to_value(report).expect("report");
+        let mut expected = record["report"].clone();
+        // #930 intentionally differs from the immutable Go oracle only when
+        // an explicit reference failed. Keep every other field comparison.
+        for provider in expected["providers"].as_array_mut().expect("providers") {
+            if let Some(detail) = provider["auth_status"]["detail"].as_str()
+                && detail.starts_with("credential resolution failed: ")
+            {
+                let detail = detail.to_owned();
+                assert_ne!(
+                    actual, record["report"],
+                    "#930 divergence must remain explicit"
+                );
+                provider["configured"] = true.into();
+                provider["error"] = detail.into();
+                known_divergences += 1;
+            }
+        }
+        assert_eq!(actual, expected, "{}: full report", record["id"]);
         assert_eq!(
             serde_json::to_value(transport.0.lock().expect("headers").clone()).expect("headers"),
             record["headers"],
@@ -97,6 +111,10 @@ fn usage_credential_768_matches_fresh_go_constructors_and_requests() {
             record["id"]
         );
     }
+    eprintln!(
+        "credential oracle: {} cases; {known_divergences} known #930 divergences",
+        records.len()
+    );
     if let Ok(path) = std::env::var("USAGE_768_NATIVE") {
         std::fs::write(
             path,

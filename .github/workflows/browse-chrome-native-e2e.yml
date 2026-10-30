@@ -23,15 +23,9 @@ jobs:
           - runner: ubuntu-24.04-arm
             platform: linux-arm64
             cft: linux-arm64
-          - runner: macos-15-intel
-            platform: darwin-amd64
-            cft: mac-x64
           - runner: macos-15
             platform: darwin-arm64
             cft: mac-arm64
-          - runner: windows-2025
-            platform: windows-amd64
-            cft: win64
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
     defaults:

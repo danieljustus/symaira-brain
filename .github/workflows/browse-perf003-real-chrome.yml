@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       diagnostic_only:
-        description: Run timestamped Windows AMD64 phase diagnostics without evaluating PERF-003.
+        description: Run timestamped supported-platform phase diagnostics without evaluating PERF-003.
         required: false
         default: false
         type: boolean
@@ -22,8 +22,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Job-level `if` cannot read `matrix`; diagnostic runs narrow the matrix instead.
-        include: ${{ fromJSON(inputs.diagnostic_only && '[{"target":"windows-amd64","runner":"windows-2025","cft":"win64"}]' || '[{"target":"darwin-amd64","runner":"macos-15-intel","cft":"mac-x64"},{"target":"darwin-arm64","runner":"macos-15","cft":"mac-arm64"},{"target":"linux-amd64","runner":"ubuntu-24.04","cft":"linux64"},{"target":"linux-arm64","runner":"ubuntu-24.04-arm","cft":"linux-arm64"},{"target":"windows-amd64","runner":"windows-2025","cft":"win64"},{"target":"windows-arm64","runner":"windows-11-arm","cft":"win-arm64"}]') }}
+        include:
+          - {target: darwin-arm64, runner: macos-15, cft: mac-arm64}
+          - {target: linux-amd64, runner: ubuntu-24.04, cft: linux64}
+          - {target: linux-arm64, runner: ubuntu-24.04-arm, cft: linux-arm64}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
@@ -44,12 +46,6 @@ jobs:
           go build -ldflags="-s -w" -o "$RUNNER_TEMP/symbrowse-go${{ runner.os == 'Windows' && '.exe' || '' }}" ./cmd/symbrowse
           cargo build --release --locked --bin symbrowse
           cp "target/release/symbrowse${{ runner.os == 'Windows' && '.exe' || '' }}" "$RUNNER_TEMP/symbrowse-rust${{ runner.os == 'Windows' && '.exe' || '' }}"
-
-      - name: Test Windows named-pipe daemon transport
-        if: runner.os == 'Windows'
-        working-directory: browse
-        shell: bash
-        run: go test ./internal/daemon -run '^Test(WindowsNamedPipeContractMatchesRust|SocketPathUsesBrowseNamedPipe|WindowsNamedPipeDaemonRoundTrip|WindowsNamedPipeDaemonHonorsIdleTimeout)$' -count=1
 
       - name: Fetch isolated official Chrome for Testing artifact
         id: cft
@@ -133,7 +129,7 @@ jobs:
           path: ${{ runner.temp }}/perf003-reports
           merge-multiple: false
 
-      - name: Require five measured native targets and report Windows ARM64 blocker
+      - name: Require all three supported native targets
         env:
           REPORT_ROOT: ${{ runner.temp }}/perf003-reports
         run: |
@@ -143,16 +139,13 @@ jobs:
 
           root = Path(os.environ["REPORT_ROOT"])
           expected = {
-              "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
               "darwin-arm64": ("Darwin", {"arm64", "aarch64"}),
               "linux-amd64": ("Linux", {"x86_64", "amd64"}),
               "linux-arm64": ("Linux", {"aarch64", "arm64"}),
-              "windows-amd64": ("Windows", {"amd64", "x86_64"}),
-              "windows-arm64": ("Windows", {"arm64", "aarch64"}),
           }
           dirs = {path.name.removeprefix("browse-perf003-"): path for path in root.iterdir() if path.is_dir()}
           if set(dirs) != set(expected):
-              raise SystemExit(f"expected six platform evidence directories, got {sorted(dirs)}")
+              raise SystemExit(f"expected three platform evidence directories, got {sorted(dirs)}")
           reports = {}
           for target, directory in dirs.items():
               files = list(directory.glob("*.json"))
@@ -162,7 +155,7 @@ jobs:
               if report.get("target") != target or report.get("source_revision") != os.environ["GITHUB_SHA"]:
                   raise SystemExit(f"{target} receipt has wrong target/SHA")
               reports[target] = report
-          for target in set(expected) - {"windows-arm64"}:
+          for target in expected:
               report = reports[target]
               system, machines = expected[target]
               host = report.get("host", {})
@@ -182,14 +175,5 @@ jobs:
                   digest = chrome.get(key, "")
                   if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
                       raise SystemExit(f"{target} missing verified Chrome for Testing {key}")
-          unsupported = reports["windows-arm64"]
-          if unsupported.get("host", {}).get("system") != expected["windows-arm64"][0] or unsupported.get("host", {}).get("machine", "").casefold() not in expected["windows-arm64"][1]:
-              raise SystemExit(f"Windows ARM64 native runner identity mismatch: {unsupported.get('host')}")
-          if unsupported.get("status") != "unsupported" or unsupported.get("chrome", {}).get("version") is not None:
-              raise SystemExit("Windows ARM64 must retain explicit unavailable-CfT evidence")
-          for implementation in ("go", "rust"):
-              digest = unsupported.get("binaries", {}).get(implementation, {}).get("sha256", "")
-              if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
-                  raise SystemExit(f"Windows ARM64 receipt lacks {implementation} binary identity")
-          print(f"PERF-003: five real-Chrome targets measured on {os.environ['GITHUB_SHA']}; Windows ARM64 unsupported by official CfT. Ledger remains incomplete.")
+          print(f"PERF-003: all three supported real-Chrome targets measured on {os.environ['GITHUB_SHA']}")
           PY

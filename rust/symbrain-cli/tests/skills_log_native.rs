@@ -129,7 +129,7 @@ corrupt
 }
 
 #[test]
-fn unavailable_log_path_uses_go_before_stdout() {
+fn unavailable_log_path_is_reported_natively_with_go_text() {
     let root = TempDir::new().unwrap();
     let share_dir = root.path().join("home/.local/share");
     fs::create_dir_all(&share_dir).unwrap();
@@ -139,7 +139,15 @@ fn unavailable_log_path_uses_go_before_stdout() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stdout.is_empty());
+    assert_eq!(
+        String::from_utf8(output.stderr).unwrap(),
+        format!(
+            "symbrain skills log: read operation log: open {}/home/.local/share/symskills/events.1.jsonl: not a directory\n",
+            root.path().canonicalize().unwrap().display()
+        )
+    );
 }
 
 #[test]
@@ -203,23 +211,32 @@ fn log_filters_trim_values_and_ignore_blank_filters() {
 }
 
 #[test]
-fn symlinked_log_uses_go_before_stdout() {
+fn symlinked_log_is_followed_natively() {
     let root = TempDir::new().unwrap();
     let log_dir = root.path().join("home/.local/share/symskills");
     let target = root.path().join("outside-events.jsonl");
     fs::create_dir_all(&log_dir).unwrap();
-    fs::write(&target, b"{}\n").unwrap();
+    fs::write(
+        &target,
+        br#"{"ts":"2026-09-17T00:00:00Z","event":"install","skill":"linked","outcome":"ok","actor":"cli"}
+"#,
+    )
+    .unwrap();
     std::os::unix::fs::symlink(&target, log_dir.join("events.jsonl")).unwrap();
 
     let output = command(&root, &["skills", "log"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert_eq!(
+        output.stdout,
+        b"WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n2026-09-17T00:00:00Z\tinstall\tlinked\t-\tok\n"
+    );
 }
 
 #[test]
-fn symlinked_log_ancestor_uses_go_before_stdout() {
+fn symlinked_log_ancestor_is_followed_natively() {
     let root = TempDir::new().unwrap();
     let home = root.path().join("home");
     let real_local = home.join("real-local");
@@ -234,14 +251,18 @@ fn symlinked_log_ancestor_uses_go_before_stdout() {
     .unwrap();
 
     let output = command(&root, &["skills", "log"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert_eq!(
+        output.stdout,
+        b"WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n2026-09-17T00:00:00Z\tinstall\t-\t-\tok\n"
+    );
 }
 
 #[test]
-fn unreadable_log_uses_go_before_stdout() {
+fn unreadable_log_is_reported_natively_with_go_text() {
     let root = TempDir::new().unwrap();
     let log_dir = root.path().join("home/.local/share/symskills");
     fs::create_dir_all(&log_dir).unwrap();
@@ -255,5 +276,17 @@ fn unreadable_log_uses_go_before_stdout() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    if fs::File::open(&path).is_ok() {
+        // Running as root: mode 000 does not restrict the owner.
+        return;
+    }
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stdout.is_empty());
+    assert_eq!(
+        String::from_utf8(output.stderr).unwrap(),
+        format!(
+            "symbrain skills log: read operation log: open {}/home/.local/share/symskills/events.jsonl: permission denied\n",
+            root.path().canonicalize().unwrap().display()
+        )
+    );
 }

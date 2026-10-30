@@ -51,6 +51,7 @@ run_stage go-build go -C "$source_root" build -trimpath -o "$scratch/go-usage$ex
 run_stage go-constructors go -C "$source_root" test ./internal/usage -run '^TestUsageProviderFiles768$' -count=1
 git -C "$source_root" diff --exit-code --quiet
 run_stage native-constructors cargo test --locked -p symbrain-usage --lib provider_files_oracle_matches_fresh_go -- --ignored --nocapture
+run_stage cli-unit python3 "$repo_root/scripts/usage-provider-files-oracle/reference_parity_test.py"
 run_stage native-build cargo build --locked -p symbrain-cli
 run_stage cli python3 "$repo_root/scripts/usage-provider-files-oracle/cli.py" "$scratch/go.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/cli.json"
 run_stage filesystem python3 "$repo_root/scripts/usage-provider-files-oracle/filesystem.py" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/filesystem.json"
