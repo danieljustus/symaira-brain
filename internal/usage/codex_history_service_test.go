@@ -39,7 +39,7 @@ func TestCodexHistoryConsentAndQuotaIndependence(t *testing.T) {
 				t.Setenv("SYMBRAIN_USAGE_CODEX_HISTORY", "true")
 			}
 			calls := 0
-			client := &http.Client{Transport: openRouterTestTransport(func(*http.Request) (*http.Response, error) {
+			client := &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
 				calls++
 				return &http.Response{StatusCode: 401, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{}`))}, nil
 			})}

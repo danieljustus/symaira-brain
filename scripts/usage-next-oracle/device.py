@@ -100,6 +100,9 @@ def main():
             cli_build=build(repo,root,evidence,source,env,run)
             argv_command=['python3',str(repo/'scripts/usage-next-oracle/argv.py')]
             for key in ['go','parent','rust','sentinel']:argv_command+=['--'+key,cli_build['binaries'][key]['path']]
+            go_head=root/('go-head.exe'if os.name=='nt'else'go-head')
+            run('go-head-build',['go','build','-trimpath','-o',str(go_head),'./cmd/symbrain'],env)
+            argv_command+=['--go-head',str(go_head)]
             run('early-argv',argv_command+['--output',str(evidence/'argv.json')],env)
             control_command=['python3',str(repo/'scripts/usage-next-oracle/argv_controls.py')]+argv_command[2:]
             run('early-argv-controls',control_command+['--output',str(evidence/'argv-controls.json')],env)

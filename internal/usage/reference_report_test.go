@@ -22,7 +22,7 @@ func (r *referenceTransport) RoundTrip(req *http.Request) (*http.Response, error
 	if req.Header.Get("Authorization") != "Bearer fixture-secret" {
 		r.t.Error("resolved credential not used")
 	}
-	return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"data":{"total_credits":10,"total_usage":1}}`)), Request: req}, nil
+	return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"data":{"usage":1}}`)), Request: req}, nil
 }
 
 func TestAllProviderReferenceFailures(t *testing.T) {
@@ -96,7 +96,7 @@ func TestReferenceReport(t *testing.T) {
 					t.Error("reference must count as configured")
 				}
 				if mode == "ok" {
-					if got.Error != "" || got.Snapshot == nil || transport.calls != 2 {
+					if got.Error != "" || got.Snapshot == nil || transport.calls != 1 {
 						t.Fatalf("successful reference not fetched: %+v, calls=%d", got, transport.calls)
 					}
 				} else {

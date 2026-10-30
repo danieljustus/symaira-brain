@@ -11,8 +11,6 @@ mod parser_extra;
 mod parser_grok;
 #[path = "parser_opencode.rs"]
 mod parser_opencode;
-#[path = "parser_openrouter.rs"]
-pub(crate) mod parser_openrouter;
 #[path = "parser_quota.rs"]
 mod parser_quota;
 #[cfg(test)]
@@ -97,7 +95,6 @@ pub(crate) fn parse_snapshot(
             parser_extra::parse_nous(&value, &mut snapshot);
             Ok(())
         }
-        "openrouter" if source == "credits" => parser_openrouter::credits(&value, &mut snapshot),
         "openrouter" => parser_extra::parse_openrouter(&value, &mut snapshot),
         "antigravity" => parser_extra::parse_antigravity(&value, &mut snapshot),
         _ => Err(UsageError::parse(id, "unknown provider")),

@@ -86,3 +86,8 @@ func loadFixture(name string) []byte {
 }
 
 var errBoom = errors.New("boom")
+
+// roundTripFunc adapts a function into an http.RoundTripper for tests.
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }

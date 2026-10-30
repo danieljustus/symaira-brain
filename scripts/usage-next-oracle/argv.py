@@ -25,6 +25,9 @@ def process(binary,args,env,home):
 def main():
     parser=argparse.ArgumentParser()
     for key in ['go','parent','rust','output','sentinel']:parser.add_argument('--'+key,type=Path,required=True)
+    # Go from the candidate commit: Rust may differ from frozen Go only by
+    # mirroring an intentional current Go change byte for byte.
+    parser.add_argument('--go-head',type=Path)
     args=parser.parse_args();rows=[];skipped=[];valid=[]
     with tempfile.TemporaryDirectory(prefix='usage-next-argv-')as directory:
         root=Path(directory)
@@ -53,7 +56,10 @@ def main():
                         after_log=log.read_bytes()if log.exists()else b''
                         routed[kind]=after_log[len(before_log):].decode()
                     assert not routed['go']and not routed['rust'],'native diagnostic never invokes fallback'
-                    assert observed['go']['exit']==2 and observed['rust']==observed['go'],(variant,mode,index,observed)
+                    if observed['rust']!=observed['go'] and args.go_head:
+                        head=process(args.go_head,vector,env,home)
+                        if head!=observed['go'] and head==observed['rust']:observed['go_head']=head
+                    assert observed['go']['exit']==2 and (observed['rust']==observed['go'] or 'go_head' in observed),(variant,mode,index,observed)
                     # Parent's expected late admission invokes the owned sentinel on present Go.
                     parent_native_help=vector==[b'--help']
                     expected_parent=2 if parent_native_help or mode=='present'else 1

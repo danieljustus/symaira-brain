@@ -10,6 +10,7 @@ import tempfile
 def main():
     parser=argparse.ArgumentParser()
     for key in ['go','parent','rust','sentinel','output']:parser.add_argument('--'+key,type=Path,required=True)
+    parser.add_argument('--go-head',type=Path)
     args=parser.parse_args();observed=[]
     with tempfile.TemporaryDirectory(prefix='usage-next-argv-controls-')as temporary:
         root=Path(temporary)
@@ -17,7 +18,7 @@ def main():
             wrapper=root/(kind+'.py')
             wrapper.write_text('import subprocess,sys\nvalues=sys.argv[2:]\n'+transform+'\n'+f'p=subprocess.run([{str(binary.resolve())!r},sys.argv[1],*values],capture_output=True)\n'+'sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.returncode)\n', encoding='utf-8')
             command=[sys.executable,str(Path(__file__).with_name('argv.py'))]
-            for key,path in [('go',args.go),('parent',args.parent),('rust',wrapper),('sentinel',args.sentinel),('output',root/(kind+'.json'))]:command+=['--'+key,str(path.resolve())]
+            for key,path in [('go',args.go),('parent',args.parent),('rust',wrapper),('sentinel',args.sentinel),('output',root/(kind+'.json'))]+([('go-head',args.go_head)]if args.go_head else[]):command+=['--'+key,str(path.resolve())]
             result=subprocess.run(command,capture_output=True,timeout=60);error=result.stderr.decode(errors='replace')
             assert result.returncode and 'AssertionError'in error and case in error,(kind,result.returncode,error)
             observed.append(dict(id=kind,rejected=True,exit=result.returncode,wrapper_sha256=hashlib.sha256(wrapper.read_bytes()).hexdigest(),wrapper_source=wrapper.read_text(encoding='utf-8'),stdout=result.stdout.decode(errors='replace'),stderr=error))

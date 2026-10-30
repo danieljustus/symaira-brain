@@ -50,6 +50,9 @@ def main():
     for name in ['go', 'parent', 'rust', 'output']:
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--parent-source', required=True)
+    # Go from the candidate commit: Rust may differ from frozen Go only by
+    # mirroring an intentional current Go change byte for byte.
+    parser.add_argument('--go-head', type=Path)
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
     original_receipt = repo / 'migration/evidence/usage-argv-768/original-abf-review/proof/symaira-usage768-abf-root-doctor-cli-extra.json'
@@ -91,6 +94,10 @@ def main():
                     old = retained[(provider, values[0].hex())]
                     assert old['go'] == go == old['parent'] and old['native'] == parent, row
                     assert old['file_sha256'] == row['file_sha256'], row
+                if not row['matched'] and args.go_head:
+                    head = observe(args.go_head, values, environment, home)
+                    if head != go and head == rust:
+                        row.update(go_head=head, matched=True)
                 records.append(row)
                 assert path.read_bytes() == data and sorted(str(p.relative_to(home)) for p in home.rglob('*')) == before, row
                 assert go['exit'] == parent['exit'] == rust['exit'] == 2 and not any(

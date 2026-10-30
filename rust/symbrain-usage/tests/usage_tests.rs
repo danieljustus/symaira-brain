@@ -5,10 +5,6 @@ use std::time::{Duration, Instant};
 
 use symbrain_usage::{Provider, Response, Service, Transport};
 
-use symbrain_usage as usage;
-#[path = "support/legacy_openrouter.rs"]
-mod legacy_openrouter;
-
 const GO_ORACLE: &str = include_str!("fixtures/provider_graph.json");
 
 fn fixture_service() -> Service {
@@ -49,7 +45,10 @@ fn fixture_service() -> Service {
             )
         })
         .collect();
-    Service::with_transport(providers, Arc::new(legacy_openrouter::transport(responses)))
+    Service::with_transport(
+        providers,
+        Arc::new(symbrain_usage::FixtureTransport::new(responses)),
+    )
 }
 
 struct CountingTransport(AtomicUsize);
@@ -309,7 +308,7 @@ fn provider_cases_compare_complete_requests_headers_strategies_snapshots_and_err
     for case in fixture["providers"].as_array().expect("providers") {
         let id = case["id"].as_str().expect("provider id");
         let body = serde_json::to_vec(&case["response"]).expect("response body");
-        let transport = legacy_openrouter::transport(
+        let transport = symbrain_usage::FixtureTransport::new(
             [(
                 id.to_string(),
                 Response {
@@ -361,9 +360,7 @@ fn provider_cases_compare_complete_requests_headers_strategies_snapshots_and_err
         );
         assert_eq!(
             canonical_request(
-                legacy_openrouter::requests(&transport)
-                    .last()
-                    .expect("request"),
+                transport.requests().last().expect("request"),
                 &case["request"]
             ),
             case["request"],
@@ -394,7 +391,7 @@ fn assert_fixture_errors(id: &str, case: &serde_json::Value) {
         } else {
             serde_json::to_vec(&case["response"]).unwrap()
         };
-        let transport = legacy_openrouter::transport(
+        let transport = symbrain_usage::FixtureTransport::new(
             [(
                 id.to_string(),
                 Response {

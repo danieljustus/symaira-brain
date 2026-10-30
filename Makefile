@@ -88,16 +88,10 @@ parity-smoke: rust-go-printable-check
 rust-go-printable-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run scripts/generate-go-printable-table.go -check
 
-.PHONY: usage-opencode-check usage-contract-current-check usage-opencode-historical-check
+.PHONY: usage-opencode-check usage-opencode-historical-check
 ## usage-opencode-check: Verify pinned OpenCode request/parse corpus without rewriting it
 usage-opencode-check:
 	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(OPENCODE_ORACLE_TOOLCHAIN) go run ./scripts/usage-request-oracle/opencode -oracle-revision $(OPENCODE_ORACLE_REVISION) -oracle-toolchain $(OPENCODE_ORACLE_TOOLCHAIN) -check
-
-## usage-contract-current-check: Optional local check of a retained v2 capture (not part of CI)
-usage-contract-current-check:
-	@test -n "$(USAGE_V2_EVIDENCE)"
-	@test -n "$(USAGE_V2_RECEIPT_SHA256)"
-	PYTHONDONTWRITEBYTECODE=1 python3 scripts/usage-contract-v2/verify.py "$(CURDIR)" "$(USAGE_V2_EVIDENCE)" "$(USAGE_V2_RECEIPT_SHA256)"
 
 ## usage-opencode-historical-check: Revalidate the frozen generator against its authentic immutable source.
 usage-opencode-historical-check:

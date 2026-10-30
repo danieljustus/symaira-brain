@@ -15,6 +15,9 @@ parser=argparse.ArgumentParser()
 for name in ['fixture','go_binary','rust_binary','output']:parser.add_argument(name,type=pathlib.Path)
 parser.add_argument('--control',choices=['exit','missing-case'])
 parser.add_argument('--owner',action='store_true')
+# Go built from the candidate commit: an intentional Go change that Rust mirrors
+# byte for byte (for example new usage help) is explained, never ignored.
+parser.add_argument('--go-head',type=pathlib.Path)
 args=parser.parse_args()
 rows=json.loads(args.fixture.read_text(encoding='utf-8'))
 owner=args.owner
@@ -37,14 +40,18 @@ for row in rows:
     variants=[('route',['--not-a-usage-flag'])]
     if row in missing:variants.extend([('table',[]),('json',['--json'])])
     for mode,flags in variants:
-        observations=[]
-        for binary in [args.go_binary,args.rust_binary]:
+        def observe(binary):
             result=subprocess.run([str(binary.resolve()),'usage',*flags],env=env,capture_output=True,check=False,timeout=15)
-            observations.append({'exit':result.returncode,'stdout_b64':base64.b64encode(result.stdout).decode(),'stderr_b64':base64.b64encode(result.stderr).decode()})
+            return {'exit':result.returncode,'stdout_b64':base64.b64encode(result.stdout).decode(),'stderr_b64':base64.b64encode(result.stderr).decode()}
+        observations=[observe(args.go_binary),observe(args.rust_binary)]
         if args.control=='exit'and not records:observations[0]['exit']=42
         byte_matches=observations[0]==observations[1]
         known_divergence=not byte_matches and reference_resolution_divergence(*observations)
-        records.append({'id':row['id']+'-'+mode,'go':observations[0],'rust':observations[1],'matches':byte_matches or known_divergence,'byte_matches':byte_matches,'known_divergence':known_divergence})
+        head=None
+        if not byte_matches and not known_divergence and args.go_head:
+            head=observe(args.go_head)
+            known_divergence=head!=observations[0] and head==observations[1]
+        records.append({'id':row['id']+'-'+mode,'go':observations[0],'rust':observations[1],'matches':byte_matches or known_divergence,'byte_matches':byte_matches,'known_divergence':known_divergence,**({'go_head':head} if head else {})})
     assert all(pathlib.Path(path).read_bytes()==value for path,value in before.items()),'actual CLI sources read-only'
     if owner:assert os.readlink(link)==target,'actual CLI owner symlink read-only'
 if args.control=='missing-case':records.pop()

@@ -9,17 +9,12 @@ mod go_decimal_tests;
 mod go_float;
 #[cfg(test)]
 mod go_float_tests;
-#[cfg(test)]
-use crate as usage;
 mod claude_history;
 mod codex_history;
 pub use codex_history::scan_codex_history;
 mod history;
 mod history_files;
 pub use claude_history::scan_claude_history;
-#[cfg(test)]
-#[path = "../tests/support/legacy_openrouter.rs"]
-mod legacy_openrouter;
 pub use history::{HistoryBucket, HistoryModel, LocalHistory, scan_grok_history};
 mod model;
 mod parser;

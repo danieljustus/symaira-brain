@@ -29,13 +29,8 @@ use provider_antigravity::fetch_antigravity_from_observations;
 use provider_antigravity::{
     AntigravityCandidate, parse_antigravity_candidates, parse_antigravity_ports,
 };
-#[cfg(test)]
-#[path = "openrouter_go_oracle_tests.rs"]
-mod openrouter_go_oracle_tests;
 #[path = "provider_opencode.rs"]
 mod provider_opencode;
-#[path = "provider_openrouter.rs"]
-mod provider_openrouter;
 #[cfg(test)]
 #[path = "usage_fetch_oracle_tests.rs"]
 mod usage_fetch_oracle_tests;
@@ -166,9 +161,7 @@ impl Provider {
         transport: &Arc<dyn Transport>,
         cancel: &Cancellation,
     ) -> Result<UsageSnapshot, UsageError> {
-        let result = if self.id == "openrouter" {
-            self.fetch_openrouter(transport, cancel)
-        } else if self.id == "zai" || self.id == "devin" {
+        let result = if self.id == "zai" || self.id == "devin" {
             provider_quota::fetch(self, transport, cancel)
         } else if self.fixture && self.id == "antigravity" && self.credential.is_none() {
             Err(UsageError::not_running())
@@ -206,7 +199,7 @@ impl Provider {
                     "oauth",
                     request_for(self, "oauth", self.credential(), None),
                 ),
-                "copilot" | "moonshot" | "nous" | "grok" => self.fetch_one(
+                "copilot" | "moonshot" | "nous" | "openrouter" | "grok" => self.fetch_one(
                     transport,
                     cancel,
                     "api",

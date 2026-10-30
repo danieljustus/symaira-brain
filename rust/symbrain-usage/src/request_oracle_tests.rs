@@ -7,7 +7,6 @@
 //! fixture state in the port.
 
 use super::super::{hostname, platform_label, request_for};
-use crate::legacy_openrouter;
 use crate::providers::Provider;
 use crate::providers::{
     claude_from_resolved, codex_from_resolved, copilot_from_resolved, cursor_from_resolved,
@@ -16,7 +15,6 @@ use crate::providers::{
 };
 use crate::transport::{Cancellation, FixtureTransport, Response};
 use serde_json::Value;
-
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
@@ -318,7 +316,7 @@ fn authenticated_direct_provider_report(
         }
         _ => panic!("unsupported direct provider {configured_provider}"),
     };
-    let transport = legacy_openrouter::transport([(configured_provider.into(), response)].into());
+    let transport = FixtureTransport::new([(configured_provider.into(), response)].into());
     let report =
         crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
     (report, transport)
@@ -553,7 +551,7 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
         None,
         "https://openrouter.ai/custom/v1".into(),
     );
-    let transport = legacy_openrouter::transport(
+    let transport = FixtureTransport::new(
         [
             (
                 "kimi".into(),
@@ -624,7 +622,7 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
             .collect::<Vec<_>>(),
         ["kimi", "moonshot", "nous", "opencode", "openrouter"]
     );
-    let requests = legacy_openrouter::requests(&transport);
+    let requests = transport.requests();
     assert_eq!(requests.len(), 5);
     let find_request = |matches: &dyn Fn(&crate::transport::Request) -> bool| {
         requests.iter().find(|request| matches(request))
@@ -1448,7 +1446,7 @@ fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
 }
 
 #[test]
-fn historical_openrouter_404_fallback_matches_go_success_and_failure_oracles() {
+fn authenticated_openrouter_report_matches_go_success_and_failure_oracles() {
     let report_oracle: Value = serde_json::from_str(include_str!(
         "../tests/fixtures/openrouter_authenticated_report.json"
     ))
@@ -1487,7 +1485,7 @@ fn historical_openrouter_404_fallback_matches_go_success_and_failure_oracles() {
         serde_json::to_value(snapshot).expect("Rust snapshot"),
         report_oracle["providers"][8]["snapshot"]
     );
-    let requests = legacy_openrouter::requests(&transport);
+    let requests = transport.requests();
     assert_eq!(requests.len(), 1);
     assert_eq!(requests[0].method, "GET");
     assert_eq!(requests[0].url, "https://openrouter.ai/api/v1/auth/key");
