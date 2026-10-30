@@ -1,5 +1,8 @@
 # Go → Rust migration
 
+> **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
+
+
 Memory803's isolated coherent-workspace successor normally integrates reviewed
 standalone Guard805 so the unchanged complete runtime plan has its real
 `symguard-cli` owner. Supplemental Skills inheritance now binds five exact
