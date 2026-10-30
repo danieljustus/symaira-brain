@@ -1,7 +1,5 @@
-use super::pricing::{Prices, estimate};
 use crate::{claude_history::Entry, history::Event};
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
 use serde_json::Value;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -73,12 +71,6 @@ fn valid_model(s: &str) -> bool {
         && s.bytes()
             .all(|b| b.is_ascii_alphanumeric() || b"-_.:/".contains(&b))
 }
-#[derive(Deserialize)]
-struct Cost<'a> {
-    #[serde(borrow, rename = "costUSD")]
-    cost: Option<&'a serde_json::value::RawValue>,
-}
-
 #[derive(Default)]
 pub(super) struct Parser {
     previous: Option<[u64; 4]>,
@@ -93,8 +85,8 @@ pub(super) struct Parser {
     replay_seen: BTreeSet<String>,
 }
 impl Parser {
-    pub(super) fn parse(&mut self, line: &[u8], prices: &Prices) -> Result<Option<Entry>, ()> {
-        let result = self.line(line, prices);
+    pub(super) fn parse(&mut self, line: &[u8]) -> Result<Option<Entry>, ()> {
+        let result = self.line(line);
         if result.is_err() {
             self.poisoned = true;
         }
@@ -170,7 +162,7 @@ impl Parser {
         // A copied replay prefix is not made live by a task-start marker.
         (!self.replay_seen.contains(id)).then_some(next)
     }
-    fn line(&mut self, line: &[u8], prices: &Prices) -> Result<Option<Entry>, ()> {
+    fn line(&mut self, line: &[u8]) -> Result<Option<Entry>, ()> {
         let o = record(line)?;
         if self.update_context(&o) {
             return Ok(None);
@@ -237,16 +229,6 @@ impl Parser {
         if self.child {
             return Ok(None);
         }
-        // Raw lexical number is retained for the existing exact recorded-cost decoder.
-        let cost: Cost<'_> = serde_json::from_slice(line).map_err(|_| ())?;
-        let ticks = cost
-            .cost
-            .and_then(|n| crate::providers::provider_config::opencode_recorded_ticks(n.get()));
-        let estimate = if o.get("costUSD").is_none() && !self.poisoned {
-            estimate(&m, b, &self.tier, prices)
-        } else {
-            None
-        };
         let id = if self.poisoned {
             String::new()
         } else {
@@ -258,15 +240,11 @@ impl Parser {
             });
             format!("{baseline_id}|{snapshot:?}|{tier}")
         };
-        Ok(Some(Entry::from_history(
-            Event {
-                id,
-                model: m,
-                at,
-                tokens: (!self.poisoned).then_some(b[0] + b[2]),
-                ticks,
-            },
-            estimate,
-        )))
+        Ok(Some(Entry::from_history(Event {
+            id,
+            model: m,
+            at,
+            tokens: (!self.poisoned).then_some(b[0] + b[2]),
+        })))
     }
 }

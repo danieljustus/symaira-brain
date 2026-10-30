@@ -110,7 +110,6 @@ fn child(mode: &str) {
         _ => {
             let h = p.history.as_ref().unwrap();
             assert_eq!(h.status, "available");
-            assert_eq!(h.daily[0].models[0].recorded_cost.as_deref(), Some("0"));
             assert_eq!(h.daily[0].models[0].events, 1);
         }
     }

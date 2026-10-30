@@ -10,10 +10,6 @@ use std::path::Path;
 pub struct LocalHistory {
     pub scope: String,
     pub attribution: String,
-    pub currency: String,
-    pub cost_basis: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price_snapshot: Option<String>,
     pub timezone: String,
     pub status: String,
     pub excluded_events: usize,
@@ -31,18 +27,7 @@ pub struct HistoryModel {
     pub events: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tokens: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub recorded_cost: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub estimated_cost: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_basis: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub recorded_events: Option<usize>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub estimated_events: Option<usize>,
     pub missing_tokens: usize,
-    pub missing_cost: usize,
 }
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) struct Event {
@@ -50,7 +35,6 @@ pub(crate) struct Event {
     pub(crate) model: String,
     pub(crate) at: DateTime<Utc>,
     pub(crate) tokens: Option<u64>,
-    pub(crate) ticks: Option<u64>,
 }
 fn count(value: &Value) -> Option<u64> {
     value.as_u64().filter(|n| *n <= 1_000_000_000_000_000)
@@ -105,17 +89,11 @@ pub(crate) fn parse_line(line: &[u8]) -> Result<Vec<Event>, ()> {
             .zip(count(&values["outputTokens"]))
             .filter(|(i, o)| *i <= 1_000_000_000_000 && *o <= 1_000_000_000_000)
             .map(|(i, o)| i + o);
-        let ticks = if values.get("costUsdTicks").is_none() && models.len() == 1 {
-            count(&update["usage"]["costUsdTicks"])
-        } else {
-            count(&values["costUsdTicks"])
-        };
         events.push(Event {
             id: id.into(),
             model: model.clone(),
             at,
             tokens,
-            ticks,
         });
     }
     Ok(events)
@@ -132,9 +110,7 @@ pub fn scan_grok_history<T: TimeZone>(
     let mut h = LocalHistory {
         scope: "local_machine".into(),
         attribution: "unattributed".into(),
-        currency: "USD".into(),
-        cost_basis: "recorded".into(),
-        price_snapshot: None,
+
         timezone: timezone.into(),
         status: "no_data".into(),
         excluded_events: 0,
@@ -281,14 +257,13 @@ pub(crate) fn aggregate<T: TimeZone>(h: &mut LocalHistory, events: Vec<Event>, n
         || h.daily
             .iter()
             .flat_map(|b| &b.models)
-            .any(|m| m.missing_tokens > 0 || m.missing_cost > 0)
+            .any(|m| m.missing_tokens > 0)
     {
         h.status = "partial".into();
     }
 }
 fn sum(model: String, events: &[Event]) -> HistoryModel {
     let missing_tokens = events.iter().filter(|e| e.tokens.is_none()).count();
-    let missing_cost = events.iter().filter(|e| e.ticks.is_none()).count();
     let tokens = (missing_tokens == 0).then(|| {
         events
             .iter()
@@ -296,26 +271,11 @@ fn sum(model: String, events: &[Event]) -> HistoryModel {
             .sum::<u64>()
             .to_string()
     });
-    let recorded_cost = (missing_cost == 0).then(|| {
-        let ticks = events.iter().filter_map(|e| e.ticks).sum::<u64>();
-        let whole = ticks / 10_000_000_000;
-        let rest = ticks % 10_000_000_000;
-        if rest == 0 {
-            whole.to_string()
-        } else {
-            format!("{whole}.{}", format!("{rest:010}").trim_end_matches('0'))
-        }
-    });
     HistoryModel {
         model,
         events: events.len(),
         tokens,
-        recorded_cost,
-        estimated_cost: None,
-        cost_basis: None,
-        recorded_events: None,
-        estimated_events: None,
+
         missing_tokens,
-        missing_cost,
     }
 }

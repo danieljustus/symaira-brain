@@ -49,17 +49,15 @@ fn grok_history_paired_cases() {
                 let m = &h.periods[0].models[0];
                 assert_eq!(m.events, 3);
                 assert_eq!(m.tokens.as_deref(), Some("470"));
-                assert_eq!(m.recorded_cost.as_deref(), Some("1.47143176"));
             }
             "true-zero" => {
                 let m = &h.daily[0].models[0];
                 assert_eq!(m.tokens.as_deref(), Some("0"));
-                assert_eq!(m.recorded_cost.as_deref(), Some("0"));
             }
             "missing-measurements" => {
                 let m = &h.daily[0].models[0];
-                assert!(m.tokens.is_none() && m.recorded_cost.is_none());
-                assert_eq!((m.missing_tokens, m.missing_cost), (1, 1));
+                assert!(m.tokens.is_none());
+                assert_eq!(m.missing_tokens, 1);
             }
             "calendar-boundaries" => {
                 assert_eq!(h.daily.len(), 5);

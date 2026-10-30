@@ -25,10 +25,7 @@ fn codex_history_consent_and_quota_independence() {
         if mode == "enabled" || mode == "quota-error" {
             let h = p.history.as_ref().unwrap();
             assert_eq!(h.status, "available");
-            assert_eq!(
-                h.daily[0].models[0].estimated_cost.as_deref(),
-                Some("0.0000025")
-            );
+            assert_eq!(h.daily[0].models[0].tokens.as_deref(), Some("1"));
         } else {
             assert!(p.history.is_none());
         }

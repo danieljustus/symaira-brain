@@ -180,38 +180,15 @@ fn render_report_table(writer: &mut dyn Write, report: &Report) -> std::io::Resu
                 "  local history\t{}\tscope={} attribution={}",
                 h.status, h.scope, h.attribution
             )?;
-            if let Some(snapshot) = &h.price_snapshot {
-                writeln!(
-                    writer,
-                    "  price snapshot\t{snapshot}\tAPI-rate estimates, not charges"
-                )?;
-            }
             for period in &h.periods {
                 for model in &period.models {
-                    if model.cost_basis.is_some() {
-                        writeln!(
-                            writer,
-                            "  {}\t{}\t{} tokens\t{} {} recorded + {} {} estimated\tmissing_cost={}",
-                            period.key,
-                            model.model,
-                            model.tokens.as_deref().unwrap_or("?"),
-                            model.recorded_cost.as_deref().unwrap_or("?"),
-                            h.currency,
-                            model.estimated_cost.as_deref().unwrap_or("?"),
-                            h.currency,
-                            model.missing_cost
-                        )?;
-                    } else {
-                        writeln!(
-                            writer,
-                            "  {}\t{}\t{} tokens\t{} {} recorded",
-                            period.key,
-                            model.model,
-                            model.tokens.as_deref().unwrap_or("?"),
-                            model.recorded_cost.as_deref().unwrap_or("?"),
-                            h.currency
-                        )?;
-                    }
+                    writeln!(
+                        writer,
+                        "  {}\t{}\t{} tokens",
+                        period.key,
+                        model.model,
+                        model.tokens.as_deref().unwrap_or("?")
+                    )?;
                 }
             }
         }

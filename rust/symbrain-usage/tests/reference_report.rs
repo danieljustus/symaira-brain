@@ -69,7 +69,7 @@ fn reference_report_child() {
         "openrouter".into(),
         Response {
             status: 200,
-            body: br#"{"data":{"usage":1}}"#.to_vec(),
+            body: br#"{"data":{"total_credits":10,"total_usage":1}}"#.to_vec(),
             headers: BTreeMap::new(),
         },
     )])));
@@ -82,7 +82,7 @@ fn reference_report_child() {
         assert!(report.providers[0].configured);
         assert!(report.providers[0].snapshot.is_some());
         let requests = transport.requests();
-        assert_eq!(requests.len(), 1);
+        assert_eq!(requests.len(), 2);
         assert!(
             requests[0]
                 .headers

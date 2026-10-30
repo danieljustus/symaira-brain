@@ -1,34 +1,15 @@
-//! Bounded Claude Code completed records and offline, source-pinned API-rate estimates.
+//! Bounded Claude Code completed records and token counts.
 use crate::{
     Cancellation,
     history::{Event, LocalHistory},
 };
 use chrono::{DateTime, TimeZone, Utc};
-use serde::Deserialize;
 use serde_json::Value;
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::Path,
 };
 
-#[derive(Deserialize)]
-struct Rate {
-    input: u64,
-    output: u64,
-    write: u64,
-    read: u64,
-    input_long: Option<u64>,
-    output_long: Option<u64>,
-    write_long: Option<u64>,
-    read_long: Option<u64>,
-    fast: Option<u64>,
-}
-#[derive(Deserialize)]
-struct Prices {
-    snapshot: String,
-    rates: BTreeMap<String, Rate>,
-    aliases: BTreeMap<String, String>,
-}
 #[derive(Clone)]
 pub(crate) struct Entry {
     pub(crate) event: Event,
@@ -37,7 +18,6 @@ pub(crate) struct Entry {
     side: bool,
     speed: bool,
     unsupported: bool,
-    pub(crate) estimate: Option<u64>,
 }
 fn count(v: &Value) -> Option<u64> {
     v.as_u64().filter(|n| *n <= 1_000_000_000_000)
@@ -51,11 +31,6 @@ fn bucket(u: &Value, name: &str, optional: bool) -> Option<u64> {
 }
 fn valid_id(s: &str) -> bool {
     !s.is_empty() && s.len() <= 256 && !s.contains(['\0', '\r', '\n'])
-}
-#[derive(Deserialize)]
-struct Cost<'a> {
-    #[serde(borrow, rename = "costUSD")]
-    cost: Option<&'a serde_json::value::RawValue>,
 }
 fn model_id(m: &Value) -> Result<&str, ()> {
     m["model"]
@@ -98,7 +73,7 @@ fn persisted_usage(m: &Value) -> Result<bool, ()> {
         _ => Err(()),
     }
 }
-fn parse(line: &[u8], prices: &Prices) -> Result<Option<Entry>, ()> {
+fn parse(line: &[u8]) -> Result<Option<Entry>, ()> {
     let obj: Value = serde_json::from_slice(line).map_err(|_| ())?;
     if obj["type"] != "assistant" {
         return Ok(None);
@@ -124,10 +99,6 @@ fn parse(line: &[u8], prices: &Prices) -> Result<Option<Entry>, ()> {
         None => false,
         Some(v) => v.as_bool().ok_or(())?,
     };
-    let cost: Cost<'_> = serde_json::from_slice(line).map_err(|_| ())?;
-    let ticks = cost
-        .cost
-        .and_then(|v| crate::providers::provider_config::opencode_recorded_ticks(v.get()));
     let u = &m["usage"];
     let input = bucket(u, "input_tokens", false);
     let output = bucket(u, "output_tokens", false);
@@ -144,7 +115,6 @@ fn parse(line: &[u8], prices: &Prices) -> Result<Option<Entry>, ()> {
         }
     }
     let speed = u.get("speed");
-    let fast = speed.is_some_and(|v| v == "fast");
     let mut unsupported = speed.is_some_and(|v| v != "fast" && v != "standard")
         || u.get("service_tier").is_some_and(|v| v != "standard");
     if let Some(iterations) = u.get("iterations") {
@@ -159,51 +129,19 @@ fn parse(line: &[u8], prices: &Prices) -> Result<Option<Entry>, ()> {
         .zip(write1)
         .map(|((((i, o), r), w), h)| [i, o, r, w, h]);
     let tokens = buckets.map(|b| b.iter().sum());
-    let estimate = if obj.get("costUSD").is_none() && !unsupported {
-        buckets.and_then(|b| estimate(model, b, fast, prices))
-    } else {
-        None
-    };
     Ok(Some(Entry {
         event: Event {
             id: String::new(),
             model: model.into(),
             at,
             tokens,
-            ticks,
         },
         message: message.into(),
         request: request.into(),
         side,
         speed: speed.is_some(),
         unsupported,
-        estimate,
     }))
-}
-fn estimate(model: &str, b: [u64; 5], fast: bool, prices: &Prices) -> Option<u64> {
-    let model = prices.aliases.get(model).map_or(model, String::as_str);
-    let r = prices.rates.get(model)?;
-    if fast && r.fast.is_none() && !model.ends_with("-fast") {
-        return None;
-    }
-    let mut rates = [r.input, r.output, r.read, r.write, r.input * 2];
-    if b[0] + b[2] + b[3] + b[4] > 200_000 {
-        for (i, long) in [r.input_long, r.output_long, r.read_long, r.write_long]
-            .into_iter()
-            .enumerate()
-        {
-            if let Some(n) = long {
-                rates[i] = n;
-            }
-        }
-        rates[4] = rates[0] * 2;
-    }
-    let n = b
-        .into_iter()
-        .zip(rates)
-        .try_fold(0_u64, |n, (b, r)| n.checked_add(b.checked_mul(r)?))?
-        .checked_mul(if fast { r.fast.unwrap_or(1) } else { 1 })?;
-    (n <= 1_000_000_000_000_000).then_some(n)
 }
 fn dedup(entries: Vec<Entry>) -> (Vec<Entry>, usize) {
     let mut result: Vec<Entry> = vec![];
@@ -227,8 +165,6 @@ fn dedup(entries: Vec<Entry>) -> (Vec<Entry>, usize) {
                 old.side
             } else if e.event.tokens.unwrap_or(0) != old.event.tokens.unwrap_or(0) {
                 e.event.tokens.unwrap_or(0) > old.event.tokens.unwrap_or(0)
-            } else if e.event.ticks.is_some() != old.event.ticks.is_some() {
-                e.event.ticks.is_some()
             } else {
                 e.speed && !old.speed
             };
@@ -259,7 +195,7 @@ fn dedup(entries: Vec<Entry>) -> (Vec<Entry>, usize) {
     (accepted, conflicts.len())
 }
 
-/// Read-only local-machine history. No credentials, persistent cache, or network pricing.
+/// Read-only local-machine history. No credentials, persistent cache, or network access.
 #[must_use]
 pub fn scan_claude_history<T: TimeZone>(
     dir: &Path,
@@ -270,20 +206,13 @@ pub fn scan_claude_history<T: TimeZone>(
     let mut h = LocalHistory {
         scope: "local_machine".into(),
         attribution: "unattributed".into(),
-        currency: "USD".into(),
-        cost_basis: "unknown".into(),
-        price_snapshot: None,
+
         timezone: timezone.into(),
         status: "no_data".into(),
         excluded_events: 0,
         daily: vec![],
         periods: vec![],
     };
-    let Ok(prices) = serde_json::from_str::<Prices>(include_str!("claude_prices.json")) else {
-        h.status = "unavailable".into();
-        return h;
-    };
-    h.price_snapshot = Some(prices.snapshot.clone());
     if !dir.is_absolute()
         || dir.as_os_str().as_encoded_bytes().contains(&b',')
         || dir
@@ -297,7 +226,7 @@ pub fn scan_claude_history<T: TimeZone>(
     }
     let mut entries = vec![];
     let read = crate::history_files::read_json(dir, "projects", true, cancel, |line| {
-        let Some(e) = parse(line, &prices)? else {
+        let Some(e) = parse(line)? else {
             return Ok(vec![]);
         };
         let event = e.event.clone();
@@ -315,16 +244,13 @@ pub fn scan_claude_history<T: TimeZone>(
         entries.iter().map(|e| e.event.clone()).collect(),
         now,
     );
-    apply_costs(&mut h, &entries, now);
     h
 }
 
-pub(crate) mod costs;
 impl Entry {
-    pub(crate) fn from_history(event: Event, estimate: Option<u64>) -> Self {
+    pub(crate) fn from_history(event: Event) -> Self {
         Self {
             event,
-            estimate,
             message: String::new(),
             request: String::new(),
             side: false,
@@ -333,7 +259,6 @@ impl Entry {
         }
     }
 }
-use costs::apply_costs;
 
 pub(crate) fn collect_enabled(
     report: &mut crate::Report,

@@ -102,45 +102,6 @@ fn opencode_history_rows(
     Err(())
 }
 
-pub(crate) fn opencode_recorded_ticks(raw: &str) -> Option<u64> {
-    if raw.len() > 64 || raw.starts_with('"') {
-        return None;
-    }
-    let (mantissa, exponent) = raw
-        .split_once(['e', 'E'])
-        .map_or(Some((raw, 0_i32)), |(m, e)| Some((m, e.parse().ok()?)))?;
-    let negative = mantissa.starts_with('-');
-    let mantissa = mantissa.strip_prefix('-').unwrap_or(mantissa);
-    let (whole, fraction) = mantissa.split_once('.').unwrap_or((mantissa, ""));
-    let mut n = format!("{whole}{fraction}").parse::<u128>().ok()?;
-    if negative && n != 0 {
-        return None;
-    }
-    let scale = 10_i32
-        .checked_add(exponent)?
-        .checked_sub(i32::try_from(fraction.len()).ok()?)?;
-    if n == 0 {
-        return Some(0);
-    }
-    if scale >= 0 {
-        n = n.checked_mul(10_u128.checked_pow(u32::try_from(scale).ok()?)?)?;
-    } else {
-        let divisor = 10_u128.checked_pow(scale.unsigned_abs())?;
-        if n % divisor != 0 {
-            return None;
-        }
-        n /= divisor;
-    }
-    u64::try_from(n)
-        .ok()
-        .filter(|n| *n <= 1_000_000_000_000_000)
-}
-
-#[derive(Deserialize)]
-struct Cost<'a> {
-    #[serde(borrow)]
-    cost: Option<&'a serde_json::value::RawValue>,
-}
 fn parse_opencode_history_row(
     id: &str,
     ms: i64,
@@ -211,8 +172,6 @@ fn parse_opencode_history_row(
         .map(|v| count(v).filter(|n| *n <= 1_000_000_000_000))
         .sum::<Option<u64>>()
     };
-    let cost: Cost<'_> = serde_json::from_str(data).map_err(|_| ())?;
-    let ticks = cost.cost.and_then(|v| opencode_recorded_ticks(v.get()));
     Ok(Some((
         provider.into(),
         crate::history::Event {
@@ -220,7 +179,6 @@ fn parse_opencode_history_row(
             model: model.into(),
             at: chrono::DateTime::from_timestamp_millis(ms).ok_or(())?,
             tokens,
-            ticks,
         },
     )))
 }
@@ -234,9 +192,9 @@ pub(crate) fn scan_opencode_history<T: chrono::TimeZone>(
     let mut h = crate::history::LocalHistory {
         scope: "local_machine".into(),
         attribution: "unattributed".into(),
-        currency: "USD".into(),
-        cost_basis: "recorded".into(),
-        price_snapshot: None,
+
+
+
         timezone: timezone.into(),
         status: "no_data".into(),
         excluded_events: 0,

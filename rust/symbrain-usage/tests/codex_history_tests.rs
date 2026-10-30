@@ -13,9 +13,6 @@ fn codex_history_checkpoint_selected_report() {
         assert_eq!(h.status, "available");
         let m = &h.daily[0].models[0];
         assert_eq!(m.tokens.as_deref(), Some("120"));
-        assert_eq!(m.recorded_cost, None);
-        assert_eq!(m.estimated_cost.as_deref(), Some("0.000505"));
-        assert!(h.price_snapshot.is_some());
         return;
     }
     let root = tempfile::tempdir().unwrap();
