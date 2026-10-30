@@ -1,4 +1,6 @@
 //! Opt-in backends remain native and never inspect excluded credentials.
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 #[cfg(unix)]
 #[test]
 fn opt_in_backends_validate_before_discovery() {
@@ -23,6 +25,7 @@ fn opt_in_backends_validate_before_discovery() {
         command
             .args(["usage", "--json", "--providers", selector])
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", home.path())
             .env("GROK_HOME", home.path())
             .env("PATH", home.path())

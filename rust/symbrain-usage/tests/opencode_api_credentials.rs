@@ -1,4 +1,6 @@
 //! Fresh-process public API tests; only synthetic credentials and fixture transport.
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use std::process::Command;
 use symbrain_usage::{ProviderSelection, selected_providers};
 
@@ -77,6 +79,7 @@ fn opencode_api_credentials() {
         let mut cmd = Command::new(std::env::current_exe().unwrap());
         cmd.args(["--exact", "opencode_api_credentials", "--nocapture"])
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", root.path())
             .env("USERPROFILE", root.path())
             .env("PATH", &bin)

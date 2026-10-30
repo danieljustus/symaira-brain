@@ -158,6 +158,7 @@ fn grok_environment_discovery() {
         let mut command = Command::new(env::current_exe().unwrap());
         command
             .env_clear()
+.envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
             .env("HOME", dir.path())
             .env("USERPROFILE", dir.path())
             .env("GROK_TEST_EXPECTED", expected)

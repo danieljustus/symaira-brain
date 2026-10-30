@@ -1,4 +1,6 @@
 //! CLI flag validation is credential-free, including the whole-report Go route.
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 #[cfg(unix)]
 #[test]
 fn usage_provider_selection_precedes_fallback_and_survives_delegation() {
@@ -27,6 +29,7 @@ fn usage_provider_selection_precedes_fallback_and_survives_delegation() {
         command
             .args(args)
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", home.path())
             .env("CODEX_HOME", home.path())
             .env("PATH", home.path())

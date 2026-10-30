@@ -1,4 +1,6 @@
 #![cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use std::{collections::BTreeMap, sync::Arc};
 use symbrain_usage::{FixtureTransport, ProviderSelection, Response, Service, selected_providers};
 #[test]
@@ -55,6 +57,7 @@ fn claude_history_consent_and_quota_independence() {
     ] {
         let mut cmd = std::process::Command::new(std::env::current_exe().unwrap());
         cmd.env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", root.path())
             .env("CLAUDE_CONFIG_DIR", root.path())
             .env(

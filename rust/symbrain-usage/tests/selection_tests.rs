@@ -1,4 +1,6 @@
 //! Selection is tested in a clean subprocess so no real credentials are visible.
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 #[cfg(unix)]
 #[test]
 fn provider_selection_excludes_credential_discovery_and_routing() {
@@ -61,6 +63,7 @@ fn provider_selection_excludes_credential_discovery_and_routing() {
             "--nocapture",
         ])
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", home.path())
         .env("CODEX_HOME", home.path())
         .env("PATH", home.path())

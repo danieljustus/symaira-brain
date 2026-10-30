@@ -1,10 +1,13 @@
 #![cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use symbrain_usage::{Cancellation, scan_grok_history};
 #[test]
 fn grok_history_dst_calendar() {
     if std::env::var_os("GROK_HISTORY_DST_CHILD").is_none() {
         let out = std::process::Command::new(std::env::current_exe().unwrap())
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("TZ", "Europe/Berlin")
             .env("TMPDIR", std::env::temp_dir())
             .env("GROK_HISTORY_DST_CHILD", "1")

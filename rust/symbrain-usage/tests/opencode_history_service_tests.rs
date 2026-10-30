@@ -1,4 +1,6 @@
 #![cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use symbrain_usage::{FixtureTransport, ProviderSelection, Response, Service, selected_providers};
@@ -52,6 +54,7 @@ fn opencode_history_independent_and_private_cleanup() {
         let before = inventory();
         let mut cmd = std::process::Command::new(std::env::current_exe().unwrap());
         cmd.env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", root.path())
             .env("TMPDIR", &tmp)
             .env("OPENCODE_DATA_DIR", &data)

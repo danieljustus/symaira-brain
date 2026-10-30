@@ -1,4 +1,6 @@
 #![cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use symbrain_usage::{FixtureTransport, ProviderSelection, Response, Service, selected_providers};
@@ -47,6 +49,7 @@ fn history_service_independent_of_quota() {
     for mode in ["missing-auth", "quota-error", "disabled", "unselected"] {
         let mut cmd = std::process::Command::new(std::env::current_exe().unwrap());
         cmd.env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", home.path())
             .env("GROK_HOME", home.path())
             .env("GROK_HISTORY_TEST_MODE", mode)

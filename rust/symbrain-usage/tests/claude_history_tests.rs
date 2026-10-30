@@ -1,4 +1,6 @@
 #![cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use std::sync::Arc;
 use symbrain_usage::{FixtureTransport, ProviderSelection, Service, selected_providers};
 #[test]
@@ -22,6 +24,7 @@ fn claude_history_checkpoint_selected_report() {
     std::fs::write(root.path().join("projects/session.jsonl"), line).unwrap();
     let output = std::process::Command::new(std::env::current_exe().unwrap())
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", root.path())
         .env("CLAUDE_CONFIG_DIR", root.path())
         .env("SYMBRAIN_USAGE_CLAUDE_HISTORY", "1")

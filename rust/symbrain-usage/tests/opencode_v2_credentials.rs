@@ -1,5 +1,7 @@
 //! Synthetic native DB/WAL discovery through the public provider constructor, in bounded fresh processes.
 #![cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 use std::fs;
@@ -139,6 +141,7 @@ fn opencode_v2_fresh_processes() {
         let mut process = Command::new(std::env::current_exe().unwrap())
             .args(["--exact", "opencode_v2_fresh_processes", "--nocapture"])
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", root.path())
             .env("PATH", "")
             .env("TMPDIR", &snapshots)

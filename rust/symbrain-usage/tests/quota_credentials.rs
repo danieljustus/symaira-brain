@@ -1,4 +1,6 @@
 //! Fresh-process credential precedence tests: no inherited environment or real tools.
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
 use std::process::Command;
 use symbrain_usage::{Provider, ProviderSelection, selected_providers};
 
@@ -115,6 +117,7 @@ fn quota_credentials() {
         let mut cmd = Command::new(std::env::current_exe().unwrap());
         cmd.args(["--exact", "quota_credentials", "--nocapture"])
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("QUOTA_CHILD_CASE", case)
             .env("HOME", &home)
             .env("USERPROFILE", &home)
