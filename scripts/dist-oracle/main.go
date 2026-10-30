@@ -70,6 +70,10 @@ type manifest struct {
 // ---- .goreleaser.yml schema (only the fields this gate asserts) ----
 
 type gBuild struct {
+	Ignore []struct {
+		GOOS   string `yaml:"goos"`
+		GOARCH string `yaml:"goarch"`
+	} `yaml:"ignore"`
 	ID      string   `yaml:"id"`
 	Main    string   `yaml:"main"`
 	Binary  string   `yaml:"binary"`
@@ -386,7 +390,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "dist-oracle: candidate artifacts: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("candidate-artifacts: PASS %d archives and checksums for %s\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		fmt.Printf("candidate-artifacts: PASS %d archives and checksums for %s\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH)-len(cfg.Builds[0].Ignore), *version)
 		fmt.Println("not-run: release signatures, SBOMs, Homebrew metadata/install, DMG, and publication")
 		return
 	}
@@ -397,6 +401,18 @@ func main() {
 		os.Exit(2)
 	}
 
+	// -check compares the immutable v0.11.0 manifest against its historical
+	// six-platform contract. Candidate checks above always use the current config.
+	// An explicit -goreleaser flag still overrides the historical default.
+	explicitConfig := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "goreleaser" {
+			explicitConfig = true
+		}
+	})
+	if !explicitConfig {
+		*goreleaserPath = "scripts/dist-oracle/fixtures/goreleaser_pre_990.yml"
+	}
 	goreleaserPathResolved := resolvePath(*goreleaserPath)
 	manifestPathResolved := resolvePath(*manifestPath)
 	workflowPathResolved := resolvePath(*workflowPath)

@@ -279,20 +279,83 @@ fn hand_written_usage_shapes_stay_native() {
     }
 }
 
-/// Real synchronisation work must never run natively: only the bare
-/// `memory sync` shape is ported, everything that names a remote keeps the
-/// shipped implementation.
+/// `memory sync` is decided inside `run_sync` (it can hand an invocation to
+/// the shipped implementation after a read-only request), never by the
+/// pre-run routing gate.
 #[test]
-fn memory_sync_with_arguments_stays_on_go() {
+fn memory_sync_is_routed_by_run_sync_not_the_gate() {
     for case in [
         vec!["sync", "--remote", "https://example.test"],
-        vec!["sync", "--pull"],
         vec!["sync", "--remote=https://example.test", "--push"],
+        vec!["sync", "--remote", "http://127.0.0.1:8080"],
+    ] {
+        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
+        assert!(is_sync(&args));
+        assert!(!requires_go_fallback(&args), "{case:?}");
+    }
+    assert!(requires_go_fallback(&[OsString::from("serve")]));
+}
+
+/// Everything the shipped implementation refuses before it opens the database
+/// is native.
+#[test]
+fn memory_sync_refusals_are_native() {
+    for case in [
+        vec!["sync", "--pull"],
+        vec!["sync", "-h"],
+        vec!["sync", "--undefined"],
+        vec!["sync", "--timeout=soon", "--remote=https://example.test"],
+        vec!["sync", "stray"],
+        vec!["sync", "--remote", "ftp://example.test"],
+        vec!["sync", "--remote", "http://example.test"],
+        vec!["sync", "--remote", "example.test"],
+        vec!["sync", "--remote", "https://h:80:90"],
     ] {
         let args = case.iter().map(OsString::from).collect::<Vec<_>>();
         assert!(
-            requires_go_fallback(&args),
-            "{case:?} carries synchronisation arguments and must go to Go"
+            !requires_go_fallback(&args),
+            "{case:?} fails before any database work and must stay native"
         );
+    }
+}
+
+#[test]
+fn go_durations_follow_parse_duration() {
+    use super::sync::valid_duration;
+    for good in [
+        "0",
+        "-0",
+        "+0",
+        "1s",
+        "1.5h",
+        "1h30m",
+        ".5s",
+        "5.s",
+        "100ms",
+        "1us",
+        "1\u{b5}s",
+        "1\u{3bc}s",
+        "-1s",
+        "9223372036s",
+        "2562047h47m16.854775807s",
+    ] {
+        assert!(valid_duration(good.as_bytes()), "{good:?} must parse");
+    }
+    for bad in [
+        "",
+        "-",
+        "s",
+        "1",
+        "1x",
+        "1 s",
+        "1s1",
+        "1.s.",
+        "..s",
+        "9223372037s",
+        "2562047h47m16.854775808s",
+        "99999999999999999999s",
+        "1\u{ff}",
+    ] {
+        assert!(!valid_duration(bad.as_bytes()), "{bad:?} must not parse");
     }
 }

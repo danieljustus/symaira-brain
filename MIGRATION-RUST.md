@@ -854,11 +854,112 @@ zero mismatches.
 table, inline `vcs`, error label, both fold characters, collision, empty-targets
 override, capability merge, non-table map, `%q` width): 16 of 16 killed.
 
-Residual: routing. `skills_cli.rs`/`skills_doctor_config.rs` must still (1) read the
+Residual: routing (delivered for `list`/`doctor`/`status` in SKL-019 below). `skills_cli.rs`/`skills_doctor_config.rs` must still (1) read the
 config bytes through the same stat/`os.IsNotExist` gates, (2) call `config_toml::load`
 and fall back on `NeedsGo`, (3) apply `SYMSKILLS_*` and the discard-to-defaults rule, and
 (4) for `status`/`list`/`sync` feed `LoadTargets` into the native verbs, each with its own
 Go-vs-Rust differential. Native three-OS CI at the final head remains required.
+
+### Skills config-file routing (#764 slice g, SKL-019)
+
+`skills list`, `skills doctor` and `skills status --target opencode` now read
+`config.toml`/`.symskills.toml` natively through `symbrain_skills::config_toml::load`
+(SKL-018). `skills targets` needed nothing: it never reads the symskills config (SKL-017).
+
+The traced Go precedence (`cmdSkills*` -> `loadSkillsEnv` -> corekit `configkit.loadOnce`):
+`Defaults()`, then the global file, then `./.symskills.toml`, then `SYMSKILLS_*`
+(`{LIBRARY,RENDER,CACHE,PROFILES,BASE}_DIR` verbatim even when empty, `SYMSKILLS_VCS_ENABLED`
+through `strconv.ParseBool`); any `Load` error (a stat/read failure, a decode or apply
+error, an invalid bool in a file or in the environment) makes `loadSkillsEnv` swap the
+**whole** config, environment included, for `Defaults()`. The Rust side is one function,
+`doctor_config::merged`, shared by all three verbs: probe both sources (Absent, Fails,
+Regular, Other), `Reset` on a failing probe, otherwise decode the regular files and map
+`LoadOutcome::Loaded` -> env overrides, `Error` -> defaults, `NeedsGo` -> Go.
+
+Verb specifics:
+
+- `list` uses only `library_dir` (Go passes only `cfg.LibraryDir` to `ListLibrary`). The
+  merged value must be the default or pass the same plain-directory gate as the old
+  environment override (absolute, lexically clean, real-directory ancestors); everything
+  else, and the native-only `SYMBRAIN_SKILLS_*` variables, stays on Go.
+- `doctor` prints the merged config; file values get the same U+2028/U+2029 guard as
+  environment values.
+- `status` uses `library_dir`/`base_dir` (same gate); a merged `cache_dir` different from the
+  default moves Go's render cache and stays on Go. Any config file switches off the #621
+  render extension exactly like a `SYMSKILLS_*` variable does.
+
+The environment-only fallbacks of SKL-013/015/016 that were really "invalid bool" or
+"config path is a directory" shapes are now native too (Go's reset-to-defaults is
+reproduced); 22 pre-existing `expect_fallback` cases were flipped to `native` for that
+reason and renamed (`skills_status_config_file_*`).
+
+Evidence: `skills_status_config_file_*` in `scripts/rust-differential.py` (93 cases: 34 list,
+23 doctor, 36 status; 69 native with the Go route removed and the fixture root asserted
+unchanged, 24 must-fallback) against the real Go binary built from `HEAD` af344aae2 by
+`scripts/run-go-oracle.sh` (Go 1.26.7). Shapes: global/project files, project over global,
+env over file, apply errors resetting the env, invalid `vcs.enabled` strings, a first
+failing global ending the load, BOM, CRLF, empty and comment-only files, literal/multi-line
+strings, unicode escapes, dotted `vcs.enabled`, non-table `vcs`, inert keys, `[[targets]]`,
+managed installs and file-only status without any environment; fallbacks for syntax errors,
+invalid UTF-8, duplicate keys, leap seconds, relative/unclean/empty/dot-segment libraries, a
+moved cache, line separators in values, an unreadable file, other status targets. The
+`skills_status_config_` family is 286 cases (192 native, 94 fallback) and the full
+differential 790 cases, all passing. `scripts/skills-status-config-oracle/run.py` carries 44
+source mutants (the config-file ones are new or rewritten: files ignored, project ignored, file
+over env, apply error keeps env / goes to Go, `NeedsGo` answered natively, JSON-unsafe file
+value, read error answered, unchecked list/status directory values, relative/unclean values,
+cache moved, plus the list mutants re-pointed at the shared resolver); 44 of 44 are killed. The ignore-the-file mutant fails 4 expected cases.
+Rust integration tests in `skills_list_native.rs`, `skills_doctor_native.rs` and
+`skills_status_opencode_tests.rs` pin the precedence, the reset and the fallback boundary; the
+pre-existing `skills_status_opencode_tests` assertions that any config file stays on Go
+were rewritten accordingly.
+
+Residuals: `skills sync` with a config file (needs `LoadTargets` fed into the install path)
+and `skills status` for targets other than `opencode` still go to Go whenever a config file
+exists; Windows is cfg-reviewed only; native three-OS CI at the final head remains
+required. The pre-existing in-sync/stale divergence found while building this slice is fixed by SKL-020 below (#955).
+
+
+### Skills status coarse comparison (#955, SKL-020)
+
+Bug: native `skills status` printed `in-sync` where Go printed `stale` when
+`SYMSKILLS_LIBRARY_DIR` (or a `library_dir` config file) moved the library and the default
+`base` snapshot directory did not exist. Reproducible with the environment alone.
+
+Root cause (traced through `cmdSkillsStatus` -> `install.Status`): Go's `skills status`/`skills sync`
+pass `cfg.CacheDir` in `StatusOptions`, so `install.Status` renders through
+`render.CachedStagingRender`. That path writes the staging marker with the `sourceFingerprint`
+hash (every file, `SKILL.md` included, plus metadata-template fingerprints), not the
+install-time tree hash `install` stores in the managed marker. With a base snapshot the
+three-way per-file classification decides and the hash is never compared; **without** one the
+coarse `marker.SourceHash == fresh.hash` comparison runs and the two hashes never match, so Go
+reports `stale` for every managed install lacking a base snapshot. Rust compared the marker with
+the install-time hash and so reported `in-sync`. It was not specific to a moved library:
+the moved library merely made the base snapshot (looked up under the default `base` dir) disappear
+in the reported shape; the default layout with the snapshot dir removed diverged identically.
+
+Fix (one shared place, `install::status_compare::compare_one`): a new
+`StatusOptions::cached_render_hash` makes the coarse comparison use
+`materialize::status_cache_source_hash` (a port of `sourceFingerprint` fed through the same
+`sourceHash` mix). `skills status` (CLI) and `install::sync` (the Go `skills sync` status scan) set
+it; the MCP restore resync (`skills_tools.rs`, Go passes no `CacheDir` there) keeps the install-time
+hash. The empty-marker-hash content fallback is unchanged (Go's `Diff` path does not use the cache).
+Sibling verbs: `skills list`/`doctor`/`targets` never compare hashes; `skills sync` shares the status
+scan and now agrees by construction (checked by hand: default layout, base missing, `--dry-run`
+plans the same reinstall as Go).
+
+Evidence: 11 new `skills_status_config_*` differential cases against the real Go binary
+(`scripts/run-go-oracle.sh`, HEAD 46b0a7e13 build): 6 environment shapes (library moved + base
+missing in JSON/table, copy-mode install, base override pointing nowhere, library not moved + base
+missing, relocated base as a control) and 5 config-file shapes (global/project `library_dir`, table
+output, `[vcs]` table, `base_dir` pointing nowhere). Before the fix 9 of the 11 failed with
+`stale` vs `in-sync` (the copy-mode install and the relocated-base control already matched);
+after the fix all 11 pass. `skills_status_config_` is now 297 cases (203 native, 94 fallback), the full
+differential 801, all passing. `scripts/skills-status-config-oracle/run.py` gained two source mutants
+(`status-without-cache-hash`, `coarse-hash-install-time`; the runner now mutates
+`install/status_compare.rs` too): 46 of 46 killed. Rust test
+`coarse_comparison_uses_cached_render_hash_only_when_requested` pins both comparison modes.
+
 
 ### Skills MCP raw JSON/EOF transport layer (#764 slice a)
 
@@ -1222,6 +1323,240 @@ follows a symlinked `CLAUDE.md`: Rust then reports `dry-run (would update)`
 with exit 0 where Go exits 1 (pre-existing, #909). (5) `$PWD`-reached symlinked
 working directories are modelled (`go_getwd`) but not oracle-covered. Still
 routed to Go under #769: the setup/doctor/usage/memory/skills predicates.
+
+### `memory sync` argument checks without a Go fallback (#762 slice 1)
+
+`memory sync <args>` was routed to Go wholesale. The shipped command refuses a
+large family of invocations before it opens the database or touches the
+network: the Go flag set, a positional, a missing `--remote`, the relay
+passphrase precheck and `syncclient.ValidateRemoteURL`. Those refusals are now
+native (`memory_cli/sync.rs`); the gate returns "Go" only for an invocation that
+would really synchronise and for remote spellings outside the ported subset.
+
+* Flag set: `remote token relay-passphrase db` (strings), `pull push
+  encrypted-relay allow-insecure-http` (Go booleans) and `timeout` (Go
+  `time.ParseDuration`; the flag package reports every failure as `parse
+  error`, so only acceptance is ported, including the nanosecond overflow
+  boundary and the `µ`/`μ` units). The shared memory flag parser gained the
+  `sync` definitions and a duration kind; other verbs are unchanged.
+* Order (as in Go): parse errors, unexpected positional, missing remote (message
+  plus help), relay passphrase (flag, else non-empty
+  `SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE`), then the URL guard.
+* URL guard: a port of `net/url.Parse` for plain ASCII (no `% @ [ ] \\ " < > ^
+  \` { | }`, controls or non-ASCII): `getScheme`, opaque URLs, the
+  colon-in-first-segment error, fragment-trimmed `*url.Error` text, the
+  `invalid port` check — strict at the first colon for `http`/`https`, last
+  colon for other schemes (Go >= 1.26 `urlstrictcolons`; the oracle caught the
+  first port using the last colon) — then scheme, loopback (`localhost`
+  case-insensitively, dotted-quad 127/8 without leading zeros) and
+  `--allow-insecure-http`. Anything else stays on Go instead of guessing its
+  wording.
+
+Evidence (`scripts/memory-cli-oracle/replay.py --family sync_preflight`, also
+part of `all`): 193 cases against the immutable Go `dcddcef0` — 168 refusals
+compared on stdout, stderr, exit and the created tree (empty: neither process
+may write anything before refusing; 40 duration spellings, 45 URL shapes, 83
+grammar/order shapes), 7 unproven spellings Go refuses but native must leave on
+Go, and 18 gates where Go (run against a closed loopback port) must pass every
+validation and the native process with the Go fallback absent must stop at the
+owned absent-binary diagnostic (exit 1, empty stdout, OS error 2, empty tree).
+`sync_controls.py` (wired into `memory-cli-native.yml`) runs three
+real-process mutants (stdout byte, stderr byte, failing exit status) that are
+each rejected through exactly their own field; a source mutant that ignores
+`--allow-insecure-http` was rejected by `gate-008`. Contract row MEM-CLI-004.
+Local macOS evidence only; native three-OS CI is pending. Still on Go: the
+sync client itself (loopback exchanges moved native in #762 slice 2, below),
+`memory serve` (#759) and non-ASCII URL diagnostics.
+
+### `memory sync` loopback exchanges without a Go fallback (#762 slice 2)
+
+Slice 1 left every valid invocation on Go. The sync client now runs natively
+for the exchanges whose whole behaviour is proven against the shipped client;
+everything else is handed to Go. `memory_cli::requires_go_fallback` no longer
+gates `sync` (only `serve`): `memory_cli::run_sync` decides, and returns `None`
+to hand an invocation to Go with nothing written to the output streams.
+
+Native subset (`sync_native.rs`, `sync_http.rs`, `sync_decode.rs`; store side
+in `symbrain-memory/src/sync_state.rs`):
+
+* plain mode against `http://127.0.0.1:<port>[/prefix]` only (explicit port,
+  not 80, no leading zero; prefix segments `[A-Za-z0-9._-]`, never `.`/`..`/empty;
+  no query, fragment or userinfo; lower-case scheme), `--pull`/`--push`/both,
+  `--json`/`--output`, `--allow-insecure-http` (the shipped warning is printed
+  after the database is opened, in the shipped order), `--token`/
+  `SYMBRAIN_MEMORY_SYNC_TOKEN` for printable ASCII without spaces, `--timeout`
+  of `Ns` (1..=60) or `1m` (default 60 s). The database is opened (created and
+  migrated) before any network traffic, as in Go.
+* request: one `GET <base>/api/sync/changes?limit=500[&since=<cursor, UTC,
+  whole seconds, ':' as %3A>]` with exactly the headers Go sends (`Host`,
+  `User-Agent: Go-http-client/1.1`, `Accept-Encoding: gzip`, `Authorization:
+  Bearer ...` when a token is set; no `Accept`), no proxy, no redirects. A push
+  half sends nothing when nothing is pending: the probe uses the shipped
+  predicates (`updated_at > cursor` without `sync_exclude`; latest oplog entry
+  a newer delete) with the shipped bound rendering.
+* replies: statuses above 300 print `remote returned <code> (<status>): <msg>`
+  or `remote returned status <status>: <msg>` from the first JSON value of at
+  most 64 KiB (case-insensitive `error`/`code` keys, last duplicate wins,
+  non-string values and non-objects leave the field empty, truncated or stalled
+  bodies decode as far as they were read); 300 and 2xx are decoded as a
+  `ChangesResponse`: `{}`, `null`, empty `memories`/`deleted`, empty or null
+  `next_cursor`, unknown keys and a `server_time` of
+  `YYYY-MM-DDTHH:MM:SS[.f]Z` (zero time allowed) are an empty exchange; an
+  empty body prints `decode remote response: EOF`, a leading non-value byte
+  `invalid character 'x' looking for beginning of value` (Go `quoteChar`
+  rules), a truncated value `unexpected EOF`; a short body reports
+  `unexpected EOF`, a stalled one `context deadline exceeded`.
+* transport: connection refused (POSIX wording) and the run deadline
+  (`Get "<url>": context deadline exceeded`, also for a header stall or a
+  silent 1xx).
+* effect: the cursor becomes the relay clock (`max(server_time, zero)`), stored
+  as `YYYY-MM-DD HH:MM:SS[.nnnnnnnnn] +0000 UTC`; a push-only run reports no
+  relay clock and therefore stores the zero cursor (the shipped quirk, kept); a
+  failing exchange leaves the cursor untouched. Stored cursors in any other
+  spelling (the shipped driver cannot read them either) go to Go.
+
+Handed to Go (`None`), each proven by a scenario: https, `localhost`, any other
+host or loopback address, the encrypted relay, tokens with spaces or non-ASCII,
+timeouts outside the claimed spellings, unreadable stored cursors, pending
+local memories or tombstones (the push half), and, after the first read-only
+GET, any reply that carries memories, tombstones or a pagination cursor, a
+`server_time` in another spelling or with a bad value, non-object or wrongly
+typed JSON, folded (`Server_Time`) keys, bodies of 1 MiB and more, nesting
+deeper than 1000 levels, gzip-encoded bodies, redirects, malformed status
+lines or chunking, a connection closed before the reply, and error bodies that
+are not valid UTF-8. The post-GET hand-off makes the shipped client repeat the
+idempotent GET; no local state has changed by then.
+
+Evidence (`scripts/memory-cli-oracle/replay.py --family sync_relay`, also part
+of `all`; fake relay `sync_relay_server.py`, scenarios `sync_relay_cases.py`):
+267 scenarios against the immutable Go `dcddcef0`, each in its own disposable
+root with its own loopback relay. 189 native scenarios (238 steps, 226 relay
+requests) must match stdout, stderr and exit status of every step, every
+request the relay received (method, target, all headers) and the complete
+database state, with the Go fallback absent; 78 hand-off scenarios must stop at
+the owned absent-binary diagnostic, leave the cursor untouched and have sent
+either no request or exactly Go's first request. `sync_relay_controls.py`
+(wired into `memory-cli-native.yml`) runs five real-process mutants (stdout,
+stderr, exit, an extra request, an extra database row), each rejected through
+exactly its own observation key; four one-off source mutants (User-Agent, page
+limit, skipped cursor write, upper-cased error message) were each rejected by
+the family. The `sync_preflight` family dropped its `http://127.0.0.1:1` gate
+(now a native scenario of the new family): 192 cases. Unit tests:
+`memory_cli::sync_decode`, `memory_cli::sync_tests` and
+`symbrain-memory::sync_state`. Contract row MEM-CLI-005. Local macOS evidence
+only; native three-OS CI is pending (on Windows the connection-refused wording
+scenarios are skipped visibly and the native client hands that failure to Go;
+the created-tree mode comparison is POSIX only).
+
+Still on Go (#762): the encrypted relay, https/TLS and non-loopback remotes,
+push batches (`/api/sync/apply`, relay push), redirects and gzip, and the cases
+above (replies with data and pagination moved native in slice 3, below). The #762 acceptance
+(`requires_go_fallback` removed entirely) is therefore not met.
+
+### `memory sync` pulls that carry data without a Go fallback (#762 slice 3)
+
+Slice 2 handed every reply with memories, tombstones or a pagination cursor to
+Go. The pull half now applies them natively, over any number of pages, with the
+shipped `SyncUpsertMemoryIfNewer` / `ApplyRemoteDelete` semantics. Everything
+that is not proven below still reaches Go, and always before the first local
+write.
+
+* Request: unchanged for the first page; later pages send
+  `GET <base>/api/sync/changes?cursor=<url.QueryEscape(next_cursor)>&limit=500`
+  (no `since`: the cursor takes precedence, keys in `url.Values.Encode` order).
+  A `next_cursor` of at most 2048 bytes is echoed; more than 64 pages go to Go.
+* Entries (`sync_entry.rs`, a `db.Memory` / `db.DeletedMemory` reading): objects
+  whose known keys are spelled exactly (a case-folded or repeated known key is
+  not claimed) and typed as the shipped decoder reads them: strings without NUL,
+  `null` as the zero value, `Z`-spelled times (`created_at`, `updated_at`,
+  `valid_*`, `expires_at`, `retired_at`, `last_access`, `prev_access`),
+  `importance` / `decay_factor` as finite `float64` literals, `access_count` as
+  an `int64` literal, `metadata` as `null` or an object of strings, `embedding` as
+  absent, `null` or `[]`, `entities` / `evidence` only when they are `null`, empty
+  (or, for `entities`, strings). A missing or empty `id` is not claimed; unknown
+  keys are ignored (JSON syntax only). Tombstones need a string `id` and an
+  optional `deleted_at`.
+* Application (`symbrain-memory::sync_apply`): one transaction per run, memories
+  before tombstones page by page, applying the shipped SQL: tombstone check
+  (`sync_oplog` latest row `delete` and `updated_at <= ts` skips), insert with
+  the shipped defaults (`consolidation_status` `raw`, `review_status`
+  `approved`, `decay_factor` outside `(0,1]` -> `1`, `content_hash` computed when
+  empty, nil metadata `null`, NULL for empty `consolidated_into_id` /
+  `superseded_by`, no `embedding_binary`, `lsh_hash` 0) or update (strictly newer
+  only; `created_*`, `valid_*` and `superseded_by` stay), the best-effort
+  `audit_log` rows (`set` / `update` / `delete`), and `ApplyRemoteDelete`'s
+  `local updated_at > deleted_at` guard. Times are stored as `YYYY-MM-DD
+  HH:MM:SS[.nnnnnnnnn] +0000 UTC` (nanoseconds, trailing zeros trimmed, as the
+  cursor is). A stored `updated_at` / oplog `ts` in any other spelling than the
+  driver's own or the oplog trigger's `...T...fffZ` is not claimed.
+* Effect: counters `pulled_memories_applied` / `pulled_deletes_applied`; the cursor
+  becomes the newest of every `updated_at`, `deleted_at` and `server_time` of all
+  pages (`maxSeen`); all pages are fetched before anything is written. If page
+  `k` fails with a proven wording (error status, decode failure, short or stalled
+  body, deadline) pages `1..k-1` are applied, the failure is printed and the
+  cursor stays, exactly what the shipped client leaves behind.
+* Both directions: after the pull the push stream is probed with the shipped
+  predicates (`updated_at > cursor` without `sync_exclude`; latest oplog entry a
+  newer delete). A pull that would make the shipped client push (`/api/sync/apply`)
+  is rolled back and handed to Go; data older than the stored cursor, excluded
+  memories and pulls that failed (the shipped client stops before pushing) stay
+  native.
+
+Handed to Go with the batch rolled back (the scenario proves no memory, audit,
+oplog, entity or cursor row differs afterwards): malformed or unproven entries
+(null / non-object entries, wrong types, offset or odd time spellings, year 0,
+folded / duplicate keys, non-empty embeddings, NUL, lone surrogates, invalid
+UTF-8, control characters inside strings), a repeated `memories` / `deleted` /
+`next_cursor` key that carried data, cursors above 2048 bytes, more than 64
+pages, redirects / gzip / closed connections on a later page, a statement the
+store rejects (for example a `consolidated_into_id` without a parent, where the
+shipped client keeps the memories applied before it), and a pull that provokes a
+push. The shipped client then repeats the read-only `GET`s.
+
+Evidence (`scripts/memory-cli-oracle/replay.py --family sync_relay`, also part of
+`all`; scenarios `sync_relay_cases.py` + `sync_pull_cases.py`): 590 scenarios against the immutable Go `dcddcef0`, each in its own disposable root with its own loopback relay (325 new). 424 native scenarios (511 steps, 571 relay requests) must match stdout, stderr and exit status of every step, every request the relay received and the complete database state with the Go fallback absent; 166 hand-off scenarios (90 new) must stop at the owned absent-binary diagnostic. `--family all` is 1454/1454 on macOS (go1.26.7).
+Comparison rules: native scenarios compare stdout, stderr, exit, every relay
+request and the complete database (audit ids and wall-clock stamps normalised
+only where they have the shipped spelling; audit rows sorted afterwards); the
+hand-off scenarios now require that the requests the native process sent are
+a prefix of Go's (all `GET`) and that no local table differs from the seeded
+state. Controls: `sync_relay_controls.py` (five real-process mutants) still
+rejects every mutant through exactly its own key; the new
+`sync_pull_controls.py` builds nine source mutants from a scratch copy
+(equal-timestamp overwrite, tombstone and delete comparison, only the first
+page, the pagination cursor never sent, cursor ignoring entry times, no audit
+row, no push probe, a failing statement skipped instead of rolled back), replays
+the scenarios that exercise each and requires the family to reject it (11, 1, 2,
+39, 13, 5, 13, 5, 1 scenarios), wired into `memory-cli-native.yml` on Linux.
+Unit tests: `memory_cli::sync_entry`, `sync_decode`, `sync_pull`,
+`sync_pull_tests` and `symbrain-memory::sync_apply`. Contract row MEM-CLI-006.
+Local macOS evidence only; native three-OS CI is pending.
+
+Still on Go (#762): the encrypted relay, https/TLS and non-loopback remotes, push
+batches (`/api/sync/apply`, relay push), non-empty embeddings in pulled memories
+(`embedding_binary` / LSH pipeline), redirects and gzip, and the cases above.
+The #762 acceptance (`requires_go_fallback` removed entirely) is therefore not met.
+
+### `memory sync` cursor comparisons follow main's #980 (`symbrain_sync_time`)
+
+Main's #980 changed the shipped Go store so that every sync cursor predicate compares
+`symbrain_sync_time(<column>)` (fixed-width UTC text with nanoseconds, chronological across the
+driver, trigger and legacy layouts) instead of raw text. The native pending-change probe
+(`symbrain-memory::sync_state::pending_changes`, memories and tombstones) mirrored the old text
+predicate, so merging main made it diverge. `symbrain-memory::sync_time` ports
+`normalizeSyncTime` (Go `time.Parse` rules: fixed two-digit fields, one- or two-digit hour, any
+number of fraction digits with nine kept, runs of spaces, range and calendar checks, `Z`/numeric
+offsets) and registers the deterministic scalar function on every native connection (rusqlite
+`functions` feature); non-text arguments and unparsable values fail like Go's, which the sync
+client hands off to Go. 106 vectors recorded from the Go function at main's #980 commit
+(`rust/symbrain-memory/tests/fixtures/sync_time_go.json`, produced and byte-checked by
+`scripts/memory-cli-oracle/sync_time_fixture.py [--check]`, run in `memory-cli-native.yml`) are
+replayed in Rust both through the library function and through the registered SQL function
+(55 accepted, 51 rejected). The sync families of `scripts/memory-cli-oracle/replay.py` moved from
+`56ef5353` to `fc5252d2e` (#980); `cmd/` and `go.mod`/`go.sum` are byte-identical between the two,
+only `internal/memory` changed, and the full replay (1,454 cases: sync_preflight 192, sync_relay
+590 across both pins) is 1,454/1,454 on macOS. The pull path (`sync_apply`) never compares
+cursors in SQL and is unchanged.
 
 ### `memory` store creation and `sync` dead route without a Go fallback (#769 slice 4)
 

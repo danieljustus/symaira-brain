@@ -75,6 +75,12 @@ pub enum LoadOutcome {
     Loaded(SkillsConfig),
     /// `Load` failed with exactly this error text.
     Error(String),
+    /// `Load` fails in `BurntSushi`'s lexer on an invalid escape inside a
+    /// single-line basic string (see [`has_go_invalid_string_escape`]). The
+    /// message embeds a source position and is not reproduced, so only a caller
+    /// that discards the error text may answer natively; `loadSkillsEnv` does,
+    /// replacing the whole config with the defaults.
+    Rejected,
     /// Go must decide.
     NeedsGo(NeedsGo),
 }
@@ -135,6 +141,85 @@ fn has_go_divergent_value(root: &Table, text: &str) -> bool {
     false
 }
 
+/// Whether `text` holds an escape that `BurntSushi` v1.6.0 refuses inside a
+/// single-line basic string, so that `toml.DecodeFile` certainly fails.
+///
+/// Its lexer (`lexStringEscape`) accepts only `\b \t \n \f \r \e \" \\` and the
+/// `\xHH`, `\uHHHH` and `\UHHHHHHHH` forms; a space or tab after the backslash
+/// is rejected when the value is decoded, every other character by the lexer
+/// itself. This is the shape of an unescaped Windows path (`"C:\Users\me"`),
+/// where `\U` is followed by no eight hex digits and `\a` or `\_` are no escape.
+///
+/// The scan is a tokenizer reduced to what it needs: comments, literal strings
+/// and basic strings. It stops without a verdict (`false`) at anything it does
+/// not model: a multi-line string, a newline or the end of the text inside a
+/// string. The text is only scanned after `toml_edit` rejected it, and the
+/// lexer fails on the whole document, so an unrelated syntax error elsewhere
+/// changes the message but not the failure.
+fn has_go_invalid_string_escape(text: &str) -> bool {
+    fn hex_digits(bytes: &[u8], count: usize) -> bool {
+        bytes.len() >= count && bytes[..count].iter().all(u8::is_ascii_hexdigit)
+    }
+    let bytes = text.as_bytes();
+    let mut index = 0;
+    while index < bytes.len() {
+        match bytes[index] {
+            b'#' => {
+                while bytes.get(index).is_some_and(|byte| *byte != b'\n') {
+                    index += 1;
+                }
+            }
+            b'\'' => {
+                if bytes[index..].starts_with(b"'''") {
+                    return false;
+                }
+                index += 1;
+                loop {
+                    match bytes.get(index) {
+                        None | Some(b'\n' | b'\r') => return false,
+                        Some(b'\'') => break,
+                        Some(_) => index += 1,
+                    }
+                }
+                index += 1;
+            }
+            b'"' => {
+                if bytes[index..].starts_with(b"\"\"\"") {
+                    return false;
+                }
+                index += 1;
+                loop {
+                    match bytes.get(index) {
+                        None | Some(b'\n' | b'\r') => return false,
+                        Some(b'"') => break,
+                        Some(b'\\') => {
+                            let rest = &bytes[index + 1..];
+                            let valid = match rest.first() {
+                                None => return false,
+                                Some(b'b' | b't' | b'n' | b'f' | b'r' | b'e' | b'"' | b'\\') => {
+                                    true
+                                }
+                                Some(b'x') => hex_digits(&rest[1..], 2),
+                                Some(b'u') => hex_digits(&rest[1..], 4),
+                                Some(b'U') => hex_digits(&rest[1..], 8),
+                                Some(_) => false,
+                            };
+                            if !valid {
+                                return true;
+                            }
+                            index += 2;
+                        }
+                        Some(_) => index += 1,
+                    }
+                }
+                index += 1;
+            }
+            _ => index += 1,
+        }
+    }
+    false
+}
+
 /// Decodes `text` the way `toml.DecodeFile` hands it to the parser: valid
 /// UTF-8 with at most one leading byte-order mark removed. Documents
 /// `toml_edit` accepts but `BurntSushi` rejects are routed to Go here.
@@ -150,6 +235,13 @@ fn parse(content: &[u8]) -> Result<Document<&str>, NeedsGo> {
         return Err(NeedsGo::Syntax);
     }
     Ok(document)
+}
+
+/// [`has_go_invalid_string_escape`] over the bytes `parse` handed to `toml_edit`.
+fn rejected_escape(content: &[u8]) -> bool {
+    std::str::from_utf8(content).is_ok_and(|text| {
+        has_go_invalid_string_escape(text.strip_prefix('\u{feff}').unwrap_or(text))
+    })
 }
 
 /// Go's dynamic type name for a decoded TOML value, as `%T` prints it.
@@ -254,6 +346,7 @@ pub fn load(
         let Some(file) = file else { continue };
         let document = match parse(file.content) {
             Ok(document) => document,
+            Err(NeedsGo::Syntax) if rejected_escape(file.content) => return LoadOutcome::Rejected,
             Err(reason) => return LoadOutcome::NeedsGo(reason),
         };
         match apply(&mut config, document.as_table()) {

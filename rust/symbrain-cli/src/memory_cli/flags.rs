@@ -25,6 +25,12 @@ impl Args {
             .get(name)
             .map_or_else(OsString::new, |value| os(value))
     }
+    pub fn bytes_of(&self, name: &str) -> &[u8] {
+        self.values.get(name).map_or(&[], Vec::as_slice)
+    }
+    pub fn flag(&self, name: &str) -> bool {
+        self.values.get(name).is_some_and(|value| value == b"true")
+    }
 }
 
 pub(super) fn has_help(args: &[OsString]) -> bool {
@@ -101,13 +107,7 @@ pub(super) fn parse(args: &[OsString], verb: &str, stderr: &mut dyn Write) -> Re
                 }
                 Err(error) => Some(error),
             },
-            Kind::Boolean => match parse_boolean(&value) {
-                Some(value) => {
-                    parsed.staged = value;
-                    None
-                }
-                None => Some("parse error"),
-            },
+            Kind::Duration | Kind::Boolean => store_typed(&mut parsed, canonical, kind, &value),
         };
         if let Some(error) = error {
             let _ = write!(
@@ -132,13 +132,51 @@ pub(super) fn parse(args: &[OsString], verb: &str, stderr: &mut dyn Write) -> Re
     Ok(parsed)
 }
 
+/// Stores a Go boolean or duration flag value, or names its parse failure.
+fn store_typed(
+    parsed: &mut Args,
+    canonical: &'static str,
+    kind: Kind,
+    value: &[u8],
+) -> Option<&'static str> {
+    if kind == Kind::Duration {
+        if !super::sync::valid_duration(value) {
+            return Some("parse error");
+        }
+        parsed.values.insert(canonical, value.to_vec());
+        return None;
+    }
+    let Some(flag) = parse_boolean(value) else {
+        return Some("parse error");
+    };
+    parsed.staged = flag;
+    let stored: &[u8] = if flag { b"true" } else { b"false" };
+    parsed.values.insert(canonical, stored.to_vec());
+    None
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Kind {
     String,
     Integer,
     Boolean,
+    Duration,
 }
 fn definition(verb: &str, name: &[u8]) -> Option<(&'static str, Kind)> {
+    if verb == "sync" {
+        return Some(match name {
+            b"remote" => ("remote", Kind::String),
+            b"token" => ("token", Kind::String),
+            b"relay-passphrase" => ("relay-passphrase", Kind::String),
+            b"db" => ("db", Kind::String),
+            b"pull" => ("pull", Kind::Boolean),
+            b"push" => ("push", Kind::Boolean),
+            b"encrypted-relay" => ("encrypted-relay", Kind::Boolean),
+            b"allow-insecure-http" => ("allow-insecure-http", Kind::Boolean),
+            b"timeout" => ("timeout", Kind::Duration),
+            _ => return None,
+        });
+    }
     let canonical = match name {
         b"db" => "db",
         b"scope" | b"s" if matches!(verb, "list" | "rules" | "search" | "set") => "scope",

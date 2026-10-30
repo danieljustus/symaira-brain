@@ -467,39 +467,35 @@ fn config_probe_absent(path: &std::path::Path) -> bool {
 /// defaults. So the native path requires both probes to be a verified absence
 /// and every other outcome stays on Go; it also owns the TOML decoding.
 fn config_files_need_go() -> bool {
+    let Some((global, project)) = config_source_paths() else {
+        return true;
+    };
+    !(config_probe_absent(&global) && config_probe_absent(&project))
+}
+
+/// The global `config.toml` and project `.symskills.toml` paths Go merges, or
+/// `None` when their spelling is one native code does not reproduce (an
+/// undefined home, `.`/`..` segments in the config root, Windows device or UNC
+/// roots, an unreadable working directory).
+fn config_source_paths() -> Option<(PathBuf, PathBuf)> {
     // Go's `configkit.DefaultPath` honours `XDG_CONFIG_HOME` only when absolute.
     let root = match std::env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
         .filter(|path| path.is_absolute())
     {
         Some(xdg) => xdg,
-        None => match symbrain_core::xdg::home_dir() {
-            Some(home) => home.join(".config"),
-            None => return true,
-        },
+        None => symbrain_core::xdg::home_dir()?.join(".config"),
     };
     let text = root.to_string_lossy();
     if has_dot_segment(&text) || (cfg!(windows) && windows_path_needs_go(&text)) {
-        return true;
+        return None;
     }
-    let Ok(cwd) = std::env::current_dir() else {
-        return true;
-    };
-    !(config_probe_absent(&root.join("symskills/config.toml"))
-        && config_probe_absent(&cwd.join(".symskills.toml")))
+    let cwd = std::env::current_dir().ok()?;
+    Some((
+        root.join("symskills/config.toml"),
+        cwd.join(".symskills.toml"),
+    ))
 }
-
-/// Go `strconv.ParseBool`: the only spellings `SYMSKILLS_VCS_ENABLED` accepts.
-fn go_parse_bool(value: &std::ffi::OsStr) -> bool {
-    const SPELLINGS: &[&str] = &[
-        "1", "t", "T", "TRUE", "true", "True", "0", "f", "F", "FALSE", "false", "False",
-    ];
-    value.to_str().is_some_and(|text| SPELLINGS.contains(&text))
-}
-
-/// A shape native `skills status` cannot replay exactly.
-#[derive(Debug)]
-struct GoOnlyConfig;
 
 /// Whether every existing component of `path` is a real directory the
 /// process can enter **and list**, and the final directory (when present) can
@@ -541,66 +537,60 @@ fn override_dir_is_plain(path: &std::path::Path) -> bool {
     !present || fs::metadata(path.join(".")).is_ok()
 }
 
-/// An absolute, lexically clean override directory whose existing ancestors
-/// are plain directories. Relative values resolve against the working
-/// directory in Go; `.`/`..`/doubled-separator spellings and symlinked
-/// ancestors resolve differently in the capability-based install layer; a
-/// linked or special-file root is reported with cap-std diagnostics; an
-/// unreadable directory is an error natively but not in Go. All stay on Go.
-fn status_override_dir(name: &str) -> Result<Option<PathBuf>, GoOnlyConfig> {
-    let Some(value) = std::env::var_os(name) else {
-        return Ok(None);
-    };
-    let Some(text) = value.to_str() else {
-        return Err(GoOnlyConfig);
-    };
-    let path = PathBuf::from(&value);
-    if !path.is_absolute()
-        || !is_lexically_clean(text)
-        || (cfg!(windows) && windows_path_needs_go(text))
-        || !override_dir_is_plain(&path)
-    {
-        return Err(GoOnlyConfig);
-    }
-    Ok(Some(path))
-}
-
-/// Library and base-snapshot directories configured purely through
-/// `SYMSKILLS_*` environment variables.
+/// Library and base-snapshot directories configured away from the defaults
+/// by config files or `SYMSKILLS_*` environment variables.
 #[derive(Debug, Default)]
 struct StatusEnvConfig {
     library_dir: Option<PathBuf>,
     base_dir: Option<PathBuf>,
 }
 
-/// Returns the environment-only config native `skills status` replays, or
-/// `None` when the shape must stay on Go.
+/// Returns the merged config native `skills status` replays, or `None` when
+/// the shape must stay on Go.
 ///
 /// Go builds its status options from `config.Load()`: defaults, then
-/// `config.toml`, then `.symskills.toml`, then `SYMSKILLS_*` variables. Go
+/// `config.toml`, then `.symskills.toml`, then `SYMSKILLS_*` variables, the
+/// whole config replaced by the defaults on a failing load. The files are
+/// decoded by the Go-exact SKL-018 decoder ([`doctor_config::merged`]). Go
 /// status reads only `LibraryDir`, `BaseDir` and `CacheDir`; `RenderDir`,
-/// `ProfilesDir` and `VCS.Enabled` never reach it, and a variable that fails
-/// config decoding (an invalid `SYMSKILLS_VCS_ENABLED` bool) makes Go discard
-/// the whole config and use defaults. A `CacheDir` override moves the status
-/// render cache Go writes, any config file carries TOML Go owns, and the
-/// native-only `SYMBRAIN_SKILLS_*` variables are not Go config, so all three
-/// stay on Go.
+/// `ProfilesDir` and `VCS.Enabled` never reach it. A `CacheDir` that differs
+/// from the default moves the status render cache Go writes, and the
+/// native-only `SYMBRAIN_SKILLS_*` variables are not Go config, so both stay
+/// on Go together with any file the decoder hands back (`NeedsGo`).
 fn status_env_config() -> Option<StatusEnvConfig> {
-    if config_files_need_go()
-        || std::env::var_os("SYMSKILLS_CACHE_DIR").is_some()
-        || std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
+    if std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
         || std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR").is_some()
     {
         return None;
     }
-    if let Some(value) = std::env::var_os("SYMSKILLS_VCS_ENABLED")
-        && !go_parse_bool(&value)
-    {
+    let (global, _) = config_source_paths()?;
+    let cwd = std::env::current_dir().ok()?;
+    let (default_library, default_base, _) = resolve_skills_dirs();
+    let default_cache = symbrain_core::paths::skills_cache_dir()?.dir;
+    let defaults = doctor_config::DoctorConfig {
+        library_dir: default_library.to_str()?.to_owned(),
+        render_dir: String::new(),
+        cache_dir: default_cache.to_str()?.to_owned(),
+        profiles_dir: String::new(),
+        base_dir: default_base.to_str()?.to_owned(),
+        vcs_enabled: true,
+    };
+    let config = doctor_config::merged(&defaults, &global, &cwd)?;
+    if config.cache_dir != defaults.cache_dir {
         return None;
     }
+    // `Some(None)`: the default; `Some(Some(dir))`: a configured directory;
+    // `None`: a configured directory native code does not scan.
+    let dir = |value: &str, default: &str| {
+        if value == default {
+            Some(None)
+        } else {
+            plain_config_dir(value).map(Some)
+        }
+    };
     Some(StatusEnvConfig {
-        library_dir: status_override_dir("SYMSKILLS_LIBRARY_DIR").ok()?,
-        base_dir: status_override_dir("SYMSKILLS_BASE_DIR").ok()?,
+        library_dir: dir(&config.library_dir, &defaults.library_dir)?,
+        base_dir: dir(&config.base_dir, &defaults.base_dir)?,
     })
 }
 
@@ -615,6 +605,8 @@ fn status_env_active() -> bool {
     .iter()
     .chain(STATUS_INERT_ENV)
     .any(|name| std::env::var_os(name).is_some())
+        // Go's bytes carry no #621 render extension once a config file exists.
+        || config_files_need_go()
 }
 
 fn has_dynamic_config() -> bool {
@@ -646,30 +638,57 @@ fn has_dynamic_config() -> bool {
 /// Go's `cmdSkillsList` reads exactly one config field: `LibraryDir` goes to
 /// `skill.ListLibrary`; the events log and the install scan hang off the home
 /// directory, and `BaseDir`, `CacheDir`, `RenderDir`, `ProfilesDir` and
-/// `VCS.Enabled` never reach it. An environment-only configuration is
-/// therefore replayed natively with `SYMSKILLS_LIBRARY_DIR` moving the scan
-/// and the other overrides inert. Everything native cannot reproduce stays on
-/// Go: any config file (the TOML decode is Go's), an undefined home, the
-/// native-only `SYMBRAIN_SKILLS_*` variables (Go ignores them), an invalid
-/// `SYMSKILLS_VCS_ENABLED` bool (Go then discards the whole config) and a
-/// library override that [`status_override_dir`] does not accept.
+/// `VCS.Enabled` never reach it. The library is therefore resolved through
+/// `loadSkillsEnv`'s merge ([`doctor_config::merged`]: defaults, global
+/// `config.toml` and `./.symskills.toml` decoded by the Go-exact SKL-018
+/// decoder, then `SYMSKILLS_*`, the whole config reset to the defaults on any
+/// `Load` failure) and the other fields are inert. Everything native cannot
+/// reproduce stays on Go: a config file the decoder hands back (`NeedsGo`), an
+/// undefined home, the native-only `SYMBRAIN_SKILLS_*` variables (Go ignores
+/// them) and a library value that [`plain_config_dir`] does not accept.
 fn list_library_dir() -> Option<PathBuf> {
     if !go_home_defined()
-        || config_files_need_go()
         || std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR").is_some()
         || std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR").is_some()
     {
         return None;
     }
-    if let Some(value) = std::env::var_os("SYMSKILLS_VCS_ENABLED")
-        && !go_parse_bool(&value)
+    let (global, _) = config_source_paths()?;
+    let cwd = std::env::current_dir().ok()?;
+    let default_library = resolve_skills_dirs().0;
+    // Only the library reaches `skills list`: the other defaults are inert.
+    let defaults = doctor_config::DoctorConfig {
+        library_dir: default_library.to_str()?.to_owned(),
+        render_dir: String::new(),
+        cache_dir: String::new(),
+        profiles_dir: String::new(),
+        base_dir: String::new(),
+        vcs_enabled: true,
+    };
+    let config = doctor_config::merged(&defaults, &global, &cwd)?;
+    if config.library_dir == defaults.library_dir {
+        return Some(default_library);
+    }
+    plain_config_dir(&config.library_dir)
+}
+
+/// An absolute, lexically clean configured directory (from a config file or a
+/// `SYMSKILLS_*` variable) whose existing ancestors are plain directories.
+/// Relative values resolve against the working directory in Go;
+/// `.`/`..`/doubled-separator spellings and symlinked ancestors resolve
+/// differently in the capability-based install layer; a linked or special-file
+/// root is reported with cap-std diagnostics; an unreadable directory is an
+/// error natively but not in Go. All stay on Go.
+fn plain_config_dir(value: &str) -> Option<PathBuf> {
+    let path = PathBuf::from(value);
+    if !path.is_absolute()
+        || !is_lexically_clean(value)
+        || (cfg!(windows) && windows_path_needs_go(value))
+        || !override_dir_is_plain(&path)
     {
         return None;
     }
-    match status_override_dir("SYMSKILLS_LIBRARY_DIR").ok()? {
-        Some(path) => Some(path),
-        None => Some(resolve_skills_dirs().0),
-    }
+    Some(path)
 }
 
 /// Reports whether the native `skills list` scan has to stay on Go for this
@@ -1061,6 +1080,8 @@ fn run_status(
         base_dir: Some(base_dir),
         skills: Vec::new(),
         render_dir,
+        // Go hands `install.Status` the config cache directory here (#955).
+        cached_render_hash: true,
     };
 
     let statuses = match install::status(&opts) {

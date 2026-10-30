@@ -1664,6 +1664,16 @@ def managed_config_then(
     return wrapped
 
 
+def drop_default_base(root: Path, env: dict[str, str]) -> None:
+    """Remove the default base-snapshot directory (#955).
+
+    Without snapshots Go falls back to the coarse source-hash comparison, whose
+    outcome depends on *where* the library lives: a library that moved away
+    from the install-time location is stale, one that stayed is in-sync.
+    """
+    shutil.rmtree(root / "data/symbrain/skills/base")
+
+
 def _status_cfg_write(path: Path, body: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     _write_text(path, body, encoding="utf-8")
@@ -1778,17 +1788,17 @@ def _status_cfg_home_empty(root: Path, env: dict[str, str]) -> None:
 
 def _status_cfg_xdg_relative_home_config(root: Path, env: dict[str, str]) -> None:
     env["XDG_CONFIG_HOME"] = "relative/config"
-    _status_cfg_write(root / "home/.config/symskills/config.toml", 'vcs = { enabled = false }\n')
+    _status_cfg_write(root / "home/.config/symskills/config.toml", 'library_dir = 5\n')
 
 
 def _status_cfg_xdg_empty_home_config(root: Path, env: dict[str, str]) -> None:
     env["XDG_CONFIG_HOME"] = ""
-    _status_cfg_write(root / "home/.config/symskills/config.toml", 'vcs = { enabled = false }\n')
+    _status_cfg_write(root / "home/.config/symskills/config.toml", 'library_dir = 5\n')
 
 
 def _status_cfg_xdg_absolute_config_file(root: Path, env: dict[str, str]) -> None:
     env["XDG_CONFIG_HOME"] = str(root / "xdg-alt")
-    _status_cfg_write(root / "xdg-alt/symskills/config.toml", 'vcs = { enabled = false }\n')
+    _status_cfg_write(root / "xdg-alt/symskills/config.toml", 'library_dir = 5\n')
 
 
 def _status_cfg_xdg_dotdot_through_symlink(root: Path, env: dict[str, str]) -> None:
@@ -2252,6 +2262,144 @@ class Case:
     native: bool = False
     expect_fallback: bool = False
     read_only: bool = False
+
+# --- skills list / doctor: config-file shapes (SKL-019) ----------------------
+#
+# `config.toml` / `.symskills.toml` contents are decoded natively by
+# `symbrain_skills::config_toml` (SKL-018). Native cases cover the decoded
+# value, the env-over-file precedence and Go's reset of the whole config to the
+# defaults on an apply error; shapes the decoder hands back to Go (syntax,
+# invalid UTF-8, leap seconds, duplicate keys) and values native code does not
+# scan (relative, unclean or empty library) must keep routing to Go.
+# A rooted path without a drive (`/nonexistent`) is relative to the current
+# drive on Windows: `windows_path_needs_go` leaves it to Go, so the cases that
+# spell a library that way are native proofs on POSIX and fallback proofs there.
+ROOTED_LIBRARY_ROUTE = {"expect_fallback": True} if os.name == "nt" else {"native": True, "read_only": True}
+FILE_CONFIG_PREFIX = "skills_status_config_file_"
+FILE_GLOBAL = "config/symskills/config.toml"
+FILE_PROJECT = "project/.symskills.toml"
+FILE_BOM = "\ufeff"
+
+
+def file_cfg(location: str, body: str | bytes | Callable[[Path], bytes]) -> Callable[[Path, dict[str, str]], None]:
+    """Write a config file; `{root}` expands to the fixture root in text bodies.
+
+    `{posix_root}` expands to the same root with forward slashes. On Windows the
+    native spelling (`D:\\a\\_temp\\...`) puts invalid TOML escapes into a basic
+    string, so BurntSushi rejects the file at the first line and Go resets to the
+    defaults: a case whose point is a *later* defect (syntax error, duplicate
+    key, unclean path, ...) must use `{posix_root}` to reach that defect on
+    every host. POSIX bytes are identical for both spellings.
+    """
+
+    def mutate(root: Path, env: dict[str, str]) -> None:
+        path = root / location
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if callable(body):
+            data = body(root)
+        elif isinstance(body, bytes):
+            data = body
+        else:
+            data = body.replace("{posix_root}", root.as_posix()).replace("{root}", str(root)).encode("utf-8")
+        path.write_bytes(data)
+
+    return mutate
+
+
+def file_list_setup(
+    *mutators: Callable[[Path, dict[str, str]], None],
+    builder: Callable[[Path, dict[str, str]], None] = setup_skills_library_categories,
+) -> Callable[[Path, dict[str, str]], None]:
+    """A Go-built library relocated to `alt/library` *without* the env override,
+    a decoy in the default library (only an ignored file lists it), then the
+    config files / environment of the case."""
+
+    def wrapped(root: Path, env: dict[str, str]) -> None:
+        builder(root, env)
+        relocate_managed_state(root, env, base=False)
+        env.pop("SYMSKILLS_LIBRARY_DIR", None)
+        write_library_skill(root, "decoy")
+        for mutate in mutators:
+            mutate(root, env)
+
+    return wrapped
+
+
+FILE_LIB = 'library_dir = "{root}/alt/library"\n'
+# Same as FILE_LIB with a forward-slash root, for the fallback cases whose
+# intended defect would otherwise be masked by the Windows escape reset.
+FILE_LIB_POSIX = FILE_LIB.replace("{root}", "{posix_root}")
+# An unescaped Windows path in a basic string: `\U` needs eight hex digits and
+# `\a`/`\_` are no escape, so Go's TOML decode fails and `loadSkillsEnv`
+# resets the whole config to the defaults. The shape is platform independent.
+FILE_WIN_PATH = 'library_dir = "C:\\Users\\sym\\library"\n'
+FILE_WIN_TEMP = 'library_dir = "D:\\a\\_temp\\alt\\library"\nbase_dir = "D:\\a\\_temp\\alt\\base"\n'
+
+
+def file_list(name: str, *mutators, args=("skills", "list", "--json"), fallback=False, **kwargs) -> "Case":
+    return Case(
+        FILE_CONFIG_PREFIX + "list_" + name,
+        args,
+        setup=file_list_setup(*mutators, **{k: v for k, v in kwargs.items() if k == "builder"}),
+        **({"expect_fallback": True} if fallback else {"native": True, "read_only": True}),
+        **{k: v for k, v in kwargs.items() if k != "builder"},
+    )
+
+
+def file_doctor(name: str, *mutators, args=("skills", "doctor", "--json"), fallback=False) -> "Case":
+    return Case(
+        FILE_CONFIG_PREFIX + "doctor_" + name,
+        args,
+        setup=doctor_setup(*mutators),
+        env_overrides=DOCTOR_ENV,
+        **({"expect_fallback": True} if fallback else {"native": True, "read_only": True}),
+    )
+
+
+def file_status_setup(
+    *mutators: Callable[[Path, dict[str, str]], None],
+    builder: Callable[[Path, dict[str, str]], None] = generate_managed_install,
+    base: bool = True,
+    unrelocated: bool = False,
+) -> Callable[[Path, dict[str, str]], None]:
+    """A Go-generated managed install relocated to `alt/library` / `alt/base`
+    *without* env overrides: only a decoded config file (or the case's own
+    environment) can make `skills status` find it."""
+
+    def wrapped(root: Path, env: dict[str, str]) -> None:
+        builder(root, env)
+        if not unrelocated:
+            relocate_managed_state(root, env, base=base)
+        env.pop("SYMSKILLS_LIBRARY_DIR", None)
+        env.pop("SYMSKILLS_BASE_DIR", None)
+        for mutate in mutators:
+            mutate(root, env)
+
+    return wrapped
+
+
+def file_status(name: str, *mutators, args=("skills", "status", "--target", "opencode", "--json"), fallback=False, base=True, unrelocated=False, posix_only=False) -> "Case":
+    return Case(
+        FILE_CONFIG_PREFIX + "status_" + name,
+        args,
+        setup=file_status_setup(*mutators, base=base, unrelocated=unrelocated),
+        posix_only=posix_only,
+        **({"expect_fallback": True} if fallback else {"native": True, "read_only": True}),
+    )
+
+
+FILE_STATUS_PATHS = 'library_dir = "{root}/alt/library"\nbase_dir = "{root}/alt/base"\n'
+FILE_STATUS_PATHS_POSIX = FILE_STATUS_PATHS.replace("{root}", "{posix_root}")
+
+
+FILE_DOCTOR_ALL = (
+    'library_dir = "{root}/cfg/library"\nrender_dir = "{root}/cfg/render"\n'
+    'cache_dir = "{root}/cfg/cache"\nprofiles_dir = "{root}/cfg/profiles"\n'
+    'base_dir = "{root}/cfg/base"\n[vcs]\nenabled = false\n'
+)
+FILE_DOCTOR_ALL_POSIX = FILE_DOCTOR_ALL.replace("{root}", "{posix_root}")
+
+
 CASES = (
     Case("guard_doctor_invalid_config_native", ("guard", "doctor"), setup=setup_guard_doctor_invalid_config, normalize_runtime=True),
     Case("guard_doctor_corrupt_anchor_native", ("guard", "doctor"), setup=setup_guard_doctor_corrupt_anchor, normalize_runtime=True),
@@ -3774,6 +3922,60 @@ CASES = (
         setup=project_scope_fixture(with_managed_config(setup_skills_opencode_managed_harness_changed)),
         native=True, read_only=True,
     ),
+    # #955: the library moves away from the install-time location while the
+    # default base-snapshot directory does not exist. Go has no snapshot, so it
+    # falls back to the coarse source-hash comparison; the pinned Go binary is
+    # the expected side of every comparison below.
+    Case(
+        "skills_status_config_env_library_moved_base_missing_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=managed_config_then(drop_default_base, base=False),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_library_moved_base_missing",
+        ("skills", "status", "--target", "opencode"),
+        setup=managed_config_then(drop_default_base, base=False),
+        native=True, read_only=True,
+    ),
+    Case(
+        "skills_status_config_env_library_moved_base_missing_copy_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_managed_config(
+            lambda root, env: (convert_managed_install_to_copy(root, env), drop_default_base(root, env)),
+            base=False,
+        ),
+        native=True, read_only=True,
+    ),
+    Case(
+        # The library did not move either: Go still reports stale, because the
+        # cached status render hashes differently from the install (#955). Any
+        # `SYMSKILLS_*` variable switches the #621 render extension off.
+        "skills_status_config_env_library_default_base_missing_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_env(
+            lambda root, env: (generate_managed_install(root, env), drop_default_base(root, env)),
+            SYMSKILLS_VCS_ENABLED="T",
+        ),
+        native=True, read_only=True,
+    ),
+    Case(
+        # Control: the snapshot directory is relocated (not missing).
+        "skills_status_config_env_library_moved_base_relocated_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_managed_config(generate_managed_install),
+        native=True, read_only=True,
+    ),
+    Case(
+        # The base override points at a directory that does not exist.
+        "skills_status_config_env_library_moved_base_override_missing_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=with_env(
+            managed_config_then(drop_default_base, base=False),
+            SYMSKILLS_BASE_DIR="{root}/alt/never-created-base",
+        ),
+        native=True, read_only=True,
+    ),
     # Shapes that must keep routing to Go (`expect_fallback` proves the route;
     # the ordinary comparison still checks the shipped bytes).
     Case(
@@ -3783,31 +3985,31 @@ CASES = (
         expect_fallback=True,
     ),
     Case(
-        "skills_status_config_fallback_config_file_json",
+        "skills_status_config_file_status_config_file_json",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=setup_status_config_config_file,
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_fallback_project_config_file",
+        "skills_status_config_file_status_project_config_file",
         ("skills", "status", "--target", "opencode"),
         setup=with_env(
             lambda root, env: _write_text(root / "project/.symskills.toml", 'library_dir = "/nonexistent"\n', encoding="utf-8"),
             SYMSKILLS_VCS_ENABLED="true",
         ),
-        expect_fallback=True,
+        **ROOTED_LIBRARY_ROUTE,
     ),
     Case(
-        "skills_status_config_fallback_invalid_vcs_bool_json",
+        "skills_status_config_file_status_invalid_vcs_bool_json",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=with_env(generate_managed_install, SYMSKILLS_VCS_ENABLED="maybe", SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used"),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_fallback_empty_vcs_bool",
+        "skills_status_config_file_status_empty_vcs_bool",
         ("skills", "status", "--target", "opencode"),
         setup=with_env(generate_managed_install, SYMSKILLS_VCS_ENABLED=""),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
         "skills_status_config_fallback_relative_library_json",
@@ -3871,36 +4073,31 @@ CASES = (
     # path (the whole config is dropped for the defaults) or in which the Rust
     # install layer would fail where Go succeeds: all stay on Go.
     Case(
-        "skills_status_config_fallback_config_toml_is_directory_json",
+        "skills_status_config_file_status_config_toml_is_directory_json",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=managed_config_then(_status_cfg_dir_as_config_toml),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_fallback_project_config_is_directory",
+        "skills_status_config_file_status_project_config_is_directory",
         ("skills", "status", "--target", "opencode"),
         setup=managed_config_then(_status_cfg_dir_as_project_config),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_fallback_config_dir_is_file_json",
+        "skills_status_config_file_status_config_dir_is_file_json",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=managed_config_then(_status_cfg_dir_is_file),
-        # POSIX stat reports ENOTDIR, which Go does not treat as "does not
-        # exist", so the whole config is dropped and the command stays on Go.
-        # Windows reports ERROR_PATH_NOT_FOUND, which Go skips like a missing
-        # file: the library override is honoured and the native run must equal
-        # Go's bytes (the relocated library only resolves when it is honoured)
-        # without touching the fixture.
-        expect_fallback=os.name != "nt",
-        native=os.name == "nt",
-        read_only=os.name == "nt",
+        # POSIX stat reports ENOTDIR (Go drops the whole config); Windows reports
+        # ERROR_PATH_NOT_FOUND (Go skips the file like a missing one). Both are
+        # replayed natively.
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_fallback_config_symlink_loop_json",
+        "skills_status_config_file_status_config_symlink_loop_json",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=managed_config_then(_status_cfg_symlink_loop),
-        expect_fallback=True,
+        native=True, read_only=True,
         posix_only=True,
     ),
     Case(
@@ -3971,22 +4168,22 @@ CASES = (
         posix_only=True,
     ),
     Case(
-        "skills_status_config_fallback_xdg_relative_home_config_file",
+        "skills_status_config_file_status_xdg_relative_home_config_file",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=managed_config_then(_status_cfg_xdg_relative_home_config),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_fallback_xdg_empty_home_config_file",
+        "skills_status_config_file_status_xdg_empty_home_config_file",
         ("skills", "status", "--target", "opencode"),
         setup=managed_config_then(_status_cfg_xdg_empty_home_config),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_fallback_xdg_absolute_config_file_json",
+        "skills_status_config_file_status_xdg_absolute_config_file_json",
         ("skills", "status", "--target", "opencode", "--json"),
         setup=managed_config_then(_status_cfg_xdg_absolute_config_file),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
         "skills_status_config_fallback_xdg_dotdot_through_symlink_json",
@@ -4084,10 +4281,10 @@ CASES = (
     *(
         (
             Case(
-                "skills_status_config_fallback_unreadable_config_dir_json",
+                "skills_status_config_file_status_unreadable_config_dir_json",
                 ("skills", "status", "--target", "opencode", "--json"),
                 setup=managed_config_then(_status_cfg_unreadable_dir),
-                expect_fallback=True,
+                native=True, read_only=True,
                 posix_only=True,
             ),
             Case(
@@ -4631,18 +4828,18 @@ CASES = (
         posix_only=True,
     ),
     Case(
-        "skills_status_config_doctor_fallback_global_config_regular_json",
+        "skills_status_config_doctor_file_global_regular_json",
         ('skills', 'doctor', '--json'),
         setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml")),
         env_overrides=DOCTOR_ENV,
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_doctor_fallback_global_config_regular_table",
+        "skills_status_config_doctor_file_global_regular_table",
         ('skills', 'doctor'),
         setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml", 'library_dir = "/cfg/library"\n'), _doctor_env(SYMSKILLS_BASE_DIR="{root}/alt/base")),
         env_overrides=DOCTOR_ENV,
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
         "skills_status_config_doctor_fallback_global_config_malformed_json",
@@ -4652,32 +4849,32 @@ CASES = (
         expect_fallback=True,
     ),
     Case(
-        "skills_status_config_doctor_fallback_global_config_empty_file_json",
+        "skills_status_config_doctor_file_global_empty_json",
         ('skills', 'doctor', '--json'),
         setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml", "")),
         env_overrides=DOCTOR_ENV,
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_doctor_fallback_project_config_regular_json",
+        "skills_status_config_doctor_file_project_regular_json",
         ('skills', 'doctor', '--json'),
         setup=doctor_setup(_doctor_regular_config("project/.symskills.toml", 'profiles_dir = "/proj/profiles"\n')),
         env_overrides=DOCTOR_ENV,
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_doctor_fallback_project_config_regular_with_env_table",
+        "skills_status_config_doctor_file_project_regular_with_env_table",
         ('skills', 'doctor'),
         setup=doctor_setup(_doctor_regular_config("project/.symskills.toml"), _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/library")),
         env_overrides=DOCTOR_ENV,
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_doctor_fallback_both_configs_regular_json",
+        "skills_status_config_doctor_file_both_regular_json",
         ('skills', 'doctor', '--json'),
         setup=doctor_setup(_doctor_regular_config("config/symskills/config.toml"), _doctor_regular_config("project/.symskills.toml", 'cache_dir = "/proj/cache"\n')),
         env_overrides=DOCTOR_ENV,
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
         "skills_status_config_doctor_fallback_unknown_flag",
@@ -4943,28 +5140,28 @@ CASES = (
         native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_list_fallback_config_file_json",
+        "skills_status_config_list_file_missing_library_json",
         ("skills", "list", "--json"),
         setup=lambda root, env: (setup_skills_library_fixture(root, env), write_symskills_config(root, 'library_dir = "/nonexistent/library"\n')),
-        expect_fallback=True,
+        **ROOTED_LIBRARY_ROUTE,
     ),
     Case(
-        "skills_status_config_list_fallback_project_config_file",
+        "skills_status_config_list_file_project_missing_library",
         ("skills", "list"),
         setup=lambda root, env: (setup_skills_library_fixture(root, env), _write_text(root / "project/.symskills.toml", 'library_dir = "/nonexistent"\n', encoding="utf-8")),
-        expect_fallback=True,
+        **ROOTED_LIBRARY_ROUTE,
     ),
     Case(
-        "skills_status_config_list_fallback_config_toml_is_directory_json",
+        "skills_status_config_list_file_directory_resets_json",
         ("skills", "list", "--json"),
         setup=lambda root, env: (setup_skills_library_fixture(root, env), _status_cfg_dir_as_config_toml(root, env)),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
-        "skills_status_config_list_fallback_invalid_vcs_bool_json",
+        "skills_status_config_list_env_invalid_vcs_bool_resets_json",
         ("skills", "list", "--json"),
         setup=list_then(setup_skills_library_fixture, lambda root, env: env.__setitem__("SYMSKILLS_VCS_ENABLED", "maybe")),
-        expect_fallback=True,
+        native=True, read_only=True,
     ),
     Case(
         "skills_status_config_list_fallback_native_only_env_json",
@@ -5521,6 +5718,114 @@ CASES = (
         expect_fallback=True, posix_only=True,
     ),
     *(
+        file_list("global_library_json", file_cfg(FILE_GLOBAL, FILE_LIB)),
+        file_list("global_library_table", file_cfg(FILE_GLOBAL, FILE_LIB), args=("skills", "list")),
+        file_list("project_library_json", file_cfg(FILE_PROJECT, FILE_LIB)),
+        file_list("project_over_global_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\n'), file_cfg(FILE_PROJECT, FILE_LIB)),
+        file_list("global_over_default_missing_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\n')),
+        file_list("env_over_file_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\n'), lambda root, env: env.__setitem__("SYMSKILLS_LIBRARY_DIR", str(root / "alt/library"))),
+        file_list("file_over_default_env_inert_json", file_cfg(FILE_GLOBAL, FILE_LIB), lambda root, env: env.update(SYMSKILLS_BASE_DIR=str(root / "never/base"), SYMSKILLS_VCS_ENABLED="false")),
+        file_list("invalid_type_resets_env_json", file_cfg(FILE_GLOBAL, "library_dir = 5\n"), lambda root, env: env.__setitem__("SYMSKILLS_LIBRARY_DIR", str(root / "alt/library"))),
+        file_list("invalid_type_resets_table", file_cfg(FILE_GLOBAL, "cache_dir = [1, 2]\n" + FILE_LIB), args=("skills", "list")),
+        file_list("invalid_vcs_string_resets_json", file_cfg(FILE_GLOBAL, FILE_LIB + '[vcs]\nenabled = "maybe"\n')),
+        file_list("vcs_string_false_is_valid_json", file_cfg(FILE_GLOBAL, FILE_LIB + 'vcs = { enabled = "false" }\n')),
+        file_list("global_error_short_circuits_project_json", file_cfg(FILE_GLOBAL, "cache_dir = true\n"), file_cfg(FILE_PROJECT, FILE_LIB)),
+        file_list("project_error_after_valid_global_json", file_cfg(FILE_GLOBAL, FILE_LIB), file_cfg(FILE_PROJECT, "base_dir = 1.5\n")),
+        file_list("bom_json", file_cfg(FILE_GLOBAL, FILE_BOM + FILE_LIB)),
+        file_list("empty_file_json", file_cfg(FILE_GLOBAL, "")),
+        file_list("empty_project_file_json", file_cfg(FILE_PROJECT, "\n# only a comment\n")),
+        file_list("no_files_default_json", lambda root, env: None),
+        file_list("crlf_comments_json", file_cfg(FILE_GLOBAL, lambda root: b"# header\r\nlibrary_dir = \"" + str(root / "alt/library").encode() + b"\" # tail\r\n")),
+        file_list("literal_and_multiline_strings_json", file_cfg(FILE_GLOBAL, "library_dir = '{root}/alt/library'\nrender_dir = \"\"\"\nmulti\nline\"\"\"\n")),
+        file_list("unicode_escape_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/libr\\u0061ry"\n')),
+        file_list("windows_path_basic_string_resets_json", file_cfg(FILE_GLOBAL, FILE_WIN_PATH)),
+        file_list("windows_path_basic_string_resets_table", file_cfg(FILE_GLOBAL, FILE_WIN_TEMP), args=("skills", "list")),
+        file_list("windows_path_project_resets_json", file_cfg(FILE_GLOBAL, FILE_LIB), file_cfg(FILE_PROJECT, FILE_WIN_PATH)),
+        file_list("windows_path_ignores_env_json", file_cfg(FILE_GLOBAL, FILE_WIN_PATH), lambda root, env: env.__setitem__("SYMSKILLS_LIBRARY_DIR", str(root / "alt/library"))),
+        file_list("fallback_windows_path_multiline_json", file_cfg(FILE_GLOBAL, 'library_dir = """C:\\Users\\sym"""\n'), fallback=True),
+        file_list("dotted_vcs_key_json", file_cfg(FILE_GLOBAL, FILE_LIB + "vcs.enabled = false\n")),
+        file_list("non_table_vcs_ignored_json", file_cfg(FILE_GLOBAL, 'vcs = 5\n' + FILE_LIB)),
+        file_list("inert_keys_json", file_cfg(FILE_GLOBAL, FILE_LIB + 'render_dir = "rel"\ncache_dir = ""\nprofiles_dir = "/x//y/"\nunknown = [1, 2, {a = 1}]\n[[targets]]\nname = "x"\nskill_root_user = "/tmp/x"\n[capabilities.x]\nfoo = true\n')),
+        file_list("managed_json", file_cfg(FILE_GLOBAL, FILE_LIB), builder=setup_skills_library_managed, normalize_atime=True),
+    ),
+    *(
+        file_list("fallback_syntax_error_global_json", file_cfg(FILE_GLOBAL, "library_dir = \n"), fallback=True),
+        file_list("fallback_syntax_error_project", file_cfg(FILE_GLOBAL, FILE_LIB_POSIX), file_cfg(FILE_PROJECT, "[unclosed\n"), args=("skills", "list"), fallback=True),
+        file_list("fallback_invalid_utf8_json", file_cfg(FILE_GLOBAL, b'library_dir = "\xff"\n'), fallback=True),
+        file_list("fallback_duplicate_key_json", file_cfg(FILE_GLOBAL, FILE_LIB_POSIX + FILE_LIB_POSIX), fallback=True),
+        file_list("fallback_leap_second_json", file_cfg(FILE_GLOBAL, FILE_LIB_POSIX + "when = 1979-05-27T07:32:60Z\n"), fallback=True),
+        file_list("fallback_relative_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "alt/library"\n'), fallback=True),
+        file_list("fallback_unclean_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "{posix_root}/alt/library/"\n'), fallback=True),
+        file_list("fallback_empty_library_json", file_cfg(FILE_GLOBAL, 'library_dir = ""\n'), fallback=True),
+        file_list("fallback_dotdot_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "{posix_root}/alt/../alt/library"\n'), fallback=True),
+        file_list("fallback_native_only_env_json", file_cfg(FILE_GLOBAL, FILE_LIB), lambda root, env: env.__setitem__("SYMBRAIN_SKILLS_LIBRARY_DIR", str(root / "alt/library")), fallback=True),
+    ),
+    *(
+        file_doctor("global_all_keys_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL)),
+        file_doctor("windows_path_basic_string_resets_json", file_cfg(FILE_GLOBAL, FILE_WIN_PATH)),
+        file_doctor("windows_path_basic_string_resets_table", file_cfg(FILE_GLOBAL, FILE_WIN_TEMP), args=("skills", "doctor")),
+        file_doctor("global_all_keys_table", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), args=("skills", "doctor")),
+        file_doctor("project_over_global_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), file_cfg(FILE_PROJECT, 'library_dir = "{root}/proj/library"\ncache_dir = "{root}/proj/cache"\nvcs.enabled = true\n')),
+        file_doctor("env_over_file_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), _doctor_env(SYMSKILLS_RENDER_DIR="{root}/env/render", SYMSKILLS_VCS_ENABLED="T", SYMSKILLS_BASE_DIR="")),
+        file_doctor("invalid_type_resets_env_json", file_cfg(FILE_GLOBAL, 'render_dir = 7\ncache_dir = "{root}/cfg/cache"\n'), _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used", SYMSKILLS_VCS_ENABLED="false")),
+        file_doctor("invalid_type_resets_table", file_cfg(FILE_GLOBAL, "profiles_dir = {a = 1}\n"), args=("skills", "doctor")),
+        file_doctor("invalid_vcs_string_resets_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL.replace("enabled = false", 'enabled = "nope"'))),
+        file_doctor("vcs_string_spellings_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/cfg/lib"\nvcs = { enabled = "F" }\n')),
+        file_doctor("non_table_vcs_ignored_json", file_cfg(FILE_GLOBAL, 'vcs = "off"\nbase_dir = "{root}/cfg/base"\n')),
+        file_doctor("global_error_short_circuits_project_json", file_cfg(FILE_GLOBAL, "cache_dir = true\n"), file_cfg(FILE_PROJECT, 'library_dir = "{root}/proj/library"\n')),
+        file_doctor("project_error_after_valid_global_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), file_cfg(FILE_PROJECT, "library_dir = 1979-05-27\n")),
+        file_doctor("bom_json", file_cfg(FILE_GLOBAL, FILE_BOM + FILE_DOCTOR_ALL)),
+        file_doctor("empty_values_verbatim_table", file_cfg(FILE_GLOBAL, 'library_dir = ""\nrender_dir = "relative/render"\ncache_dir = "/a//b/../c/"\n'), args=("skills", "doctor")),
+        file_doctor("special_characters_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/a&b<c>d \\"q\\" \\\\ \\t \\u00e9\\U0001F600"\n')),
+        file_doctor("targets_and_capabilities_inert_json", file_cfg(FILE_GLOBAL, '[[targets]]\nname = "x"\nskill_root_user = "/tmp/x"\n[capabilities.x]\nfoo = true\n' + 'base_dir = "{root}/cfg/base"\n')),
+        file_doctor("no_files_default_json"),
+        file_doctor("fallback_syntax_error_global_json", file_cfg(FILE_GLOBAL, "library_dir = \n"), _doctor_env(SYMSKILLS_LIBRARY_DIR="{root}/alt/never-used"), fallback=True),
+        file_doctor("fallback_syntax_error_project_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL_POSIX), file_cfg(FILE_PROJECT, "[unclosed\n"), fallback=True),
+        file_doctor("fallback_invalid_utf8_json", file_cfg(FILE_GLOBAL, b'library_dir = "\xff"\n'), fallback=True),
+        file_doctor("fallback_leap_second_json", file_cfg(FILE_GLOBAL, "when = 1979-05-27T07:32:60Z\n"), fallback=True),
+        file_doctor("fallback_line_separator_value_json", file_cfg(FILE_GLOBAL, 'library_dir = "{posix_root}/a\\u2028b"\n'), fallback=True),
+        file_doctor("fallback_unknown_flag_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), args=("skills", "doctor", "--bogus"), fallback=True),
+    ),
+    *(
+        file_status("global_library_base_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS)),
+        file_status("global_library_base_table", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), args=("skills", "status", "--target", "opencode")),
+        file_status("project_library_base_json", file_cfg(FILE_PROJECT, FILE_STATUS_PATHS)),
+        file_status("project_over_global_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\nbase_dir = "{root}/alt/nowhere-base"\n'), file_cfg(FILE_PROJECT, FILE_STATUS_PATHS)),
+        file_status("library_only_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/library"\n'), base=False),
+        # #955: library moved by a config file, default base directory missing.
+        file_status("library_moved_base_missing_json", file_cfg(FILE_GLOBAL, FILE_LIB), drop_default_base, base=False),
+        file_status("library_moved_base_missing_table", file_cfg(FILE_GLOBAL, FILE_LIB), drop_default_base, base=False, args=("skills", "status", "--target", "opencode")),
+        file_status("library_moved_base_missing_project_json", file_cfg(FILE_PROJECT, FILE_LIB), drop_default_base, base=False),
+        file_status("library_moved_base_missing_with_vcs_json", file_cfg(FILE_GLOBAL, FILE_LIB + "[vcs]\nenabled = false\n"), drop_default_base, base=False),
+        file_status("library_moved_base_missing_base_dir_missing_json", file_cfg(FILE_GLOBAL, FILE_LIB + 'base_dir = "{root}/alt/never-created-base"\n'), drop_default_base, base=False),
+        file_status("base_only_json", file_cfg(FILE_GLOBAL, 'base_dir = "{root}/alt/base"\n')),
+        file_status("env_over_file_json", file_cfg(FILE_GLOBAL, 'library_dir = "{root}/alt/nowhere"\nbase_dir = "{root}/alt/nowhere-base"\n'), lambda root, env: env.update(SYMSKILLS_LIBRARY_DIR=str(root / "alt/library"), SYMSKILLS_BASE_DIR=str(root / "alt/base"))),
+        file_status("invalid_type_resets_env_json", file_cfg(FILE_GLOBAL, "library_dir = 5\n"), lambda root, env: env.update(SYMSKILLS_LIBRARY_DIR=str(root / "alt/library"), SYMSKILLS_BASE_DIR=str(root / "alt/base"))),
+        file_status("invalid_vcs_string_resets_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS + 'vcs = { enabled = "maybe" }\n')),
+        file_status("windows_path_basic_string_resets_json", file_cfg(FILE_GLOBAL, FILE_WIN_TEMP)),
+        file_status("windows_path_project_resets_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), file_cfg(FILE_PROJECT, FILE_WIN_PATH)),
+        file_status("global_error_short_circuits_project_json", file_cfg(FILE_GLOBAL, "cache_dir = true\n"), file_cfg(FILE_PROJECT, FILE_STATUS_PATHS)),
+        file_status("bom_json", file_cfg(FILE_GLOBAL, FILE_BOM + FILE_STATUS_PATHS)),
+        file_status("empty_file_json", file_cfg(FILE_GLOBAL, "")),
+        file_status("inert_keys_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS + 'render_dir = "rel"\nprofiles_dir = ""\nvcs.enabled = false\n[[targets]]\nname = "x"\nskill_root_user = "/tmp/x"\n')),
+        file_status("file_only_no_env_json", file_cfg(FILE_GLOBAL, "# nothing decisive\n"), unrelocated=True),
+        file_status("project_file_only_no_env_table", file_cfg(FILE_PROJECT, "vcs.enabled = false\n"), args=("skills", "status", "--target", "opencode"), unrelocated=True),
+        file_status("directory_config_no_env_json", _status_cfg_dir_as_config_toml, unrelocated=True),
+        file_status("dir_is_file_config_no_env_json", _status_cfg_dir_is_file, unrelocated=True, posix_only=True),
+        file_status("fallback_syntax_error_json", file_cfg(FILE_GLOBAL, "library_dir = \n"), fallback=True),
+        file_status("fallback_syntax_error_project", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS_POSIX), file_cfg(FILE_PROJECT, "[unclosed\n"), args=("skills", "status", "--target", "opencode"), fallback=True),
+        file_status("fallback_invalid_utf8_json", file_cfg(FILE_GLOBAL, b'library_dir = "\xff"\n'), fallback=True),
+        file_status("cache_dir_moved_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS_POSIX + 'cache_dir = "{posix_root}/alt/cache"\n'), fallback=True),
+        file_status("fallback_relative_library_json", file_cfg(FILE_GLOBAL, 'library_dir = "alt/library"\n'), fallback=True),
+        file_status("fallback_other_target_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), args=("skills", "status", "--target", "claude", "--json"), fallback=True),
+        file_status("fallback_no_target_json", file_cfg(FILE_GLOBAL, FILE_STATUS_PATHS), args=("skills", "status", "--json"), fallback=True),
+    ),
+    *(
+        (file_doctor("fallback_unreadable_file_json", file_cfg(FILE_GLOBAL, FILE_DOCTOR_ALL), lambda root, env: (root / FILE_GLOBAL).chmod(0o000), fallback=True),)
+        if hasattr(os, "geteuid") and os.geteuid() != 0 and os.name == "posix"
+        else ()
+    ),
+    *(
         (
             Case(
                 "skills_status_config_targets_config_dir_unreadable_json",
@@ -5629,7 +5934,15 @@ def normalize_fixture_root(data: bytes, root: Path) -> bytes:
     json_root = json_text.encode("ascii")
     # Go's quoted executable path is itself escaped by the outer JSON string.
     quoted_json_root = json.dumps(json_text, ensure_ascii=True)[1:-1].encode("ascii")
-    return data.replace(quoted_json_root, b"<root>").replace(json_root, b"<root>").replace(raw_root, b"<root>")
+    # `{posix_root}` bodies echo the forward-slash spelling back on Windows; on
+    # POSIX it equals raw_root and this replacement is a no-op.
+    posix_root = root.as_posix().encode()
+    return (
+        data.replace(quoted_json_root, b"<root>")
+        .replace(json_root, b"<root>")
+        .replace(raw_root, b"<root>")
+        .replace(posix_root, b"<root>")
+    )
 
 
 def normalize_atomic_tempfile(data: bytes) -> bytes:

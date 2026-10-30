@@ -20,8 +20,12 @@ import cases
 import corrupt_reads
 import creation_cases
 import path_cases
+import sync_cases
+import sync_relay_cases
 
 ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+SYNC_ORACLE = "fc5252d2e88c0ac2f8fe945113f9494084916558"
+SYNC_CONFIGKIT_SHA = "a5feec34169538e85c16b07f7d6bdaaa4456da5ce0326349633d0e70f692a467"
 CONFIGKIT_SHA = "bd812ed747352c76b9f223a19ec64970b61fda59050f7ed436f5b2e74b997218"
 
 
@@ -230,16 +234,10 @@ def configured_search(go, rust, records):
         thread.join(timeout=5)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--go", type=Path, help="optional prebuilt immutable oracle; SHA recorded")
-    parser.add_argument("--rust", type=Path)
-    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths", "corrupt_reads", "store_creation"), default="all")
-    parser.add_argument("--report", type=Path)
-    args = parser.parse_args()
-    repo = Path(__file__).resolve().parents[2]
-    rust = (args.rust or repo / "target/debug" / ("symbrain.exe" if os.name == "nt" else "symbrain")).resolve()
-    archive = run(["git", "archive", ORACLE], repo).stdout
+def replay_revision(args, repo, rust, revision, families):
+    corekit_version = "v0.18.2" if revision == SYNC_ORACLE else "v0.17.0"
+    configkit_sha = SYNC_CONFIGKIT_SHA if revision == SYNC_ORACLE else CONFIGKIT_SHA
+    archive = run(["git", "archive", revision], repo).stdout
     go_cache = run(["go", "env", "GOMODCACHE", "GOCACHE"], repo).stdout.decode().splitlines()
     with tempfile.TemporaryDirectory(prefix="memory-cli-oracle-") as temporary:
         root = Path(temporary)
@@ -251,10 +249,11 @@ def main():
         home.mkdir()
         env = isolated_env(home)
         env.update(PATH=os.environ.get("PATH", ""), GOWORK="off", GOENV="off",
+                   GOTOOLCHAIN="go1.26.7",
                    GOMODCACHE=go_cache[0], GOCACHE=go_cache[1], CGO_ENABLED="0")
-        run(["go", "mod", "download", "github.com/danieljustus/symaira-corekit@v0.17.0"], source, env)
-        configkit = Path(go_cache[0]) / "github.com/danieljustus/symaira-corekit@v0.17.0/configkit/configkit.go"
-        assert digest(configkit.read_bytes()) == CONFIGKIT_SHA, "pinned Go configkit changed"
+        run(["go", "mod", "download", "github.com/danieljustus/symaira-corekit@" + corekit_version], source, env)
+        configkit = Path(go_cache[0]) / ("github.com/danieljustus/symaira-corekit@" + corekit_version + "/configkit/configkit.go")
+        assert digest(configkit.read_bytes()) == configkit_sha, "pinned Go configkit changed"
         go = args.go.resolve() if args.go else root / ("oracle.exe" if os.name == "nt" else "oracle")
         if args.go is None:
             run(["go", "build", "-o", str(go), "./cmd/symbrain"], source, env)
@@ -265,27 +264,31 @@ def main():
         reflected = run(["go", "run", "./scripts/memory-cli-oracle-schema"], source, env).stdout
         expected_fields = [(field["name"], field["kind"]) for field in json.loads(reflected)]
         records = []
-        if args.family in ("all", "arguments"):
+        if "arguments" in families:
             arguments(go, rust, records)
-        if args.family in ("all", "configuration"):
+        if "configuration" in families:
             configuration(go, rust, repo, records, expected_fields)
-        if args.family in ("all", "seeded_reads"):
+        if "seeded_reads" in families:
             seeded_reads(go, rust, records)
-        if args.family in ("all", "configured_search"):
+        if "configured_search" in families:
             configured_search(go, rust, records)
-        if args.family in ("all", "database_paths"):
+        if "database_paths" in families:
             records.extend(path_cases.run(go, rust, output, snapshot, isolated_env))
-        if args.family in ("all", "corrupt_reads"):
+        if "corrupt_reads" in families:
             records.extend(corrupt_reads.run(go, rust, output, snapshot, isolated_env))
-        if args.family in ("all", "store_creation"):
+        if "store_creation" in families:
             records.extend(creation_cases.run(go, rust, output, snapshot, isolated_env))
+        if "sync_preflight" in families:
+            records.extend(sync_cases.run(go, rust, output, isolated_env))
+        if "sync_relay" in families:
+            records.extend(sync_relay_cases.run(go, rust, output, snapshot, isolated_env))
         candidate_files = set(run(["git", "ls-files", "--cached", "--others", "--exclude-standard",
                                    "rust/symbrain-cli", "rust/symbrain-memory", "Cargo.toml", "Cargo.lock",
                                    "scripts/memory-cli-oracle", ".github/workflows/memory-cli-native.yml"], repo)
                               .stdout.decode().splitlines())
         report = dict(
-            go_oracle_revision=ORACLE, go_binary_sha256=digest(go.read_bytes()),
-            rust_binary_sha256=digest(rust.read_bytes()), corekit_configkit_sha256=CONFIGKIT_SHA,
+            go_oracle_revision=revision, go_binary_sha256=digest(go.read_bytes()),
+            rust_binary_sha256=digest(rust.read_bytes()), corekit_configkit_sha256=configkit_sha,
             reflected_go_schema_sha256=digest(reflected), known_config_fields=len(expected_fields),
             schema_generator_sha256=digest(schema_source.read_bytes()),
             immutable_go_cli_source_sha256={str(path.relative_to(source)): digest(path.read_bytes())
@@ -293,15 +296,50 @@ def main():
             candidate_source_sha256={name: digest((repo / name).read_bytes()) for name in sorted(candidate_files)},
             candidate_revision=run(["git", "rev-parse", "HEAD"], repo).stdout.decode().strip(),
             candidate_dirty=bool(run(["git", "status", "--porcelain"], repo).stdout),
-            go_version=run(["go", "version"], repo).stdout.decode().strip(),
+            go_version=run(["go", "version"], source, env).stdout.decode().strip(),
             operator_home_used=False,
             fallback_available=any(record.get("fallback_available", False) for record in records),
             cases=len(records), passed=sum(record["match"] for record in records), records=records)
-        if args.report:
-            args.report.write_text(json.dumps(report, indent=2) + "\n")
-        print(json.dumps({key: value for key, value in report.items()
-                          if key not in ("records", "candidate_source_sha256", "immutable_go_cli_source_sha256")}, indent=2))
-        assert report["cases"] == report["passed"], "actual Go/Rust output or database state differs"
+        return report
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--go", type=Path, help="optional prebuilt immutable oracle; SHA recorded")
+    parser.add_argument("--rust", type=Path)
+    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths", "corrupt_reads", "store_creation", "sync_preflight", "sync_relay"), default="all")
+    parser.add_argument("--report", type=Path)
+    args = parser.parse_args()
+    repo = Path(__file__).resolve().parents[2]
+    target = Path(os.environ.get("CARGO_TARGET_DIR", str(repo / "target")))
+    rust = (args.rust or target / "debug" / ("symbrain.exe" if os.name == "nt" else "symbrain")).resolve()
+    sync_families = {"sync_preflight", "sync_relay"}
+    other_families = {"arguments", "configuration", "seeded_reads", "configured_search",
+                      "database_paths", "corrupt_reads", "store_creation"}
+    selected = sync_families | other_families if args.family == "all" else {args.family}
+    if args.go and selected & sync_families and selected & other_families:
+        parser.error("--go requires a single revision's families; all binds two immutable oracles")
+    reports = []
+    for revision, families in ((ORACLE, selected & other_families),
+                               (SYNC_ORACLE, selected & sync_families)):
+        if families:
+            reports.append(replay_revision(args, repo, rust, revision, families))
+    report = dict(reports[0])
+    report["oracle_provenance"] = [{key: value for key, value in item.items()
+                                    if key not in ("records", "cases", "passed")}
+                                   for item in reports]
+    report["records"] = [dict(record, go_oracle_revision=item["go_oracle_revision"])
+                         for item in reports for record in item["records"]]
+    report["go_oracle_revisions"] = {
+        record["family"]: record["go_oracle_revision"] for record in report["records"]}
+    report["cases"] = len(report["records"])
+    report["passed"] = sum(record["match"] for record in report["records"])
+    if args.report:
+        args.report.write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps({key: value for key, value in report.items()
+                      if key not in ("records", "candidate_source_sha256", "immutable_go_cli_source_sha256",
+                                     "oracle_provenance")}, indent=2))
+    assert report["cases"] == report["passed"], "actual Go/Rust output or database state differs"
 
 
 if __name__ == "__main__":

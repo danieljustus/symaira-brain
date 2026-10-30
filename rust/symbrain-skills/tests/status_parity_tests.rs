@@ -161,3 +161,30 @@ fn status_reports_dangling_and_directory_links_like_go() {
     assert_eq!(names, vec!["chain-tail", "dangling"]);
     assert!(rows.iter().all(|row| row.status == StatusKind::Unmanaged));
 }
+
+/// #955: without a base snapshot Go's `skills status` (which passes a cache
+/// directory) compares the marker against the cached render's fingerprint
+/// hash, which never equals the install-time hash. The MCP restore path passes
+/// no cache directory and keeps the install-time comparison.
+#[test]
+fn coarse_comparison_uses_cached_render_hash_only_when_requested() {
+    let home = tempfile::tempdir().expect("home");
+    let library = tempfile::tempdir().expect("library");
+    let source = library.path().join("cached");
+    write_skill(&source, "cached", "body\n");
+    install_one(home.path(), &source, "opencode");
+    let missing_base = home.path().join("no-such-base");
+    let options = |cached_render_hash| StatusOptions {
+        home_dir: home.path().to_path_buf(),
+        library_dir: library.path().to_path_buf(),
+        base_dir: Some(missing_base.clone()),
+        targets: vec!["opencode".to_owned()],
+        cached_render_hash,
+        ..Default::default()
+    };
+    let install_time = status(&options(false)).expect("status");
+    assert_eq!(install_time[0].status, StatusKind::InSync);
+    let cached = status(&options(true)).expect("status");
+    assert_eq!(cached[0].status, StatusKind::Stale);
+    assert!(cached[0].error.is_none());
+}
