@@ -33,6 +33,12 @@ recorded request bodies are not normalized. Rust verifies exact hash inventories
 and uses independent full-fixture and evidence-script digests, with negative
 controls against changed hashes, expected results, and requests. `-check`
 regenerates the oracle in memory and compares without overwriting the target.
+Because only squash merges are allowed, a newer pin cannot stay an ancestor of
+`main`. `-check` therefore also accepts a changed behavior source when the
+current code reproduces every frozen case byte for byte under the same oracle
+revision and toolchain; it names the changed inputs on stderr. Regeneration
+without `-check` still rejects any changed source, so the frozen provenance
+keeps describing the pinned revision.
 
 ## Compared contracts
 

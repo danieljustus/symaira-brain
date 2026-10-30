@@ -35,40 +35,47 @@ func digestText(data []byte) string {
 	return fmt.Sprintf("%x", sha256.Sum256(bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))))
 }
 
-func recordProvenance(p *provenance, oracleRevision, oracleToolchain string) error {
+// recordProvenance pins source hashes to the oracle revision. With
+// allowDrift, changed sources are returned instead of rejected; the caller
+// must then prove unchanged behavior by comparing the recorded cases.
+func recordProvenance(p *provenance, oracleRevision, oracleToolchain string, allowDrift bool) ([]string, error) {
 	if oracleRevision == "" || oracleToolchain == "" {
-		return fmt.Errorf("oracle revision and toolchain must be supplied by the gate")
+		return nil, fmt.Errorf("oracle revision and toolchain must be supplied by the gate")
 	}
 	if runtime.Version() != oracleToolchain {
-		return fmt.Errorf("oracle needs %s, got %s", oracleToolchain, runtime.Version())
+		return nil, fmt.Errorf("oracle needs %s, got %s", oracleToolchain, runtime.Version())
 	}
 	// The release revision survives squash integration of this new harness.
 	if err := exec.Command("git", "merge-base", "--is-ancestor", oracleRevision, "HEAD").Run(); err != nil {
-		return fmt.Errorf("oracle revision is not an ancestor: %w", err)
+		return nil, fmt.Errorf("oracle revision is not an ancestor: %w", err)
 	}
 	p.OracleRevision, p.Toolchain = oracleRevision, oracleToolchain
+	var drift []string
 	p.SourceHashes = make(map[string]string, len(sourcePaths))
 	p.HarnessHashes = make(map[string]string, len(harnessPaths))
 	for _, path := range sourcePaths {
 		pinned, err := exec.Command("git", "show", oracleRevision+":"+path).Output()
 		if err != nil {
-			return fmt.Errorf("read pinned source %s: %w", path, err)
+			return nil, fmt.Errorf("read pinned source %s: %w", path, err)
 		}
 		current, err := os.ReadFile(path)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if digestText(pinned) != digestText(current) {
-			return fmt.Errorf("oracle source changed: %s", path)
+			if !allowDrift {
+				return nil, fmt.Errorf("oracle source changed: %s", path)
+			}
+			drift = append(drift, path)
 		}
 		p.SourceHashes[path] = digestText(pinned)
 	}
 	for _, path := range harnessPaths {
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		p.HarnessHashes[path] = digestText(data)
 	}
-	return nil
+	return drift, nil
 }
