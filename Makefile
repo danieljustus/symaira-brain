@@ -89,13 +89,17 @@ rust-go-printable-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run scripts/generate-go-printable-table.go -check
 
 .PHONY: usage-opencode-check usage-contract-current-check usage-opencode-historical-check
-## Current acceptance requires separately retained v2 evidence; never use the older receipt.
-usage-opencode-check: usage-contract-current-check
+## usage-opencode-check: Verify pinned OpenCode request/parse corpus without rewriting it
+usage-opencode-check:
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(OPENCODE_ORACLE_TOOLCHAIN) go run ./scripts/usage-request-oracle/opencode -oracle-revision $(OPENCODE_ORACLE_REVISION) -oracle-toolchain $(OPENCODE_ORACLE_TOOLCHAIN) -check
+
+## usage-contract-current-check: Optional local check of a retained v2 capture (not part of CI)
 usage-contract-current-check:
 	@test -n "$(USAGE_V2_EVIDENCE)"
-	PYTHONDONTWRITEBYTECODE=1 python3 scripts/usage-contract-v2/verify.py "$(CURDIR)" "$(USAGE_V2_EVIDENCE)"
+	@test -n "$(USAGE_V2_RECEIPT_SHA256)"
+	PYTHONDONTWRITEBYTECODE=1 python3 scripts/usage-contract-v2/verify.py "$(CURDIR)" "$(USAGE_V2_EVIDENCE)" "$(USAGE_V2_RECEIPT_SHA256)"
 
-## Revalidate the frozen generator only against its authentic immutable source.
+## usage-opencode-historical-check: Revalidate the frozen generator against its authentic immutable source.
 usage-opencode-historical-check:
 	@test "$$(git -C "$(HISTORICAL_USAGE_ROOT)" rev-parse HEAD)" = b807eae643c627ae31166b90176d5a0de6f4e647
 	@test -z "$$(git -C "$(HISTORICAL_USAGE_ROOT)" status --porcelain=v1 --untracked-files=all)"

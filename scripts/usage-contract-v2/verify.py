@@ -24,6 +24,13 @@ def artifact(root, name, expected):
     return raw
 
 
+def anchor_for(evidence, receipt_sha256):
+    """Bind a retained receipt to the hash the reviewer recorded out of band."""
+    require(isinstance(receipt_sha256, str) and re.fullmatch('[0-9a-f]{64}', receipt_sha256), 'invalid receipt hash')
+    receipt = json.loads((evidence / 'receipt.json').read_bytes())
+    return dict(source_commit=receipt['source_commit'], receipt_sha256=receipt_sha256, inputs=receipt['inputs'])
+
+
 def validate(root, evidence, anchor):
     source_commit = anchor['source_commit']
     require(isinstance(source_commit, str) and re.fullmatch('[0-9a-f]{40}', source_commit), 'invalid source commit')
@@ -73,7 +80,6 @@ def validate(root, evidence, anchor):
 
 
 if __name__ == '__main__':
-    root, evidence = map(lambda p: Path(p).resolve(), sys.argv[1:])
-    anchor = json.loads((root / 'scripts/usage-contract-v2/accepted.json').read_bytes())
-    r = validate(root, evidence, anchor)
+    root, evidence = (Path(p).resolve() for p in sys.argv[1:3])
+    r = validate(root, evidence, anchor_for(evidence, sys.argv[3]))
     print(json.dumps(dict(verdict='PASS', source_commit=r['source_commit'], acceptance_head=git(root, 'rev-parse', 'HEAD'), openrouter_cases=27, history_cases=17, cli_cases=28)))

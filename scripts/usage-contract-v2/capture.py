@@ -24,8 +24,7 @@ def git(root, *args):
 
 def inventory(root):
     paths = git(root, 'ls-files').splitlines()
-    return {p: digest((root / p).read_bytes()) for p in paths
-            if p != 'scripts/usage-contract-v2/accepted.json'}
+    return {p: digest((root / p).read_bytes()) for p in paths}
 
 
 def require_clean(root, revision):

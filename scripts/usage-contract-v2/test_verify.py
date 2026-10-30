@@ -8,14 +8,14 @@ import shutil
 import tempfile
 import unittest
 from capture import digest, git, ROOT
-from verify import artifact, validate
+from verify import anchor_for, artifact, validate
 
 
 class Controls(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evidence = Path(os.environ['USAGE_V2_EVIDENCE']).resolve()
-        cls.anchor = json.loads((ROOT / 'scripts/usage-contract-v2/accepted.json').read_bytes())
+        cls.anchor = anchor_for(cls.evidence, os.environ['USAGE_V2_RECEIPT_SHA256'])
         validate(ROOT, cls.evidence, cls.anchor)
 
     def test_receipt_and_coordinated_replacement_rejected(self):

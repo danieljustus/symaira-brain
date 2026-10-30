@@ -8,40 +8,40 @@ Only its input-root entrypoint changed; the historical generator, fixtures,
 independent anchors and validation predicates remain unchanged. The original
 entrypoint is also runnable on that immutable checkout.
 
-Current approval requires `accepted.json`, an independently reviewed anchor of
-a separately retained v2 receipt. The receipt binds clean detached source,
-complete pre/post input inventories, actual Go/Rust observations, built binary
-hashes and every raw artifact. Its `source_commit` is the measured source,
-not the later acceptance HEAD that adds this anchor. All measured Go/Rust and
-harness inputs must remain byte-identical at acceptance HEAD. The unfiltered
-Rust usage suite includes the current source-freshness and mutation tests;
-missing v2 acceptance is a failure, not an ignored test.
+This capture is an optional local evidence tool. It is not a CI gate and no
+committed anchor depends on it: `make rust-check` runs the self-contained
+`usage-opencode-check` against the pinned OpenCode oracle revision, and the
+Go/Rust usage fixtures stay covered by `usage-oracle-check` and the Rust tests.
+Unrelated repository changes therefore never invalidate CI.
 
-Create a clean committed source checkpoint (acceptance may still be pending),
-then capture to **new** retained evidence and supported external build paths:
+A retained v2 receipt binds clean detached source, complete pre/post input
+inventories, actual Go/Rust observations, built binary hashes and every raw
+artifact. Its `source_commit` is the measured source. Create a clean committed
+source checkpoint, then capture to **new** retained evidence and supported
+external build paths:
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/usage-contract-v2/capture.py \
   "$(git rev-parse HEAD)" "$NEW_EVIDENCE" "$NEW_BUILD"
 ```
 
-Do not edit old captures. Review the receipt and actual observations before
-adding `accepted.json` with `source_commit`, `receipt_sha256`, and `inputs`
-from the independently reviewed v2 receipt. There is deliberately no automatic
-anchor-refresh mode. Then on the clean acceptance checkout:
+Do not edit old captures. Review the receipt and the actual observations, record
+the reviewed `receipt_sha256` outside the repository, then verify on a clean
+checkout whose tracked files match the capture:
 
 ```sh
-make usage-contract-current-check USAGE_V2_EVIDENCE="$EVIDENCE"
+make usage-contract-current-check USAGE_V2_EVIDENCE="$EVIDENCE" \
+  USAGE_V2_RECEIPT_SHA256="$REVIEWED_SHA256"
 PYTHONDONTWRITEBYTECODE=1 USAGE_V2_EVIDENCE="$EVIDENCE" \
+  USAGE_V2_RECEIPT_SHA256="$REVIEWED_SHA256" \
   python3 scripts/usage-contract-v2/test_verify.py
 make usage-opencode-historical-check HISTORICAL_USAGE_ROOT="$HISTORICAL_CHECKOUT"
 ```
 
-`usage-opencode-check` now owns current v2 acceptance; the historical target
-requires a clean checkout at the exact original source before invoking its
-unchanged generator/check. Existing CI callers must supply retained v2 evidence;
-absence fails closed rather than falling back to v1. No workflow publication
-or full-repository acceptance is implied by local execution.
+The historical target requires a clean checkout at the exact original source
+before invoking its unchanged generator/check. Local verification is evidence
+for the measured commit only; it implies no workflow publication or
+full-repository acceptance.
 
 Evidence classes: 27 scripted OpenRouter production-report/request walks,
 fresh OpenCode generator cases compared to the preserved legacy corpus,
