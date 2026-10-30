@@ -1,4 +1,4 @@
-# Rust release candidate pipeline (#730). Builds the six release archives with
+# Rust release candidate pipeline (#730). Builds the three supported release archives with
 # the Rust CLI and its packaged Go fallback, verifies them against the release
 # archive contract and smoke-tests each one on its native platform.
 #
@@ -60,10 +60,7 @@ jobs:
           # Ubuntu 22.04 keeps the glibc floor at 2.35 for the dynamically linked CLI.
           - { os: linux, arch: amd64, runner: ubuntu-22.04 }
           - { os: linux, arch: arm64, runner: ubuntu-22.04-arm }
-          - { os: darwin, arch: amd64, runner: macos-15-intel }
           - { os: darwin, arch: arm64, runner: macos-15 }
-          - { os: windows, arch: amd64, runner: windows-2025 }
-          - { os: windows, arch: arm64, runner: windows-11-arm }
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     defaults:
@@ -73,7 +70,7 @@ jobs:
       VERSION: ${{ needs.version.outputs.version }}
       SOURCE_DATE_EPOCH: ${{ needs.version.outputs.epoch }}
       MACOSX_DEPLOYMENT_TARGET: "12.0"
-      EXE: ${{ matrix.os == 'windows' && '.exe' || '' }}
+      EXE: ""
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -136,13 +133,18 @@ jobs:
           path: ${{ runner.temp }}/dist
           merge-multiple: true
 
+      - name: Verify supported runner and release contracts
+        run: |
+          go test ./.github/tests ./scripts/dist-oracle
+          python3 -m unittest discover -s scripts/rust-release -p 'test_*.py'
+
       - name: Write checksums
         run: python3 scripts/rust-release/package.py checksums --dir "$RUNNER_TEMP/dist"
 
-      - name: Verify the archive contract for all six platforms
+      - name: Verify the archive contract for all three supported platforms
         run: go run ./scripts/dist-oracle -hybrid-candidate-check -platforms all -version "$VERSION" -assets "$RUNNER_TEMP/dist"
 
-      - name: Render Homebrew formula and Scoop manifest (not published)
+      - name: Render Homebrew formula (not published)
         run: python3 scripts/rust-release/manifests.py --version "$VERSION" --checksums "$RUNNER_TEMP/dist/checksums.txt" --out "$RUNNER_TEMP/manifests"
 
       - name: Install Syft
@@ -254,7 +256,7 @@ jobs:
           echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
           export API_KEY_PATH
           dist="$RUNNER_TEMP/candidate/dist"
-          for arch in amd64 arm64; do
+          for arch in arm64; do
             archive="$dist/symbrain_${VERSION}_darwin_${arch}.tar.gz"
             work="$RUNNER_TEMP/darwin-$arch"
             mkdir -p "$work"
@@ -283,7 +285,7 @@ jobs:
       - name: Regenerate the darwin SBOMs
         run: |
           set -euo pipefail
-          for arch in amd64 arm64; do
+          for arch in arm64; do
             name="symbrain_${VERSION}_darwin_${arch}.tar.gz"
             syft "$RUNNER_TEMP/candidate/dist/$name" --output "cyclonedx-json=$RUNNER_TEMP/candidate/sbom/$name.sbom.json"
           done

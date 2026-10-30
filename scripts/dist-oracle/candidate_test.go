@@ -30,6 +30,9 @@ func TestCandidateArchiveBundleChecksNamesContentsAndChecksums(t *testing.T) {
 	var checksumLines []string
 	for _, goos := range cfg.Builds[0].GOOS {
 		for _, goarch := range cfg.Builds[0].GOARCH {
+			if goos == "darwin" && goarch == "amd64" {
+				continue
+			}
 			name := renderTemplate(cfg.Archives[0].NameTemplate, cfg.ProjectName, version, goos, goarch) + "." + formatFor(cfg.Archives[0], goos)
 			binary := cfg.Builds[0].Binary
 			if goos == "windows" && !strings.HasSuffix(binary, ".exe") {
@@ -162,13 +165,13 @@ func TestHybridCandidateArchiveRequiresBothBinariesAndExactChecksum(t *testing.T
 
 func TestHybridPlatformsAcceptAllOrKnownPairsOnly(t *testing.T) {
 	all, err := parseHybridPlatforms("all")
-	if err != nil || len(all) != 6 {
-		t.Fatalf("all = %v, %v; want six release targets", all, err)
+	if err != nil || len(all) != 3 {
+		t.Fatalf("all = %v, %v; want three release targets", all, err)
 	}
-	if got, err := parseHybridPlatforms("linux/amd64,windows/arm64"); err != nil || len(got) != 2 {
+	if got, err := parseHybridPlatforms("linux/amd64,darwin/arm64"); err != nil || len(got) != 2 {
 		t.Fatalf("explicit list = %v, %v", got, err)
 	}
-	for _, bad := range []string{"linux/riscv64", "linux/amd64,linux/amd64", ""} {
+	for _, bad := range []string{"windows/arm64", "darwin/amd64", "linux/riscv64", "linux/amd64,linux/amd64", ""} {
 		if _, err := parseHybridPlatforms(bad); err == nil {
 			t.Fatalf("%q accepted", bad)
 		}

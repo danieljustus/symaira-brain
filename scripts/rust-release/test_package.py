@@ -47,14 +47,10 @@ class Package(unittest.TestCase):
         self.assertEqual(info["README.md"].mode, 0o644)
         self.assertEqual({(m.uid, m.gid, m.mtime) for m in info.values()}, {(0, 0, 1700000000)})
 
-    def test_windows_zip_uses_exe_members(self):
-        path = self.build(self.tmp / "w", "windows", "arm64")
-        self.assertEqual(path.suffix, ".zip")
-        with zipfile.ZipFile(path) as archive:
-            self.assertEqual(sorted(archive.namelist()),
-                             ["AGENTS.md", "LICENSE", "README.md", "symbrain-go.exe", "symbrain.exe"])
-            self.assertEqual(archive.read("symbrain.exe"), b"rust")
-        self.assertEqual(path.read_bytes(), self.build(self.tmp / "w2", "windows", "arm64").read_bytes())
+    def test_removed_platforms_cannot_be_packaged(self):
+        for goos, goarch in [("windows", "arm64"), ("windows", "amd64"), ("darwin", "amd64")]:
+            with self.subTest(platform=(goos, goarch)), self.assertRaises(SystemExit):
+                self.build(self.tmp / "unsupported", goos, goarch)
 
     def test_rejects_v_prefixed_version(self):
         with self.assertRaises(SystemExit):
@@ -66,7 +62,7 @@ class Package(unittest.TestCase):
         for goos, goarch in package.PLATFORMS:
             self.build(out, goos, goarch)
         lines = package.write_checksums(out).read_text().splitlines()
-        self.assertEqual(len(lines), 6)
+        self.assertEqual(len(lines), 3)
         for line in lines:
             digest, name = line.split("  ")
             self.assertEqual(digest, hashlib.sha256((out / name).read_bytes()).hexdigest())
@@ -81,7 +77,7 @@ class Package(unittest.TestCase):
                  "-version", VERSION, "-assets", str(out)]
         result = subprocess.run(check, cwd=package.ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("PASS 6 archives", result.stdout)
+        self.assertIn("PASS 3 archives", result.stdout)
         (out / package.archive_name(VERSION, "darwin", "arm64")).unlink()
         package.write_checksums(out)
         self.assertNotEqual(subprocess.run(check, cwd=package.ROOT, capture_output=True).returncode, 0)
