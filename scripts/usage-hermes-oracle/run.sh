@@ -36,6 +36,7 @@ run_stage() {
   if "$@" >"$evidence_dir/$label.log" 2>&1; then tail -n 12 "$evidence_dir/$label.log"; else local code=$?; tail -n 100 "$evidence_dir/$label.log" >&2; return "$code"; fi
 }
 cd "$repo_root"
+run_stage parity-controls python3 scripts/usage-hermes-oracle/composed_parity_test.py
 python3 scripts/usage-hermes-oracle/cases.py "$scratch/input.json"
 mkdir -p "$scratch/home"
 export USAGE_HERMES_ORACLE="$scratch/go.json" USAGE_HERMES_NATIVE="$scratch/native.json" USAGE_HERMES_INPUT="$scratch/input.json" USAGE_HERMES_ROOT="$scratch/home"
