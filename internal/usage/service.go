@@ -3,6 +3,7 @@ package usage
 import (
 	"context"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -59,6 +60,14 @@ func BuildReport(ctx context.Context, providers []Provider) Report {
 			DisplayName: p.DisplayName(),
 			Configured:  p.IsConfigured(),
 			AuthStatus:  p.AuthStatus(),
+		}
+		// A failed explicit reference is configured intent, not an absent
+		// credential. Preserve the resolver diagnostic and never start a fetch.
+		if strings.HasPrefix(pu.AuthStatus.Detail, "credential resolution failed: ") {
+			pu.Configured = true
+			pu.Error = pu.AuthStatus.Detail
+			report.Providers[i] = pu
+			continue
 		}
 		if !pu.Configured {
 			report.Providers[i] = pu
