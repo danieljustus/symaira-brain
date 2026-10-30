@@ -1,6 +1,6 @@
 # OpenCode recorded local history
 
-This additive schema-1 capability reuses [LocalHistory](usage-grok-recorded-history.md), independently of quota/authentication results. It is not full OpenUsage parity or account billing.
+This additive schema-1 capability reuses [LocalHistory](usage-grok-recorded-history.md), independently of quota/authentication results. It is not account billing.
 
 ```sh
 SYMBRAIN_USAGE_OPENCODE_HISTORY=1 symbrain usage --providers opencode --output json
@@ -10,25 +10,25 @@ Only the exact flag value `1` **and explicit provider selection including `openc
 
 ## Source and classification
 
-Read-only reference: OpenUsage `abf472d5dbb23645c3afbb5a0c7429606ffbdcd7`, `OpenCodeUsageScanner.swift`, `OpenCodePaths.swift`, `OpenCodeCodexUsageScanner.swift`, `docs/providers/opencode.md`; upstream was inspected, not executed. All added fixtures are synthetic documented-schema controls, not user/native OpenCode captures.
+All added fixtures are synthetic documented-schema controls, not user/native OpenCode captures.
 
 Data directory: absolute `OPENCODE_DATA_DIR`, else `XDG_DATA_HOME/opencode`, else `$HOME/.local/share/opencode`. No tilde expansion; `.`/`..` or symlinked ancestors are rejected. Union path-sorted `opencode*.db`, including stable and preview. Read v1 `message(id,time_created,data)` and v2 `session_message(id,time_created,type,data)` where present. A database without either table contributes no rows; unreadable/schema-invalid database admission fails the scan closed.
 
 - v1: `data.role == assistant`, flat `providerID` / `modelID`.
 - v2: `type == assistant`, or `type == compaction` with `data.status == completed`; nested `model.providerID` / `model.id` (legacy flat rows copied into the v2 table are supported). Conflicting nested/flat identities are rejected.
-- Only recorded provider IDs `opencode-go` (Go) and `opencode` (Zen) contribute. `openai` is excluded regardless of zero/positive cost or current OAuth/API login: it is never charged to Go/Zen. This avoids reading credentials to distinguish Codex-owned ChatGPT OAuth from ordinary OpenAI API traffic. Other non-hosted provider IDs likewise contribute nothing. Missing/invalid ownership is a visible excluded diagnostic, never current-account attribution.
+- Only recorded provider IDs `opencode-go` (Go) and `opencode` (Zen) contribute. `openai` is excluded regardless of current OAuth/API login: it is never attributed to Go/Zen. This avoids reading credentials to distinguish Codex-owned ChatGPT OAuth from ordinary OpenAI API traffic. Other non-hosted provider IDs likewise contribute nothing. Missing/invalid ownership is a visible excluded diagnostic, never current-account attribution.
 - Match upstream's assistant eligibility, including assistant rows without a separate completion marker; completed compactions are the only accepted compactions. Timestamp is integer `time_created` milliseconds, not inferred completion time.
 - Deduplicate **message ID alone across all tables/channels**. Identical normalized provider/model/time/measurements count once; conflicting copies (including non-hosted/unknown ownership or model changes) do not count. A malformed identifiable copy poisons an otherwise eligible duplicate. Missing/oversized IDs are excluded, not independently counted. `excluded_events` is a diagnostic contribution/identity count, not exact lost messages.
 
 ## Unchanged consumer shape and measurement policy
 
-`providers[].history` uses the existing required `scope`, `attribution`, `currency`, `cost_basis`, `timezone`, `status`, `excluded_events`, `daily`, `periods`. No new required schema field. Scope is always `local_machine`, attribution `unattributed`, currency `USD`, basis `recorded`. Current credential/account identity is not evidence of historical ownership, even with only one channel. Multiple channels are unioned only under this explicit local/unattributed scope.
+`providers[].history` uses the existing required `scope`, `attribution`, `timezone`, `status`, `excluded_events`, `daily`, `periods`. Scope is always `local_machine`, attribution `unattributed`. Current credential/account identity is not evidence of historical ownership, even with only one channel. Multiple channels are unioned only under this explicit local/unattributed scope.
 
 Daily keys ascend, model keys sort lexically; period keys are `last_30_days`, `today`, `yesterday`. The window is today plus the preceding 29 **host-local calendar dates**, yesterday is a calendar date, and future instants are excluded. Missing periods/days are not fabricated zero rows. `timezone: local` describes the Brain host, not a remote UI's zone.
 
-Model rows retain required `model`, `events`, `missing_tokens`, `missing_cost`, and optional decimal-string `tokens`, `recorded_cost`. Prefer exact nonnegative integer `tokens.total` when present; otherwise require all five documented buckets `input + output + reasoning + cache.read + cache.write`. Incomplete buckets are unknown, not zero. No additive use of buckets when total exists. Each bucket is bounded at 10^12; total at 10^15.
+Model rows retain required `model`, `events`, `missing_tokens`, and optional decimal-string `tokens`. Prefer exact nonnegative integer `tokens.total` when present; otherwise require all five documented buckets `input + output + reasoning + cache.read + cache.write`. Incomplete buckets are unknown, not zero. No additive use of buckets when total exists. Each bucket is bounded at 10^12; total at 10^15.
 
-Costs are read from the JSON numeric lexeme, never a binary float sum or a price estimate. The existing exact 10^-10 USD unit is retained: values requiring finer precision, negative/invalid/non-numeric costs or values above 10^15 ticks per contribution remain missing; no rounding/clamping. Exact zero is `"0"`. Any missing contribution suppresses that aggregate amount and marks history `partial`; rejected identities also mark it `partial`. No account-wide or inferred complete total is exposed. Malformed numeric JSON rejected by a runtime parser is an excluded row, not a fabricated value.
+History ignores monetary values. Any missing token contribution suppresses that aggregate and marks history `partial`; rejected identities also mark it `partial`. No account-wide total is exposed. Malformed numeric JSON rejected by a runtime parser is an excluded row, not a fabricated value.
 
 ## Safety and limits
 

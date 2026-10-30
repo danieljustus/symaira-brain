@@ -1,6 +1,6 @@
 # Grok recorded local history: consumer contract
 
-This is an additive optional schema-1 capability in **Brain**, not a Cockpit UI implementation or complete OpenUsage parity.
+This is an additive optional schema-1 capability in **Brain**, not a Cockpit UI implementation.
 
 ## User flow
 
@@ -22,25 +22,23 @@ History object, all fields required when present:
 |---|---|
 | `scope` | `"local_machine"`; not cloud billing or balance |
 | `attribution` | `"unattributed"`; never the current signed-in account |
-| `currency` | `"USD"`, from the recorded `costUsdTicks` unit |
-| `cost_basis` | `"recorded"`; never estimated |
 | `timezone` | `"local"` in production, meaning the Brain host's calendar/time zone, **not the consumer's**; injected library tests may name another zone |
 | `status` | `available`, `no_data`, `partial`, `unavailable` |
 | `excluded_events` | integer count of rejected lines, unfinished non-LF tails, or conflicting event/model identities; diagnostics, not an exact count of lost turns |
 | `daily` | ascending `{key: "YYYY-MM-DD", models: [...]}` rows, only dates with accepted data |
 | `periods` | ascending key rows: `last_30_days`, `today`, `yesterday`, only periods with accepted data |
 
-Each model row has required `model` (bounded ASCII model identifier), `events` (integer accepted completed contributions), `missing_tokens` and `missing_cost` (integer contribution counts); optional `tokens` and `recorded_cost` are **decimal strings**. An amount is omitted if any accepted contribution in that row lacks that measurement. Genuine measured zero is `"0"`. There are no fabricated empty-day zero rows. `recorded_cost` is USD, exact to the recorded 10^-10 USD tick; no floating-point summation. Per-model amounts must not be summed into a complete period total unless every row has that amount and no excluded/partial data is hidden. Show `partial` as incomplete even where a row has measured values. `unavailable` has empty arrays and means an admission/budget/read failure; do not reuse earlier totals as current results.
+Each model row has required `model`, `events`, and `missing_tokens`, with optional decimal-string `tokens`. The total is omitted if any accepted contribution lacks a token measurement. Genuine measured zero is `"0"`; empty-day rows are not fabricated. `partial` signals incomplete data. `unavailable` has empty arrays and means an admission, budget or read failure. Monetary fields are not read or emitted.
 
 Calendar window: today plus the preceding 29 local dates; yesterday is the preceding calendar date, not the preceding 24 hours. Future timestamps are excluded. DST is resolved by the host time-zone rules at each event. Model rows sort lexically; daily rows sort ascending. Consumers should select period keys, not array positions.
 
 ## Event acceptance and ownership
 
-Source: OpenUsage `abf472d5dbb23645c3afbb5a0c7429606ffbdcd7`, `GrokLogUsageScanner.swift`, `GrokLogUsageScannerTests.swift`, `docs/providers/grok.md` (read only, never executed). Fixtures here are explicitly synthetic source-shaped controls, not native Grok captures.
+Fixtures here are explicitly synthetic source-shaped controls, not native Grok captures.
 
-Accept completed `update.sessionUpdate == turn_completed`, in `params` or top-level envelope. Prefer agent millisecond timestamp, then outer RFC3339 or integer Unix seconds. Per-model `usage.modelUsage` contributions use `inputTokens + outputTokens`; cached read/creation and reasoning are subsets, not added again. Exact nonnegative integer counts only, input/output each at most 10^12, cost ticks at most 10^15 per contribution. Missing, negative, fractional, non-integer-string, boolean or oversized measurement values remain unknown; they are not clamped to zero. Per-model cost is preferred; only a single-model event can use top-level `usage.costUsdTicks` when per-model cost is absent.
+Accept completed `update.sessionUpdate == turn_completed`, in `params` or top-level envelope. Prefer agent millisecond timestamp, then outer RFC3339 or integer Unix seconds. Per-model `usage.modelUsage` contributions use `inputTokens + outputTokens`; cached read/creation and reasoning are subsets, not added again. Exact nonnegative integer counts only, input/output each at most 10^12. Missing, negative, fractional, non-integer-string, boolean or oversized measurement values remain unknown; they are not clamped to zero.
 
-Deduplicate by stable `_meta.eventId` and model across every session kind, including nested subagents, resumed/forked copies. Different models within one event stay separate. Conflicting copies are excluded, not first-wins. Missing event ID means ambiguous deduplication and is excluded/flagged. This is intentionally stricter than upstream's count-every-no-ID behavior. No observed event field establishes ownership by the current login; all history stays explicitly unattributed. Account-filtered history, estimates/shared prices, currency conversion and cloud reconciliation remain unsupported.
+Deduplicate by stable `_meta.eventId` and model across every session kind, including nested subagents, resumed/forked copies. Different models within one event stay separate. Conflicting copies are excluded, not first-wins. Missing event ID means ambiguous deduplication and is excluded/flagged. This is intentionally stricter than upstream's count-every-no-ID behavior. No observed event field establishes ownership by the current login; all history stays explicitly unattributed. Account-filtered history and cloud reconciliation remain unsupported.
 
 ## Bounds and safety
 
