@@ -74,7 +74,7 @@
       "files": {
         "p/updates.jsonl": "{\"timestamp\":\"2026-10-28T09:00:00Z\",\"params\":{\"_meta\":{\"eventId\":\"a\"},\"update\":{\"sessionUpdate\":\"turn_completed\",\"usage\":{\"modelUsage\":{\"grok-a\":{\"inputTokens\":1,\"outputTokens\":2},\"grok-b\":{\"inputTokens\":3,\"outputTokens\":4,\"costUsdTicks\":1}},\"costUsdTicks\":10000000000}}}}\n"
       },
-      "status": "partial",
+      "status": "available",
       "excluded": 0
     },
     {
@@ -128,7 +128,7 @@
     {
       "name": "unicode-content-is-not-jsonl-delimiter",
       "files": {
-        "p/updates.jsonl": "{\"timestamp\": \"2026-10-28T09:00:00Z\", \"params\": {\"_meta\": {\"eventId\": \"a\"}, \"update\": {\"sessionUpdate\": \"turn_completed\", \"usage\": {\"modelUsage\": {\"grok-build\": {\"inputTokens\": 100, \"outputTokens\": 20, \"reasoningTokens\": 5, \"cachedReadTokens\": 70, \"costUsdTicks\": 2357158800}}}}, \"prompt\": \"synthetic\u2028content\u2029never-output\"}}\n"
+        "p/updates.jsonl": "{\"timestamp\": \"2026-10-28T09:00:00Z\", \"params\": {\"_meta\": {\"eventId\": \"a\"}, \"update\": {\"sessionUpdate\": \"turn_completed\", \"usage\": {\"modelUsage\": {\"grok-build\": {\"inputTokens\": 100, \"outputTokens\": 20, \"reasoningTokens\": 5, \"cachedReadTokens\": 70, \"costUsdTicks\": 2357158800}}}}, \"prompt\": \"synthetic content never-output\"}}\n"
       },
       "status": "available",
       "excluded": 0

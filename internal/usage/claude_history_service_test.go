@@ -72,7 +72,7 @@ func TestClaudeHistoryConsentAndQuotaIndependence(t *testing.T) {
 			if (p.History != nil) != want {
 				t.Fatalf("%s: %+v", mode, p)
 			}
-			if want && (p.History.Status != "available" || *p.History.Daily[0].Models[0].EstimatedCost != "0") {
+			if want && (p.History.Status != "available") {
 				t.Fatalf("%+v", p.History)
 			}
 			if mode == "quota-error" {

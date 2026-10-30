@@ -2,16 +2,12 @@ package usage
 
 import (
 	"context"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strings"
 	"time"
 )
-
-//go:embed codex_prices.json
-var codexPrices []byte
 
 // Cache and reasoning are subsets, not additional tokens.
 type codexCounts [4]uint64
@@ -83,12 +79,11 @@ func nonNullCodex(v json.RawMessage) bool {
 	var s string
 	return json.Unmarshal(v, &s) != nil || strings.TrimSpace(s) != ""
 }
-func (p *codexParser) parse(line []byte, prices codexPriceTable) (*claudeEntry, bool) {
+func (p *codexParser) parse(line []byte) (*claudeEntry, bool) {
 	var o struct {
 		Type      string                     `json:"type"`
 		Timestamp string                     `json:"timestamp"`
 		Payload   map[string]json.RawMessage `json:"payload"`
-		Cost      json.RawMessage            `json:"costUSD"`
 	}
 	if json.Unmarshal(line, &o) != nil || strings.TrimSpace(string(line)) == "null" {
 		p.poisoned = true
@@ -226,7 +221,7 @@ func (p *codexParser) parse(line []byte, prices codexPriceTable) (*claudeEntry, 
 	if total == 0 {
 		return nil, true
 	}
-	e := &claudeEntry{event: historyEvent{model: model, at: at, tokens: &total, ticks: openCodeCost(o.Cost)}}
+	e := &claudeEntry{event: historyEvent{model: model, at: at, tokens: &total}}
 	if p.poisoned {
 		if p.child {
 			return nil, true
@@ -271,24 +266,15 @@ func (p *codexParser) parse(line []byte, prices codexPriceTable) (*claudeEntry, 
 	if p.child {
 		return nil, true
 	}
-	if len(o.Cost) == 0 {
-		e.estimate = codexEstimate(model, b, p.tier, prices)
-	}
 	return e, true
 }
 
 // ScanCodexHistory scans one native home, without credentials, caches or source writes.
 func ScanCodexHistory(ctx context.Context, dir string, now time.Time) *LocalHistory {
-	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Currency: "USD", CostBasis: "unknown", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
+	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
 	if now.Location() == time.Local {
 		h.Timezone = "local"
 	}
-	var prices codexPriceTable
-	if json.Unmarshal(codexPrices, &prices) != nil {
-		h.Status = "unavailable"
-		return h
-	}
-	h.PriceSnapshot = &prices.Snapshot
 	if !filepath.IsAbs(dir) || strings.ContainsAny(dir, ",\x00") {
 		h.Status = "unavailable"
 		return h
@@ -309,7 +295,7 @@ func ScanCodexHistory(ctx context.Context, dir string, now time.Time) *LocalHist
 	for _, sub := range []string{"sessions", "archived_sessions"} {
 		parser := codexParser{}
 		_, bad, err := readJSONHistoryFilesReset(ctx, filepath.Join(dir, sub), true, func(line []byte) ([]historyEvent, bool) {
-			e, ok := parser.parse(line, prices)
+			e, ok := parser.parse(line)
 			if e == nil {
 				return nil, ok
 			}
@@ -321,19 +307,7 @@ func ScanCodexHistory(ctx context.Context, dir string, now time.Time) *LocalHist
 				// Contradictory tiers on the same copied measurement remain incomplete.
 				measurementID = e.event.id[:strings.LastIndex(e.event.id, "|")]
 			}
-			if i, found := seen[measurementID]; found {
-				old := &entries[i]
-				if old.event.ticks == nil && e.event.ticks != nil {
-					*old = *e
-				} else if old.event.ticks == nil {
-					if old.estimate != nil && e.estimate != nil && *old.estimate != *e.estimate {
-						old.estimate = nil
-						conflicts++
-					}
-					if e.estimate == nil {
-						old.estimate = nil
-					}
-				}
+			if _, found := seen[measurementID]; found {
 				return nil, ok
 			}
 			seen[measurementID] = len(entries)
@@ -358,6 +332,5 @@ func ScanCodexHistory(ctx context.Context, dir string, now time.Time) *LocalHist
 		events = append(events, e.event)
 	}
 	aggregateHistory(h, events, excluded+conflicts, now)
-	applyClaudeCosts(h, entries, now)
 	return h
 }

@@ -9,9 +9,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -23,12 +20,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -41,12 +33,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -57,12 +44,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -79,9 +61,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -93,12 +72,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -111,12 +85,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         },
@@ -127,12 +96,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -149,9 +113,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -163,12 +124,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -181,12 +137,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         },
@@ -197,12 +148,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -219,9 +165,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -233,12 +176,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -251,12 +189,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -267,12 +200,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -289,9 +217,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -303,12 +228,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "144",
-              "estimated_cost": "0.000606"
+              "tokens": "144"
             }
           ]
         }
@@ -321,12 +241,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "144",
-              "estimated_cost": "0.000606"
+              "tokens": "144"
             }
           ]
         },
@@ -337,12 +252,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "144",
-              "estimated_cost": "0.000606"
+              "tokens": "144"
             }
           ]
         }
@@ -359,9 +269,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -373,12 +280,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -391,12 +293,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -407,12 +304,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -429,9 +321,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -443,12 +332,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -461,12 +345,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -477,12 +356,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -499,11 +373,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -513,10 +384,6 @@
               "model": "unknown",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -530,10 +397,6 @@
               "model": "unknown",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -545,10 +408,6 @@
               "model": "unknown",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -566,11 +425,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -580,10 +436,6 @@
               "model": "gpt-future-unpriced",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -597,10 +449,6 @@
               "model": "gpt-future-unpriced",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -612,10 +460,6 @@
               "model": "gpt-future-unpriced",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -633,11 +477,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -647,10 +488,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -664,10 +501,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -679,10 +512,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -700,9 +529,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -714,12 +540,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         }
@@ -732,12 +553,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         },
@@ -748,12 +564,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         }
@@ -770,9 +581,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -784,12 +592,7 @@
               "model": "gpt-5.4-high-fast",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         }
@@ -802,12 +605,7 @@
               "model": "gpt-5.4-high-fast",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         },
@@ -818,12 +616,7 @@
               "model": "gpt-5.4-high-fast",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         }
@@ -840,9 +633,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -854,12 +644,7 @@
               "model": "gpt-5.5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.002525"
+              "tokens": "120"
             }
           ]
         }
@@ -872,12 +657,7 @@
               "model": "gpt-5.5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.002525"
+              "tokens": "120"
             }
           ]
         },
@@ -888,12 +668,7 @@
               "model": "gpt-5.5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.002525"
+              "tokens": "120"
             }
           ]
         }
@@ -910,9 +685,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -924,12 +696,7 @@
               "model": "gpt-6-astra",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.01092"
+              "tokens": "120"
             }
           ]
         }
@@ -942,12 +709,7 @@
               "model": "gpt-6-astra",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.01092"
+              "tokens": "120"
             }
           ]
         },
@@ -958,12 +720,7 @@
               "model": "gpt-6-astra",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.01092"
+              "tokens": "120"
             }
           ]
         }
@@ -980,9 +737,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -994,12 +748,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272001",
-              "estimated_cost": "0.680015"
+              "tokens": "272001"
             }
           ]
         }
@@ -1012,12 +761,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272001",
-              "estimated_cost": "0.680015"
+              "tokens": "272001"
             }
           ]
         },
@@ -1028,12 +772,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272001",
-              "estimated_cost": "0.680015"
+              "tokens": "272001"
             }
           ]
         }
@@ -1050,9 +789,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1064,12 +800,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272002",
-              "estimated_cost": "1.3600275"
+              "tokens": "272002"
             }
           ]
         }
@@ -1082,12 +813,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272002",
-              "estimated_cost": "1.3600275"
+              "tokens": "272002"
             }
           ]
         },
@@ -1098,12 +824,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272002",
-              "estimated_cost": "1.3600275"
+              "tokens": "272002"
             }
           ]
         }
@@ -1120,9 +841,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1134,12 +852,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272002",
-              "estimated_cost": "0.1360275"
+              "tokens": "272002"
             }
           ]
         }
@@ -1152,12 +865,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272002",
-              "estimated_cost": "0.1360275"
+              "tokens": "272002"
             }
           ]
         },
@@ -1168,12 +876,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "272002",
-              "estimated_cost": "0.1360275"
+              "tokens": "272002"
             }
           ]
         }
@@ -1190,9 +893,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1204,12 +904,7 @@
               "model": "daybreak-blue-latest",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000728"
+              "tokens": "120"
             }
           ]
         }
@@ -1222,12 +917,7 @@
               "model": "daybreak-blue-latest",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000728"
+              "tokens": "120"
             }
           ]
         },
@@ -1238,12 +928,7 @@
               "model": "daybreak-blue-latest",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000728"
+              "tokens": "120"
             }
           ]
         }
@@ -1260,9 +945,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1274,12 +956,7 @@
               "model": "gpt-reserve",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.0000404"
+              "tokens": "120"
             }
           ]
         }
@@ -1292,12 +969,7 @@
               "model": "gpt-reserve",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.0000404"
+              "tokens": "120"
             }
           ]
         },
@@ -1308,12 +980,7 @@
               "model": "gpt-reserve",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.0000404"
+              "tokens": "120"
             }
           ]
         }
@@ -1330,11 +997,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1344,10 +1008,6 @@
               "model": "codex-auto-review",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1361,10 +1021,6 @@
               "model": "codex-auto-review",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1376,10 +1032,6 @@
               "model": "codex-auto-review",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1397,9 +1049,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1411,12 +1060,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         }
@@ -1429,12 +1073,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         },
@@ -1445,12 +1084,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         }
@@ -1467,9 +1101,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1481,12 +1112,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0.1000000001"
+              "tokens": "120"
             }
           ]
         }
@@ -1499,12 +1125,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0.1000000001"
+              "tokens": "120"
             }
           ]
         },
@@ -1515,12 +1136,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0.1000000001"
+              "tokens": "120"
             }
           ]
         }
@@ -1537,11 +1153,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1551,10 +1164,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1568,10 +1177,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1583,10 +1188,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1604,11 +1205,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1618,10 +1216,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1635,10 +1229,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1650,10 +1240,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1671,11 +1257,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1685,10 +1268,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1702,10 +1281,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1717,10 +1292,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1738,11 +1309,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1752,10 +1320,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1769,10 +1333,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1784,10 +1344,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1805,11 +1361,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1819,10 +1372,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1836,10 +1385,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1851,10 +1396,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1872,11 +1413,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1886,10 +1424,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1903,10 +1437,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1918,10 +1448,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -1939,11 +1465,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "mixed",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -1953,13 +1476,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "mixed",
-              "recorded_events": 1,
-              "estimated_events": 1,
-              "tokens": "360",
-              "recorded_cost": "0",
-              "estimated_cost": "0.000505"
+              "tokens": "360"
             }
           ]
         }
@@ -1972,13 +1489,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "mixed",
-              "recorded_events": 1,
-              "estimated_events": 1,
-              "tokens": "360",
-              "recorded_cost": "0",
-              "estimated_cost": "0.000505"
+              "tokens": "360"
             }
           ]
         },
@@ -1989,13 +1500,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "mixed",
-              "recorded_events": 1,
-              "estimated_events": 1,
-              "tokens": "360",
-              "recorded_cost": "0",
-              "estimated_cost": "0.000505"
+              "tokens": "360"
             }
           ]
         }
@@ -2012,9 +1517,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -2032,9 +1534,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -2052,9 +1551,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2072,9 +1568,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2092,9 +1585,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2112,9 +1602,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2132,9 +1619,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2152,9 +1636,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2165,11 +1646,7 @@
             {
               "model": "gpt-5.4",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -2181,11 +1658,7 @@
             {
               "model": "gpt-5.4",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         },
@@ -2195,11 +1668,7 @@
             {
               "model": "gpt-5.4",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -2216,9 +1685,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2230,12 +1696,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2248,12 +1709,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2264,12 +1720,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2286,9 +1737,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2300,12 +1748,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2318,12 +1761,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2334,12 +1772,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2356,9 +1789,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -2377,9 +1807,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2391,12 +1818,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2409,12 +1831,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2425,12 +1842,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2448,9 +1860,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2462,12 +1871,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2480,12 +1884,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2496,12 +1895,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2519,9 +1913,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2533,12 +1924,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -2551,12 +1937,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         },
@@ -2567,12 +1948,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -2590,11 +1966,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -2604,21 +1977,12 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             },
             {
               "model": "unknown",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -2632,21 +1996,12 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             },
             {
               "model": "unknown",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -2658,21 +2013,12 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             },
             {
               "model": "unknown",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -2692,9 +2038,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2706,12 +2049,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2724,12 +2062,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2740,12 +2073,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2762,9 +2090,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2776,12 +2101,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2794,12 +2114,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2810,12 +2125,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2832,9 +2142,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2846,12 +2153,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2864,12 +2166,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2880,12 +2177,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2902,9 +2194,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2916,12 +2205,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2934,12 +2218,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -2950,12 +2229,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -2972,9 +2246,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2986,12 +2257,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3004,12 +2270,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -3020,12 +2281,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3042,9 +2298,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -3062,9 +2315,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3076,12 +2326,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3094,12 +2339,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -3110,12 +2350,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3132,9 +2367,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3146,12 +2378,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3164,12 +2391,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -3180,12 +2402,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3202,9 +2419,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3216,12 +2430,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -3234,12 +2443,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         },
@@ -3250,12 +2454,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -3272,9 +2471,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3286,12 +2482,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3304,12 +2495,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -3320,12 +2506,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3342,9 +2523,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -3362,9 +2540,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -3382,9 +2557,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3396,12 +2568,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3414,12 +2581,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -3430,12 +2592,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3453,9 +2610,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3467,12 +2621,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         }
@@ -3485,12 +2634,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         },
@@ -3501,12 +2645,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         }
@@ -3524,9 +2663,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3538,12 +2674,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         }
@@ -3556,12 +2687,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         },
@@ -3572,12 +2698,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "120",
-              "recorded_cost": "0"
+              "tokens": "120"
             }
           ]
         }
@@ -3595,11 +2716,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -3609,10 +2727,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3626,10 +2740,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3641,10 +2751,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3663,11 +2769,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -3677,10 +2780,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3694,10 +2793,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3709,10 +2804,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3731,9 +2822,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3745,12 +2833,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3763,12 +2846,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         },
@@ -3779,12 +2857,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.000505"
+              "tokens": "120"
             }
           ]
         }
@@ -3802,12 +2875,9 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
-      "excluded_events": 1,
+      "status": "available",
+      "excluded_events": 0,
       "daily": [
         {
           "key": "2026-10-20",
@@ -3816,10 +2886,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3833,10 +2899,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3848,10 +2910,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -3869,9 +2927,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3883,12 +2938,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -3901,12 +2951,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         },
@@ -3917,12 +2962,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -3939,9 +2979,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -3953,12 +2990,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -3971,12 +3003,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         },
@@ -3987,12 +3014,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -4009,9 +3031,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4023,12 +3042,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -4041,12 +3055,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         },
@@ -4057,12 +3066,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -4079,11 +3083,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -4093,10 +3094,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -4110,10 +3107,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -4125,10 +3118,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -4146,9 +3135,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4160,12 +3146,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         }
@@ -4178,12 +3159,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         },
@@ -4194,12 +3170,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.00101"
+              "tokens": "120"
             }
           ]
         }
@@ -4216,9 +3187,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -4236,9 +3204,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4256,9 +3221,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4276,9 +3238,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4296,9 +3255,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4316,9 +3272,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4336,9 +3289,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4356,9 +3306,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4376,9 +3323,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -4396,9 +3340,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4410,12 +3351,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -4428,12 +3364,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         },
@@ -4444,12 +3375,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -4467,9 +3393,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4481,12 +3404,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -4499,12 +3417,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         },
@@ -4515,12 +3428,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -4538,9 +3446,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4552,12 +3457,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -4570,12 +3470,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         },
@@ -4586,12 +3481,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.00101"
+              "tokens": "240"
             }
           ]
         }
@@ -4608,9 +3498,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4622,12 +3509,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -4640,12 +3522,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         },
@@ -4656,12 +3533,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -4679,9 +3551,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4693,12 +3562,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -4711,12 +3575,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         },
@@ -4727,12 +3586,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -4750,9 +3604,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4764,12 +3615,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -4782,12 +3628,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         },
@@ -4798,12 +3639,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -4820,9 +3656,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4834,12 +3667,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -4852,12 +3680,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         },
@@ -4868,12 +3691,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -4890,9 +3708,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4904,12 +3719,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -4922,12 +3732,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         },
@@ -4938,12 +3743,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -4961,9 +3761,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -4975,12 +3772,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "24",
-              "estimated_cost": "0.000101"
+              "tokens": "24"
             }
           ]
         }
@@ -4993,12 +3785,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "24",
-              "estimated_cost": "0.000101"
+              "tokens": "24"
             }
           ]
         },
@@ -5009,12 +3796,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "24",
-              "estimated_cost": "0.000101"
+              "tokens": "24"
             }
           ]
         }
@@ -5032,9 +3814,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -5046,12 +3825,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "144",
-              "estimated_cost": "0.000606"
+              "tokens": "144"
             }
           ]
         }
@@ -5064,12 +3838,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "144",
-              "estimated_cost": "0.000606"
+              "tokens": "144"
             }
           ]
         },
@@ -5080,12 +3849,7 @@
               "model": "gpt-5.4",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "144",
-              "estimated_cost": "0.000606"
+              "tokens": "144"
             }
           ]
         }
@@ -5103,12 +3867,9 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
-      "excluded_events": 1,
+      "status": "available",
+      "excluded_events": 0,
       "daily": [
         {
           "key": "2026-10-20",
@@ -5117,10 +3878,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -5134,10 +3891,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -5149,10 +3902,6 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -5171,9 +3920,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -5185,12 +3931,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.001515"
+              "tokens": "240"
             }
           ]
         }
@@ -5203,12 +3944,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.001515"
+              "tokens": "240"
             }
           ]
         },
@@ -5219,12 +3955,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "240",
-              "estimated_cost": "0.001515"
+              "tokens": "240"
             }
           ]
         }
@@ -5241,9 +3972,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -5254,11 +3982,7 @@
             {
               "model": "gpt-5.4",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -5270,11 +3994,7 @@
             {
               "model": "gpt-5.4",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         },
@@ -5284,11 +4004,7 @@
             {
               "model": "gpt-5.4",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -5305,12 +4021,9 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
-      "status": "partial",
-      "excluded_events": 1,
+      "status": "available",
+      "excluded_events": 0,
       "daily": [
         {
           "key": "2026-10-20",
@@ -5319,12 +4032,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "180",
-              "estimated_cost": "0.000505"
+              "tokens": "180"
             }
           ]
         }
@@ -5337,12 +4045,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "180",
-              "estimated_cost": "0.000505"
+              "tokens": "180"
             }
           ]
         },
@@ -5353,12 +4056,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "180",
-              "estimated_cost": "0.000505"
+              "tokens": "180"
             }
           ]
         }
@@ -5375,9 +4073,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -5395,9 +4090,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -5409,12 +4101,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -5427,12 +4114,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         },
@@ -5443,12 +4125,7 @@
               "model": "gpt-5.4",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "60",
-              "estimated_cost": "0.0002525"
+              "tokens": "60"
             }
           ]
         }
@@ -5465,9 +4142,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02:codex",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -5479,12 +4153,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }
@@ -5497,12 +4166,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         },
@@ -5513,12 +4177,7 @@
               "model": "gpt-5.4",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "180",
-              "estimated_cost": "0.0007575"
+              "tokens": "180"
             }
           ]
         }

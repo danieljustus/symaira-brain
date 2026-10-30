@@ -3,10 +3,8 @@ package usage
 import (
 	"context"
 	"encoding/json"
-	"math/big"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -25,7 +23,7 @@ func openCodeHistoryHome() string {
 
 // ScanOpenCodeHistory unions recorded hosted traffic, never current-account credentials.
 func ScanOpenCodeHistory(ctx context.Context, dir string, now time.Time) *LocalHistory {
-	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Currency: "USD", CostBasis: "recorded", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
+	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
 	if now.Location() == time.Local {
 		h.Timezone = "local"
 	}
@@ -49,32 +47,6 @@ func ScanOpenCodeHistory(ctx context.Context, dir string, now time.Time) *LocalH
 	return aggregateHistory(h, events, excluded, now)
 }
 
-// Exact recorded decimal to the shared 10^-10 USD unit. Unsupported precision stays unknown.
-func openCodeCost(raw json.RawMessage) *uint64 {
-	if len(raw) == 0 || len(raw) > 64 || raw[0] == '"' {
-		return nil
-	}
-	if i := strings.IndexAny(string(raw), "eE"); i >= 0 {
-		exponent, err := strconv.ParseInt(string(raw[i+1:]), 10, 16)
-		if err != nil || exponent < -128 || exponent > 128 {
-			return nil
-		}
-	}
-	r, ok := new(big.Rat).SetString(string(raw))
-	if !ok || r.Sign() < 0 {
-		return nil
-	}
-	r.Mul(r, big.NewRat(10_000_000_000, 1))
-	if !r.IsInt() || !r.Num().IsUint64() {
-		return nil
-	}
-	n := r.Num().Uint64()
-	if n > 1_000_000_000_000_000 {
-		return nil
-	}
-	return &n
-}
-
 type openCodeHistoryRow struct {
 	id, provider string
 	event        historyEvent
@@ -91,7 +63,7 @@ func parseOpenCodeHistoryRow(id string, ms int64, kind string, data []byte) (ope
 			ID         string `json:"id"`
 			ProviderID string `json:"providerID"`
 		} `json:"model"`
-		Cost   json.RawMessage `json:"cost"`
+
 		Tokens struct {
 			Total     json.RawMessage `json:"total"`
 			Input     json.RawMessage `json:"input"`
@@ -122,7 +94,7 @@ func parseOpenCodeHistoryRow(id string, ms int64, kind string, data []byte) (ope
 	if id == "" || len(id) > 256 || ms <= 0 || ms >= 253402300800000 || !validHistoryModel(model) || provider == "" {
 		return openCodeHistoryRow{}, false
 	}
-	e := historyEvent{id: id, model: model, at: time.UnixMilli(ms), ticks: openCodeCost(obj.Cost)}
+	e := historyEvent{id: id, model: model, at: time.UnixMilli(ms)}
 	if len(obj.Tokens.Total) > 0 {
 		e.tokens = historyCount(obj.Tokens.Total)
 	} else {

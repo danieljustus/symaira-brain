@@ -13,11 +13,9 @@ import (
 
 // LocalHistory is independent of quota credentials, balances and account identity.
 type LocalHistory struct {
-	Scope          string          `json:"scope"`
-	Attribution    string          `json:"attribution"`
-	Currency       string          `json:"currency"`
-	CostBasis      string          `json:"cost_basis"`
-	PriceSnapshot  *string         `json:"price_snapshot,omitempty"`
+	Scope       string `json:"scope"`
+	Attribution string `json:"attribution"`
+
 	Timezone       string          `json:"timezone"`
 	Status         string          `json:"status"`
 	ExcludedEvents int             `json:"excluded_events"`
@@ -30,25 +28,19 @@ type HistoryBucket struct {
 	Models []HistoryModel `json:"models"`
 }
 
-// Tokens require complete measurements. Recorded-only backends also require complete cost;
-// Claude explicitly labels subtotal coverage through recorded_events/estimated_events.
+// Tokens require complete measurements.
 type HistoryModel struct {
-	Model           string  `json:"model"`
-	Events          int     `json:"events"`
-	Tokens          *string `json:"tokens,omitempty"`
-	RecordedCost    *string `json:"recorded_cost,omitempty"`
-	EstimatedCost   *string `json:"estimated_cost,omitempty"`
-	CostBasis       *string `json:"cost_basis,omitempty"`
-	RecordedEvents  *int    `json:"recorded_events,omitempty"`
-	EstimatedEvents *int    `json:"estimated_events,omitempty"`
-	MissingTokens   int     `json:"missing_tokens"`
-	MissingCost     int     `json:"missing_cost"`
+	Model  string  `json:"model"`
+	Events int     `json:"events"`
+	Tokens *string `json:"tokens,omitempty"`
+
+	MissingTokens int `json:"missing_tokens"`
 }
 
 type historyEvent struct {
-	id, model     string
-	at            time.Time
-	tokens, ticks *uint64
+	id, model string
+	at        time.Time
+	tokens    *uint64
 }
 
 func historyCount(v json.RawMessage) *uint64 {
@@ -102,15 +94,11 @@ func parseHistoryLine(line []byte) ([]historyEvent, bool) {
 		var valuesObj struct {
 			Input  json.RawMessage `json:"inputTokens"`
 			Output json.RawMessage `json:"outputTokens"`
-			Cost   json.RawMessage `json:"costUsdTicks"`
 		}
 		if string(values) == "null" || json.Unmarshal(values, &valuesObj) != nil {
 			return nil, false
 		}
-		e := historyEvent{id: id, model: model, at: at, ticks: historyCount(valuesObj.Cost)}
-		if len(valuesObj.Cost) == 0 && len(models) == 1 {
-			e.ticks = historyCount(envelope.Update.Usage.Cost)
-		}
+		e := historyEvent{id: id, model: model, at: at}
 		input, output := historyCount(valuesObj.Input), historyCount(valuesObj.Output)
 		if input != nil && output != nil && *input <= 1_000_000_000_000 && *output <= 1_000_000_000_000 {
 			total := *input + *output
@@ -130,7 +118,6 @@ type historyEnvelope struct {
 		Kind  string `json:"sessionUpdate"`
 		Usage struct {
 			Models map[string]json.RawMessage `json:"modelUsage"`
-			Cost   json.RawMessage            `json:"costUsdTicks"`
 		} `json:"usage"`
 	} `json:"update"`
 }
@@ -149,7 +136,7 @@ func validHistoryModel(model string) bool {
 
 // ScanGrokHistory reads only explicitly opted-in local completed events. No credential I/O.
 func ScanGrokHistory(ctx context.Context, home string, now time.Time) *LocalHistory {
-	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Currency: "USD", CostBasis: "recorded", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
+	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
 	if now.Location() == time.Local {
 		h.Timezone = "local"
 	}
@@ -238,7 +225,7 @@ func aggregateHistory(h *LocalHistory, events []historyEvent, excluded int, now 
 	}
 	for _, bucket := range h.Daily {
 		for _, model := range bucket.Models {
-			if model.MissingCost > 0 || model.MissingTokens > 0 {
+			if model.MissingTokens > 0 {
 				h.Status = "partial"
 			}
 		}
@@ -251,34 +238,21 @@ func aggregateHistory(h *LocalHistory, events []historyEvent, excluded int, now 
 
 func sameHistoryEvent(a, b historyEvent) bool {
 	eq := func(a, b *uint64) bool { return a == nil && b == nil || a != nil && b != nil && *a == *b }
-	return a.at.Equal(b.at) && eq(a.tokens, b.tokens) && eq(a.ticks, b.ticks)
+	return a.at.Equal(b.at) && eq(a.tokens, b.tokens)
 }
 func sumHistory(model string, events []historyEvent) HistoryModel {
 	m := HistoryModel{Model: model, Events: len(events)}
-	var tokens, ticks uint64
+	var tokens uint64
 	for _, e := range events {
 		if e.tokens == nil {
 			m.MissingTokens++
 		} else {
 			tokens += *e.tokens
 		}
-		if e.ticks == nil {
-			m.MissingCost++
-		} else {
-			ticks += *e.ticks
-		}
 	}
 	if m.MissingTokens == 0 {
 		s := strconv.FormatUint(tokens, 10)
 		m.Tokens = &s
-	}
-	if m.MissingCost == 0 {
-		s := strconv.FormatUint(ticks/10_000_000_000, 10)
-		if ticks%10_000_000_000 != 0 {
-			fraction := strconv.FormatUint(ticks%10_000_000_000+10_000_000_000, 10)[1:]
-			s += "." + strings.TrimRight(fraction, "0")
-		}
-		m.RecordedCost = &s
 	}
 	return m
 }

@@ -2,7 +2,6 @@ package usage
 
 import (
 	"context"
-	_ "embed"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -11,30 +10,10 @@ import (
 	"time"
 )
 
-//go:embed claude_prices.json
-var claudePrices []byte
-
-type claudeRate struct {
-	Input      uint64  `json:"input"`
-	Output     uint64  `json:"output"`
-	Write      uint64  `json:"write"`
-	Read       uint64  `json:"read"`
-	InputLong  *uint64 `json:"input_long"`
-	OutputLong *uint64 `json:"output_long"`
-	WriteLong  *uint64 `json:"write_long"`
-	ReadLong   *uint64 `json:"read_long"`
-	Fast       *uint64 `json:"fast"`
-}
-type claudePriceTable struct {
-	Snapshot string                `json:"snapshot"`
-	Rates    map[string]claudeRate `json:"rates"`
-	Aliases  map[string]string     `json:"aliases"`
-}
 type claudeEntry struct {
 	event                    historyEvent
 	message, request         string
 	side, speed, unsupported bool
-	estimate                 *uint64
 }
 
 func claudeHistoryHome() string {
@@ -45,14 +24,14 @@ func claudeHistoryHome() string {
 	return filepath.Join(home, ".claude")
 }
 
-func parseClaudeLine(line []byte, prices claudePriceTable) (*claudeEntry, bool) {
+func parseClaudeLine(line []byte) (*claudeEntry, bool) {
 	var obj struct {
 		Type      string          `json:"type"`
 		Timestamp string          `json:"timestamp"`
 		Request   string          `json:"requestId"`
 		Side      json.RawMessage `json:"isSidechain"`
-		Cost      json.RawMessage `json:"costUSD"`
-		Message   struct {
+
+		Message struct {
 			ID    string                     `json:"id"`
 			Role  string                     `json:"role"`
 			Model string                     `json:"model"`
@@ -93,7 +72,7 @@ func parseClaudeLine(line []byte, prices claudePriceTable) (*claudeEntry, bool) 
 	if len(obj.Side) > 0 && (string(obj.Side) == "null" || json.Unmarshal(obj.Side, &side) != nil) {
 		return nil, false
 	}
-	e := &claudeEntry{message: m.ID, request: obj.Request, side: side, event: historyEvent{model: m.Model, at: at, ticks: openCodeCost(obj.Cost)}}
+	e := &claudeEntry{message: m.ID, request: obj.Request, side: side, event: historyEvent{model: m.Model, at: at}}
 	u := m.Usage
 	if raw, ok := u["service_tier"]; ok && string(raw) != `"standard"` {
 		e.unsupported = true
@@ -155,31 +134,6 @@ func parseClaudeLine(line []byte, prices claudePriceTable) (*claudeEntry, bool) 
 	if input != nil && output != nil && read != nil && write != nil && write1 != nil {
 		total := *input + *output + *read + *write + *write1
 		e.event.tokens = &total
-		if len(obj.Cost) == 0 && !e.unsupported {
-			model := m.Model
-			if alias, ok := prices.Aliases[model]; ok {
-				model = alias
-			}
-			rate, known := prices.Rates[model]
-			if known && (speed != "fast" || rate.Fast != nil || strings.HasSuffix(model, "-fast")) {
-				rates := []uint64{rate.Input, rate.Output, rate.Read, rate.Write, rate.Input * 2}
-				if total-*output > 200_000 {
-					for i, v := range []*uint64{rate.InputLong, rate.OutputLong, rate.ReadLong, rate.WriteLong} {
-						if v != nil {
-							rates[i] = *v
-						}
-					}
-					rates[4] = rates[0] * 2
-				}
-				ticks := *input*rates[0] + *output*rates[1] + *read*rates[2] + *write*rates[3] + *write1*rates[4]
-				if speed == "fast" && rate.Fast != nil {
-					ticks *= *rate.Fast
-				}
-				if ticks <= 1_000_000_000_000_000 {
-					e.estimate = &ticks
-				}
-			}
-		}
 	}
 	return e, true
 }
@@ -218,8 +172,6 @@ func dedupClaude(entries []claudeEntry) ([]claudeEntry, int) {
 				replace = old.side
 			} else if total(e.event.tokens) != total(old.event.tokens) {
 				replace = total(e.event.tokens) > total(old.event.tokens)
-			} else if (e.event.ticks == nil) != (old.event.ticks == nil) {
-				replace = e.event.ticks != nil
 			} else {
 				replace = e.speed && !old.speed
 			}
@@ -246,16 +198,10 @@ func dedupClaude(entries []claudeEntry) ([]claudeEntry, int) {
 
 // ScanClaudeHistory reads selected completed Claude Code records without credentials or source writes.
 func ScanClaudeHistory(ctx context.Context, dir string, now time.Time) *LocalHistory {
-	var prices claudePriceTable
-	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Currency: "USD", CostBasis: "unknown", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
+	h := &LocalHistory{Scope: "local_machine", Attribution: "unattributed", Timezone: now.Location().String(), Status: "no_data", Daily: []HistoryBucket{}, Periods: []HistoryBucket{}}
 	if now.Location() == time.Local {
 		h.Timezone = "local"
 	}
-	if json.Unmarshal(claudePrices, &prices) != nil {
-		h.Status = "unavailable"
-		return h
-	}
-	h.PriceSnapshot = &prices.Snapshot
 	if !filepath.IsAbs(dir) || strings.Contains(dir, ",") {
 		h.Status = "unavailable"
 		return h
@@ -268,7 +214,7 @@ func ScanClaudeHistory(ctx context.Context, dir string, now time.Time) *LocalHis
 	}
 	var entries []claudeEntry
 	_, excluded, err := readJSONHistoryFiles(ctx, filepath.Join(dir, "projects"), true, func(line []byte) ([]historyEvent, bool) {
-		e, ok := parseClaudeLine(line, prices)
+		e, ok := parseClaudeLine(line)
 		if e == nil {
 			return nil, ok
 		}
@@ -289,6 +235,5 @@ func ScanClaudeHistory(ctx context.Context, dir string, now time.Time) *LocalHis
 		}
 	}
 	aggregateHistory(h, events, excluded, now)
-	applyClaudeCosts(h, entries, now)
 	return h
 }

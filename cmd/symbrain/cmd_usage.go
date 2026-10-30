@@ -111,27 +111,13 @@ func printUsageReport(w io.Writer, report usage.Report) {
 		}
 		if h := p.History; h != nil {
 			fmt.Fprintf(w, "  local history	%s	scope=%s attribution=%s\n", h.Status, h.Scope, h.Attribution)
-			if h.PriceSnapshot != nil {
-				fmt.Fprintf(w, "  price snapshot\t%s\tAPI-rate estimates, not charges\n", *h.PriceSnapshot)
-			}
 			for _, period := range h.Periods {
 				for _, model := range period.Models {
-					tokens, cost := "?", "?"
+					tokens := "?"
 					if model.Tokens != nil {
 						tokens = *model.Tokens
 					}
-					if model.RecordedCost != nil {
-						cost = *model.RecordedCost
-					}
-					if model.CostBasis != nil {
-						estimate := "?"
-						if model.EstimatedCost != nil {
-							estimate = *model.EstimatedCost
-						}
-						fmt.Fprintf(w, "  %s\t%s\t%s tokens\t%s %s recorded + %s %s estimated\tmissing_cost=%d\n", period.Key, model.Model, tokens, cost, h.Currency, estimate, h.Currency, model.MissingCost)
-					} else {
-						fmt.Fprintf(w, "  %s	%s	%s tokens	%s %s recorded\n", period.Key, model.Model, tokens, cost, h.Currency)
-					}
+					fmt.Fprintf(w, "  %s\t%s\t%s tokens\n", period.Key, model.Model, tokens)
 				}
 			}
 		}

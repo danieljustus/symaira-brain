@@ -7,9 +7,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -21,12 +18,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -39,12 +31,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -55,12 +42,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -75,9 +57,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -89,12 +68,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "0"
+              "tokens": "190"
             }
           ]
         }
@@ -107,12 +81,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "0"
+              "tokens": "190"
             }
           ]
         },
@@ -123,12 +92,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "0"
+              "tokens": "190"
             }
           ]
         }
@@ -143,9 +107,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -157,12 +118,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "0.1000000001"
+              "tokens": "190"
             }
           ]
         }
@@ -175,12 +131,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "0.1000000001"
+              "tokens": "190"
             }
           ]
         },
@@ -191,12 +142,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "0.1000000001"
+              "tokens": "190"
             }
           ]
         }
@@ -211,11 +157,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "mixed",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -225,13 +168,7 @@
               "model": "claude-sonnet-4-5",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "mixed",
-              "recorded_events": 1,
-              "estimated_events": 1,
-              "tokens": "570",
-              "recorded_cost": "2",
-              "estimated_cost": "0.0007245"
+              "tokens": "570"
             }
           ]
         }
@@ -244,13 +181,7 @@
               "model": "claude-sonnet-4-5",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "mixed",
-              "recorded_events": 1,
-              "estimated_events": 1,
-              "tokens": "570",
-              "recorded_cost": "2",
-              "estimated_cost": "0.0007245"
+              "tokens": "570"
             }
           ]
         },
@@ -261,13 +192,7 @@
               "model": "claude-sonnet-4-5",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "mixed",
-              "recorded_events": 1,
-              "estimated_events": 1,
-              "tokens": "570",
-              "recorded_cost": "2",
-              "estimated_cost": "0.0007245"
+              "tokens": "570"
             }
           ]
         }
@@ -282,11 +207,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -296,10 +218,6 @@
               "model": "claude-future-secretless",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -313,10 +231,6 @@
               "model": "claude-future-secretless",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -328,10 +242,6 @@
               "model": "claude-future-secretless",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -347,9 +257,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -361,12 +268,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "0",
-              "estimated_cost": "0"
+              "tokens": "0"
             }
           ]
         }
@@ -379,12 +281,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "0",
-              "estimated_cost": "0"
+              "tokens": "0"
             }
           ]
         },
@@ -395,12 +292,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "0",
-              "estimated_cost": "0"
+              "tokens": "0"
             }
           ]
         }
@@ -415,9 +307,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 0,
@@ -428,11 +317,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -444,11 +329,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         },
@@ -458,11 +339,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -477,9 +354,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 0,
@@ -490,11 +364,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -506,11 +376,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         },
@@ -520,11 +386,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -539,9 +401,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -553,12 +412,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.000747"
+              "tokens": "190"
             }
           ]
         }
@@ -571,12 +425,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.000747"
+              "tokens": "190"
             }
           ]
         },
@@ -587,12 +436,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.000747"
+              "tokens": "190"
             }
           ]
         }
@@ -607,9 +451,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 0,
@@ -620,11 +461,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -636,11 +473,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         },
@@ -650,11 +483,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -669,9 +498,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 0,
@@ -682,11 +508,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -698,11 +520,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         },
@@ -712,11 +530,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -731,9 +545,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -745,10 +556,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "3"
             }
           ]
@@ -762,10 +569,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "3"
             }
           ]
@@ -777,10 +580,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "3"
             }
           ]
@@ -796,9 +595,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -810,12 +606,7 @@
               "model": "claude-opus-4-6",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.006"
+              "tokens": "120"
             }
           ]
         }
@@ -828,12 +619,7 @@
               "model": "claude-opus-4-6",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.006"
+              "tokens": "120"
             }
           ]
         },
@@ -844,12 +630,7 @@
               "model": "claude-opus-4-6",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.006"
+              "tokens": "120"
             }
           ]
         }
@@ -864,11 +645,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -878,10 +656,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -895,10 +669,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -910,10 +680,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "120"
             }
           ]
@@ -929,9 +695,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -943,12 +706,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200001",
-              "estimated_cost": "0.600015"
+              "tokens": "200001"
             }
           ]
         }
@@ -961,12 +719,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200001",
-              "estimated_cost": "0.600015"
+              "tokens": "200001"
             }
           ]
         },
@@ -977,12 +730,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200001",
-              "estimated_cost": "0.600015"
+              "tokens": "200001"
             }
           ]
         }
@@ -997,9 +745,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1011,12 +756,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200002",
-              "estimated_cost": "1.2000285"
+              "tokens": "200002"
             }
           ]
         }
@@ -1029,12 +769,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200002",
-              "estimated_cost": "1.2000285"
+              "tokens": "200002"
             }
           ]
         },
@@ -1045,12 +780,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200002",
-              "estimated_cost": "1.2000285"
+              "tokens": "200002"
             }
           ]
         }
@@ -1065,9 +795,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1079,12 +806,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200002",
-              "estimated_cost": "0.1200285"
+              "tokens": "200002"
             }
           ]
         }
@@ -1097,12 +819,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200002",
-              "estimated_cost": "0.1200285"
+              "tokens": "200002"
             }
           ]
         },
@@ -1113,12 +830,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "200002",
-              "estimated_cost": "0.1200285"
+              "tokens": "200002"
             }
           ]
         }
@@ -1133,9 +845,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1147,12 +856,7 @@
               "model": "claude-opus-5.5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.0016"
+              "tokens": "120"
             }
           ]
         }
@@ -1165,12 +869,7 @@
               "model": "claude-opus-5.5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.0016"
+              "tokens": "120"
             }
           ]
         },
@@ -1181,12 +880,7 @@
               "model": "claude-opus-5.5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.0016"
+              "tokens": "120"
             }
           ]
         }
@@ -1201,9 +895,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1215,12 +906,7 @@
               "model": "claude-haiku-4-5-20251001",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0002415"
+              "tokens": "190"
             }
           ]
         }
@@ -1233,12 +919,7 @@
               "model": "claude-haiku-4-5-20251001",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0002415"
+              "tokens": "190"
             }
           ]
         },
@@ -1249,12 +930,7 @@
               "model": "claude-haiku-4-5-20251001",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0002415"
+              "tokens": "190"
             }
           ]
         }
@@ -1269,9 +945,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1283,12 +956,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1301,12 +969,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -1317,12 +980,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1337,9 +995,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1351,12 +1006,7 @@
               "model": "claude-sonnet-4-5",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "380",
-              "estimated_cost": "0.001449"
+              "tokens": "380"
             }
           ]
         }
@@ -1369,12 +1019,7 @@
               "model": "claude-sonnet-4-5",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "380",
-              "estimated_cost": "0.001449"
+              "tokens": "380"
             }
           ]
         },
@@ -1385,12 +1030,7 @@
               "model": "claude-sonnet-4-5",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "380",
-              "estimated_cost": "0.001449"
+              "tokens": "380"
             }
           ]
         }
@@ -1405,9 +1045,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1419,12 +1056,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1437,12 +1069,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -1453,12 +1080,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1473,9 +1095,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1487,12 +1106,7 @@
               "model": "claude-sonnet-4-5",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "380",
-              "estimated_cost": "0.001449"
+              "tokens": "380"
             }
           ]
         }
@@ -1505,12 +1119,7 @@
               "model": "claude-sonnet-4-5",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "380",
-              "estimated_cost": "0.001449"
+              "tokens": "380"
             }
           ]
         },
@@ -1521,12 +1130,7 @@
               "model": "claude-sonnet-4-5",
               "events": 2,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 2,
-              "tokens": "380",
-              "estimated_cost": "0.001449"
+              "tokens": "380"
             }
           ]
         }
@@ -1541,9 +1145,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1555,12 +1156,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1573,12 +1169,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -1589,12 +1180,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1609,9 +1195,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1623,12 +1206,7 @@
               "model": "claude-opus-4-6",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.006"
+              "tokens": "120"
             }
           ]
         }
@@ -1641,12 +1219,7 @@
               "model": "claude-opus-4-6",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.006"
+              "tokens": "120"
             }
           ]
         },
@@ -1657,12 +1230,7 @@
               "model": "claude-opus-4-6",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "120",
-              "estimated_cost": "0.006"
+              "tokens": "120"
             }
           ]
         }
@@ -1677,9 +1245,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -1695,9 +1260,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 2,
@@ -1709,12 +1271,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1727,12 +1284,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -1743,12 +1295,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1763,9 +1310,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1777,12 +1321,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1795,12 +1334,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -1811,12 +1345,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1831,9 +1360,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1845,12 +1371,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1863,12 +1384,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -1879,12 +1395,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -1899,9 +1410,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -1917,9 +1425,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -1931,10 +1436,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -1948,10 +1449,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -1963,10 +1460,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -1982,9 +1475,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -1996,12 +1486,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -2014,12 +1499,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -2030,12 +1510,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -2050,9 +1525,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2064,10 +1536,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2081,10 +1549,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2096,10 +1560,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2115,11 +1575,8 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
-      "status": "partial",
+      "status": "available",
       "excluded_events": 0,
       "daily": [
         {
@@ -2129,10 +1586,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2146,10 +1599,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2161,10 +1610,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2180,9 +1625,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2194,12 +1636,7 @@
               "model": "claude-new",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "3"
+              "tokens": "190"
             }
           ]
         }
@@ -2212,12 +1649,7 @@
               "model": "claude-new",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "3"
+              "tokens": "190"
             }
           ]
         },
@@ -2228,12 +1660,7 @@
               "model": "claude-new",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "3"
+              "tokens": "190"
             }
           ]
         }
@@ -2248,9 +1675,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 0,
@@ -2261,11 +1685,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -2277,11 +1697,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         },
@@ -2291,11 +1707,7 @@
             {
               "model": "claude-sonnet-4-5",
               "events": 1,
-              "missing_tokens": 1,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0
+              "missing_tokens": 1
             }
           ]
         }
@@ -2310,9 +1722,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "no_data",
       "excluded_events": 0,
@@ -2328,9 +1737,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "estimated",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2342,12 +1748,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -2358,12 +1759,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -2374,12 +1770,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -2392,12 +1783,7 @@
               "model": "claude-sonnet-4-5",
               "events": 3,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 3,
-              "tokens": "570",
-              "estimated_cost": "0.0021735"
+              "tokens": "570"
             }
           ]
         },
@@ -2408,12 +1794,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         },
@@ -2424,12 +1805,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "estimated",
-              "recorded_events": 0,
-              "estimated_events": 1,
-              "tokens": "190",
-              "estimated_cost": "0.0007245"
+              "tokens": "190"
             }
           ]
         }
@@ -2444,9 +1820,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2458,10 +1831,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2475,10 +1844,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2490,10 +1855,6 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 1,
-              "cost_basis": "unknown",
-              "recorded_events": 0,
-              "estimated_events": 0,
               "tokens": "190"
             }
           ]
@@ -2509,9 +1870,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2527,9 +1885,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2545,9 +1900,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "recorded",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "available",
       "excluded_events": 0,
@@ -2559,12 +1911,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "1"
+              "tokens": "190"
             }
           ]
         }
@@ -2577,12 +1924,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "1"
+              "tokens": "190"
             }
           ]
         },
@@ -2593,12 +1935,7 @@
               "model": "claude-sonnet-4-5",
               "events": 1,
               "missing_tokens": 0,
-              "missing_cost": 0,
-              "cost_basis": "recorded",
-              "recorded_events": 1,
-              "estimated_events": 0,
-              "tokens": "190",
-              "recorded_cost": "1"
+              "tokens": "190"
             }
           ]
         }
@@ -2613,9 +1950,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,
@@ -2631,9 +1965,6 @@
     "expected": {
       "scope": "local_machine",
       "attribution": "unattributed",
-      "currency": "USD",
-      "cost_basis": "unknown",
-      "price_snapshot": "openusage:abf472d5dbb23645c3afbb5a0c7429606ffbdcd7:litellm-2026-07-02:supplement-2026-10-16:modelsdev-2026-07-02",
       "timezone": "fixture",
       "status": "partial",
       "excluded_events": 1,

@@ -75,19 +75,19 @@ func TestGrokHistoryCases(t *testing.T) {
 			}
 			if c.Name == "replays-subagents-forks-resume" {
 				m := h.Periods[0].Models[0]
-				if m.Events != 3 || *m.Tokens != "470" || *m.RecordedCost != "1.47143176" {
+				if m.Events != 3 || *m.Tokens != "470" {
 					t.Fatal(m)
 				}
 			}
 			if c.Name == "true-zero" {
 				m := h.Daily[0].Models[0]
-				if m.Tokens == nil || *m.Tokens != "0" || m.RecordedCost == nil || *m.RecordedCost != "0" {
+				if m.Tokens == nil || *m.Tokens != "0" {
 					t.Fatal(m)
 				}
 			}
 			if c.Name == "missing-measurements" {
 				m := h.Daily[0].Models[0]
-				if m.Tokens != nil || m.RecordedCost != nil || m.MissingTokens != 1 || m.MissingCost != 1 {
+				if m.Tokens != nil || m.MissingTokens != 1 {
 					t.Fatal(m)
 				}
 			}
