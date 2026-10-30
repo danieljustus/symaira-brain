@@ -1,6 +1,8 @@
 //! Schema-versioned, read-only AI provider usage reporting.
 #![deny(unsafe_code)]
 
+mod claude_history;
+mod codex_history;
 mod go_decimal;
 mod go_decimal_fast;
 mod go_decimal_shift;
@@ -9,8 +11,6 @@ mod go_decimal_tests;
 mod go_float;
 #[cfg(test)]
 mod go_float_tests;
-mod claude_history;
-mod codex_history;
 pub use codex_history::scan_codex_history;
 mod history;
 mod history_files;
