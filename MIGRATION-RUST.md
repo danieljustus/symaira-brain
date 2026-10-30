@@ -2,6 +2,16 @@
 
 > **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
 
+## Cutover decision (2026-10-30)
+
+The maintainer replaced the dual-binary cutover (#782) with the EraseMe model.
+The stable release ships Rust symbrain/symguard/symbrowse only: no Go fallback
+binary, no rollback to v0.12.x and no seven-day observation window. Go sources
+are removed at the cutover. Data safety stays a cutover gate: Rust must open
+existing Go-created memory, skills, guard and browse state unchanged, and the
+first Rust run creates an automatic backup whose restore is verified. Windows
+is out of scope. Remaining work is completed locally and pushed once complete.
+
 
 Memory803's isolated coherent-workspace successor normally integrates reviewed
 standalone Guard805 so the unchanged complete runtime plan has its real
