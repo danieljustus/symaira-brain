@@ -4,8 +4,9 @@
   manifests.py --version 0.13.0 --checksums dist/checksums.txt --out manifests
   manifests.py --version 0.12.0 --checksums checksums.txt --out rollback --legacy-go
 
-Writes `symbrain.rb` (danieljustus/homebrew-tap, Formula/) and `symbrain.json`
-(danieljustus/scoop-bucket, repository root). Nothing is published: the files
+Writes `symbrain.rb` (danieljustus/homebrew-tap, Formula/). Only the explicit
+--legacy-go rollback mode also writes the historical Scoop manifest. Nothing
+is published: the files
 are review artifacts until the cutover (#782) pushes them.
 
 Rust archives carry `symbrain` plus the `symbrain-go` fallback, and both are
@@ -28,7 +29,7 @@ VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$")
 CHECKSUM_LINE = re.compile(r"^([0-9a-f]{64})  (\S+)$")
 
 
-def read_checksums(path: Path, version: str) -> dict[tuple[str, str], str]:
+def read_checksums(path: Path, version: str, legacy_go: bool = False) -> dict[tuple[str, str], str]:
     digests = {}
     for line in path.read_text(encoding="ascii").splitlines():
         match = CHECKSUM_LINE.fullmatch(line)
@@ -38,7 +39,9 @@ def read_checksums(path: Path, version: str) -> dict[tuple[str, str], str]:
         archive = re.fullmatch(rf"symbrain_{re.escape(version)}_(darwin|linux|windows)_(amd64|arm64)\.(tar\.gz|zip)", name)
         if archive:
             digests[(archive[1], archive[2])] = digest
-    missing = {(o, a) for o in ["darwin", "linux", "windows"] for a in ["amd64", "arm64"]} - set(digests)
+    required = ({(o, a) for o in ["darwin", "linux", "windows"] for a in ["amd64", "arm64"]} if legacy_go
+                else {("darwin", "arm64"), ("linux", "amd64"), ("linux", "arm64")})
+    missing = required - set(digests)
     if missing:
         raise SystemExit(f"checksums.txt lacks archives for {sorted(missing)}")
     return digests
@@ -64,7 +67,7 @@ def formula(version: str, digests: dict[tuple[str, str], str], legacy_go: bool) 
             "class Symbrain < Formula\n"
             f'  desc "{DESCRIPTION}"\n  homepage "{REPOSITORY}"\n  license "Apache-2.0"\n\n'
             "  on_macos do\n"
-            + block("darwin", "amd64", "Hardware::CPU.intel?", True)
+            + (block("darwin", "amd64", "Hardware::CPU.intel?", True) if legacy_go else "")
             + block("darwin", "arm64", "Hardware::CPU.arm?", True)
             + "  end\n\n  on_linux do\n"
             + block("linux", "amd64", "Hardware::CPU.intel? && Hardware::CPU.is_64_bit?", False)
@@ -94,11 +97,12 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv)
     if not VERSION.fullmatch(args.version):
         raise SystemExit(f"invalid version {args.version!r} (no leading v)")
-    digests = read_checksums(args.checksums, args.version)
+    digests = read_checksums(args.checksums, args.version, args.legacy_go)
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "symbrain.rb").write_text(formula(args.version, digests, args.legacy_go), encoding="utf-8")
-    (args.out / "symbrain.json").write_text(scoop(args.version, digests, args.legacy_go), encoding="utf-8")
-    print(args.out / "symbrain.rb", args.out / "symbrain.json")
+    if args.legacy_go:
+        (args.out / "symbrain.json").write_text(scoop(args.version, digests, True), encoding="utf-8")
+    print(args.out / "symbrain.rb")
     return 0
 
 

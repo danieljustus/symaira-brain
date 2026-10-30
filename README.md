@@ -646,6 +646,23 @@ commands read back. The canonical global instruction source does consult an
 absolute `$XDG_CONFIG_HOME`, falling back to `~/.config`; project-local
 instructions remain at `<project>/.symbrain/instructions.md`.
 
+## Supported platforms
+
+Product scope is Apple (macOS on Apple Silicon and iOS) plus Web. Linux remains
+supported for CI/server use and the existing CLI distribution.
+
+| Surface | Supported targets |
+|---|---|
+| CLI release archives | macOS arm64, Linux amd64 and arm64 |
+| Native apps | macOS Apple Silicon and iOS |
+| Web | Browser-based clients |
+
+Native Windows and macOS Intel are unsupported. New releases do not include
+Windows or darwin-amd64 archives or Scoop manifests. Existing platform-specific
+source and historical release evidence remain for a separate cleanup; they do
+not imply native acceptance or support. Linux and macOS arm64 parity, security
+and port-contract gates remain unchanged. See [#990](https://github.com/danieljustus/symaira-brain/issues/990).
+
 ## Building
 
 Download the archive for your platform from the [latest GitHub

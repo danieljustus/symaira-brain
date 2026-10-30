@@ -25,6 +25,16 @@ D = "dir"
 F = "file"
 L = "link"
 M = "mode"
+P = "fifo"
+
+# Existing instruction targets must be read without following links or opening
+# special files. Keep these separate from project-root path shapes (#909).
+SYNC_TARGET_SHAPES = [
+    ("symlink", [(F, "notes", SEED_INSTRUCTIONS), (L, "CLAUDE.md", "notes")]),
+    ("dangling", [(L, "CLAUDE.md", "missing-notes")]),
+    ("directory", [(D, "CLAUDE.md")]),
+    ("fifo", [(P, "CLAUDE.md")]),
+]
 
 # (label, project argument, layout ops, directory (relative to the fixture
 # project) where `.mcp.json` / instruction files are seeded, or None)
@@ -118,6 +128,8 @@ def apply_layout(project: Path, ops: list[tuple], seed_dir: str | None = None, s
         elif kind == F:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(op[2])
+        elif kind == P:
+            os.mkfifo(path, 0o600)
         elif kind == L:
             path.parent.mkdir(parents=True, exist_ok=True)
             os.symlink(op[2], path)

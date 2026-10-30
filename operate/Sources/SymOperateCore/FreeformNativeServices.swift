@@ -196,6 +196,42 @@ public struct NativeFreeformEnvironment: FreeformEnvironmentProtocol {
         return percent
     }
 
+    public func frame(label: String) throws -> RectValue {
+        guard let frame = axCopyFrame(try uniqueItem(label)) else {
+            throw AutomationError.unavailable("Freeform item has no AX geometry.")
+        }
+        return frame
+    }
+
+    public func selectedLineEnd(_ end: FreeformLineEnd) throws -> PointValue {
+        guard let frame = axCopyFrame(try lineHandle(end)) else { throw AutomationError.unavailable("Line handle has no position.") }
+        return PointValue(x: frame.x, y: frame.y)
+    }
+
+    public func setSelectedLineEnd(_ end: FreeformLineEnd, to point: PointValue) throws {
+        var position = CGPoint(x: point.x, y: point.y)
+        guard let value = AXValueCreate(.cgPoint, &position) else { throw AutomationError.unavailable("Cannot create AXPosition.") }
+        try check(AXUIElementSetAttributeValue(try lineHandle(end), kAXPositionAttribute as CFString, value), "Line handle")
+    }
+
+    public func selectedLineDescription() throws -> String {
+        axCopyString(try selectedLine(), attribute: kAXDescriptionAttribute) ?? ""
+    }
+
+    /// Exactly one selected item exposing the three line handles: curvature, tail, head (in this order,
+    /// observed live on macOS 27.2; the localized handle names are deliberately not matched).
+    private func selectedLine() throws -> AXUIElement {
+        let selected = try canvasItems().filter { axBoolify(axCopyAttribute($0, attribute: kAXSelectedAttribute)) == true }
+        guard selected.count == 1, (axCopyElements(selected[0], attribute: "AXHandles") ?? []).count == 3 else {
+            throw AutomationError.unavailable("Expected exactly one selected connection line after paste.")
+        }
+        return selected[0]
+    }
+
+    private func lineHandle(_ end: FreeformLineEnd) throws -> AXUIElement {
+        (axCopyElements(try selectedLine(), attribute: "AXHandles") ?? [])[end == .tail ? 1 : 2]
+    }
+
     private func scrollArea(in elements: [AXUIElement]) throws -> AXUIElement {
         let areas = elements.filter { axCopyString($0, attribute: kAXRoleAttribute) == kAXScrollAreaRole }
         guard areas.count == 1 else { throw AutomationError.notFound("No unique Freeform canvas scroll area.") }
@@ -241,11 +277,26 @@ public struct NativeFreeformEnvironment: FreeformEnvironmentProtocol {
     }
 
     private func canvasItems() throws -> [AXUIElement] {
-        let areas = descendants(try boardWindow(), maxDepth: 5).filter { axCopyString($0, attribute: kAXRoleAttribute) == "AXLayoutArea" }
+        let window = try boardWindow()
+        var areas = layoutAreas(window)
+        if areas.isEmpty {
+            // Observed live on macOS 27.2: a board opened while Freeform runs in the background can expose
+            // no canvas at all until an assistive client pokes AXEnhancedUserInterface (the call itself
+            // reports an error, the canvas appears anyway). The flag is reset right away.
+            let app = try application()
+            AXUIElementSetAttributeValue(app, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)
+            pause(seconds: 0.3)
+            areas = layoutAreas(window)
+            AXUIElementSetAttributeValue(app, "AXEnhancedUserInterface" as CFString, kCFBooleanFalse)
+        }
         guard areas.count == 1 else { throw AutomationError.notFound("No unique Freeform canvas.") }
         return (axCopyElements(areas[0], attribute: kAXChildrenAttribute) ?? []).filter {
             axCopyString($0, attribute: kAXRoleAttribute) == "AXLayoutItem"
         }
+    }
+
+    private func layoutAreas(_ window: AXUIElement) -> [AXUIElement] {
+        descendants(window, maxDepth: 5).filter { axCopyString($0, attribute: kAXRoleAttribute) == "AXLayoutArea" }
     }
 
     private func uniqueItem(_ label: String) throws -> AXUIElement {

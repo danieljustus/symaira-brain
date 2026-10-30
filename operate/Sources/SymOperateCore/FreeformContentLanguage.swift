@@ -195,6 +195,21 @@ public enum FreeformContentLanguage {
         return item
     }
 
+    /// One unanchored line, used as the starting point for connecting objects already on the board.
+    public static func freeLine() throws -> [String: Data] {
+        var line = try template("freeform-line")[0]
+        func end(_ x: Double) -> [String: Any] {
+            typed("connection-line.end", ["end_point": typed("position", ["x": x, "y": 0]), "outset": 0, "line_end": "none"])
+        }
+        line["tail"] = end(0)
+        line["head"] = end(100)
+        line["line_type"] = typed("connection-line.line-type", [
+            "primary_case": "curved", "curved": typed("position", ["x": 50, "y": 0]),
+        ])
+        try validateEnums([line])
+        return [pasteboardType: try JSONSerialization.data(withJSONObject: [line], options: [.sortedKeys])]
+    }
+
     private static func geometry(_ template: Any?, _ object: FreeformObject) -> [String: Any] {
         var geometry = template as? [String: Any] ?? [:]
         geometry["position"] = typed("position", ["x": object.x, "y": object.y])

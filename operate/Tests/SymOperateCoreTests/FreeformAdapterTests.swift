@@ -72,6 +72,25 @@ private final class MockFreeformEnvironment: FreeformEnvironmentProtocol {
         scrolls.append(position)
         scrollPosition = position
     }
+    var lineEnds: [String: PointValue] = ["tail": PointValue(x: 0, y: 0), "head": PointValue(x: 100, y: 0)]
+    func frame(label: String) throws -> RectValue {
+        let origin = try position(label: label)
+        return RectValue(x: origin.x, y: origin.y, width: 100, height: 50)
+    }
+    func selectedLineEnd(_ end: FreeformLineEnd) throws -> PointValue { lineEnds[end == .tail ? "tail" : "head"]! }
+    func setSelectedLineEnd(_ end: FreeformLineEnd, to point: PointValue) throws {
+        log.calls.append("line:\(end)")
+        let key = end == .tail ? "tail" : "head", old = lineEnds[key]!
+        lineEnds[key] = PointValue(x: old.x + (point.x - old.x) * zoom, y: old.y + (point.y - old.y) * zoom)
+    }
+    /// Freeform names the anchored objects once an end lands on an object's center.
+    func selectedLineDescription() throws -> String {
+        func anchor(_ key: String) -> String? {
+            positions.first { PointValue(x: $0.value.x + 50, y: $0.value.y + 25) == lineEnds[key] }?.key
+        }
+        guard let tail = anchor("tail"), let head = anchor("head") else { return "Verbindungslinie, gerade" }
+        return "Verbindungslinie, Verbindung von \(tail), Rechteck zu \(head), Rechteck, gerade"
+    }
 }
 
 private final class MockFreeformPasteboard: FreeformPasteboardProtocol {
@@ -367,6 +386,42 @@ final class FreeformAdapterTests: XCTestCase {
         XCTAssertEqual(env.scrolls.last, PointValue(x: 0.3, y: 0.7))
     }
 
+    func testConnectExistingPastesFreeLineAndAnchorsBothEndsAtZoom() throws {
+        let log = FreeformCallLog()
+        let env = MockFreeformEnvironment(log)
+        env.zoom = 0.5
+        let clipboard = MockFreeformPasteboard(log)
+        let original = clipboard.contents
+        let result = try FreeformAdapter(environment: env, pasteboard: clipboard).connectExisting(
+            FreeformConnectExistingRequest(tailLabel: "Alpha", headLabel: "Beta"), boardTitle: "Test Board", policy: ActionPolicy())
+        XCTAssertTrue(result.submitted)
+        XCTAssertTrue(result.anchored)
+        XCTAssertNil(result.error)
+        XCTAssertEqual(env.lineEnds["tail"], PointValue(x: 160, y: 245))
+        XCTAssertEqual(env.lineEnds["head"], PointValue(x: 450, y: 425))
+        XCTAssertEqual(clipboard.contents, original)
+        XCTAssertLessThan(log.calls.firstIndex(of: "paste")!, log.calls.firstIndex(of: "line:tail")!)
+    }
+
+    func testConnectExistingRejectsUnreachableOrIdenticalLabelsBeforePasting() {
+        let log = FreeformCallLog()
+        let adapter = FreeformAdapter(environment: MockFreeformEnvironment(log), pasteboard: MockFreeformPasteboard(log))
+        XCTAssertThrowsError(try adapter.connectExisting(FreeformConnectExistingRequest(tailLabel: "Alpha", headLabel: "Missing"),
+                                                         boardTitle: "Test Board", policy: ActionPolicy()))
+        XCTAssertThrowsError(try adapter.connectExisting(FreeformConnectExistingRequest(tailLabel: "Alpha", headLabel: "Alpha"),
+                                                         boardTitle: "Test Board", policy: ActionPolicy()))
+        XCTAssertFalse(log.calls.contains("write"))
+        XCTAssertFalse(log.calls.contains("paste"))
+    }
+
+    func testFreeLineHasNoAnchors() throws {
+        let line = try JSONSerialization.jsonObject(with: FreeformContentLanguage.freeLine()[FreeformContentLanguage.pasteboardType]!)
+            as! [[String: Any]]
+        XCTAssertEqual(line.count, 1)
+        XCTAssertNil((line[0]["tail"] as! [String: Any])["anchor"])
+        XCTAssertNil((line[0]["head"] as! [String: Any])["anchor"])
+    }
+
     func testZoomPercentParsing() {
         XCTAssertEqual(NativeFreeformEnvironment.zoomPercent("75 %"), 75)
         XCTAssertEqual(NativeFreeformEnvironment.zoomPercent("100%"), 100)
@@ -407,7 +462,8 @@ final class FreeformAdapterTests: XCTestCase {
                     freeform: FreeformAdapter(environment: MockFreeformEnvironment(log), pasteboard: MockFreeformPasteboard(log)))
         let catalog = try await server.dispatch(method: "tools/list", params: [:])["tools"] as! [[String: Any]]
         XCTAssertEqual(Set(catalog.compactMap { $0["name"] as? String }.filter { $0.hasPrefix("freeform_") }),
-                       ["freeform_doctor", "freeform_insert", "freeform_move", "freeform_connect", "freeform_read_board", "freeform_list_boards", "freeform_snapshot"])
+                       ["freeform_doctor", "freeform_insert", "freeform_move", "freeform_connect", "freeform_connect_existing",
+                        "freeform_read_board", "freeform_list_boards", "freeform_snapshot"])
         let board = try JSONSerialization.jsonObject(with: JSONEncoder().encode(freeformTestBoard()))
         for tool in ["freeform_insert", "freeform_connect"] {
             let result = try await server.dispatch(method: "tools/call", params: ["name": tool, "arguments": ["board": board, "board_title": "Test Board", "dry_run": true]])

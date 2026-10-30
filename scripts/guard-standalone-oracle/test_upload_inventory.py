@@ -12,7 +12,7 @@ import unittest
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 STEP = "- name: Upload native standalone Guard evidence"
-TARGETS = 3  # Linux, macOS, Windows
+TARGETS = 2  # Linux and macOS arm64; Windows acceptance was retired in #990.
 
 
 def expected_paths(run_sh):

@@ -10,7 +10,10 @@ Usage: run.py GO_BINARY RUST_BINARY [--mutants MUTANT_TARGET_DIR]
    (this includes `skills_status_config_targets_*`: `skills targets` is
    config-independent in Go, so every env/config shape is native there, and
    `skills_status_config_list_*`: `skills list` reads only LibraryDir from the
-   config, so an environment-only config is native):
+   config, so an environment-only config is native, and
+   `skills_status_config_log_*`: `skills log` reads only the operation log under
+   the home directory, so every config is irrelevant and the symlink, read
+   error and line-decode shapes are what the cases pin):
    native cases run the Rust binary with every Go fallback route removed and
    must leave the fixture root untouched; `fallback` cases must reach the
    missing-fallback diagnostic when no Go route exists.
@@ -49,13 +52,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "rust/symbrain-cli/src/skills_cli.rs"
 # Mutants may patch either file; a pattern must match exactly one of them once.
-SOURCES = (SOURCE, ROOT / "rust/symbrain-cli/src/skills_doctor_config.rs")
+SOURCES = (
+    SOURCE,
+    ROOT / "rust/symbrain-cli/src/skills_doctor_config.rs",
+    ROOT / "rust/symbrain-skills/src/install/status_compare.rs",
+    ROOT / "rust/symbrain-skills/src/install/event.rs",
+    ROOT / "rust/symbrain-skills/src/install/event_decode.rs",
+)
 PREFIX = "skills_status_config_"
 
 # chmod 000 does not restrict root, so these cases only exist for an
 # unprivileged user; a mutant is then judged on its remaining expectations.
 UNPRIVILEGED_ONLY = {
-    "skills_status_config_fallback_unreadable_config_dir_json",
+    "skills_status_config_file_status_unreadable_config_dir_json",
     "skills_status_config_fallback_library_mode_000_json",
     "skills_status_config_fallback_library_ancestor_search_only",
     "skills_status_config_fallback_library_ancestor_search_only_111",
@@ -63,6 +72,11 @@ UNPRIVILEGED_ONLY = {
     "skills_status_config_fallback_base_ancestor_search_only_111",
     "skills_status_config_fallback_library_mode_444_json",
     "skills_status_config_doctor_config_dir_unreadable_resets_env_json",
+    "skills_status_config_file_doctor_fallback_unreadable_file_json",
+    "skills_status_config_log_env_log_mode_000",
+    "skills_status_config_log_env_rotated_mode_000_json",
+    "skills_status_config_log_env_dir_mode_000",
+    "skills_status_config_log_env_dir_search_only",
 }
 PRIVILEGED = hasattr(os, "geteuid") and os.geteuid() == 0
 
@@ -91,32 +105,6 @@ MUTANTS = {
             "skills_status_config_fallback_no_target",
         ],
     ),
-    "accept-cache-dir": (
-        "        || std::env::var_os(\"SYMSKILLS_CACHE_DIR\").is_some()\n",
-        "",
-        ["skills_status_config_fallback_cache_dir_json"],
-    ),
-    "accept-config-file": (
-        "    if config_files_need_go()\n        || std::env::var_os(\"SYMSKILLS_CACHE_DIR\")",
-        "    if std::env::var_os(\"SYMSKILLS_CACHE_DIR\")",
-        [
-            "skills_status_config_fallback_config_file_json",
-            "skills_status_config_fallback_project_config_file",
-        ],
-    ),
-    "accept-invalid-bool": (
-        "&& !go_parse_bool(&value)\n    {\n        return None;\n    }\n    Some(StatusEnvConfig {",
-        "&& false\n    {\n        return None;\n    }\n    Some(StatusEnvConfig {",
-        [
-            "skills_status_config_fallback_invalid_vcs_bool_json",
-            "skills_status_config_fallback_empty_vcs_bool",
-        ],
-    ),
-    "accept-relative-path": (
-        "    if !path.is_absolute()\n        || !is_lexically_clean(text)",
-        "    if !is_lexically_clean(text)",
-        ["skills_status_config_fallback_relative_clean_library"],
-    ),
     "accept-linked-library": (
         "            Ok(metadata) if metadata.is_dir() => {\n                if fs::read_dir(&prefix).is_err() {\n                    return false;\n                }\n            }\n",
         "            Ok(_) => {}\n",
@@ -132,15 +120,6 @@ MUTANTS = {
             "skills_status_config_fallback_library_symlink_json",
             "skills_status_config_fallback_library_symlinked_ancestor_json",
             "skills_status_config_fallback_base_symlinked_ancestor_json",
-        ],
-    ),
-    "accept-unclean-path": (
-        "        || !is_lexically_clean(text)\n",
-        "",
-        [
-            "skills_status_config_fallback_library_dotdot_json",
-            "skills_status_config_fallback_library_dot_segment",
-            "skills_status_config_fallback_library_trailing_slash",
         ],
     ),
     "accept-unlistable-ancestor": (
@@ -162,21 +141,14 @@ MUTANTS = {
         "    matches!(fs::metadata(path), Err(error) if is_go_not_exist(&error))",
         "    !path.is_file()",
         [
-            "skills_status_config_fallback_config_toml_is_directory_json",
-            "skills_status_config_fallback_project_config_is_directory",
-            "skills_status_config_fallback_config_dir_is_file_json",
-            "skills_status_config_fallback_config_symlink_loop_json",
-            "skills_status_config_fallback_unreadable_config_dir_json",
+            "skills_status_config_file_status_directory_config_no_env_json",
+            "skills_status_config_file_status_dir_is_file_config_no_env_json",
         ],
     ),
     "any-probe-error-is-absent": (
         "    matches!(fs::metadata(path), Err(error) if is_go_not_exist(&error))",
         "    fs::metadata(path).is_err()",
-        [
-            "skills_status_config_fallback_config_dir_is_file_json",
-            "skills_status_config_fallback_config_symlink_loop_json",
-            "skills_status_config_fallback_unreadable_config_dir_json",
-        ],
+        ["skills_status_config_file_status_dir_is_file_config_no_env_json"],
     ),
     "missing-home-guard": (
         "            if !go_home_defined() {\n                // Go's",
@@ -200,8 +172,8 @@ MUTANTS = {
         "        .filter(|path| path.is_absolute())\n    {\n        Some(xdg) => xdg,",
         "    {\n        Some(xdg) => xdg,",
         [
-            "skills_status_config_fallback_xdg_relative_home_config_file",
-            "skills_status_config_fallback_xdg_empty_home_config_file",
+            "skills_status_config_file_status_xdg_relative_home_config_file",
+            "skills_status_config_file_status_xdg_empty_home_config_file",
         ],
     ),
     "doctor-gated-on-config": (
@@ -235,12 +207,14 @@ MUTANTS = {
         ],
     ),
     "doctor-invalid-bool-applies-env": (
-        "        let Some(enabled) = go_bool(&value) else {\n            return Some(defaults);\n        };\n",
+        "        let Some(enabled) = go_bool(&value) else {\n            return Some(defaults.clone());\n        };\n",
         "        let enabled = go_bool(&value).unwrap_or(true);\n",
         [
             "skills_status_config_doctor_env_invalid_vcs_bool_resets_json",
             "skills_status_config_doctor_env_invalid_vcs_bool_resets_table",
             "skills_status_config_doctor_env_empty_vcs_bool_resets_json",
+            "skills_status_config_list_env_invalid_vcs_bool_resets_json",
+            "skills_status_config_file_status_invalid_vcs_bool_json",
         ],
     ),
     "doctor-directory-config-is-absent": (
@@ -327,57 +301,136 @@ MUTANTS = {
             "skills_status_config_fallback_home_unset_symlinked_project_root_json",
         ],
     ),
+
+    # --- SKL-019: config-file routing for list / doctor / status -------------
+    "cache-dir-moved-accepted": (
+        "    if config.cache_dir != defaults.cache_dir {\n        return None;\n    }\n",
+        "",
+        ["skills_status_config_fallback_cache_dir_json", "skills_status_config_file_status_cache_dir_moved_json"],
+    ),
+    "files-ignored": (
+        "        Plan::Decode => (\n            read_source(config_path, global).ok()?,\n            read_source(&project_path, project).ok()?,\n        ),\n",
+        "        Plan::Decode => (None::<Vec<u8>>, None::<Vec<u8>>),\n",
+        [
+            "skills_status_config_file_list_global_library_json",
+            "skills_status_config_file_list_project_library_json",
+            "skills_status_config_file_doctor_global_all_keys_json",
+            "skills_status_config_file_status_global_library_base_json",
+        ],
+    ),
+    "project-file-ignored": (
+        "            read_source(&project_path, project).ok()?,\n        ),\n    };",
+        "            {\n                let _ = read_source(&project_path, project).ok()?;\n                None::<Vec<u8>>\n            },\n        ),\n    };",
+        [
+            "skills_status_config_file_list_project_library_json",
+            "skills_status_config_file_list_project_over_global_json",
+            "skills_status_config_file_doctor_project_over_global_json",
+            "skills_status_config_file_status_project_over_global_json",
+        ],
+    ),
+    "file-over-env": (
+        "    let config = apply_env(base, defaults)?;\n",
+        "    let config = {\n        let env_first = apply_env(defaults.clone(), defaults)?;\n        if base == *defaults { env_first } else { base }\n    };\n",
+        [
+            "skills_status_config_file_list_env_over_file_json",
+            "skills_status_config_file_doctor_env_over_file_json",
+            "skills_status_config_file_status_env_over_file_json",
+        ],
+    ),
+    "apply-error-keeps-env": (
+        "        LoadOutcome::Error(_) => return Some(defaults.clone()),\n",
+        "        LoadOutcome::Error(_) => return apply_env(defaults.clone(), defaults),\n",
+        [
+            "skills_status_config_file_list_invalid_type_resets_env_json",
+            "skills_status_config_file_doctor_invalid_type_resets_env_json",
+            "skills_status_config_file_status_invalid_type_resets_env_json",
+        ],
+    ),
+    "apply-error-to-go": (
+        "        LoadOutcome::Error(_) => return Some(defaults.clone()),\n",
+        "        LoadOutcome::Error(_) => return None,\n",
+        [
+            "skills_status_config_file_list_invalid_type_resets_env_json",
+            "skills_status_config_file_list_invalid_vcs_string_resets_json",
+            "skills_status_config_file_doctor_invalid_type_resets_table",
+            "skills_status_config_file_status_invalid_vcs_string_resets_json",
+        ],
+    ),
+    "needs-go-answered-natively": (
+        "        LoadOutcome::NeedsGo(_) => return None,\n",
+        "        LoadOutcome::NeedsGo(_) => return Some(defaults.clone()),\n",
+        [
+            "skills_status_config_file_list_fallback_syntax_error_global_json",
+            "skills_status_config_file_list_fallback_invalid_utf8_json",
+            "skills_status_config_file_doctor_fallback_syntax_error_global_json",
+            "skills_status_config_file_status_fallback_syntax_error_json",
+        ],
+    ),
+    "file-value-unchecked-for-json": (
+        "    .all(|value| json_plain(value));\n",
+        "    .all(|_| true);\n",
+        ["skills_status_config_file_doctor_fallback_line_separator_value_json"],
+    ),
+    "read-error-answered": (
+        "        Probe::Regular => fs::read(path).map(Some),\n",
+        "        Probe::Regular => Ok(fs::read(path).ok()),\n",
+        ["skills_status_config_file_doctor_fallback_unreadable_file_json"],
+    ),
+    "list-library-unchecked": (
+        "    plain_config_dir(&config.library_dir)\n}",
+        "    Some(PathBuf::from(&config.library_dir))\n}",
+        [
+            "skills_status_config_file_list_fallback_relative_library_json",
+            "skills_status_config_file_list_fallback_unclean_library_json",
+            "skills_status_config_file_list_fallback_empty_library_json",
+            "skills_status_config_file_list_fallback_dotdot_library_json",
+        ],
+    ),
+    "status-library-unchecked": (
+        "            plain_config_dir(value).map(Some)\n",
+        "            Some(Some(PathBuf::from(value)))\n",
+        ["skills_status_config_file_status_fallback_relative_library_json"],
+    ),
+    "relative-path-accepted": (
+        "    if !path.is_absolute()\n        || !is_lexically_clean(value)",
+        "    if !is_lexically_clean(value)",
+        ["skills_status_config_fallback_relative_clean_library", "skills_status_config_file_list_fallback_relative_library_json"],
+    ),
+    "unclean-path-accepted": (
+        "        || !is_lexically_clean(value)\n",
+        "",
+        [
+            "skills_status_config_fallback_library_dotdot_json",
+            "skills_status_config_fallback_library_dot_segment",
+            "skills_status_config_fallback_library_trailing_slash",
+            "skills_status_config_file_list_fallback_unclean_library_json",
+        ],
+    ),
     "list-ignores-library-env": (
         # An override that names an empty library is treated as unset: the
-        # decoy skill of the default library leaks into the report. (Ignoring
-        # every override would trip the harness' non-vacuity assertion of the
-        # `last_used` case before any comparison is reported.)
-        "        Some(path) => Some(path),\n        None =>",
-        "        Some(path) if !path.ends_with(\"empty-library\") => Some(path),\n        _ =>",
+        # decoy skill of the default library leaks into the report.
+        "    if config.library_dir == defaults.library_dir {\n        return Some(default_library);\n    }\n    plain_config_dir",
+        "    if config.library_dir == defaults.library_dir || config.library_dir.ends_with(\"empty-library\") {\n        return Some(default_library);\n    }\n    plain_config_dir",
         [
             "skills_status_config_list_env_empty_library_json",
             "skills_status_config_list_env_empty_library",
         ],
     ),
-    "list-accepts-config-file": (
-        "    if !go_home_defined()\n        || config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
-        "    if !go_home_defined()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
-        [
-            "skills_status_config_list_fallback_config_file_json",
-            "skills_status_config_list_fallback_project_config_file",
-            "skills_status_config_list_fallback_config_toml_is_directory_json",
-        ],
-    ),
     "list-ignores-home": (
-        "    if !go_home_defined()\n        || config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
-        "    if config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\")",
+        "    if !go_home_defined()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\").is_some()",
+        "    if std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\").is_some()",
         [
             "skills_status_config_list_fallback_home_unset_json",
             "skills_status_config_list_fallback_home_empty",
         ],
     ),
     "list-accepts-native-only-env": (
-        "        || config_files_need_go()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\").is_some()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_BASE_DIR\").is_some()\n",
-        "        || config_files_need_go()\n",
+        "        || std::env::var_os(\"SYMBRAIN_SKILLS_LIBRARY_DIR\").is_some()\n        || std::env::var_os(\"SYMBRAIN_SKILLS_BASE_DIR\").is_some()\n    {\n        return None;\n    }\n    let (global, _) = config_source_paths()?;\n    let cwd = std::env::current_dir().ok()?;\n    let default_library",
+        "    {\n        return None;\n    }\n    let (global, _) = config_source_paths()?;\n    let cwd = std::env::current_dir().ok()?;\n    let default_library",
         [
             "skills_status_config_list_fallback_native_only_env_json",
             "skills_status_config_list_fallback_native_only_base_env_json",
-        ],
-    ),
-    "list-accepts-invalid-bool": (
-        "        && !go_parse_bool(&value)\n    {\n        return None;\n    }\n    match status_override_dir(",
-        "        && false\n    {\n        return None;\n    }\n    match status_override_dir(",
-        ["skills_status_config_list_fallback_invalid_vcs_bool_json"],
-    ),
-    "list-override-unchecked": (
-        "    match status_override_dir(\"SYMSKILLS_LIBRARY_DIR\").ok()? {",
-        "    match std::env::var_os(\"SYMSKILLS_LIBRARY_DIR\").map(PathBuf::from) {",
-        [
-            "skills_status_config_list_fallback_relative_library_json",
-            "skills_status_config_list_fallback_empty_library_value",
-            "skills_status_config_list_fallback_library_symlink_json",
-            "skills_status_config_list_fallback_library_trailing_slash",
-            "skills_status_config_list_fallback_library_dotdot_json",
+            "skills_status_config_file_list_fallback_native_only_env_json",
         ],
     ),
     "list-accepts-bad-flags": (
@@ -385,11 +438,214 @@ MUTANTS = {
         "    let _ = parse_list_flags(args);\n",
         ["skills_status_config_list_fallback_unknown_flag_with_env"],
     ),
+    'log-accepts-octal-limit': (
+        "|| (digits.starts_with(|c: char| ('1'..='9').contains(&c))",
+        '|| (digits.starts_with(|c: char| c.is_ascii_digit())',
+        [
+            'skills_status_config_log_fallback_limit_octal_json',
+        ],
+    ),
+    'log-skips-flag-normalization': (
+        'Some(rest) if !rest.is_empty() => format!("-{rest}"),',
+        'Some(rest) if false => format!("-{rest}"),',
+        [
+            'skills_status_config_log_env_skill_filter_json',
+            'skills_status_config_log_env_double_dash_value_json',
+            'skills_status_config_log_env_limit_json',
+        ],
+    ),
+    'log-keeps-symlinks-on-go': (
+        'match fs::metadata(&segment) {',
+        'match fs::symlink_metadata(&segment) {',
+        [
+            'skills_status_config_log_env_symlink_log_file_json',
+            'skills_status_config_log_env_symlink_rotated_file_json',
+            'skills_status_config_log_env_symlink_to_directory',
+            'skills_status_config_log_env_dangling_log_json',
+            'skills_status_config_log_env_dangling_rotated_json',
+            'skills_status_config_log_env_symlink_loop_log',
+        ],
+    ),
+    'log-wrong-read-op': (
+        'op: "read",',
+        'op: "open",',
+        [
+            'skills_status_config_log_env_log_is_directory',
+            'skills_status_config_log_env_rotated_is_directory_json',
+            'skills_status_config_log_env_symlink_to_directory',
+        ],
+    ),
+    'log-wrong-directory-text': (
+        '21 => "is a directory",',
+        '21 => "is a dir",',
+        [
+            'skills_status_config_log_env_log_is_directory',
+            'skills_status_config_log_env_rotated_is_directory_json',
+            'skills_status_config_log_env_symlink_to_directory',
+        ],
+    ),
+    'log-wrong-notdir-text': (
+        '20 => "not a directory",',
+        '20 => "not a dir",',
+        [
+            'skills_status_config_log_env_parent_is_file',
+        ],
+    ),
+    'log-wrong-loop-text': (
+        '62 if cfg!(target_os = "macos") => "too many levels of symbolic links",',
+        '62 if cfg!(target_os = "macos") => "too many symlinks",',
+        [
+            'skills_status_config_log_env_symlink_loop_log',
+            'skills_status_config_log_env_symlink_loop_rotated',
+        ],
+    ),
+    'log-wrong-eacces-text': (
+        '13 => "permission denied",',
+        '13 => "denied",',
+        [
+            'skills_status_config_log_env_log_mode_000',
+            'skills_status_config_log_env_rotated_mode_000_json',
+            'skills_status_config_log_env_dir_mode_000',
+        ],
+    ),
+    'log-accepts-unclean-home-error': (
+        '|| !is_lexically_clean(home.to_str()?)',
+        '|| home.to_str().is_none()',
+        [
+            'skills_status_config_log_fallback_unclean_home_error',
+        ],
+    ),
+    'log-accepts-dotdot-home': (
+        'if go_home_defined() && home.to_str().is_none_or(has_dot_segment) {',
+        'if false {',
+        [
+            'skills_status_config_log_fallback_home_dotdot_through_symlink_json',
+        ],
+    ),
+    'log-sorts-oldest-first': (
+        'records.sort_by(|left, right| right.ts.cmp(&left.ts));',
+        'records.sort_by(|left, right| left.ts.cmp(&right.ts));',
+        [
+            'skills_status_config_log_env_populated_json',
+            'skills_status_config_log_env_populated',
+        ],
+    ),
+    'log-limit-zero-truncates': (
+        'if parsed.limit > 0 {',
+        'if parsed.limit >= 0 {',
+        [
+            'skills_status_config_log_env_populated_json',
+            'skills_status_config_log_env_limit_zero_json',
+        ],
+    ),
+    'log-skill-filter-untrimmed': (
+        '        .skill\n        .as_deref()\n        .map(str::trim)\n',
+        '        .skill\n        .as_deref()\n        .map(|value| value)\n',
+        [
+            'skills_status_config_log_env_skill_filter_trimmed',
+        ],
+    ),
+    'log-reads-current-before-rotated': (
+        'for segment in [rotated_event_path(path), path.to_owned()] {\n        match fs::metadata',
+        'for segment in [path.to_owned(), rotated_event_path(path)] {\n        match fs::metadata',
+        [
+            'skills_status_config_log_env_populated_json',
+            'skills_status_config_log_env_sort_ties_json',
+        ],
+    ),
+    'log-decodes-case-folded-keys': (
+        '} else if !key.is_ascii() || FIELDS.iter().any(|field| field.eq_ignore_ascii_case(&key)) {',
+        '} else if !key.is_ascii() {',
+        [
+            'skills_status_config_log_fallback_uppercase_keys_json',
+        ],
+    ),
+    'log-decodes-non-ascii-keys': (
+        '} else if !key.is_ascii() || FIELDS',
+        '} else if FIELDS',
+        [
+            'skills_status_config_log_fallback_non_ascii_key_json',
+        ],
+    ),
+    'log-decodes-duplicate-keys': (
+        'if seen[slot] {\n                return LineDecode::Unsure;',
+        'if false {\n                return LineDecode::Unsure;',
+        [
+            'skills_status_config_log_fallback_duplicate_key_json',
+        ],
+    ),
+    'log-decodes-top-level-null': (
+        'if bytes[start..].starts_with(b"null") {',
+        'if false {',
+        [
+            'skills_status_config_log_fallback_top_level_null_json',
+        ],
+    ),
+    'log-decodes-invalid-utf8': (
+        'let Ok(text) = std::str::from_utf8(line) else {\n        return LineDecode::Unsure;',
+        'let Ok(text) = std::str::from_utf8(line) else {\n        return LineDecode::Skip;',
+        [
+            'skills_status_config_log_fallback_invalid_utf8_json',
+        ],
+    ),
+    'log-decodes-lone-surrogates': (
+        'let Ok(value) = serde_json::from_str::<String>(raw) else {\n                return LineDecode::Unsure;',
+        'let Ok(value) = serde_json::from_str::<String>(raw) else {\n                return LineDecode::Skip;',
+        [
+            'skills_status_config_log_fallback_lone_surrogate_json',
+        ],
+    ),
+    'log-accepts-deep-nesting': (
+        'const MAX_DEPTH: usize = 200;',
+        'const MAX_DEPTH: usize = 2000;',
+        [
+            'skills_status_config_log_fallback_too_deep_json',
+        ],
+    ),
+    'log-accepts-trailing-garbage': (
+        '    if index != bytes.len() {\n        return LineDecode::Skip;\n    }\n    build_event(text, &members)',
+        '    build_event(text, &members)',
+        [
+            'skills_status_config_log_env_skipped_lines_json',
+        ],
+    ),
     "write-a-file": (
         "    let (library_dir, base_dir, home_dir, render_dir) = status_dirs();\n",
         "    let (library_dir, base_dir, home_dir, render_dir) = status_dirs();\n"
         "    let _ = fs::create_dir_all(skills_data_root().join(\"mutant-scratch\"));\n",
         ["skills_status_config_env_symlink_insync_json"],
+    ),
+    # #955: Go's `skills status` passes the cache directory, so the coarse
+    # (no base snapshot) comparison reads the cached render's fingerprint hash.
+    "status-without-cache-hash": (
+        "cached_render_hash: true,",
+        "cached_render_hash: false,",
+        [
+        "skills_status_config_env_library_moved_base_missing_json",
+        "skills_status_config_env_library_moved_base_missing",
+        "skills_status_config_env_library_default_base_missing_json",
+        "skills_status_config_env_library_moved_base_override_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_table",
+        "skills_status_config_file_status_library_moved_base_missing_project_json",
+        "skills_status_config_file_status_library_moved_base_missing_with_vcs_json",
+        "skills_status_config_file_status_library_moved_base_missing_base_dir_missing_json",
+    ],
+    ),
+    "coarse-hash-install-time": (
+        "crate::materialize::status_cache_source_hash(&bundle, &rendered)?",
+        "fresh.source_hash.clone()",
+        [
+        "skills_status_config_env_library_moved_base_missing_json",
+        "skills_status_config_env_library_moved_base_missing",
+        "skills_status_config_env_library_default_base_missing_json",
+        "skills_status_config_env_library_moved_base_override_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_json",
+        "skills_status_config_file_status_library_moved_base_missing_table",
+        "skills_status_config_file_status_library_moved_base_missing_project_json",
+        "skills_status_config_file_status_library_moved_base_missing_with_vcs_json",
+        "skills_status_config_file_status_library_moved_base_missing_base_dir_missing_json",
+    ],
     ),
 }
 

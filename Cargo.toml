@@ -42,7 +42,7 @@ signal-hook = "=0.3.18"
 # Keep both consumers' YAML API while using the maintained YAML organization fork.
 serde_yaml_ng = { package = "yaml_serde", version = "=0.10.7" }
 sha2 = "0.10.9"
-rusqlite = { version = "0.40.2", features = ["bundled"] }
+rusqlite = { version = "0.40.2", features = ["bundled", "functions"] }
 regex = "1"
 ureq = { version = "=3.4.1", default-features = false, features = ["rustls"] }
 symaira-core-llm = { version = "=0.0.0", git = "https://github.com/danieljustus/symaira-corekit", rev = "7515add9acd865fa56f908643d0b3b689a70946b", package = "symaira-core-llm" }

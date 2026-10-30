@@ -1,5 +1,8 @@
 #![cfg(unix)]
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::ffi::OsString;
 use std::os::unix::ffi::OsStringExt;
 use std::path::PathBuf;
@@ -41,6 +44,7 @@ fn harness_registry_nonutf8_environment() {
             "--nocapture",
         ])
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HARNESS_NONUTF8_CHILD", "1")
         .env("HOME", &path)
         .env("XDG_CONFIG_HOME", &path)

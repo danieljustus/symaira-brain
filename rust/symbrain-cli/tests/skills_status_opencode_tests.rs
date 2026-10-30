@@ -134,18 +134,78 @@ fn empty_explicit_user_roots_are_native() {
 }
 
 #[test]
-fn configured_status_keeps_go_fallback() {
+fn configured_status_decodes_valid_config_and_keeps_go_for_the_rest() {
+    // SKL-019: a valid config file is decoded natively (an absent library
+    // lists no installs); a syntax error or an unscannable value stays on Go.
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
+    let config = root.path().join("config/symskills/config.toml");
+    // A drive-less "/different/library" is relative on Windows, where Go
+    // keeps such values on the fallback path; use a host-absolute directory.
+    let library = root.path().join("different").join("library");
+    let body = format!(
+        "library_dir = \"{}\"\n",
+        library.to_string_lossy().replace('\\', "/")
+    );
+    std::fs::write(&config, body).unwrap();
+    let output = run(&root, &["skills", "status", "--target", "opencode"]);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert_eq!(output.stdout, b"No installed skills found.\n");
+    for (body, what) in [
+        (&b"library_dir = \n"[..], "syntax error"),
+        (
+            &b"library_dir = \"relative/library\"\n"[..],
+            "relative library",
+        ),
+        (&b"cache_dir = \"/moved/cache\"\n"[..], "moved cache"),
+    ] {
+        std::fs::write(&config, body).unwrap();
+        let output = run(&root, &["skills", "status", "--target", "opencode"]);
+        assert_go_fallback(&output, what);
+    }
+}
+
+#[test]
+fn windows_path_in_a_basic_string_resets_the_config_natively_on_every_host() {
+    // `"C:\Users\me"` is not valid TOML (`\U` needs eight hex digits), so Go's
+    // `config.Load` fails and `loadSkillsEnv` falls back to the defaults. The
+    // decision depends on the bytes, not the platform: no Go binary is needed.
+    let root = TempDir::new().unwrap();
+    std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
+    let config = root.path().join("config/symskills/config.toml");
     std::fs::write(
-        root.path().join("config/symskills/config.toml"),
-        b"library_dir = \"/different/library\"\n",
+        &config,
+        b"library_dir = \"C:\\Users\\me\\library\"\nbase_dir = \"D:\\a\\_temp\\base\"\n",
     )
     .unwrap();
-    let output = run(&root, &["skills", "status", "--target", "opencode"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let list = run(&root, &["skills", "list", "--json"]);
+    assert!(list.status.success(), "list stderr: {:?}", list.stderr);
+    assert_eq!(
+        String::from_utf8_lossy(&list.stdout),
+        "{\"skills\":[],\"category_counts\":{},\"issues\":[]}\n"
+    );
+    let status = run(&root, &["skills", "status", "--target", "opencode"]);
+    assert!(
+        status.status.success(),
+        "status stderr: {:?}",
+        status.stderr
+    );
+    assert_eq!(status.stdout, b"No installed skills found.\n");
+    let doctor = run(&root, &["skills", "doctor", "--json"]);
+    assert!(
+        doctor.status.success(),
+        "doctor stderr: {:?}",
+        doctor.stderr
+    );
+    let report: serde_json::Value = serde_json::from_slice(&doctor.stdout).unwrap();
+    let library = report["config"]["library_dir"].as_str().unwrap();
+    assert!(
+        std::path::Path::new(library).starts_with(root.path().join("data")),
+        "default library expected, got {library}"
+    );
+    // A multi-line string keeps its Go-owned diagnostic.
+    std::fs::write(&config, b"library_dir = \"\"\"C:\\Users\"\"\"\n").unwrap();
+    assert_go_fallback(&run(&root, &["skills", "list", "--json"]), "multi-line");
 }
 
 #[test]
@@ -160,12 +220,14 @@ fn default_status_with_dynamic_target_state_keeps_go_fallback() {
 
 #[test]
 fn legacy_go_config_wins_when_new_skills_config_dir_exists() {
+    // Go reads `symskills/config.toml` whatever `symbrain/skills` holds; a
+    // decoder hand-off in that file must reach Go.
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("config/symbrain/skills")).unwrap();
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
     std::fs::write(
         root.path().join("config/symskills/config.toml"),
-        b"library_dir = \"/different/library\"\n",
+        b"library_dir = \n",
     )
     .unwrap();
     let output = run(&root, &["skills", "status", "--target", "opencode"]);
@@ -325,21 +387,29 @@ fn symskills_cache_dir_override_keeps_go_fallback() {
 type Shape<'a> = (&'a [&'a str], &'a [(&'a str, &'a str)], &'a str);
 
 #[test]
+fn invalid_vcs_bool_resets_the_whole_config_natively() {
+    // Go's `Load` fails on the bool and `loadSkillsEnv` swaps in the defaults,
+    // the library override included: the report equals the plain default one.
+    let root = TempDir::new().unwrap();
+    let plain = run(&root, &["skills", "status", "--target", "opencode"]);
+    assert!(plain.status.success(), "stderr: {:?}", plain.stderr);
+    for value in ["maybe", ""] {
+        let output = command(&root, &["skills", "status", "--target", "opencode"])
+            .env("SYMSKILLS_VCS_ENABLED", value)
+            .env("SYMSKILLS_LIBRARY_DIR", "/different/library")
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{value:?}: {:?}", output.stderr);
+        assert_eq!(output.stdout, plain.stdout, "{value:?}");
+    }
+}
+
+#[test]
 fn symskills_unreplayable_env_shapes_keep_go_fallback() {
     let root = TempDir::new().unwrap();
     let file = root.path().join("not-a-dir");
     std::fs::write(&file, b"x").unwrap();
     let cases: &[Shape] = &[
-        (
-            &["skills", "status", "--target", "opencode"],
-            &[("SYMSKILLS_VCS_ENABLED", "maybe")],
-            "invalid bool",
-        ),
-        (
-            &["skills", "status", "--target", "opencode"],
-            &[("SYMSKILLS_VCS_ENABLED", "")],
-            "empty bool",
-        ),
         (
             &["skills", "status", "--target", "opencode"],
             &[("SYMSKILLS_LIBRARY_DIR", "relative/library")],

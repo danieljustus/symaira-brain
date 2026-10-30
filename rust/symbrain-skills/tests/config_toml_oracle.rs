@@ -207,6 +207,7 @@ struct Replay {
     native_value: usize,
     native_error: usize,
     go_syntax: usize,
+    rejected: usize,
     targets_value: usize,
     targets_go_error: usize,
     targets_nondeterministic: usize,
@@ -243,6 +244,15 @@ impl Replay {
                 } else {
                     self.failures
                         .push(format!("{id}: Error {message:?} but Go said {expected}"));
+                }
+            }
+            LoadOutcome::Rejected => {
+                // Only a Go parse failure may be answered without its message.
+                if go_parse_error {
+                    self.rejected += 1;
+                } else {
+                    self.failures
+                        .push(format!("{id}: Rejected but Go said {expected}"));
                 }
             }
             LoadOutcome::NeedsGo(reason) => {
@@ -350,13 +360,14 @@ fn replays_go_config_toml_corpus() {
         replay.check_targets(id, &case["targets_decode"], load_targets(global, project));
     }
     eprintln!(
-        "config_toml oracle: {} cases; Load native value {} / apply error {} / Go parse error left to Go {} / \
+        "config_toml oracle: {} cases; Load native value {} / apply error {} / Go parse error left to Go {} / Go parse error answered as rejected {} / \
          accepted but Go-owned {}; targets native {} / Go error left to Go {} / map-order dependent left to Go {} / \
          accepted but Go-owned {}",
         cases.len(),
         replay.native_value,
         replay.native_error,
         replay.go_syntax,
+        replay.rejected,
         replay.owned_load.len(),
         replay.targets_value,
         replay.targets_go_error,
@@ -368,6 +379,10 @@ fn replays_go_config_toml_corpus() {
         "{} mismatches:\n{}",
         replay.failures.len(),
         replay.failures.join("\n")
+    );
+    assert!(
+        replay.rejected > 0,
+        "no invalid-escape case in the corpus was rejected"
     );
     if soak {
         eprintln!(
