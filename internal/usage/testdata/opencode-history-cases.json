@@ -1,0 +1,951 @@
+[
+  {
+    "name": "v1-hosted-checkpoint",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "",
+        "data": "{\"role\":\"assistant\",\"providerID\":\"opencode-go\",\"modelID\":\"go-model\",\"cost\":0.1000000001,\"tokens\":{\"total\":12}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "go-model",
+              "events": 1,
+              "tokens": "12",
+              "missing_tokens": 0
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "go-model",
+              "events": 1,
+              "tokens": "12",
+              "missing_tokens": 0
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "go-model",
+              "events": 1,
+              "tokens": "12",
+              "missing_tokens": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "v2-completed-compaction",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "msg-zen",
+        "ms": 1793181600000,
+        "kind": "compaction",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}},\"status\":\"completed\"}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "pending",
+        "ms": 1793181600000,
+        "kind": "compaction",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}},\"status\":\"started\"}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "user",
+        "ms": 1793181600000,
+        "kind": "user",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "v1-v2-channel-dedup",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "",
+        "data": "{\"role\":\"assistant\",\"providerID\":\"opencode-go\",\"modelID\":\"go-model\",\"cost\":0.1000000001,\"tokens\":{\"total\":12}}"
+      },
+      {
+        "db": "opencode-next.db",
+        "table": "session_message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"role\":\"assistant\",\"providerID\":\"opencode-go\",\"modelID\":\"go-model\",\"cost\":0.1000000001,\"tokens\":{\"total\":12}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "msg-zen",
+        "ms": 1793181600000,
+        "kind": "compaction",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}},\"status\":\"completed\"}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "go-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "12"
+            },
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "go-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "12"
+            },
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "go-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "12"
+            },
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "hosted-only-not-codex-or-api",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "msg-zen",
+        "ms": 1793181600000,
+        "kind": "compaction",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}},\"status\":\"completed\"}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "oauth-codex",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"gpt-model\",\"providerID\":\"openai\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "openai-api",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"gpt-model\",\"providerID\":\"openai\"},\"cost\":9,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "anthropic-api",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"claude-model\",\"providerID\":\"anthropic\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "unknown-owner",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"m\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "cross-owner-conflict-not-first-wins",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "",
+        "data": "{\"role\":\"assistant\",\"providerID\":\"opencode-go\",\"modelID\":\"go-model\",\"cost\":0.1000000001,\"tokens\":{\"total\":12}}"
+      },
+      {
+        "db": "opencode-next.db",
+        "table": "session_message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"go-model\",\"providerID\":\"openai\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "msg-zen",
+        "ms": 1793181600000,
+        "kind": "compaction",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}},\"status\":\"completed\"}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "cross-model-conflict-not-model-key",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "",
+        "data": "{\"role\":\"assistant\",\"providerID\":\"opencode-go\",\"modelID\":\"go-model\",\"cost\":0.1000000001,\"tokens\":{\"total\":12}}"
+      },
+      {
+        "db": "opencode-next.db",
+        "table": "session_message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"other-model\",\"providerID\":\"opencode-go\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "msg-zen",
+        "ms": 1793181600000,
+        "kind": "compaction",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}},\"status\":\"completed\"}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "missing-not-zero",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "zero",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"total\":0}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "missing",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "partial",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 2,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 2,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 2,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "null-malformed-measurements",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "null",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":null,\"tokens\":{\"total\":null}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "fraction",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":-1,\"tokens\":{\"total\":1.5}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "boolean",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":true,\"tokens\":{\"total\":true}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "bad-json",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "missing-id",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "unknown",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"role\":\"assistant\",\"modelID\":\"m\"}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "idless",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "partial",
+      "excluded_events": 2,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 5,
+              "missing_tokens": 3
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 5,
+              "missing_tokens": 3
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 5,
+              "missing_tokens": 3
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "precision-and-exponents",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "tiny",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":1e-10,\"tokens\":{\"total\":0}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "zero",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"total\":0}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unsupported-cost-precision",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "precision",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0.00000000001,\"tokens\":{\"total\":0}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "calendar-boundaries",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "today",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "yesterday",
+        "ms": 1793095200000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "oldest",
+        "ms": 1790676000000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "outside",
+        "ms": 1790589600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "future",
+        "ms": 1793268000000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}}}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-09-29",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "2026-10-27",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "45"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "yesterday",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-owner-copy-poisons-hosted-id",
+    "now": "2026-10-28T12:00:00Z",
+    "rows": [
+      {
+        "db": "opencode.db",
+        "table": "message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "",
+        "data": "{\"role\":\"assistant\",\"providerID\":\"opencode-go\",\"modelID\":\"go-model\",\"cost\":0.1000000001,\"tokens\":{\"total\":12}}"
+      },
+      {
+        "db": "opencode-next.db",
+        "table": "session_message",
+        "id": "msg-go",
+        "ms": 1793181600000,
+        "kind": "assistant",
+        "data": "{\"model\":{\"id\":\"go-model\"}}"
+      },
+      {
+        "db": "opencode.db",
+        "table": "session_message",
+        "id": "msg-zen",
+        "ms": 1793181600000,
+        "kind": "compaction",
+        "data": "{\"model\":{\"id\":\"zen-model\",\"providerID\":\"opencode\"},\"cost\":0,\"tokens\":{\"input\":1,\"output\":2,\"reasoning\":3,\"cache\":{\"read\":4,\"write\":5}},\"status\":\"completed\"}"
+      }
+    ],
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "UTC",
+      "status": "partial",
+      "excluded_events": 2,
+      "daily": [
+        {
+          "key": "2026-10-28",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "zen-model",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "15"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

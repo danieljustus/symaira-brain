@@ -13,6 +13,7 @@ def main():
     for name in ['go', 'parent', 'rust', 'output']:
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--parent-source', required=True)
+    parser.add_argument('--go-head', type=Path)
     args = parser.parse_args()
     mutations = [('bad-syntax', "error=error.replace(b'bad flag syntax: ',b'flag provided but not defined: -')", 'copilot-original-2'),
                  ('positional-hex', "error=error.replace(br'\\xff',br'\\xFF')", 'copilot-original-7')]
@@ -33,6 +34,8 @@ def main():
             command = [sys.executable, str(Path(__file__).with_name('argv.py')),
                        '--go', str(args.go), '--parent', str(args.parent), '--rust', str(wrapper),
                        '--parent-source', args.parent_source, '--output', str(root / (name + '.json'))]
+            if args.go_head:
+                command += ['--go-head', str(args.go_head)]
             result = subprocess.run(command, capture_output=True, timeout=60)
             error = result.stderr.decode(errors='replace')
             assert result.returncode and 'AssertionError' in error and case in error, (name, result.returncode, error)

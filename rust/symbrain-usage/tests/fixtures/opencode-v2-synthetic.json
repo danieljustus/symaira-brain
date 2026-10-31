@@ -1,0 +1,243 @@
+{
+  "provenance": "Synthetic offline contract cases, not a live capture or upstream execution.",
+  "schema": "CREATE TABLE migration(id TEXT PRIMARY KEY,time_completed INTEGER); CREATE TABLE credential(id TEXT PRIMARY KEY,integration_id TEXT,value TEXT,active INTEGER,time_updated INTEGER);",
+  "cases": [
+    {
+      "id": "current",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-current\"}',1,1);",
+      "outcome": "current"
+    },
+    {
+      "id": "wal-current",
+      "wal": true,
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-current\"}',1,1);",
+      "outcome": "current"
+    },
+    {
+      "id": "wal-logout",
+      "wal": true,
+      "sql": "DELETE FROM credential;",
+      "outcome": "none"
+    },
+    {
+      "id": "wal-without-shm",
+      "wal": true,
+      "mutation": "remove-shm",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-current\"}',1,1);",
+      "outcome": "current"
+    },
+    {
+      "id": "deleted-logout",
+      "outcome": "none"
+    },
+    {
+      "id": "inactive-logout",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-stale\"}',0,2);",
+      "outcome": "none"
+    },
+    {
+      "id": "null-import",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-current\"}',NULL,1);",
+      "outcome": "current"
+    },
+    {
+      "id": "active-before-import",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-stale\"}',NULL,999),('b','opencode-go','{\"key\":\"synthetic-current\"}',1,1);",
+      "outcome": "current"
+    },
+    {
+      "id": "updated-account-precedence",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-stale\"}',1,1),('b','opencode-go','{\"key\":\"synthetic-current\"}',1,2);",
+      "outcome": "current"
+    },
+    {
+      "id": "id-account-precedence",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-stale\"}',1,2),('b','opencode-go','{\"key\":\"synthetic-current\"}',1,2);",
+      "outcome": "current"
+    },
+    {
+      "id": "missing-current-key-no-account-switch",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-stale\"}',1,1),('b','opencode-go','{}',1,2);",
+      "outcome": "none"
+    },
+    {
+      "id": "bad-current-no-account-switch",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-stale\"}',1,1),('b','opencode-go','{',1,2);",
+      "outcome": "error"
+    },
+    {
+      "id": "empty-key",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\" \"}',1,1);",
+      "outcome": "none"
+    },
+    {
+      "id": "null-key",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":null}',1,1);",
+      "outcome": "error"
+    },
+    {
+      "id": "wrong-key-type",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":true}',1,1);",
+      "outcome": "error"
+    },
+    {
+      "id": "wrong-value-type",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go',X'7b7d',1,1);",
+      "outcome": "error"
+    },
+    {
+      "id": "invalid-active",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{}',2,1);",
+      "outcome": "error"
+    },
+    {
+      "id": "invalid-timestamp",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{}',1,'broken');",
+      "outcome": "error"
+    },
+    {
+      "id": "pre-import-empty",
+      "imported": false,
+      "outcome": "legacy"
+    },
+    {
+      "id": "pre-import-missing-credential",
+      "imported": false,
+      "sql": "DROP TABLE credential;",
+      "outcome": "legacy"
+    },
+    {
+      "id": "pre-import-with-rows",
+      "imported": false,
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{}',0,1);",
+      "outcome": "error"
+    },
+    {
+      "id": "imported-missing-table",
+      "sql": "DROP TABLE credential;",
+      "outcome": "error"
+    },
+    {
+      "id": "missing-migration",
+      "sql": "DROP TABLE migration;",
+      "outcome": "error"
+    },
+    {
+      "id": "bad-migration-schema",
+      "sql": "DROP TABLE migration; CREATE TABLE migration(id INTEGER);",
+      "outcome": "error"
+    },
+    {
+      "id": "bad-credential-schema",
+      "sql": "DROP TABLE credential; CREATE TABLE credential(id TEXT);",
+      "outcome": "error"
+    },
+    {
+      "id": "credential-view",
+      "imported": false,
+      "sql": "DROP TABLE credential; CREATE VIEW credential AS SELECT 1;",
+      "outcome": "error"
+    },
+    {
+      "id": "corrupt-db",
+      "mutation": "corrupt-db",
+      "outcome": "error"
+    },
+    {
+      "id": "corrupt-wal-header",
+      "wal": true,
+      "mutation": "wal-header",
+      "outcome": "error"
+    },
+    {
+      "id": "corrupt-wal-frame",
+      "wal": true,
+      "mutation": "wal-frame",
+      "outcome": "error"
+    },
+    {
+      "id": "truncated-wal",
+      "wal": true,
+      "mutation": "wal-truncate",
+      "outcome": "error"
+    },
+    {
+      "id": "multiple-channels",
+      "mutation": "second-channel",
+      "outcome": "error"
+    },
+    {
+      "id": "preview-only",
+      "mutation": "preview",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-current\"}',1,1);",
+      "outcome": "current"
+    },
+    {
+      "id": "db-symlink",
+      "mutation": "db-symlink",
+      "outcome": "error"
+    },
+    {
+      "id": "db-fifo",
+      "mutation": "db-fifo",
+      "outcome": "error"
+    },
+    {
+      "id": "wal-symlink",
+      "mutation": "wal-symlink",
+      "outcome": "error"
+    },
+    {
+      "id": "wal-fifo",
+      "mutation": "wal-fifo",
+      "outcome": "error"
+    },
+    {
+      "id": "journal-present",
+      "mutation": "journal",
+      "outcome": "error"
+    },
+    {
+      "id": "oversized-db",
+      "mutation": "oversized-db",
+      "outcome": "error"
+    },
+    {
+      "id": "too-many-rows",
+      "sql": "WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i+1 FROM n WHERE i<257) INSERT INTO credential SELECT 'row-'||i,'opencode-go','{}',0,i FROM n;",
+      "outcome": "error"
+    },
+    {
+      "id": "oversized-value",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go',replace(hex(zeroblob(40000)),'0','x'),1,1);",
+      "outcome": "error"
+    },
+    {
+      "id": "wal-import-marker",
+      "wal": true,
+      "imported": false,
+      "sql": "INSERT INTO migration VALUES('20260805200742_import_legacy_credentials',1); INSERT INTO credential VALUES('a','opencode-go','{\"key\":\"synthetic-current\"}',1,1);",
+      "outcome": "current"
+    },
+    {
+      "id": "orphan-wal",
+      "mutation": "orphan-wal",
+      "outcome": "error"
+    },
+    {
+      "id": "directory-symlink",
+      "mutation": "dir-symlink",
+      "outcome": "error"
+    },
+    {
+      "id": "too-many-entries",
+      "mutation": "many-entries",
+      "outcome": "error"
+    },
+    {
+      "id": "missing-key",
+      "sql": "INSERT INTO credential VALUES('a','opencode-go','{}',1,1);",
+      "outcome": "none"
+    }
+  ]
+}

@@ -169,7 +169,8 @@ func run() int {
 		Cases: make([]recordedCase, 0, len(declared)),
 	}
 
-	if err := recordProvenance(&out.Provenance, *oracleRevision, *oracleToolchain); err != nil {
+	drift, err := recordProvenance(&out.Provenance, *oracleRevision, *oracleToolchain, *check)
+	if err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle:", err)
 		return 1
 	}
@@ -196,11 +197,18 @@ func run() int {
 
 	if *check {
 		existing, err := os.ReadFile(*output)
-		if err != nil || !bytes.Equal(existing, encoded) {
-			fmt.Fprintf(os.Stderr, "%s is out of date; run %s\n", *output, out.Provenance.Command)
-			return 1
+		if err == nil && bytes.Equal(existing, encoded) && len(drift) == 0 {
+			return 0
 		}
-		return 0
+		// Squash-only integration cannot keep a newer pin reachable, so a
+		// changed behavior source is accepted only when the current code
+		// reproduces every frozen case byte for byte under the same pin.
+		if err == nil && sameRecordedBehavior(existing, encoded) {
+			fmt.Fprintf(os.Stderr, "opencode-discovery-oracle: frozen cases reproduced with changed inputs %v\n", drift)
+			return 0
+		}
+		fmt.Fprintf(os.Stderr, "%s is out of date; run %s\n", *output, out.Provenance.Command)
+		return 1
 	}
 	if err := os.MkdirAll(filepath.Dir(*output), 0o755); err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle: mkdir:", err)
@@ -359,4 +367,28 @@ func sortedHeaderNames(header http.Header) []string {
 // replace host/version/platform substrings inside behavior-bearing payloads.
 func normalize(text string) string {
 	return strings.ReplaceAll(text, fixtureCookie, "CREDENTIAL")
+}
+
+// sameRecordedBehavior compares the complete recorded cases plus the oracle
+// identity. Provenance hashes may differ; they still describe the frozen corpus.
+func sameRecordedBehavior(existing, current []byte) bool {
+	type recorded struct {
+		Provenance struct {
+			OracleRevision string `json:"oracle_revision"`
+			Toolchain      string `json:"toolchain"`
+		} `json:"provenance"`
+		Cases json.RawMessage `json:"cases"`
+	}
+	var a, b recorded
+	if json.Unmarshal(existing, &a) != nil || json.Unmarshal(current, &b) != nil {
+		return false
+	}
+	if a.Provenance.OracleRevision == "" || a.Provenance != b.Provenance || len(a.Cases) == 0 {
+		return false
+	}
+	var ca, cb bytes.Buffer
+	if json.Compact(&ca, a.Cases) != nil || json.Compact(&cb, b.Cases) != nil {
+		return false
+	}
+	return bytes.Equal(ca.Bytes(), cb.Bytes())
 }

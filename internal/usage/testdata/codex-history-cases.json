@@ -1,0 +1,4187 @@
+[
+  {
+    "name": "canonical-cumulative-subsets",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "total-deltas",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "last-over-delta",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1000,\"output_tokens\":200,\"cached_input_tokens\":200,\"reasoning_output_tokens\":100,\"total_tokens\":1200},\"last_token_usage\":{\"input_tokens\":50,\"output_tokens\":10,\"cached_input_tokens\":10,\"reasoning_output_tokens\":5,\"total_tokens\":60}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "repeated-snapshot-with-last",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120},\"last_token_usage\":{\"input_tokens\":900,\"output_tokens\":90,\"cached_input_tokens\":0,\"reasoning_output_tokens\":0,\"total_tokens\":990}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "reset-new-epoch",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":10,\"output_tokens\":2,\"cached_input_tokens\":2,\"reasoning_output_tokens\":1,\"total_tokens\":12}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:02:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":20,\"output_tokens\":4,\"cached_input_tokens\":4,\"reasoning_output_tokens\":2,\"total_tokens\":24}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "144"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "144"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "144"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "last-only",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "null-last-uses-totals",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120},\"last_token_usage\":null}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "missing-model-no-fallback",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "unknown",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "unknown",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "unknown",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-model",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-future-unpriced\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-future-unpriced",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-future-unpriced",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-future-unpriced",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-tier",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"unsupported\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "priority",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"priority\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "fast-alias-once",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4-high-fast\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"priority\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4-high-fast",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4-high-fast",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4-high-fast",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "gpt55-priority-exact-half",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.5\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"priority\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "astra-ultrafast",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-6-astra\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"ultrafast\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-6-astra",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-6-astra",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-6-astra",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "long-boundary",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":272000,\"output_tokens\":1,\"cached_input_tokens\":0,\"reasoning_output_tokens\":0,\"total_tokens\":272001}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272001"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272001"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272001"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "long-above",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":272001,\"output_tokens\":1,\"cached_input_tokens\":0,\"reasoning_output_tokens\":0,\"total_tokens\":272002}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272002"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272002"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272002"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "long-cache-subset",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":272001,\"output_tokens\":1,\"cached_input_tokens\":272000,\"reasoning_output_tokens\":0,\"total_tokens\":272002}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272002"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272002"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "272002"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "daybreak-alias",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"daybreak-blue-latest\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "daybreak-blue-latest",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "daybreak-blue-latest",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "daybreak-blue-latest",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "reserve-alias",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-reserve\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-reserve",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-reserve",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-reserve",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "auto-review-unsupported",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"codex-auto-review\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "codex-auto-review",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "codex-auto-review",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "codex-auto-review",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "recorded-zero-extension",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":0}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "recorded-exact-extension",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":0.1000000001}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-no-estimate-None",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":null}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-no-estimate-True",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":true}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-no-estimate--1",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":-1}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-no-estimate-0.1",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":\"0.1\"}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-no-estimate-{}",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":{}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-no-estimate-1e+100",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":1e+100}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "mixed-coverage",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":0}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:02:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":null}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "360"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "360"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "360"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "zero-is-not-new-turn",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":0,\"output_tokens\":0,\"cached_input_tokens\":0,\"reasoning_output_tokens\":0,\"total_tokens\":0}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "missing-info",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"token_count\",\"info\":null}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "missing-buckets-excluded",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"output_tokens\":1}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "null-input-excluded",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":null,\"output_tokens\":1}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "cache-over-input",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":1,\"output_tokens\":2,\"cached_input_tokens\":3,\"reasoning_output_tokens\":0,\"total_tokens\":3}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "reasoning-over-output",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":1,\"output_tokens\":2,\"cached_input_tokens\":0,\"reasoning_output_tokens\":3,\"total_tokens\":3}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "total-including-reasoning-rejected",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":130}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "invalid-counter-poisons-later",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":true,\"output_tokens\":2}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "partial-tail",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"private\":\"unfinished"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "private-content-unicode",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"response_item\",\"payload\":{\"content\":\"synthetic-private-sentinel still-private \"}}\n{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "nested-payload-not-event",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"response_item\",\"payload\":{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "archive-copy",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "archived_sessions/b.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "active-relative-path-wins",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "archived_sessions/a.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":900,\"output_tokens\":90,\"cached_input_tokens\":0,\"reasoning_output_tokens\":0,\"total_tokens\":990}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "new-session-same-timestamp-distinct",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "sessions/b.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"other\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "file-state-isolation",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "sessions/b.jsonl": "{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            },
+            {
+              "model": "unknown",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            },
+            {
+              "model": "unknown",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            },
+            {
+              "model": "unknown",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "archive-only",
+    "files": {
+      "archived_sessions/old.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "auth.json": "{\"private\":\"synthetic-private-sentinel\"}",
+      "other/unrelated.jsonl": "{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":999,\"output_tokens\":999,\"cached_input_tokens\":0,\"reasoning_output_tokens\":0,\"total_tokens\":1998}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "child-gate-forked_from_id",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486740}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1000,\"output_tokens\":200,\"cached_input_tokens\":200,\"reasoning_output_tokens\":100,\"total_tokens\":1200}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486801}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1100,\"output_tokens\":220,\"cached_input_tokens\":220,\"reasoning_output_tokens\":110,\"total_tokens\":1320}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "child-gate-parent_thread_id",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"parent_thread_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486740}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1000,\"output_tokens\":200,\"cached_input_tokens\":200,\"reasoning_output_tokens\":100,\"total_tokens\":1200}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486801}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1100,\"output_tokens\":220,\"cached_input_tokens\":220,\"reasoning_output_tokens\":110,\"total_tokens\":1320}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "child-gate-thread_source",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"thread_source\":\"subagent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486740}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1000,\"output_tokens\":200,\"cached_input_tokens\":200,\"reasoning_output_tokens\":100,\"total_tokens\":1200}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486801}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1100,\"output_tokens\":220,\"cached_input_tokens\":220,\"reasoning_output_tokens\":110,\"total_tokens\":1320}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "child-gate-source",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"source\":{\"subagent\":{\"thread_spawn\":{\"parent_thread_id\":\"parent\"}}}}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486740}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1000,\"output_tokens\":200,\"cached_input_tokens\":200,\"reasoning_output_tokens\":100,\"total_tokens\":1200}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486801}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1100,\"output_tokens\":220,\"cached_input_tokens\":220,\"reasoning_output_tokens\":110,\"total_tokens\":1320}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "child-no-live-turn",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "child-invalid-created-self-timed",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"invalid\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1000,\"output_tokens\":200,\"cached_input_tokens\":200,\"reasoning_output_tokens\":100,\"total_tokens\":1200}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486799}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792486800}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":1100,\"output_tokens\":220,\"cached_input_tokens\":220,\"reasoning_output_tokens\":110,\"total_tokens\":1320}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "null-parent-is-root",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":null,\"parent_thread_id\":\"\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "inline-model-persists",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.5\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120},\"model\":\"gpt-5.4\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "context-without-model-keeps-current",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"turn_context\",\"payload\":{\"private\":\"sentinel\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "future-excluded",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-21T00:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "old-excluded",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-09-20T00:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "zone-calendar",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-19T23:30:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+01:00",
+    "offset_seconds": 3600,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "recorded-copy-wins",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":0}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "recorded-active-wins",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":0}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-copy-blocks-estimate",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":null}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bad-recorded-active-blocks-estimate",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}},\"costUSD\":null}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "totals-versus-last-copy",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "conflicting-copy-tier-is-incomplete",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"priority\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "last-only-spans-cumulative-gap",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":50,\"output_tokens\":10,\"cached_input_tokens\":10,\"reasoning_output_tokens\":5,\"total_tokens\":60}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:02:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:03:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "first-last-then-cumulative",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "duplicate-last-does-not-advance-baseline",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:01:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "explicit-null-tier-is-unknown",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"priority\"}}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":null}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "direct-tier",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"service_tier\":\"fast\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "quoted-start-does-not-open-child",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":\"1792486801\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-array",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "[]\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-null",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "null\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-number",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "2\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-string",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "invalid\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-type-int",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":2}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-timestamp-int",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"response_item\",\"timestamp\":2}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-payload-array",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"event_msg\",\"payload\":[]}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-info-array",
+    "files": {
+      "sessions/2026/10/rollout.jsonl": "{\"type\":\"event_msg\",\"payload\":{\"type\":\"token_count\",\"info\":[]}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "issue986-same-instant-distinct-total",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-same-instant-archive-copy",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-same-instant-unchanged",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-child-last-only-replay",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-child-repeated-replay-archive",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-root-counterpart",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-root-repeated-last-baseline",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-child-known-prefix-last",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":50,\"output_tokens\":10,\"cached_input_tokens\":10,\"reasoning_output_tokens\":5,\"total_tokens\":60}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:03Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-child-replay-reset",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":10,\"output_tokens\":2,\"cached_input_tokens\":2,\"reasoning_output_tokens\":1,\"total_tokens\":12}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:03Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":20,\"output_tokens\":4,\"cached_input_tokens\":4,\"reasoning_output_tokens\":2,\"total_tokens\":24}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":10,\"output_tokens\":2,\"cached_input_tokens\":2,\"reasoning_output_tokens\":1,\"total_tokens\":12}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:03Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":20,\"output_tokens\":4,\"cached_input_tokens\":4,\"reasoning_output_tokens\":2,\"total_tokens\":24}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "24"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "24"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "24"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-root-same-instant-reset",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":10,\"output_tokens\":2,\"cached_input_tokens\":2,\"reasoning_output_tokens\":1,\"total_tokens\":12}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":20,\"output_tokens\":4,\"cached_input_tokens\":4,\"reasoning_output_tokens\":2,\"total_tokens\":24}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":10,\"output_tokens\":2,\"cached_input_tokens\":2,\"reasoning_output_tokens\":1,\"total_tokens\":12}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":20,\"output_tokens\":4,\"cached_input_tokens\":4,\"reasoning_output_tokens\":2,\"total_tokens\":24}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "144"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "144"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "144"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-cumulative-tier-conflict",
+    "files": {
+      "sessions/a.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"thread_settings\":{\"service_tier\":\"priority\"}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-same-instant-tier-increments",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"service_tier\":\"priority\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n",
+      "archived_sessions/copy.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"service_tier\":\"priority\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":200,\"output_tokens\":40,\"cached_input_tokens\":40,\"reasoning_output_tokens\":20,\"total_tokens\":240}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "240"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-child-invalid-replay-continuity",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":true,\"output_tokens\":2}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-last-only-tier-baseline",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"payload\":{\"type\":\"thread_settings_applied\",\"service_tier\":\"priority\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-child-last-only-no-gate",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "issue986-child-replay-copy-after-gate",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\",\"forked_from_id\":\"parent\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:01Z\",\"payload\":{\"type\":\"task_started\",\"started_at\":1792490401}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "60"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "issue986-root-last-copy-after-cumulative",
+    "files": {
+      "sessions/input.jsonl": "{\"type\":\"session_meta\",\"timestamp\":\"2026-10-20T09:00:00Z\",\"payload\":{\"id\":\"s\"}}\n{\"type\":\"turn_context\",\"payload\":{\"model\":\"gpt-5.4\"}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:02Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"total_token_usage\":{\"input_tokens\":150,\"output_tokens\":30,\"cached_input_tokens\":30,\"reasoning_output_tokens\":15,\"total_tokens\":180}}}}\n{\"type\":\"event_msg\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"payload\":{\"type\":\"token_count\",\"info\":{\"last_token_usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cached_input_tokens\":20,\"reasoning_output_tokens\":10,\"total_tokens\":120}}}}\n"
+    },
+    "now": "2026-10-20T12:00:00+00:00",
+    "offset_seconds": 0,
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "gpt-5.4",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "180"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

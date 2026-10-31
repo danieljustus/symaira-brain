@@ -24,10 +24,11 @@ type Report struct {
 // map directly; credentialDescriptor/credentialSource collapse into
 // AuthStatus (see its doc comment).
 type ProviderUsage struct {
-	ID          string     `json:"id"`
-	DisplayName string     `json:"display_name"`
-	Configured  bool       `json:"configured"`
-	AuthStatus  AuthStatus `json:"auth_status"`
+	History     *LocalHistory `json:"history,omitempty"`
+	ID          string        `json:"id"`
+	DisplayName string        `json:"display_name"`
+	Configured  bool          `json:"configured"`
+	AuthStatus  AuthStatus    `json:"auth_status"`
 	// Snapshot is nil when the provider is not configured or the fetch
 	// failed; Error then carries the reason.
 	Snapshot *UsageSnapshot `json:"snapshot,omitempty"`

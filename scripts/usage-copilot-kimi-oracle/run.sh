@@ -85,8 +85,9 @@ python3 - "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-candida
 import shutil,sys
 shutil.copyfile(sys.argv[1],sys.argv[2]);shutil.copymode(sys.argv[1],sys.argv[2])
 PYCOPY
-run_stage cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/go.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/cli.json"
-run_stage owner-cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/owner.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/owner-cli.json" --owner
+run_stage go-head-build go -C "$repo_root" build -trimpath -o "$scratch/go-head$executable_suffix" ./cmd/symbrain
+run_stage cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/go.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/cli.json" --go-head "$scratch/go-head$executable_suffix"
+run_stage owner-cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/owner.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/owner-cli.json" --owner --go-head "$scratch/go-head$executable_suffix"
 run_stage controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/controls.py" "$scratch" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix"
 # The frozen parent predates shared workspace API changes in the merge base.
 # Archive and clean shared workspace packages between variants, not the full target.
@@ -120,6 +121,6 @@ pathlib.Path(sys.argv[5]).write_text(json.dumps(dict(parent_source=commit,parent
     binaries_sha256={kind:hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()for kind,path in [('parent',sys.argv[3]),('rust',sys.argv[4])]},
     rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True, encoding='utf-8'),scope='One exclusive target; every CLI and Usage dependency variant package-cleaned after verified lossless artifact archive. Actual parent copied; candidate restored byte-identically to actual initial candidate. Clean candidate source checked against immutable Git, no duplicate target'),indent=2)+'\n', encoding='utf-8')
 PYBUILD
-run_stage argv python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv.json"
-run_stage argv-controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv_controls.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv-controls.json"
+run_stage argv python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv.json" --go-head "$scratch/go-head$executable_suffix"
+run_stage argv-controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv_controls.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv-controls.json" --go-head "$scratch/go-head$executable_suffix"
 python3 "$repo_root/scripts/usage-copilot-kimi-oracle/receipt.py" "$scratch/go.json" "$scratch/native.json" "$output" "$oracle_commit"

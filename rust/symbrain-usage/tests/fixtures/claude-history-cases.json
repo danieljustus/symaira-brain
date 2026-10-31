@@ -1,0 +1,1975 @@
+[
+  {
+    "name": "completed",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "recorded-zero-authoritative",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"costUSD\":0}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "recorded-exact-decimal",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"costUSD\":0.1000000001}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "mixed-and-unknown",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"a\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"b\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"costUSD\":2}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"c\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"costUSD\":null}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "570"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "570"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "570"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-model-retains-tokens",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-future-secretless\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-future-secretless",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-future-secretless",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-future-secretless",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "cache-absent-zero",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":0,\"output_tokens\":0}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "0"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "input-missing-not-zero",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"output_tokens\":0}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "cache-null-not-zero",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":2,\"cache_read_input_tokens\":null}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "cache-split-5m-1h",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_read_input_tokens\":40,\"cache_creation_input_tokens\":30,\"cache_creation\":{\"ephemeral_5m_input_tokens\":20,\"ephemeral_1h_input_tokens\":10}}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "cache-split-mismatch",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":31,\"cache_creation\":{\"ephemeral_5m_input_tokens\":20,\"ephemeral_1h_input_tokens\":10}}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "cache-split-missing-subset",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation\":{\"ephemeral_5m_input_tokens\":20}}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-speed",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":2,\"speed\":\"turbo\"}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "3"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "3"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "3"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "fast-opus-4-6",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-opus-4-6\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"speed\":\"fast\"}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-opus-4-6",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-opus-4-6",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-opus-4-6",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-fast-tier",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"speed\":\"fast\"}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "sonnet-long-boundary",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":200000,\"output_tokens\":1}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200001"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200001"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200001"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "sonnet-long-above",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":200001,\"output_tokens\":1}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200002"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200002"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200002"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "long-prompt-includes-cache",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1,\"cache_read_input_tokens\":200000}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200002"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200002"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "200002"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "supplement-opus-5-5-alias",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-opus-5.5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"speed\":\"fast\"}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-opus-5.5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-opus-5.5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-opus-5.5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "haiku-exact-read-rate",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-haiku-4-5-20251001\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-haiku-4-5-20251001",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-haiku-4-5-20251001",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-haiku-4-5-20251001",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "resume-exact-replay",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "fork-sidechain-replay",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"fork\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":900000,\"output_tokens\":20}},\"isSidechain\":true}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"sub\",\"message\":{\"id\":\"subagent\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"isSidechain\":true}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "380"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "380"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "380"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "sidechain-before-parent",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"fork\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":900000,\"output_tokens\":20}},\"isSidechain\":true}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":2}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "distinct-nonsidechain-requests",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"other\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "380"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "380"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 2,
+              "missing_tokens": 0,
+              "tokens": "380"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "replay-larger-completion",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":2}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "replay-explicit-speed-tiebreak",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-opus-4-6\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-opus-4-6\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"speed\":\"fast\"}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-opus-4-6",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-opus-4-6",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-opus-4-6",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "120"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "replay-model-conflict",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-opus-4-6\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "malformed-and-partial-tail",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\nnot JSON\n{\"type\":\"user\",\"message\":{\"content\":\"synthetic-private-sentinel\"}}\n{\"partial\":",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 2,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "canonical-null-stop-persisted-usage",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":null,\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "canonical-missing-stop-persisted-usage",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "streaming-start-not-usage",
+    "source": "{\"type\":\"message_start\",\"message\":{\"role\":\"assistant\"}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "advisor-unsupported-main-tokens-retained",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40,\"iterations\":[{\"type\":\"advisor_message\",\"model\":\"other\"}]}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "ordinary-iterations-not-recounted",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40,\"iterations\":[{\"type\":\"message\",\"model\":null}]}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "null-iterations-unsupported",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40,\"iterations\":null}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "negative-cost-no-fallback",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"costUSD\":-1}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-model-recorded-retained",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-new\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"costUSD\":3}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-new",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-new",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-new",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "bucket-over-bound",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1000000000001,\"output_tokens\":0}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "old-and-future-excluded",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-09-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T12:00:01Z\",\"requestId\":\"r\",\"message\":{\"id\":\"future\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "no_data",
+      "excluded_events": 0,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "host-calendar-yesterday-and-day29",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-19T23:30:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"a\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-19T21:30:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"b\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n{\"type\":\"assistant\",\"timestamp\":\"2026-09-20T22:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"c\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 7200,
+    "now": "2026-10-20T12:00:00+02:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-09-21",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "2026-10-19",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 3,
+              "missing_tokens": 0,
+              "tokens": "570"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "yesterday",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-service-tier",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40,\"service_tier\":\"batch\"}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "null-sidechain-invalid",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"isSidechain\":null}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "numeric-stop-invalid",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":7,\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "recorded-replay-wins-speed",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40}},\"costUSD\":1}\n{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":100,\"output_tokens\":20,\"cache_creation_input_tokens\":30,\"cache_read_input_tokens\":40,\"speed\":\"standard\"}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "available",
+      "excluded_events": 0,
+      "daily": [
+        {
+          "key": "2026-10-20",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ],
+      "periods": [
+        {
+          "key": "last_30_days",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        },
+        {
+          "key": "today",
+          "models": [
+            {
+              "model": "claude-sonnet-4-5",
+              "events": 1,
+              "missing_tokens": 0,
+              "tokens": "190"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "null-stop-over-count-bound",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":null,\"usage\":{\"input_tokens\":1000000000000001,\"output_tokens\":1}}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  },
+  {
+    "name": "null-stop-array-usage-malformed",
+    "source": "{\"type\":\"assistant\",\"timestamp\":\"2026-10-20T10:00:00Z\",\"requestId\":\"r\",\"message\":{\"id\":\"m\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-5\",\"stop_reason\":null,\"usage\":[]}}\n",
+    "offset_seconds": 0,
+    "now": "2026-10-20T12:00:00+00:00",
+    "expected": {
+      "scope": "local_machine",
+      "attribution": "unattributed",
+      "timezone": "fixture",
+      "status": "partial",
+      "excluded_events": 1,
+      "daily": [],
+      "periods": []
+    }
+  }
+]

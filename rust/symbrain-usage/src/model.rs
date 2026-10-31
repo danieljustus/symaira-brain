@@ -36,6 +36,8 @@ pub struct ProviderUsage {
     pub configured: bool,
     pub auth_status: AuthStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub history: Option<crate::LocalHistory>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub snapshot: Option<UsageSnapshot>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
@@ -54,6 +56,7 @@ impl ProviderUsage {
             display_name: provider.display_name.clone(),
             configured: provider.configured || resolution_failed,
             auth_status: provider.auth_status.clone(),
+            history: None,
             snapshot: None,
             error: resolution_failed.then(|| provider.auth_status.detail.clone()),
         }

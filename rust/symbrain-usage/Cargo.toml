@@ -8,6 +8,10 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+rusqlite = { workspace = true, features = ["hooks"] }
+# Existing locked, validated Ed25519 implementation; never implement signing locally.
+ring = "=0.17.14"
+base64 = "=0.22.1"
 cap-std.workspace = true
 chrono.workspace = true
 libc.workspace = true
@@ -15,6 +19,7 @@ serde.workspace = true
 serde_json.workspace = true
 rustix.workspace = true
 tempfile.workspace = true
+toml_edit.workspace = true
 ureq.workspace = true
 regex.workspace = true
 

@@ -88,10 +88,16 @@ parity-smoke: rust-go-printable-check
 rust-go-printable-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run scripts/generate-go-printable-table.go -check
 
-.PHONY: usage-opencode-check
+.PHONY: usage-opencode-check usage-opencode-historical-check
 ## usage-opencode-check: Verify pinned OpenCode request/parse corpus without rewriting it
 usage-opencode-check:
 	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(OPENCODE_ORACLE_TOOLCHAIN) go run ./scripts/usage-request-oracle/opencode -oracle-revision $(OPENCODE_ORACLE_REVISION) -oracle-toolchain $(OPENCODE_ORACLE_TOOLCHAIN) -check
+
+## usage-opencode-historical-check: Revalidate the frozen generator against its authentic immutable source.
+usage-opencode-historical-check:
+	@test "$$(git -C "$(HISTORICAL_USAGE_ROOT)" rev-parse HEAD)" = b807eae643c627ae31166b90176d5a0de6f4e647
+	@test -z "$$(git -C "$(HISTORICAL_USAGE_ROOT)" status --porcelain=v1 --untracked-files=all)"
+	$(MAKE) -C "$(HISTORICAL_USAGE_ROOT)" usage-opencode-check
 
 ## usage-oracle-check: Ensure native Usage fixtures remain derived from Go
 usage-oracle-check:

@@ -59,6 +59,10 @@ include!("provider_config/registry.rs");
 include!("provider_config/routing.rs");
 include!("provider_config/accounts.rs");
 include!("provider_config/other_accounts.rs");
+include!("provider_config/opencode_api.rs");
+include!("provider_config/opencode_history.rs");
+include!("provider_config/quota.rs");
+include!("provider_grok.rs");
 
 #[cfg(test)]
 #[path = "../../test-support/coverage.rs"]
@@ -91,3 +95,7 @@ mod device_oracle_tests;
 #[cfg(test)]
 #[path = "kimi_file_access_oracle_tests.rs"]
 mod kimi_file_access_oracle_tests;
+
+#[cfg(test)]
+#[path = "quota_config_tests.rs"]
+mod quota_config_tests;

@@ -14,7 +14,45 @@ pub(super) fn fetch_one(
 ) -> Result<UsageSnapshot, UsageError> {
     let response = transport
         .request_with_cancel(request, cancel)
-        .map_err(|e| UsageError::transport(&provider.id, &e))?;
+        .map_err(|e| {
+            if provider.id == "grok" {
+                UsageError::exact("Grok billing request failed; check your connection")
+            } else {
+                UsageError::transport(&provider.id, &e)
+            }
+        })?;
+    if provider.id == "grok" {
+        match response.status {
+            401 | 403 => {
+                return Err(UsageError::exact(
+                    "Grok auth expired. Run `grok login` again; usage never refreshes or writes credentials.",
+                ));
+            }
+            412 => {
+                let team = serde_json::from_slice::<serde_json::Value>(&response.body)
+                    .ok()
+                    .and_then(|value| {
+                        value
+                            .get("error")
+                            .and_then(serde_json::Value::as_str)
+                            .map(str::to_lowercase)
+                    })
+                    .is_some_and(|error| error.contains("no personal team"));
+                if team {
+                    return Err(UsageError::exact(
+                        "Grok team billing unavailable: this account has no personal weekly quota",
+                    ));
+                }
+            }
+            _ => {}
+        }
+        if !(200..300).contains(&response.status) && response.status != 429 {
+            return Err(UsageError::exact(format!(
+                "Grok billing request failed with HTTP {}",
+                response.status
+            )));
+        }
+    }
     if !(200..300).contains(&response.status) {
         return Err(status_error(
             &provider.id,

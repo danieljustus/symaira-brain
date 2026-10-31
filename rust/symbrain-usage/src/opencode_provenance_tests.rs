@@ -121,9 +121,21 @@ fn temporary_root() -> PathBuf {
     ))
 }
 
+#[path = "opencode_historical_source.rs"]
+mod historical_source;
+
 #[test]
 fn provenance_checks_hashes_and_rejects_mutation() {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let checkout = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let paths: Vec<&str> = SOURCES
+        .iter()
+        .chain(HARNESS.iter())
+        .copied()
+        .chain(anchor::EVIDENCE_HASHES.iter().map(|(path, _)| *path))
+        .chain(["Makefile", CURRENT_FIXTURE, HISTORICAL_FIXTURE])
+        .collect();
+    let historical = historical_source::materialize(&checkout, temporary_root(), &paths);
+    let root = historical.0.clone();
     let current_bytes = fs::read(root.join(CURRENT_FIXTURE)).expect("current fixture required");
     let oracle = validate_current_fixture(&current_bytes, &root);
 

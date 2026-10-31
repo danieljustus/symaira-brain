@@ -238,6 +238,7 @@ mod tests {
             display_name: "Fixture".into(),
             configured: true,
             auth_status: AuthStatus::default(),
+            history: None,
             snapshot: snapshot.then(UsageSnapshot::default),
             error: error.map(str::to_owned),
         }

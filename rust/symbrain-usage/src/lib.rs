@@ -1,6 +1,8 @@
 //! Schema-versioned, read-only AI provider usage reporting.
 #![deny(unsafe_code)]
 
+mod claude_history;
+mod codex_history;
 mod go_decimal;
 mod go_decimal_fast;
 mod go_decimal_shift;
@@ -9,6 +11,11 @@ mod go_decimal_tests;
 mod go_float;
 #[cfg(test)]
 mod go_float_tests;
+pub use codex_history::scan_codex_history;
+mod history;
+mod history_files;
+pub use claude_history::scan_claude_history;
+pub use history::{HistoryBucket, HistoryModel, LocalHistory, scan_grok_history};
 mod model;
 mod parser;
 mod providers;
@@ -17,9 +24,9 @@ mod transport;
 
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
 pub use providers::{
-    Provider, ProviderSpec, UsageError, all_providers, is_secret_reference, is_vault_uri,
-    needs_go_fallback, resolve_reference, resolve_reference_or_env, secretref_timeout,
-    set_secretref_timeout,
+    Provider, ProviderSelection, ProviderSpec, UsageError, all_providers, is_secret_reference,
+    is_vault_uri, needs_go_fallback, needs_go_fallback_for_selection, resolve_reference,
+    resolve_reference_or_env, secretref_timeout, selected_providers, set_secretref_timeout,
 };
 pub use retry_after::parse_retry_after;
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
@@ -38,13 +45,23 @@ pub struct Service {
     transport: Arc<dyn Transport>,
     provider_timeout: Duration,
     max_concurrency: usize,
+    opencode_history_selected: bool,
+    claude_history_selected: bool,
+    codex_history_selected: bool,
 }
 
 impl Service {
     #[must_use]
     pub fn new() -> Self {
+        Self::with_selection(&ProviderSelection::default())
+    }
+    #[must_use]
+    pub fn with_selection(selection: &ProviderSelection) -> Self {
         Self {
-            providers: all_providers(),
+            providers: selected_providers(selection),
+            opencode_history_selected: selection.explicit_opencode(),
+            claude_history_selected: selection.explicit_claude(),
+            codex_history_selected: selection.explicit_codex(),
             transport: Arc::new(UreqTransport::default()),
             provider_timeout: DEFAULT_PROVIDER_TIMEOUT,
             max_concurrency: MAX_CONCURRENT_PROVIDERS,
@@ -53,6 +70,9 @@ impl Service {
     #[must_use]
     pub fn with_transport(providers: Vec<Provider>, transport: Arc<dyn Transport>) -> Self {
         Self {
+            opencode_history_selected: providers.iter().any(|p| p.id == "opencode"),
+            claude_history_selected: providers.iter().any(|p| p.id == "claude"),
+            codex_history_selected: providers.iter().any(|p| p.id == "codex"),
             providers,
             transport,
             provider_timeout: DEFAULT_PROVIDER_TIMEOUT,
@@ -78,6 +98,28 @@ impl Service {
         self.report_with_cancel(|| false)
     }
 
+    fn collect_history(
+        &self,
+        report: &mut Report,
+        cancelled: &impl Fn() -> bool,
+        report_deadline: Option<Instant>,
+    ) {
+        codex_history::collect_enabled(
+            report,
+            self.codex_history_selected,
+            cancelled,
+            report_deadline,
+        );
+        let selected = self.opencode_history_selected;
+        history::collect_enabled(report, cancelled, report_deadline, selected);
+        claude_history::collect_enabled(
+            report,
+            self.claude_history_selected,
+            cancelled,
+            report_deadline,
+        );
+    }
+
     /// Runs bounded worker batches. `thread::scope` guarantees every worker is
     /// joined before return; cancellation is propagated before the join so a
     /// cooperative transport never survives a report call.
@@ -101,6 +143,7 @@ impl Service {
             .iter()
             .map(ProviderUsage::from_provider)
             .collect();
+        self.collect_history(&mut report, &cancelled, report_deadline);
         let configured: Vec<usize> = report
             .providers
             .iter()

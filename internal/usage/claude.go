@@ -277,37 +277,7 @@ func (s *claudeOAuthStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error)
 		return nil, &claudeError{kind: "unparseable"}
 	}
 
-	var meters []UsageMeter
-	// Session window (5h) and weekly window (7d) as separate meters.
-	for _, window := range []struct {
-		label string
-		w     *claudeUsageWindow
-	}{{"five_hour", payload.FiveHour}, {"seven_day", payload.SevenDay}} {
-		if window.w == nil || window.w.Limit == nil || *window.w.Limit <= 0 {
-			continue
-		}
-		used := 0.0
-		if window.w.Utilized != nil {
-			used = *window.w.Utilized
-		}
-		meters = append(meters, UsageMeter{
-			Label:    window.label,
-			Used:     strPtr(formatAmount(used)),
-			Limit:    strPtr(formatAmount(*window.w.Limit)),
-			Unit:     "%",
-			ResetsAt: window.w.ResetsAt,
-		})
-	}
-	if extra := payload.ExtraUsage; extra != nil {
-		var used, limit *string
-		if extra.Used != nil {
-			used = strPtr(formatAmount(*extra.Used))
-		}
-		if extra.Limit != nil {
-			limit = strPtr(formatAmount(*extra.Limit))
-		}
-		meters = append(meters, UsageMeter{Label: "Extra usage", Used: used, Limit: limit, Unit: "USD"})
-	}
+	meters := claudeOAuthMeters(payload)
 
 	return &UsageSnapshot{
 		ProviderID: claudeProviderID,
@@ -316,21 +286,4 @@ func (s *claudeOAuthStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error)
 		FetchedAt:  time.Now().UTC(),
 		Source:     s.Source(),
 	}, nil
-}
-
-type claudeOAuthUsage struct {
-	FiveHour   *claudeUsageWindow `json:"five_hour"`
-	SevenDay   *claudeUsageWindow `json:"seven_day"`
-	ExtraUsage *claudeExtraUsage  `json:"extra_usage"`
-}
-
-type claudeUsageWindow struct {
-	Utilized *float64   `json:"utilized"`
-	Limit    *float64   `json:"limit"`
-	ResetsAt *time.Time `json:"resets_at"`
-}
-
-type claudeExtraUsage struct {
-	Used  *float64 `json:"used"`
-	Limit *float64 `json:"limit"`
 }

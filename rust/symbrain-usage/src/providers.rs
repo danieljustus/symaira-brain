@@ -20,6 +20,10 @@ mod provider_antigravity;
 mod provider_fetch;
 #[path = "provider_identity.rs"]
 mod provider_identity;
+#[path = "provider_ollama.rs"]
+pub(crate) mod provider_ollama;
+#[path = "provider_quota.rs"]
+mod provider_quota;
 use provider_antigravity::fetch_antigravity_from_observations;
 #[cfg(test)]
 use provider_antigravity::{
@@ -33,10 +37,11 @@ mod usage_fetch_oracle_tests;
 use provider_fetch::fetch_one;
 
 #[path = "provider_config.rs"]
-mod provider_config;
+pub(crate) mod provider_config;
 pub use provider_config::{
-    all_providers, is_secret_reference, is_vault_uri, needs_go_fallback, resolve_reference,
-    resolve_reference_or_env, secretref_timeout, set_secretref_timeout,
+    ProviderSelection, all_providers, is_secret_reference, is_vault_uri, needs_go_fallback,
+    needs_go_fallback_for_selection, resolve_reference, resolve_reference_or_env,
+    secretref_timeout, selected_providers, set_secretref_timeout,
 };
 #[cfg(test)]
 pub(crate) use provider_config::{
@@ -156,7 +161,9 @@ impl Provider {
         transport: &Arc<dyn Transport>,
         cancel: &Cancellation,
     ) -> Result<UsageSnapshot, UsageError> {
-        let result = if self.fixture && self.id == "antigravity" && self.credential.is_none() {
+        let result = if self.id == "zai" || self.id == "devin" {
+            provider_quota::fetch(self, transport, cancel)
+        } else if self.fixture && self.id == "antigravity" && self.credential.is_none() {
             Err(UsageError::not_running())
         } else if self.fixture && self.id == "antigravity" {
             self.fetch_antigravity_fixture(transport, cancel)
@@ -192,7 +199,7 @@ impl Provider {
                     "oauth",
                     request_for(self, "oauth", self.credential(), None),
                 ),
-                "copilot" | "moonshot" | "nous" | "openrouter" => self.fetch_one(
+                "copilot" | "moonshot" | "nous" | "openrouter" | "grok" => self.fetch_one(
                     transport,
                     cancel,
                     "api",
@@ -204,6 +211,7 @@ impl Provider {
                     "web",
                     request_for(self, "web", self.credential(), None),
                 ),
+                "ollama" => self.fetch_ollama(transport, cancel),
                 "kimi" => self.fetch_kimi(transport, cancel),
                 "opencode" => self.fetch_opencode(transport, cancel),
                 "antigravity" => self.fetch_antigravity(transport, cancel),
@@ -377,3 +385,7 @@ mod antigravity_tests;
 #[cfg(test)]
 #[path = "debug_redaction_tests.rs"]
 mod debug_redaction_tests;
+
+#[cfg(test)]
+#[path = "quota_tests.rs"]
+mod quota_tests;
