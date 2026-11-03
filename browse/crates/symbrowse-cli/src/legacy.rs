@@ -2,31 +2,22 @@
 //! config show, state key init). They print on the process streams.
 
 use std::{
-    collections::BTreeMap,
-    ffi::OsString,
-    fs,
-    io::{self, Read, Write},
-    path::PathBuf,
+    io::{self, Write},
     process::ExitCode,
     time::Duration,
 };
 
 use serde::Serialize;
 use symbrowse_core::{
-    batch::{self, ItemOutput},
+    batch::{self},
     config::{FlagOverrides, LoadContext, load, render_show_text, render_show_yaml, show_fields},
     error::ErrorCode,
-    flows,
     key_resolver::{KeyInitResult, KeyResolver},
     key_sources::SystemKeySources,
     output::{Envelope, Format},
 };
-use symbrowse_daemon::{
-    Client, ClientOptions, Frame, PolicyStatus, Server, ServerOptions, SessionSpec,
-    codes as daemon_codes, default_socket_path, dispatch_once,
-};
+use symbrowse_daemon::{PolicyStatus, Server, ServerOptions, SessionSpec, default_socket_path};
 use symbrowse_mcp::{ServeOptions, registry, serve_stdio};
-use symbrowse_protocol::{render_root_version, render_version_json, render_version_text};
 
 pub(crate) const VERSION: &str = match option_env!("SYMBROWSE_VERSION") {
     Some(version) => version,
@@ -57,84 +48,6 @@ pub(crate) struct StateSuccess<'a> {
 }
 
 pub(crate) const MCP_PROFILE_LIST: &str = "core     14 tools  Page interaction and reading: open, snapshot, click, fill, type, press, wait, read, get, find. The default profile.\n           tools: open, snapshot, click, fill, type, press, wait, read, get, find, fetch_url, fetch_batch, cache_get, wayback_snapshots\nnav       3 tools  History navigation: back, forward, reload.\n           tools: back, forward, reload\nstate     0 tools  Sessions, cookies, storage, state save/load, auth login. Tools land with the state milestone (v0.4.0).\nnetwork   0 tools  Routing, mocking, request inspection, HAR, headers, offline. Tools land with the network milestone (v1.0.0).\ndebug     0 tools  Console, errors, eval, a11y, diff, doctor. Tools land with the reach milestones (v1.0.0).\nflows     0 tools  Flow list/run/record. Tools land with the flows milestone (v0.6.0).\n";
-
-pub(crate) fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCode {
-    let mapped = match code {
-        daemon_codes::MALFORMED_REQUEST => ErrorCode::MalformedRequest,
-        daemon_codes::UNKNOWN_COMMAND => ErrorCode::UnknownCommand,
-        daemon_codes::OPERATION_TIMEOUT => ErrorCode::OperationTimeout,
-        daemon_codes::PEER_DENIED => ErrorCode::PeerDenied,
-        daemon_codes::DAEMON_UNAVAILABLE => ErrorCode::DaemonUnavailable,
-        daemon_codes::INVALID_SESSION => ErrorCode::InvalidSession,
-        symbrowse_core::config::TRANSPORT_RETIRED => ErrorCode::Config,
-        _ => ErrorCode::OperationFailed,
-    };
-    match Envelope::failure(mapped, message).render(format) {
-        Ok(output) => {
-            let _ = io::stdout().write_all(output.as_bytes());
-        }
-        Err(_) => {
-            let _ = writeln!(io::stderr(), "dispatch failed");
-        }
-    }
-    ExitCode::from(mapped.exit_code())
-}
-
-pub(crate) fn run_flow_list(format: Format) -> ExitCode {
-    let mut groups = Vec::new();
-    let project = PathBuf::from(".symbrowse").join("flows");
-    if let Ok(found) = flows::discover_directory(&project, "project") {
-        groups.push(found);
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        let global = PathBuf::from(home)
-            .join(".config")
-            .join("symbrowse")
-            .join("flows");
-        if let Ok(found) = flows::discover_directory(&global, "global") {
-            groups.push(found);
-        }
-    }
-    let data = serde_json::json!({"flows": flows::merge_discovered(groups)});
-    match Envelope::ok(data, Vec::new()).render(format) {
-        Ok(output) => write_stdout(&output),
-        Err(error) => {
-            render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
-        }
-    }
-}
-
-pub(crate) fn run_flow_validate(path: PathBuf, format: Format) -> ExitCode {
-    let source = match fs::read(&path) {
-        Ok(source) => source,
-        Err(error) => {
-            return render_dispatch_error(
-                format,
-                "not_found",
-                format!("read flow {}: {error}", path.display()),
-            );
-        }
-    };
-    match flows::parse(&source, path.to_string_lossy().to_string()) {
-        Ok(flow) => {
-            let data = serde_json::json!({
-                "name": flow.name,
-                "version": flow.version,
-                "domains": flow.domains,
-                "steps": flow.steps.len(),
-                "outputs": flow.outputs.len(),
-                "valid": true,
-            });
-            match Envelope::ok(data, Vec::new()).render(format) {
-                Ok(output) => write_stdout(&output),
-                Err(error) => {
-                    render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
-                }
-            }
-        }
-        Err(error) => render_dispatch_error(format, "malformed_request", error.to_string()),
-    }
-}
 
 pub(crate) fn run_mcp(
     session: String,

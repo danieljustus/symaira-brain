@@ -37,7 +37,6 @@ struct RawFlag {
     name: String,
     #[serde(rename = "type")]
     ty: String,
-    default: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -59,7 +58,6 @@ pub struct Flag {
     pub name: String,
     pub short: Option<u8>,
     pub ty: FlagType,
-    pub default: Option<String>,
 }
 
 #[derive(Debug)]
@@ -75,7 +73,6 @@ pub struct Node {
 
 pub struct Tree {
     pub nodes: Vec<Node>,
-    by_path: HashMap<Vec<String>, usize>,
 }
 
 fn convert(raw: &RawFlag) -> Flag {
@@ -90,7 +87,6 @@ fn convert(raw: &RawFlag) -> Flag {
         name: raw.name.clone(),
         short: raw.short.as_ref().and_then(|s| s.bytes().next()),
         ty,
-        default: raw.default.clone(),
     }
 }
 
@@ -107,13 +103,31 @@ impl Tree {
                 help = remove_retired_listing(&help);
             }
             let mut flags: Vec<Flag> = node.flags.iter().map(convert).collect();
+            // Rust-only transport selection flags (`compat` is retired and
+            // answers with the typed `transport_retired` error); hidden from
+            // the Go-derived help text.
+            if node.path.as_slice() == ["daemon"] {
+                flags.push(Flag {
+                    name: "mode".into(),
+                    short: None,
+                    ty: FlagType::String,
+                });
+            }
+            if node.path.as_slice() == ["config", "show"] {
+                for name in ["mode", "engine"] {
+                    flags.push(Flag {
+                        name: name.into(),
+                        short: None,
+                        ty: FlagType::String,
+                    });
+                }
+            }
             if node.path.as_slice() == ["daemon"] {
                 // `daemon --mcp-mode` is hidden from help but accepted.
                 flags.push(Flag {
                     name: "mcp-mode".into(),
                     short: None,
                     ty: FlagType::Bool,
-                    default: None,
                 });
             }
             let use_name = node
@@ -146,15 +160,7 @@ impl Tree {
             children.sort_by(|a, b| nodes[*a].use_name.cmp(&nodes[*b].use_name));
             nodes[parent].children = children;
         }
-        Self { nodes, by_path }
-    }
-
-    pub fn node(&self, path: &[String]) -> Option<&Node> {
-        self.by_path.get(path).map(|i| &self.nodes[*i])
-    }
-
-    pub fn index(&self, path: &[String]) -> Option<usize> {
-        self.by_path.get(path).copied()
+        Self { nodes }
     }
 
     /// All flags addressable on a node (own first, then inherited).
@@ -486,14 +492,6 @@ impl FlagValues {
             .unwrap_or(default)
     }
 
-    pub fn float(&self, name: &str, default: f64) -> f64 {
-        self.values
-            .get(name)
-            .and_then(|v| v.last())
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(default)
-    }
-
     pub fn array(&self, name: &str) -> Vec<String> {
         self.values.get(name).cloned().unwrap_or_default()
     }
@@ -784,12 +782,4 @@ pub fn validate_args(
 
 pub fn exact_args_error(expected: usize, got: usize) -> String {
     format!("accepts {expected} arg(s), received {got}")
-}
-
-pub fn no_args_error(tree: &Tree, index: usize, first: &str) -> String {
-    format!(
-        "unknown command {} for {}",
-        go_quote(first),
-        go_quote(&tree.command_path(index))
-    )
 }

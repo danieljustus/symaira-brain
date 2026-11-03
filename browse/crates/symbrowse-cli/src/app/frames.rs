@@ -964,7 +964,7 @@ fn network_route(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
     }
     // json.Marshal fails for an invalid RawMessage; the Go code ignores the
     // error and sends a frame without arguments.
-    let payload = (!invalid_body).then(|| Value::Object(route));
+    let payload = (!invalid_body).then_some(Value::Object(route));
     let response = daemon_request(&session(ctx), "network.route", payload, None)?;
     if !response.success {
         return Err(response_error(&response));

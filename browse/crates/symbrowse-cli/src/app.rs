@@ -5,7 +5,7 @@
 //! `exitcodes.FormatCLIError` / `output.WriteError` do.
 
 use std::{
-    io::{Read, Write},
+    io::Read,
     sync::{
         OnceLock,
         atomic::{AtomicU64, Ordering},
@@ -20,11 +20,9 @@ use symbrowse_core::{
 };
 use symbrowse_daemon::{Client, ClientError, ClientOptions, Frame, Response, default_socket_path};
 
-use crate::cobra::{self, ArgSpec, FlagValues, Tree};
+use crate::cobra::{self, FlagValues, Tree};
 
 mod frames;
-
-pub use frames::*;
 
 static TREE: OnceLock<Tree> = OnceLock::new();
 
@@ -167,7 +165,6 @@ pub struct Ctx<'a> {
     pub flags: FlagValues,
     pub args: Vec<String>,
     pub path: Vec<String>,
-    pub version: &'a str,
     pub stdin: &'a mut dyn Read,
     /// True while a batch item runs (process-stream handlers are refused).
     pub captured: bool,
@@ -537,7 +534,6 @@ fn execute(
         flags: parsed.values,
         args: parsed.args,
         path: path.clone(),
-        version,
         stdin,
         captured,
     };
@@ -552,14 +548,4 @@ fn execute(
         Outcome::Fail(error) => Err(fail(error, ctx.flags, path)),
         other => Ok(other),
     }
-}
-
-/// Shared by handlers: exact-args check for closure validators.
-pub fn arg_error(
-    spec: ArgSpec,
-    tree: &Tree,
-    index: usize,
-    args: &[String],
-) -> Result<(), CliError> {
-    cobra::validate_args(spec, tree, index, args).map_err(CliError::plain)
 }

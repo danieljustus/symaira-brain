@@ -1,4 +1,7 @@
 #![deny(unsafe_code)]
+// `CliError` is a rich failure value built only on cold error paths; boxing it
+// would add noise to every handler without changing behavior.
+#![allow(clippy::result_large_err)]
 
 mod app;
 mod browser_profiles;

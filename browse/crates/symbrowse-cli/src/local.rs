@@ -59,8 +59,8 @@ pub fn dispatch(ctx: &mut Ctx<'_>, key: &str, args: &[String]) -> Outcome {
                     cache_dir: flag("cache-dir"),
                     state_dir: flag("state-dir"),
                     executable_path: flag("executable-path"),
-                    engine: None,
-                    mode: None,
+                    engine: flag("engine"),
+                    mode: flag("mode"),
                 };
                 Outcome::Raw(legacy::run_config_show(format, overrides))
             }
@@ -96,7 +96,7 @@ fn daemon(ctx: &Ctx<'_>) -> Result<ExitCode, CliError> {
     let tri = |name: &str| ctx.flags.changed(name).then(|| ctx.flags.bool(name));
     Ok(legacy::run_daemon(
         ctx.flags.string("session", "default"),
-        String::new(),
+        ctx.flags.string("mode", ""),
         ctx.flags.string("engine", "chrome"),
         tri("ssrf"),
         tri("allow-private"),

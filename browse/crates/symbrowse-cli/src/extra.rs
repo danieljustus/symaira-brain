@@ -255,9 +255,7 @@ fn session_id(ctx: &mut Ctx<'_>) -> Handled {
                 true,
             ),
             Some((repo, worktree)) => {
-                let origin = if scope == "repo" {
-                    repo
-                } else if worktree.as_os_str().is_empty() {
+                let origin = if scope == "repo" || worktree.as_os_str().is_empty() {
                     repo
                 } else {
                     worktree
@@ -1076,7 +1074,7 @@ fn flow_run(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
         }
     }
     let dry = ctx.flags.bool("dry-run");
-    let session = ctx.flags.string("session", "default");
+    let _session = ctx.flags.string("session", "default");
     let socket_error = "socket path is required";
     let mut executor = |_: &str, _: Value| -> Result<Value, runner::ExecutionError> {
         Err(runner::ExecutionError::new(socket_error))
