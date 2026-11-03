@@ -86,7 +86,7 @@ impl Envelope {
     pub fn render(&self, format: Format) -> Result<String, RenderError> {
         match format {
             Format::Json => {
-                let mut output = serde_json::to_string(self).map_err(RenderError::Json)?;
+                let mut output = self.render_json()?;
                 output.push('\n');
                 Ok(output)
             }
@@ -94,6 +94,83 @@ impl Envelope {
             Format::Text => Ok(render_human(self)),
         }
     }
+}
+
+impl Envelope {
+    /// Compact JSON in Go's field order with Go's number/escape rules.
+    fn render_json(&self) -> Result<String, RenderError> {
+        let mut out = format!("{{\"success\":{}", self.success);
+        if !self.data.is_null() {
+            out.push_str(",\"data\":");
+            out.push_str(&crate::go_value::marshal_plain(&self.data));
+        }
+        if !self.warnings.is_empty() {
+            out.push_str(",\"warnings\":[");
+            for (index, warning) in self.warnings.iter().enumerate() {
+                if index > 0 {
+                    out.push(',');
+                }
+                let mut fields = vec![("kind", warning.kind.as_str())];
+                for (key, value) in [
+                    ("severity", warning.severity.as_str()),
+                    ("message", warning.message.as_str()),
+                    ("ref", warning.r#ref.as_str()),
+                    ("excerpt", warning.excerpt.as_str()),
+                ] {
+                    if key == "message" || !value.is_empty() {
+                        fields.push((key, value));
+                    }
+                }
+                out.push_str(&json_object(&fields));
+            }
+            out.push(']');
+        }
+        if let Some(error) = &self.error {
+            out.push_str(",\"error\":{\"code\":");
+            let code = serde_json::to_value(error.code).map_err(RenderError::Json)?;
+            out.push_str(&crate::go_value::marshal_plain(&code));
+            out.push_str(",\"message\":");
+            out.push_str(&crate::go_value::marshal_plain(&Value::String(error.message.clone())));
+            if !error.hint.is_empty() {
+                out.push_str(",\"hint\":");
+                out.push_str(&crate::go_value::marshal_plain(&Value::String(error.hint.clone())));
+            }
+            if let Some(details) = &error.details
+                && !details.as_object().is_some_and(serde_json::Map::is_empty)
+            {
+                out.push_str(",\"details\":");
+                out.push_str(&crate::go_value::marshal_plain(details));
+            }
+            if let Some(retryable) = error.retryable {
+                out.push_str(&format!(",\"retryable\":{retryable}"));
+            }
+            if let Some(confirm) = error.requires_user_confirmation {
+                out.push_str(&format!(",\"requires_user_confirmation\":{confirm}"));
+            }
+            if !error.resume_hint.is_empty() {
+                out.push_str(",\"resume_hint\":");
+                out.push_str(&crate::go_value::marshal_plain(&Value::String(
+                    error.resume_hint.clone(),
+                )));
+            }
+            out.push('}');
+        }
+        out.push('}');
+        Ok(out)
+    }
+}
+
+fn json_object(fields: &[(&str, &str)]) -> String {
+    let parts: Vec<String> = fields
+        .iter()
+        .map(|(key, value)| {
+            format!(
+                "\"{key}\":{}",
+                crate::go_value::marshal_plain(&Value::String((*value).to_owned()))
+            )
+        })
+        .collect();
+    format!("{{{}}}", parts.join(","))
 }
 
 #[derive(Debug)]
@@ -207,6 +284,28 @@ pub(crate) fn write_yaml_field(output: &mut String, key: &str, value: &Value, in
         }
         Value::Object(_) => output.push_str(" {}\n"),
         Value::Array(_) => output.push_str(" []\n"),
+        Value::String(text) if text.contains('\n') => {
+            match crate::yaml_str::encode(text, false) {
+                crate::yaml_str::Encoded::Literal { header, lines } => {
+                    output.push(' ');
+                    output.push_str(&header);
+                    output.push('\n');
+                    let pad = " ".repeat(indent + 4);
+                    for line in lines {
+                        if !line.is_empty() {
+                            output.push_str(&pad);
+                            output.push_str(&line);
+                        }
+                        output.push('\n');
+                    }
+                }
+                crate::yaml_str::Encoded::Inline(text) => {
+                    output.push(' ');
+                    output.push_str(&text);
+                    output.push('\n');
+                }
+            }
+        }
         _ => {
             output.push(' ');
             output.push_str(&yaml_scalar(value));
@@ -263,17 +362,23 @@ fn write_yaml_children(output: &mut String, value: &Value, indent: usize) {
 }
 
 fn yaml_key(value: &str) -> String {
-    if needs_yaml_quotes(value) {
-        serde_json::to_string(value).expect("string serialization cannot fail")
-    } else {
-        value.to_owned()
-    }
+    crate::yaml_str::inline(value, true)
 }
 
 pub(crate) fn yaml_scalar(value: &Value) -> String {
     match value {
         Value::Null => "null".to_owned(),
         Value::Bool(value) => value.to_string(),
+        Value::Number(value) if value.is_f64() => {
+            let float = value.as_f64().unwrap_or_default();
+            if float.is_infinite() {
+                if float > 0.0 { ".inf" } else { "-.inf" }.to_owned()
+            } else if float.is_nan() {
+                ".nan".to_owned()
+            } else {
+                crate::go_value::float_v(float)
+            }
+        }
         Value::Number(value) => value.to_string(),
         Value::String(value) => yaml_string(value),
         Value::Array(_) | Value::Object(_) => "null".to_owned(),
@@ -281,29 +386,7 @@ pub(crate) fn yaml_scalar(value: &Value) -> String {
 }
 
 fn yaml_string(value: &str) -> String {
-    if value.starts_with('@') || value.starts_with('`') {
-        return format!("'{}'", value.replace('\'', "''"));
-    }
-    if needs_yaml_quotes(value) {
-        if (value.contains('"') || value.contains(": ")) && !value.contains(['\n', '\r', '\t']) {
-            return format!("'{}'", value.replace('\'', "''"));
-        }
-        return serde_json::to_string(value).expect("string serialization cannot fail");
-    }
-    value.to_owned()
-}
-
-fn needs_yaml_quotes(value: &str) -> bool {
-    if time::OffsetDateTime::parse(value, &time::format_description::well_known::Rfc3339).is_ok() {
-        return true;
-    }
-    if value.is_empty() || value.contains(['\n', '\r', '\t']) || value.contains(": ") {
-        return true;
-    }
-    matches!(
-        value.to_ascii_lowercase().as_str(),
-        "y" | "yes" | "n" | "no" | "true" | "false" | "on" | "off" | "null" | "~"
-    )
+    crate::yaml_str::inline(value, false)
 }
 
 fn render_human(envelope: &Envelope) -> String {
@@ -325,18 +408,15 @@ fn render_human(envelope: &Envelope) -> String {
             marker.head, marker.tokens_returned, marker.tokens_total, marker.foot, marker.hint
         );
     }
-    let mut output = serde_json::to_string_pretty(&envelope.data)
-        .expect("serde_json::Value serialization cannot fail");
-    output.push('\n');
-    output
+    crate::human::render_value(&envelope.data)
 }
 
 struct TruncationMarker<'a> {
     head: &'a str,
     foot: &'a str,
     hint: &'a str,
-    tokens_returned: u64,
-    tokens_total: u64,
+    tokens_returned: i64,
+    tokens_total: i64,
 }
 
 fn truncation_marker(value: &Value) -> Option<TruncationMarker<'_>> {
@@ -359,11 +439,11 @@ fn truncation_marker(value: &Value) -> Option<TruncationMarker<'_>> {
             .unwrap_or_default(),
         tokens_returned: fields
             .get("tokens_returned")
-            .and_then(Value::as_u64)
-            .unwrap_or_default(),
+            .and_then(Value::as_f64)
+            .map_or(0, |v| v as i64),
         tokens_total: fields
             .get("tokens_total")
-            .and_then(Value::as_u64)
-            .unwrap_or_default(),
+            .and_then(Value::as_f64)
+            .map_or(0, |v| v as i64),
     })
 }

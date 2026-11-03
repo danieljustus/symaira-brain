@@ -68,24 +68,17 @@ pub(super) fn complete_no_descriptions(args: &[String]) -> String {
 }
 
 fn help_for_context(context: &[String]) -> Option<String> {
-    if context.is_empty() {
-        return Some(super::root_help());
-    }
-    let command = match context[0].as_str() {
-        "workflow" => "flow",
-        other => other,
-    };
-    if !super::implemented_help_command(command) {
-        return None;
-    }
-    let suffix: Vec<_> = context[1..]
+    let tree = crate::app::tree();
+    let words: Vec<String> = context
         .iter()
         .take_while(|value| !value.starts_with('-'))
-        .map(String::as_str)
+        .cloned()
         .collect();
-    super::help_catalog::help(command, &suffix)
-        .map(str::to_owned)
-        .or_else(|| super::command_help(command, &suffix))
+    let found = crate::cobra::find(tree, &words);
+    if found.legacy_error.is_some() || !found.args.is_empty() && !context.is_empty() && found.index == 0 {
+        return None;
+    }
+    Some(tree.nodes[found.index].help.clone())
 }
 
 fn command_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
