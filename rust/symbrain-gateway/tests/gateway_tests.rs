@@ -103,37 +103,62 @@ impl Drop for TestTempDir {
     }
 }
 
-fn build_go_fake_mcp(directory: &Path) -> PathBuf {
-    let repository = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .expect("resolve repository root");
-    let mut executable = directory.join("fakemcp");
-    if cfg!(windows) {
-        executable.set_extension("exe");
+/// Locate the broker crate's test-only MCP child (`symbrain-fakemcp`, feature
+/// `test-fakemcp`). It implements the same `FAKEMCP_*` contract as the Go
+/// `internal/broker/testdata/fakemcp` child the oracle recorded the
+/// cancellation transcript with, so the replay needs no Go toolchain. When the
+/// workspace run did not leave the binary next to the test executable (a
+/// `-p symbrain-gateway` run), produce it once into the same target directory.
+fn rust_fake_mcp() -> PathBuf {
+    let name = format!("symbrain-fakemcp{}", std::env::consts::EXE_SUFFIX);
+    let executable = std::env::current_exe().expect("test executable path");
+    let profile_dir = executable
+        .parent()
+        .and_then(Path::parent)
+        .expect("cargo profile directory")
+        .to_path_buf();
+    let candidate = profile_dir.join(&name);
+    if candidate.is_file() {
+        return candidate;
     }
-    let output = Command::new("go")
+    let target_dir = profile_dir.parent().expect("cargo target directory");
+    let mut command = Command::new(option_env!("CARGO").unwrap_or("cargo"));
+    command
         .args([
             "build",
-            "-trimpath",
-            "-o",
-            executable.to_str().expect("fixture path is UTF-8"),
-            "./internal/broker/testdata/fakemcp",
+            "--locked",
+            "-p",
+            "symbrain-broker",
+            "--features",
+            "test-fakemcp",
+            "--bin",
+            "symbrain-fakemcp",
+            "--target-dir",
         ])
-        .current_dir(repository)
-        .env("CGO_ENABLED", "0")
-        .output()
-        .expect("run Go compiler for the same fake child used by the oracle");
+        .arg(target_dir)
+        .current_dir(env!("CARGO_MANIFEST_DIR"));
+    if profile_dir
+        .file_name()
+        .is_some_and(|profile| profile == "release")
+    {
+        command.arg("--release");
+    }
+    let output = command.output().expect("run cargo for the fake MCP child");
     assert!(
         output.status.success(),
-        "build Go fake MCP child failed: {}",
+        "produce Rust fake MCP child failed: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    executable
+    assert!(
+        candidate.is_file(),
+        "fake MCP child missing at {}",
+        candidate.display()
+    );
+    candidate
 }
 
 fn cancellation_child_env(marker: &Path) -> Vec<(String, String)> {
-    #[allow(unused_mut)] // Windows adds process environment needed by the Go child.
+    #[allow(unused_mut)] // Windows adds process environment needed by the child.
     let mut env = vec![
         (
             "FAKEMCP_TOOLS".to_string(),
@@ -333,7 +358,7 @@ fn in_flight_tools_call_cancellation_matches_go_oracle() {
     assert!(fixture.cancellation.connection_cancelled);
 
     let temp = TestTempDir::new();
-    let fake_mcp = build_go_fake_mcp(temp.path());
+    let fake_mcp = rust_fake_mcp();
     let marker = temp.path().join("child-call-started");
     let managed = Arc::new(ManagedServer::new(Config {
         name: "vault".to_string(),
@@ -381,7 +406,7 @@ fn in_flight_tools_call_cancellation_matches_go_oracle() {
         let _ = finish_tx.send(());
         let _ = worker.join();
         managed.shutdown();
-        panic!("gateway never dispatched the in-flight call to the Go fake child");
+        panic!("gateway never dispatched the in-flight call to the fake MCP child");
     }
     cancelled.store(true, Ordering::Release);
     finish_tx
