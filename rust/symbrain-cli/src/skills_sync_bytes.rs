@@ -2,7 +2,7 @@
 
 use std::ffi::{OsStr, OsString};
 
-pub(super) fn normalize(args: &[OsString]) -> Vec<Vec<u8>> {
+pub(crate) fn normalize(args: &[OsString]) -> Vec<Vec<u8>> {
     let mut terminated = false;
     args.iter()
         .map(|arg| {
@@ -55,7 +55,7 @@ fn wide_bytes(wide: impl Iterator<Item = u16>) -> Vec<u8> {
     bytes
 }
 
-pub(super) fn trim_target(mut bytes: &[u8]) -> &[u8] {
+pub(crate) fn trim_target(mut bytes: &[u8]) -> &[u8] {
     // Decode boundary runes only. Go TrimSpace stops at invalid UTF-8,
     // including WTF-8 surrogate bytes, without replacing interior bytes.
     let whitespace = |bytes: &[u8]| {

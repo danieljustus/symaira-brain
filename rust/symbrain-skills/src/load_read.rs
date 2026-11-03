@@ -47,6 +47,18 @@ impl ReadBudget {
         }
     }
 
+    /// Charges `len` bytes against the budget.
+    pub(crate) fn charge(&mut self, len: u64) -> Result<(), SkillError> {
+        if len > self.remaining {
+            return Err(SkillError(format!(
+                "{} exceeds maximum total size of {} bytes",
+                self.label, self.limit
+            )));
+        }
+        self.remaining -= len;
+        Ok(())
+    }
+
     fn error(&self) -> InputReadError {
         InputReadError::Budget(SkillError(format!(
             "{} exceeds maximum total size of {} bytes",

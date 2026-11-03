@@ -1,0 +1,297 @@
+{
+ "doctor/global_config_syntax_error": {
+  "code": 0,
+  "err": "",
+  "out": "config      $ROOT/config/symskills/config.toml\nlibrary     $ROOT/data/symbrain/skills/library\nrendered    $ROOT/data/symbrain/skills/rendered\ncache       $ROOT/cache/symbrain/skills\nbase        $ROOT/data/symbrain/skills/base\nprofiles    $ROOT/config/symskills/profiles\nlog         $ROOT/home/.local/share/symskills/events.jsonl\nproject     $ROOT/project\nversioning  true\n"
+ },
+ "doctor/shape/flag error": {
+  "code": 2,
+  "err": "flag provided but not defined: -bogus\nUsage of skills doctor:\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "doctor/shape/line separator in override": {
+  "code": 0,
+  "err": "",
+  "out": "config      $ROOT/config/symskills/config.toml\nlibrary     /a b\nrendered    $ROOT/data/symbrain/skills/rendered\ncache       $ROOT/cache/symbrain/skills\nbase        $ROOT/data/symbrain/skills/base\nprofiles    $ROOT/config/symskills/profiles\nlog         $ROOT/home/.local/share/symskills/events.jsonl\nproject     $ROOT/project\nversioning  true\n"
+ },
+ "doctor/shape/positional argument": {
+  "code": 0,
+  "err": "",
+  "out": "config      $ROOT/config/symskills/config.toml\nlibrary     $ROOT/data/symbrain/skills/library\nrendered    $ROOT/data/symbrain/skills/rendered\ncache       $ROOT/cache/symbrain/skills\nbase        $ROOT/data/symbrain/skills/base\nprofiles    $ROOT/config/symskills/profiles\nlog         $ROOT/home/.local/share/symskills/events.jsonl\nproject     $ROOT/project\nversioning  true\n"
+ },
+ "doctor/shape/project config the decoder hands to Go": {
+  "code": 0,
+  "err": "",
+  "out": "config      $ROOT/config/symskills/config.toml\nlibrary     $ROOT/data/symbrain/skills/library\nrendered    $ROOT/data/symbrain/skills/rendered\ncache       $ROOT/cache/symbrain/skills\nbase        $ROOT/data/symbrain/skills/base\nprofiles    $ROOT/config/symskills/profiles\nlog         $ROOT/home/.local/share/symskills/events.jsonl\nproject     $ROOT/project\nversioning  true\n"
+ },
+ "doctor/shape/unclean xdg base": {
+  "code": 0,
+  "err": "",
+  "out": "config      $ROOT/config/symskills/config.toml\nlibrary     /data/symbrain/skills/library\nrendered    /data/symbrain/skills/rendered\ncache       $ROOT/cache/symbrain/skills\nbase        /data/symbrain/skills/base\nprofiles    $ROOT/config/symskills/profiles\nlog         $ROOT/home/.local/share/symskills/events.jsonl\nproject     $ROOT/project\nversioning  true\n"
+ },
+ "list/bogus_flag": {
+  "code": 2,
+  "err": "flag provided but not defined: -bogus\nUsage of skills list:\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "list/config_relative_library": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[],\"category_counts\":{},\"issues\":[]}\n"
+ },
+ "list/config_syntax_error": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"demo\",\"description\":\"demo skill\",\"path\":\"$ROOT/data/symbrain/skills/library/demo\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[]}\n"
+ },
+ "list/env/SYMBRAIN_SKILLS_BASE_DIR=/different/base": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"demo\",\"description\":\"demo skill\",\"path\":\"$ROOT/data/symbrain/skills/library/demo\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[]}\n"
+ },
+ "list/env/SYMBRAIN_SKILLS_LIBRARY_DIR=/different/library": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"demo\",\"description\":\"demo skill\",\"path\":\"$ROOT/data/symbrain/skills/library/demo\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[]}\n"
+ },
+ "list/env/SYMSKILLS_LIBRARY_DIR=": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[],\"category_counts\":{},\"issues\":[]}\n"
+ },
+ "list/env/SYMSKILLS_LIBRARY_DIR=relative/library": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[],\"category_counts\":{},\"issues\":[]}\n"
+ },
+ "list/unloadable_entry/broken": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"good skill\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"SKILL.md must start with YAML frontmatter\",\"path\":\"broken\"}]}\n"
+ },
+ "list/unloadable_entry/empty-dir": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"good skill\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: no such file or directory\",\"path\":\"empty-dir\"}]}\n"
+ },
+ "list/unloadable_entry/escapes skill root": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"good skill\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: no such file or directory\",\"path\":\"escapes skill root\"}]}\n"
+ },
+ "list/unloadable_entry/exceeds maximum": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"good skill\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: no such file or directory\",\"path\":\"exceeds maximum\"}]}\n"
+ },
+ "list/unloadable_entry/must be a regular file": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"good skill\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: no such file or directory\",\"path\":\"must be a regular file\"}]}\n"
+ },
+ "log/bogus_flag": {
+  "code": 2,
+  "err": "flag provided but not defined: -bogus\nUsage of skills log:\n  -l int\n    \tmaximum records to return, newest first\n  -limit int\n    \tmaximum records to return, newest first\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -skill string\n    \tlimit to one skill name\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "log_exact/args/skills log -- --limit 1": {
+  "code": 0,
+  "err": "",
+  "out": "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n<TS>\tinstall\ta\tclaude\tok\n"
+ },
+ "log_exact/args/skills log --bogus": {
+  "code": 2,
+  "err": "flag provided but not defined: -bogus\nUsage of skills log:\n  -l int\n    \tmaximum records to return, newest first\n  -limit int\n    \tmaximum records to return, newest first\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -skill string\n    \tlimit to one skill name\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "log_exact/args/skills log --limit 010": {
+  "code": 0,
+  "err": "",
+  "out": "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n<TS>\tinstall\ta\tclaude\tok\n"
+ },
+ "log_exact/args/skills log --limit many": {
+  "code": 2,
+  "err": "invalid value \"many\" for flag -limit: parse error\nUsage of skills log:\n  -l int\n    \tmaximum records to return, newest first\n  -limit int\n    \tmaximum records to return, newest first\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -skill string\n    \tlimit to one skill name\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "log_exact/args/skills log --limit=0x2": {
+  "code": 0,
+  "err": "",
+  "out": "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n<TS>\tinstall\ta\tclaude\tok\n"
+ },
+ "log_exact/args/skills log --skill": {
+  "code": 2,
+  "err": "flag needs an argument: -skill\nUsage of skills log:\n  -l int\n    \tmaximum records to return, newest first\n  -limit int\n    \tmaximum records to return, newest first\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -skill string\n    \tlimit to one skill name\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "log_exact/args/skills log -h": {
+  "code": 2,
+  "err": "Usage of skills log:\n  -l int\n    \tmaximum records to return, newest first\n  -limit int\n    \tmaximum records to return, newest first\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -skill string\n    \tlimit to one skill name\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "log_exact/args/skills log extra": {
+  "code": 0,
+  "err": "",
+  "out": "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n<TS>\tinstall\ta\tclaude\tok\n"
+ },
+ "log_exact/dot_dot_home": {
+  "code": 0,
+  "err": "",
+  "out": "No recorded skill operations.\n"
+ },
+ "log_exact/doubled_slash_home": {
+  "code": 1,
+  "err": "symbrain skills log: read operation log: read $ROOT/home/.local/share/symskills/events.jsonl: is a directory\n",
+  "out": ""
+ },
+ "log_exact/line/duplicate key": {
+  "code": 0,
+  "err": "",
+  "out": "[{\"ts\":\"b\",\"event\":\"\",\"outcome\":\"ok\",\"actor\":\"\"}]\n"
+ },
+ "log_exact/line/lone surrogate": {
+  "code": 0,
+  "err": "",
+  "out": "[{\"ts\":\"a\",\"event\":\"�\",\"outcome\":\"\",\"actor\":\"\"}]\n"
+ },
+ "log_exact/line/null value": {
+  "code": 0,
+  "err": "",
+  "out": "[{\"ts\":\"a\",\"event\":\"\",\"outcome\":\"\",\"actor\":\"\"}]\n"
+ },
+ "log_exact/line/number value": {
+  "code": 0,
+  "err": "",
+  "out": "[]\n"
+ },
+ "log_exact/line/top-level null": {
+  "code": 0,
+  "err": "",
+  "out": "[{\"ts\":\"\",\"event\":\"\",\"outcome\":\"\",\"actor\":\"\"}]\n"
+ },
+ "log_exact/line/upper-case key": {
+  "code": 0,
+  "err": "",
+  "out": "[{\"ts\":\"x\",\"event\":\"e\",\"outcome\":\"ok\",\"actor\":\"\"}]\n"
+ },
+ "status_opencode/cache_dir": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/configured/moved cache": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/configured/relative library": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/configured/syntax error": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/default_dynamic_state": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/env_shape/empty base": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/env_shape/library is a file": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/env_shape/native-only variable": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/env_shape/no target": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/env_shape/other target": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/env_shape/relative library": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/env_shape/unknown scope": {
+  "code": 2,
+  "err": "symbrain skills status: unknown scope \"bogus\" (known: user, project)\n",
+  "out": ""
+ },
+ "status_opencode/legacy_config_wins": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/linked_library": {
+  "code": 0,
+  "err": "",
+  "out": "No installed skills found.\n"
+ },
+ "status_opencode/marker/broken": {
+  "code": 0,
+  "err": "",
+  "out": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\nopencode\tbroken\tstale\t-\t$ROOT/home/.config/opencode/skills/broken\n"
+ },
+ "status_opencode/marker/emptymarker": {
+  "code": 0,
+  "err": "",
+  "out": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\nopencode\temptymarker\tstale\t-\t$ROOT/home/.config/opencode/skills/emptymarker\n"
+ },
+ "status_opencode/marker/schema": {
+  "code": 0,
+  "err": "",
+  "out": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\nopencode\tschema\torphaned\tcopy\t$ROOT/home/.config/opencode/skills/schema\n"
+ },
+ "status_opencode/marker/wrongtype": {
+  "code": 0,
+  "err": "",
+  "out": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\nopencode\twrongtype\tstale\tcopy\t$ROOT/home/.config/opencode/skills/wrongtype\n"
+ },
+ "status_opencode/project_symlink_chain": {
+  "code": 0,
+  "err": "",
+  "out": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\nopencode\tchain\tunmanaged\t-\t$ROOT/project/.opencode/skills/chain\n"
+ },
+ "status_opencode/user_symlink_chain": {
+  "code": 0,
+  "err": "",
+  "out": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\nopencode\tchain\tunmanaged\t-\t$ROOT/home/.config/opencode/skills/chain\n"
+ },
+ "status_opencode/windows_path/multi-line": {
+  "code": 0,
+  "err": "",
+  "out": "{\"skills\":[],\"category_counts\":{},\"issues\":[]}\n"
+ },
+ "targets/missing_home": {
+  "code": 0,
+  "err": "",
+  "out": "TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT\nclaude\tfalse\t0\t0\t.claude/skills\nopencode\tfalse\t0\t0\t.config/opencode/skills\ncodex\tfalse\t0\t0\t.agents/skills\nantigravity\tfalse\t0\t0\t.gemini/config/skills\nhermes\tfalse\t0\t0\t.hermes/skills/symaira\nopenclaw\tfalse\t0\t0\t.openclaw/skills\n"
+ },
+ "targets/skills targets --bogus": {
+  "code": 2,
+  "err": "flag provided but not defined: -bogus\nUsage of skills targets:\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n",
+  "out": ""
+ },
+ "targets/skills targets --scope team": {
+  "code": 2,
+  "err": "symbrain skills targets: unknown scope \"team\" (known: user, project)\n",
+  "out": ""
+ }
+}

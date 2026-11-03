@@ -7,12 +7,16 @@
 mod coverage;
 
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
-use std::path::PathBuf;
 use std::process::{Command, Output};
 
 use serde_json::json;
 use tempfile::TempDir;
+
+mod skills_native_record;
+
+fn expect(root: &TempDir, label: &str, command: &mut Command) -> Output {
+    skills_native_record::expect(label, command, root.path())
+}
 
 fn command(root: &TempDir, args: &[&str]) -> Command {
     let home = root.path().join("home");
@@ -40,23 +44,6 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
         .current_dir(project)
         .args(args);
     command
-}
-
-fn fallback(root: &TempDir) -> PathBuf {
-    let path = root.path().join("go-fallback");
-    fs::write(
-        &path,
-        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 23\n",
-    )
-    .unwrap();
-    fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
-    path
-}
-
-fn assert_fake_fallback(output: &Output) {
-    assert_eq!(output.status.code(), Some(23));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
 }
 
 #[test]
@@ -175,7 +162,7 @@ fn failing_config_probe_resets_environment_to_defaults() {
 }
 
 #[test]
-fn undecoded_shapes_fall_back_before_stdout() {
+fn undecoded_shapes_are_native() {
     for (name, args, env) in [
         (
             "flag error",
@@ -209,26 +196,22 @@ fn undecoded_shapes_fall_back_before_stdout() {
             fs::write(root.path().join("project/.symskills.toml"), b"[unclosed\n").unwrap();
         }
         let mut command = command(&root, args);
-        command.env("SYMBRAIN_GO_BINARY", fallback(&root));
         if let Some((name, value)) = env {
             command.env(name, value);
         }
-        assert_fake_fallback(&command.output().unwrap());
+        expect(&root, &format!("doctor/shape/{name}"), &mut command);
     }
 }
 
 #[test]
-fn global_config_the_decoder_hands_to_go_falls_back_before_stdout() {
+fn global_config_the_decoder_hands_to_go_are_native() {
     let root = TempDir::new().unwrap();
     let config = root.path().join("config/symskills");
     fs::create_dir_all(&config).unwrap();
     fs::write(config.join("config.toml"), b"library_dir = \n").unwrap();
 
-    let output = command(&root, &["skills", "doctor"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
-        .output()
-        .unwrap();
-    assert_fake_fallback(&output);
+    let mut doctor = command(&root, &["skills", "doctor"]);
+    expect(&root, "doctor/global_config_syntax_error", &mut doctor);
 }
 
 #[test]

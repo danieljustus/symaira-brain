@@ -185,7 +185,7 @@ fn fifo_control_resources_and_library_never_block() {
             .expect("special inputs must fail without waiting for a FIFO writer");
         assert!(error.contains("must be a regular file"), "{error}");
         if name == "SKILL.md" {
-            assert_eq!(issues[0].code, "skill_input_rejected");
+            assert_eq!(issues[0].code, "skill_load");
         }
     }
 }
@@ -208,7 +208,7 @@ fn library_rejections_and_normal_order_are_stable() {
     )
     .unwrap();
     let (_, issues) = symbrain_skills::library::list_library(temp.path());
-    assert_eq!(issues[0].code, "skill_input_rejected");
+    assert_eq!(issues[0].code, "skill_load");
 }
 
 #[test]

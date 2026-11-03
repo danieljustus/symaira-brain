@@ -158,7 +158,7 @@ fn run_native(
             rest, stdout, stderr, format, true,
         )),
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
-        "skills" => skills_cli::run(rest, stdout, stderr, format),
+        "skills" => Some(skills_cli::run(rest, stdout, stderr, format)),
         "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),
         "vault" => Some(vault_admin::run(args, stdout, stderr)),
         "guard" => guard_cli::run(rest, stdout, stderr),

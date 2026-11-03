@@ -286,28 +286,23 @@ fn go_exact_reader_skips_what_go_skips() {
 }
 
 #[test]
-fn go_exact_reader_hands_ambiguous_lines_to_go() {
-    for line in [
-        &b"{\"TS\":\"a\"}"[..],
+fn go_exact_reader_decodes_what_encoding_json_decodes() {
+    let records = exact(&[
+        b"{\"TS\":\"a\"}",
         b"{\"ts\":\"a\",\"ts\":\"b\"}",
         b"{\"ts\":null}",
-        b"{\"ts\":5}",
         b"null",
         b"{\"ts\":\"\\ud800\"}",
         b"{\"ts\":\"\xff\"}",
         "{\"\u{17f}kill\":\"a\"}".as_bytes(),
-    ] {
-        assert!(
-            matches!(exact(&[line]), Err(EventReadFailure::Divergent)),
-            "{}",
-            String::from_utf8_lossy(line)
-        );
-    }
+        b"{\"ts\":5}",
+    ])
+    .expect("every line is decidable");
+    let ts: Vec<_> = records.iter().map(|event| event.ts.as_str()).collect();
+    assert_eq!(ts, ["a", "b", "", "", "\u{fffd}", "\u{fffd}", ""]);
+    assert_eq!(records[6].skill, "a");
     let deep = format!("{{\"x\":{}{}}}", "[".repeat(300), "]".repeat(300));
-    assert!(matches!(
-        exact(&[deep.as_bytes()]),
-        Err(EventReadFailure::Divergent)
-    ));
+    assert_eq!(exact(&[deep.as_bytes()]).expect("deep line").len(), 1);
 }
 
 #[test]
@@ -317,7 +312,7 @@ fn go_exact_reader_reports_the_failing_operation() {
     fs::create_dir(&path).expect("directory as log");
     match read_events_go_exact(&path, None, None) {
         #[cfg(unix)]
-        Err(EventReadFailure::Io {
+        Err(EventReadFailure {
             op, path: failed, ..
         }) => {
             assert_eq!(op, "read");

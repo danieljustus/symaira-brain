@@ -7,6 +7,12 @@ use std::process::{Command, Output};
 
 use tempfile::TempDir;
 
+mod skills_native_record;
+
+fn expect(root: &TempDir, label: &str, command: &mut Command) -> Output {
+    skills_native_record::expect(label, command, root.path())
+}
+
 fn command(root: &TempDir, args: &[&str]) -> Command {
     let home = root.path().join("home");
     let config = root.path().join("config");
@@ -196,7 +202,7 @@ fn access_time_inside_the_install_gap_is_not_usage() {
 }
 
 #[test]
-fn unloadable_library_entry_keeps_go_fallback() {
+fn unloadable_library_entry_is_native() {
     // Go reports these with cap-std error text that the native path does not
     // reproduce, so the whole report stays on Go.
     for (name, body) in [
@@ -213,24 +219,16 @@ fn unloadable_library_entry_keeps_go_fallback() {
         if !body.is_empty() {
             std::fs::write(directory.join("SKILL.md"), body).unwrap();
         }
-        let output = run(&root, &["skills", "list", "--json"]);
-        assert_eq!(output.status.code(), Some(1), "{name}");
-        assert!(output.stdout.is_empty(), "{name}");
-        assert!(
-            String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-            "{name}: {:?}",
-            output.stderr
-        );
+        let mut list = command(&root, &["skills", "list", "--json"]);
+        expect(&root, &format!("list/unloadable_entry/{name}"), &mut list);
     }
 }
 
 #[test]
-fn empty_library_with_extra_flag_keeps_go_fallback() {
+fn empty_library_with_extra_flag_is_native() {
     let root = TempDir::new().unwrap();
-    let output = run(&root, &["skills", "list", "--bogus"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let mut list = command(&root, &["skills", "list", "--bogus"]);
+    expect(&root, "list/bogus_flag", &mut list);
 }
 
 #[test]
@@ -243,7 +241,7 @@ fn sync_dry_run_json_matches_go_bytes() {
 }
 
 #[test]
-fn classified_input_rejection_never_uses_go_even_with_an_override() {
+fn oversize_skill_md_is_reported_natively_as_skill_load_even_with_an_override() {
     for override_dir in [false, true] {
         let root = TempDir::new().unwrap();
         let skill = write_library_skill(&root, "large", "");
@@ -258,7 +256,7 @@ fn classified_input_rejection_never_uses_go_even_with_an_override() {
         let output = process.output().unwrap();
         assert!(output.status.success(), "{:?}", output.stderr);
         let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-        assert_eq!(value["issues"][0]["code"], "skill_input_rejected");
+        assert_eq!(value["issues"][0]["code"], "skill_load");
         assert!(output.stderr.is_empty());
     }
 }
@@ -431,7 +429,7 @@ fn config_file_library_is_listed_natively_with_go_precedence() {
 }
 
 #[test]
-fn config_file_native_only_env_and_bad_overrides_keep_go_fallback() {
+fn config_file_native_only_env_and_bad_overrides_are_native() {
     let root = TempDir::new().unwrap();
     write_library_skill(&root, "demo", "");
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
@@ -441,18 +439,15 @@ fn config_file_native_only_env_and_bad_overrides_keep_go_fallback() {
         "library_dir = \n",
     )
     .unwrap();
-    let output = run(&root, &["skills", "list", "--json"]);
-    assert_eq!(output.status.code(), Some(1), "config file");
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let mut list = command(&root, &["skills", "list", "--json"]);
+    expect(&root, "list/config_syntax_error", &mut list);
     std::fs::write(
         root.path().join("config/symskills/config.toml"),
         "library_dir = \"relative/library\"\n",
     )
     .unwrap();
-    let output = run(&root, &["skills", "list", "--json"]);
-    assert_eq!(output.status.code(), Some(1), "relative library in a file");
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let mut list = command(&root, &["skills", "list", "--json"]);
+    expect(&root, "list/config_relative_library", &mut list);
 
     let clean = TempDir::new().unwrap();
     write_library_skill(&clean, "demo", "");
@@ -462,16 +457,8 @@ fn config_file_native_only_env_and_bad_overrides_keep_go_fallback() {
         ("SYMSKILLS_LIBRARY_DIR", "relative/library"),
         ("SYMSKILLS_LIBRARY_DIR", ""),
     ] {
-        let output = command(&clean, &["skills", "list", "--json"])
-            .env(name, value)
-            .output()
-            .unwrap();
-        assert_eq!(output.status.code(), Some(1), "{name}={value}");
-        assert!(output.stdout.is_empty(), "{name}={value}");
-        assert!(
-            String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-            "{name}={value}: {:?}",
-            output.stderr
-        );
+        let mut list = command(&clean, &["skills", "list", "--json"]);
+        list.env(name, value);
+        expect(&clean, &format!("list/env/{name}={value}"), &mut list);
     }
 }

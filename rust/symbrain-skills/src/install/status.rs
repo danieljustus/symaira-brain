@@ -16,11 +16,10 @@ use serde::Serialize;
 use super::base::base_path_for_scope;
 use super::destination::entry_metadata;
 use super::lock;
-use super::marker::{MarkerState, read_marker_at};
 use super::replace::open_trusted_dir;
 use super::status_compare::{
-    compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link,
-    resolves_to_directory, unmanaged,
+    compare_one, is_regular_skill_source, read_entries, resolve_link, resolves_to_directory,
+    unmanaged,
 };
 use crate::BundleLoader;
 use crate::model::SkillError;
@@ -142,6 +141,20 @@ pub(super) fn status_with_loader(
     Ok(rows)
 }
 
+/// Go's `os.ReadDir` failure for a skill root the confined opener refused:
+/// `scan skill root <root>: open <root>: <errno text>`.
+fn scan_root_error(root: &std::path::Path, error: SkillError) -> SkillError {
+    match std::fs::read_dir(root) {
+        Err(source) => SkillError(format!(
+            "scan skill root {}: open {}: {}",
+            root.display(),
+            root.display(),
+            crate::gotext::io_text(&source)
+        )),
+        Ok(_) => error,
+    }
+}
+
 fn status_target(
     options: &StatusOptions,
     target: &str,
@@ -170,7 +183,10 @@ fn status_target(
     // An absent install root is a no-op and status must not create it merely
     // to acquire a read lock. If it exists, lock both shared directory roots
     // before reading entries or their per-skill base manifests.
-    if entry_metadata(&root)?.is_none() {
+    if entry_metadata(&root)
+        .map_err(|error| scan_root_error(&root, error))?
+        .is_none()
+    {
         return Ok(Vec::new());
     }
     let base_root = base_path_for_scope(
@@ -201,14 +217,32 @@ fn status_target(
         lock_roots.push(legacy_root);
     }
     let _locks = lock::acquire_existing_shared(&lock_roots)?;
-    let Some(metadata) = entry_metadata(&root)? else {
+    let Some(metadata) = entry_metadata(&root).map_err(|error| scan_root_error(&root, error))?
+    else {
         return Ok(Vec::new());
     };
-    if metadata.file_type().is_symlink() {
-        return Err(SkillError("OpenCode skill root is a symlink".to_owned()));
-    }
-    let root_cap = open_trusted_dir(&root)?;
-    let mut entries = read_entries(&root_cap)?;
+    // Go's `os.ReadDir` follows a symlinked skill root; entry paths keep the
+    // unresolved root prefix. A dangling link reads as a missing root.
+    let open_root = if metadata.file_type().is_symlink() {
+        match std::fs::canonicalize(&root) {
+            Ok(resolved) => resolved,
+            Err(source) if source.kind() == std::io::ErrorKind::NotFound => {
+                return Ok(Vec::new());
+            }
+            Err(source) => {
+                return Err(SkillError(format!(
+                    "scan skill root {}: open {}: {}",
+                    root.display(),
+                    root.display(),
+                    crate::gotext::io_text(&source)
+                )));
+            }
+        }
+    } else {
+        root.clone()
+    };
+    let root_cap = open_trusted_dir(&open_root).map_err(|error| scan_root_error(&root, error))?;
+    let mut entries = read_entries(&root_cap).map_err(|error| scan_root_error(&root, error))?;
     entries.sort_by_key(|entry| entry.file_name());
     let filter = options
         .skills
@@ -226,7 +260,7 @@ fn status_target(
             .file_type()
             .map_err(|error| SkillError(format!("stat installed skill {name}: {error}")))?;
         let installed_tree = if file_type.is_symlink() {
-            match resolve_link(&path) {
+            match resolve_link(&open_root.join(&name_os)) {
                 Some(resolved) if resolves_to_directory(&resolved)? => resolved,
                 // Go reads the marker through the link; a link whose target is
                 // missing or not a directory simply carries no marker and stays
@@ -242,18 +276,39 @@ fn status_target(
             }
             path.clone()
         };
-        let marker = if file_type.is_symlink() {
-            super::marker::read_marker(&installed_tree)?
+        let observation = if file_type.is_symlink() {
+            super::marker_go::read_at_path(&installed_tree)?
         } else {
             let skill_cap = root_cap
                 .open_dir_nofollow(&name_os)
                 .map_err(|error| SkillError(format!("open installed skill {name}: {error}")))?;
-            read_marker_at(&skill_cap)?
+            super::marker_go::read(&skill_cap)
         };
-        let MarkerState::Valid(marker) = marker else {
-            rows.push(marker_row(target, &name, path, marker));
+        let Some(observation) = observation else {
+            rows.push(unmanaged(target, &name, path));
             continue;
         };
+        let marker = observation.marker;
+        if let Some(error) = observation.error {
+            // Go keeps the fields it decoded around a mistyped value and
+            // reports the managed install as stale with the decode error.
+            rows.push(InstallStatus {
+                target: target.to_owned(),
+                name: name.clone(),
+                path: path.clone(),
+                status: StatusKind::Stale,
+                mode: Some(marker.mode.clone()).filter(|value| !value.is_empty()),
+                installed_at: Some(marker.installed.clone()).filter(|value| !value.is_empty()),
+                source_hash: Some(marker.source_hash.clone()).filter(|value| !value.is_empty()),
+                allow_executable: marker.allow_executable.then_some(true),
+                error: Some(format!("reading marker {}: {error}", path.display())),
+                drift: Vec::new(),
+                render_status: None,
+                render_drift: Vec::new(),
+                render_error: None,
+            });
+            continue;
+        }
         // A source_hash-only marker is a legacy cache marker, not an owned
         // installation. Do not silently upgrade it into a managed entry.
         let marker_for_row = marker.clone();

@@ -11,6 +11,7 @@ mod encode;
 pub mod gotext;
 pub mod install;
 pub mod library;
+mod library_go_read;
 mod load;
 pub mod materialize;
 pub mod metadata;
@@ -23,6 +24,7 @@ pub mod targets_status;
 mod validation;
 pub mod variant;
 pub mod vcs;
+mod yaml_go;
 
 pub use load::{BundleLoader, load_bundle};
 pub use materialize::{Materialized, MaterializedFile, materialize, materialize_with_fault};

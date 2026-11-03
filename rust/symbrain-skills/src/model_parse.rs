@@ -60,6 +60,73 @@ pub fn parse_skill_md(raw: &[u8]) -> Result<ParsedSkill, SkillError> {
     })
 }
 
+/// Go's `parseSkillMD` front half for the library listing: the frontmatter is
+/// decoded from the raw bytes, so invalid UTF-8 is a YAML reader error inside
+/// the header and irrelevant in the body, exactly as in `yaml.Unmarshal`.
+pub(crate) fn parse_frontmatter_go(raw: &[u8]) -> Result<Frontmatter, SkillError> {
+    let mut text = Vec::with_capacity(raw.len());
+    let mut index = 0;
+    while index < raw.len() {
+        if raw[index] == b'\r' && raw.get(index + 1) == Some(&b'\n') {
+            index += 1;
+            continue;
+        }
+        text.push(raw[index]);
+        index += 1;
+    }
+    let Some(rest) = text.strip_prefix(b"---\n") else {
+        return Err(SkillError(
+            "SKILL.md must start with YAML frontmatter".into(),
+        ));
+    };
+    let end = rest
+        .windows(4)
+        .position(|window| window == b"\n---")
+        .ok_or_else(|| SkillError("SKILL.md frontmatter is not closed".into()))?;
+    let header = &rest[..end];
+    if header.len() > crate::model::MAX_FRONTMATTER_SIZE {
+        return Err(frontmatter_size_error());
+    }
+    let header = std::str::from_utf8(header).map_err(|error| {
+        SkillError(format!(
+            "parse SKILL.md frontmatter: yaml: {}",
+            yaml_utf8_problem(header, error.valid_up_to())
+        ))
+    })?;
+    parse_frontmatter(header)
+}
+
+/// The YAML reader diagnostic for the invalid sequence at `at`.
+fn yaml_utf8_problem(bytes: &[u8], at: usize) -> &'static str {
+    let octet = bytes[at];
+    let (width, mask) = if octet & 0x80 == 0 {
+        (1, 0x7f)
+    } else if octet & 0xe0 == 0xc0 {
+        (2, 0x1f)
+    } else if octet & 0xf0 == 0xe0 {
+        (3, 0x0f)
+    } else if octet & 0xf8 == 0xf0 {
+        (4, 0x07)
+    } else {
+        return "invalid leading UTF-8 octet";
+    };
+    if bytes.len() - at < width {
+        return "incomplete UTF-8 octet sequence";
+    }
+    let mut value = u32::from(octet & mask);
+    for &next in &bytes[at + 1..at + width] {
+        if next & 0xc0 != 0x80 {
+            return "invalid trailing UTF-8 octet";
+        }
+        value = (value << 6) + u32::from(next & 0x3f);
+    }
+    let minimum = [0, 0, 0x80, 0x800, 0x1_0000][width];
+    if value < minimum {
+        return "invalid length of a UTF-8 sequence";
+    }
+    "invalid Unicode character"
+}
+
 /// Scans the leading delimiter without allocating or parsing YAML. Returns true
 /// once the input is definitively outside a valid frontmatter header.
 pub(crate) fn frontmatter_scan(raw: &[u8]) -> Result<bool, SkillError> {
@@ -125,18 +192,63 @@ fn frontmatter_size_error() -> SkillError {
     ))
 }
 
+const FRONTMATTER_PREFIX: &str = "parse SKILL.md frontmatter: ";
+
+/// Parses the frontmatter and wraps every failure like Go's
+/// `fmt.Errorf("parse SKILL.md frontmatter: %w", err)`.
 fn parse_frontmatter(text: &str) -> Result<Frontmatter, SkillError> {
-    let value: serde_yaml_ng::Value = serde_yaml_ng::from_str(text)
-        .map_err(|error| SkillError(format!("parse SKILL.md frontmatter: {error}")))?;
-    let map = value
-        .as_mapping()
-        .ok_or_else(|| SkillError("frontmatter must be a mapping".into()))?;
+    parse_frontmatter_fields(text).map_err(|error| {
+        if error.0.starts_with(FRONTMATTER_PREFIX) {
+            error
+        } else {
+            SkillError(format!("{FRONTMATTER_PREFIX}{}", error.0))
+        }
+    })
+}
+
+/// The frontmatter root as a mapping, or go-yaml's decode error for
+/// `map[string]yaml.Node`.
+fn root_mapping<'a>(
+    value: &'a serde_yaml_ng::Value,
+    text: &str,
+) -> Result<&'a serde_yaml_ng::Mapping, SkillError> {
+    let (tag, shown) = match value {
+        serde_yaml_ng::Value::Mapping(map) => return Ok(map),
+        serde_yaml_ng::Value::String(scalar) => ("!!str", scalar.as_str()),
+        serde_yaml_ng::Value::Number(number) => (
+            if number.is_f64() { "!!float" } else { "!!int" },
+            text.trim(),
+        ),
+        serde_yaml_ng::Value::Bool(_) => ("!!bool", text.trim()),
+        serde_yaml_ng::Value::Sequence(_) => ("!!seq", ""),
+        _ => return Err(SkillError("frontmatter must be a mapping".into())),
+    };
+    Err(SkillError(crate::yaml_go::not_a_mapping(tag, shown)))
+}
+
+fn parse_frontmatter_fields(text: &str) -> Result<Frontmatter, SkillError> {
+    let value: serde_yaml_ng::Value = serde_yaml_ng::from_str(text).map_err(|error| {
+        let message = error.to_string();
+        let go = crate::yaml_go::duplicate_key_text(text)
+            .filter(|_| message.starts_with("duplicate entry"))
+            .or_else(|| crate::yaml_go::syntax_error(&message))
+            .unwrap_or(message);
+        SkillError(format!("{FRONTMATTER_PREFIX}{go}"))
+    })?;
+    let map = root_mapping(&value, text)?;
     let string = |name: &str| -> Result<String, SkillError> {
         let Some(value) = map.get(serde_yaml_ng::Value::String(name.into())) else {
             return Ok(String::new());
         };
         if value.is_null() {
             return Ok(String::new());
+        }
+        if matches!(
+            value,
+            serde_yaml_ng::Value::Number(_) | serde_yaml_ng::Value::Bool(_)
+        ) && let Some(raw) = crate::yaml_go::raw_plain_scalar(text, name)
+        {
+            return Ok(raw);
         }
         if let Some(scalar) = yaml_scalar_string(value) {
             return Ok(scalar);

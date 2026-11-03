@@ -7,6 +7,12 @@ use std::process::{Command, Output};
 
 use tempfile::TempDir;
 
+mod skills_native_record;
+
+fn expect(root: &TempDir, label: &str, command: &mut Command) -> Output {
+    skills_native_record::expect(label, command, root.path())
+}
+
 fn command(root: &TempDir, args: &[&str]) -> Command {
     let home = root.path().join("home");
     let config = root.path().join("config");
@@ -160,8 +166,12 @@ fn configured_status_decodes_valid_config_and_keeps_go_for_the_rest() {
         (&b"cache_dir = \"/moved/cache\"\n"[..], "moved cache"),
     ] {
         std::fs::write(&config, body).unwrap();
-        let output = run(&root, &["skills", "status", "--target", "opencode"]);
-        assert_go_fallback(&output, what);
+        let mut status = command(&root, &["skills", "status", "--target", "opencode"]);
+        expect(
+            &root,
+            &format!("status_opencode/configured/{what}"),
+            &mut status,
+        );
     }
 }
 
@@ -205,17 +215,16 @@ fn windows_path_in_a_basic_string_resets_the_config_natively_on_every_host() {
     );
     // A multi-line string keeps its Go-owned diagnostic.
     std::fs::write(&config, b"library_dir = \"\"\"C:\\Users\"\"\"\n").unwrap();
-    assert_go_fallback(&run(&root, &["skills", "list", "--json"]), "multi-line");
+    let mut list = command(&root, &["skills", "list", "--json"]);
+    expect(&root, "status_opencode/windows_path/multi-line", &mut list);
 }
 
 #[test]
-fn default_status_with_dynamic_target_state_keeps_go_fallback() {
+fn default_status_with_dynamic_target_state_is_native() {
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("home/.config/opencode/skills")).unwrap();
-    let output = run(&root, &["skills", "status"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let mut status = command(&root, &["skills", "status"]);
+    expect(&root, "status_opencode/default_dynamic_state", &mut status);
 }
 
 #[test]
@@ -230,20 +239,8 @@ fn legacy_go_config_wins_when_new_skills_config_dir_exists() {
         b"library_dir = \n",
     )
     .unwrap();
-    let output = run(&root, &["skills", "status", "--target", "opencode"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
-}
-
-fn assert_go_fallback(output: &Output, what: &str) {
-    assert_eq!(output.status.code(), Some(1), "{what}");
-    assert!(output.stdout.is_empty(), "{what}");
-    assert!(
-        String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-        "{what}: {:?}",
-        output.stderr
-    );
+    let mut status = command(&root, &["skills", "status", "--target", "opencode"]);
+    expect(&root, "status_opencode/legacy_config_wins", &mut status);
 }
 
 /// Writes a managed-marker install whose library source decides its row.
@@ -374,14 +371,11 @@ fn symskills_inert_overrides_do_not_add_the_render_extension() {
 }
 
 #[test]
-fn symskills_cache_dir_override_keeps_go_fallback() {
+fn symskills_cache_dir_override_is_native() {
     let root = TempDir::new().unwrap();
     let mut command = command(&root, &["skills", "status", "--target", "opencode"]);
-    let output = command
-        .env("SYMSKILLS_CACHE_DIR", "/different/cache")
-        .output()
-        .unwrap();
-    assert_go_fallback(&output, "cache dir");
+    command.env("SYMSKILLS_CACHE_DIR", "/different/cache");
+    expect(&root, "status_opencode/cache_dir", &mut command);
 }
 
 type Shape<'a> = (&'a [&'a str], &'a [(&'a str, &'a str)], &'a str);
@@ -405,7 +399,7 @@ fn invalid_vcs_bool_resets_the_whole_config_natively() {
 }
 
 #[test]
-fn symskills_unreplayable_env_shapes_keep_go_fallback() {
+fn symskills_unreplayable_env_shapes_are_native() {
     let root = TempDir::new().unwrap();
     let file = root.path().join("not-a-dir");
     std::fs::write(&file, b"x").unwrap();
@@ -453,23 +447,25 @@ fn symskills_unreplayable_env_shapes_keep_go_fallback() {
         for (key, value) in *env {
             command.env(key, value);
         }
-        assert_go_fallback(&command.output().unwrap(), what);
+        expect(
+            &root,
+            &format!("status_opencode/env_shape/{what}"),
+            &mut command,
+        );
     }
 }
 
 #[cfg(unix)]
 #[test]
-fn symskills_library_override_symlink_keeps_go_fallback() {
+fn symskills_library_override_symlink_is_native() {
     let root = TempDir::new().unwrap();
     let real = root.path().join("real-library");
     std::fs::create_dir_all(&real).unwrap();
     let link = root.path().join("linked-library");
     std::os::unix::fs::symlink(&real, &link).unwrap();
-    let output = command(&root, &["skills", "status", "--target", "opencode"])
-        .env("SYMSKILLS_LIBRARY_DIR", &link)
-        .output()
-        .unwrap();
-    assert_go_fallback(&output, "linked library");
+    let mut status = command(&root, &["skills", "status", "--target", "opencode"]);
+    status.env("SYMSKILLS_LIBRARY_DIR", &link);
+    expect(&root, "status_opencode/linked_library", &mut status);
 }
 
 #[cfg(unix)]
@@ -493,7 +489,7 @@ fn opencode_user_status_link_onto_file_matches_go_bytes() {
 
 #[cfg(unix)]
 #[test]
-fn opencode_user_status_symlink_chain_keeps_go_fallback() {
+fn opencode_user_status_symlink_chain_is_native() {
     let root = TempDir::new().unwrap();
     let skills = root.path().join("home/.config/opencode/skills");
     std::fs::create_dir_all(&skills).unwrap();
@@ -503,14 +499,12 @@ fn opencode_user_status_symlink_chain_keeps_go_fallback() {
     let middle = root.path().join("home/.config/opencode/middle");
     std::os::unix::fs::symlink(&real, &middle).unwrap();
     std::os::unix::fs::symlink(&middle, skills.join("chain")).unwrap();
-    let output = run(&root, &["skills", "status", "--target", "opencode"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let mut status = command(&root, &["skills", "status", "--target", "opencode"]);
+    expect(&root, "status_opencode/user_symlink_chain", &mut status);
 }
 
 #[test]
-fn opencode_user_status_marker_states_keep_go_fallback() {
+fn opencode_user_status_marker_states_are_native() {
     // Go reports these markers with encoding/json error text and keeps the
     // fields it managed to fill (an unknown schema_version is even accepted
     // outright), so the native scan leaves them to Go instead of exchanging
@@ -535,13 +529,11 @@ fn opencode_user_status_marker_states_keep_go_fallback() {
         std::fs::create_dir_all(&skill).unwrap();
         std::fs::write(skill.join("SKILL.md"), b"body\n").unwrap();
         std::fs::write(skill.join(".symskills.json"), marker).unwrap();
-        let output = run(&root, &["skills", "status", "--target", "opencode"]);
-        assert_eq!(output.status.code(), Some(1), "{name}");
-        assert!(output.stdout.is_empty(), "{name}");
-        assert!(
-            String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-            "{name}: {:?}",
-            output.stderr
+        let mut status = command(&root, &["skills", "status", "--target", "opencode"]);
+        expect(
+            &root,
+            &format!("status_opencode/marker/{name}"),
+            &mut status,
         );
     }
 }
@@ -634,7 +626,7 @@ fn opencode_project_status_ignores_the_user_root() {
 
 #[cfg(unix)]
 #[test]
-fn opencode_project_status_symlink_chain_keeps_go_fallback() {
+fn opencode_project_status_symlink_chain_is_native() {
     let root = TempDir::new().unwrap();
     let skills = root.path().join("project/.opencode/skills");
     std::fs::create_dir_all(&skills).unwrap();
@@ -644,15 +636,13 @@ fn opencode_project_status_symlink_chain_keeps_go_fallback() {
     let middle = root.path().join("project/.opencode/middle");
     std::os::unix::fs::symlink(&real, &middle).unwrap();
     std::os::unix::fs::symlink(&middle, skills.join("chain")).unwrap();
-    let output = run(
+    let mut status = command(
         &root,
         &[
             "skills", "status", "--target", "opencode", "--scope", "project",
         ],
     );
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    expect(&root, "status_opencode/project_symlink_chain", &mut status);
 }
 
 #[test]
