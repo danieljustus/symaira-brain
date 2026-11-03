@@ -1527,7 +1527,13 @@
    "record": {
     "kind": "script",
     "producer": "scripts/oracle-freeze/record_harness_nonutf8.py",
-    "note": "needs a symbrain-go binary; historical tooling"
+    "note": "needs a symbrain-go binary; historical tooling",
+    "recorded_with": {
+     "go_version": "go version go1.27.3 darwin/arm64",
+     "worktree_commit": "eda559e0314438042709c7294416fe895f910157",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_harness_nonutf8.py <symbrain-go> <fixture> <go version> <commit>; symbrain-go = CGO_ENABLED=0 go -C <worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain"
+    }
    },
    "go_inputs": [
     "go.mod"
@@ -1544,7 +1550,36 @@
    "record": {
     "kind": "script",
     "producer": "rust/symbrain-cli/tests/skills_render_drift.rs record mode (SYMBRAIN_SKILLS_STATUS_RECORD_GO)",
-    "note": "historical tooling"
+    "note": "historical tooling",
+    "recorded_with": {
+     "go_version": "go version go1.27.3 darwin/arm64",
+     "worktree_commit": "eda559e0314438042709c7294416fe895f910157",
+     "platform": "darwin/arm64",
+     "command": "SYMBRAIN_SKILLS_STATUS_RECORD_GO=<symbrain-go> SYMBRAIN_SKILLS_STATUS_RECORD_OUT=<path> cargo test -p symbrain-cli --test skills_render_drift"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "rust-differential-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "Black-box CLI differential: 890 Go transcripts (stdout/stderr/exit/side effects) replayed by `make parity-smoke`",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "make record-parity-smoke (scripts/rust-differential.py record FIXTURE GO_BINARY)",
+    "note": "historical tooling; linux/windows transcripts must be recorded on those platforms",
+    "recorded_with": {
+     "go_version": "go version go1.27.3 darwin/arm64",
+     "worktree_commit": "eda559e0314438042709c7294416fe895f910157",
+     "platform": "darwin/arm64",
+     "command": "env SYMAIRA_EXTERNAL_BASE=<dir> SYMAIRA_EXTERNAL_RUNTIME_ROOT=<dir> bash scripts/run-external-env.sh python3 scripts/rust-differential.py record rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json <symbrain-go>"
+    }
    },
    "go_inputs": [
     "go.mod"

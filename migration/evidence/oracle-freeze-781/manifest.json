@@ -2888,18 +2888,24 @@
    "record": {
     "kind": "script",
     "producer": "scripts/oracle-freeze/record_harness_nonutf8.py",
-    "note": "needs a symbrain-go binary; historical tooling"
+    "note": "needs a symbrain-go binary; historical tooling",
+    "recorded_with": {
+     "go_version": "go version go1.27.3 darwin/arm64",
+     "worktree_commit": "eda559e0314438042709c7294416fe895f910157",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_harness_nonutf8.py <symbrain-go> <fixture> <go version> <commit>; symbrain-go = CGO_ENABLED=0 go -C <worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain"
+    }
    },
    "fixtures": [
     {
      "path": "rust/symbrain-cli/tests/fixtures/harness_nonutf8_go.darwin.json",
      "sha256": "6cf7e890459be87d2ce0c6f959ac8d3eea0128d92f79db219bd08a6d733dcce6",
      "bytes": 9617,
-     "last_modified_commit": ""
+     "last_modified_commit": "ab9111c5ba7a79541a622658d5af2f848acca326"
     }
    ],
    "provenance": {
-    "sealed_at_commit": "eda559e0314438042709c7294416fe895f910157",
+    "sealed_at_commit": "ab9111c5ba7a79541a622658d5af2f848acca326",
     "origin": "pinned-go-recorded",
     "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
     "platform": "darwin",
@@ -2915,21 +2921,60 @@
    "record": {
     "kind": "script",
     "producer": "rust/symbrain-cli/tests/skills_render_drift.rs record mode (SYMBRAIN_SKILLS_STATUS_RECORD_GO)",
-    "note": "historical tooling"
+    "note": "historical tooling",
+    "recorded_with": {
+     "go_version": "go version go1.27.3 darwin/arm64",
+     "worktree_commit": "eda559e0314438042709c7294416fe895f910157",
+     "platform": "darwin/arm64",
+     "command": "SYMBRAIN_SKILLS_STATUS_RECORD_GO=<symbrain-go> SYMBRAIN_SKILLS_STATUS_RECORD_OUT=<path> cargo test -p symbrain-cli --test skills_render_drift"
+    }
    },
    "fixtures": [
     {
      "path": "rust/symbrain-cli/tests/fixtures/skills_status_go_oracle.json",
      "sha256": "104da2fa5e0cb5a93a06cbe7fae6f6ade8825b9c7194bcce70df34c87c0fc50d",
      "bytes": 12397,
+     "last_modified_commit": "ab9111c5ba7a79541a622658d5af2f848acca326"
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "ab9111c5ba7a79541a622658d5af2f848acca326",
+    "origin": "pinned-go-recorded",
+    "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
+    "platform": "any",
+    "go_inputs": {
+     "go.mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9"
+    }
+   }
+  },
+  {
+   "id": "rust-differential-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "Black-box CLI differential: 890 Go transcripts (stdout/stderr/exit/side effects) replayed by `make parity-smoke`",
+   "record": {
+    "kind": "script",
+    "producer": "make record-parity-smoke (scripts/rust-differential.py record FIXTURE GO_BINARY)",
+    "note": "historical tooling; linux/windows transcripts must be recorded on those platforms",
+    "recorded_with": {
+     "go_version": "go version go1.27.3 darwin/arm64",
+     "worktree_commit": "eda559e0314438042709c7294416fe895f910157",
+     "platform": "darwin/arm64",
+     "command": "env SYMAIRA_EXTERNAL_BASE=<dir> SYMAIRA_EXTERNAL_RUNTIME_ROOT=<dir> bash scripts/run-external-env.sh python3 scripts/rust-differential.py record rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json <symbrain-go>"
+    }
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json",
+     "sha256": "5b13af892aed0fb9798eabce8c382711920771f030939d5e89c88de7f6a8fed3",
+     "bytes": 751124,
      "last_modified_commit": ""
     }
    ],
    "provenance": {
-    "sealed_at_commit": "eda559e0314438042709c7294416fe895f910157",
+    "sealed_at_commit": "ab9111c5ba7a79541a622658d5af2f848acca326",
     "origin": "pinned-go-recorded",
     "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
-    "platform": "any",
+    "platform": "darwin",
     "go_inputs": {
      "go.mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9"
     }
