@@ -145,7 +145,9 @@ PARITY_OS := $(shell uname -s | tr "[:upper:]" "[:lower:]")
 PARITY_FIXTURE := rust/symbrain-cli/tests/fixtures/rust_differential_go.$(PARITY_OS).json
 
 ## parity-smoke: Replay the frozen Go transcripts of the black-box CLI differential against the Rust binary
-parity-smoke: build-rust guard-scan-parity
+parity-smoke:
+	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev cargo build --workspace --locked
+	./guard/scripts/guard-scan-oracle/run.sh parity "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev $(PYTHON) scripts/rust-differential.py replay "$(PARITY_FIXTURE)" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 
 ## init-differential: Replay the frozen Go transcripts of `symbrain init` against the Rust binary

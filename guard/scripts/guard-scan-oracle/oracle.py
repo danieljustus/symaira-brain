@@ -59,19 +59,37 @@ def require_pin() -> dict[str, str]:
 
 
 def verify_binding(document: dict[str, object]) -> dict[str, str]:
-    expected = require_pin()
+    """Go-free binding check: the fixture is the sealed record of the pinned Go revision.
+
+    The Go sources and the pinned revision are not needed (and may be absent from a shallow or
+    Go-free checkout); `scripts/oracle-freeze` seals the fixture bytes. `verify_live_binding`
+    keeps the historical git-backed check for `write`/`check` re-recording.
+    """
     if document.get("source_commit") != PINNED_COMMIT_SHA:
         raise RuntimeError("fixture is not bound to the pinned Go revision")
-    if document.get("source_files") != expected:
-        raise RuntimeError("fixture source hashes do not match the pinned Go revision")
-    current = {path: sha256((ROOT / path).read_bytes()) for path in GO_SOURCE_PATHS}
-    if current != expected:
-        raise RuntimeError("working-tree Go scan sources drifted from the pinned revision")
+    recorded = document.get("source_files")
+    if not isinstance(recorded, dict) or set(recorded) != set(GO_SOURCE_PATHS):
+        raise RuntimeError("fixture source inventory does not match the pinned Go scan sources")
+    for path, digest in recorded.items():
+        if not (isinstance(digest, str) and len(digest) == 64 and all(c in "0123456789abcdef" for c in digest)):
+            raise RuntimeError(f"fixture records a malformed digest for {path}")
     if os.name == "nt" and document.get("native_platform") != "windows":
         raise RuntimeError(
             "Windows requires a native Go scan fixture; set "
             "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE to a fixture generated on this runner"
         )
+    return dict(recorded)
+
+
+def verify_live_binding(document: dict[str, object]) -> dict[str, str]:
+    """Historical re-recording check (needs the pinned git revision and the Go sources)."""
+    expected = require_pin()
+    verify_binding(document)
+    if document.get("source_files") != expected:
+        raise RuntimeError("fixture source hashes do not match the pinned Go revision")
+    current = {path: sha256((ROOT / path).read_bytes()) for path in GO_SOURCE_PATHS}
+    if current != expected:
+        raise RuntimeError("working-tree Go scan sources drifted from the pinned revision")
     return expected
 
 
@@ -358,7 +376,7 @@ def main() -> int:
     ensure_shared_external_environment(__file__)
     if args.action == "check":
         current = json.loads(FIXTURE.read_text(encoding="utf-8"))
-        verify_binding(current)
+        verify_live_binding(current)
     generated = build_and_run()
     if args.action == "check":
         expected = fixture_for_platform(current, windows=os.name == "nt")
