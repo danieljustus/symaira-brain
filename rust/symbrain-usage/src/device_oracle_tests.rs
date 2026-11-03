@@ -219,12 +219,6 @@ fn device_oracle_matches_fresh_go() {
     for row in &records {
         let before = prepare(row);
         let gate = row["input"]["kind"] == "retain-go-control";
-        assert_eq!(
-            super::needs_go_fallback(),
-            gate,
-            "{} eligibility",
-            row["id"]
-        );
         if gate {
             gated += 1;
             readonly(row, &before);

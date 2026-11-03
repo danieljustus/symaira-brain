@@ -148,7 +148,6 @@ fn run_native(
         "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),
         "mcp" => Some(mcp_cli::run(rest, stderr)),
         "serve" => Some(mcp_cli::run_serve(rest, stderr)),
-        "usage" if usage_cli::requires_go_fallback(rest) => None,
         "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
         "init" => Some(init_cli::run(rest, stdout, stderr)),
         "harness" => Some(harness_cli::run(rest, stdout, stderr, format)),

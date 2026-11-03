@@ -73,12 +73,8 @@ fn selected_invocation(selector: Option<String>, default: ProviderSelection) -> 
     }
 }
 
-// Free-function entry points keep `lib.rs` byte-identical to the inherited
+// Free-function entry point keeps `lib.rs` byte-identical to the inherited
 // global-output owner pinned by the Skills argv oracle (novel.py).
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    classify(args).requires_go_fallback()
-}
-
 pub fn run(
     args: &[OsString],
     stdout: &mut dyn Write,
@@ -89,10 +85,6 @@ pub fn run(
 }
 
 impl Invocation {
-    pub(crate) fn requires_go_fallback(&self) -> bool {
-        matches!(self, Self::Report(selection) if symbrain_usage::needs_go_fallback_for_selection(selection))
-    }
-
     pub(crate) fn run(
         self,
         stdout: &mut dyn Write,
@@ -218,7 +210,6 @@ mod tests {
         for flag in ["-h", "--help"] {
             let args = [OsString::from(flag)];
             let invocation = classify(&args);
-            assert!(!invocation.requires_go_fallback());
             let (mut stdout, mut stderr) = (Vec::new(), Vec::new());
             assert_eq!(
                 invocation.run(&mut stdout, &mut stderr, OutputFormat::Table),

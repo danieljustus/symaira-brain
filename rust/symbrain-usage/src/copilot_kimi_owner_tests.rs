@@ -14,11 +14,6 @@ fn owner_matches_fresh_go() {
     );
     for record in &records {
         prepare(record);
-        assert!(
-            !super::needs_go_fallback(),
-            "{}: consistent owner eligibility",
-            record["id"]
-        );
         let before: BTreeMap<_, _> = record["file_sha256"]
             .as_object()
             .unwrap()

@@ -108,10 +108,7 @@ fn opencode_auth_json_key(dir: &Path) -> Result<Option<String>, &'static str> {
     let data = {
         let mut options = cap_std::fs::OpenOptions::new();
         options.read(true);
-        cap_std::fs::OpenOptionsExt::custom_flags(
-            &mut options,
-            libc::O_NOFOLLOW | libc::O_NONBLOCK,
-        );
+        cap_std::fs::OpenOptionsExt::custom_flags(&mut options, CREDENTIAL_OPEN_FLAGS);
         match root.open_with("auth.json", &options) {
             Ok(file) => {
                 let metadata = file.metadata().map_err(|_| OPENCODE_DB_ERROR)?;

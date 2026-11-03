@@ -66,9 +66,17 @@ impl UsageError {
 impl std::fmt::Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Transport { detail, .. } => {
-                write!(f, "AI usage request failed: {detail}")
-            }
+            // Go wraps a network failure in the provider's own error type, whose
+            // text carries the short provider name; other providers share the
+            // nameless wording.
+            Self::Transport { provider, detail } => match provider.as_str() {
+                "claude" => write!(f, "Claude request failed: {detail}"),
+                "copilot" => write!(f, "Copilot request failed: {detail}"),
+                "cursor" => write!(f, "Cursor request failed: {detail}"),
+                "kimi" => write!(f, "Kimi request failed: {detail}"),
+                "opencode" => write!(f, "OpenCode request failed: {detail}"),
+                _ => write!(f, "AI usage request failed: {detail}"),
+            },
             Self::Status { detail, .. } if !detail.is_empty() => write!(f, "{detail}"),
             Self::Status {
                 provider, status, ..

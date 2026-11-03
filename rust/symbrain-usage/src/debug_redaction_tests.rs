@@ -26,6 +26,7 @@ fn debug_formats_redact_secrets_without_mutating_values() {
     provider.enterprise_host = Some(ENTERPRISE_HOST.into());
 
     let request = Request {
+        header_bytes: std::collections::BTreeMap::new(),
         provider_id: "test-provider".into(),
         method: "POST".into(),
         url: URL.into(),

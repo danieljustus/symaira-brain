@@ -1,11 +1,24 @@
 // Bounded read-only credential files and ordered Go-compatible JSON objects.
+// Go opens credentials through `os.Root`, which follows a symlink that stays
+// inside the credential directory and rejects absolute or escaping targets.
+// On Linux cap-std resolves beneath the directory with `openat2`, which gives
+// exactly that rule unless `O_NOFOLLOW` is also passed (it would reject the
+// in-root relative symlink Go follows); the macOS resolver already matches Go
+// with the flag. `O_NONBLOCK` keeps a FIFO from blocking the report.
+#[cfg(unix)]
+const CREDENTIAL_OPEN_FLAGS: i32 = if cfg!(target_os = "linux") {
+    libc::O_NONBLOCK
+} else {
+    libc::O_NOFOLLOW | libc::O_NONBLOCK
+};
+
 fn read_provider_credentials(path: &Path) -> Option<Vec<u8>> {
     let parent =
         cap_std::fs::Dir::open_ambient_dir(path.parent()?, cap_std::ambient_authority()).ok()?;
     let mut options = cap_std::fs::OpenOptions::new();
     options.read(true);
     #[cfg(unix)]
-    cap_std::fs::OpenOptionsExt::custom_flags(&mut options, libc::O_NOFOLLOW | libc::O_NONBLOCK);
+    cap_std::fs::OpenOptionsExt::custom_flags(&mut options, CREDENTIAL_OPEN_FLAGS);
     let file = parent.open_with(path.file_name()?, &options).ok()?;
     let metadata = file.metadata().ok()?;
     if !metadata.is_file() || metadata.len() > MAX_CREDENTIAL_FILE_BYTES {

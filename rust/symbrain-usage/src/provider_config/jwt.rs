@@ -1,13 +1,22 @@
 // Unverified JWT expiry is a read-only credential presence check, never auth.
-#[allow(clippy::cast_precision_loss)]
-fn jwt_expiry_out_of_range(expiry: f64) -> bool {
-    !expiry.is_finite() || expiry < i64::MIN as f64 || expiry >= i64::MAX as f64
-}
+//
+// Go evaluates `time.Unix(int64(exp), 0).After(time.Now())`. The float-to-int
+// conversion of an out-of-range value is architecture-specific (amd64 yields
+// the minimum int64, arm64 saturates), but `time.Unix` adds the 62135596800s
+// epoch offset with wrapping arithmetic, so every out-of-range value, and every
+// value within that offset of the maximum, ends up before the present on both
+// architectures. Rust's saturating cast plus the same wrapping addition is
+// therefore exact for both.
+const GO_UNIX_TO_INTERNAL_SECONDS: i64 = 62_135_596_800;
 
-#[allow(clippy::cast_precision_loss)]
+#[allow(clippy::cast_possible_truncation)]
 fn nous_jwt_is_live(token: &str) -> bool {
     jwt_expiry(token).is_some_and(|expiry| {
-        !jwt_expiry_out_of_range(expiry) && expiry.trunc() > seconds_since_epoch() as f64
+        let expires = (expiry as i64).wrapping_add(GO_UNIX_TO_INTERNAL_SECONDS);
+        let now = i64::try_from(seconds_since_epoch())
+            .unwrap_or(i64::MAX)
+            .wrapping_add(GO_UNIX_TO_INTERNAL_SECONDS);
+        expires > now
     })
 }
 

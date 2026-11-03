@@ -33,7 +33,6 @@ fn check_child(case: &str) {
         }
         _ => panic!("unknown case"),
     }
-    assert!(!symbrain_usage::needs_go_fallback());
     if ["env", "vault", "file"].contains(&case) {
         check_report(providers, case);
     }

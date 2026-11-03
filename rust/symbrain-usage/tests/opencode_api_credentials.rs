@@ -6,7 +6,6 @@ use symbrain_usage::{ProviderSelection, selected_providers};
 
 fn check_child(case: &str) {
     let selection = ProviderSelection::parse("opencode").unwrap();
-    assert!(!symbrain_usage::needs_go_fallback_for_selection(&selection));
     let providers = selected_providers(&selection);
     let p = &providers[0];
     if ["v2", "failed", "invalid"].contains(&case) {

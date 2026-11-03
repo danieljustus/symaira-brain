@@ -109,6 +109,15 @@ pub fn all_providers() -> Vec<Provider> {
 
 #[must_use]
 pub fn selected_providers(selection: &ProviderSelection) -> Vec<Provider> {
+    selected_providers_with_claude_keychain(selection, claude_keychain_credential)
+}
+
+// The system Keychain stays injectable so tests never read the real one.
+fn selected_providers_with_claude_keychain(
+    selection: &ProviderSelection,
+    read_keychain: impl FnOnce() -> Option<(String, Option<SystemTime>)>,
+) -> Vec<Provider> {
+    let mut read_keychain = Some(read_keychain);
     PROVIDER_FACTORIES
         .iter()
         .filter(|(id, _)| selection.contains(id))
@@ -117,6 +126,10 @@ pub fn selected_providers(selection: &ProviderSelection) -> Vec<Provider> {
                 claude_from_resolved(None, None, None, None, None)
             } else if *id == "codex" && codex_history_only(selection) {
                 codex_from_resolved(None, None, false)
+            } else if *id == "claude"
+                && let Some(read_keychain) = read_keychain.take()
+            {
+                claude_with_keychain(read_keychain)
             } else {
                 constructor()
             }

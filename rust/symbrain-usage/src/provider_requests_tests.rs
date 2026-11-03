@@ -139,3 +139,34 @@ fn oversized_probe_output_terminates_the_child_while_it_is_running() {
 /// by shape in this historical fixture.
 #[path = "request_oracle_tests.rs"]
 mod request_oracle;
+
+#[test]
+fn custom_base_trust_and_request_url_match_the_go_url_corpus() {
+    let corpus: serde_json::Value =
+        serde_json::from_str(include_str!("../tests/fixtures/usage_url_corpus.json"))
+            .expect("Go URL corpus");
+    let rows = corpus["rows"].as_array().expect("rows");
+    assert!(rows.len() >= 2000, "corpus lost rows: {}", rows.len());
+    let mut trusted_rows = 0;
+    for row in rows {
+        let raw = row["raw"].as_str().expect("raw");
+        let trusted = row["trusted"].as_bool().unwrap_or(false);
+        assert_eq!(trusted_https_url(raw, false), trusted, "trusted {raw:?}");
+        if !trusted {
+            continue;
+        }
+        trusted_rows += 1;
+        let base = validated_base(raw, "D");
+        assert_eq!(base, row["base"].as_str().expect("base"), "base {raw:?}");
+        let url = crate::go_url::request_url(&format!("{}/x", base.trim_end_matches('/')));
+        if row["err"].as_bool().unwrap_or(false) {
+            assert_eq!(url, None, "Go refuses {raw:?}");
+        } else {
+            assert_eq!(url.as_deref(), row["url"].as_str(), "url {raw:?}");
+        }
+    }
+    assert!(
+        trusted_rows >= 400,
+        "trusted corpus too small: {trusted_rows}"
+    );
+}
