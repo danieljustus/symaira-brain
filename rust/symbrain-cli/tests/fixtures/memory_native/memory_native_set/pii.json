@@ -1,0 +1,73 @@
+{
+  "payload": {
+    "config": "ollama.url = \"{EMBED}\"\n",
+    "db": [
+      "== memories (1 rows)",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"reach me at [REDACTED_EMAIL] please\"|content_hash=\"cddd00eae287d5d7946a16da0850e91e85e8835ac120ee4ea9b96686b4be02e1\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.40824828,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.40824828,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.40824828,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.40824828,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.40824828,0,0.40824828,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"\"|embedding_quantization=\"\"|embedding_source=\"hash-fallback\"|expires_at=NULL|id=\"<id1>\"|importance=0.0|kind=\"reference\"|last_access=NULL|lsh_hash=36672|metadata=\"{\\\"authority\\\":\\\"direct\\\",\\\"confidence\\\":\\\"high\\\",\\\"observed_at\\\":\\\"<isots>\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_tool\\\":\\\"symbrain-cli\\\",\\\"source_type\\\":\\\"direct\\\",\\\"source_uri\\\":\\\"\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "== entities (0 rows)",
+      "== entities_aliases (0 rows)",
+      "== memory_entities (0 rows)",
+      "== audit_log (2 rows)",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"<id2>\"|memory_id=\"<id1>\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "action=\"redaction\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=\"email\"|id=\"<id3>\"|memory_id=\"<id1>\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "== memory_evidence (0 rows)",
+      "== rules (0 rows)",
+      "== query_log (0 rows)",
+      "== sync_oplog (2 rows)",
+      "event_id=1|memory_id=\"<id1>\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=2|memory_id=\"<id1>\"|op=\"upsert\"|ts=\"<isots>\""
+    ],
+    "mutate_sql": [],
+    "requests": {
+      "embed": [],
+      "llm": []
+    },
+    "scenario": "pii",
+    "seed_file": "pii.seed.db",
+    "seed_sha256": "4b77d6a2596e488399b9389d406c5f074f6dc40bf40bdf3745e4585b4ac09044",
+    "seed_steps": [],
+    "steps": [
+      {
+        "argv": [
+          "set",
+          "reach me at alice@example.com please",
+          "--kind",
+          "reference",
+          "--db",
+          "{DB}",
+          "--json"
+        ],
+        "code": 0,
+        "stderr": "<time> WARN PII redacted from memory content pattern=email\n",
+        "stdout": "{\"id\":\"<id1>\",\"scope\":\"global\",\"kind\":\"reference\",\"staged\":false}\n"
+      }
+    ],
+    "tree": [
+      "dir home 755",
+      "file memory.db 600",
+      "dir work 755",
+      "dir xdg 755",
+      "dir xdg/cache 755",
+      "dir xdg/config 755",
+      "dir xdg/config/symmemory 755",
+      "file xdg/config/symmemory/config.toml 644",
+      "dir xdg/data 755",
+      "dir xdg/state 755"
+    ]
+  },
+  "provenance": {
+    "go_source": {
+      "git_head": "b9b5b85b8488a96f8c3c79530d4edec73434c13a",
+      "go_mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+      "go_sum": "d527200e8f13fd16eb27b802bbe5b6ee19cd6a0c",
+      "tree_cmd": "6a47d5ab34dcd2f8e676684bd4a349da152765e9",
+      "tree_internal": "8ebcacdf27d3e1dc2e9d2a1d5b4e1d04ac57f5fe"
+    },
+    "go_version": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/MEM-NATIVE/oracle/symbrain: go1.27.3",
+    "kind": "go-oracle-recording",
+    "oracle_sha256": "6e81245f3c1ca3008f9e92ee175ca211c089c3a166be250d405e9123a18b47ff",
+    "payload_sha256": "dd13ac48322c5eb2778b6bf8d13989cfc3909a9555dddf51d476ed3b9cb9ab06",
+    "platform": "macos/aarch64",
+    "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1"
+  }
+}

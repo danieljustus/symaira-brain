@@ -1,0 +1,80 @@
+{
+  "payload": {
+    "config": "ollama.url = \"{EMBED}\"\n",
+    "db": [
+      "== memories (3 rows)",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"I like tea. I use vim\"|content_hash=\"c40c8530a5334c80addb1115c3aafe8a4cad824f1a060fa86a626abe95d7eeae\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.35355338,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.70710677,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.35355338,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.35355338,0,0,0.35355338,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"\"|embedding_quantization=\"\"|embedding_source=\"hash-fallback\"|expires_at=NULL|id=\"<id1>\"|importance=0.0|kind=\"reference\"|last_access=NULL|lsh_hash=17750|metadata=\"{\\\"authority\\\":\\\"direct\\\",\\\"confidence\\\":\\\"high\\\",\\\"observed_at\\\":\\\"<isots>\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_tool\\\":\\\"symbrain-cli\\\",\\\"source_type\\\":\\\"direct\\\",\\\"source_uri\\\":\\\"\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"User prefers tea\"|content_hash=\"28b14d0d9b665b70358b8493a226217fe9418f3cf6f46a41535b76cdd4e9d490\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"\"|embedding_quantization=\"\"|embedding_source=\"hash-fallback\"|expires_at=NULL|id=\"<id2>\"|importance=0.0|kind=\"\"|last_access=NULL|lsh_hash=40203|metadata=\"{\\\"authority\\\":\\\"inferred\\\",\\\"confidence\\\":\\\"high\\\",\\\"extraction_method\\\":\\\"pattern\\\",\\\"method\\\":\\\"regex_pattern\\\",\\\"raw_trigger\\\":\\\"I like tea\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_type\\\":\\\"extracted\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"User uses vim\"|content_hash=\"4c4e05203afe10c4035c3dbbcba3760f8b7537e54a0db7efd8b4f00faaed5351\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"\"|embedding_quantization=\"\"|embedding_source=\"hash-fallback\"|expires_at=NULL|id=\"<id3>\"|importance=0.0|kind=\"\"|last_access=NULL|lsh_hash=5015|metadata=\"{\\\"authority\\\":\\\"inferred\\\",\\\"confidence\\\":\\\"high\\\",\\\"extraction_method\\\":\\\"pattern\\\",\\\"method\\\":\\\"regex_pattern\\\",\\\"raw_trigger\\\":\\\"I use vim\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_type\\\":\\\"extracted\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "== entities (0 rows)",
+      "== entities_aliases (0 rows)",
+      "== memory_entities (0 rows)",
+      "== audit_log (3 rows)",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"<id4>\"|memory_id=\"<id1>\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"<id5>\"|memory_id=\"<id2>\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"<id6>\"|memory_id=\"<id3>\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "== memory_evidence (2 rows)",
+      "alignment_status=\"exact\"|char_end=10|char_start=0|created_at=\"<ts>\"|evidence_text=\"I like tea\"|id=\"<id7>\"|memory_id=\"<id2>\"|source_id=\"<id1>\"|source_kind=\"symbrain-cli\"|text=\"User prefers tea\"",
+      "alignment_status=\"exact\"|char_end=21|char_start=12|created_at=\"<ts>\"|evidence_text=\"I use vim\"|id=\"<id8>\"|memory_id=\"<id3>\"|source_id=\"<id1>\"|source_kind=\"symbrain-cli\"|text=\"User uses vim\"",
+      "== rules (0 rows)",
+      "== query_log (0 rows)",
+      "== sync_oplog (4 rows)",
+      "event_id=1|memory_id=\"<id1>\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=2|memory_id=\"<id2>\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=3|memory_id=\"<id3>\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=4|memory_id=\"<id1>\"|op=\"upsert\"|ts=\"<isots>\""
+    ],
+    "mutate_sql": [],
+    "requests": {
+      "embed": [],
+      "llm": []
+    },
+    "scenario": "extract",
+    "seed_file": "extract.seed.db",
+    "seed_sha256": "a7b7e9b01fb1a73397217a8d4e95f22e61ce065c8e3d7abc1b99179e30ba46aa",
+    "seed_steps": [],
+    "steps": [
+      {
+        "argv": [
+          "set",
+          "I like tea. I use vim",
+          "--kind",
+          "reference",
+          "--db",
+          "{DB}",
+          "--json"
+        ],
+        "code": 0,
+        "stderr": "",
+        "stdout": "{\"id\":\"<id1>\",\"scope\":\"global\",\"kind\":\"reference\",\"staged\":false}\n"
+      }
+    ],
+    "tree": [
+      "dir home 755",
+      "file memory.db 600",
+      "dir work 755",
+      "dir xdg 755",
+      "dir xdg/cache 755",
+      "dir xdg/config 755",
+      "dir xdg/config/symmemory 755",
+      "file xdg/config/symmemory/config.toml 644",
+      "dir xdg/data 755",
+      "dir xdg/state 755"
+    ]
+  },
+  "provenance": {
+    "go_source": {
+      "git_head": "b9b5b85b8488a96f8c3c79530d4edec73434c13a",
+      "go_mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+      "go_sum": "d527200e8f13fd16eb27b802bbe5b6ee19cd6a0c",
+      "tree_cmd": "6a47d5ab34dcd2f8e676684bd4a349da152765e9",
+      "tree_internal": "8ebcacdf27d3e1dc2e9d2a1d5b4e1d04ac57f5fe"
+    },
+    "go_version": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/MEM-NATIVE/oracle/symbrain: go1.27.3",
+    "kind": "go-oracle-recording",
+    "oracle_sha256": "6e81245f3c1ca3008f9e92ee175ca211c089c3a166be250d405e9123a18b47ff",
+    "payload_sha256": "c7ad9235b78b42134757a0f565af2ae403531669422f73f3ac89746ac1a4f0e7",
+    "platform": "macos/aarch64",
+    "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1"
+  }
+}

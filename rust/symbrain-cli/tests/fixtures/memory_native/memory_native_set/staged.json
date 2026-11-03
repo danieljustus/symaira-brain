@@ -1,0 +1,87 @@
+{
+  "payload": {
+    "config": "ollama.url = \"{EMBED}\"\n",
+    "db": [
+      "== memories (2 rows)",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"the sky is blue today\"|content_hash=\"4cf85386fa562bc95ad75f6a4423cced93279887d2ad19a9c9b3cc348ca672a9\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"\"|embedding_quantization=\"\"|embedding_source=\"hash-fallback\"|expires_at=NULL|id=\"5e27c5d3-3ffc-49f1-9c58-74794f4c068f\"|importance=0.0|kind=\"reference\"|last_access=NULL|lsh_hash=57271|metadata=\"{\\\"authority\\\":\\\"direct\\\",\\\"confidence\\\":\\\"high\\\",\\\"observed_at\\\":\\\"<isots>\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_tool\\\":\\\"symbrain-cli\\\",\\\"source_type\\\":\\\"direct\\\",\\\"source_uri\\\":\\\"\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"the sky is blue today\"|content_hash=\"4cf85386fa562bc95ad75f6a4423cced93279887d2ad19a9c9b3cc348ca672a9\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.57735026,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"\"|embedding_quantization=\"\"|embedding_source=\"hash-fallback\"|expires_at=NULL|id=\"<id1>\"|importance=0.0|kind=\"reference\"|last_access=NULL|lsh_hash=57271|metadata=\"{\\\"authority\\\":\\\"direct\\\",\\\"confidence\\\":\\\"high\\\",\\\"observed_at\\\":\\\"<isots>\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_tool\\\":\\\"symbrain-cli\\\",\\\"source_type\\\":\\\"direct\\\",\\\"source_uri\\\":\\\"\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"staged\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "== entities (0 rows)",
+      "== entities_aliases (0 rows)",
+      "== memory_entities (0 rows)",
+      "== audit_log (2 rows)",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"72558d6b-91cf-4ea7-bf0b-38f544580e7a\"|memory_id=\"5e27c5d3-3ffc-49f1-9c58-74794f4c068f\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"<id2>\"|memory_id=\"<id1>\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "== memory_evidence (0 rows)",
+      "== rules (0 rows)",
+      "== query_log (0 rows)",
+      "== sync_oplog (5 rows)",
+      "event_id=1|memory_id=\"5e27c5d3-3ffc-49f1-9c58-74794f4c068f\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=2|memory_id=\"5e27c5d3-3ffc-49f1-9c58-74794f4c068f\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=3|memory_id=\"<id1>\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=4|memory_id=\"<id1>\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=5|memory_id=\"<id1>\"|op=\"upsert\"|ts=\"<isots>\""
+    ],
+    "mutate_sql": [],
+    "requests": {
+      "embed": [],
+      "llm": []
+    },
+    "scenario": "staged",
+    "seed_file": "staged.seed.db",
+    "seed_sha256": "f4e07c7bd9230c3315ec0e2026a911517d15b770a8a7b744873448412538ed10",
+    "seed_steps": [
+      [
+        "set",
+        "the sky is blue today",
+        "--kind",
+        "reference",
+        "--db",
+        "{DB}"
+      ]
+    ],
+    "steps": [
+      {
+        "argv": [
+          "set",
+          "the sky is blue today",
+          "--kind",
+          "reference",
+          "--db",
+          "{DB}",
+          "--staged",
+          "--json"
+        ],
+        "code": 0,
+        "stderr": "",
+        "stdout": "{\"id\":\"<id1>\",\"scope\":\"global\",\"kind\":\"reference\",\"staged\":true}\n"
+      }
+    ],
+    "tree": [
+      "dir home 755",
+      "file memory.db 600",
+      "dir work 755",
+      "dir xdg 755",
+      "dir xdg/cache 755",
+      "dir xdg/config 755",
+      "dir xdg/config/symmemory 755",
+      "file xdg/config/symmemory/config.toml 644",
+      "dir xdg/data 755",
+      "dir xdg/state 755"
+    ]
+  },
+  "provenance": {
+    "go_source": {
+      "git_head": "b9b5b85b8488a96f8c3c79530d4edec73434c13a",
+      "go_mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+      "go_sum": "d527200e8f13fd16eb27b802bbe5b6ee19cd6a0c",
+      "tree_cmd": "6a47d5ab34dcd2f8e676684bd4a349da152765e9",
+      "tree_internal": "8ebcacdf27d3e1dc2e9d2a1d5b4e1d04ac57f5fe"
+    },
+    "go_version": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/MEM-NATIVE/oracle/symbrain: go1.27.3",
+    "kind": "go-oracle-recording",
+    "oracle_sha256": "6e81245f3c1ca3008f9e92ee175ca211c089c3a166be250d405e9123a18b47ff",
+    "payload_sha256": "f82a291810e27f415fd74c5219af22fb3d909a866dcb211011c5370d82600c38",
+    "platform": "macos/aarch64",
+    "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1"
+  }
+}
