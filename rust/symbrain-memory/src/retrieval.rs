@@ -236,7 +236,7 @@ fn composite_score(
 }
 
 /// The shipped `CosineSimilarity`, accumulated in `float64` and narrowed once.
-fn cosine_similarity(left: &[f32], right: &[f32]) -> f32 {
+pub(crate) fn cosine_similarity(left: &[f32], right: &[f32]) -> f32 {
     if left.len() != right.len() || left.is_empty() {
         return 0.0;
     }
