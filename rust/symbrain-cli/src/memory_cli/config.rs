@@ -104,7 +104,9 @@ fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
             };
             item = next;
         }
-        if item.is_none() || (!matches!(kind, Kind::PointerBool) && is_zero(item)) {
+        // configkit v0.18.2 applies present values, including false, zero and
+        // empty strings.
+        if item.is_none() {
             continue;
         }
         config_value::validate_item(kind, item)?;
@@ -119,13 +121,6 @@ fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
         }
     }
     Some(())
-}
-
-fn is_zero(item: &toml_edit::Item) -> bool {
-    item.as_str().is_some_and(str::is_empty)
-        || item.as_integer() == Some(0)
-        || item.as_float() == Some(0.0)
-        || item.as_bool() == Some(false)
 }
 
 fn apply(config: &mut Config, path: &str, value: &str) {

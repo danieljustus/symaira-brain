@@ -607,6 +607,8 @@ pub struct Compared {
     pub rust: Vec<Outcome>,
     pub go_requests: (Vec<RecordedRequest>, Vec<RecordedRequest>),
     pub rust_requests: (Vec<RecordedRequest>, Vec<RecordedRequest>),
+    /// Normalized database snapshot after the steps (identical for both).
+    pub db: Vec<String>,
 }
 
 fn expand(args: &[OsString], db: &Path) -> Vec<OsString> {
@@ -692,6 +694,7 @@ pub fn compare(scenario: &Scenario<'_>) -> Compared {
         rust: Vec::new(),
         go_requests: (Vec::new(), Vec::new()),
         rust_requests: (Vec::new(), Vec::new()),
+        db: Vec::new(),
     };
     let mut snapshots: Vec<(Vec<String>, Vec<String>, Vec<Vec<u8>>, Vec<Vec<u8>>)> = Vec::new();
     let known = seed_db.as_deref().map(known_ids).unwrap_or_default();
@@ -815,6 +818,7 @@ pub fn compare(scenario: &Scenario<'_>) -> Compared {
     }
     assert_eq!(go_db, rs_db, "{}: database state", scenario.name);
     assert_eq!(go_tree, rs_tree, "{}: created files", scenario.name);
+    compared.db = go_db.clone();
     if let Some(seed) = seed_db {
         let _ = std::fs::remove_file(seed);
     }

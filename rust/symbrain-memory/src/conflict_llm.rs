@@ -124,8 +124,32 @@ fn query_ollama(settings: &LlmSettings, system: &str, prompt: &str) -> Result<St
                 Ok(())
             },
         )
-        .map_err(|error| wrap(error.to_string()))?;
+        .map_err(|error| {
+            wrap(go_transport(
+                &error,
+                &format!("{}/api/generate", ollama_root(base)),
+            ))
+        })?;
     Ok(out)
+}
+
+/// Renders a transport failure the way Go's `net/http` client does, for the
+/// failure class that can be observed without waiting on a timeout.
+fn go_transport(error: &symaira_core_llm::Error, url: &str) -> String {
+    if error.code == symaira_core_llm::ErrorCode::TransportError
+        && error.status_code == 0
+        && error.body.is_empty()
+        && error.detail.to_lowercase().contains("connection refused")
+    {
+        let host = url
+            .split_once("://")
+            .and_then(|(_, rest)| rest.split('/').next())
+            .unwrap_or_default();
+        return format!(
+            "llmkit: transport_error: Post \"{url}\": dial tcp {host}: connect: connection refused"
+        );
+    }
+    error.to_string()
 }
 
 fn query_openai(system: &str, prompt: &str) -> Result<String, String> {

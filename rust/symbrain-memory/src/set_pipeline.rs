@@ -44,6 +44,20 @@ pub struct CliSet {
     pub conflict: ConflictConfig,
 }
 
+/// How the shipped SQLite driver renders a statement failure:
+/// `<primary code text>: <message> (<extended code>)`.
+pub(crate) fn go_sqlite_error(error: &rusqlite::Error) -> String {
+    match error {
+        rusqlite::Error::SqliteFailure(failure, message) => format!(
+            "{}: {} ({})",
+            rusqlite::ffi::code_to_str(failure.extended_code & 0xff),
+            message.clone().unwrap_or_default(),
+            failure.extended_code
+        ),
+        other => other.to_string(),
+    }
+}
+
 /// A byte string bound as SQLite text (the statement wraps it in `CAST`).
 pub(crate) struct Bytes<'a>(pub &'a [u8]);
 
@@ -195,7 +209,7 @@ fn insert(conn: &Connection, row: &Row<'_>) -> Result<(), String> {
             superseded,
         ],
     )
-    .map_err(|error| error.to_string())?;
+    .map_err(|error| go_sqlite_error(&error))?;
     audit(conn, "set", row.id, row.scope, row.author, "");
     Ok(())
 }
@@ -362,7 +376,7 @@ impl Pipeline<'_> {
                         "failed to mark memory superseded",
                         &[
                             ("loser", &resolution.loser_id),
-                            ("error", &error.to_string()),
+                            ("error", &go_sqlite_error(&error)),
                         ],
                     );
                     continue;
@@ -519,18 +533,22 @@ impl Store {
         }
 
         // SetGoverned.
-        let affected = conn.execute(
-            "UPDATE memories SET kind = ?, updated_at = ? WHERE id = ?",
-            params![request.kind, crate::gotime::format(Utc::now()), stored.id],
-        )?;
+        let affected = conn
+            .execute(
+                "UPDATE memories SET kind = ?, updated_at = ? WHERE id = ?",
+                params![request.kind, crate::gotime::format(Utc::now()), stored.id],
+            )
+            .map_err(|error| invalid(go_sqlite_error(&error)))?;
         if affected == 0 {
             return Err(invalid(format!("memory not found: {}", stored.id)));
         }
         if request.staged {
-            let affected = conn.execute(
-                "UPDATE memories SET review_status = 'staged', updated_at = ? WHERE id = ?",
-                params![crate::gotime::format(Utc::now()), stored.id],
-            )?;
+            let affected = conn
+                .execute(
+                    "UPDATE memories SET review_status = 'staged', updated_at = ? WHERE id = ?",
+                    params![crate::gotime::format(Utc::now()), stored.id],
+                )
+                .map_err(|error| invalid(go_sqlite_error(&error)))?;
             if affected == 0 {
                 return Err(invalid(format!("memory not found: {}", stored.id)));
             }

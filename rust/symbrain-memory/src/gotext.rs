@@ -117,15 +117,15 @@ impl GoView {
     }
 }
 
-/// Go's `strconv.Quote`-free JSON string body for raw bytes: invalid bytes
-/// become `\ufffd`, as `encoding/json` writes them.
+/// `encoding/json` string encoding of raw bytes under Go 1.27 (the v2 engine
+/// with v1 semantics): an invalid byte is written as a literal U+FFFD.
 pub(crate) fn json_string(bytes: &[u8]) -> String {
     let view = GoView::new(bytes);
     let mut out = String::with_capacity(view.text.len() + 2);
     out.push('"');
     for character in view.text.chars() {
         if view.placeholder(character).is_some() {
-            out.push_str("\\ufffd");
+            out.push('\u{fffd}');
             continue;
         }
         match character {
@@ -183,8 +183,8 @@ mod tests {
     #[test]
     fn json_strings_follow_encoding_json() {
         assert_eq!(
-            json_string(b"a&b<c>\"\\\n\xffz\x01"),
-            "\"a\\u0026b\\u003cc\\u003e\\\"\\\\\\n\\ufffdz\\u0001\""
+            json_string(b"a&b<c>\"\\\n\xffz\x01\x7f"),
+            "\"a\\u0026b\\u003cc\\u003e\\\"\\\\\\n\u{fffd}z\\u0001\x7f\""
         );
     }
 }
