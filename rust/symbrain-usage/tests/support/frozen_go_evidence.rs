@@ -154,7 +154,13 @@ pub fn in_child(module_path: &str, name: &str) {
         .map_or(module_path, |(_, rest)| rest);
     let test = format!("{relative}::{name}");
     let output = std::process::Command::new(std::env::current_exe().expect("test binary"))
-        .args([test.as_str(), "--exact", "--ignored", "--nocapture", "--test-threads=1"])
+        .args([
+            test.as_str(),
+            "--exact",
+            "--ignored",
+            "--nocapture",
+            "--test-threads=1",
+        ])
         .env("SYMBRAIN_FROZEN_EVIDENCE_CHILD", "1")
         .output()
         .expect("start child test process");
