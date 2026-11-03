@@ -468,9 +468,37 @@ def build_go_reference_binary(
     }
 
 
-def capture_fs_manifest(root: Path) -> list[dict[str, Any]]:
-    """Captures a complete sorted filesystem manifest of all entries under root."""
+def root_variants(root: Path) -> list[str]:
+    """Every spelling of a scratch root a child process may print."""
+    variants = {str(root), os.path.realpath(root)}
+    for item in list(variants):
+        if item.startswith("/private/"):
+            variants.add(item[len("/private"):])
+        elif item.startswith(("/var/", "/tmp/")):
+            variants.add("/private" + item)
+    return sorted(variants, key=len, reverse=True)
+
+
+def normalize_roots(data: bytes, run_root: Path, base_dir: Path) -> bytes:
+    """Replace the per-run scratch roots so recorded and replayed bytes compare."""
+    for variant in root_variants(run_root):
+        data = data.replace(variant.encode(), b"<RUN_ROOT>")
+    for variant in root_variants(base_dir / "tmp"):
+        data = data.replace(variant.encode(), b"<TMPDIR>")
+    # Seeds (absolute symlink targets) live beside the run roots.
+    for variant in root_variants(base_dir):
+        data = data.replace(variant.encode(), b"<BASE_DIR>")
+    return data
+
+
+def capture_fs_manifest(root: Path, normalize: Callable[[bytes], bytes] | None = None) -> list[dict[str, Any]]:
+    """Captures a complete sorted filesystem manifest of all entries under root.
+
+    ``normalize`` (record/replay modes) rewrites scratch-root spellings inside
+    file contents and symlink targets before they are measured.
+    """
     entries: list[dict[str, Any]] = []
+    fold = normalize or (lambda data: data)
     if not root.exists():
         return entries
 
@@ -480,7 +508,7 @@ def capture_fs_manifest(root: Path) -> list[dict[str, Any]]:
             p = dirpath_p / d
             rel = p.relative_to(root).as_posix()
             if p.is_symlink():
-                target = os.readlink(p)
+                target = fold(os.readlink(p).encode()).decode(errors="surrogateescape")
                 entries.append(
                     {
                         "path": rel,
@@ -502,7 +530,7 @@ def capture_fs_manifest(root: Path) -> list[dict[str, Any]]:
             p = dirpath_p / f
             rel = p.relative_to(root).as_posix()
             if p.is_symlink():
-                target = os.readlink(p)
+                target = fold(os.readlink(p).encode()).decode(errors="surrogateescape")
                 entries.append(
                     {
                         "path": rel,
@@ -512,7 +540,7 @@ def capture_fs_manifest(root: Path) -> list[dict[str, Any]]:
                 )
             else:
                 st = p.stat()
-                content = p.read_bytes()
+                content = fold(p.read_bytes())
                 entries.append(
                     {
                         "path": rel,
@@ -536,11 +564,17 @@ class CaseRunner:
         rust_binary: Path,
         base_dir: Path,
         case_timeout: float = TIMEOUT_CASE_SECONDS,
+        mode: str = "live",
+        recorded: dict[str, dict[str, Any]] | None = None,
     ) -> None:
         self.go_binary = go_binary
         self.rust_binary = rust_binary
         self.base_dir = base_dir
         self.case_timeout = case_timeout
+        # live: run Go and Rust (needs Go); record: run only Go and return its
+        # transcript; replay: compare Rust with a recorded Go transcript (no Go).
+        self.mode = mode
+        self.recorded = recorded or {}
 
     def run_case(
         self,
@@ -590,19 +624,56 @@ class CaseRunner:
 
         run_root = self.base_dir / "runs" / case_id / "root"
 
-        # --- GO EXECUTION ---
-        if run_root.exists():
-            shutil.rmtree(run_root)
-        run_root.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(seed_dir, run_root, symlinks=True)
+        scrub: Callable[[bytes], bytes] | None = None
+        if self.mode != "live":
+            scrub = lambda data: normalize_roots(data, run_root, self.base_dir)  # noqa: E731
 
-        cwd_path = run_root / working_sub_dir if working_sub_dir else run_root
-        cwd_path.mkdir(parents=True, exist_ok=True)
+        # --- GO EXECUTION (or recorded Go transcript) ---
+        if self.mode == "replay":
+            if case_id not in self.recorded:
+                raise KeyError(f"no recorded Go transcript for case {case_id!r}")
+            recorded_go = self.recorded[case_id]["go"]
+            go_cmd = list(recorded_go["argv"])
+            go_proc = ProcessResult(
+                go_cmd,
+                recorded_go["exit_code"],
+                base64.b64decode(recorded_go["stdout_b64"]),
+                base64.b64decode(recorded_go["stderr_b64"]),
+                recorded_go["timed_out"],
+            )
+            go_manifest = recorded_go["manifest"]
+        else:
+            if run_root.exists():
+                shutil.rmtree(run_root)
+            run_root.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(seed_dir, run_root, symlinks=True)
 
-        go_env = self._build_env(run_root, env_overrides, is_rust=False)
-        go_cmd = [str(self.go_binary), "init", *args]
-        go_proc = run_bounded(go_cmd, cwd=cwd_path, env=go_env, timeout=self.case_timeout)
-        go_manifest = capture_fs_manifest(run_root)
+            cwd_path = run_root / working_sub_dir if working_sub_dir else run_root
+            cwd_path.mkdir(parents=True, exist_ok=True)
+
+            go_env = self._build_env(run_root, env_overrides, is_rust=False)
+            go_cmd = [str(self.go_binary), "init", *args]
+            go_proc = run_bounded(go_cmd, cwd=cwd_path, env=go_env, timeout=self.case_timeout)
+            go_manifest = capture_fs_manifest(run_root, scrub)
+            if scrub is not None:
+                go_proc.stdout = scrub(go_proc.stdout)
+                go_proc.stderr = scrub(go_proc.stderr)
+                go_cmd = ["<go-binary>", "init", *args]
+            if self.mode == "record":
+                if run_root.exists():
+                    shutil.rmtree(run_root)
+                return {
+                    "case_id": case_id,
+                    "name": name,
+                    "go": {
+                        "argv": go_cmd,
+                        "exit_code": go_proc.returncode,
+                        "timed_out": go_proc.timed_out,
+                        "stdout_b64": base64.b64encode(go_proc.stdout).decode("ascii"),
+                        "stderr_b64": base64.b64encode(go_proc.stderr).decode("ascii"),
+                        "manifest": go_manifest,
+                    },
+                }
 
         # --- RUST EXECUTION ---
         if run_root.exists():
@@ -616,7 +687,10 @@ class CaseRunner:
         rust_env = self._build_env(run_root, env_overrides, is_rust=True)
         rust_cmd = [str(self.rust_binary), "init", *args]
         rust_proc = run_bounded(rust_cmd, cwd=cwd_path, env=rust_env, timeout=self.case_timeout)
-        rust_manifest = capture_fs_manifest(run_root)
+        rust_manifest = capture_fs_manifest(run_root, scrub)
+        if scrub is not None:
+            rust_proc.stdout = scrub(rust_proc.stdout)
+            rust_proc.stderr = scrub(rust_proc.stderr)
 
         # Clean run root
         if run_root.exists():
@@ -1180,7 +1254,100 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+FIXTURE_SCHEMA = 1
+
+
+def host_identity() -> dict[str, str]:
+    return {"os": sys.platform, "system": platform.system(), "architecture": platform.machine()}
+
+
+def record_main(argv: list[str]) -> int:
+    """Run ONLY the pinned Go reference (needs Go) and freeze its transcripts."""
+    parser = argparse.ArgumentParser(prog="compare.py record")
+    parser.add_argument("--fixture", type=Path, required=True)
+    parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--work-dir", type=Path)
+    args = parser.parse_args(argv)
+    repo_root = args.repo_root.resolve()
+    work = args.work_dir.resolve() if args.work_dir else repo_root / "target" / "init-oracle-record"
+    work.mkdir(parents=True, exist_ok=True)
+    verify_autocrlf_hostility_resilience(repo_root, PINNED_COMMIT_SHA)
+    go_src_dir = work / "go-source"
+    _, source_manifest = extract_and_verify_go_sources(repo_root, PINNED_COMMIT_SHA, go_src_dir)
+    go_bin_name = "symbrain-go.exe" if os.name == "nt" else "symbrain-go"
+    go_binary = work / "go-bin" / go_bin_name
+    go_info = build_go_reference_binary(go_src_dir, go_binary, work / "go-cache")
+    runner = CaseRunner(go_binary=go_binary, rust_binary=Path("/nonexistent"), base_dir=work, mode="record")
+    specs = get_case_specs()
+    cases = [
+        runner.run_case(spec.case_id, spec.name, spec.setup_seed, spec.args, spec.env_overrides, spec.working_sub_dir)
+        for spec in specs
+    ]
+    validate_case_inventory(specs, cases)
+    fixture = {
+        "schema_version": FIXTURE_SCHEMA,
+        "tool": "init-oracle-fixture",
+        "pinned_commit": PINNED_COMMIT_SHA,
+        "go_info": go_info,
+        "source_manifest": source_manifest,
+        "recorded_on": host_identity(),
+        "cases": cases,
+    }
+    args.fixture.parent.mkdir(parents=True, exist_ok=True)
+    args.fixture.write_text(json.dumps(fixture, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"init-oracle: recorded {len(cases)} Go transcripts to {args.fixture}")
+    return 0
+
+
+def replay_main(argv: list[str]) -> int:
+    """Compare the Rust binary with the frozen Go transcripts. No Go is used; a
+    missing/short fixture or a platform without a recording FAILS."""
+    parser = argparse.ArgumentParser(prog="compare.py replay")
+    parser.add_argument("--fixture", type=Path, required=True)
+    parser.add_argument("--rust-binary", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--work-dir", type=Path)
+    args = parser.parse_args(argv)
+    if not args.fixture.is_file():
+        print(f"init-oracle: FAIL missing frozen Go transcript {args.fixture} (record with `make record-init-differential`)", file=sys.stderr)
+        return 1
+    fixture = json.loads(args.fixture.read_text(encoding="utf-8"))
+    if fixture.get("schema_version") != FIXTURE_SCHEMA or fixture.get("pinned_commit") != PINNED_COMMIT_SHA:
+        print("init-oracle: FAIL fixture schema/pin mismatch", file=sys.stderr)
+        return 1
+    if fixture["recorded_on"]["os"] != sys.platform:
+        print(f"init-oracle: FAIL fixture recorded on {fixture['recorded_on']['os']}, running on {sys.platform}; record a transcript for this OS", file=sys.stderr)
+        return 1
+    rust_binary = args.rust_binary.resolve()
+    if not rust_binary.is_file():
+        raise FileNotFoundError(f"Rust binary not found: {rust_binary}")
+    recorded = {case["case_id"]: case for case in fixture["cases"]}
+    with tempfile.TemporaryDirectory(prefix="init-oracle-replay-") as scratch:
+        base = Path(args.work_dir.resolve() if args.work_dir else scratch)
+        base.mkdir(parents=True, exist_ok=True)
+        runner = CaseRunner(go_binary=Path("/nonexistent"), rust_binary=rust_binary, base_dir=base, mode="replay", recorded=recorded)
+        results = run_all_cases(runner)
+    passed = sum(1 for case in results if case["status"] == "pass")
+    failed = len(results) - passed
+    report = {"schema_version": 1, "tool": "init-oracle-replay", "pinned_commit": PINNED_COMMIT_SHA, "fixture": str(args.fixture),
+              "cases_total": len(results), "cases_passed": passed, "cases_failed": failed, "passed": failed == 0, "results": results}
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(f"init-oracle: {passed}/{len(results)} cases passed (replayed against frozen Go transcripts).")
+    for case in results:
+        if case["status"] != "pass":
+            print(f"FAIL: {case['case_id']} - {case['name']}")
+            for diff in case["diffs"]:
+                print(f"  {diff}")
+    return 1 if failed else 0
+
+
 def main(argv: list[str] | None = None) -> int:
+    raw = list(sys.argv[1:] if argv is None else argv)
+    if raw and raw[0] == "record":
+        return record_main(raw[1:])
+    if raw and raw[0] == "replay":
+        return replay_main(raw[1:])
     parser = build_parser()
     args = parser.parse_args(argv)
 
