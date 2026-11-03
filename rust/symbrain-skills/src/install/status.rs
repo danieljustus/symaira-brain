@@ -282,7 +282,7 @@ fn status_target(
             let skill_cap = root_cap
                 .open_dir_nofollow(&name_os)
                 .map_err(|error| SkillError(format!("open installed skill {name}: {error}")))?;
-            super::marker_go::read(&skill_cap)?
+            super::marker_go::read(&skill_cap)
         };
         let Some(observation) = observation else {
             rows.push(unmanaged(target, &name, path));

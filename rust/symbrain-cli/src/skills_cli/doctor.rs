@@ -35,6 +35,7 @@ struct Config<'a> {
 }
 
 #[derive(Debug, Serialize)]
+#[allow(clippy::struct_field_names)]
 struct Target {
     target: String,
     #[serde(serialize_with = "serialize_path")]

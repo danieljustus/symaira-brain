@@ -31,7 +31,7 @@ fn setup(name: &str, root: &Path) {
         "status_root_mode0" => {
             let skills = root.join("home/.claude/skills");
             std::fs::create_dir_all(&skills).unwrap();
-            std::fs::set_permissions(&skills, std::fs::Permissions::from_mode(0)).unwrap();
+            std::fs::set_permissions(&skills, std::fs::Permissions::from_mode(0o000)).unwrap();
         }
         "status_opencode_dangling_root" => {
             std::fs::create_dir_all(root.join("home/.config/opencode")).unwrap();
@@ -108,11 +108,11 @@ fn library_case(name: &str, root: &Path) {
         }
         "lib_skill_md_mode0" => {
             std::fs::write(&skill_md, OK).unwrap();
-            std::fs::set_permissions(&skill_md, std::fs::Permissions::from_mode(0)).unwrap();
+            std::fs::set_permissions(&skill_md, std::fs::Permissions::from_mode(0o000)).unwrap();
         }
         "lib_bundle_mode0" => {
             std::fs::write(&skill_md, OK).unwrap();
-            std::fs::set_permissions(&bad, std::fs::Permissions::from_mode(0)).unwrap();
+            std::fs::set_permissions(&bad, std::fs::Permissions::from_mode(0o000)).unwrap();
         }
         "lib_bad_utf8_frontmatter" => {
             std::fs::write(&skill_md, b"---\nname: x\ndescription: \xff\n---\n").unwrap();

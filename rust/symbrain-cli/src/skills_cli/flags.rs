@@ -192,7 +192,7 @@ fn underscore_ok(text: &[u8]) -> bool {
     {
         index = 2;
         saw = b'0';
-        hex = text[1].to_ascii_lowercase() == b'x';
+        hex = text[1].eq_ignore_ascii_case(&b'x');
     }
     for &byte in &text[index..] {
         if byte.is_ascii_digit() || (hex && matches!(byte.to_ascii_lowercase(), b'a'..=b'f')) {

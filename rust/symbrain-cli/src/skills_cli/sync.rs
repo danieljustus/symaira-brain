@@ -1,6 +1,7 @@
 //! `symbrain skills sync` (Go `cmdSkillsSync`).
 
 use std::ffi::OsString;
+use std::fmt::Write as _;
 use std::io::Write;
 
 use serde::Serialize;
@@ -84,10 +85,11 @@ fn table(results: &[SyncResult]) -> Vec<u8> {
         } else {
             &result.error
         };
-        text.push_str(&format!(
-            "{}\t{}\t{}\t{detail}\n",
+        let _ = writeln!(
+            text,
+            "{}\t{}\t{}\t{detail}",
             result.target, result.name, result.action
-        ));
+        );
     }
     text.into_bytes()
 }

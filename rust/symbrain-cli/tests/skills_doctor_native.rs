@@ -7,8 +7,6 @@
 mod coverage;
 
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
-use std::path::PathBuf;
 use std::process::{Command, Output};
 
 use serde_json::json;

@@ -327,20 +327,20 @@ pub(super) struct Observation {
 }
 
 /// Reads the marker below `root`; `None` when the file is absent.
-pub(super) fn read(root: &Dir) -> Result<Option<Observation>, SkillError> {
+pub(super) fn read(root: &Dir) -> Option<Observation> {
     match root.symlink_metadata(MARKER_FILE) {
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return None,
         Err(error) => {
-            return Ok(Some(Observation {
+            return Some(Observation {
                 marker: empty(),
                 error: Some(error.to_string()),
-            }));
+            });
         }
         Ok(metadata) if metadata.file_type().is_symlink() => {
-            return Ok(Some(Observation {
+            return Some(Observation {
                 marker: empty(),
                 error: Some("marker is a symlink".to_owned()),
-            }));
+            });
         }
         Ok(_) => {}
     }
@@ -352,11 +352,11 @@ pub(super) fn read(root: &Dir) -> Result<Option<Observation>, SkillError> {
         "marker",
         crate::MAX_INPUT_SIZE,
     ) {
-        Ok(bytes) => Ok(Some(decode(&bytes))),
-        Err(error) => Ok(Some(Observation {
+        Ok(bytes) => Some(decode(&bytes)),
+        Err(error) => Some(Observation {
             marker: empty(),
             error: Some(error.to_string()),
-        })),
+        }),
     }
 }
 
@@ -372,7 +372,7 @@ pub(super) fn read_at_path(path: &Path) -> Result<Option<Observation>, SkillErro
             )));
         }
     };
-    read(&root)
+    Ok(read(&root))
 }
 
 fn empty() -> Marker {

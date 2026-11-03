@@ -206,6 +206,26 @@ fn parse_frontmatter(text: &str) -> Result<Frontmatter, SkillError> {
     })
 }
 
+/// The frontmatter root as a mapping, or go-yaml's decode error for
+/// `map[string]yaml.Node`.
+fn root_mapping<'a>(
+    value: &'a serde_yaml_ng::Value,
+    text: &str,
+) -> Result<&'a serde_yaml_ng::Mapping, SkillError> {
+    let (tag, shown) = match value {
+        serde_yaml_ng::Value::Mapping(map) => return Ok(map),
+        serde_yaml_ng::Value::String(scalar) => ("!!str", scalar.as_str()),
+        serde_yaml_ng::Value::Number(number) => (
+            if number.is_f64() { "!!float" } else { "!!int" },
+            text.trim(),
+        ),
+        serde_yaml_ng::Value::Bool(_) => ("!!bool", text.trim()),
+        serde_yaml_ng::Value::Sequence(_) => ("!!seq", ""),
+        _ => return Err(SkillError("frontmatter must be a mapping".into())),
+    };
+    Err(SkillError(crate::yaml_go::not_a_mapping(tag, shown)))
+}
+
 fn parse_frontmatter_fields(text: &str) -> Result<Frontmatter, SkillError> {
     let value: serde_yaml_ng::Value = serde_yaml_ng::from_str(text).map_err(|error| {
         let message = error.to_string();
@@ -215,26 +235,7 @@ fn parse_frontmatter_fields(text: &str) -> Result<Frontmatter, SkillError> {
             .unwrap_or(message);
         SkillError(format!("{FRONTMATTER_PREFIX}{go}"))
     })?;
-    let map = match &value {
-        serde_yaml_ng::Value::Mapping(map) => map,
-        serde_yaml_ng::Value::String(scalar) => {
-            return Err(SkillError(crate::yaml_go::not_a_mapping("!!str", scalar)));
-        }
-        serde_yaml_ng::Value::Number(number) => {
-            let tag = if number.is_f64() { "!!float" } else { "!!int" };
-            return Err(SkillError(crate::yaml_go::not_a_mapping(tag, text.trim())));
-        }
-        serde_yaml_ng::Value::Bool(_) => {
-            return Err(SkillError(crate::yaml_go::not_a_mapping(
-                "!!bool",
-                text.trim(),
-            )));
-        }
-        serde_yaml_ng::Value::Sequence(_) => {
-            return Err(SkillError(crate::yaml_go::not_a_mapping("!!seq", "")));
-        }
-        _ => return Err(SkillError("frontmatter must be a mapping".into())),
-    };
+    let map = root_mapping(&value, text)?;
     let string = |name: &str| -> Result<String, SkillError> {
         let Some(value) = map.get(serde_yaml_ng::Value::String(name.into())) else {
             return Ok(String::new());

@@ -7,6 +7,7 @@
 //! reported with Go's bytes.
 
 use std::collections::BTreeMap;
+use std::fmt::Write as _;
 
 /// Go's `parser.fail` text for a libyaml syntax error reported by serde.
 ///
@@ -62,10 +63,11 @@ pub(crate) fn duplicate_key_text(text: &str) -> Option<String> {
             continue;
         }
         if let Some(first) = seen.get(key) {
-            lines.push_str(&format!(
+            let _ = write!(
+                lines,
                 "\n  line {}: mapping key \"{key}\" already defined at line {first}",
                 index + 1
-            ));
+            );
         } else {
             seen.insert(key, index + 1);
         }

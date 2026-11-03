@@ -1,6 +1,7 @@
 //! `symbrain skills log` (Go `cmdSkillsLog`).
 
 use std::ffi::OsString;
+use std::fmt::Write as _;
 use std::io::Write;
 
 use symbrain_core::exit;
@@ -70,14 +71,15 @@ fn table(records: &[OperationEvent]) -> Vec<u8> {
     }
     let mut text = String::from("WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n");
     for event in records {
-        text.push_str(&format!(
-            "{}\t{}\t{}\t{}\t{}\n",
+        let _ = writeln!(
+            text,
+            "{}\t{}\t{}\t{}\t{}",
             event.ts,
             event.event,
             or_dash(&event.skill),
             or_dash(&event.target),
             event.outcome
-        ));
+        );
     }
     text.into_bytes()
 }

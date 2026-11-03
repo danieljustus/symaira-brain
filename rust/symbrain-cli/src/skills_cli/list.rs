@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::ffi::OsString;
+use std::fmt::Write as _;
 use std::io::Write;
 
 use serde::Serialize;
@@ -100,13 +101,14 @@ fn table(report: &Report) -> Vec<u8> {
         } else {
             targets.join(",")
         };
-        text.push_str(&format!(
-            "{}\t{}\t{}\t{}\n",
+        let _ = writeln!(
+            text,
+            "{}\t{}\t{}\t{}",
             skill.name,
             or_dash(&skill.category),
             installed,
             skill.description.replace(['\t', '\r', '\n'], " ")
-        ));
+        );
     }
     text.into_bytes()
 }
