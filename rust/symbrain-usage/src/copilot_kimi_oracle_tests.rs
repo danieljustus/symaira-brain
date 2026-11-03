@@ -111,6 +111,12 @@ fn normalized_requests(requests: &serde_json::Value) -> serde_json::Value {
 }
 #[test]
 fn copilot_kimi_oracle_matches_frozen_go() {
+    frozen::in_child(module_path!(), "copilot_kimi_oracle_replay");
+}
+
+#[test]
+#[ignore = "child process of copilot_kimi_oracle_matches_frozen_go (mutates process environment)"]
+fn copilot_kimi_oracle_replay() {
     // Recorded on darwin; the credential tree, owners and paths are platform specific.
     if !cfg!(target_os = "macos") {
         eprintln!("SKIP frozen Copilot/Kimi evidence was recorded on darwin; running elsewhere");

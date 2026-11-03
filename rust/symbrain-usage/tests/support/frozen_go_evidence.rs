@@ -144,3 +144,24 @@ pub fn install_fake_symvault(bin_dir: &Path) {
         set_mode(&path, 0o755);
     }
 }
+
+/// Run `module_path::name` (an `#[ignore]`d sibling test) in a child process of the current test
+/// binary. The replays mutate process-wide environment variables, which would race with every
+/// other test in a shared library test binary; a child isolates them without `serial` machinery.
+pub fn in_child(module_path: &str, name: &str) {
+    let relative = module_path
+        .split_once("::")
+        .map_or(module_path, |(_, rest)| rest);
+    let test = format!("{relative}::{name}");
+    let output = std::process::Command::new(std::env::current_exe().expect("test binary"))
+        .args([test.as_str(), "--exact", "--ignored", "--nocapture", "--test-threads=1"])
+        .env("SYMBRAIN_FROZEN_EVIDENCE_CHILD", "1")
+        .output()
+        .expect("start child test process");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output.status.success() && stdout.contains("1 passed"),
+        "child {test} failed:\n{stdout}\n{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+}

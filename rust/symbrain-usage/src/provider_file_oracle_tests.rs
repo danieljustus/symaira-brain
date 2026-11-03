@@ -64,6 +64,12 @@ fn prepare(record: &serde_json::Value) {
 }
 #[test]
 fn provider_files_oracle_matches_frozen_go() {
+    frozen::in_child(module_path!(), "provider_files_oracle_replay");
+}
+
+#[test]
+#[ignore = "child process of provider_files_oracle_matches_frozen_go (mutates process environment)"]
+fn provider_files_oracle_replay() {
     // Recorded on darwin; the credential tree and paths are platform specific.
     if !cfg!(target_os = "macos") {
         eprintln!("SKIP frozen provider-file evidence was recorded on darwin; running elsewhere");

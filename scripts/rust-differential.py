@@ -6187,7 +6187,14 @@ def main() -> int:
         if not cases:
             print(f"no parity case matches prefix {case_prefix!r}", file=sys.stderr)
             return 2
-    if mode == "replay" and not case_prefix:
+    # Verification aid, never set by the Makefile or CI: drop whole case families (comma-separated
+    # prefixes) whose native owner has not landed on this branch yet, e.g. `memory_`.
+    excluded_prefixes = tuple(p for p in os.environ.get("SYMBRAIN_DIFFERENTIAL_EXCLUDE_PREFIX", "").split(",") if p)
+    if excluded_prefixes:
+        dropped = [case.name for case in cases if case.name.startswith(excluded_prefixes)]
+        cases = tuple(case for case in cases if not case.name.startswith(excluded_prefixes))
+        print(f"EXCLUDED {len(dropped)} cases by SYMBRAIN_DIFFERENTIAL_EXCLUDE_PREFIX={','.join(excluded_prefixes)}")
+    if mode == "replay" and not case_prefix and not excluded_prefixes:
         expected_names = [case.name for case in cases]
         missing = [name for name in expected_names if name not in recorded]
         extra = sorted(set(recorded) - set(expected_names) - {name for name, _ in skipped_cases})
