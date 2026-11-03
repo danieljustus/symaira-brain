@@ -613,7 +613,7 @@ def _install_windows_stub(path: Path) -> None:
 
 
 def _managed_cores() -> dict[str, dict[str, object]]:
-    manifest_path = Path(__file__).resolve().parent.parent / "internal/managed/manifest.json"
+    manifest_path = Path(__file__).resolve().parent.parent / "rust/symbrain-cli/tests/fixtures/managed_manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     cores = manifest.get("cores")
     if not isinstance(cores, dict):

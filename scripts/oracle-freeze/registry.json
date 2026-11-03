@@ -1686,6 +1686,25 @@
    "go_inputs": [
     "go.mod"
    ]
+  },
+  {
+   "id": "managed-manifest-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo managed core manifest (internal/managed/manifest.json) read by the black-box differential",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/managed_manifest.json"
+   ],
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-cli/tests/fixtures/managed_manifest.json": "internal/managed/manifest.json"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "go_inputs": [
+    "internal/managed/manifest.json"
+   ]
   }
  ]
 }
