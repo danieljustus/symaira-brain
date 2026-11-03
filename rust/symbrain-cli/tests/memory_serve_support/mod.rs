@@ -13,8 +13,110 @@ use std::time::{Duration, Instant};
 pub const SECRET: &str = "differential-test-secret-0123456789abcdef";
 pub const FIXED_TIME: &str = "2030-01-02T03:04:05Z";
 
+/// The Go binary used ONLY to record fixtures
+/// (`SYMBRAIN_MEMORY_FIXTURE_RECORD=1` plus `SYMBRAIN_MEMORY_SERVE_GO_ORACLE`).
 pub fn oracle() -> Option<PathBuf> {
     std::env::var_os("SYMBRAIN_MEMORY_SERVE_GO_ORACLE").map(PathBuf::from)
+}
+
+pub fn record_mode() -> bool {
+    std::env::var("SYMBRAIN_MEMORY_FIXTURE_RECORD").is_ok_and(|value| value == "1")
+}
+
+/// Directory of the frozen Go observations of this test binary.
+pub fn fixture_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/memory_native/memory_serve_oracle")
+}
+
+fn digest(bytes: &[u8]) -> String {
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+fn git(args: &[&str]) -> String {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    Command::new("git")
+        .arg("-C")
+        .arg(root)
+        .args(args)
+        .output()
+        .map(|out| String::from_utf8_lossy(&out.stdout).trim().to_owned())
+        .unwrap_or_default()
+}
+
+fn provenance(name: &str, command: &str, oracle_bin: &Path) -> serde_json::Value {
+    let dirty = git(&["status", "--porcelain", "--", "cmd", "internal", "go.mod", "go.sum"]);
+    assert!(dirty.is_empty(), "recording needs a clean Go source tree:\n{dirty}");
+    let version = Command::new("go")
+        .arg("version")
+        .arg(oracle_bin)
+        .output()
+        .map(|out| String::from_utf8_lossy(&out.stdout).trim().to_owned())
+        .unwrap_or_default();
+    let seed = std::fs::read(fixture_dir().join("seed.db")).unwrap_or_default();
+    serde_json::json!({
+        "kind": "go-oracle-recording",
+        "fixture": name,
+        "command": command,
+        "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1 SYMBRAIN_MEMORY_SERVE_GO_ORACLE=<go build of ./cmd/symbrain>",
+        "go_source": {
+            "git_head": git(&["rev-parse", "HEAD"]),
+            "tree_cmd": git(&["rev-parse", "HEAD:cmd"]),
+            "tree_internal": git(&["rev-parse", "HEAD:internal"]),
+            "go_mod": git(&["rev-parse", "HEAD:go.mod"]),
+            "go_sum": git(&["rev-parse", "HEAD:go.sum"]),
+        },
+        "go_version": version,
+        "platform": format!("{}/{}", std::env::consts::OS, std::env::consts::ARCH),
+        "oracle_sha256": digest(&std::fs::read(oracle_bin).unwrap_or_default()),
+        "seed_sha256": digest(&seed),
+    })
+}
+
+/// The Go behavior of one differential case, frozen. Replay reads the
+/// recording (no Go involved); with `SYMBRAIN_MEMORY_FIXTURE_RECORD=1` the Go
+/// binary runs once and the recording is rewritten.
+pub fn frozen<T>(name: &str, command: &str, go: impl FnOnce(&Path) -> T) -> T
+where
+    T: serde::Serialize + serde::de::DeserializeOwned,
+{
+    let path = fixture_dir().join(format!("{name}.json"));
+    if record_mode() {
+        let oracle = oracle().expect("recording needs SYMBRAIN_MEMORY_SERVE_GO_ORACLE");
+        let value = go(&oracle);
+        let payload = serde_json::to_value(&value).expect("payload");
+        let mut provenance = provenance(name, command, &oracle);
+        provenance["payload_sha256"] =
+            serde_json::Value::String(digest(serde_json::to_string(&payload).expect("payload").as_bytes()));
+        std::fs::create_dir_all(fixture_dir()).expect("fixture directory");
+        std::fs::write(
+            &path,
+            serde_json::to_string_pretty(&serde_json::json!({"provenance": provenance, "payload": payload}))
+                .expect("fixture")
+                + "\n",
+        )
+        .expect("write fixture");
+        return value;
+    }
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|error| {
+        panic!("missing Go-oracle fixture {} ({error}); record it with SYMBRAIN_MEMORY_FIXTURE_RECORD=1", path.display())
+    });
+    let document: serde_json::Value = serde_json::from_str(&text).expect("fixture json");
+    assert_eq!(
+        document["provenance"]["payload_sha256"].as_str(),
+        Some(digest(serde_json::to_string(&document["payload"]).expect("payload").as_bytes()).as_str()),
+        "{name}: fixture payload digest"
+    );
+    assert_eq!(document["provenance"]["kind"], "go-oracle-recording");
+    let seed = std::fs::read(fixture_dir().join("seed.db")).unwrap_or_default();
+    assert_eq!(
+        document["provenance"]["seed_sha256"].as_str(),
+        Some(digest(&seed).as_str()),
+        "{name}: recorded against a different seed database"
+    );
+    serde_json::from_value(document["payload"].clone()).expect("fixture payload")
 }
 
 pub fn rust_binary() -> PathBuf {
