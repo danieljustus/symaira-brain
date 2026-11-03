@@ -1,0 +1,43 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_26",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://[::ffff:127.0.0.1]:1/",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: pull from http://[::ffff:127.0.0.1]:1/: request http://[::ffff:127.0.0.1]:1: Get \"http://[::ffff:127.0.0.1]:1/api/sync/changes?limit=500\": dial tcp 127.0.0.1:1: connect: connection refused\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://[::ffff:127.0.0.1]:1/",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

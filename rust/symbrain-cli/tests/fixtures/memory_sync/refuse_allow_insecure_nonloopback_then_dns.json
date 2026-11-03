@@ -1,0 +1,45 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_allow_insecure_nonloopback_then_dns",
+ "note": "validation passes; the request fails to resolve",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://example.test",
+    "--allow-insecure-http",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "WARNING: --allow-insecure-http is set: bearer tokens will be sent in the clear to http://example.test\nsymbrain memory sync: pull from http://example.test: request http://example.test: Get \"http://example.test/api/sync/changes?limit=500\": dial tcp: lookup example.test: no such host\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://example.test",
+    "--allow-insecure-http",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

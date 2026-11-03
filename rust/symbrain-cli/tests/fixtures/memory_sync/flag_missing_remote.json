@@ -1,0 +1,39 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "flag_missing_remote",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 2,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: --remote is required\nsymbrain memory sync — synchronize the embedded memory store with a remote\n\nUsage:\n  symbrain memory sync --remote <url> [flags]\n\nFlags:\n  --remote <url>          Base URL of the remote memory server (required).\n                          Must use https, except http://localhost or\n                          127.0.0.1 for local development.\n  --pull                  Only pull remote changes into the local database.\n  --push                  Only push local changes to the remote server.\n                          (With neither flag, both directions run.)\n  --token <token>         Bearer token for the remote API. May come from\n                          $SYMBRAIN_MEMORY_SYNC_TOKEN instead; never pass it on the command line in\n                          shared shells.\n  --encrypted-relay       Exchange client-side AES-256-GCM encrypted blobs\n                          through the remote /api/sync/relay endpoint, so the\n                          relay never sees plaintext memory content.\n  --relay-passphrase <p>  Passphrase for --encrypted-relay. May come from\n                          $SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE instead. Both peers must share it.\n  --allow-insecure-http   Override the https requirement for non-loopback\n                          remotes. Bearer tokens will be sent in the clear;\n                          a WARNING is printed. Use only for testing.\n  --db <path>             Database path override (default: the standard\n                          memory database under the XDG data directory).\n  --timeout <duration>    Per-run HTTP timeout (default 60s).\n\nThe local database and its per-remote sync cursors are reused in place;\nno export or import step is needed.\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

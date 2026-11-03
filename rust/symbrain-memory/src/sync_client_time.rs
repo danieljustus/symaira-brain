@@ -252,6 +252,7 @@ fn getnum(text: &str, fixed: bool) -> Option<(u32, &str)> {
 ///
 /// # Errors
 /// The `*time.ParseError` text.
+#[allow(clippy::too_many_lines)] // One transcription of Go's `parseRFC3339`.
 pub fn parse_rfc3339(value: &str) -> Result<GoTime, String> {
     let mut rest = value;
     // stdLongYear
@@ -436,9 +437,7 @@ fn parse_date_time(text: &str, with_time: bool, with_seconds: bool) -> Option<Pa
     let (mut hour, mut minute, mut second, mut nanos) = (0, 0, 0, 0);
     let mut rest = rest;
     if with_time {
-        rest = rest
-            .strip_prefix(' ')
-            .or_else(|| rest.strip_prefix('T'))?;
+        rest = rest.strip_prefix(' ').or_else(|| rest.strip_prefix('T'))?;
         let (h, tail) = getnum(rest, false)?;
         let tail = tail.strip_prefix(':')?;
         let (m, tail) = digits_n(tail, 2)?;
@@ -508,7 +507,7 @@ fn assemble(parts: &Parts<'_>, offset: i32, zone: &str) -> Option<GoTime> {
 /// `2006-01-02 15:04:05.999999999 -0700 MST`.
 fn parse_string_form(text: &str) -> Option<GoTime> {
     let parts = parse_date_time(text, true, true)?;
-    if !text.as_bytes().get(10).is_some_and(|byte| *byte == b' ') {
+    if text.as_bytes().get(10).is_none_or(|byte| *byte != b' ') {
         return None;
     }
     let rest = parts.rest.strip_prefix(' ')?;
@@ -575,11 +574,17 @@ mod tests {
         let zoned = parse_rfc3339("2026-10-26T03:02:03+02:00").unwrap();
         assert_eq!(zoned.to_go_string(), "2026-10-26 03:02:03 +0200 +0200");
         assert_eq!(zoned.to_rfc3339_nano(), "2026-10-26T03:02:03+02:00");
-        assert_eq!(zoned.instant(), parse_rfc3339("2026-10-26T01:02:03Z").unwrap().instant());
+        assert_eq!(
+            zoned.instant(),
+            parse_rfc3339("2026-10-26T01:02:03Z").unwrap().instant()
+        );
         let back = parse_stored(&zoned.to_go_string()).unwrap();
         assert_eq!(back, zoned.clone());
         assert_eq!(back.to_rfc3339_nano(), "2026-10-26T03:02:03+02:00");
-        assert_eq!(GoTime::zero().to_go_string(), "0001-01-01 00:00:00 +0000 UTC");
+        assert_eq!(
+            GoTime::zero().to_go_string(),
+            "0001-01-01 00:00:00 +0000 UTC"
+        );
     }
 
     #[test]
@@ -601,7 +606,10 @@ mod tests {
             r#"parsing time "2026-02-30T01:02:03Z": day out of range"#
         );
         assert!(parse_rfc3339("2026-10-26T1:02:03,5+24:00").is_ok());
-        assert_eq!(unmarshal_json("5").unwrap_err(), "Time.UnmarshalJSON: input is not a JSON string");
+        assert_eq!(
+            unmarshal_json("5").unwrap_err(),
+            "Time.UnmarshalJSON: input is not a JSON string"
+        );
     }
 
     #[test]

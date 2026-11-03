@@ -75,7 +75,9 @@ fn text_col(row: &Row<'_>, index: usize, name: &str) -> Result<String, String> {
             name,
             "converting NULL to string is unsupported",
         )),
-        ValueRef::Text(bytes) | ValueRef::Blob(bytes) => Ok(String::from_utf8_lossy(bytes).into_owned()),
+        ValueRef::Text(bytes) | ValueRef::Blob(bytes) => {
+            Ok(String::from_utf8_lossy(bytes).into_owned())
+        }
         ValueRef::Integer(number) => Ok(number.to_string()),
         ValueRef::Real(number) => Ok(format!("{number}")),
     }
@@ -85,7 +87,9 @@ fn opt_text_col(row: &Row<'_>, index: usize) -> Result<String, String> {
     let value = row.get_ref(index).map_err(|error| error.to_string())?;
     Ok(match value {
         ValueRef::Null => String::new(),
-        ValueRef::Text(bytes) | ValueRef::Blob(bytes) => String::from_utf8_lossy(bytes).into_owned(),
+        ValueRef::Text(bytes) | ValueRef::Blob(bytes) => {
+            String::from_utf8_lossy(bytes).into_owned()
+        }
         ValueRef::Integer(number) => number.to_string(),
         ValueRef::Real(number) => format!("{number}"),
     })
@@ -103,12 +107,23 @@ fn float_col(row: &Row<'_>, index: usize, name: &str) -> Result<f64, String> {
                 scan_error(
                     index,
                     name,
-                    &format!("converting driver.Value type string ({}) to a float64: invalid syntax", crate::sync_client_scan::go_quote(&text)),
+                    &format!(
+                        "converting driver.Value type string ({}) to a float64: invalid syntax",
+                        crate::sync_client_scan::go_quote(&text)
+                    ),
                 )
             })
         }
-        ValueRef::Null => Err(scan_error(index, name, "converting NULL to float64 is unsupported")),
-        ValueRef::Blob(_) => Err(scan_error(index, name, "converting driver.Value type []uint8 to a float64: invalid syntax")),
+        ValueRef::Null => Err(scan_error(
+            index,
+            name,
+            "converting NULL to float64 is unsupported",
+        )),
+        ValueRef::Blob(_) => Err(scan_error(
+            index,
+            name,
+            "converting driver.Value type []uint8 to a float64: invalid syntax",
+        )),
     }
 }
 
@@ -116,23 +131,36 @@ fn int_col(row: &Row<'_>, index: usize, name: &str) -> Result<i64, String> {
     let value = row.get_ref(index).map_err(|error| error.to_string())?;
     match value {
         ValueRef::Integer(number) => Ok(number),
-        ValueRef::Null => Err(scan_error(index, name, "converting NULL to int64 is unsupported")),
+        ValueRef::Null => Err(scan_error(
+            index,
+            name,
+            "converting NULL to int64 is unsupported",
+        )),
         ValueRef::Text(bytes) => {
             let text = String::from_utf8_lossy(bytes).into_owned();
             text.parse::<i64>().map_err(|_| {
                 scan_error(
                     index,
                     name,
-                    &format!("converting driver.Value type string ({}) to a int64: invalid syntax", crate::sync_client_scan::go_quote(&text)),
+                    &format!(
+                        "converting driver.Value type string ({}) to a int64: invalid syntax",
+                        crate::sync_client_scan::go_quote(&text)
+                    ),
                 )
             })
         }
         ValueRef::Real(number) => Err(scan_error(
             index,
             name,
-            &format!("converting driver.Value type float64 (\"{number}\") to a int64: invalid syntax"),
+            &format!(
+                "converting driver.Value type float64 (\"{number}\") to a int64: invalid syntax"
+            ),
         )),
-        ValueRef::Blob(_) => Err(scan_error(index, name, "converting driver.Value type []uint8 to a int64: invalid syntax")),
+        ValueRef::Blob(_) => Err(scan_error(
+            index,
+            name,
+            "converting driver.Value type []uint8 to a int64: invalid syntax",
+        )),
     }
 }
 
@@ -245,10 +273,11 @@ impl Store {
         limit: i64,
     ) -> Result<Vec<LocalMemory>, String> {
         let conn = self.lock().map_err(|error| sql(&error))?;
-        let mut predicate = "symbrain_sync_time(updated_at) > symbrain_sync_time(?)".to_owned();
-        if !last_id.is_empty() {
-            predicate = "(symbrain_sync_time(updated_at) > symbrain_sync_time(?) OR (symbrain_sync_time(updated_at) = symbrain_sync_time(?) AND id > ?))".to_owned();
-        }
+        let predicate = if last_id.is_empty() {
+            "symbrain_sync_time(updated_at) > symbrain_sync_time(?)"
+        } else {
+            "(symbrain_sync_time(updated_at) > symbrain_sync_time(?) OR (symbrain_sync_time(updated_at) = symbrain_sync_time(?) AND id > ?))"
+        };
         let query = format!(
             "SELECT {LITE} FROM memories WHERE ({predicate}) AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true' ORDER BY symbrain_sync_time(updated_at) ASC, id ASC LIMIT ?"
         );
@@ -373,7 +402,15 @@ impl Store {
         if let Some((_, scope, created_by, created_session)) = local
             && audit_enabled
         {
-            audit(&conn, "delete", id, &scope, &created_session, &created_by, "");
+            audit(
+                &conn,
+                "delete",
+                id,
+                &scope,
+                &created_session,
+                &created_by,
+                "",
+            );
         }
         Ok(present)
     }
@@ -418,7 +455,11 @@ fn upsert(conn: &Connection, memory: &ClientMemory, mode: ClientApplyMode) -> Re
         memory.decay_factor
     };
     let existing: Option<Value> = conn
-        .query_row("SELECT updated_at FROM memories WHERE id = ?", [&memory.id], |row| row.get(0))
+        .query_row(
+            "SELECT updated_at FROM memories WHERE id = ?",
+            [&memory.id],
+            |row| row.get(0),
+        )
         .optional()
         .map_err(|error| sql(&error))?;
     let Some(existing) = existing else {
@@ -440,7 +481,15 @@ fn upsert(conn: &Connection, memory: &ClientMemory, mode: ClientApplyMode) -> Re
         )
         .map_err(|error| sql(&error))?;
         if mode.audit_enabled {
-            audit(conn, "set", &memory.id, &memory.scope, &memory.created_session, &memory.created_by, "");
+            audit(
+                conn,
+                "set",
+                &memory.id,
+                &memory.scope,
+                &memory.created_session,
+                &memory.created_by,
+                "",
+            );
         }
         return Ok(true);
     };
@@ -463,7 +512,15 @@ fn upsert(conn: &Connection, memory: &ClientMemory, mode: ClientApplyMode) -> Re
     )
     .map_err(|error| sql(&error))?;
     if mode.audit_enabled {
-        audit(conn, "update", &memory.id, &memory.scope, &memory.updated_session, &memory.updated_by, "");
+        audit(
+            conn,
+            "update",
+            &memory.id,
+            &memory.scope,
+            &memory.updated_session,
+            &memory.updated_by,
+            "",
+        );
     }
     Ok(true)
 }

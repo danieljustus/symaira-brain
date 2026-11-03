@@ -1,0 +1,66 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {
+  "config/symmemory/config.toml": "[hybrid_search]\nquantize_to_binary = true\n"
+ },
+ "name": "pull_full_memory_quantize",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: apply remote memory full-1: lsh: dimension mismatch: got 3, expected 768\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[{\"id\":\"full-1\",\"content\":\"everything set\",\"scope\":\"global\",\"metadata\":{\"k\":\"v\",\"\\u00e9\":\"<&>\"},\"created_at\":\"2026-10-15T09:30:00Z\",\"updated_at\":\"2026-10-15T09:30:00Z\",\"consolidation_status\":\"consolidated\",\"importance\":0.9,\"review_status\":\"staged\",\"tier\":\"working\",\"access_count\":7,\"embedding\":[0.25,-0.5,0.125],\"embedding_source\":\"ollama\",\"embedding_model\":\"nomic\",\"embedding_quantization\":\"f32\",\"content_hash\":\"abc123\",\"created_by\":\"alice\",\"updated_by\":\"bob\",\"created_session\":\"s1\",\"updated_session\":\"s2\",\"consolidated_into_id\":\"\",\"valid_from\":\"2026-09-01T00:00:00Z\",\"valid_to\":\"2027-01-01T00:00:00+01:00\",\"superseded_by\":\"\",\"kind\":\"decision\",\"decay_factor\":0.0,\"retired_at\":\"2026-10-30T00:00:00Z\",\"expires_at\":\"2026-12-01T00:00:00Z\",\"last_access\":\"2026-10-19T00:00:00Z\",\"prev_access\":\"2026-10-18T00:00:00Z\"}],\"deleted\":[],\"server_time\":\"2026-10-18T17:45:10Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

@@ -71,7 +71,9 @@ impl RelayCipher {
             Some(cached) if cached.passphrase == passphrase => (cached.salt.clone(), cached.key),
             _ => {
                 let mut salt = vec![0_u8; SALT_V1];
-                random.fill(&mut salt).map_err(|_| "random source failed".to_owned())?;
+                random
+                    .fill(&mut salt)
+                    .map_err(|_| "random source failed".to_owned())?;
                 let key = derive_key(passphrase, &salt);
                 self.cached = Some(Derived {
                     passphrase: passphrase.to_vec(),
@@ -81,7 +83,8 @@ impl RelayCipher {
                 (salt, key)
             }
         };
-        let unbound = UnboundKey::new(&AES_256_GCM, &key).map_err(|_| "cipher setup failed".to_owned())?;
+        let unbound =
+            UnboundKey::new(&AES_256_GCM, &key).map_err(|_| "cipher setup failed".to_owned())?;
         let sealing = LessSafeKey::new(unbound);
         let mut nonce_bytes = [0_u8; NONCE_LEN];
         random
@@ -89,7 +92,11 @@ impl RelayCipher {
             .map_err(|_| "random source failed".to_owned())?;
         let mut sealed = plaintext.to_vec();
         sealing
-            .seal_in_place_append_tag(Nonce::assume_unique_for_key(nonce_bytes), Aad::empty(), &mut sealed)
+            .seal_in_place_append_tag(
+                Nonce::assume_unique_for_key(nonce_bytes),
+                Aad::empty(),
+                &mut sealed,
+            )
             .map_err(|_| "seal failed".to_owned())?;
         let mut payload = Vec::with_capacity(1 + salt.len() + NONCE_LEN + sealed.len());
         payload.push(VERSION_V1);
@@ -113,7 +120,11 @@ impl RelayCipher {
         let nonce: [u8; NONCE_LEN] = nonce.try_into().map_err(|_| failure())?;
         let mut buffer = ciphertext.to_vec();
         let plain = opening
-            .open_in_place(Nonce::assume_unique_for_key(nonce), Aad::empty(), &mut buffer)
+            .open_in_place(
+                Nonce::assume_unique_for_key(nonce),
+                Aad::empty(),
+                &mut buffer,
+            )
             .map_err(|_| failure())?;
         Ok(plain.to_vec())
     }
@@ -164,8 +175,14 @@ mod tests {
             reader.decrypt(&first, b"other").unwrap_err(),
             "decryption failed: invalid passphrase or corrupted payload"
         );
-        assert_eq!(reader.decrypt(b"", b"pw").unwrap_err(), "encrypted payload too short");
-        assert_eq!(reader.decrypt(&[1; 20], b"pw").unwrap_err(), "encrypted payload too short");
+        assert_eq!(
+            reader.decrypt(b"", b"pw").unwrap_err(),
+            "encrypted payload too short"
+        );
+        assert_eq!(
+            reader.decrypt(&[1; 20], b"pw").unwrap_err(),
+            "encrypted payload too short"
+        );
     }
 
     #[test]
@@ -181,6 +198,9 @@ mod tests {
         let mut payload = salt.to_vec();
         payload.extend_from_slice(&nonce);
         payload.extend_from_slice(&body);
-        assert_eq!(RelayCipher::new().decrypt(&payload, b"pw").unwrap(), b"legacy");
+        assert_eq!(
+            RelayCipher::new().decrypt(&payload, b"pw").unwrap(),
+            b"legacy"
+        );
     }
 }

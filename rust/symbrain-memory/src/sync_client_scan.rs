@@ -406,10 +406,16 @@ mod tests {
         let cases: [(&[u8], &str); 8] = [
             (b"{", "unexpected end of JSON input"),
             (b"", "unexpected end of JSON input"),
-            (b"{\"a\":1,}", "invalid character '}' looking for beginning of object key string"),
+            (
+                b"{\"a\":1,}",
+                "invalid character '}' looking for beginning of object key string",
+            ),
             (b"{\"a\" 1}", "invalid character '1' after object key"),
             (b"[1 2]", "invalid character '2' after array element"),
-            (b"nulx", "invalid character 'x' in literal null (expecting 'l')"),
+            (
+                b"nulx",
+                "invalid character 'x' in literal null (expecting 'l')",
+            ),
             (b"{} {}", "invalid character '{' after top-level value"),
             (b"-x", "invalid character 'x' in numeric literal"),
         ];

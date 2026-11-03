@@ -1,0 +1,77 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-18 17:45:10 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "relay_pull_cursor_query",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/relay?limit=500&since=2026-10-12T07%3A08%3A09.123456789Z"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"pull\",\"encrypted_relay\":true,\"cursor\":\"2026-10-18T17:45:10Z\",\"server_time\":\"2026-10-18T17:45:10Z\",\"pulled_memories_applied\":0,\"pulled_deletes_applied\":0,\"pushed_memories\":0,\"pushed_deletes\":0,\"relay_blobs_fetched\":0,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [
+  "INSERT INTO sync_state (remote, last_sync) VALUES ('{base}', '2026-10-12 07:08:09.123456789 +0000 UTC')"
+ ],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"blobs\":[],\"server_time\":\"2026-10-18T17:45:10Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

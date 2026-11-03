@@ -1700,6 +1700,7 @@ name = "symbrain-cli"
 version = "0.12.1"
 dependencies = [
  "chrono",
+ "flate2",
  "process-wrap",
  "regex",
  "rusqlite",

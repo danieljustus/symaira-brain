@@ -1,43 +1,31 @@
-//! `memory sync`: the argument checks that precede the shipped
-//! implementation's database and network work (flag grammar, positional
-//! refusal, the missing remote, the relay passphrase and the remote URL
-//! guard), then the native exchange for the proven loopback subset
-//! (`sync_native`). Every other valid invocation (or a remote spelling
-//! outside the proven URL subset) returns `None` and stays on Go.
+//! `memory sync`: `symbrain memory sync` end to end — flag grammar, the
+//! argument checks that precede the database and network work, the remote
+//! URL guard, then the pull/push/encrypted-relay run (`sync_run`) and the
+//! report. Nothing is handed to another implementation.
 
 use super::help::{MEMORY_SYNC_REMOTE_REQUIRED, MEMORY_SYNC_USAGE};
-use super::{OsString, flags, sync_native};
-use std::io::Write;
+use super::sync_run::{self, Failure, Options, Report};
+use super::sync_url;
+use super::{OsString, Write, exit, flags, resolve_db_path};
+use std::time::{Duration, Instant};
 use symbrain_core::config::format_go_quoted;
-use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
+use symbrain_memory::Store;
+use symbrain_memory::sync_client::ClientApplyMode;
 
 const PASSPHRASE_ENV: &str = "SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE";
+const TOKEN_ENV: &str = "SYMBRAIN_MEMORY_SYNC_TOKEN";
 
-enum Outcome {
-    /// The invocation fails before any database or network work.
-    Refused(u8),
-    /// A valid invocation (or an unproven URL spelling).
-    Proceed(flags::Args),
-}
-
-/// Runs `memory sync`; `None` leaves the invocation to the shipped
-/// implementation (nothing has been written to the streams then).
+/// Runs `memory sync`.
+#[allow(clippy::too_many_lines)] // One linear pass through the shipped handler.
 pub(super) fn run(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> Option<u8> {
-    match preflight(args, stderr) {
-        Outcome::Refused(code) => Some(code),
-        Outcome::Proceed(parsed) => sync_native::run(&parsed, stdout, stderr, format),
-    }
-}
-
-fn preflight(args: &[OsString], stderr: &mut dyn Write) -> Outcome {
+) -> u8 {
     let Ok(parsed) = flags::parse(args, "sync", stderr) else {
-        return Outcome::Refused(exit::USAGE);
+        return exit::USAGE;
     };
     if let Some(first) = parsed.positional.first() {
         let _ = writeln!(
@@ -45,296 +33,137 @@ fn preflight(args: &[OsString], stderr: &mut dyn Write) -> Outcome {
             "symbrain memory sync: unexpected argument {}",
             format_go_quoted(first)
         );
-        return Outcome::Refused(exit::USAGE);
+        return exit::USAGE;
     }
-    let remote = parsed.bytes_of("remote");
-    if remote.is_empty() {
+    let remote_bytes = parsed.bytes_of("remote");
+    if remote_bytes.is_empty() {
         let _ = write!(stderr, "{MEMORY_SYNC_REMOTE_REQUIRED}{MEMORY_SYNC_USAGE}");
-        return Outcome::Refused(exit::USAGE);
+        return exit::USAGE;
     }
-    if parsed.flag("encrypted-relay")
-        && parsed.bytes_of("relay-passphrase").is_empty()
-        && std::env::var_os(PASSPHRASE_ENV).is_none_or(|value| value.is_empty())
-    {
+    let relay = parsed.flag("encrypted-relay");
+    let mut passphrase = parsed.bytes_of("relay-passphrase").to_vec();
+    if passphrase.is_empty() {
+        passphrase = env_bytes(PASSPHRASE_ENV);
+    }
+    if relay && passphrase.is_empty() {
         let _ = writeln!(
             stderr,
             "symbrain memory sync: --encrypted-relay requires --relay-passphrase (or ${PASSPHRASE_ENV})"
         );
-        return Outcome::Refused(exit::USAGE);
+        return exit::USAGE;
     }
-    match validate_remote(remote, parsed.flag("allow-insecure-http")) {
-        Verdict::Valid | Verdict::Unproven => Outcome::Proceed(parsed),
-        Verdict::Rejected(message) => {
-            let _ = writeln!(stderr, "symbrain memory sync: {message}");
-            Outcome::Refused(exit::USAGE)
-        }
+    let remote = flags::go_string(remote_bytes);
+    let allow_insecure = parsed.flag("allow-insecure-http");
+    if let Err(message) = sync_url::validate_remote(&remote, allow_insecure) {
+        let _ = writeln!(stderr, "symbrain memory sync: {message}");
+        return exit::USAGE;
     }
-}
-
-enum Verdict {
-    Valid,
-    Rejected(String),
-    /// Outside the subset whose `net/url` behaviour is ported.
-    Unproven,
-}
-
-/// `syncclient.ValidateRemoteURL` for the plain ASCII subset of `net/url`
-/// (no escapes, userinfo, IPv6 literals, quotes or control bytes); every
-/// other spelling is `Unproven` and keeps the shipped implementation.
-fn validate_remote(raw: &[u8], allow_insecure: bool) -> Verdict {
-    if !raw.iter().all(|&byte| plain_url_byte(byte)) {
-        return Verdict::Unproven;
+    if allow_insecure {
+        let _ = writeln!(
+            stderr,
+            "WARNING: --allow-insecure-http is set: bearer tokens will be sent in the clear to {remote}"
+        );
     }
-    let raw = std::str::from_utf8(raw).expect("ASCII subset");
-    let parse_error = |url: &str, reason: &str| {
-        Verdict::Rejected(format!("parse remote URL: parse {url:?}: {reason}"))
+    let (pull, push) = match (parsed.flag("pull"), parsed.flag("push")) {
+        (false, false) => (true, true),
+        other => other,
     };
-    // url.Parse cuts the fragment first and reports errors against the rest.
-    let without_fragment = raw.split_once('#').map_or(raw, |(head, _)| head);
-    let (scheme, rest) = match split_scheme(without_fragment) {
-        Err(()) => return parse_error(without_fragment, "missing protocol scheme"),
-        Ok(split) => split,
-    };
-    let rest = rest.split_once('?').map_or(rest, |(head, _)| head);
-    let lower = scheme.to_ascii_lowercase();
-    if !rest.starts_with('/') {
-        if lower.is_empty() {
-            let segment = rest.split('/').next().unwrap_or("");
-            if segment.contains(':') {
-                return parse_error(
-                    without_fragment,
-                    "first path segment in URL cannot contain colon",
-                );
-            }
-            return Verdict::Rejected(format!("parse remote URL: missing scheme in {raw:?}"));
-        }
-        // An opaque URL has no host.
-        return judge(&lower, "", raw, allow_insecure);
+    let mut token = parsed.bytes_of("token").to_vec();
+    if token.is_empty() {
+        token = env_bytes(TOKEN_ENV);
     }
-    let mut host = "";
-    if rest.starts_with("//") && (!lower.is_empty() || !rest.starts_with("///")) {
-        let authority = &rest[2..];
-        host = authority.split('/').next().unwrap_or("");
-        // http(s) hosts are strict: the port starts at the first colon, so a
-        // second colon makes the port invalid; other schemes use the last one.
-        let split = if matches!(lower.as_str(), "http" | "https") {
-            host.find(':')
+    let timeout_ns = {
+        let raw = parsed.bytes_of("timeout");
+        if raw.is_empty() {
+            60_000_000_000
         } else {
-            host.rfind(':')
-        };
-        if let Some(colon) = split
-            && !valid_optional_port(&host[colon..])
-        {
-            return parse_error(
-                without_fragment,
-                &format!("invalid port {:?} after host", &host[colon..]),
+            super::sync_duration::parse_duration(raw).unwrap_or(60_000_000_000)
+        }
+    };
+
+    let path = resolve_db_path(Some(&parsed.raw("db")));
+    let store = match Store::open(&path) {
+        Ok(store) => store,
+        Err(error) => {
+            let _ = writeln!(
+                stderr,
+                "symbrain memory sync: open memory database: {error}"
             );
+            return exit::GENERIC;
+        }
+    };
+    let config = super::config::load();
+    let started = Instant::now();
+    let deadline = u64::try_from(timeout_ns).map_or(started, |nanos| {
+        started
+            .checked_add(Duration::from_nanos(nanos))
+            .unwrap_or_else(|| started + Duration::from_hours(24 * 365 * 50))
+    });
+    let options = Options {
+        remote: &remote,
+        token: &String::from_utf8_lossy(&token),
+        pull,
+        push,
+        relay,
+        passphrase: &passphrase,
+        deadline,
+        mode: ClientApplyMode {
+            quantize_binary: config.quantize_binary,
+            audit_enabled: config.audit_log_enabled,
+        },
+    };
+    match sync_run::run(&store, &options) {
+        Ok(report) => {
+            let rendered = match format {
+                OutputFormat::Json => format!("{}\n", crate::go_json(&report)),
+                OutputFormat::Table => table(&report),
+            };
+            let _ = stdout.write_all(rendered.as_bytes());
+            exit::OK
+        }
+        Err(Failure::Message(message)) => {
+            let _ = writeln!(stderr, "symbrain memory sync: {message}");
+            exit::GENERIC
+        }
+        Err(Failure::NilPanic) => {
+            let _ = stderr.write_all(sync_run::nil_panic_text().as_bytes());
+            2
         }
     }
-    if lower.is_empty() {
-        return Verdict::Rejected(format!("parse remote URL: missing scheme in {raw:?}"));
-    }
-    judge(&lower, host, raw, allow_insecure)
 }
 
-fn judge(scheme: &str, host: &str, raw: &str, allow_insecure: bool) -> Verdict {
-    match scheme {
-        "https" => Verdict::Valid,
-        "http" => {
-            let hostname = hostname(host);
-            if hostname.is_empty() {
-                return Verdict::Rejected(format!(
-                    "remote memory sync requires an https URL: http URL {raw:?} has no host"
-                ));
-            }
-            if hostname.eq_ignore_ascii_case("localhost")
-                || is_loopback_v4(hostname)
-                || allow_insecure
-            {
-                return Verdict::Valid;
-            }
-            Verdict::Rejected(format!(
-                "remote memory sync requires an https URL: {raw} (pass --allow-insecure-http to override)"
-            ))
-        }
-        other => Verdict::Rejected(format!(
-            "remote URL scheme {other:?} is not supported (use https, or http for loopback)"
-        )),
-    }
+fn env_bytes(name: &str) -> Vec<u8> {
+    flags::bytes(&std::env::var_os(name).unwrap_or_default())
 }
 
-/// Bytes whose handling by `net/url` is ported: printable ASCII minus the
-/// escape, userinfo, IPv6-literal, quoting and backslash characters.
-fn plain_url_byte(byte: u8) -> bool {
-    byte.is_ascii_graphic()
-        && !matches!(
-            byte,
-            b'%' | b'@'
-                | b'['
-                | b']'
-                | b'\\'
-                | b'"'
-                | b'<'
-                | b'>'
-                | b'^'
-                | b'`'
-                | b'{'
-                | b'|'
-                | b'}'
-        )
-}
-
-/// Go `getScheme`: `Err` is the empty-scheme-before-colon error.
-fn split_scheme(raw: &str) -> Result<(&str, &str), ()> {
-    for (index, byte) in raw.bytes().enumerate() {
-        match byte {
-            b'a'..=b'z' | b'A'..=b'Z' => {}
-            b'0'..=b'9' | b'+' | b'-' | b'.' => {
-                if index == 0 {
-                    return Ok(("", raw));
-                }
-            }
-            b':' => {
-                if index == 0 {
-                    return Err(());
-                }
-                return Ok((&raw[..index], &raw[index + 1..]));
-            }
-            _ => return Ok(("", raw)),
-        }
+fn table(report: &Report) -> String {
+    use std::fmt::Write as _;
+    let mut text = String::new();
+    let mut line = |label: &str, value: &dyn std::fmt::Display| {
+        let _ = writeln!(text, "{:<18} {value}", format!("{label}:"));
+    };
+    line("Remote", &report.remote);
+    line("Mode", &report.mode);
+    line("Encrypted relay", &report.encrypted_relay);
+    if !report.cursor_time.is_zero() {
+        line("Cursor", &report.cursor_time.to_rfc3339_utc());
     }
-    Ok(("", raw))
-}
-
-fn valid_optional_port(port: &str) -> bool {
-    port.strip_prefix(':')
-        .is_some_and(|digits| digits.bytes().all(|byte| byte.is_ascii_digit()))
-}
-
-/// `url.URL.Hostname` for an unbracketed host.
-fn hostname(host: &str) -> &str {
-    match host.rfind(':') {
-        Some(colon) if valid_optional_port(&host[colon..]) => &host[..colon],
-        _ => host,
+    if !report.server_clock.is_zero() {
+        line("Server time", &report.server_clock.to_rfc3339_utc());
     }
-}
-
-/// `net.ParseIP(host).IsLoopback()` for dotted-quad IPv4 (no leading zeros).
-fn is_loopback_v4(host: &str) -> bool {
-    let parts: Vec<&str> = host.split('.').collect();
-    if parts.len() != 4 {
-        return false;
+    line("Pulled memories", &report.pulled_memories_applied);
+    line("Pulled deletes", &report.pulled_deletes_applied);
+    line("Pushed memories", &report.pushed_memories);
+    line("Pushed deletes", &report.pushed_deletes);
+    if report.encrypted_relay {
+        line("Relay blobs fetched", &report.relay_blobs_fetched);
+        line("Relay blobs stored", &report.relay_blobs_stored);
     }
-    let mut octets = [0_u8; 4];
-    for (slot, part) in octets.iter_mut().zip(&parts) {
-        if part.is_empty() || part.len() > 3 || (part.len() > 1 && part.starts_with('0')) {
-            return false;
-        }
-        match part.parse::<u8>() {
-            Ok(value) => *slot = value,
-            Err(_) => return false,
-        }
-    }
-    octets[0] == 127
+    text
 }
 
 /// Whether Go `time.ParseDuration` accepts `raw` (the flag package reports
 /// every failure as `parse error`).
 pub(super) fn valid_duration(raw: &[u8]) -> bool {
-    const LIMIT: u64 = 1 << 63;
-    let mut rest = raw;
-    let negative = matches!(rest.first(), Some(b'-'));
-    if matches!(rest.first(), Some(b'-' | b'+')) {
-        rest = &rest[1..];
-    }
-    if rest == b"0" {
-        return true;
-    }
-    if rest.is_empty() {
-        return false;
-    }
-    let mut total = 0_u64;
-    while !rest.is_empty() {
-        if !(rest[0] == b'.' || rest[0].is_ascii_digit()) {
-            return false;
-        }
-        let before = rest.len();
-        let mut whole = 0_u64;
-        while let Some(&digit) = rest.first().filter(|byte| byte.is_ascii_digit()) {
-            if whole > LIMIT / 10 {
-                return false;
-            }
-            whole = whole * 10 + u64::from(digit - b'0');
-            if whole > LIMIT {
-                return false;
-            }
-            rest = &rest[1..];
-        }
-        let pre = before != rest.len();
-        let (mut fraction, mut scale, mut post) = (0_u64, 1_f64, false);
-        if rest.first() == Some(&b'.') {
-            rest = &rest[1..];
-            let start = rest.len();
-            let mut overflow = false;
-            while let Some(&digit) = rest.first().filter(|byte| byte.is_ascii_digit()) {
-                rest = &rest[1..];
-                if overflow {
-                    continue;
-                }
-                if fraction > (LIMIT - 1) / 10 {
-                    overflow = true;
-                    continue;
-                }
-                let next = fraction * 10 + u64::from(digit - b'0');
-                if next > LIMIT {
-                    overflow = true;
-                    continue;
-                }
-                fraction = next;
-                scale *= 10.0;
-            }
-            post = start != rest.len();
-        }
-        if !pre && !post {
-            return false;
-        }
-        let unit_len = rest
-            .iter()
-            .position(|&byte| byte == b'.' || byte.is_ascii_digit())
-            .unwrap_or(rest.len());
-        if unit_len == 0 {
-            return false;
-        }
-        let unit: u64 = match &rest[..unit_len] {
-            b"ns" => 1,
-            b"us" | b"\xc2\xb5s" | b"\xce\xbcs" => 1_000,
-            b"ms" => 1_000_000,
-            b"s" => 1_000_000_000,
-            b"m" => 60_000_000_000,
-            b"h" => 3_600_000_000_000,
-            _ => return false,
-        };
-        rest = &rest[unit_len..];
-        if whole > LIMIT / unit {
-            return false;
-        }
-        let mut value = whole * unit;
-        if fraction > 0 {
-            #[allow(
-                clippy::cast_precision_loss,
-                clippy::cast_possible_truncation,
-                clippy::cast_sign_loss
-            )]
-            let extra = (fraction as f64 * (unit as f64 / scale)) as u64;
-            value = value.saturating_add(extra);
-            if value > LIMIT {
-                return false;
-            }
-        }
-        total = total.saturating_add(value);
-        if total > LIMIT {
-            return false;
-        }
-    }
-    negative || total < LIMIT
+    super::sync_duration::parse_duration(raw).is_some()
 }

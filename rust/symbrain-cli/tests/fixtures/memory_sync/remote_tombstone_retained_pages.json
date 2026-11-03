@@ -1,0 +1,93 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "x-1",
+    "op": "delete",
+    "ts": "2026-10-15 09:30:00 +0000 UTC"
+   }
+  ],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-18 17:45:10 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "remote_tombstone_retained_pages",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?cursor=p2&limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"pull\",\"encrypted_relay\":false,\"cursor\":\"2026-10-18T17:45:10Z\",\"server_time\":\"2026-10-18T17:45:10Z\",\"pulled_memories_applied\":0,\"pulled_deletes_applied\":0,\"pushed_memories\":0,\"pushed_deletes\":0,\"relay_blobs_fetched\":0,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[],\"deleted\":[{\"id\":\"x-1\",\"deleted_at\":\"2026-10-15T09:30:00Z\"}],\"server_time\":\"2026-10-15T09:30:00Z\",\"next_cursor\":\"p2\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    },
+    {
+     "body": "{\"memories\":[{\"id\":\"x-1\",\"content\":\"late older\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-10T08:00:00Z\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"consolidation_status\":\"raw\",\"importance\":0.5,\"review_status\":\"approved\",\"tier\":\"long_term\",\"access_count\":1}],\"deleted\":[],\"server_time\":\"2026-10-18T17:45:10Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

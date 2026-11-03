@@ -1,0 +1,198 @@
+{
+ "db": {
+  "audit_log": [
+   [
+    "delete",
+    "l-1",
+    "global",
+    null,
+    null,
+    null
+   ],
+   [
+    "set",
+    "r-z",
+    "global",
+    null,
+    null,
+    null
+   ]
+  ],
+  "memories": [
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "local two",
+    "content_hash": "",
+    "created_at": "2026-10-15 09:30:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": 1.0,
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "l-2",
+    "importance": 0.5,
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-15 09:30:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "zoned",
+    "content_hash": "94a54131c2c62727571c195a0e1247de2f4fac06c4b7bde2afce3bf71624c47d",
+    "created_at": "2026-10-12 10:00:00.5 +0200 +0200",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": 1.0,
+    "embedding": "null",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "r-z",
+    "importance": 0.5,
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-12 10:00:00 +0200 +0200",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   }
+  ],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "l-1",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 2,
+    "memory_id": "l-2",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 3,
+    "memory_id": "gone-1",
+    "op": "delete",
+    "ts": "2026-10-18 17:45:10 +0000 UTC"
+   },
+   {
+    "event_id": 4,
+    "memory_id": "r-z",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 5,
+    "memory_id": "l-1",
+    "op": "delete",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 6,
+    "memory_id": "l-1",
+    "op": "delete",
+    "ts": "2026-10-19 00:00:00 +0530 +0530"
+   }
+  ],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-20 12:00:00 -0300 -0300",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "pull_offset_zones",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"pull\",\"encrypted_relay\":false,\"cursor\":\"2026-10-20T12:00:00-03:00\",\"server_time\":\"2026-10-20T12:00:00-03:00\",\"pulled_memories_applied\":1,\"pulled_deletes_applied\":1,\"pushed_memories\":0,\"pushed_deletes\":0,\"relay_blobs_fetched\":0,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-1', 'local one', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC')",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-2', 'local two', 'global', '{}', '[]', '2026-10-15 09:30:00 +0000 UTC', '2026-10-15 09:30:00 +0000 UTC')",
+  "INSERT INTO sync_oplog (op, memory_id, ts) VALUES ('delete', 'gone-1', '2026-10-18 17:45:10 +0000 UTC')"
+ ],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[{\"id\":\"r-z\",\"content\":\"zoned\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-12T10:00:00.5+02:00\",\"updated_at\":\"2026-10-12T10:00:00+02:00\",\"consolidation_status\":\"raw\",\"importance\":0.5,\"review_status\":\"approved\",\"tier\":\"long_term\",\"access_count\":1}],\"deleted\":[{\"id\":\"l-1\",\"deleted_at\":\"2026-10-19T00:00:00+05:30\"}],\"server_time\":\"2026-10-20T12:00:00-03:00\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

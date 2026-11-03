@@ -103,11 +103,9 @@ impl Parser<'_> {
             }
             _ => {
                 let start = self.at;
-                while self
-                    .bytes
-                    .get(self.at)
-                    .is_some_and(|byte| matches!(byte, b'0'..=b'9' | b'-' | b'+' | b'.' | b'e' | b'E'))
-                {
+                while self.bytes.get(self.at).is_some_and(|byte| {
+                    matches!(byte, b'0'..=b'9' | b'-' | b'+' | b'.' | b'e' | b'E')
+                }) {
                     self.at += 1;
                 }
                 Node::Number(String::from_utf8_lossy(&self.bytes[start..self.at]).into_owned())
@@ -344,7 +342,9 @@ type Abort = String;
 struct Decoder {
     saved: Option<String>,
     structure: Option<&'static str>,
-    fields: Vec<&'static str>,
+    /// The JSON path below the root struct: member names, array indices and
+    /// map keys, as `encoding/json` names the field of a type error.
+    fields: Vec<String>,
 }
 
 impl Decoder {
@@ -357,11 +357,15 @@ impl Decoder {
     }
 
     fn mismatch(&mut self, found: &str, ty: Ty) {
+        self.mismatch_because(found, ty, None);
+    }
+
+    fn mismatch_because(&mut self, found: &str, ty: Ty, cause: Option<&str>) {
         if self.saved.is_some() {
             return;
         }
         let target = type_name(ty);
-        self.saved = Some(if self.structure.is_some() || !self.fields.is_empty() {
+        let mut text = if self.structure.is_some() || !self.fields.is_empty() {
             format!(
                 "json: cannot unmarshal {found} into Go struct field {}.{} of type {target}",
                 self.structure.unwrap_or(""),
@@ -369,13 +373,12 @@ impl Decoder {
             )
         } else {
             format!("json: cannot unmarshal {found} into Go value of type {target}")
-        });
-    }
-
-    fn save(&mut self, message: String) {
-        if self.saved.is_none() {
-            self.saved = Some(message);
+        };
+        if let Some(cause) = cause {
+            text.push_str(": ");
+            text.push_str(cause);
         }
+        self.saved = Some(text);
     }
 
     fn value(&mut self, node: &Node, ty: Ty, target: &mut Val) -> Result<(), Abort> {
@@ -388,7 +391,7 @@ impl Decoder {
 
     /// `indirect` for a non-null value: allocates pointers and returns the
     /// innermost type and slot.
-    fn deref<'a>(ty: Ty, target: &'a mut Val) -> (Ty, &'a mut Val) {
+    fn deref(ty: Ty, target: &mut Val) -> (Ty, &mut Val) {
         match (ty, target) {
             (Ty::Ptr(inner), Val::Ptr(slot)) => {
                 let boxed = slot.get_or_insert_with(|| Box::new(zero(*inner)));
@@ -401,9 +404,7 @@ impl Decoder {
     fn time_from(node: &Node) -> Result<Option<GoTime>, Abort> {
         match node {
             Node::Null => time_from_json("null"),
-            Node::Str { raw, .. } => {
-                time_from_json(&String::from_utf8_lossy(raw))
-            }
+            Node::Str { raw, .. } => time_from_json(&String::from_utf8_lossy(raw)),
             _ => time_from_json("0"),
         }
     }
@@ -429,16 +430,17 @@ impl Decoder {
     fn array(&mut self, items: &[Node], ty: Ty, target: &mut Val) -> Result<(), Abort> {
         let (ty, target) = Self::deref(ty, target);
         match (ty, target) {
-            (Ty::Time | Ty::TimePtr, slot) => {
-                Self::assign_time(ty, slot, &Node::Array(Vec::new()))
-            }
+            (Ty::Time | Ty::TimePtr, slot) => Self::assign_time(ty, slot, &Node::Array(Vec::new())),
             (Ty::Slice(element), Val::Slice(slot)) => {
                 let vector = slot.get_or_insert_with(Vec::new);
                 for (index, item) in items.iter().enumerate() {
                     if index >= vector.len() {
                         vector.push(zero(*element));
                     }
-                    self.value(item, *element, &mut vector[index])?;
+                    self.fields.push(index.to_string());
+                    let outcome = self.value(item, *element, &mut vector[index]);
+                    self.fields.pop();
+                    outcome?;
                 }
                 vector.truncate(items.len());
                 Ok(())
@@ -480,7 +482,10 @@ impl Decoder {
                 let map = slot.get_or_insert_with(BTreeMap::new);
                 for (key, node) in members {
                     let mut element = Val::Str(String::new());
-                    self.value(node, Ty::Str, &mut element)?;
+                    self.fields.push(key.clone());
+                    let outcome = self.value(node, Ty::Str, &mut element);
+                    self.fields.pop();
+                    outcome?;
                     if let Val::Str(text) = element {
                         map.insert(key.clone(), text);
                     }
@@ -488,7 +493,11 @@ impl Decoder {
                 Ok(())
             }
             (Ty::Struct(shape), Val::Struct(values)) => {
+                // The error names the root struct, not the one that holds the field.
                 let original = (self.structure, self.fields.len());
+                if self.structure.is_none() {
+                    self.structure = Some(shape.name);
+                }
                 for (key, node) in members {
                     let index = shape
                         .fields
@@ -500,12 +509,15 @@ impl Decoder {
                         });
                     let Some(index) = index else { continue };
                     let (name, field_ty) = shape.fields[index];
-                    self.structure = Some(shape.name);
-                    self.fields.push(name);
-                    self.value(node, field_ty, &mut values[index])?;
+                    self.fields.push(name.to_owned());
+                    let outcome = self.value(node, field_ty, &mut values[index]);
                     self.fields.truncate(original.1);
-                    self.structure = original.0;
+                    if outcome.is_err() {
+                        self.structure = original.0;
+                        return outcome;
+                    }
                 }
+                self.structure = original.0;
                 Ok(())
             }
             (other, _) => {
@@ -521,7 +533,6 @@ impl Decoder {
             match (ty, &mut *target) {
                 (Ty::Ptr(_), Val::Ptr(slot)) => *slot = None,
                 (Ty::TimePtr, Val::TimePtr(slot)) => *slot = None,
-                (Ty::Time, _) => {}
                 (Ty::Slice(_), Val::Slice(slot)) => *slot = None,
                 (Ty::Bytes, Val::Bytes(slot)) => *slot = None,
                 (Ty::MapStr, Val::Map(slot)) => *slot = None,
@@ -539,9 +550,11 @@ impl Decoder {
                 (Ty::Str, Val::Str(slot)) => value.clone_into(slot),
                 (Ty::Bytes, Val::Bytes(slot)) => match base64_decode(value.as_bytes()) {
                     Ok(bytes) => *slot = Some(bytes),
-                    Err(position) => {
-                        self.save(format!("illegal base64 data at input byte {position}"));
-                    }
+                    Err(position) => self.mismatch_because(
+                        "string",
+                        ty,
+                        Some(&format!("illegal base64 data at input byte {position}")),
+                    ),
                 },
                 (other, _) => self.mismatch("string", other),
             },
@@ -559,10 +572,12 @@ impl Decoder {
                 Ok(number) => *slot = number,
                 Err(_) => self.mismatch(&found, ty),
             },
-            (Ty::U8, Val::U8(slot)) => match text.parse::<u64>().ok().and_then(|n| u8::try_from(n).ok()) {
-                Some(number) => *slot = number,
-                None => self.mismatch(&found, ty),
-            },
+            (Ty::U8, Val::U8(slot)) => {
+                match text.parse::<u64>().ok().and_then(|n| u8::try_from(n).ok()) {
+                    Some(number) => *slot = number,
+                    None => self.mismatch(&found, ty),
+                }
+            }
             (Ty::F64, Val::F64(slot)) => match text.parse::<f64>() {
                 Ok(number) if number.is_finite() => *slot = number,
                 _ => self.mismatch(&found, ty),
@@ -633,7 +648,8 @@ fn base64_decode(src: &[u8]) -> Result<Vec<u8>, usize> {
             break;
         }
         let word = (quantum[0] << 18) | (quantum[1] << 12) | (quantum[2] << 6) | quantum[3];
-        let bytes = [(word >> 16) as u8, (word >> 8) as u8, word as u8];
+        let [_, high, middle, low] = word.to_be_bytes();
+        let bytes = [high, middle, low];
         let take = if padded == 0 { 3 } else { 3 - padded };
         out.extend_from_slice(&bytes[..take]);
         if padded > 0 {
@@ -778,7 +794,13 @@ fn memory_from(values: &[Val]) -> ClientMemory {
             Val::Slice(Some(items)) => Some(
                 items
                     .iter()
-                    .map(|item| if let Val::F32(number) = item { *number } else { 0.0 })
+                    .map(|item| {
+                        if let Val::F32(number) = item {
+                            *number
+                        } else {
+                            0.0
+                        }
+                    })
                     .collect(),
             ),
             _ => None,
@@ -838,7 +860,10 @@ fn with_stack<T: Send>(body: impl FnOnce() -> T + Send) -> T {
         std::thread::Builder::new()
             .stack_size(256 << 20)
             .spawn_scoped(scope, body)
-            .map_or_else(|_| unreachable_stack(), |handle| handle.join().unwrap_or_else(|_| unreachable_stack()))
+            .map_or_else(
+                |_| unreachable_stack(),
+                |handle| handle.join().unwrap_or_else(|_| unreachable_stack()),
+            )
     })
 }
 
@@ -872,7 +897,11 @@ fn read_value<'a>(body: &'a [u8], stop: Option<&str>) -> Result<&'a [u8], String
 }
 
 fn parse(value: &[u8]) -> Node {
-    Parser { bytes: value, at: 0 }.value()
+    Parser {
+        bytes: value,
+        at: 0,
+    }
+    .value()
 }
 
 /// Decodes `value` into the top-level struct `shape`.
@@ -1020,7 +1049,7 @@ pub fn decode_apply_counts(body: &[u8], stop: Option<&str>) -> Result<ApplyCount
 
 fn unmarshal_into_raw_map(found: &str) -> String {
     let _ = &COUNT_ERROR;
-    format!("json: cannot unmarshal {found} into Go value of type map[string]json.RawMessage")
+    format!("json: cannot unmarshal {found} into Go value of type map[string]jsontext.Value")
 }
 
 /// The `{"error", "code"}` pair of an error body; the shipped decoder ignores
@@ -1171,7 +1200,11 @@ fn string_member(out: &mut Vec<String>, name: &str, value: &str, omit_empty: boo
 }
 
 fn time_member(out: &mut Vec<String>, name: &str, value: &GoTime) {
-    out.push(format!("{}:{}", quote(name), quote(&value.to_rfc3339_nano())));
+    out.push(format!(
+        "{}:{}",
+        quote(name),
+        quote(&value.to_rfc3339_nano())
+    ));
 }
 
 fn time_ptr_member(out: &mut Vec<String>, name: &str, value: Option<&GoTime>) {
@@ -1208,16 +1241,34 @@ impl LocalMemory {
         string_member(&mut members, "updated_by", &self.updated_by, true);
         string_member(&mut members, "created_session", &self.created_session, true);
         string_member(&mut members, "updated_session", &self.updated_session, true);
-        string_member(&mut members, "consolidation_status", &self.consolidation_status, false);
-        string_member(&mut members, "consolidated_into_id", &self.consolidated_into_id, true);
-        members.push(format!("{}:{}", quote("importance"), float64(self.importance)));
+        string_member(
+            &mut members,
+            "consolidation_status",
+            &self.consolidation_status,
+            false,
+        );
+        string_member(
+            &mut members,
+            "consolidated_into_id",
+            &self.consolidated_into_id,
+            true,
+        );
+        members.push(format!(
+            "{}:{}",
+            quote("importance"),
+            float64(self.importance)
+        ));
         time_ptr_member(&mut members, "valid_from", self.valid_from.as_ref());
         time_ptr_member(&mut members, "valid_to", self.valid_to.as_ref());
         string_member(&mut members, "superseded_by", &self.superseded_by, true);
         string_member(&mut members, "kind", &self.kind, true);
         string_member(&mut members, "review_status", &self.review_status, false);
         if self.decay_factor != 0.0 {
-            members.push(format!("{}:{}", quote("decay_factor"), float64(self.decay_factor)));
+            members.push(format!(
+                "{}:{}",
+                quote("decay_factor"),
+                float64(self.decay_factor)
+            ));
         }
         time_ptr_member(&mut members, "retired_at", self.retired_at.as_ref());
         string_member(&mut members, "tier", &self.tier, false);
@@ -1274,7 +1325,10 @@ pub fn apply_body(memories: &[LocalMemory], deleted: &[(String, GoTime)]) -> Str
 
 /// `json.Marshal` of the plaintext carried inside one relay blob.
 #[must_use]
-pub fn relay_payload_json(memory: Option<&LocalMemory>, deleted: Option<(&str, &GoTime)>) -> String {
+pub fn relay_payload_json(
+    memory: Option<&LocalMemory>,
+    deleted: Option<(&str, &GoTime)>,
+) -> String {
     if let Some(memory) = memory {
         return format!("{{\"memory\":{}}}", memory.to_json());
     }
@@ -1325,7 +1379,10 @@ mod tests {
         assert_eq!(memory.metadata.as_ref().unwrap()["k"], "");
         assert_eq!(memory.embedding, Some(Vec::new()));
         assert_eq!(page.deleted[0].id, "b");
-        assert_eq!(page.server_time.to_go_string(), "2026-10-26 01:02:03 +0200 +0200");
+        assert_eq!(
+            page.server_time.to_go_string(),
+            "2026-10-26 01:02:03 +0200 +0200"
+        );
     }
 
     #[test]
@@ -1333,7 +1390,7 @@ mod tests {
         let error = |body: &str| decode_changes(body.as_bytes(), None).unwrap_err();
         assert_eq!(
             error(r#"{"memories":[{"id":5,"content":7}]}"#),
-            "json: cannot unmarshal number into Go struct field Memory.memories.id of type string"
+            "json: cannot unmarshal number into Go struct field ChangesResponse.memories.0.id of type string"
         );
         assert_eq!(
             error(r#"{"memories":[{"id":5,"created_at":"bad"}]}"#),
@@ -1350,13 +1407,23 @@ mod tests {
 
     #[test]
     fn apply_counts_follow_the_custom_unmarshaler() {
-        let counts = decode_apply_counts(br#"{"applied":3,"deleted":"x","skipped":1.5}"#, None).unwrap();
-        assert_eq!(counts, ApplyCounts { applied: 3, deleted: 0 });
+        let counts =
+            decode_apply_counts(br#"{"applied":3,"deleted":"x","skipped":1.5}"#, None).unwrap();
+        assert_eq!(
+            counts,
+            ApplyCounts {
+                applied: 3,
+                deleted: 0
+            }
+        );
         assert_eq!(
             decode_apply_counts(b"[1]", None).unwrap_err(),
-            "json: cannot unmarshal array into Go value of type map[string]json.RawMessage"
+            "json: cannot unmarshal array into Go value of type map[string]jsontext.Value"
         );
-        assert_eq!(decode_apply_counts(b"null", None).unwrap(), ApplyCounts::default());
+        assert_eq!(
+            decode_apply_counts(b"null", None).unwrap(),
+            ApplyCounts::default()
+        );
     }
 
     #[test]
@@ -1365,7 +1432,10 @@ mod tests {
             decode_api_error(br#"{"error":5,"code":"c"}"#),
             (String::new(), "c".into())
         );
-        assert_eq!(decode_api_error(b"{\"error\":\"cut"), (String::new(), String::new()));
+        assert_eq!(
+            decode_api_error(b"{\"error\":\"cut"),
+            (String::new(), String::new())
+        );
     }
 
     #[test]
@@ -1374,7 +1444,10 @@ mod tests {
         assert_eq!(float64(1.0), "1");
         assert_eq!(float64(1e-7), "1e-7");
         assert_eq!(float64(1e21), "1e+21");
-        assert_eq!(quote("a<b>&\u{2028}\u{8}"), "\"a\\u003cb\\u003e\\u0026\\u2028\\b\"");
+        assert_eq!(
+            quote("a<b>&\u{2028}\u{8}"),
+            "\"a\\u003cb\\u003e\\u0026\\u2028\\b\""
+        );
         assert_eq!(apply_body(&[], &[]), "{\"memories\":null,\"deleted\":null}");
     }
 }
