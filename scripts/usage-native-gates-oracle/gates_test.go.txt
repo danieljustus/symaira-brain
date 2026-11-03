@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 	"unicode/utf8"
@@ -66,6 +67,7 @@ type gateObserved struct {
 }
 
 type gateRecorder struct {
+	mu       sync.Mutex
 	status   int
 	requests []gateRequest
 	inner    *http.Transport
@@ -103,6 +105,8 @@ func (r *gateRecorder) RoundTrip(req *http.Request) (*http.Response, error) {
 		data, _ := io.ReadAll(req.Body)
 		body = string(data)
 	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.requests = append(r.requests, gateRequest{Method: req.Method, URL: req.URL.String(), Host: req.URL.Host, RequestURI: req.URL.RequestURI(), Headers: headers, RawHeaders: rawHeaders, Body: body})
 	return &http.Response{StatusCode: r.status, Header: make(http.Header), Body: io.NopCloser(strings.NewReader("{}")), Request: req}, nil
 }
@@ -450,7 +454,7 @@ func TestNativeGatesOracle768(t *testing.T) {
 		sort.SliceStable(observed, func(i, j int) bool { return string(observed[i].Report) < string(observed[j].Report) })
 		records = append(records, record{gateCase: c, Observed: observed})
 	}
-	data, err := json.MarshalIndent(map[string]any{"schema_version": 1, "go_version": runtime.Version(), "goos": runtime.GOOS, "goarch": runtime.GOARCH, "cases": records}, "", " ")
+	data, err := json.Marshal(map[string]any{"schema_version": 1, "go_version": runtime.Version(), "goos": runtime.GOOS, "goarch": runtime.GOARCH, "cases": records})
 	if err != nil {
 		t.Fatal(err)
 	}

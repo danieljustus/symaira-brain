@@ -1,0 +1,1226 @@
+{
+ "schema_version": 1,
+ "cases": [
+  {
+   "id": "base-kimi-0",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_BASE_URL": "http://unsupported.invalid"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjpmYWxzZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoibWlzc2luZyIsImRldGFpbCI6Ik5vIEtpbWkgQ29kZSBDTEkgY3JlZGVudGlhbHMgZm91bmQifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-nous-0",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "HERMES_PORTAL_BASE_URL": "http://unsupported.invalid"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOmZhbHNlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJtaXNzaW5nIiwiZGV0YWlsIjoiTm8gTm91cyBQb3J0YWwgY3JlZGVudGlhbHMgZm91bmQg4oCUIHNpZ24gaW4gd2l0aCB0aGUgSGVybWVzIENMSSJ9fV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-openrouter-0",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_URL": "http://unsupported.invalid"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5yb3V0ZXIiLCJkaXNwbGF5X25hbWUiOiJPcGVuUm91dGVyIiwiY29uZmlndXJlZCI6ZmFsc2UsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJubyBBUEkga2V5IGNvbmZpZ3VyZWQgKE9QRU5ST1VURVJfQVBJX0tFWSkifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-kimi-1",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_BASE_URL": "https://API.example.com/v1?x=1"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjpmYWxzZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoibWlzc2luZyIsImRldGFpbCI6Ik5vIEtpbWkgQ29kZSBDTEkgY3JlZGVudGlhbHMgZm91bmQifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-nous-1",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "HERMES_PORTAL_BASE_URL": "https://API.example.com/v1?x=1"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOmZhbHNlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJtaXNzaW5nIiwiZGV0YWlsIjoiTm8gTm91cyBQb3J0YWwgY3JlZGVudGlhbHMgZm91bmQg4oCUIHNpZ24gaW4gd2l0aCB0aGUgSGVybWVzIENMSSJ9fV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-openrouter-1",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_URL": "https://API.example.com/v1?x=1"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5yb3V0ZXIiLCJkaXNwbGF5X25hbWUiOiJPcGVuUm91dGVyIiwiY29uZmlndXJlZCI6ZmFsc2UsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJubyBBUEkga2V5IGNvbmZpZ3VyZWQgKE9QRU5ST1VURVJfQVBJX0tFWSkifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-kimi-2",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_BASE_URL": "https://api.example.com:8443/a/../b"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjpmYWxzZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoibWlzc2luZyIsImRldGFpbCI6Ik5vIEtpbWkgQ29kZSBDTEkgY3JlZGVudGlhbHMgZm91bmQifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-nous-2",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "HERMES_PORTAL_BASE_URL": "https://api.example.com:8443/a/../b"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOmZhbHNlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJtaXNzaW5nIiwiZGV0YWlsIjoiTm8gTm91cyBQb3J0YWwgY3JlZGVudGlhbHMgZm91bmQg4oCUIHNpZ24gaW4gd2l0aCB0aGUgSGVybWVzIENMSSJ9fV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-openrouter-2",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_URL": "https://api.example.com:8443/a/../b"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5yb3V0ZXIiLCJkaXNwbGF5X25hbWUiOiJPcGVuUm91dGVyIiwiY29uZmlndXJlZCI6ZmFsc2UsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJubyBBUEkga2V5IGNvbmZpZ3VyZWQgKE9QRU5ST1VURVJfQVBJX0tFWSkifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-kimi-3",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_BASE_URL": "https://user@example.com"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjpmYWxzZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoibWlzc2luZyIsImRldGFpbCI6Ik5vIEtpbWkgQ29kZSBDTEkgY3JlZGVudGlhbHMgZm91bmQifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-nous-3",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "HERMES_PORTAL_BASE_URL": "https://user@example.com"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOmZhbHNlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJtaXNzaW5nIiwiZGV0YWlsIjoiTm8gTm91cyBQb3J0YWwgY3JlZGVudGlhbHMgZm91bmQg4oCUIHNpZ24gaW4gd2l0aCB0aGUgSGVybWVzIENMSSJ9fV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-openrouter-3",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_URL": "https://user@example.com"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5yb3V0ZXIiLCJkaXNwbGF5X25hbWUiOiJPcGVuUm91dGVyIiwiY29uZmlndXJlZCI6ZmFsc2UsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJubyBBUEkga2V5IGNvbmZpZ3VyZWQgKE9QRU5ST1VURVJfQVBJX0tFWSkifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-kimi-4",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_BASE_URL": "https://exämple.com/%41"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjpmYWxzZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoibWlzc2luZyIsImRldGFpbCI6Ik5vIEtpbWkgQ29kZSBDTEkgY3JlZGVudGlhbHMgZm91bmQifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-nous-4",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "HERMES_PORTAL_BASE_URL": "https://exämple.com/%41"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOmZhbHNlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJtaXNzaW5nIiwiZGV0YWlsIjoiTm8gTm91cyBQb3J0YWwgY3JlZGVudGlhbHMgZm91bmQg4oCUIHNpZ24gaW4gd2l0aCB0aGUgSGVybWVzIENMSSJ9fV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-openrouter-4",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_URL": "https://exämple.com/%41"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5yb3V0ZXIiLCJkaXNwbGF5X25hbWUiOiJPcGVuUm91dGVyIiwiY29uZmlndXJlZCI6ZmFsc2UsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJubyBBUEkga2V5IGNvbmZpZ3VyZWQgKE9QRU5ST1VURVJfQVBJX0tFWSkifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-kimi-5",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_BASE_URL": "https://api.example.com//"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjpmYWxzZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoibWlzc2luZyIsImRldGFpbCI6Ik5vIEtpbWkgQ29kZSBDTEkgY3JlZGVudGlhbHMgZm91bmQifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-nous-5",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "HERMES_PORTAL_BASE_URL": "https://api.example.com//"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOmZhbHNlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJtaXNzaW5nIiwiZGV0YWlsIjoiTm8gTm91cyBQb3J0YWwgY3JlZGVudGlhbHMgZm91bmQg4oCUIHNpZ24gaW4gd2l0aCB0aGUgSGVybWVzIENMSSJ9fV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-openrouter-5",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_URL": "https://api.example.com//"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5yb3V0ZXIiLCJkaXNwbGF5X25hbWUiOiJPcGVuUm91dGVyIiwiY29uZmlndXJlZCI6ZmFsc2UsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJubyBBUEkga2V5IGNvbmZpZ3VyZWQgKE9QRU5ST1VURVJfQVBJX0tFWSkifX1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "base-all-table",
+   "ids": [
+    "kimi",
+    "nous",
+    "openrouter"
+   ],
+   "env": {
+    "KIMI_CODE_BASE_URL": "https://A.example.com/x?y",
+    "HERMES_PORTAL_BASE_URL": "https://b.example.com/%zz",
+    "OPENROUTER_API_URL": "https://c.example.com#f"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "a2ltaQlLaW1pIENvZGUJbm90IGNvbmZpZ3VyZWQJTm8gS2ltaSBDb2RlIENMSSBjcmVkZW50aWFscyBmb3VuZApub3VzCU5vdXMgUG9ydGFsCW5vdCBjb25maWd1cmVkCU5vIE5vdXMgUG9ydGFsIGNyZWRlbnRpYWxzIGZvdW5kIOKAlCBzaWduIGluIHdpdGggdGhlIEhlcm1lcyBDTEkKb3BlbnJvdXRlcglPcGVuUm91dGVyCW5vdCBjb25maWd1cmVkCW5vIEFQSSBrZXkgY29uZmlndXJlZCAoT1BFTlJPVVRFUl9BUElfS0VZKQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "workspace-only-0",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_WORKSPACE_ID": "wrk_é"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJXb3Jrc3BhY2Ugb3ZlcnJpZGUgc2V0Iiwic291cmNlIjoiZW52In0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6ICJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "workspace-only-1",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_WORKSPACE_ID": "wrk_a/b"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJXb3Jrc3BhY2Ugb3ZlcnJpZGUgc2V0Iiwic291cmNlIjoiZW52In0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6ICJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "workspace-only-2",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_WORKSPACE_ID": "wrk_a-b"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJXb3Jrc3BhY2Ugb3ZlcnJpZGUgc2V0Iiwic291cmNlIjoiZW52In0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6ICJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "workspace-only-3",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_WORKSPACE_ID": "wrk_"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJXb3Jrc3BhY2Ugb3ZlcnJpZGUgc2V0Iiwic291cmNlIjoiZW52In0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6ICJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "workspace-only-4",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_WORKSPACE_ID": "plain"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJXb3Jrc3BhY2Ugb3ZlcnJpZGUgc2V0Iiwic291cmNlIjoiZW52In0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6ICJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "workspace-only-5",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_x/billing"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJXb3Jrc3BhY2Ugb3ZlcnJpZGUgc2V0Iiwic291cmNlIjoiZW52In0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6ICJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "claude-oauth-unresolvable-reference",
+   "ids": [
+    "claude"
+   ],
+   "env": {
+    "ANTHROPIC_OAUTH_TOKEN": "env://CLAUDE_ABSENT_768"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNsYXVkZSIsImRpc3BsYXlfbmFtZSI6IkNsYXVkZSIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJjcmVkZW50aWFsIHJlc29sdXRpb24gZmFpbGVkOiByZXNvbHZlIEFOVEhST1BJQ19PQVVUSF9UT0tFTjogc2VjcmV0IHJlc29sdXRpb24gZmFpbGVkIGZvciBlbnY6Ly9DTEFVREVfQUJTRU5UXzc2ODogZW52aXJvbm1lbnQgdmFyaWFibGUgQ0xBVURFX0FCU0VOVF83NjggaXMgbm90IHNldCAocmVmZXJlbmNlIGVudjovL0NMQVVERV9BQlNFTlRfNzY4KTsgc2V0IGVudiB2YXIgIGFzIGZhbGxiYWNrIG9yIGluc3RhbGwgc3ltdmF1bHQiLCJzb3VyY2UiOiJ2YXVsdCJ9LCJlcnJvciI6ImNyZWRlbnRpYWwgcmVzb2x1dGlvbiBmYWlsZWQ6IHJlc29sdmUgQU5USFJPUElDX09BVVRIX1RPS0VOOiBzZWNyZXQgcmVzb2x1dGlvbiBmYWlsZWQgZm9yIGVudjovL0NMQVVERV9BQlNFTlRfNzY4OiBlbnZpcm9ubWVudCB2YXJpYWJsZSBDTEFVREVfQUJTRU5UXzc2OCBpcyBub3Qgc2V0IChyZWZlcmVuY2UgZW52Oi8vQ0xBVURFX0FCU0VOVF83NjgpOyBzZXQgZW52IHZhciAgYXMgZmFsbGJhY2sgb3IgaW5zdGFsbCBzeW12YXVsdCJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "claude-oauth-empty-reference",
+   "ids": [
+    "claude"
+   ],
+   "env": {
+    "ANTHROPIC_OAUTH_TOKEN": "env://"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNsYXVkZSIsImRpc3BsYXlfbmFtZSI6IkNsYXVkZSIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6Im1pc3NpbmciLCJkZXRhaWwiOiJjcmVkZW50aWFsIHJlc29sdXRpb24gZmFpbGVkOiByZXNvbHZlIEFOVEhST1BJQ19PQVVUSF9UT0tFTjogc2VjcmV0IHJlc29sdXRpb24gZmFpbGVkIGZvciBlbnY6Ly86IGVudmlyb25tZW50IHZhcmlhYmxlICBpcyBub3Qgc2V0IChyZWZlcmVuY2UgZW52Oi8vKTsgc2V0IGVudiB2YXIgIGFzIGZhbGxiYWNrIG9yIGluc3RhbGwgc3ltdmF1bHQiLCJzb3VyY2UiOiJ2YXVsdCJ9LCJlcnJvciI6ImNyZWRlbnRpYWwgcmVzb2x1dGlvbiBmYWlsZWQ6IHJlc29sdmUgQU5USFJPUElDX09BVVRIX1RPS0VOOiBzZWNyZXQgcmVzb2x1dGlvbiBmYWlsZWQgZm9yIGVudjovLzogZW52aXJvbm1lbnQgdmFyaWFibGUgIGlzIG5vdCBzZXQgKHJlZmVyZW5jZSBlbnY6Ly8pOyBzZXQgZW52IHZhciAgYXMgZmFsbGJhY2sgb3IgaW5zdGFsbCBzeW12YXVsdCJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-claude-env",
+   "ids": [
+    "claude"
+   ],
+   "env": {
+    "ANTHROPIC_OAUTH_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNsYXVkZSIsImRpc3BsYXlfbmFtZSI6IkNsYXVkZSIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IlNpZ25lZCBpbiB2aWEgQ2xhdWRlIENvZGUgT0F1dGggdG9rZW4iLCJzb3VyY2UiOiJlbnYifSwiZXJyb3IiOiJhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ2xhdWRlIHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL2FwaS5hbnRocm9waWMuY29tL2FwaS9vYXV0aC91c2FnZVwiOiBuZXQvaHR0cDogaW52YWxpZCBoZWFkZXIgZmllbGQgdmFsdWUgZm9yIFwiQXV0aG9yaXphdGlvblwiIn1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-claude-env-table",
+   "ids": [
+    "claude"
+   ],
+   "env": {
+    "ANTHROPIC_OAUTH_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "Y2xhdWRlCUNsYXVkZQllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ2xhdWRlIHJlcXVlc3QgZmFpbGVkOiBHZXQgImh0dHBzOi8vYXBpLmFudGhyb3BpYy5jb20vYXBpL29hdXRoL3VzYWdlIjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciAiQXV0aG9yaXphdGlvbiIK",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-claude-admin-env",
+   "ids": [
+    "claude"
+   ],
+   "env": {
+    "ANTHROPIC_OAUTH_TOKEN": "env://CLAUDE_ABSENT_768",
+    "ANTHROPIC_ADMIN_KEY": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNsYXVkZSIsImRpc3BsYXlfbmFtZSI6IkNsYXVkZSIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IkFkbWluIEFQSSBrZXkgZnJvbSBBTlRIUk9QSUNfQURNSU5fS0VZIiwic291cmNlIjoiZW52In0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IENsYXVkZSByZXF1ZXN0IGZhaWxlZDogR2V0IFwiaHR0cHM6Ly9hcGkuYW50aHJvcGljLmNvbS92MS9vcmdhbml6YXRpb25zL2Nvc3RfcmVwb3J0P2J1Y2tldF93aWR0aD0xZFx1MDAyNmxpbWl0PTdcIjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciBcIkF1dGhvcml6YXRpb25cIiJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-claude-admin-env-table",
+   "ids": [
+    "claude"
+   ],
+   "env": {
+    "ANTHROPIC_OAUTH_TOKEN": "env://CLAUDE_ABSENT_768",
+    "ANTHROPIC_ADMIN_KEY": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "Y2xhdWRlCUNsYXVkZQllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ2xhdWRlIHJlcXVlc3QgZmFpbGVkOiBHZXQgImh0dHBzOi8vYXBpLmFudGhyb3BpYy5jb20vdjEvb3JnYW5pemF0aW9ucy9jb3N0X3JlcG9ydD9idWNrZXRfd2lkdGg9MWQmbGltaXQ9NyI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-codex-env",
+   "ids": [
+    "codex"
+   ],
+   "env": {
+    "CODEX_ACCESS_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNvZGV4IiwiZGlzcGxheV9uYW1lIjoiQ29kZXgiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJTaWduZWQgaW4gdmlhIENvZGV4IENMSSBPQXV0aCAoQ09ERVhfQUNDRVNTX1RPS0VOIG9yIGF1dGguanNvbikiLCJzb3VyY2UiOiJlbnYifSwiZXJyb3IiOiJhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQUkgdXNhZ2UgcmVxdWVzdCBmYWlsZWQ6IEdldCBcImh0dHBzOi8vY2hhdGdwdC5jb20vYmFja2VuZC1hcGkvd2hhbS91c2FnZVwiOiBuZXQvaHR0cDogaW52YWxpZCBoZWFkZXIgZmllbGQgdmFsdWUgZm9yIFwiQXV0aG9yaXphdGlvblwiIn1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-codex-env-table",
+   "ids": [
+    "codex"
+   ],
+   "env": {
+    "CODEX_ACCESS_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "Y29kZXgJQ29kZXgJZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IEFJIHVzYWdlIHJlcXVlc3QgZmFpbGVkOiBHZXQgImh0dHBzOi8vY2hhdGdwdC5jb20vYmFja2VuZC1hcGkvd2hhbS91c2FnZSI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-copilot-env",
+   "ids": [
+    "copilot"
+   ],
+   "env": {
+    "COPILOT_ACCESS_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNvcGlsb3QiLCJkaXNwbGF5X25hbWUiOiJHaXRIdWIgQ29waWxvdCIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IlNpZ25lZCBpbiB2aWEgR2l0SHViIENvcGlsb3QgKENPUElMT1RfQUNDRVNTX1RPS0VOIG9yIENvcGlsb3QgQ0xJKSIsInNvdXJjZSI6ImVudiJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBDb3BpbG90IHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL2FwaS5naXRodWIuY29tL2NvcGlsb3RfaW50ZXJuYWwvdXNlclwiOiBuZXQvaHR0cDogaW52YWxpZCBoZWFkZXIgZmllbGQgdmFsdWUgZm9yIFwiQXV0aG9yaXphdGlvblwiIn1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-copilot-env-table",
+   "ids": [
+    "copilot"
+   ],
+   "env": {
+    "COPILOT_ACCESS_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "Y29waWxvdAlHaXRIdWIgQ29waWxvdAllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ29waWxvdCByZXF1ZXN0IGZhaWxlZDogR2V0ICJodHRwczovL2FwaS5naXRodWIuY29tL2NvcGlsb3RfaW50ZXJuYWwvdXNlciI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-copilot-file",
+   "ids": [
+    "copilot"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".config/github-copilot/apps.json",
+     "contents": "{\"github.com:1\": {\"oauth_token\": \"tok\\u0001\"}}"
+    }
+   ],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNvcGlsb3QiLCJkaXNwbGF5X25hbWUiOiJHaXRIdWIgQ29waWxvdCIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IlNpZ25lZCBpbiB2aWEgR2l0SHViIENvcGlsb3QgKENPUElMT1RfQUNDRVNTX1RPS0VOIG9yIENvcGlsb3QgQ0xJKSIsInNvdXJjZSI6ImZpbGUifSwiZXJyb3IiOiJhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ29waWxvdCByZXF1ZXN0IGZhaWxlZDogR2V0IFwiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9jb3BpbG90X2ludGVybmFsL3VzZXJcIjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciBcIkF1dGhvcml6YXRpb25cIiJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-copilot-file-table",
+   "ids": [
+    "copilot"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".config/github-copilot/apps.json",
+     "contents": "{\"github.com:1\": {\"oauth_token\": \"tok\\u0001\"}}"
+    }
+   ],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "Y29waWxvdAlHaXRIdWIgQ29waWxvdAllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ29waWxvdCByZXF1ZXN0IGZhaWxlZDogR2V0ICJodHRwczovL2FwaS5naXRodWIuY29tL2NvcGlsb3RfaW50ZXJuYWwvdXNlciI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-copilot-file-newline",
+   "ids": [
+    "copilot"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".config/github-copilot/apps.json",
+     "contents": "{\"github.com:1\": {\"oauth_token\": \"tok\\nx\"}}"
+    }
+   ],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImNvcGlsb3QiLCJkaXNwbGF5X25hbWUiOiJHaXRIdWIgQ29waWxvdCIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IlNpZ25lZCBpbiB2aWEgR2l0SHViIENvcGlsb3QgKENPUElMT1RfQUNDRVNTX1RPS0VOIG9yIENvcGlsb3QgQ0xJKSIsInNvdXJjZSI6ImZpbGUifSwiZXJyb3IiOiJhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ29waWxvdCByZXF1ZXN0IGZhaWxlZDogR2V0IFwiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9jb3BpbG90X2ludGVybmFsL3VzZXJcIjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciBcIkF1dGhvcml6YXRpb25cIiJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-copilot-file-newline-table",
+   "ids": [
+    "copilot"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".config/github-copilot/apps.json",
+     "contents": "{\"github.com:1\": {\"oauth_token\": \"tok\\nx\"}}"
+    }
+   ],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "Y29waWxvdAlHaXRIdWIgQ29waWxvdAllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ29waWxvdCByZXF1ZXN0IGZhaWxlZDogR2V0ICJodHRwczovL2FwaS5naXRodWIuY29tL2NvcGlsb3RfaW50ZXJuYWwvdXNlciI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-cursor-env",
+   "ids": [
+    "cursor"
+   ],
+   "env": {
+    "CURSOR_COOKIE": "a=\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImN1cnNvciIsImRpc3BsYXlfbmFtZSI6IkN1cnNvciIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IkNvb2tpZSBjb25maWd1cmVkIChDVVJTT1JfQ09PS0lFKSIsInNvdXJjZSI6ImVudiJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBDdXJzb3IgcmVxdWVzdCBmYWlsZWQ6IEdldCBcImh0dHBzOi8vY3Vyc29yLmNvbS9hcGkvdXNhZ2Utc3VtbWFyeVwiOiBuZXQvaHR0cDogaW52YWxpZCBoZWFkZXIgZmllbGQgdmFsdWUgZm9yIFwiQ29va2llXCIifV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-cursor-env-table",
+   "ids": [
+    "cursor"
+   ],
+   "env": {
+    "CURSOR_COOKIE": "a=\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "Y3Vyc29yCUN1cnNvcgllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQ3Vyc29yIHJlcXVlc3QgZmFpbGVkOiBHZXQgImh0dHBzOi8vY3Vyc29yLmNvbS9hcGkvdXNhZ2Utc3VtbWFyeSI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkNvb2tpZSIK",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-api-env",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_API_KEY": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJBUEkga2V5IGZyb20gS0lNSV9DT0RFX0FQSV9LRVkiLCJzb3VyY2UiOiJlbnYifSwiZXJyb3IiOiJhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogS2ltaSByZXF1ZXN0IGZhaWxlZDogR2V0IFwiaHR0cHM6Ly9hcGkua2ltaS5jb20vY29kaW5nL3YxL3VzYWdlc1wiOiBuZXQvaHR0cDogaW52YWxpZCBoZWFkZXIgZmllbGQgdmFsdWUgZm9yIFwiQXV0aG9yaXphdGlvblwiIn1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-api-env-table",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_CODE_API_KEY": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "a2ltaQlLaW1pIENvZGUJZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IEtpbWkgcmVxdWVzdCBmYWlsZWQ6IEdldCAiaHR0cHM6Ly9hcGkua2ltaS5jb20vY29kaW5nL3YxL3VzYWdlcyI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-web-env",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_AUTH_TOKEN": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJXZWIgYXV0aCB0b2tlbiBmcm9tIEtJTUlfQVVUSF9UT0tFTiIsInNvdXJjZSI6ImVudiJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBLaW1pIHJlcXVlc3QgZmFpbGVkOiBQb3N0IFwiaHR0cHM6Ly93d3cua2ltaS5jb20vYXBpdjIva2ltaS5nYXRld2F5LmJpbGxpbmcudjEuQmlsbGluZ1NlcnZpY2UvR2V0VXNhZ2VzXCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgXCJBdXRob3JpemF0aW9uXCIifV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-web-env-table",
+   "ids": [
+    "kimi"
+   ],
+   "env": {
+    "KIMI_AUTH_TOKEN": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "a2ltaQlLaW1pIENvZGUJZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IEtpbWkgcmVxdWVzdCBmYWlsZWQ6IFBvc3QgImh0dHBzOi8vd3d3LmtpbWkuY29tL2FwaXYyL2tpbWkuZ2F0ZXdheS5iaWxsaW5nLnYxLkJpbGxpbmdTZXJ2aWNlL0dldFVzYWdlcyI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-cli-file",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\": \"tok\\u0001\"}"
+    }
+   ],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJLaW1pIENvZGUgQ0xJIGlzIHNpZ25lZCBpbiIsInNvdXJjZSI6ImNsaSJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBLaW1pIHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL2FwaS5raW1pLmNvbS9jb2RpbmcvdjEvdXNhZ2VzXCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgXCJBdXRob3JpemF0aW9uXCIifV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-cli-file-table",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\": \"tok\\u0001\"}"
+    }
+   ],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "a2ltaQlLaW1pIENvZGUJZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IEtpbWkgcmVxdWVzdCBmYWlsZWQ6IEdldCAiaHR0cHM6Ly9hcGkua2ltaS5jb20vY29kaW5nL3YxL3VzYWdlcyI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-device-control",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\":\"cli-token-a\"}"
+    },
+    {
+     "path": ".kimi-code/device_id",
+     "contents": "dev\u0001ice"
+    }
+   ],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJLaW1pIENvZGUgQ0xJIGlzIHNpZ25lZCBpbiIsInNvdXJjZSI6ImNsaSJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBLaW1pIHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL2FwaS5raW1pLmNvbS9jb2RpbmcvdjEvdXNhZ2VzXCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgXCJYLU1zaC1EZXZpY2UtSWRcIiJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-device-control-table",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\":\"cli-token-a\"}"
+    },
+    {
+     "path": ".kimi-code/device_id",
+     "contents": "dev\u0001ice"
+    }
+   ],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "a2ltaQlLaW1pIENvZGUJZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IEtpbWkgcmVxdWVzdCBmYWlsZWQ6IEdldCAiaHR0cHM6Ly9hcGkua2ltaS5jb20vY29kaW5nL3YxL3VzYWdlcyI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIlgtTXNoLURldmljZS1JZCIK",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-device-newline",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\":\"cli-token-a\"}"
+    },
+    {
+     "path": ".kimi-code/device_id",
+     "contents": "dev\nice"
+    }
+   ],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJLaW1pIENvZGUgQ0xJIGlzIHNpZ25lZCBpbiIsInNvdXJjZSI6ImNsaSJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBLaW1pIHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL2FwaS5raW1pLmNvbS9jb2RpbmcvdjEvdXNhZ2VzXCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgXCJYLU1zaC1EZXZpY2UtSWRcIiJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-kimi-device-newline-table",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\":\"cli-token-a\"}"
+    },
+    {
+     "path": ".kimi-code/device_id",
+     "contents": "dev\nice"
+    }
+   ],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "a2ltaQlLaW1pIENvZGUJZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IEtpbWkgcmVxdWVzdCBmYWlsZWQ6IEdldCAiaHR0cHM6Ly9hcGkua2ltaS5jb20vY29kaW5nL3YxL3VzYWdlcyI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIlgtTXNoLURldmljZS1JZCIK",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-nous-env",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "NOUS_PORTAL_ACCESS_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IlNpZ25lZCBpbiB2aWEgSGVybWVzIENMSSBhdXRoIHN0b3JlIChOT1VTX1BPUlRBTF9BQ0NFU1NfVE9LRU4gb3IgZmlsZSkiLCJzb3VyY2UiOiJlbnYifSwiZXJyb3IiOiJhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQUkgdXNhZ2UgcmVxdWVzdCBmYWlsZWQ6IEdldCBcImh0dHBzOi8vcG9ydGFsLm5vdXNyZXNlYXJjaC5jb20vYXBpL29hdXRoL2FjY291bnRcIjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciBcIkF1dGhvcml6YXRpb25cIiJ9XX0K",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-nous-env-table",
+   "ids": [
+    "nous"
+   ],
+   "env": {
+    "NOUS_PORTAL_ACCESS_TOKEN": "tok\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "bm91cwlOb3VzIFBvcnRhbAllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQUkgdXNhZ2UgcmVxdWVzdCBmYWlsZWQ6IEdldCAiaHR0cHM6Ly9wb3J0YWwubm91c3Jlc2VhcmNoLmNvbS9hcGkvb2F1dGgvYWNjb3VudCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-nous-file",
+   "ids": [
+    "nous"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".hermes/auth.json",
+     "contents": "{\"providers\": {\"nous\": {\"access_token\": \"tok\\u0001\"}}}"
+    }
+   ],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOnRydWUsImF1dGhfc3RhdHVzIjp7InN0YXR1cyI6ImF2YWlsYWJsZSIsImRldGFpbCI6IlNpZ25lZCBpbiB2aWEgSGVybWVzIENMSSBhdXRoIHN0b3JlIChOT1VTX1BPUlRBTF9BQ0NFU1NfVE9LRU4gb3IgZmlsZSkiLCJzb3VyY2UiOiJmaWxlIn0sImVycm9yIjoiYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IEFJIHVzYWdlIHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL3BvcnRhbC5ub3VzcmVzZWFyY2guY29tL2FwaS9vYXV0aC9hY2NvdW50XCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgXCJBdXRob3JpemF0aW9uXCIifV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-nous-file-table",
+   "ids": [
+    "nous"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".hermes/auth.json",
+     "contents": "{\"providers\": {\"nous\": {\"access_token\": \"tok\\u0001\"}}}"
+    }
+   ],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "bm91cwlOb3VzIFBvcnRhbAllcnJvcglhbGwgQUkgdXNhZ2UgZmFsbGJhY2tzIGZhaWxlZDogQUkgdXNhZ2UgcmVxdWVzdCBmYWlsZWQ6IEdldCAiaHR0cHM6Ly9wb3J0YWwubm91c3Jlc2VhcmNoLmNvbS9hcGkvb2F1dGgvYWNjb3VudCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkF1dGhvcml6YXRpb24iCg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-openrouter-env",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_KEY": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5yb3V0ZXIiLCJkaXNwbGF5X25hbWUiOiJPcGVuUm91dGVyIiwiY29uZmlndXJlZCI6dHJ1ZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoiYXZhaWxhYmxlIiwiZGV0YWlsIjoiQVBJIGtleSBmcm9tIE9QRU5ST1VURVJfQVBJX0tFWSIsInNvdXJjZSI6ImVudiJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBBSSB1c2FnZSByZXF1ZXN0IGZhaWxlZDogR2V0IFwiaHR0cHM6Ly9vcGVucm91dGVyLmFpL2FwaS92MS9hdXRoL2tleVwiOiBuZXQvaHR0cDogaW52YWxpZCBoZWFkZXIgZmllbGQgdmFsdWUgZm9yIFwiQXV0aG9yaXphdGlvblwiIn1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-openrouter-env-table",
+   "ids": [
+    "openrouter"
+   ],
+   "env": {
+    "OPENROUTER_API_KEY": "key\u0001"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "b3BlbnJvdXRlcglPcGVuUm91dGVyCWVycm9yCWFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBBSSB1c2FnZSByZXF1ZXN0IGZhaWxlZDogR2V0ICJodHRwczovL29wZW5yb3V0ZXIuYWkvYXBpL3YxL2F1dGgva2V5IjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciAiQXV0aG9yaXphdGlvbiIK",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-opencode-cookie",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_COOKIE": "a=\u0001",
+    "OPENCODE_WORKSPACE_ID": "wrk_abc"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJDb29raWUgY29uZmlndXJlZCAoT1BFTkNPREVfQ09PS0lFKSIsInNvdXJjZSI6ImVudiJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBPcGVuQ29kZSByZXF1ZXN0IGZhaWxlZDogR2V0IFwiaHR0cHM6Ly9vcGVuY29kZS5haS9fc2VydmVyP2FyZ3M9JTVCJTIyd3JrX2FiYyUyMiU1RFx1MDAyNmlkPTdhYmVlYmVlMzcyZjMwNGUwNTBhYWFmOTJiZTg2M2Y0YTg2NDkwZTM4MmY4Yzc5ZGI2OGZkOTQwNDBkNjkxYjRcIjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciBcIkNvb2tpZVwiIn1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-opencode-cookie-table",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_COOKIE": "a=\u0001",
+    "OPENCODE_WORKSPACE_ID": "wrk_abc"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "b3BlbmNvZGUJT3BlbkNvZGUgR28JZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IE9wZW5Db2RlIHJlcXVlc3QgZmFpbGVkOiBHZXQgImh0dHBzOi8vb3BlbmNvZGUuYWkvX3NlcnZlcj9hcmdzPSU1QiUyMndya19hYmMlMjIlNUQmaWQ9N2FiZWViZWUzNzJmMzA0ZTA1MGFhYWY5MmJlODYzZjRhODY0OTBlMzgyZjhjNzlkYjY4ZmQ5NDA0MGQ2OTFiNCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgIkNvb2tpZSIK",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-opencode-workspace-control",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_COOKIE": "auth=1",
+    "OPENCODE_WORKSPACE_ID": "wrk_ab\u0001c"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6Im9wZW5jb2RlIiwiZGlzcGxheV9uYW1lIjoiT3BlbkNvZGUgR28iLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJDb29raWUgY29uZmlndXJlZCAoT1BFTkNPREVfQ09PS0lFKSIsInNvdXJjZSI6ImVudiJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBPcGVuQ29kZSByZXF1ZXN0IGZhaWxlZDogR2V0IFwiaHR0cHM6Ly9vcGVuY29kZS5haS9fc2VydmVyP2FyZ3M9JTVCJTIyd3JrX2FiJTVDdTAwMDFjJTIyJTVEXHUwMDI2aWQ9N2FiZWViZWUzNzJmMzA0ZTA1MGFhYWY5MmJlODYzZjRhODY0OTBlMzgyZjhjNzlkYjY4ZmQ5NDA0MGQ2OTFiNFwiOiBuZXQvaHR0cDogaW52YWxpZCBoZWFkZXIgZmllbGQgdmFsdWUgZm9yIFwiUmVmZXJlclwiIn1dfQo=",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "refused-opencode-workspace-control-table",
+   "ids": [
+    "opencode"
+   ],
+   "env": {
+    "OPENCODE_COOKIE": "auth=1",
+    "OPENCODE_WORKSPACE_ID": "wrk_ab\u0001c"
+   },
+   "files": [],
+   "home": "set",
+   "output": "table",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "b3BlbmNvZGUJT3BlbkNvZGUgR28JZXJyb3IJYWxsIEFJIHVzYWdlIGZhbGxiYWNrcyBmYWlsZWQ6IE9wZW5Db2RlIHJlcXVlc3QgZmFpbGVkOiBHZXQgImh0dHBzOi8vb3BlbmNvZGUuYWkvX3NlcnZlcj9hcmdzPSU1QiUyMndya19hYiU1Q3UwMDAxYyUyMiU1RCZpZD03YWJlZWJlZTM3MmYzMDRlMDUwYWFhZjkyYmU4NjNmNGE4NjQ5MGUzODJmOGM3OWRiNjhmZDk0MDQwZDY5MWI0IjogbmV0L2h0dHA6IGludmFsaWQgaGVhZGVyIGZpZWxkIHZhbHVlIGZvciAiUmVmZXJlciIK",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "home-unset-kimi-control",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\": \"tok\\u0001\"}"
+    }
+   ],
+   "home": "unset",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJLaW1pIENvZGUgQ0xJIGlzIHNpZ25lZCBpbiIsInNvdXJjZSI6ImNsaSJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBLaW1pIHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL2FwaS5raW1pLmNvbS9jb2RpbmcvdjEvdXNhZ2VzXCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgXCJBdXRob3JpemF0aW9uXCIifV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "home-empty-kimi-control",
+   "ids": [
+    "kimi"
+   ],
+   "env": {},
+   "files": [
+    {
+     "path": ".kimi-code/credentials/kimi-code.json",
+     "contents": "{\"access_token\": \"tok\\u0001\"}"
+    }
+   ],
+   "home": "empty",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjp0cnVlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJhdmFpbGFibGUiLCJkZXRhaWwiOiJLaW1pIENvZGUgQ0xJIGlzIHNpZ25lZCBpbiIsInNvdXJjZSI6ImNsaSJ9LCJlcnJvciI6ImFsbCBBSSB1c2FnZSBmYWxsYmFja3MgZmFpbGVkOiBLaW1pIHJlcXVlc3QgZmFpbGVkOiBHZXQgXCJodHRwczovL2FwaS5raW1pLmNvbS9jb2RpbmcvdjEvdXNhZ2VzXCI6IG5ldC9odHRwOiBpbnZhbGlkIGhlYWRlciBmaWVsZCB2YWx1ZSBmb3IgXCJBdXRob3JpemF0aW9uXCIifV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  },
+  {
+   "id": "home-userprofile-ignored",
+   "ids": [
+    "kimi",
+    "nous"
+   ],
+   "env": {
+    "USERPROFILE": "/nonexistent-768"
+   },
+   "files": [],
+   "home": "set",
+   "output": "json",
+   "go": {
+    "exit": 0,
+    "stdout_b64": "eyJzY2hlbWFfdmVyc2lvbiI6MSwicHJvdmlkZXJzIjpbeyJpZCI6ImtpbWkiLCJkaXNwbGF5X25hbWUiOiJLaW1pIENvZGUiLCJjb25maWd1cmVkIjpmYWxzZSwiYXV0aF9zdGF0dXMiOnsic3RhdHVzIjoibWlzc2luZyIsImRldGFpbCI6Ik5vIEtpbWkgQ29kZSBDTEkgY3JlZGVudGlhbHMgZm91bmQifX0seyJpZCI6Im5vdXMiLCJkaXNwbGF5X25hbWUiOiJOb3VzIFBvcnRhbCIsImNvbmZpZ3VyZWQiOmZhbHNlLCJhdXRoX3N0YXR1cyI6eyJzdGF0dXMiOiJtaXNzaW5nIiwiZGV0YWlsIjoiTm8gTm91cyBQb3J0YWwgY3JlZGVudGlhbHMgZm91bmQg4oCUIHNpZ24gaW4gd2l0aCB0aGUgSGVybWVzIENMSSJ9fV19Cg==",
+    "stderr_b64": ""
+   },
+   "matches": true
+  }
+ ]
+}

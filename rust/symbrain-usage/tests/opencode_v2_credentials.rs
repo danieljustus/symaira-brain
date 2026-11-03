@@ -43,7 +43,6 @@ fn inventory(root: &Path) -> BTreeMap<String, (u32, u64, i64, i64, Vec<u8>)> {
 
 fn child() {
     let selection = ProviderSelection::parse("opencode").unwrap();
-    assert!(!symbrain_usage::needs_go_fallback_for_selection(&selection));
     let providers = selected_providers(&selection);
     let outcome = std::env::var("OPENCODE_V2_OUTCOME").unwrap();
     if outcome == "none" || outcome == "error" {

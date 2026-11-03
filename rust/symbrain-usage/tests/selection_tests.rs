@@ -3,10 +3,10 @@
 mod coverage;
 #[cfg(unix)]
 #[test]
-fn provider_selection_excludes_credential_discovery_and_routing() {
+fn provider_selection_excludes_credential_discovery() {
     use std::os::unix::fs::PermissionsExt;
     use std::process::Command;
-    use symbrain_usage::{ProviderSelection, Service, needs_go_fallback_for_selection};
+    use symbrain_usage::{ProviderSelection, Service};
 
     if std::env::var_os("SELECTION_TEST_CHILD").is_some() {
         for selector in [
@@ -21,7 +21,6 @@ fn provider_selection_excludes_credential_discovery_and_routing() {
             assert!(ProviderSelection::parse(selector).is_err(), "{selector:?}");
         }
         let selection = ProviderSelection::parse("openrouter,codex,codex").unwrap();
-        assert!(!needs_go_fallback_for_selection(&selection));
         let service = Service::with_selection(&selection);
         let report = service.report();
         assert_eq!(
@@ -34,10 +33,6 @@ fn provider_selection_excludes_credential_discovery_and_routing() {
         );
         assert!(report.providers.iter().all(|p| !p.configured));
         assert!(!std::path::Path::new(&std::env::var_os("SELECTION_MARKER").unwrap()).exists());
-        // Positive route control: an explicitly selected unsupported source still falls back.
-        assert!(needs_go_fallback_for_selection(
-            &ProviderSelection::parse("kimi").unwrap()
-        ));
         return;
     }
 
@@ -59,7 +54,7 @@ fn provider_selection_excludes_credential_discovery_and_routing() {
     child
         .args([
             "--exact",
-            "provider_selection_excludes_credential_discovery_and_routing",
+            "provider_selection_excludes_credential_discovery",
             "--nocapture",
         ])
         .env_clear()

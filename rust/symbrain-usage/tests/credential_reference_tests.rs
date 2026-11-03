@@ -74,11 +74,6 @@ fn usage_credential_768_matches_fresh_go_constructors_and_requests() {
         for (name, value) in record["env"].as_object().expect("case env") {
             set(name, value.as_str().expect("env string"));
         }
-        assert!(
-            !symbrain_usage::needs_go_fallback(),
-            "{}: native routing",
-            record["id"]
-        );
         let providers = symbrain_usage::all_providers()
             .into_iter()
             .filter(|provider| provider.id == record["provider"].as_str().expect("provider"))

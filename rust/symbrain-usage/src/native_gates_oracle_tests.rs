@@ -19,7 +19,13 @@ use std::process::Command;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
-const ORACLE: &str = include_str!("../tests/fixtures/usage_native_gates.json");
+// Header values (the Kimi platform label) and the file-access semantics of the
+// reference implementation are per OS, so each supported OS replays the fixture
+// the oracle produced there.
+#[cfg(target_os = "macos")]
+const ORACLE: &str = include_str!("../tests/fixtures/usage_native_gates_darwin.json");
+#[cfg(target_os = "linux")]
+const ORACLE: &str = include_str!("../tests/fixtures/usage_native_gates_linux.json");
 const CASE_ENV: &str = "SYMBRAIN_GATES_CASE";
 const OUT_ENV: &str = "SYMBRAIN_GATES_OUT";
 // Go draws a random server-instance UUID per request; the native constant is a

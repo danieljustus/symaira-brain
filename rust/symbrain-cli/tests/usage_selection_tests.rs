@@ -1,9 +1,9 @@
-//! CLI flag validation is credential-free, including the whole-report Go route.
+//! CLI flag validation and provider selection are credential-free and native.
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
 #[cfg(unix)]
 #[test]
-fn usage_provider_selection_precedes_fallback_and_survives_delegation() {
+fn usage_provider_selection_is_native_and_credential_free() {
     use std::os::unix::fs::PermissionsExt;
     use std::process::Command;
 
@@ -82,14 +82,15 @@ fn usage_provider_selection_precedes_fallback_and_survives_delegation() {
         assert_eq!(result.status.code(), Some(2));
         assert!(result.stdout.is_empty());
     }
-    let args = ["usage", "--output", "json", "--providers", "kimi"];
-    let result = run(&args);
+    // An unusual base override is no longer a routing predicate: the same
+    // invocation is answered natively and never reaches the fallback script.
+    let result = run(&["usage", "--output", "json", "--providers", "openrouter"]);
     assert!(result.status.success());
-    assert_eq!(
-        String::from_utf8(result.stdout).unwrap(),
-        args.join("\n") + "\n",
-        "fallback must retain original selection"
-    );
+    let report: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    let providers = report["providers"].as_array().unwrap();
+    assert_eq!(providers.len(), 1);
+    assert_eq!(providers[0]["id"], "openrouter");
+    assert_eq!(providers[0]["configured"], false);
     assert!(
         !marker.exists(),
         "excluded credential/process command executed"

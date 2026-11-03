@@ -6,8 +6,9 @@
 //! with a cleared environment, so process-global `HOME`/`KIMI_CODE_HOME` are
 //! never mutated in the test binary. Every case must report exactly Go's
 //! `configured`/`auth_status`; there is no Go route to fall back to.
-//! Run as a non-root user; root bypasses the mode-000 cases.
-#![cfg(unix)]
+//! Recorded on macOS and needs a non-root user (root bypasses the mode-000
+//! cases); `native_gates_oracle_tests` replays the same shapes per OS.
+#![cfg(target_os = "macos")]
 
 use super::{coverage, kimi};
 use serde_json::{Value, json};

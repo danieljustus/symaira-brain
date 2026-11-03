@@ -85,11 +85,6 @@ fn usage_hermes_768_matches_fresh_go_file_and_jwt_contracts() {
     assert_eq!(observed, expected, "exact Hermes case coverage");
     for record in &records {
         prepare(record);
-        assert!(
-            !symbrain_usage::needs_go_fallback(),
-            "{}: native Hermes routing",
-            record["id"]
-        );
         let path = record["auth_path"].as_str().expect("store path");
         let before = std::fs::read(path).ok();
         assert_eq!(
