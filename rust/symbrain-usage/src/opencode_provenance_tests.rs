@@ -29,7 +29,8 @@ const HARNESS_KEYS: &[&str] = &[
     "rust/symbrain-usage/src/opencode_discovery_tests.rs",
     "rust/symbrain-usage/src/opencode_provenance_tests.rs",
 ];
-const CURRENT_FIXTURE: &str = "tests/fixtures/opencode_discovery_go_dependency_update_20261008.json";
+const CURRENT_FIXTURE: &str =
+    "tests/fixtures/opencode_discovery_go_dependency_update_20261008.json";
 const HISTORICAL_FIXTURE: &str = "tests/fixtures/opencode_discovery.json";
 
 fn digest_text(data: &[u8]) -> String {
@@ -52,7 +53,10 @@ fn validate(oracle: &Value) {
     let p = &oracle["provenance"];
     assert_eq!(p["oracle_revision"], anchor::ORACLE_REVISION);
     assert_eq!(p["toolchain"], anchor::GO_TOOLCHAIN);
-    for (key, paths) in [("source_hashes", SOURCE_KEYS), ("harness_hashes", HARNESS_KEYS)] {
+    for (key, paths) in [
+        ("source_hashes", SOURCE_KEYS),
+        ("harness_hashes", HARNESS_KEYS),
+    ] {
         let map = p[key].as_object().expect("hash map required");
         assert_eq!(map.len(), paths.len(), "{key}: input inventory changed");
         for path in paths {
@@ -79,7 +83,8 @@ fn validate_current_fixture(data: &[u8]) -> Value {
 #[test]
 fn provenance_checks_hashes_and_rejects_mutation() {
     let crate_root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let current_bytes = fs::read(crate_root.join(CURRENT_FIXTURE)).expect("current fixture required");
+    let current_bytes =
+        fs::read(crate_root.join(CURRENT_FIXTURE)).expect("current fixture required");
     let oracle = validate_current_fixture(&current_bytes);
 
     let historical_bytes =

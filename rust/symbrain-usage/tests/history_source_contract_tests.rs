@@ -36,7 +36,10 @@ fn additive_history_preserves_exact_frozen_go_schema_projection() {
             assert!(positions.windows(2).all(|pair| pair[0] < pair[1]), "{text}");
         }
     }
-    assert!(providers >= 10, "only {providers} frozen providers replayed");
+    assert!(
+        providers >= 10,
+        "only {providers} frozen providers replayed"
+    );
 }
 
 #[test]

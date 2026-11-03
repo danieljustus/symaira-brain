@@ -163,7 +163,10 @@ fn check_provenance(fixture: &OracleFixture) {
 }
 
 fn is_sha256_hex(value: &str) -> bool {
-    value.len() == 64 && value.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
 }
 
 fn write_oracle_skill(root: &Path, body: &str) {

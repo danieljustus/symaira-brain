@@ -162,10 +162,17 @@ fn capability_oracle_provenance_and_case_ids_are_complete() {
     );
     assert_eq!(suite.source_sha256.len(), 4);
     assert_eq!(suite.generator_sha256.len(), 2);
-    for (path, digest) in suite.source_sha256.iter().chain(suite.generator_sha256.iter()) {
+    for (path, digest) in suite
+        .source_sha256
+        .iter()
+        .chain(suite.generator_sha256.iter())
+    {
         assert!(!path.is_empty());
         assert!(
-            digest.len() == 64 && digest.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f')),
+            digest.len() == 64
+                && digest
+                    .bytes()
+                    .all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f')),
             "malformed recorded digest for {path}"
         );
     }

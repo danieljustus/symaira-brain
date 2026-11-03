@@ -1584,6 +1584,106 @@
    "go_inputs": [
     "go.mod"
    ]
+  },
+  {
+   "id": "usage-768-credential",
+   "origin": "pinned-go-recorded",
+   "description": "Go 44-case credential reference constructor/request corpus (11 providers x 4 references) + recorded home trees",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_credential_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py credential",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py credential <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-768-hermes",
+   "origin": "pinned-go-recorded",
+   "description": "Go 96-case Hermes file/JWT corpus + recorded home trees + Go HEAD CR/LF probe",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_hermes_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py hermes",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py hermes <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-768-provider-files",
+   "origin": "pinned-go-recorded",
+   "description": "Go 86-case Claude/Codex provider-file corpus + recorded home trees",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_provider_files_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py files",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py files <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-768-copilot-kimi",
+   "origin": "pinned-go-recorded",
+   "description": "Go 89-case Copilot/Kimi corpus, 97-case local-files baseline, 16 owner and 22 path cases + recorded trees",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_copilot_kimi_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py copilot-kimi",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py copilot-kimi <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
   }
  ]
 }

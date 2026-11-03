@@ -82,7 +82,10 @@ fn decode(value: &str) -> Vec<u8> {
 }
 
 fn is_sha256_hex(value: &str) -> bool {
-    value.len() == 64 && value.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
 }
 
 #[test]
@@ -99,7 +102,11 @@ fn oracle_is_pinned_to_current_go_sources_and_generator() {
         assert!(source.rollback_present);
         assert!(!source.path.is_empty());
         assert!(is_sha256_hex(&source.sha256), "digest of {}", source.path);
-        assert!(is_sha256_hex(&source.rollback_sha256), "rollback digest of {}", source.path);
+        assert!(
+            is_sha256_hex(&source.rollback_sha256),
+            "rollback digest of {}",
+            source.path
+        );
     }
     assert!(is_sha256_hex(&suite.generator_sha256));
 }

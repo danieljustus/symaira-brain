@@ -124,8 +124,8 @@ fn validation_matches_name_limits_and_render_blocking_policy() {
 
 #[test]
 fn validation_reports_source_marker_line_and_known_target_warnings() {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/render_testdata/variant-source");
+    let root =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/render_testdata/variant-source");
     let bundle = load_bundle(&root).expect("variant fixture");
     let known = [
         "claude",

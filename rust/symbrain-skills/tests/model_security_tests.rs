@@ -26,8 +26,7 @@ fn oracle_security_case(name: &str) -> serde_json::Value {
 }
 
 fn inline_manifest_fixture() -> std::path::PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/render_testdata/inline-manifest")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/render_testdata/inline-manifest")
 }
 
 #[test]

@@ -33,7 +33,11 @@ fn validate(bytes: &[u8]) -> Result<Value, String> {
     // the sealed capture itself (scripts/oracle-freeze), so check they are present and well-formed.
     for (path, hash) in sources {
         let digest = hash.as_str().unwrap_or_default();
-        if digest.len() != 64 || !digest.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f')) {
+        if digest.len() != 64
+            || !digest
+                .bytes()
+                .all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+        {
             return Err(format!("recorded source digest malformed: {path}"));
         }
     }

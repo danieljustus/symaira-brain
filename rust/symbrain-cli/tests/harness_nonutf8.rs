@@ -108,12 +108,18 @@ fn replay_go(argv: &[&str], observed: &Output, root: &std::path::Path, suffix: &
     }
     let fixture: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/harness_nonutf8_go.darwin.json")).unwrap();
-    let suffix_hex: String = suffix.iter().map(|b| format!("{b:02x}")).collect();
+    let suffix_hex = suffix.iter().fold(String::new(), |mut out, b| {
+        use std::fmt::Write;
+        write!(out, "{b:02x}").unwrap();
+        out
+    });
     let case = fixture["cases"]
         .as_array()
         .unwrap()
         .iter()
-        .find(|case| case["suffix_hex"] == suffix_hex.as_str() && case["argv"] == serde_json::json!(argv))
+        .find(|case| {
+            case["suffix_hex"] == suffix_hex.as_str() && case["argv"] == serde_json::json!(argv)
+        })
         .unwrap_or_else(|| panic!("no frozen Go transcript for {argv:?} {suffix_hex}"));
     assert_eq!(case["exit"], observed.status.code().unwrap(), "{argv:?}");
     assert_eq!(
@@ -130,6 +136,9 @@ fn replay_go(argv: &[&str], observed: &Output, root: &std::path::Path, suffix: &
             "{argv:?}"
         );
     } else {
-        assert_eq!(go_stdout, native_stdout, "{argv:?} stdout bytes differ from frozen Go");
+        assert_eq!(
+            go_stdout, native_stdout,
+            "{argv:?} stdout bytes differ from frozen Go"
+        );
     }
 }

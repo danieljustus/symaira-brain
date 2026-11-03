@@ -568,10 +568,8 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
                 "moonshot".into(),
                 Response {
                     status: 200,
-                    body: include_bytes!(
-                        "../tests/fixtures/go_testdata/moonshot-balance-cn.json"
-                    )
-                    .to_vec(),
+                    body: include_bytes!("../tests/fixtures/go_testdata/moonshot-balance-cn.json")
+                        .to_vec(),
                     headers: BTreeMap::new(),
                 },
             ),
@@ -599,10 +597,8 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
                 "openrouter".into(),
                 Response {
                     status: 200,
-                    body: include_bytes!(
-                        "../tests/fixtures/go_testdata/openrouter-credits.json"
-                    )
-                    .to_vec(),
+                    body: include_bytes!("../tests/fixtures/go_testdata/openrouter-credits.json")
+                        .to_vec(),
                     headers: BTreeMap::new(),
                 },
             ),
@@ -1297,8 +1293,7 @@ fn assert_claude_oauth_report_matches_scenario(
     let (report, transport) = authenticated_claude_oauth_report(
         Response {
             status: 200,
-            body: include_bytes!("../tests/fixtures/go_testdata/claude-oauth-usage.json")
-                .to_vec(),
+            body: include_bytes!("../tests/fixtures/go_testdata/claude-oauth-usage.json").to_vec(),
             headers: BTreeMap::new(),
         },
         source,
