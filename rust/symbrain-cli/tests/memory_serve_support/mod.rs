@@ -268,13 +268,29 @@ fn dechunk(mut body: &[u8]) -> Vec<u8> {
 /// Sends one literal request and reads the whole reply (the request must
 /// carry `Connection: close`).
 pub fn raw(port: u16, request: &str) -> Response {
-    let mut stream = TcpStream::connect(("127.0.0.1", port)).unwrap();
-    stream
-        .set_read_timeout(Some(Duration::from_secs(10)))
-        .unwrap();
-    let _ = stream.write_all(request.as_bytes());
+    // A server may answer and close before it has read a very large body; the
+    // client then sees a reset instead of the reply. The request is retried a
+    // few times, and the body is written while the reply is read, so the
+    // outcome does not depend on scheduling under load.
     let mut bytes = Vec::new();
-    let _ = stream.read_to_end(&mut bytes);
+    for _ in 0..4 {
+        let stream = TcpStream::connect(("127.0.0.1", port)).unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(10)))
+            .unwrap();
+        let mut writer = stream.try_clone().unwrap();
+        let payload = request.as_bytes().to_vec();
+        let sender = std::thread::spawn(move || {
+            let _ = writer.write_all(&payload);
+        });
+        let mut reader = stream;
+        bytes.clear();
+        let _ = reader.read_to_end(&mut bytes);
+        let _ = sender.join();
+        if !bytes.is_empty() {
+            break;
+        }
+    }
     let split = bytes
         .windows(4)
         .position(|w| w == b"\r\n\r\n")

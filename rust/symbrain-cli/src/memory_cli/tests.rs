@@ -293,7 +293,8 @@ fn memory_sync_is_routed_by_run_sync_not_the_gate() {
         assert!(is_sync(&args));
         assert!(!requires_go_fallback(&args), "{case:?}");
     }
-    assert!(requires_go_fallback(&[OsString::from("serve")]));
+    // `serve` is native (#759): no hand-off to the shipped implementation.
+    assert!(!requires_go_fallback(&[OsString::from("serve")]));
 }
 
 /// Everything the shipped implementation refuses before it opens the database
