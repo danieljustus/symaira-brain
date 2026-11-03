@@ -9,11 +9,18 @@ impl Store {
     ///
     /// # Errors
     /// Returns a SQLite error; audit errors do not fail a completed deletion.
-    pub fn delete_cli(&self, id: &str) -> Result<bool, StoreError> {
-        self.delete_service(id, true)
+    pub fn delete_cli(&self, id: &[u8]) -> Result<bool, StoreError> {
+        self.delete_service_bytes(id, true)
     }
 
     pub(crate) fn delete_service(&self, id: &str, audit_enabled: bool) -> Result<bool, StoreError> {
+        self.delete_service_bytes(id.as_bytes(), audit_enabled)
+    }
+
+    /// The identifier is bound as the exact `TEXT` bytes Go binds, valid
+    /// UTF-8 or not.
+    fn delete_service_bytes(&self, id_bytes: &[u8], audit_enabled: bool) -> Result<bool, StoreError> {
+        let id = RawText(id_bytes);
         let conn = self.lock()?;
         // `GetMemory`: the full-row hydration, with its scan diagnostics.
         let loaded = conn
@@ -22,7 +29,7 @@ impl Store {
                     "SELECT {} FROM memories WHERE id = ?",
                     crate::search_rows::SEARCH_COLUMNS
                 ),
-                [id],
+                [&id],
                 crate::SearchRow::from_row,
             )
             .optional()?;
@@ -34,16 +41,27 @@ impl Store {
         // Go reads the audit identity in DeleteMemory after GetMemory's access
         // update. If another process already deleted it, DeleteMemory succeeds.
         let identity: Option<(String, String, String)> = conn.query_row(
-            "SELECT COALESCE(scope,''),COALESCE(created_by,''),COALESCE(created_session,'') FROM memories WHERE id=?", [id],
+            "SELECT COALESCE(scope,''),COALESCE(created_by,''),COALESCE(created_session,'') FROM memories WHERE id=?", [&id],
             |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?))).optional()?;
         let Some((scope, author, session)) = identity else {
             return Ok(true);
         };
-        conn.execute("DELETE FROM memories WHERE id=?", [id])?;
+        conn.execute("DELETE FROM memories WHERE id=?", [&id])?;
         if audit_enabled {
-            audit(&conn, "delete", id, &scope, &session, &author, "");
+            audit(&conn, "delete", &String::from_utf8_lossy(id_bytes), &scope, &session, &author, "");
         }
         Ok(true)
+    }
+}
+
+/// A `TEXT` parameter from raw bytes (SQLite does not require UTF-8).
+struct RawText<'a>(&'a [u8]);
+
+impl rusqlite::ToSql for RawText<'_> {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        Ok(rusqlite::types::ToSqlOutput::Borrowed(
+            rusqlite::types::ValueRef::Text(self.0),
+        ))
     }
 }
 

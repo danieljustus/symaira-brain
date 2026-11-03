@@ -216,13 +216,45 @@ pub fn normalize_output(raw: &[u8], root: &Path, ids: &mut IdMap) -> Vec<u8> {
     bytes = slog_prefix()
         .replace_all(&bytes, &b"<time> "[..])
         .into_owned();
-    let out = uuid_re()
+    let bytes = uuid_re()
         .replace_all(&bytes, |caps: &regex::bytes::Captures<'_>| {
             let id = String::from_utf8_lossy(&caps[0]).into_owned();
             ids.label(&id).into_bytes()
         })
         .into_owned();
-    out
+    // Retrieval scores blend in `time.Since(updated_at)`, so their digits
+    // depend on when the process ran; the ranking order stays compared.
+    let bytes = score_json()
+        .replace_all(&bytes, &b"\"similarity_score\":<score>"[..])
+        .into_owned();
+    let bytes = score_table()
+        .replace_all(&bytes, &b"<score>\t"[..])
+        .into_owned();
+    // Access tracking stamps the time of the search itself.
+    access_stamp()
+        .replace_all(&bytes, &b"\"${1}\":\"<ts>\""[..])
+        .into_owned()
+}
+
+fn access_stamp() -> &'static regex::bytes::Regex {
+    static RE: OnceLock<regex::bytes::Regex> = OnceLock::new();
+    RE.get_or_init(|| {
+        regex::bytes::Regex::new(r#""(last_access|prev_access)":"[^"]*""#).expect("regex")
+    })
+}
+
+fn score_json() -> &'static regex::bytes::Regex {
+    static RE: OnceLock<regex::bytes::Regex> = OnceLock::new();
+    RE.get_or_init(|| {
+        regex::bytes::Regex::new(r#""similarity_score":[0-9eE+.\-]+"#).expect("regex")
+    })
+}
+
+fn score_table() -> &'static regex::bytes::Regex {
+    static RE: OnceLock<regex::bytes::Regex> = OnceLock::new();
+    RE.get_or_init(|| {
+        regex::bytes::Regex::new(r"(?m)^[0-9]\.[0-9]{6}\t").expect("regex")
+    })
 }
 
 fn replace_bytes(haystack: &[u8], needle: &[u8], with: &[u8]) -> Vec<u8> {
@@ -367,6 +399,12 @@ fn ts_re() -> &'static [(regex::Regex, &'static str)] {
 
 /// Identifiers present in a database (to keep seeded ids literal).
 pub fn known_ids(path: &Path) -> BTreeSet<String> {
+    // Inspect a copy: opening a WAL database creates side files next to it,
+    // and the fixture directory must stay untouched.
+    let scratch = tempfile::tempdir().expect("scratch directory");
+    let copy = scratch.path().join("seed.db");
+    std::fs::copy(path, &copy).expect("seed copy");
+    let path = copy.as_path();
     let mut ids = BTreeSet::new();
     let re = regex::Regex::new(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
         .expect("regex");
@@ -629,12 +667,14 @@ fn first_id(db: &Path) -> OsString {
 
 /// `{DB}` is the sandbox database, `{FIRST_ID}` the oldest memory id in it.
 fn expand(args: &[OsString], db: &Path) -> Vec<OsString> {
+    use std::os::unix::ffi::{OsStrExt, OsStringExt};
     args.iter()
         .map(|arg| {
             if arg == OsStr::new("{DB}") {
                 db.as_os_str().to_owned()
-            } else if arg == OsStr::new("{FIRST_ID}") {
-                first_id(db)
+            } else if arg.as_bytes().windows(10).any(|w| w == b"{FIRST_ID}") {
+                let id = first_id(db);
+                OsString::from_vec(replace_bytes(arg.as_bytes(), b"{FIRST_ID}", id.as_bytes()))
             } else {
                 arg.clone()
             }
@@ -683,8 +723,25 @@ fn run_side(who: Who, scenario: &Scenario<'_>, seed_db: Option<&Path>, known: &B
         std::fs::copy(seed, sb.db()).expect("fixture copy");
         if !scenario.mutate_sql.is_empty() {
             let conn = Connection::open(sb.db()).expect("mutate connection");
+            // Triggers (sync log, JSON checks) would reject or log the
+            // fault injection itself; they are restored right after.
+            let triggers: Vec<(String, String)> = conn
+                .prepare("SELECT name, sql FROM sqlite_schema WHERE type='trigger'")
+                .and_then(|mut statement| {
+                    statement
+                        .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
+                        .and_then(|rows| rows.collect())
+                })
+                .expect("trigger list");
+            for (name, _) in &triggers {
+                conn.execute_batch(&format!("DROP TRIGGER \"{name}\""))
+                    .expect("trigger drop");
+            }
             for statement in &scenario.mutate_sql {
                 conn.execute_batch(statement).expect("fixture mutation");
+            }
+            for (_, sql) in &triggers {
+                conn.execute_batch(sql).expect("trigger restore");
             }
         }
     }
@@ -849,6 +906,10 @@ fn side_payload(
         .enumerate()
         .map(|(index, out)| {
             serde_json::json!({
+                "argv": scenario.steps[index].iter().map(|arg| {
+                    use std::os::unix::ffi::OsStrExt;
+                    encode(arg.as_bytes())
+                }).collect::<Vec<_>>(),
                 "code": out.code,
                 "stdout": encode(&side.stdouts[index]),
                 "stderr": encode(&side.stderrs[index]),
@@ -857,6 +918,11 @@ fn side_payload(
         .collect();
     serde_json::json!({
         "scenario": scenario.name,
+        "config": scenario.config,
+        "seed_steps": scenario.seed.iter().map(|step| step.iter().map(|arg| {
+            use std::os::unix::ffi::OsStrExt;
+            encode(arg.as_bytes())
+        }).collect::<Vec<_>>()).collect::<Vec<_>>(),
         "seed_file": seed_file,
         "seed_sha256": seed_sha,
         "mutate_sql": scenario.mutate_sql,
@@ -977,6 +1043,9 @@ fn build_seed(scenario: &Scenario<'_>, target: &Path) {
 }
 
 fn record(scenario: &Scenario<'_>, dir: &Path) {
+    // Scenarios of different tests share seeds; build each one only once.
+    static SEEDS: Mutex<()> = Mutex::new(());
+    let _guard = SEEDS.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
     std::fs::create_dir_all(dir).expect("fixture directory");
     let seed_name = seed_file_name(scenario);
     let seed_path = dir.join(&seed_name);
@@ -1006,50 +1075,56 @@ fn record(scenario: &Scenario<'_>, dir: &Path) {
     .expect("write fixture");
 }
 
+/// Fails with the first differing offset and the bytes around it.
+fn assert_bytes(label: &str, want: &[u8], got: &[u8]) {
+    if want == got {
+        return;
+    }
+    let at = want
+        .iter()
+        .zip(got)
+        .position(|(a, b)| a != b)
+        .unwrap_or_else(|| want.len().min(got.len()));
+    let window = |bytes: &[u8]| {
+        let start = at.saturating_sub(120).min(bytes.len());
+        let end = (at + 160).min(bytes.len());
+        String::from_utf8_lossy(&bytes[start..end]).into_owned()
+    };
+    panic!(
+        "{label}: bytes differ at offset {at} (go {} bytes, rust {} bytes)\n go:   {:?}\n rust: {:?}",
+        want.len(),
+        got.len(),
+        window(want),
+        window(got)
+    );
+}
+
 fn assert_sides(scenario: &Scenario<'_>, go: &Side, rust: &Side) {
+    let name = scenario.name;
+    assert_eq!(go.outs.len(), rust.outs.len(), "{name}: step count");
     for (index, (g, r)) in go.outs.iter().zip(&rust.outs).enumerate() {
-        assert_eq!(
-            g.code,
-            r.code,
-            "{} step {index}: exit status\n go stderr: {}\n rust stderr: {}",
-            scenario.name,
-            String::from_utf8_lossy(&g.stderr),
-            String::from_utf8_lossy(&r.stderr)
-        );
-        assert_eq!(
-            String::from_utf8_lossy(&go.stdouts[index]),
-            String::from_utf8_lossy(&rust.stdouts[index]),
-            "{} step {index}: stdout",
-            scenario.name
-        );
-        assert_eq!(
-            go.stdouts[index], rust.stdouts[index],
-            "{} step {index}: stdout bytes",
-            scenario.name
+        assert_bytes(
+            &format!("{name} step {index}: stdout"),
+            &go.stdouts[index],
+            &rust.stdouts[index],
         );
         if scenario.stderr_as_set {
             let mut a: Vec<&[u8]> = go.stderrs[index].split(|b| *b == b'\n').collect();
             let mut b: Vec<&[u8]> = rust.stderrs[index].split(|b| *b == b'\n').collect();
             a.sort_unstable();
             b.sort_unstable();
-            assert_eq!(a, b, "{} step {index}: stderr lines", scenario.name);
+            assert_eq!(a, b, "{name} step {index}: stderr lines");
         } else {
-            assert_eq!(
-                String::from_utf8_lossy(&go.stderrs[index]),
-                String::from_utf8_lossy(&rust.stderrs[index]),
-                "{} step {index}: stderr",
-                scenario.name
-            );
-            assert_eq!(
-                go.stderrs[index], rust.stderrs[index],
-                "{} step {index}: stderr bytes",
-                scenario.name
+            assert_bytes(
+                &format!("{name} step {index}: stderr"),
+                &go.stderrs[index],
+                &rust.stderrs[index],
             );
         }
+        assert_eq!(g.code, r.code, "{name} step {index}: exit status");
     }
-    assert_eq!(go.outs.len(), rust.outs.len(), "{}: step count", scenario.name);
-    assert_eq!(go.db, rust.db, "{}: database state", scenario.name);
-    assert_eq!(go.tree, rust.tree, "{}: created files", scenario.name);
+    assert_eq!(go.db, rust.db, "{name}: database state");
+    assert_eq!(go.tree, rust.tree, "{name}: created files");
 }
 
 /// Replays the recorded Go behavior against the Rust implementation.

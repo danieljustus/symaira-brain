@@ -176,8 +176,8 @@ pub(super) fn run_delete(
         let _ = write!(stderr, "{MEMORY_DELETE_USAGE_ERROR}");
         return exit::USAGE;
     }
-    let id = flags::go_string(&flags::bytes(&parsed.positional[0]));
-    let id = id.trim();
+    let raw_id = flags::bytes(&parsed.positional[0]);
+    let id = trim_space(&raw_id);
     if id.is_empty() {
         let _ = writeln!(stderr, "symbrain memory delete: id is required");
         return exit::USAGE;
@@ -192,16 +192,25 @@ pub(super) fn run_delete(
             match format {
                 OutputFormat::Json => {
                     // Shipped shape: compact, `id` before `deleted`.
-                    let _ = writeln!(stdout, "{{\"id\":{},\"deleted\":true}}", go_json_string(id));
+                    let mut line = b"{\"id\":".to_vec();
+                    line.extend_from_slice(go_json_bytes(id).as_bytes());
+                    line.extend_from_slice(b",\"deleted\":true}\n");
+                    let _ = stdout.write_all(&line);
                 }
                 OutputFormat::Table => {
-                    let _ = writeln!(stdout, "Deleted memory {id}.");
+                    let mut line = b"Deleted memory ".to_vec();
+                    line.extend_from_slice(id);
+                    line.extend_from_slice(b".\n");
+                    let _ = stdout.write_all(&line);
                 }
             }
             exit::OK
         }
         Ok(false) => {
-            let _ = writeln!(stderr, "symbrain memory delete: memory not found: {id}");
+            let mut line = b"symbrain memory delete: memory not found: ".to_vec();
+            line.extend_from_slice(id);
+            line.push(b'\n');
+            let _ = stderr.write_all(&line);
             exit::GENERIC
         }
         Err(err) => {
@@ -209,6 +218,21 @@ pub(super) fn run_delete(
             exit::GENERIC
         }
     }
+}
+
+/// Renders a byte string as the shipped encoder does: HTML escaping, and one
+/// U+FFFD per byte that is not valid UTF-8.
+fn go_json_bytes(value: &[u8]) -> String {
+    let mut out = String::from("\"");
+    for chunk in value.utf8_chunks() {
+        let quoted = go_json_string(chunk.valid());
+        out.push_str(&quoted[1..quoted.len() - 1]);
+        for _ in chunk.invalid() {
+            out.push('\u{fffd}');
+        }
+    }
+    out.push('"');
+    out
 }
 
 /// Renders a string as the shipped encoder does, including its HTML escaping.

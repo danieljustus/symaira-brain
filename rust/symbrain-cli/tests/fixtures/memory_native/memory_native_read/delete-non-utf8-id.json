@@ -1,0 +1,122 @@
+{
+  "payload": {
+    "config": "ollama.url = \"{EMBED}\"\n[conflict]\nenabled = false\n",
+    "db": [
+      "== memories (3 rows)",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"doc0 marker\"|content_hash=\"615efdd548099793db5e211d8470d6d7633210f4c86f65ad18869697fad682ef\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"nomic-embed-text\"|embedding_quantization=\"\"|embedding_source=\"ollama\"|expires_at=NULL|id=\"305452a3-8cee-42e4-aa0d-fb0fe0be2bf3\"|importance=0.0|kind=\"user\"|last_access=NULL|lsh_hash=39929|metadata=\"{\\\"authority\\\":\\\"direct\\\",\\\"confidence\\\":\\\"high\\\",\\\"observed_at\\\":\\\"<isots>\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_tool\\\":\\\"symbrain-cli\\\",\\\"source_type\\\":\\\"direct\\\",\\\"source_uri\\\":\\\"\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"doc1 marker\"|content_hash=\"f661bed59bc85e02f9fdae896a3714d9da65f31fa7f06e9749e2c6eac89d4cfe\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[1,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"nomic-embed-text\"|embedding_quantization=\"\"|embedding_source=\"ollama\"|expires_at=NULL|id=\"603170ca-f200-49af-b022-3459aa174d0d\"|importance=0.0|kind=\"user\"|last_access=NULL|lsh_hash=39801|metadata=\"{\\\"authority\\\":\\\"direct\\\",\\\"confidence\\\":\\\"high\\\",\\\"observed_at\\\":\\\"<isots>\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_tool\\\":\\\"symbrain-cli\\\",\\\"source_type\\\":\\\"direct\\\",\\\"source_uri\\\":\\\"\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "access_count=1|consolidated_into_id=NULL|consolidation_status=\"raw\"|content=\"doc2 marker\"|content_hash=\"0e7590774ceaf782569bc318f48e79d4553a8e988ebd450596dcd3d4c2a53cf6\"|created_at=\"<ts>\"|created_by=\"cli:symbrain\"|created_session=\"\"|decay_factor=1.0|embedding=\"[1,0.1,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]\"|embedding_binary=NULL|embedding_dim=768|embedding_model=\"nomic-embed-text\"|embedding_quantization=\"\"|embedding_source=\"ollama\"|expires_at=NULL|id=\"ece74c26-b770-47d3-bd8f-15d9694d3eab\"|importance=0.0|kind=\"user\"|last_access=NULL|lsh_hash=39801|metadata=\"{\\\"authority\\\":\\\"direct\\\",\\\"confidence\\\":\\\"high\\\",\\\"observed_at\\\":\\\"<isots>\\\",\\\"sensitivity\\\":\\\"internal\\\",\\\"sharing_level\\\":\\\"private\\\",\\\"source_tool\\\":\\\"symbrain-cli\\\",\\\"source_type\\\":\\\"direct\\\",\\\"source_uri\\\":\\\"\\\",\\\"verification_status\\\":\\\"unverified\\\"}\"|prev_access=NULL|retired_at=NULL|review_status=\"approved\"|scope=\"global\"|superseded_by=NULL|tier=\"long_term\"|updated_at=\"<ts>\"|updated_by=\"cli:symbrain\"|updated_session=\"\"|valid_from=\"<ts>\"|valid_to=NULL",
+      "== entities (0 rows)",
+      "== entities_aliases (0 rows)",
+      "== memory_entities (0 rows)",
+      "== audit_log (3 rows)",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"a6fb3527-3568-466f-a372-5c0137bcf59a\"|memory_id=\"305452a3-8cee-42e4-aa0d-fb0fe0be2bf3\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"dedc17cc-c6bb-4864-bf71-a046dabfc171\"|memory_id=\"603170ca-f200-49af-b022-3459aa174d0d\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "action=\"set\"|actor=\"cli:symbrain\"|created_at=\"<ts>\"|detail=NULL|id=\"55776128-a064-40a6-a7b0-ce8d44aefd2a\"|memory_id=\"ece74c26-b770-47d3-bd8f-15d9694d3eab\"|scope=\"global\"|session=NULL|target_id=NULL|target_type=NULL",
+      "== memory_evidence (0 rows)",
+      "== rules (0 rows)",
+      "== query_log (0 rows)",
+      "== sync_oplog (6 rows)",
+      "event_id=1|memory_id=\"305452a3-8cee-42e4-aa0d-fb0fe0be2bf3\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=2|memory_id=\"305452a3-8cee-42e4-aa0d-fb0fe0be2bf3\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=3|memory_id=\"603170ca-f200-49af-b022-3459aa174d0d\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=4|memory_id=\"603170ca-f200-49af-b022-3459aa174d0d\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=5|memory_id=\"ece74c26-b770-47d3-bd8f-15d9694d3eab\"|op=\"upsert\"|ts=\"<isots>\"",
+      "event_id=6|memory_id=\"ece74c26-b770-47d3-bd8f-15d9694d3eab\"|op=\"upsert\"|ts=\"<isots>\""
+    ],
+    "mutate_sql": [],
+    "requests": {
+      "embed": [],
+      "llm": []
+    },
+    "scenario": "delete-non-utf8-id",
+    "seed_file": "seed-rows3.db",
+    "seed_sha256": "3d3daf3f33ebe0967d3c2b431761a45654fccb59cbec454c78b85953570d524b",
+    "seed_steps": [
+      [
+        "set",
+        "doc0 marker",
+        "--kind",
+        "user",
+        "--db",
+        "{DB}"
+      ],
+      [
+        "set",
+        "doc1 marker",
+        "--kind",
+        "user",
+        "--db",
+        "{DB}"
+      ],
+      [
+        "set",
+        "doc2 marker",
+        "--kind",
+        "user",
+        "--db",
+        "{DB}"
+      ]
+    ],
+    "steps": [
+      {
+        "argv": [
+          "delete",
+          {
+            "hex": "78fffe79"
+          },
+          "--db",
+          "{DB}"
+        ],
+        "code": 1,
+        "stderr": {
+          "hex": "73796d627261696e206d656d6f72792064656c6574653a206d656d6f7279206e6f7420666f756e643a2078fffe790a"
+        },
+        "stdout": ""
+      },
+      {
+        "argv": [
+          "delete",
+          {
+            "hex": "78ff"
+          },
+          "--db",
+          "{DB}",
+          "--json"
+        ],
+        "code": 1,
+        "stderr": {
+          "hex": "73796d627261696e206d656d6f72792064656c6574653a206d656d6f7279206e6f7420666f756e643a2078ff0a"
+        },
+        "stdout": ""
+      }
+    ],
+    "tree": [
+      "dir home 755",
+      "file memory.db 600",
+      "dir work 755",
+      "dir xdg 755",
+      "dir xdg/cache 755",
+      "dir xdg/config 755",
+      "dir xdg/config/symmemory 755",
+      "file xdg/config/symmemory/config.toml 644",
+      "dir xdg/data 755",
+      "dir xdg/state 755"
+    ]
+  },
+  "provenance": {
+    "go_source": {
+      "git_head": "5c208b11f89dad6f3d5d36ccfbbf42d67d03edbc",
+      "go_mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+      "go_sum": "d527200e8f13fd16eb27b802bbe5b6ee19cd6a0c",
+      "tree_cmd": "6a47d5ab34dcd2f8e676684bd4a349da152765e9",
+      "tree_internal": "8ebcacdf27d3e1dc2e9d2a1d5b4e1d04ac57f5fe"
+    },
+    "go_version": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/MEM-NATIVE/oracle/symbrain: go1.27.3",
+    "kind": "go-oracle-recording",
+    "oracle_sha256": "6e81245f3c1ca3008f9e92ee175ca211c089c3a166be250d405e9123a18b47ff",
+    "payload_sha256": "abbc7f74a575078203376098be764e430f4b94b466ddad7c2dd1d7e235b97cfe",
+    "platform": "macos/aarch64",
+    "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1"
+  }
+}

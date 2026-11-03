@@ -6,7 +6,7 @@
 //! are parsed with [`crate::gotime`] so a database written by either
 //! implementation reads the same.
 
-use chrono::{DateTime, SecondsFormat, Utc};
+use chrono::{DateTime, FixedOffset, SecondsFormat, Utc};
 use rusqlite::Row;
 
 use crate::gojson::{self, Members};
@@ -44,9 +44,9 @@ pub struct SearchRow {
     /// Quantization level of the embedding space.
     pub embedding_quantization: String,
     /// Creation timestamp.
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: Option<DateTime<FixedOffset>>,
     /// Update timestamp.
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<FixedOffset>>,
     /// Actor that created the memory.
     pub created_by: String,
     /// Actor that last updated it.
@@ -64,21 +64,21 @@ pub struct SearchRow {
     /// Importance weight.
     pub importance: f64,
     /// Validity window start.
-    pub valid_from: Option<DateTime<Utc>>,
+    pub valid_from: Option<DateTime<FixedOffset>>,
     /// Validity window end.
-    pub valid_to: Option<DateTime<Utc>>,
+    pub valid_to: Option<DateTime<FixedOffset>>,
     /// Memory that superseded this one.
     pub superseded_by: String,
     /// Working or long-term tier.
     pub tier: String,
     /// Expiry of a working-tier memory.
-    pub expires_at: Option<DateTime<Utc>>,
+    pub expires_at: Option<DateTime<FixedOffset>>,
     /// Number of times retrieved.
     pub access_count: i64,
     /// Last retrieval timestamp.
-    pub last_access: Option<DateTime<Utc>>,
+    pub last_access: Option<DateTime<FixedOffset>>,
     /// Retrieval timestamp before the most recent one.
-    pub prev_access: Option<DateTime<Utc>>,
+    pub prev_access: Option<DateTime<FixedOffset>>,
     /// `approved` or `staged`.
     pub review_status: String,
     /// Semantic kind.
@@ -86,7 +86,7 @@ pub struct SearchRow {
     /// Aging multiplier in `(0, 1]`.
     pub decay_factor: f64,
     /// When set, the memory is retired.
-    pub retired_at: Option<DateTime<Utc>>,
+    pub retired_at: Option<DateTime<FixedOffset>>,
 }
 
 impl SearchRow {
@@ -170,6 +170,7 @@ impl SearchRow {
     #[must_use]
     pub fn created_at_seconds(&self) -> String {
         self.created_at
+            .map(|time| time.with_timezone(&Utc))
             .unwrap_or_else(|| DateTime::<Utc>::from_timestamp(0, 0).unwrap_or_default())
             .to_rfc3339_opts(SecondsFormat::Secs, true)
     }

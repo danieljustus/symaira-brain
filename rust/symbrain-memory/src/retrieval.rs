@@ -397,7 +397,7 @@ fn candidates(
                 embedding_dim: dim,
                 binary,
                 metadata,
-                created_at,
+                created_at: created_at.with_timezone(&Utc),
                 superseded_by,
             })
         })?;
@@ -460,7 +460,12 @@ fn score_and_rank(hits: &mut [SearchHit], query_vector: &[f32]) {
         #[allow(clippy::cast_possible_truncation)]
         {
             hit.score =
-                (composite_score(relevance, hit.memory.created_at, hit.memory.importance, now)
+                (composite_score(
+                    relevance,
+                    hit.memory.created_at.map(|time| time.with_timezone(&Utc)),
+                    hit.memory.importance,
+                    now,
+                )
                     * decay) as f32;
         }
     }

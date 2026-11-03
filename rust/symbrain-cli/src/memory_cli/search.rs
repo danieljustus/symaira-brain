@@ -76,14 +76,15 @@ pub(super) fn run_search(
             } else {
                 let _ = writeln!(stdout, "SCORE\tID\tSCOPE\tCREATED\tCONTENT");
                 for hit in &hits {
-                    let _ = writeln!(
+                    super::read::write_row(
                         stdout,
-                        "{:.6}\t{}\t{}\t{}\t{}",
-                        f64::from(hit.score),
-                        hit.memory.id,
-                        hit.memory.scope,
-                        hit.memory.created_at_seconds(),
-                        table_content(&hit.memory.content)
+                        &[
+                            &format!("{:.6}", f64::from(hit.score)),
+                            &hit.memory.id,
+                            &hit.memory.scope,
+                            &hit.memory.created_at_seconds(),
+                            &table_content(&hit.memory.content),
+                        ],
                     );
                 }
             }

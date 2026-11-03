@@ -8,7 +8,7 @@
 //! otherwise. This module reproduces both layers so a store with unclean rows
 //! reports the shipped diagnostics (and, where Go converts, the same values).
 
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{DateTime, FixedOffset, TimeZone};
 use rusqlite::Row;
 use rusqlite::types::ValueRef;
 
@@ -107,14 +107,40 @@ fn as_bytes(value: ValueRef<'_>) -> Vec<u8> {
     }
 }
 
-/// Bytes as a Rust string, every invalid byte becoming one U+FFFD like the
-/// shipped JSON encoder renders it.
+/// First code point of the escape range that carries one byte that is not
+/// valid UTF-8 (`U+10FF00 + byte`, plane 16 private use).
+const RAW_BASE: u32 = 0x10_FF00;
+
+/// Bytes as a Rust string. A byte that is not valid UTF-8 becomes one private
+/// use code point, so the JSON renderer can print the encoder's `\ufffd` and
+/// the table renderer can print the original byte back ([`raw_bytes`]).
 pub(crate) fn lossy(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len());
     for chunk in bytes.utf8_chunks() {
         out.push_str(chunk.valid());
-        for _ in chunk.invalid() {
-            out.push('\u{fffd}');
+        for byte in chunk.invalid() {
+            out.extend(char::from_u32(RAW_BASE + u32::from(*byte)));
+        }
+    }
+    out
+}
+
+/// Whether `value` carries bytes escaped by [`lossy`].
+pub(crate) fn has_raw(value: &str) -> bool {
+    value.chars().any(|c| u32::from(c) >= RAW_BASE)
+}
+
+/// The stored bytes behind a string produced by [`lossy`].
+#[must_use]
+pub fn raw_bytes(value: &str) -> Vec<u8> {
+    let mut out = Vec::with_capacity(value.len());
+    let mut buffer = [0_u8; 4];
+    for character in value.chars() {
+        let code = u32::from(character);
+        if code >= RAW_BASE {
+            out.push(u8::try_from(code - RAW_BASE).unwrap_or(0));
+        } else {
+            out.extend_from_slice(character.encode_utf8(&mut buffer).as_bytes());
         }
     }
     out
@@ -293,7 +319,7 @@ pub(crate) fn blob(
     }
 }
 
-fn time_value(value: ValueRef<'_>) -> Result<DateTime<Utc>, String> {
+fn time_value(value: ValueRef<'_>) -> Result<DateTime<FixedOffset>, String> {
     match value {
         ValueRef::Text(bytes) => std::str::from_utf8(bytes)
             .ok()
@@ -309,7 +335,7 @@ fn time_value(value: ValueRef<'_>) -> Result<DateTime<Utc>, String> {
 }
 
 /// A `time.Time` destination.
-pub(crate) fn time(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<DateTime<Utc>> {
+pub(crate) fn time(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<DateTime<FixedOffset>> {
     time_value(value(row, index, name)?).map_err(|reason| column(index, name, &reason))
 }
 
@@ -318,7 +344,7 @@ pub(crate) fn null_time(
     row: &Row<'_>,
     index: usize,
     name: &str,
-) -> rusqlite::Result<Option<DateTime<Utc>>> {
+) -> rusqlite::Result<Option<DateTime<FixedOffset>>> {
     let value = value(row, index, name)?;
     if matches!(value, ValueRef::Null) {
         return Ok(None);
@@ -408,7 +434,7 @@ const LAYOUTS: [Layout; 7] = [
 ];
 
 /// `time.Parse` for one driver layout.
-fn parse_layout(text: &str, layout: &Layout) -> Option<DateTime<Utc>> {
+fn parse_layout(text: &str, layout: &Layout) -> Option<DateTime<FixedOffset>> {
     let mut cursor = Cursor { rest: text.as_bytes() };
     let year = cursor.year()?;
     cursor.literal(b'-')?;
@@ -460,12 +486,14 @@ fn parse_layout(text: &str, layout: &Layout) -> Option<DateTime<Utc>> {
         u32::try_from(second).ok()?,
         nanos,
     )?;
-    Some(Utc.from_utc_datetime(&naive) - chrono::Duration::seconds(offset))
+    FixedOffset::east_opt(i32::try_from(offset).ok()?)?
+        .from_local_datetime(&naive)
+        .single()
 }
 
 /// `time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", s)` after the
 /// driver's monotonic-clock trim.
-fn parse_string_form(raw: &str) -> Option<DateTime<Utc>> {
+fn parse_string_form(raw: &str) -> Option<DateTime<FixedOffset>> {
     let mut text = raw;
     if let Some(position) = raw.find("m=").filter(|position| *position > 0) {
         text = &raw[..position];
@@ -524,12 +552,14 @@ fn parse_string_form(raw: &str) -> Option<DateTime<Utc>> {
         nanos,
     )?;
     let offset = sign * (offset_hour * 3600 + offset_minute * 60);
-    Some(Utc.from_utc_datetime(&naive) - chrono::Duration::seconds(offset))
+    FixedOffset::east_opt(i32::try_from(offset).ok()?)?
+        .from_local_datetime(&naive)
+        .single()
 }
 
 /// `(*conn).parseTime`: the value a `DATETIME` column's text becomes, or
 /// `None` when the driver leaves it a string.
-pub(crate) fn driver_time(raw: &str) -> Option<DateTime<Utc>> {
+pub(crate) fn driver_time(raw: &str) -> Option<DateTime<FixedOffset>> {
     if let Some(parsed) = parse_string_form(raw) {
         return Some(parsed);
     }

@@ -5,11 +5,25 @@
 //! zeros trimmed and a `float64` in its shortest form (`0`, not `0.0`).
 //! `serde_json` would print `0.0`, so the rows below render themselves.
 
-use chrono::{DateTime, Utc};
+use chrono::DateTime;
 
 /// Renders a string as a JSON string literal.
 pub(crate) fn quote(value: &str) -> String {
-    serde_json::to_string(value).unwrap_or_else(|_| "\"\"".to_owned())
+    let quoted = serde_json::to_string(value).unwrap_or_else(|_| "\"\"".to_owned());
+    if !crate::goscan::has_raw(&quoted) {
+        return quoted;
+    }
+    // The encoder writes a byte that is not valid UTF-8 as U+FFFD.
+    quoted
+        .chars()
+        .map(|character| {
+            if crate::goscan::has_raw(character.encode_utf8(&mut [0; 4])) {
+                '\u{fffd}'
+            } else {
+                character
+            }
+        })
+        .collect()
 }
 
 /// Renders a float the way Go's encoder does: shortest round-trip form
@@ -75,16 +89,34 @@ pub(crate) fn render_value(value: &serde_json::Value) -> String {
     }
 }
 
-/// Renders an optional timestamp the way Go marshals `time.Time`.
-pub(crate) fn timestamp(value: Option<DateTime<Utc>>) -> Option<String> {
+/// Renders an optional timestamp the way Go marshals `time.Time`: RFC3339
+/// with the zone offset the value carries (`Z` for a zero offset).
+pub(crate) fn timestamp<Tz>(value: Option<DateTime<Tz>>) -> Option<String>
+where
+    Tz: chrono::TimeZone,
+    Tz::Offset: std::fmt::Display,
+{
+    use chrono::Offset;
     value.map(|time| {
         let base = time.format("%Y-%m-%dT%H:%M:%S").to_string();
         let nanos = time.timestamp_subsec_nanos();
+        let seconds = time.offset().fix().local_minus_utc();
+        let zone = if seconds == 0 {
+            "Z".to_owned()
+        } else {
+            let magnitude = seconds.unsigned_abs();
+            format!(
+                "{}{:02}:{:02}",
+                if seconds < 0 { '-' } else { '+' },
+                magnitude / 3600,
+                magnitude % 3600 / 60
+            )
+        };
         if nanos == 0 {
-            return format!("{base}Z");
+            return format!("{base}{zone}");
         }
         let fraction = format!("{nanos:09}");
-        format!("{base}.{}Z", fraction.trim_end_matches('0'))
+        format!("{base}.{}{zone}", fraction.trim_end_matches('0'))
     })
 }
 
@@ -120,7 +152,10 @@ impl Members {
     }
 
     /// Adds a timestamp member unless it is absent.
-    pub(crate) fn time_if_present(&mut self, name: &str, value: Option<DateTime<Utc>>) {
+    pub(crate) fn time_if_present<Tz>(&mut self, name: &str, value: Option<DateTime<Tz>>)
+    where
+        Tz: chrono::TimeZone,
+        Tz::Offset: std::fmt::Display, {
         if let Some(rendered) = timestamp(value) {
             self.rendered
                 .push(format!("{}:{}", quote(name), quote(&rendered)));
@@ -129,7 +164,10 @@ impl Members {
 
     /// Adds an optional timestamp, which the shipped struct declares as
     /// `omitempty` but never omits when the driver returns a value.
-    pub(crate) fn time(&mut self, name: &str, value: Option<DateTime<Utc>>) {
+    pub(crate) fn time<Tz>(&mut self, name: &str, value: Option<DateTime<Tz>>)
+    where
+        Tz: chrono::TimeZone,
+        Tz::Offset: std::fmt::Display, {
         match timestamp(value) {
             Some(rendered) => self
                 .rendered

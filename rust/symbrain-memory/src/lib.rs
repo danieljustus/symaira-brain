@@ -48,6 +48,7 @@ pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, P
 pub use conflict::ConflictConfig;
 pub use conflict_llm::LlmSettings;
 pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
+pub use goscan::raw_bytes;
 pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};
 pub use schema_inspection::missing_required_columns;

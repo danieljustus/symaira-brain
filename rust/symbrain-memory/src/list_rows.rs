@@ -5,7 +5,7 @@
 //! columns and in the same field order. Times are parsed with [`gotime`] so a
 //! database written by either implementation reads the same.
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, FixedOffset};
 use rusqlite::{Connection, Row};
 
 use crate::gojson::Members;
@@ -35,9 +35,9 @@ pub struct MemoryListRow {
     /// The column held JSON `null` (a nil map), rendered as `null`.
     pub metadata_null: bool,
     /// Creation timestamp.
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: Option<DateTime<FixedOffset>>,
     /// Update timestamp.
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<FixedOffset>>,
     /// Actor that created the memory.
     pub created_by: String,
     /// Actor that last updated it.
@@ -53,21 +53,21 @@ pub struct MemoryListRow {
     /// Importance weight.
     pub importance: f64,
     /// Validity window start.
-    pub valid_from: Option<DateTime<Utc>>,
+    pub valid_from: Option<DateTime<FixedOffset>>,
     /// Validity window end.
-    pub valid_to: Option<DateTime<Utc>>,
+    pub valid_to: Option<DateTime<FixedOffset>>,
     /// Memory that superseded this one.
     pub superseded_by: String,
     /// Working or long-term tier.
     pub tier: String,
     /// Expiry for working-tier memories.
-    pub expires_at: Option<DateTime<Utc>>,
+    pub expires_at: Option<DateTime<FixedOffset>>,
     /// Retrieval count.
     pub access_count: i64,
     /// Last retrieval.
-    pub last_access: Option<DateTime<Utc>>,
+    pub last_access: Option<DateTime<FixedOffset>>,
     /// Retrieval before the most recent one.
-    pub prev_access: Option<DateTime<Utc>>,
+    pub prev_access: Option<DateTime<FixedOffset>>,
     /// Review status.
     pub review_status: String,
     /// Semantic kind.
@@ -75,7 +75,7 @@ pub struct MemoryListRow {
     /// Aging multiplier.
     pub decay_factor: f64,
     /// Retirement timestamp.
-    pub retired_at: Option<DateTime<Utc>>,
+    pub retired_at: Option<DateTime<FixedOffset>>,
 }
 
 impl MemoryListRow {
@@ -169,9 +169,9 @@ pub struct RuleRow {
     /// The column held JSON `null` (a nil map), rendered as `null`.
     pub metadata_null: bool,
     /// Creation timestamp.
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: Option<DateTime<FixedOffset>>,
     /// Update timestamp.
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<FixedOffset>>,
     /// Actor that created the rule.
     pub created_by: String,
     /// Actor that last updated it.
