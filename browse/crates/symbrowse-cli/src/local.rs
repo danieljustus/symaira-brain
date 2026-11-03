@@ -84,7 +84,11 @@ pub fn dispatch(ctx: &mut Ctx<'_>, key: &str, args: &[String]) -> Outcome {
             "daemon" => Outcome::Raw(daemon(ctx)?),
             "state key init" => Outcome::Raw(legacy::run_state_key_init(format_of(ctx)?)),
             "profiles" => Outcome::Raw(crate::browser_profiles::run(format_of(ctx)?)),
-            "upgrade" => Outcome::Raw(crate::upgrade::run(format_of(ctx)?, VERSION)),
+            "upgrade" => Outcome::Raw(crate::upgrade::run(
+                format_of(ctx)?,
+                VERSION,
+                ctx.flags.bool("check"),
+            )),
             "batch" => batch_command(ctx, args)?,
             other => crate::extra::dispatch(ctx, other, args),
         })
