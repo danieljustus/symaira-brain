@@ -75,7 +75,9 @@ fn help_for_context(context: &[String]) -> Option<String> {
         .cloned()
         .collect();
     let found = crate::cobra::find(tree, &words);
-    if found.legacy_error.is_some() || !found.args.is_empty() && !context.is_empty() && found.index == 0 {
+    if found.legacy_error.is_some()
+        || !found.args.is_empty() && !context.is_empty() && found.index == 0
+    {
         return None;
     }
     Some(tree.nodes[found.index].help.clone())
@@ -108,13 +110,15 @@ fn command_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
 
 fn flag_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
     let mut in_flags = false;
+    let mut in_global = false;
     let mut candidates = Vec::new();
     let mut seen = HashSet::new();
-    let mut help_candidates = Vec::new();
+    let mut local_candidates = Vec::new();
     for line in help.lines() {
         let trimmed = line.trim();
         if trimmed == "Flags:" || trimmed == "Global Flags:" {
             in_flags = true;
+            in_global = trimmed == "Global Flags:";
             continue;
         }
         if !in_flags {
@@ -171,16 +175,18 @@ fn flag_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
                 }
                 let item = (candidate.clone(), description);
                 if seen.insert(candidate) {
-                    if item.0 == "--help" {
-                        help_candidates.push(item);
-                    } else {
+                    // Cobra completes inherited flags first, then the
+                    // command's own flags (each group sorted by name).
+                    if in_global {
                         candidates.push(item);
+                    } else {
+                        local_candidates.push(item);
                     }
                 }
             }
         }
     }
-    candidates.extend(help_candidates);
+    candidates.extend(local_candidates);
     candidates
 }
 

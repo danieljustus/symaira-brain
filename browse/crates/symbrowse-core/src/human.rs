@@ -162,8 +162,10 @@ fn render_state(fields: &Fields) -> Option<String> {
     if let Some(Value::Object(metadata)) = fields.get("metadata") {
         return Some(render_state_metadata(metadata, "metadata:"));
     }
-    if has_any(fields, &["schema_version", "saved_at", "expires_at", "key_source"])
-        && fields.contains_key("origins")
+    if has_any(
+        fields,
+        &["schema_version", "saved_at", "expires_at", "key_source"],
+    ) && fields.contains_key("origins")
     {
         return Some(render_state_metadata(fields, ""));
     }
@@ -264,12 +266,20 @@ fn cookie_text(cookie: &Value) -> String {
         .filter(|v| !v.is_empty())
         .unwrap_or("cookie");
     let mut parts = vec![name.to_owned()];
-    for (key, label) in [("domain", "domain"), ("path", "path"), ("same_site", "same_site")] {
+    for (key, label) in [
+        ("domain", "domain"),
+        ("path", "path"),
+        ("same_site", "same_site"),
+    ] {
         if let Some(value) = string_field(fields, key).filter(|v| !v.is_empty()) {
             parts.push(format!("{label}={value}"));
         }
     }
-    for (key, label) in [("secure", "secure"), ("http_only", "httpOnly"), ("session", "session")] {
+    for (key, label) in [
+        ("secure", "secure"),
+        ("http_only", "httpOnly"),
+        ("session", "session"),
+    ] {
         if fields.get(key).and_then(Value::as_bool) == Some(true) {
             parts.push(label.to_owned());
         }

@@ -6,7 +6,10 @@
 pub(crate) enum Encoded {
     Inline(String),
     /// Literal block: header (`|`, `|-`, `|4+` ...) and the body lines.
-    Literal { header: String, lines: Vec<String> },
+    Literal {
+        header: String,
+        lines: Vec<String>,
+    },
 }
 
 fn is_printable(c: char) -> bool {
@@ -37,13 +40,19 @@ fn analyze(value: &str) -> Analysis {
     let mut preceded_by_whitespace = true;
     let mut previous_space = false;
     let mut previous_break = false;
-    let is_ws = |c: char| matches!(c, ' ' | '\t' | '\n' | '\r' | '\u{85}' | '\u{2028}' | '\u{2029}');
+    let is_ws = |c: char| {
+        matches!(
+            c,
+            ' ' | '\t' | '\n' | '\r' | '\u{85}' | '\u{2028}' | '\u{2029}'
+        )
+    };
     let is_break = |c: char| matches!(c, '\n' | '\r' | '\u{85}' | '\u{2028}' | '\u{2029}');
     for (i, &c) in chars.iter().enumerate() {
         let followed_by_whitespace = chars.get(i + 1).is_none_or(|n| is_ws(*n));
         if i == 0 {
             match c {
-                '#' | ',' | '[' | ']' | '{' | '}' | '&' | '*' | '!' | '|' | '>' | '\'' | '"' | '%' | '@' | '`' => {
+                '#' | ',' | '[' | ']' | '{' | '}' | '&' | '*' | '!' | '|' | '>' | '\'' | '"'
+                | '%' | '@' | '`' => {
                     flow_indicators = true;
                     block_indicators = true;
                 }
@@ -233,9 +242,33 @@ fn resolves_to_string(value: &str) -> bool {
     }
     if matches!(
         value,
-        "~" | "null" | "Null" | "NULL" | "true" | "True" | "TRUE" | "false" | "False" | "FALSE"
-            | "y" | "Y" | "yes" | "Yes" | "YES" | "n" | "N" | "no" | "No" | "NO" | "on" | "On"
-            | "ON" | "off" | "Off" | "OFF" | "<<" | "="
+        "~" | "null"
+            | "Null"
+            | "NULL"
+            | "true"
+            | "True"
+            | "TRUE"
+            | "false"
+            | "False"
+            | "FALSE"
+            | "y"
+            | "Y"
+            | "yes"
+            | "Yes"
+            | "YES"
+            | "n"
+            | "N"
+            | "no"
+            | "No"
+            | "NO"
+            | "on"
+            | "On"
+            | "ON"
+            | "off"
+            | "Off"
+            | "OFF"
+            | "<<"
+            | "="
     ) {
         return false;
     }
@@ -246,7 +279,9 @@ fn is_base60_float(value: &str) -> bool {
     let body = value.strip_prefix(['+', '-']).unwrap_or(value);
     body.contains(':')
         && body.split(':').count() >= 2
-        && body.split(':').all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit() || c == '.'))
+        && body
+            .split(':')
+            .all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit() || c == '.'))
         && body.chars().next().is_some_and(|c| c.is_ascii_digit())
 }
 
@@ -309,7 +344,8 @@ pub(crate) fn encode(value: &str, key: bool) -> Encoded {
         }
         return Encoded::Inline(double_quote(value));
     }
-    let plain_ok = resolves_to_string(value) && analysis.block_plain_allowed && !(key && analysis.multiline);
+    let plain_ok =
+        resolves_to_string(value) && analysis.block_plain_allowed && !(key && analysis.multiline);
     if plain_ok {
         return Encoded::Inline(value.to_owned());
     }
@@ -322,7 +358,7 @@ pub(crate) fn encode(value: &str, key: bool) -> Encoded {
     Encoded::Inline(double_quote(value))
 }
 
-pub(crate) fn inline(value: &str, key: bool) -> String {
+pub fn inline(value: &str, key: bool) -> String {
     match encode(value, key) {
         Encoded::Inline(text) => text,
         Encoded::Literal { .. } => double_quote(value),

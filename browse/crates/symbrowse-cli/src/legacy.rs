@@ -1,8 +1,6 @@
 //! Runners carried over from the first Rust CLI (daemon run, mcp serve, flow,
 //! config show, state key init). They print on the process streams.
 
-
-
 use std::{
     collections::BTreeMap,
     ffi::OsString,
@@ -34,7 +32,6 @@ pub(crate) const VERSION: &str = match option_env!("SYMBROWSE_VERSION") {
     Some(version) => version,
     None => "dev",
 };
-
 
 #[derive(Serialize)]
 pub(crate) struct ConfigSuccess<T> {
@@ -82,7 +79,6 @@ pub(crate) fn render_dispatch_error(format: Format, code: &str, message: String)
     }
     ExitCode::from(mapped.exit_code())
 }
-
 
 pub(crate) fn run_flow_list(format: Format) -> ExitCode {
     let mut groups = Vec::new();
@@ -214,6 +210,19 @@ pub(crate) fn validate_engine(value: &str) -> Result<(), String> {
 
 pub(crate) fn run_state_key_init(format: Format) -> ExitCode {
     let resolver = KeyResolver::new(SystemKeySources::default());
+    // `Initialize` wraps a failing provider lookup as "check existing ...".
+    let checked = resolver
+        .resolve()
+        .map(|_| ())
+        .map_err(|error| format!("check existing state encryption key: {error}"));
+    if let Err(message) = checked {
+        if format == Format::Text {
+            let _ = writeln!(io::stderr(), "{message}");
+        } else if let Ok(output) = Envelope::failure(ErrorCode::Internal, message).render(format) {
+            let _ = io::stdout().write_all(output.as_bytes());
+        }
+        return ExitCode::from(1);
+    }
     match resolver.initialize() {
         Ok(result) => match render_state_key_init(format, &result) {
             Ok(output) => write_stdout(&output),
@@ -367,7 +376,6 @@ pub(crate) fn run_daemon(
     }
 }
 
-
 pub(crate) fn run_config_show(format: Format, flags: FlagOverrides) -> ExitCode {
     match render_config_show(format, flags) {
         Ok(output) => write_stdout(&output),
@@ -448,7 +456,6 @@ pub(crate) fn write_config_error(format: Format, message: &str) -> ExitCode {
     ExitCode::from(9)
 }
 
-
 pub(crate) fn write_stdout(value: &str) -> ExitCode {
     if io::stdout().write_all(value.as_bytes()).is_err() {
         return ExitCode::from(1);
@@ -456,8 +463,12 @@ pub(crate) fn write_stdout(value: &str) -> ExitCode {
     ExitCode::SUCCESS
 }
 
-
-pub(crate) fn write_batch_error(format: Format, code: ErrorCode, message: &str, exit_code: u8) -> ExitCode {
+pub(crate) fn write_batch_error(
+    format: Format,
+    code: ErrorCode,
+    message: &str,
+    exit_code: u8,
+) -> ExitCode {
     if format == Format::Text {
         let _ = writeln!(io::stderr(), "{message}");
     } else if let Ok(output) = Envelope::failure(code, message).render(format) {

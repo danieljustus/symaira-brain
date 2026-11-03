@@ -24,7 +24,8 @@ pub fn dispatch(ctx: &mut Ctx<'_>, key: &str, args: &[String]) -> Outcome {
         Ok(match key {
             "version" => {
                 if ctx.structured() {
-                    let text = render_version_json(VERSION).map_err(|e| CliError::plain(e.to_string()))?;
+                    let text =
+                        render_version_json(VERSION).map_err(|e| CliError::plain(e.to_string()))?;
                     ctx.print(&text);
                 } else {
                     ctx.print(&render_version_text(VERSION));
@@ -68,7 +69,10 @@ pub fn dispatch(ctx: &mut Ctx<'_>, key: &str, args: &[String]) -> Outcome {
                     ctx.print(legacy::MCP_PROFILE_LIST);
                     Outcome::Done
                 } else {
-                    let engine = ctx.flags.changed("engine").then(|| ctx.flags.string("engine", ""));
+                    let engine = ctx
+                        .flags
+                        .changed("engine")
+                        .then(|| ctx.flags.string("engine", ""));
                     Outcome::Raw(legacy::run_mcp(
                         ctx.flags.string("session", "default"),
                         ctx.flags.string("tools", "core"),
@@ -79,14 +83,10 @@ pub fn dispatch(ctx: &mut Ctx<'_>, key: &str, args: &[String]) -> Outcome {
             }
             "daemon" => Outcome::Raw(daemon(ctx)?),
             "state key init" => Outcome::Raw(legacy::run_state_key_init(format_of(ctx)?)),
-            "flow list" => Outcome::Raw(legacy::run_flow_list(format_of(ctx)?)),
-            "flow validate" => Outcome::Raw(legacy::run_flow_validate(args[0].clone().into(), format_of(ctx)?)),
             "profiles" => Outcome::Raw(crate::browser_profiles::run(format_of(ctx)?)),
             "upgrade" => Outcome::Raw(crate::upgrade::run(format_of(ctx)?, VERSION)),
             "batch" => batch_command(ctx, args)?,
-            other => Outcome::Fail(CliError::plain(format!(
-                "symbrowse {other} is not implemented natively in the Rust CLI yet"
-            ))),
+            other => crate::extra::dispatch(ctx, other, args),
         })
     })();
     result.unwrap_or_else(Outcome::Fail)
@@ -136,13 +136,17 @@ fn batch_command(ctx: &mut Ctx<'_>, args: &[String]) -> Result<Outcome, CliError
         let unexpected_end = input.trim().is_empty();
         let prefix = "stdin must contain a JSON array of command strings: ";
         commands = if unexpected_end {
-            return Err(CliError::plain(format!("{prefix}unexpected end of JSON input")));
+            return Err(CliError::plain(format!(
+                "{prefix}unexpected end of JSON input"
+            )));
         } else {
             decode_batch_commands(&input).map_err(|e| CliError::plain(format!("{prefix}{e}")))?
         };
     }
     if commands.is_empty() {
-        return Err(CliError::invalid_args("batch requires at least one command"));
+        return Err(CliError::invalid_args(
+            "batch requires at least one command",
+        ));
     }
     let report = batch::run(
         &commands,
@@ -159,13 +163,17 @@ fn batch_command(ctx: &mut Ctx<'_>, args: &[String]) -> Result<Outcome, CliError
     let format = ctx.format()?;
     let text = match format {
         Format::Json => {
-            let mut out = serde_json::to_string(&legacy::BatchSuccess { success: true, data: &report })
-                .map_err(|e| CliError::plain(e.to_string()))?;
+            let mut out = serde_json::to_string(&legacy::BatchSuccess {
+                success: true,
+                data: &report,
+            })
+            .map_err(|e| CliError::plain(e.to_string()))?;
             out.push('\n');
             out
         }
         Format::Text => {
-            let mut out = serde_json::to_string_pretty(&report).map_err(|e| CliError::plain(e.to_string()))?;
+            let mut out = serde_json::to_string_pretty(&report)
+                .map_err(|e| CliError::plain(e.to_string()))?;
             out = html_escape(&out);
             out.push('\n');
             out
@@ -216,11 +224,12 @@ fn decode_batch_commands(input: &str) -> Result<Vec<String>, String> {
     };
     items
         .into_iter()
-        .map(|item| match item {
+        .enumerate()
+        .map(|(index, item)| match item {
             serde_json::Value::String(command) => Ok(command),
             serde_json::Value::Null => Ok(String::new()),
             other => Err(format!(
-                "json: cannot unmarshal {} into Go value of type string",
+                "json: cannot unmarshal {} into .{index} of type string",
                 json_type_name(&other)
             )),
         })
@@ -237,4 +246,3 @@ fn json_type_name(value: &serde_json::Value) -> &'static str {
         serde_json::Value::Object(_) => "object",
     }
 }
-

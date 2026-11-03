@@ -104,7 +104,11 @@ impl CliError {
         let mut envelope;
         if let Some(coded) = &self.coded {
             envelope = Envelope::failure(coded.code, self.error_string());
-            let hint = if coded.hint.is_empty() { self.hint.clone() } else { coded.hint.clone() };
+            let hint = if coded.hint.is_empty() {
+                self.hint.clone()
+            } else {
+                coded.hint.clone()
+            };
             if let Some(error) = envelope.error.as_mut() {
                 error.hint = hint;
                 error.details = coded
@@ -228,7 +232,10 @@ impl Ctx<'_> {
                 excerpt: warning.excerpt.clone(),
             })
             .collect();
-        let data = response.data.as_ref().map_or(Value::Null, go_value::to_go_any);
+        let data = response
+            .data
+            .as_ref()
+            .map_or(Value::Null, go_value::to_go_any);
         self.write_envelope(&Envelope::ok(data, warnings))
     }
 }
@@ -360,7 +367,11 @@ pub fn request_no_autostart(session: &str, command: &str) -> Result<Response, Cl
 }
 
 /// `client.Request(Frame{Cmd, Args, Session})` without request id.
-pub fn plain_request(session: &str, command: &str, args: Option<Value>) -> Result<Response, CliError> {
+pub fn plain_request(
+    session: &str,
+    command: &str,
+    args: Option<Value>,
+) -> Result<Response, CliError> {
     let client = client(session)?;
     client
         .request(Frame {
@@ -426,7 +437,12 @@ pub fn run(args: &[String], version: &str, stdin: &mut dyn Read) -> Execution {
             let error = normalize(failure.error);
             let structured = resolve_format(
                 failure.flags.bool("json"),
-                &if failure.path.iter().map(String::as_str).eq(["network", "har"]) {
+                &if failure
+                    .path
+                    .iter()
+                    .map(String::as_str)
+                    .eq(["network", "har"])
+                {
                     "text".to_owned()
                 } else {
                     failure.flags.string("output", "text")
@@ -482,11 +498,8 @@ fn execute(
 ) -> Result<Outcome, RunFailure> {
     let tree = tree();
     let found = cobra::find(tree, &strings_of(args));
-    let fail = |error: CliError, flags: FlagValues, path: Vec<String>| RunFailure {
-        error,
-        flags,
-        path,
-    };
+    let fail =
+        |error: CliError, flags: FlagValues, path: Vec<String>| RunFailure { error, flags, path };
     let path = tree.nodes[found.index].path.clone();
     if let Some(message) = found.legacy_error {
         return Err(fail(CliError::plain(message), FlagValues::default(), path));
@@ -495,11 +508,7 @@ fn execute(
     let parsed = match cobra::parse_flags(&flagset, &found.args) {
         Ok(parsed) => parsed,
         Err(failure) => {
-            return Err(fail(
-                CliError::plain(failure.message),
-                failure.state,
-                path,
-            ));
+            return Err(fail(CliError::plain(failure.message), failure.state, path));
         }
     };
     let node = &tree.nodes[found.index];
@@ -546,6 +555,11 @@ fn execute(
 }
 
 /// Shared by handlers: exact-args check for closure validators.
-pub fn arg_error(spec: ArgSpec, tree: &Tree, index: usize, args: &[String]) -> Result<(), CliError> {
+pub fn arg_error(
+    spec: ArgSpec,
+    tree: &Tree,
+    index: usize,
+    args: &[String],
+) -> Result<(), CliError> {
     cobra::validate_args(spec, tree, index, args).map_err(CliError::plain)
 }

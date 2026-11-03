@@ -130,10 +130,14 @@ impl Envelope {
             let code = serde_json::to_value(error.code).map_err(RenderError::Json)?;
             out.push_str(&crate::go_value::marshal_plain(&code));
             out.push_str(",\"message\":");
-            out.push_str(&crate::go_value::marshal_plain(&Value::String(error.message.clone())));
+            out.push_str(&crate::go_value::marshal_plain(&Value::String(
+                error.message.clone(),
+            )));
             if !error.hint.is_empty() {
                 out.push_str(",\"hint\":");
-                out.push_str(&crate::go_value::marshal_plain(&Value::String(error.hint.clone())));
+                out.push_str(&crate::go_value::marshal_plain(&Value::String(
+                    error.hint.clone(),
+                )));
             }
             if let Some(details) = &error.details
                 && !details.as_object().is_some_and(serde_json::Map::is_empty)
@@ -284,28 +288,26 @@ pub(crate) fn write_yaml_field(output: &mut String, key: &str, value: &Value, in
         }
         Value::Object(_) => output.push_str(" {}\n"),
         Value::Array(_) => output.push_str(" []\n"),
-        Value::String(text) if text.contains('\n') => {
-            match crate::yaml_str::encode(text, false) {
-                crate::yaml_str::Encoded::Literal { header, lines } => {
-                    output.push(' ');
-                    output.push_str(&header);
-                    output.push('\n');
-                    let pad = " ".repeat(indent + 4);
-                    for line in lines {
-                        if !line.is_empty() {
-                            output.push_str(&pad);
-                            output.push_str(&line);
-                        }
-                        output.push('\n');
+        Value::String(text) if text.contains('\n') => match crate::yaml_str::encode(text, false) {
+            crate::yaml_str::Encoded::Literal { header, lines } => {
+                output.push(' ');
+                output.push_str(&header);
+                output.push('\n');
+                let pad = " ".repeat(indent + 4);
+                for line in lines {
+                    if !line.is_empty() {
+                        output.push_str(&pad);
+                        output.push_str(&line);
                     }
-                }
-                crate::yaml_str::Encoded::Inline(text) => {
-                    output.push(' ');
-                    output.push_str(&text);
                     output.push('\n');
                 }
             }
-        }
+            crate::yaml_str::Encoded::Inline(text) => {
+                output.push(' ');
+                output.push_str(&text);
+                output.push('\n');
+            }
+        },
         _ => {
             output.push(' ');
             output.push_str(&yaml_scalar(value));
@@ -362,7 +364,7 @@ fn write_yaml_children(output: &mut String, value: &Value, indent: usize) {
 }
 
 fn yaml_key(value: &str) -> String {
-    crate::yaml_str::inline(value, true)
+    crate::yaml_str::inline(crate::go_value::yaml_name(value), true)
 }
 
 pub(crate) fn yaml_scalar(value: &Value) -> String {
@@ -380,7 +382,9 @@ pub(crate) fn yaml_scalar(value: &Value) -> String {
             }
         }
         Value::Number(value) => value.to_string(),
-        Value::String(value) => yaml_string(value),
+        Value::String(value) => {
+            crate::go_value::raw_text(value).map_or_else(|| yaml_string(value), str::to_owned)
+        }
         Value::Array(_) | Value::Object(_) => "null".to_owned(),
     }
 }

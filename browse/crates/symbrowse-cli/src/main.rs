@@ -4,9 +4,11 @@ mod app;
 mod browser_profiles;
 mod cobra;
 mod completion;
+mod extra;
 mod gojson;
 mod legacy;
 mod local;
+mod read;
 mod upgrade;
 
 use std::{ffi::OsString, io::Write, process::ExitCode};
@@ -22,7 +24,9 @@ fn main() -> ExitCode {
         .first()
         .is_some_and(|arg| arg == symbrowse_core::key_sources::STARTUP_PROVIDER_ARGUMENT)
     {
-        return ExitCode::from(symbrowse_core::key_sources::run_startup_provider(&args[1..]));
+        return ExitCode::from(symbrowse_core::key_sources::run_startup_provider(
+            &args[1..],
+        ));
     }
     let values: Vec<String> = args
         .iter()
@@ -36,6 +40,12 @@ fn main() -> ExitCode {
         } else {
             completion::complete(&values[1..])
         };
+        if let Some(directive) = output.lines().last().and_then(|l| l.strip_prefix(':')) {
+            eprintln!(
+                "Completion ended with directive: {}",
+                directive_names(directive)
+            );
+        }
         return write_stdout(&output);
     }
     let mut stdin = std::io::stdin();
@@ -53,4 +63,31 @@ fn write_stdout(value: &str) -> ExitCode {
         return ExitCode::from(1);
     }
     ExitCode::SUCCESS
+}
+
+/// `ShellCompDirective.string()` of Cobra.
+fn directive_names(value: &str) -> String {
+    let Ok(bits) = value.parse::<u32>() else {
+        return format!("ERROR: unexpected ShellCompDirective value: {value}");
+    };
+    if bits >= 64 {
+        return format!("ERROR: unexpected ShellCompDirective value: {bits}");
+    }
+    let names: Vec<&str> = [
+        (1, "ShellCompDirectiveError"),
+        (2, "ShellCompDirectiveNoSpace"),
+        (4, "ShellCompDirectiveNoFileComp"),
+        (8, "ShellCompDirectiveFilterFileExt"),
+        (16, "ShellCompDirectiveFilterDirs"),
+        (32, "ShellCompDirectiveKeepOrder"),
+    ]
+    .into_iter()
+    .filter(|(bit, _)| bits & bit != 0)
+    .map(|(_, name)| name)
+    .collect();
+    if names.is_empty() {
+        "ShellCompDirectiveDefault".to_owned()
+    } else {
+        names.join(", ")
+    }
 }

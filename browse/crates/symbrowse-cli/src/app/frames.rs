@@ -28,18 +28,17 @@ fn max_tokens(ctx: &Ctx<'_>) -> Option<i64> {
 }
 
 fn obj(entries: Vec<(&str, Value)>) -> Value {
-    Value::Object(entries.into_iter().map(|(k, v)| (k.to_owned(), v)).collect())
+    Value::Object(
+        entries
+            .into_iter()
+            .map(|(k, v)| (k.to_owned(), v))
+            .collect(),
+    )
 }
 
 /// `json.Marshal` of an int-typed Go field: integers stay integral.
 fn int(value: i64) -> Value {
     Value::from(value)
-}
-
-fn not_native(name: &str) -> Outcome {
-    Outcome::Fail(CliError::plain(format!(
-        "symbrowse {name} is not implemented natively in the Rust CLI yet"
-    )))
 }
 
 fn done(result: Handled) -> Outcome {
@@ -70,7 +69,11 @@ fn go_int(map: &Map<String, Value>, key: &str) -> i64 {
 // ---------------------------------------------------------------------------
 // Custom `Args:` closures (they run before PersistentPreRunE).
 
-pub fn custom_args(path: &[String], ctx_flags: &crate::cobra::FlagValues, args: &[String]) -> Result<(), CliError> {
+pub fn custom_args(
+    path: &[String],
+    ctx_flags: &crate::cobra::FlagValues,
+    args: &[String],
+) -> Result<(), CliError> {
     let key = path.join(" ");
     let n = args.len();
     let plain = |m: String| Err(CliError::plain(m));
@@ -79,7 +82,11 @@ pub fn custom_args(path: &[String], ctx_flags: &crate::cobra::FlagValues, args: 
             "find requires kind, query, action, and an optional value",
         )),
         "cookies set" => {
-            let expected = if ctx_flags.string("curl", "").is_empty() { 2 } else { 0 };
+            let expected = if ctx_flags.string("curl", "").is_empty() {
+                2
+            } else {
+                0
+            };
             if n != expected {
                 return plain(crate::cobra::exact_args_error(expected, n));
             }
@@ -88,7 +95,10 @@ pub fn custom_args(path: &[String], ctx_flags: &crate::cobra::FlagValues, args: 
         "set device" => {
             if ctx_flags.bool("list") {
                 if n > 0 {
-                    return plain(format!("unknown command {} for \"symbrowse set device\"", go_quote(&args[0])));
+                    return plain(format!(
+                        "unknown command {} for \"symbrowse set device\"",
+                        go_quote(&args[0])
+                    ));
                 }
             } else if n != 1 {
                 return plain(crate::cobra::exact_args_error(1, n));
@@ -98,7 +108,11 @@ pub fn custom_args(path: &[String], ctx_flags: &crate::cobra::FlagValues, args: 
         "check" | "click" | "dblclick" | "fill" | "focus" | "hover" | "press" | "scroll"
         | "scrollintoview" | "select" | "type" | "uncheck" => {
             let name = path[0].as_str();
-            let max = if matches!(name, "fill" | "type" | "press" | "select" | "scroll") { 2 } else { 1 };
+            let max = if matches!(name, "fill" | "type" | "press" | "select" | "scroll") {
+                2
+            } else {
+                1
+            };
             if n < 1 || n > max {
                 return Err(CliError::invalid_args(format!(
                     "{name} requires a selector and optional value"
@@ -110,18 +124,24 @@ pub fn custom_args(path: &[String], ctx_flags: &crate::cobra::FlagValues, args: 
             let (group, kind) = (path[0].as_str(), path[1].as_str());
             if matches!(kind, "title" | "url") {
                 if n > 1 {
-                    return Err(CliError::invalid_args(format!("get {kind} accepts at most one selector")));
+                    return Err(CliError::invalid_args(format!(
+                        "get {kind} accepts at most one selector"
+                    )));
                 }
             } else if kind == "attr" {
                 if n != 2 {
-                    return Err(CliError::invalid_args("get attr requires a selector and attribute name"));
+                    return Err(CliError::invalid_args(
+                        "get attr requires a selector and attribute name",
+                    ));
                 }
             } else if kind == "styles" {
                 if n < 1 {
                     return Err(CliError::invalid_args("get styles requires a selector"));
                 }
             } else if n != 1 {
-                return Err(CliError::invalid_args(format!("{group} {kind} requires a selector")));
+                return Err(CliError::invalid_args(format!(
+                    "{group} {kind} requires a selector"
+                )));
             }
             Ok(())
         }
@@ -195,14 +215,22 @@ pub fn dispatch(ctx: &mut Ctx<'_>) -> Outcome {
         "cookies set" => done(cookies_set(ctx, &args)),
         "cookies clear" => done(cookies_clear(ctx, &args)),
         "storage get" => done(storage_get(ctx, &args)),
-        "storage set" => done(storage_op(ctx, "storage.set", json!({"kind": args[0], "key": args[1], "value": args[2]}))),
+        "storage set" => done(storage_op(
+            ctx,
+            "storage.set",
+            json!({"kind": args[0], "key": args[1], "value": args[2]}),
+        )),
         "storage clear" => done(storage_op(ctx, "storage.clear", json!({"kind": args[0]}))),
         "set viewport" => done(set_viewport(ctx, &args)),
         "set geo" => done(set_geo(ctx, &args)),
         "set offline" => done(set_offline(ctx, &args)),
         "set headers" => done(set_headers(ctx, &args)),
         "set media" => done(set_media(ctx, &args)),
-        "set user-agent" => done(send_set(ctx, "set.user-agent", json!({"user_agent": args[0]}))),
+        "set user-agent" => done(send_set(
+            ctx,
+            "set.user-agent",
+            json!({"user_agent": args[0]}),
+        )),
         "set device" => done(set_device(ctx, &args)),
         "a11y" => done(a11y(ctx, &args)),
         "diff snapshot" => done(diff_snapshot(ctx)),
@@ -220,7 +248,11 @@ pub fn dispatch(ctx: &mut Ctx<'_>) -> Outcome {
 fn navigate(ctx: &mut Ctx<'_>, name: &str, args: &[String]) -> Handled {
     let opening = matches!(name, "open" | "goto");
     if opening && args.len() != 1 {
-        return Err(CliError::wrapf(2, ErrorCode::InvalidArgs, "navigation URL is required"));
+        return Err(CliError::wrapf(
+            2,
+            ErrorCode::InvalidArgs,
+            "navigation URL is required",
+        ));
     }
     if !opening && !args.is_empty() {
         return Err(CliError::wrapf(
@@ -249,7 +281,9 @@ fn wait(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
         + usize::from(!url.is_empty())
         + usize::from(!load.is_empty());
     if selected != 1 {
-        return Err(CliError::invalid_args("wait requires exactly one condition"));
+        return Err(CliError::invalid_args(
+            "wait requires exactly one condition",
+        ));
     }
     let mut condition = Map::new();
     if args.len() == 1 {
@@ -411,12 +445,16 @@ fn inspect(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
     }
     let data = data_map(&response);
     let Some(value) = data.get("value") else {
-        return Err(CliError::plain("decode inspection value: unexpected end of JSON input"));
+        return Err(CliError::plain(
+            "decode inspection value: unexpected end of JSON input",
+        ));
     };
     ctx.println(&go_value::sprint(value));
     if group == "is" {
         let Some(matched) = value.as_bool() else {
-            return Err(CliError::plain("state inspection returned a non-boolean value"));
+            return Err(CliError::plain(
+                "state inspection returned a non-boolean value",
+            ));
         };
         if !matched {
             return Err(CliError::wrapf(
@@ -434,7 +472,11 @@ fn inspect(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 
 fn snapshot(ctx: &mut Ctx<'_>) -> Handled {
     let mut request = Map::new();
-    for (name, key) in [("interactive", "interactive"), ("compact", "compact"), ("urls", "urls")] {
+    for (name, key) in [
+        ("interactive", "interactive"),
+        ("compact", "compact"),
+        ("urls", "urls"),
+    ] {
         if ctx.flags.bool(name) {
             request.insert(key.into(), true.into());
         }
@@ -468,7 +510,12 @@ fn snapshot(ctx: &mut Ctx<'_>) -> Handled {
         );
     }
     let session_name = session(ctx);
-    let mut response = daemon_request(&session_name, "snapshot", Some(Value::Object(request)), max_tokens(ctx))?;
+    let mut response = daemon_request(
+        &session_name,
+        "snapshot",
+        Some(Value::Object(request)),
+        max_tokens(ctx),
+    )?;
     if !response.success {
         return Err(response_error(&response));
     }
@@ -476,7 +523,12 @@ fn snapshot(ctx: &mut Ctx<'_>) -> Handled {
         let origin = current_page_origin(&session_name)?;
         let boundary = symbrowse_core::injection_boundary::Boundary::new(origin)
             .map_err(|error| CliError::plain(error.to_string()))?;
-        let text = go_value::sprint(&response.data.as_ref().map_or(Value::Null, go_value::to_go_any));
+        let text = go_value::sprint(
+            &response
+                .data
+                .as_ref()
+                .map_or(Value::Null, go_value::to_go_any),
+        );
         response.data = Some(Value::String(boundary.wrap_text(&text)));
     }
     ctx.write_response(&response)
@@ -507,7 +559,9 @@ fn current_page_origin(session_name: &str) -> Result<String, CliError> {
     let data = data_map(&response);
     match data.get("value") {
         Some(Value::String(origin)) => Ok(origin.clone()),
-        _ => Err(CliError::plain("json: cannot unmarshal into Go value of type string")),
+        _ => Err(CliError::plain(
+            "json: cannot unmarshal into Go value of type string",
+        )),
     }
 }
 
@@ -521,7 +575,12 @@ fn screenshot(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
     if args.len() == 1 {
         payload.insert("path".into(), args[0].clone().into());
     }
-    let response = daemon_request(&session(ctx), "screenshot", Some(Value::Object(payload)), None)?;
+    let response = daemon_request(
+        &session(ctx),
+        "screenshot",
+        Some(Value::Object(payload)),
+        None,
+    )?;
     if !response.success {
         return Err(response_error(&response));
     }
@@ -542,11 +601,19 @@ fn screenshot(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 
 fn eval(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
     let expression = eval_expression(ctx, args)?;
-    let response = daemon_request(&session(ctx), "eval", Some(json!({"expression": expression})), None)?;
+    let response = daemon_request(
+        &session(ctx),
+        "eval",
+        Some(json!({"expression": expression})),
+        None,
+    )?;
     if !response.success {
         return Err(response_error(&response));
     }
-    let data = response.data.as_ref().map_or(Value::Null, go_value::to_go_any);
+    let data = response
+        .data
+        .as_ref()
+        .map_or(Value::Null, go_value::to_go_any);
     if ctx.structured() {
         return ctx.write_ok(data);
     }
@@ -579,7 +646,9 @@ fn eval_expression(ctx: &mut Ctx<'_>, args: &[String]) -> Result<String, CliErro
     } else if let Some(first) = args.first() {
         expression = first.clone();
     } else {
-        return Err(CliError::invalid_args("eval requires an expression argument (or --stdin)"));
+        return Err(CliError::invalid_args(
+            "eval requires an expression argument (or --stdin)",
+        ));
     }
     if encoded {
         let raw = go_base64_decode(&expression).map_err(|offset| {
@@ -649,13 +718,18 @@ pub fn go_base64_decode(input: &str) -> Result<Vec<u8>, usize> {
             dlen = j;
             break;
         }
-        let val = (u32::from(dbuf[0]) << 18) | (u32::from(dbuf[1]) << 12) | (u32::from(dbuf[2]) << 6) | u32::from(dbuf[3]);
+        let val = (u32::from(dbuf[0]) << 18)
+            | (u32::from(dbuf[1]) << 12)
+            | (u32::from(dbuf[2]) << 6)
+            | u32::from(dbuf[3]);
         let bytes = [(val >> 16) as u8, (val >> 8) as u8, val as u8];
-        out.extend_from_slice(&bytes[..match dlen {
-            4 => 3,
-            3 => 2,
-            _ => 1,
-        }]);
+        out.extend_from_slice(
+            &bytes[..match dlen {
+                4 => 3,
+                3 => 2,
+                _ => 1,
+            }],
+        );
         if let Some(offset) = trailing_err {
             return Err(offset);
         }
@@ -667,7 +741,10 @@ pub fn go_base64_decode(input: &str) -> Result<Vec<u8>, usize> {
 }
 
 fn print_entries(ctx: &mut Ctx<'_>, response: &Response, errors: bool) -> Handled {
-    let data = response.data.as_ref().map_or(Value::Null, go_value::to_go_any);
+    let data = response
+        .data
+        .as_ref()
+        .map_or(Value::Null, go_value::to_go_any);
     if ctx.structured() {
         return ctx.write_ok(data);
     }
@@ -742,7 +819,12 @@ fn downloads(ctx: &mut Ctx<'_>) -> Handled {
     let session_name = session(ctx);
     let dir = ctx.flags.string("dir", "");
     if !dir.is_empty() {
-        let response = daemon_request(&session_name, "download.setdir", Some(json!({"dir": dir})), None)?;
+        let response = daemon_request(
+            &session_name,
+            "download.setdir",
+            Some(json!({"dir": dir})),
+            None,
+        )?;
         if !response.success {
             return Err(response_error(&response));
         }
@@ -756,10 +838,19 @@ fn downloads(ctx: &mut Ctx<'_>) -> Handled {
         return Err(response_error(&response));
     }
     let data = data_map(&response);
-    for entry in data.get("downloads").and_then(Value::as_array).cloned().unwrap_or_default() {
+    for entry in data
+        .get("downloads")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default()
+    {
         let fields = entry.as_object().cloned().unwrap_or_default();
         let state = str_of(&fields, "state");
-        let mut line = format!("[{state}] {} ({})", str_of(&fields, "filename"), str_of(&fields, "url"));
+        let mut line = format!(
+            "[{state}] {} ({})",
+            str_of(&fields, "filename"),
+            str_of(&fields, "url")
+        );
         let sha = str_of(&fields, "sha256");
         if state == "completed" && !sha.is_empty() {
             line.push_str(&format!(" sha256:{sha}"));
@@ -783,7 +874,12 @@ fn network_requests(ctx: &mut Ctx<'_>) -> Handled {
     let method = ctx.flags.string("method", "");
     let status = ctx.flags.int("status", 0);
     let mut filtered: Vec<Value> = Vec::new();
-    for entry in data.get("requests").and_then(Value::as_array).cloned().unwrap_or_default() {
+    for entry in data
+        .get("requests")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default()
+    {
         let fields = entry.as_object().cloned().unwrap_or_default();
         if !filter.is_empty() && !str_of(&fields, "url").to_lowercase().contains(&filter) {
             continue;
@@ -801,7 +897,11 @@ fn network_requests(ctx: &mut Ctx<'_>) -> Handled {
     }
     if ctx.structured() {
         let count = filtered.len() as i64;
-        let requests = if filtered.is_empty() { Value::Null } else { Value::Array(filtered) };
+        let requests = if filtered.is_empty() {
+            Value::Null
+        } else {
+            Value::Array(filtered)
+        };
         let value = obj(vec![("requests", requests), ("count", int(count))]);
         ctx.println(&go_value::marshal_indent(&value));
         return Ok(());
@@ -820,14 +920,22 @@ fn network_requests(ctx: &mut Ctx<'_>) -> Handled {
 }
 
 fn network_request(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
-    let response = daemon_request(&session(ctx), "network.request", Some(json!({"id": args[0]})), None)?;
+    let response = daemon_request(
+        &session(ctx),
+        "network.request",
+        Some(json!({"id": args[0]})),
+        None,
+    )?;
     if ctx.structured() {
         return ctx.write_response(&response);
     }
     if !response.success {
         return Err(response_error(&response));
     }
-    let data = response.data.as_ref().map_or(Value::Null, go_value::to_go_any);
+    let data = response
+        .data
+        .as_ref()
+        .map_or(Value::Null, go_value::to_go_any);
     ctx.println(&go_value::marshal_indent(&data));
     Ok(())
 }
@@ -866,7 +974,9 @@ fn network_route(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 }
 
 fn network_unroute(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
-    let payload = args.first().map_or_else(|| json!({}), |p| json!({"pattern": p}));
+    let payload = args
+        .first()
+        .map_or_else(|| json!({}), |p| json!({"pattern": p}));
     let response = daemon_request(&session(ctx), "network.unroute", Some(payload), None)?;
     if !response.success {
         return Err(response_error(&response));
@@ -938,7 +1048,11 @@ fn tab_new(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 }
 
 /// Shared tail of the `structured -> text` commands.
-fn text_or_envelope(ctx: &mut Ctx<'_>, response: &Response, render: impl FnOnce(&mut Ctx<'_>) -> Handled) -> Handled {
+fn text_or_envelope(
+    ctx: &mut Ctx<'_>,
+    response: &Response,
+    render: impl FnOnce(&mut Ctx<'_>) -> Handled,
+) -> Handled {
     if ctx.structured() {
         return ctx.write_response(response);
     }
@@ -955,7 +1069,12 @@ fn auth_login(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
     if !url.is_empty() {
         request.insert("url".into(), url.into());
     }
-    let response = daemon_request(&session(ctx), "auth.login", Some(Value::Object(request)), None)?;
+    let response = daemon_request(
+        &session(ctx),
+        "auth.login",
+        Some(Value::Object(request)),
+        None,
+    )?;
     text_or_envelope(ctx, &response, |ctx| {
         ctx.println("credentials entered; press enter or submit the form to log in");
         Ok(())
@@ -963,7 +1082,10 @@ fn auth_login(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 }
 
 fn pretty_data(ctx: &mut Ctx<'_>, response: &Response) -> Handled {
-    let data = response.data.as_ref().map_or(Value::Null, go_value::to_go_any);
+    let data = response
+        .data
+        .as_ref()
+        .map_or(Value::Null, go_value::to_go_any);
     ctx.println(&go_value::marshal_indent(&data));
     Ok(())
 }
@@ -1002,7 +1124,11 @@ fn journal(ctx: &mut Ctx<'_>, tail: bool) -> Handled {
 
 pub fn journal_lines(response: &Response, class_prefix: &str) -> Vec<String> {
     let data = data_map(response);
-    let (class, decider) = if class_prefix == "\t" { ("", "") } else { ("class=", "decider=") };
+    let (class, decider) = if class_prefix == "\t" {
+        ("", "")
+    } else {
+        ("class=", "decider=")
+    };
     data.get("entries")
         .and_then(Value::as_array)
         .cloned()
@@ -1030,7 +1156,11 @@ fn oob_status(ctx: &mut Ctx<'_>) -> Handled {
             ctx.println("no pending oob prompt");
             return Ok(());
         }
-        let prompt = data.get("prompt").and_then(Value::as_object).cloned().unwrap_or_default();
+        let prompt = data
+            .get("prompt")
+            .and_then(Value::as_object)
+            .cloned()
+            .unwrap_or_default();
         let line = format!(
             "{}\t{}\t{}",
             str_of(&prompt, "id"),
@@ -1053,7 +1183,10 @@ fn policy_explain(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
         let data = data_map(&response);
         let mut explanation = str_of(&data, "explanation");
         if explanation.is_empty() {
-            let raw = response.data.as_ref().map_or(Value::Null, go_value::to_go_any);
+            let raw = response
+                .data
+                .as_ref()
+                .map_or(Value::Null, go_value::to_go_any);
             explanation = go_value::marshal_indent(&raw);
         }
         ctx.println(&explanation);
@@ -1073,7 +1206,12 @@ fn state_named(ctx: &mut Ctx<'_>, command: &str, args: &[String], label: &str) -
 }
 
 fn state_show(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
-    let response = daemon_request(&session(ctx), "state.show", Some(json!({"name": args[0]})), None)?;
+    let response = daemon_request(
+        &session(ctx),
+        "state.show",
+        Some(json!({"name": args[0]})),
+        None,
+    )?;
     text_or_envelope(ctx, &response, |ctx| pretty_data(ctx, &response))
 }
 
@@ -1081,7 +1219,12 @@ fn state_list(ctx: &mut Ctx<'_>) -> Handled {
     let response = daemon_request(&session(ctx), "state.list", None, None)?;
     text_or_envelope(ctx, &response, |ctx| {
         let data = data_map(&response);
-        for name in data.get("states").and_then(Value::as_array).cloned().unwrap_or_default() {
+        for name in data
+            .get("states")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default()
+        {
             ctx.println(name.as_str().unwrap_or_default());
         }
         Ok(())
@@ -1095,7 +1238,12 @@ fn state_clean(ctx: &mut Ctx<'_>) -> Handled {
         let days = older
             .parse::<i64>()
             .ok()
-            .filter(|d| *d >= 0 && older.bytes().all(|b| b.is_ascii_digit() || b == b'-' || b == b'+'))
+            .filter(|d| {
+                *d >= 0
+                    && older
+                        .bytes()
+                        .all(|b| b.is_ascii_digit() || b == b'-' || b == b'+')
+            })
             .ok_or_else(|| CliError::plain(format!("invalid day count {}", go_quote(&older))))?;
         payload = Some(json!({"older_than_days": days}));
     }
@@ -1104,7 +1252,11 @@ fn state_clean(ctx: &mut Ctx<'_>) -> Handled {
         return Err(response_error(&response));
     }
     let data = data_map(&response);
-    let removed: Vec<Value> = data.get("removed").and_then(Value::as_array).cloned().unwrap_or_default();
+    let removed: Vec<Value> = data
+        .get("removed")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
     if ctx.structured() {
         // stateCleanPayload{Removed []string `json:"removed"`}: a missing list is null.
         let list = if data.contains_key("removed") && data.get("removed") != Some(&Value::Null) {
@@ -1144,7 +1296,11 @@ fn cookies_list(ctx: &mut Ctx<'_>) -> Handled {
     }
     let reveal = ctx.flags.string("reveal", "");
     let data = data_map(&response);
-    let cookies = data.get("cookies").and_then(Value::as_array).cloned().unwrap_or_default();
+    let cookies = data
+        .get("cookies")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
     if ctx.structured() {
         let mut typed = Vec::new();
         for cookie in &cookies {
@@ -1169,12 +1325,20 @@ fn cookies_list(ctx: &mut Ctx<'_>) -> Handled {
             value = mask_secret(&value);
         }
         let mut flags = Vec::new();
-        for (key, label) in [("secure", "secure"), ("http_only", "httpOnly"), ("session", "session")] {
+        for (key, label) in [
+            ("secure", "secure"),
+            ("http_only", "httpOnly"),
+            ("session", "session"),
+        ] {
             if fields.get(key).and_then(Value::as_bool) == Some(true) {
                 flags.push(label);
             }
         }
-        let flags = if flags.is_empty() { "-".to_owned() } else { flags.join(",") };
+        let flags = if flags.is_empty() {
+            "-".to_owned()
+        } else {
+            flags.join(",")
+        };
         ctx.println(&format!(
             "{name}\t{value}\t{}\t{}\t{flags}",
             str_of(&fields, "domain"),
@@ -1191,10 +1355,22 @@ fn typed_cookie(fields: &Map<String, Value>) -> TypedDoc {
     doc.string("value", &str_of(fields, "value"));
     doc.string("domain", &str_of(fields, "domain"));
     doc.string("path", &str_of(fields, "path"));
-    doc.float("expires", fields.get("expires").and_then(Value::as_f64).unwrap_or(0.0));
-    doc.int("size", fields.get("size").and_then(Value::as_f64).map_or(0, |v| v as i64));
+    doc.float(
+        "expires",
+        fields.get("expires").and_then(Value::as_f64).unwrap_or(0.0),
+    );
+    doc.int(
+        "size",
+        fields
+            .get("size")
+            .and_then(Value::as_f64)
+            .map_or(0, |v| v as i64),
+    );
     for key in ["http_only", "secure", "session"] {
-        doc.bool(key, fields.get(key).and_then(Value::as_bool).unwrap_or(false));
+        doc.bool(
+            key,
+            fields.get(key).and_then(Value::as_bool).unwrap_or(false),
+        );
     }
     doc.string_omitempty("same_site", &str_of(fields, "same_site"));
     doc
@@ -1230,7 +1406,10 @@ fn cookies_clear(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 
 fn import_curl_cookies(ctx: &mut Ctx<'_>, path: &str) -> Handled {
     let text = std::fs::read(path).map_err(|error| {
-        CliError::plain(format!("open curl cookie jar: open {path}: {}", go_io_error(&error)))
+        CliError::plain(format!(
+            "open curl cookie jar: open {path}: {}",
+            go_io_error(&error)
+        ))
     })?;
     let session_name = session(ctx);
     let (mut imported, mut skipped) = (0, 0);
@@ -1247,7 +1426,12 @@ fn import_curl_cookies(ctx: &mut Ctx<'_>, path: &str) -> Handled {
             "expires": expires, "size": 0, "http_only": false,
             "secure": fields[3].eq_ignore_ascii_case("TRUE"), "session": false,
         });
-        let response = daemon_request(&session_name, "cookies.set", Some(json!({"cookie": cookie, "url": ""})), None)?;
+        let response = daemon_request(
+            &session_name,
+            "cookies.set",
+            Some(json!({"cookie": cookie, "url": ""})),
+            None,
+        )?;
         if response.success {
             imported += 1;
         } else {
@@ -1259,10 +1443,19 @@ fn import_curl_cookies(ctx: &mut Ctx<'_>, path: &str) -> Handled {
 }
 
 fn storage_get(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
-    let response = daemon_request(&session(ctx), "storage.list", Some(json!({"kind": args[0]})), None)?;
+    let response = daemon_request(
+        &session(ctx),
+        "storage.list",
+        Some(json!({"kind": args[0]})),
+        None,
+    )?;
     text_or_envelope(ctx, &response, |ctx| {
         let data = data_map(&response);
-        let items = data.get("items").and_then(Value::as_object).cloned().unwrap_or_default();
+        let items = data
+            .get("items")
+            .and_then(Value::as_object)
+            .cloned()
+            .unwrap_or_default();
         if args.len() == 2 {
             return match items.get(&args[1]).and_then(Value::as_str) {
                 Some(value) => {
@@ -1327,10 +1520,16 @@ fn go_parse_float_error(label: &str, value: &str) -> Option<String> {
 
 fn set_viewport(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
     let width = parse_int10(&args[0]).map_err(|reason| {
-        CliError::invalid_args(format!("width: strconv.ParseInt: parsing {}: {reason}", go_quote(&args[0])))
+        CliError::invalid_args(format!(
+            "width: strconv.ParseInt: parsing {}: {reason}",
+            go_quote(&args[0])
+        ))
     })?;
     let height = parse_int10(&args[1]).map_err(|reason| {
-        CliError::invalid_args(format!("height: strconv.ParseInt: parsing {}: {reason}", go_quote(&args[1])))
+        CliError::invalid_args(format!(
+            "height: strconv.ParseInt: parsing {}: {reason}",
+            go_quote(&args[1])
+        ))
     })?;
     let mut scale = 0.0;
     if args.len() == 3 {
@@ -1381,7 +1580,8 @@ fn set_offline(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 }
 
 fn set_headers(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
-    let wrap = |detail: String| CliError::invalid_args(format!("headers must be a JSON object: {detail}"));
+    let wrap =
+        |detail: String| CliError::invalid_args(format!("headers must be a JSON object: {detail}"));
     let scan = crate::gojson::scan(&args[0]).map_err(wrap)?;
     let mut headers = Map::new();
     match scan.top {
@@ -1430,7 +1630,24 @@ fn set_media(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 
 fn set_device(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
     if ctx.flags.bool("list") {
-        return Err(CliError::plain("set device --list is not implemented natively in the Rust CLI yet"));
+        // The embedded device data table (names sorted like `engine.Devices`).
+        const DEVICES: [&str; 8] = [
+            "Desktop 4K",
+            "Desktop HD",
+            "Galaxy S23",
+            "Laptop",
+            "Pixel 7",
+            "iPad",
+            "iPhone 13",
+            "iPhone SE",
+        ];
+        if ctx.structured() {
+            return ctx.write_ok(json!({"devices": DEVICES}));
+        }
+        for name in DEVICES {
+            ctx.println(name);
+        }
+        return Ok(());
     }
     send_set(ctx, "set.device", json!({"name": args[0]}))
 }
@@ -1449,20 +1666,44 @@ fn a11y(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
             .map(|t| Value::String(t.to_owned()))
             .collect()
     };
-    let tag_value = if tag_list.is_empty() { Value::Null } else { Value::Array(tag_list) };
+    let tag_value = if tag_list.is_empty() {
+        Value::Null
+    } else {
+        Value::Array(tag_list)
+    };
     let session_name = session(ctx);
     if args.len() == 1 {
         plain_request(&session_name, "open", Some(json!({"url": args[0]})))?;
     }
-    let payload = obj(vec![("tags", tag_value), ("selector", ctx.flags.string("selector", "").into())]);
+    let payload = obj(vec![
+        ("tags", tag_value),
+        ("selector", ctx.flags.string("selector", "").into()),
+    ]);
     let response = plain_request(&session_name, "a11y", Some(payload))?;
     ctx.write_response(&response)
 }
 
 /// `daemon.NewClient(ClientOptions{Session: ...})` has no socket path, so the
 /// request fails before anything is sent.
-fn missing_socket() -> CliError {
-    CliError::plain("socket path is required")
+fn missing_socket(session_name: &str) -> CliError {
+    use symbrowse_core::config::{FlagOverrides, LoadContext, load};
+    let log = LoadContext::from_process(FlagOverrides::default())
+        .ok()
+        .and_then(|context| load(&context).ok())
+        .map(|result| result.config.daemon_log)
+        .unwrap_or_default();
+    CliError {
+        message: "socket path is required".into(),
+        exit: 1,
+        coded: Some(super::Coded {
+            code: ErrorCode::DaemonUnavailable,
+            hint: format!(
+                "start daemon with 'symbrowse daemon --session {session_name}'; see daemon log at {log}"
+            ),
+            details: Some(json!({"session": session_name})),
+        }),
+        ..CliError::default()
+    }
 }
 
 fn read_baseline(path: &str) -> Result<String, CliError> {
@@ -1488,7 +1729,7 @@ fn diff_snapshot(ctx: &mut Ctx<'_>) -> Handled {
             )));
         }
     }
-    Err(missing_socket())
+    Err(missing_socket(&session(ctx)))
 }
 
 fn diff_screenshot(ctx: &mut Ctx<'_>) -> Handled {
@@ -1503,15 +1744,15 @@ fn diff_screenshot(ctx: &mut Ctx<'_>) -> Handled {
             go_io_error(&error)
         ))
     })?;
-    Err(missing_socket())
+    Err(missing_socket(&session(ctx)))
 }
 
-fn diff_url(_ctx: &mut Ctx<'_>, _args: &[String]) -> Handled {
-    Err(missing_socket())
+fn diff_url(ctx: &mut Ctx<'_>, _args: &[String]) -> Handled {
+    Err(missing_socket(&session(ctx)))
 }
 
-fn flow_record(_ctx: &mut Ctx<'_>, _args: &[String]) -> Handled {
-    Err(missing_socket())
+fn flow_record(ctx: &mut Ctx<'_>, _args: &[String]) -> Handled {
+    Err(missing_socket(&session(ctx)))
 }
 
 // ---------------------------------------------------------------------------
@@ -1525,7 +1766,10 @@ pub struct TypedDoc {
 
 enum TypedValue {
     /// String field; `omit` mirrors `json:",omitempty"` (YAML always prints it).
-    Str { value: String, omit: bool },
+    Str {
+        value: String,
+        omit: bool,
+    },
     Int(i64),
     Float(f64),
     Bool(bool),
@@ -1538,11 +1782,23 @@ impl TypedDoc {
     }
 
     pub fn string(&mut self, key: &str, value: &str) {
-        self.fields.push((key.to_owned(), TypedValue::Str { value: value.to_owned(), omit: false }));
+        self.fields.push((
+            key.to_owned(),
+            TypedValue::Str {
+                value: value.to_owned(),
+                omit: false,
+            },
+        ));
     }
 
     pub fn string_omitempty(&mut self, key: &str, value: &str) {
-        self.fields.push((key.to_owned(), TypedValue::Str { value: value.to_owned(), omit: true }));
+        self.fields.push((
+            key.to_owned(),
+            TypedValue::Str {
+                value: value.to_owned(),
+                omit: true,
+            },
+        ));
     }
 
     pub fn int(&mut self, key: &str, value: i64) {
@@ -1578,7 +1834,13 @@ impl TypedDoc {
                     TypedValue::Bool(flag) => flag.to_string(),
                     TypedValue::Docs(docs) if docs.is_empty() => "null".to_owned(),
                     TypedValue::Docs(docs) => {
-                        format!("[{}]", docs.iter().map(TypedDoc::to_json).collect::<Vec<_>>().join(","))
+                        format!(
+                            "[{}]",
+                            docs.iter()
+                                .map(TypedDoc::to_json)
+                                .collect::<Vec<_>>()
+                                .join(",")
+                        )
                     }
                 };
                 Some(format!("\"{key}\":{rendered}"))
@@ -1604,7 +1866,9 @@ impl TypedDoc {
                     out.push_str(&format!("{lead}{name}: {}\n", go_value::float_v(*number)));
                 }
                 TypedValue::Bool(flag) => out.push_str(&format!("{lead}{name}: {flag}\n")),
-                TypedValue::Docs(docs) if docs.is_empty() => out.push_str(&format!("{lead}{name}: []\n")),
+                TypedValue::Docs(docs) if docs.is_empty() => {
+                    out.push_str(&format!("{lead}{name}: []\n"))
+                }
                 TypedValue::Docs(docs) => {
                     out.push_str(&format!("{lead}{name}:\n"));
                     for doc in docs {

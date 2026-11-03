@@ -38,7 +38,10 @@ struct Scanner<'a> {
 }
 
 fn quote_char(text: &str, pos: usize) -> String {
-    let c = text.get(pos..).and_then(|rest| rest.chars().next()).unwrap_or('?');
+    let c = text
+        .get(pos..)
+        .and_then(|rest| rest.chars().next())
+        .unwrap_or('?');
     match c {
         '\'' => "'\\''".to_owned(),
         '"' => "'\"'".to_owned(),
@@ -52,7 +55,9 @@ fn quote_char(text: &str, pos: usize) -> String {
 
 impl Scanner<'_> {
     fn skip_ws(&mut self) {
-        while self.pos < self.bytes.len() && matches!(self.bytes[self.pos], b' ' | b'\t' | b'\r' | b'\n') {
+        while self.pos < self.bytes.len()
+            && matches!(self.bytes[self.pos], b' ' | b'\t' | b'\r' | b'\n')
+        {
             self.pos += 1;
         }
     }
@@ -179,10 +184,16 @@ impl Scanner<'_> {
                             let mut code = 0u32;
                             for _ in 0..4 {
                                 self.pos += 1;
-                                match self.bytes.get(self.pos).and_then(|b| (*b as char).to_digit(16)) {
+                                match self
+                                    .bytes
+                                    .get(self.pos)
+                                    .and_then(|b| (*b as char).to_digit(16))
+                                {
                                     Some(digit) => code = code * 16 + digit,
                                     None => {
-                                        return Err(self.fail(text, "in \\u hexadecimal character escape"));
+                                        return Err(
+                                            self.fail(text, "in \\u hexadecimal character escape")
+                                        );
                                     }
                                 }
                             }
@@ -223,7 +234,11 @@ impl Scanner<'_> {
         }
     }
 
-    fn object(&mut self, text: &str, mut members: Option<&mut Vec<(String, Kind)>>) -> Result<(), String> {
+    fn object(
+        &mut self,
+        text: &str,
+        mut members: Option<&mut Vec<(String, Kind)>>,
+    ) -> Result<(), String> {
         self.skip_ws();
         if self.bytes.get(self.pos) == Some(&b'}') {
             self.pos += 1;

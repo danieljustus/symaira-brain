@@ -29,4 +29,4 @@ pub mod settings;
 pub mod state;
 pub mod state_store;
 pub mod trace;
-mod yaml_str;
+pub mod yaml_str;

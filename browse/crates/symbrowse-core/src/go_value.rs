@@ -100,7 +100,7 @@ fn write_value(out: &mut String, value: &Value, html: bool, indent: Option<usize
         Value::Bool(b) => out.push_str(if *b { "true" } else { "false" }),
         Value::Number(n) if n.is_f64() => out.push_str(&float_json(as_f64(n))),
         Value::Number(n) => out.push_str(&n.to_string()),
-        Value::String(s) => escape(out, s, html),
+        Value::String(s) => escape(out, s.strip_prefix(RAW_MARK).unwrap_or(s), html),
         Value::Array(items) => {
             if items.is_empty() {
                 out.push_str("[]");
@@ -118,17 +118,21 @@ fn write_value(out: &mut String, value: &Value, html: bool, indent: Option<usize
             out.push(']');
         }
         Value::Object(map) => {
-            if map.is_empty() {
+            let visible: Vec<(&String, &Value)> = map
+                .iter()
+                .filter(|(key, _)| !json_name(key).is_empty() || !key.starts_with(ORDER_MARK))
+                .collect();
+            if visible.is_empty() {
                 out.push_str("{}");
                 return;
             }
             out.push('{');
-            for (i, (key, item)) in map.iter().enumerate() {
+            for (i, (key, item)) in visible.into_iter().enumerate() {
                 if i > 0 {
                     out.push(',');
                 }
                 newline(out, indent.map(|n| n + 1));
-                escape(out, key, html);
+                escape(out, json_name(key), html);
                 out.push(':');
                 if indent.is_some() {
                     out.push(' ');
@@ -188,7 +192,69 @@ pub fn to_go_any(value: &Value) -> Value {
             .and_then(serde_json::Number::from_f64)
             .map_or_else(|| value.clone(), Value::Number),
         Value::Array(items) => Value::Array(items.iter().map(to_go_any).collect()),
-        Value::Object(map) => Value::Object(map.iter().map(|(k, v)| (k.clone(), to_go_any(v))).collect()),
+        Value::Object(map) => {
+            Value::Object(map.iter().map(|(k, v)| (k.clone(), to_go_any(v))).collect())
+        }
         other => other.clone(),
     }
+}
+
+const ORDER_MARK: char = '\u{1}';
+
+/// Object key that pins the position and the per-format names of a Go struct
+/// field. `serde_json` maps are key-sorted (like Go maps); Go structs keep
+/// their declaration order and yaml.v3 lowercases untagged field names, so
+/// struct-typed payloads carry `index`, the JSON tag and the YAML name in the
+/// key itself and every renderer strips it again with [`json_name`] and
+/// [`yaml_name`].
+#[must_use]
+pub fn ordered_key(index: usize, json: &str, yaml: &str) -> String {
+    format!("{ORDER_MARK}{index:04}{ORDER_MARK}{json}{ORDER_MARK}{yaml}")
+}
+
+/// JSON spelling of a possibly ordered key.
+#[must_use]
+pub fn json_name(key: &str) -> &str {
+    ordered_part(key, 2)
+}
+
+/// YAML spelling of a possibly ordered key.
+#[must_use]
+pub fn yaml_name(key: &str) -> &str {
+    ordered_part(key, 3)
+}
+
+fn ordered_part(key: &str, part: usize) -> &str {
+    if !key.starts_with(ORDER_MARK) {
+        return key;
+    }
+    key.splitn(4, ORDER_MARK).nth(part).unwrap_or(key)
+}
+
+/// Builds a Go-struct-shaped object from `(json, yaml, value)` fields in
+/// declaration order.
+#[must_use]
+pub fn go_struct(fields: Vec<(&str, &str, Value)>) -> Value {
+    Value::Object(
+        fields
+            .into_iter()
+            .enumerate()
+            .map(|(index, (json, yaml, value))| (ordered_key(index, json, yaml), value))
+            .collect(),
+    )
+}
+
+const RAW_MARK: char = '\u{2}';
+
+/// A string that YAML renders as a bare scalar (a Go `time.Time`) and JSON as
+/// an ordinary string.
+#[must_use]
+pub fn raw_scalar(text: &str) -> Value {
+    Value::String(format!("{RAW_MARK}{text}"))
+}
+
+/// The bare text of a [`raw_scalar`], if `text` is one.
+#[must_use]
+pub fn raw_text(text: &str) -> Option<&str> {
+    text.strip_prefix(RAW_MARK)
 }

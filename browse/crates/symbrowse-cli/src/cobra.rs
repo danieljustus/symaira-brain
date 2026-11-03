@@ -170,11 +170,9 @@ impl Tree {
     }
 
     fn find_next(&self, index: usize, name: &str) -> Option<usize> {
-        self.nodes[index]
-            .children
-            .iter()
-            .copied()
-            .find(|c| self.nodes[*c].use_name == name || self.nodes[*c].aliases.iter().any(|a| a == name))
+        self.nodes[index].children.iter().copied().find(|c| {
+            self.nodes[*c].use_name == name || self.nodes[*c].aliases.iter().any(|a| a == name)
+        })
     }
 
     /// Usage text only (the help template without the description).
@@ -186,7 +184,9 @@ impl Tree {
         // `Usage()` runs before cobra registers the implicit help/version flags.
         usage
             .split_inclusive('\n')
-            .filter(|line| !line.starts_with("  -h, --help ") && !line.starts_with("  -v, --version "))
+            .filter(|line| {
+                !line.starts_with("  -h, --help ") && !line.starts_with("  -v, --version ")
+            })
             .collect()
     }
 
@@ -369,7 +369,11 @@ fn levenshtein(a: &str, b: &str) -> usize {
         let mut row = vec![i + 1];
         for (j, cb) in b.iter().enumerate() {
             let cost = usize::from(ca != cb);
-            row.push((previous[j] + cost).min(previous[j + 1] + 1).min(row[j] + 1));
+            row.push(
+                (previous[j] + cost)
+                    .min(previous[j + 1] + 1)
+                    .min(row[j] + 1),
+            );
         }
         previous = row;
     }
@@ -413,15 +417,15 @@ pub fn args_validator(path: &[String]) -> ArgSpec {
         | "state list" | "state clean" | "state key init" | "cache list" | "cache clear"
         | "config show" | "console list" | "console clear" | "errors list" | "errors clear"
         | "diff snapshot" | "diff screenshot" | "daemon status" | "daemon stop"
-        | "network requests" | "trace export" | "flow list" | "state" | "state key"
-        | "cache" | "errors" | "console" | "network" | "session" | "journal" | "oob" | "auth"
-        | "cookies" | "storage" | "set" | "policy" | "trace" => ArgSpec::No,
+        | "network requests" | "trace export" | "flow list" | "state" | "state key" | "cache"
+        | "errors" | "console" | "network" | "session" | "journal" | "oob" | "auth" | "cookies"
+        | "storage" | "set" | "policy" | "trace" => ArgSpec::No,
         "upload" => ArgSpec::Min(2),
         "tab switch" | "frame select" | "dialog auto" | "auth login" | "cookies clear"
         | "policy explain" | "trace replay" | "state save" | "state load" | "state show"
-        | "state clear" | "storage clear" | "cache get" | "network request"
-        | "network route" | "network har" | "set headers" | "set media" | "set user-agent"
-        | "flow validate" | "flow run" | "flow record" => ArgSpec::Exact(1),
+        | "state clear" | "storage clear" | "cache get" | "network request" | "network route"
+        | "network har" | "set headers" | "set media" | "set user-agent" | "flow validate"
+        | "flow run" | "flow record" => ArgSpec::Exact(1),
         "set geo" | "diff url" => ArgSpec::Exact(2),
         "storage set" => ArgSpec::Exact(3),
         "set viewport" => ArgSpec::Range(2, 3),
@@ -437,7 +441,11 @@ pub fn runnable(tree: &Tree, index: usize) -> bool {
         return true;
     }
     matches!(
-        node.path.iter().map(String::as_str).collect::<Vec<_>>().as_slice(),
+        node.path
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>()
+            .as_slice(),
         ["daemon"]
     )
 }
@@ -509,17 +517,18 @@ pub fn parse_int(value: &str) -> Result<i64, &'static str> {
     if body.is_empty() {
         return Err("invalid syntax");
     }
-    let (base, digits, prefixed) = if let Some(rest) = body.strip_prefix("0x").or_else(|| body.strip_prefix("0X")) {
-        (16, rest, true)
-    } else if let Some(rest) = body.strip_prefix("0b").or_else(|| body.strip_prefix("0B")) {
-        (2, rest, true)
-    } else if let Some(rest) = body.strip_prefix("0o").or_else(|| body.strip_prefix("0O")) {
-        (8, rest, true)
-    } else if body.len() > 1 && body.starts_with('0') {
-        (8, &body[1..], true)
-    } else {
-        (10, body, false)
-    };
+    let (base, digits, prefixed) =
+        if let Some(rest) = body.strip_prefix("0x").or_else(|| body.strip_prefix("0X")) {
+            (16, rest, true)
+        } else if let Some(rest) = body.strip_prefix("0b").or_else(|| body.strip_prefix("0B")) {
+            (2, rest, true)
+        } else if let Some(rest) = body.strip_prefix("0o").or_else(|| body.strip_prefix("0O")) {
+            (8, rest, true)
+        } else if body.len() > 1 && body.starts_with('0') {
+            (8, &body[1..], true)
+        } else {
+            (10, body, false)
+        };
     let clean = underscore_ok(digits, prefixed).ok_or("invalid syntax")?;
     if clean.is_empty() {
         return Err("invalid syntax");
@@ -547,7 +556,10 @@ fn underscore_ok(digits: &str, prefixed: bool) -> Option<String> {
     if !digits.contains('_') {
         return Some(digits.to_owned());
     }
-    if !prefixed && digits.bytes().all(|b| b.is_ascii_digit() || b == b'_') && !digits.starts_with('_') {
+    if !prefixed
+        && digits.bytes().all(|b| b.is_ascii_digit() || b == b'_')
+        && !digits.starts_with('_')
+    {
         // base-0 allows underscores only with a base prefix or between digits
         // of a prefixed literal; plain decimal underscores are a syntax error.
         return None;
@@ -654,14 +666,20 @@ pub fn parse_flags(flags: &[&Flag], args: &[String]) -> Result<ParsedFlags, Pars
                 break;
             }
             if long.starts_with(['-', '=', '#']) {
-                return Err(ParseFailure { message: format!("bad flag syntax: {s}"), state });
+                return Err(ParseFailure {
+                    message: format!("bad flag syntax: {s}"),
+                    state,
+                });
             }
             let (name, inline) = match long.split_once('=') {
                 Some((name, value)) => (name, Some(value.to_owned())),
                 None => (long, None),
             };
             let Some(flag) = flags.iter().find(|f| f.name == name) else {
-                return Err(ParseFailure { message: format!("unknown flag: --{name}"), state });
+                return Err(ParseFailure {
+                    message: format!("unknown flag: --{name}"),
+                    state,
+                });
             };
             let value = match inline {
                 Some(value) => value,
@@ -672,14 +690,20 @@ pub fn parse_flags(flags: &[&Flag], args: &[String]) -> Result<ParsedFlags, Pars
                         value.clone()
                     }
                     None => {
-                        return Err(ParseFailure { message: format!("flag needs an argument: {s}"), state });
+                        return Err(ParseFailure {
+                            message: format!("flag needs an argument: {s}"),
+                            state,
+                        });
                     }
                 },
             };
             if name == "help" && flag.ty == FlagType::Bool {
                 // pflag reports -h/--help through the regular value path.
             }
-            set_flag(flag, &value, &mut state).map_err(|message| ParseFailure { message, state: state.clone() })?;
+            set_flag(flag, &value, &mut state).map_err(|message| ParseFailure {
+                message,
+                state: state.clone(),
+            })?;
             continue;
         }
         let mut shorts: &str = &s[1..];
@@ -687,10 +711,10 @@ pub fn parse_flags(flags: &[&Flag], args: &[String]) -> Result<ParsedFlags, Pars
             let bytes = shorts.as_bytes();
             let c = bytes[0];
             let Some(flag) = flags.iter().find(|f| f.short == Some(c)) else {
-                return Err(ParseFailure { message: format!(
-                    "unknown shorthand flag: {} in -{shorts}",
-                    go_rune_quote(c)
-                ), state });
+                return Err(ParseFailure {
+                    message: format!("unknown shorthand flag: {} in -{shorts}", go_rune_quote(c)),
+                    state,
+                });
             };
             let after = &shorts[1.min(shorts.len())..];
             let value;
@@ -708,12 +732,15 @@ pub fn parse_flags(flags: &[&Flag], args: &[String]) -> Result<ParsedFlags, Pars
                 rest = tail;
                 shorts = "";
             } else {
-                return Err(ParseFailure { message: format!(
-                    "flag needs an argument: {} in -{shorts}",
-                    go_rune_quote(c)
-                ), state });
+                return Err(ParseFailure {
+                    message: format!("flag needs an argument: {} in -{shorts}", go_rune_quote(c)),
+                    state,
+                });
             }
-            set_flag(flag, &value, &mut state).map_err(|message| ParseFailure { message, state: state.clone() })?;
+            set_flag(flag, &value, &mut state).map_err(|message| ParseFailure {
+                message,
+                state: state.clone(),
+            })?;
         }
     }
     Ok(ParsedFlags {
@@ -729,7 +756,12 @@ pub struct ParseFailure {
 }
 
 /// Applies a validator to the positional arguments.
-pub fn validate_args(spec: ArgSpec, tree: &Tree, index: usize, args: &[String]) -> Result<(), String> {
+pub fn validate_args(
+    spec: ArgSpec,
+    tree: &Tree,
+    index: usize,
+    args: &[String],
+) -> Result<(), String> {
     let n = args.len();
     match spec {
         ArgSpec::Legacy | ArgSpec::Arbitrary | ArgSpec::Custom => Ok(()),
@@ -738,12 +770,14 @@ pub fn validate_args(spec: ArgSpec, tree: &Tree, index: usize, args: &[String]) 
             go_quote(&args[0]),
             go_quote(&tree.command_path(index))
         )),
-        ArgSpec::Min(min) if n < min => Err(format!("requires at least {min} arg(s), only received {n}")),
+        ArgSpec::Min(min) if n < min => {
+            Err(format!("requires at least {min} arg(s), only received {n}"))
+        }
         ArgSpec::Max(max) if n > max => Err(format!("accepts at most {max} arg(s), received {n}")),
         ArgSpec::Exact(exact) if n != exact => Err(format!("accepts {exact} arg(s), received {n}")),
-        ArgSpec::Range(min, max) if n < min || n > max => {
-            Err(format!("accepts between {min} and {max} arg(s), received {n}"))
-        }
+        ArgSpec::Range(min, max) if n < min || n > max => Err(format!(
+            "accepts between {min} and {max} arg(s), received {n}"
+        )),
         _ => Ok(()),
     }
 }
