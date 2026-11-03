@@ -175,12 +175,3 @@ fn nous_file_token(path: &Path) -> Option<String> {
     let token = decode_hermes_token(&read_provider_credentials(path)?)?;
     (!token.contains('.') || nous_jwt_is_live(&token)).then_some(token)
 }
-
-fn nous_file_requires_go(path: &Path) -> bool {
-    let Some(token) =
-        read_provider_credentials(path).and_then(|contents| decode_hermes_token(&contents))
-    else {
-        return false;
-    };
-    jwt_expiry(&token).is_some_and(jwt_expiry_out_of_range)
-}

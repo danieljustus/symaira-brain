@@ -4,13 +4,12 @@
 //! the shipped Go `NewKimiProvider` observed. This test recreates the same tree
 //! and runs the *native* routing and provider constructor in a child process
 //! with a cleared environment, so process-global `HOME`/`KIMI_CODE_HOME` are
-//! never mutated in the test binary. Every case must keep the report native
-//! (no Go route) and report exactly Go's `configured`/`auth_status`.
-//! macOS only: the gate is removed only there (see `kimi_file_requires_go`).
+//! never mutated in the test binary. Every case must report exactly Go's
+//! `configured`/`auth_status`; there is no Go route to fall back to.
 //! Run as a non-root user; root bypasses the mode-000 cases.
-#![cfg(target_os = "macos")]
+#![cfg(unix)]
 
-use super::{coverage, kimi, needs_go_fallback};
+use super::{coverage, kimi};
 use serde_json::{Value, json};
 use std::fs;
 use std::os::unix::fs::{PermissionsExt, symlink};
@@ -30,7 +29,6 @@ fn kimi_access_probe_child() {
     let observed = json!({
         "configured": provider.configured,
         "auth_status": provider.auth_status,
-        "needs_go": needs_go_fallback(),
     });
     println!("PROBE {observed}");
 }
@@ -139,7 +137,6 @@ fn kimi_cli_credential_file_shapes_match_go_and_stay_native() {
             observed["auth_status"], case["auth_status"],
             "{id}: auth_status"
         );
-        assert_eq!(observed["needs_go"], false, "{id}: must stay native");
         if case["configured"] == true {
             configured += 1;
         } else {

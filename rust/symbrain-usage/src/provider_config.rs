@@ -13,7 +13,7 @@
 
 #[cfg(test)]
 use super::Value;
-use super::provider_requests::{trusted_https_url, validated_base};
+use super::provider_requests::validated_base;
 use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider};
 use serde::de::{IgnoredAny, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer};
@@ -56,7 +56,6 @@ include!("provider_config/hermes.rs");
 include!("provider_config/jwt.rs");
 include!("provider_config/keychain.rs");
 include!("provider_config/registry.rs");
-include!("provider_config/routing.rs");
 include!("provider_config/accounts.rs");
 include!("provider_config/other_accounts.rs");
 include!("provider_config/opencode_api.rs");
@@ -99,3 +98,7 @@ mod kimi_file_access_oracle_tests;
 #[cfg(test)]
 #[path = "quota_config_tests.rs"]
 mod quota_config_tests;
+
+#[cfg(all(test, unix))]
+#[path = "native_gates_oracle_tests.rs"]
+mod native_gates_oracle_tests;

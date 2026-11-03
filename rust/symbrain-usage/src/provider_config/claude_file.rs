@@ -38,27 +38,16 @@ fn claude_accounts(contents: &[u8]) -> Option<std::collections::BTreeMap<String,
 
 fn claude_file_token_in(path: &Path) -> Option<String> {
     let accounts = claude_accounts(&read_provider_credentials(path)?)?;
-    claude_selected_token(&accounts).ok().flatten()
+    claude_selected_token(&accounts)
 }
 
-fn claude_selected_token(
-    accounts: &std::collections::BTreeMap<String, String>,
-) -> Result<Option<String>, ()> {
-    if let Some(token) = accounts.get("default").filter(|token| !token.is_empty()) {
-        return Ok(Some(token.clone()));
-    }
-    let mut tokens = accounts.values().filter(|token| !token.is_empty());
-    let Some(token) = tokens.next() else {
-        return Ok(None);
-    };
-    if tokens.any(|other| other != token) {
-        return Err(());
-    }
-    Ok(Some(token.clone()))
-}
-
-fn claude_file_requires_go(path: &Path) -> bool {
-    read_provider_credentials(path)
-        .and_then(|contents| claude_accounts(&contents))
-        .is_some_and(|accounts| claude_selected_token(&accounts).is_err())
+// Go prefers a nonempty `default` account, then takes whichever nonempty token
+// its unordered map iteration yields first. Any nonempty token is therefore a
+// Go-possible outcome; the sorted map makes the native choice deterministic.
+fn claude_selected_token(accounts: &std::collections::BTreeMap<String, String>) -> Option<String> {
+    accounts
+        .get("default")
+        .filter(|token| !token.is_empty())
+        .or_else(|| accounts.values().find(|token| !token.is_empty()))
+        .cloned()
 }

@@ -47,12 +47,9 @@ fn copilot_file_token() -> Option<String> {
     copilot_file_token_in(&copilot_config_dir())
 }
 
-fn copilot_file_token_in(dir: &Path) -> Option<String> {
-    copilot_file_token_candidate_in(dir).ok().flatten()
-}
-
 // Preserve the existing gate for unsafe/unreadable sources; regular malformed
 // JSON supplies no token and falls through to the next file, as Go does.
+#[cfg(not(unix))]
 fn read_optional_credential_file(path: &Path) -> Result<Option<Vec<u8>>, ()> {
     let metadata = match fs::symlink_metadata(path) {
         Ok(metadata) => metadata,
@@ -66,24 +63,4 @@ fn read_optional_credential_file(path: &Path) -> Result<Option<Vec<u8>>, ()> {
         return Ok(None);
     }
     read_provider_credentials(path).map(Some).ok_or(())
-}
-
-#[cfg(windows)]
-fn usage_home_mismatch_requires_go() -> bool {
-    let rust_home = home();
-    let go_home = env::var_os("USERPROFILE").map_or_else(|| PathBuf::from("."), PathBuf::from);
-    rust_home != go_home
-}
-
-#[cfg(not(windows))]
-fn usage_home_mismatch_requires_go() -> bool {
-    false
-}
-
-#[cfg(test)]
-fn path_may_exist(path: &Path) -> bool {
-    match fs::symlink_metadata(path) {
-        Ok(_) => true,
-        Err(error) => error.kind() != std::io::ErrorKind::NotFound,
-    }
 }

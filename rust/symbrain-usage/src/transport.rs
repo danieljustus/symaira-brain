@@ -60,6 +60,10 @@ pub struct Request {
     pub method: String,
     pub url: String,
     pub headers: BTreeMap<String, String>,
+    /// Exact bytes of header values that are not valid UTF-8 (for example a
+    /// Kimi device id file). An entry replaces the same-named `headers` value,
+    /// which then only carries a lossy rendering for diagnostics.
+    pub header_bytes: BTreeMap<String, Vec<u8>>,
     pub body: Option<Vec<u8>>,
 }
 
@@ -245,11 +249,20 @@ impl UreqTransport {
         if !trusted_https_url(&request.url, request.provider_id == "antigravity") {
             return Err("provider URL must use HTTPS".to_string());
         }
+        let wire_url = crate::go_url::wire_url(&request.url)
+            .ok_or_else(|| "provider URL must use HTTPS".to_string())?;
         let mut builder = ureq::http::Request::builder()
             .method(request.method.as_str())
-            .uri(request.url.as_str());
+            .uri(wire_url.as_str());
         for (name, value) in &request.headers {
-            builder = builder.header(name, value);
+            if !request.header_bytes.contains_key(name) {
+                builder = builder.header(name, value);
+            }
+        }
+        for (name, value) in &request.header_bytes {
+            let value = ureq::http::HeaderValue::from_bytes(value)
+                .map_err(|e| format!("build request: {e}"))?;
+            builder = builder.header(name.as_str(), value);
         }
         let body = request.body.unwrap_or_default();
         let http_request = builder
@@ -352,6 +365,7 @@ mod tests {
         let deadline = Instant::now() + Duration::from_millis(200);
         let cancellation = Cancellation::with_deadline(deadline);
         let request = Request {
+            header_bytes: std::collections::BTreeMap::new(),
             provider_id: "antigravity".to_string(),
             method: "GET".to_string(),
             url: format!("https://127.0.0.1:{port}/usage"),
@@ -385,6 +399,7 @@ mod tests {
 
     fn request(provider: &str, url: &str, body: Option<Vec<u8>>) -> Request {
         Request {
+            header_bytes: std::collections::BTreeMap::new(),
             provider_id: provider.to_string(),
             method: "POST".to_string(),
             url: url.to_string(),

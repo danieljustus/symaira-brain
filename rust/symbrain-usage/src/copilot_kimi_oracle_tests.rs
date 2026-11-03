@@ -125,12 +125,6 @@ fn copilot_kimi_oracle_matches_fresh_go() {
     for record in &records {
         prepare(record);
         let gate = record["gated"].as_bool().unwrap();
-        assert_eq!(
-            super::needs_go_fallback(),
-            gate,
-            "{}: conservative native eligibility",
-            record["id"]
-        );
         let mut before = BTreeMap::new();
         for (path, hash) in record["file_sha256"].as_object().unwrap() {
             let bytes = std::fs::read(path).unwrap();
@@ -252,18 +246,6 @@ fn baseline_routes(current: &[serde_json::Value]) {
             );
             "JWT expiry: existing architecture gate or missing/expired credential"
         };
-        let expected = (id.contains("-base-") && !id.ends_with("-public-prefix"))
-            || [
-                "opencode-workspace-hyphen",
-                "opencode-workspace-unicode",
-                "opencode-workspace-slash",
-                "nous-jwt-overflow-positive",
-                "nous-jwt-overflow-negative",
-                "nous-jwt-upper-i64-boundary",
-            ]
-            .contains(&id);
-        let actual = super::needs_go_fallback();
-        assert_eq!(actual, expected, "{id}: original remaining route contract");
         for (path, bytes) in before {
             assert_eq!(
                 std::fs::read(path).unwrap(),
@@ -272,7 +254,7 @@ fn baseline_routes(current: &[serde_json::Value]) {
             );
         }
         mapping.push(serde_json::json!({"id":id, "provider":source["provider"],
-            "family":family, "needs_go_fallback":actual, "read_only":true,
+            "family":family, "read_only":true,
             "proof":"fresh original Go constructor plus native eligibility only; no full native report/request parity assertion"}));
     }
     assert_eq!(retained, 66);

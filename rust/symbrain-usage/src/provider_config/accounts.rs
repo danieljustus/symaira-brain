@@ -243,6 +243,8 @@ pub(crate) fn cursor_from_resolved(
 fn kimi() -> Provider {
     let cli_home = kimi_cli_home();
     let (cli_token, device_id, expiry) = kimi_store(&cli_home);
+    let device_id_bytes = kimi_device_id_bytes(&cli_home)
+        .filter(|bytes| std::str::from_utf8(bytes).is_err());
     let api_key = resolve_env("KIMI_CODE_API_KEY");
     let auth_token = resolve_env("KIMI_AUTH_TOKEN");
     let (api_value, api_failure) = match api_key {
@@ -267,6 +269,7 @@ fn kimi() -> Provider {
         device_id,
     );
     provider.kimi_cli_expires_at = expiry;
+    provider.device_id_bytes = device_id_bytes;
     provider
 }
 

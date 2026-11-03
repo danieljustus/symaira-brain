@@ -1,10 +1,8 @@
 use super::{
-    MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
-    codex_from_resolved, copilot_file_token_candidate_in, copilot_file_token_in, decode_base64url,
-    json_string, kimi_device_id_is_native, kimi_file_token_candidate, kimi_store,
-    names_from_keychain_dump, needs_go_fallback_for, nous_file_token, nous_jwt_is_live,
-    parse_claude_keychain_blob, path_may_exist, read_limited, supported_custom_base,
-    supported_opencode_workspace,
+    MAX_CREDENTIAL_FILE_BYTES, claude_file_token_in, codex_file_token, codex_from_resolved,
+    copilot_file_token_in, decode_base64url, go_trim_space, json_string, kimi_store,
+    names_from_keychain_dump, nous_file_token, nous_jwt_is_live, parse_claude_keychain_blob,
+    read_limited,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -66,32 +64,6 @@ fn bounded_credential_file_read_rejects_oversized_files() {
     assert!(read_limited(&path).is_none());
 }
 
-#[test]
-fn routing_metadata_treats_indeterminate_and_symlink_paths_as_present() {
-    let directory = tempfile::tempdir().expect("temporary directory");
-    let missing = directory.path().join("missing/auth.json");
-    assert!(!path_may_exist(&missing));
-
-    let ordinary = write(directory.path(), "ordinary/auth.json", "{}");
-    assert!(path_may_exist(&ordinary));
-
-    // A metadata error other than NotFound is conservatively treated as a
-    // possible credential path; this Unix case is a non-directory parent.
-    #[cfg(unix)]
-    let not_directory = write(directory.path(), "file-parent", "x").join("auth.json");
-    #[cfg(unix)]
-    assert!(path_may_exist(&not_directory));
-
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::symlink;
-        let dangling = directory.path().join("dangling/auth.json");
-        fs::create_dir_all(dangling.parent().expect("parent")).expect("create parent");
-        symlink(directory.path().join("absent-target"), &dangling).expect("create symlink");
-        assert!(path_may_exist(&dangling));
-    }
-}
-
 #[cfg(unix)]
 #[test]
 fn bounded_credential_file_read_does_not_follow_symlinks() {
@@ -141,19 +113,20 @@ fn claude_file_token_accepts_only_go_equivalent_deterministic_shapes() {
         );
         let got = claude_file_token_in(&path);
         let id = case["id"].as_str().expect("case id");
-        if case["possible_tokens"].is_array() {
+        if let Some(possible) = case["possible_tokens"].as_array() {
+            // Go's map iteration order is unspecified: any possible token is
+            // a Go outcome; the native choice is the first in sorted key order.
+            let got = got.unwrap_or_default();
             assert!(
-                got.is_none(),
-                "ambiguous account selection stays gated: {id}"
+                possible.iter().any(|token| token.as_str() == Some(got.as_str())),
+                "ambiguous account selection {id}: {got}"
             );
-            assert!(super::claude_file_requires_go(&path));
         } else {
             assert_eq!(
                 got.unwrap_or_default(),
                 case["token"].as_str().unwrap(),
                 "Go case {id}"
             );
-            assert!(!super::claude_file_requires_go(&path));
         }
     }
 }
@@ -169,15 +142,20 @@ fn copilot_file_token_matches_go_for_native_shapes_and_rejects_unproven_files() 
                 write(directory.path(), filename, contents);
             }
         }
-        let got = copilot_file_token_candidate_in(directory.path());
+        let got = copilot_file_token_in(directory.path());
         let id = case["id"].as_str().expect("case id");
-        if case["token"].is_null() {
-            assert!(got.is_err(), "distinct Go map tokens remain gated: {id}");
+        if let Some(possible) = case["possible_tokens"].as_array() {
+            // Go's map iteration order is unspecified: any possible token is
+            // a Go outcome; the native choice is the first in sorted key order.
+            let got = got.unwrap_or_default();
+            assert!(
+                possible.iter().any(|token| token.as_str() == Some(got.as_str())),
+                "distinct Go map tokens {id}: {got}"
+            );
         } else {
             let expected = case["token"].as_str().unwrap();
             let expected = (!expected.is_empty()).then_some(expected);
-            assert_eq!(got.unwrap().as_deref(), expected, "Go case {id}");
-            assert_eq!(copilot_file_token_in(directory.path()).as_deref(), expected);
+            assert_eq!(got.as_deref(), expected, "Go case {id}");
         }
     }
 }
@@ -278,75 +256,6 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 }
 
 #[test]
-fn literal_file_references_are_native_and_other_unproven_sources_keep_go() {
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_file: Some("synthetic-copilot-file"),
-        kimi_cli: Some("synthetic-kimi-file"),
-        claude_file: Some("synthetic-claude-file"),
-        ..UsageFallbackSignals::default()
-    }));
-    for reference in [
-        "symvault://test/token",
-        "vault://test/token",
-        "env://TOKEN",
-        "keychain://test/account",
-    ] {
-        for signals in [
-            UsageFallbackSignals {
-                copilot_file: Some(reference),
-                ..UsageFallbackSignals::default()
-            },
-            UsageFallbackSignals {
-                kimi_cli: Some(reference),
-                ..UsageFallbackSignals::default()
-            },
-        ] {
-            assert!(!needs_go_fallback_for(&signals));
-        }
-    }
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("symvault://literal-file-token"),
-        ..UsageFallbackSignals::default()
-    }));
-    for signals in [
-        UsageFallbackSignals {
-            other_provider_env: true,
-            ..UsageFallbackSignals::default()
-        },
-        UsageFallbackSignals {
-            other_credential_source: true,
-            ..UsageFallbackSignals::default()
-        },
-        UsageFallbackSignals {
-            local_provider_present: true,
-            ..UsageFallbackSignals::default()
-        },
-    ] {
-        assert!(needs_go_fallback_for(&signals));
-    }
-}
-
-#[test]
-fn claude_oauth_source_preempts_keychain_fallback() {
-    for credential in [
-        "synthetic-claude-oauth",
-        "env://MISSING",
-        "symvault://test/token",
-    ] {
-        assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-            claude_oauth_env: Some(credential),
-            local_provider_present: true,
-            ..UsageFallbackSignals::default()
-        }));
-    }
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-}
-
-#[test]
 fn kimi_store_reads_token_and_trims_the_device_id() {
     let directory = tempfile::tempdir().expect("temporary directory");
     write(
@@ -366,7 +275,7 @@ fn kimi_store_reads_token_and_trims_the_device_id() {
 }
 
 #[test]
-fn kimi_file_candidate_matches_only_the_source_bound_native_shapes() {
+fn kimi_file_token_matches_every_frozen_go_shape() {
     let fixture: serde_json::Value =
         serde_json::from_str(KIMI_FILE_TOKEN_ORACLE).expect("Go Kimi file parser oracle");
     for case in fixture["cases"].as_array().expect("oracle cases") {
@@ -379,11 +288,9 @@ fn kimi_file_candidate_matches_only_the_source_bound_native_shapes() {
         if !case["file_present"].as_bool().expect("file presence") {
             fs::remove_file(&path).expect("remove absent-file fixture");
         }
-        let candidate = kimi_file_token_candidate(&path);
         let expected = case["token"].as_str().unwrap();
         let expected = (!expected.is_empty()).then_some(expected);
-        assert_eq!(candidate.as_deref(), expected, "{}", case["id"]);
-        assert_eq!(kimi_store(directory.path()).0.as_deref(), expected);
+        assert_eq!(kimi_store(directory.path()).0.as_deref(), expected, "{}", case["id"]);
     }
 }
 
@@ -406,43 +313,6 @@ fn nous_file_parser_matches_all_frozen_go_shapes() {
             case["token"].as_str().expect("Go token"),
             "{}",
             case["id"]
-        );
-    }
-}
-
-#[test]
-fn supported_provider_overrides_are_narrow_and_go_equivalent() {
-    for base in [
-        "https://api.example.com/v1",
-        "https://openrouter.ai/custom/v1/",
-    ] {
-        assert!(supported_custom_base(base), "{base}");
-    }
-    for base in [
-        "http://api.example.com/v1",
-        "https://localhost/v1",
-        "https://api.example.com:8443/v1",
-        "https://user@api.example.com/v1",
-        "https://api.example.com/v1?next=x",
-        "https://api.example.com/a/../v1",
-        "https://api.example.com/a/./v1",
-        "https://api.example.com/./v1",
-        "https://api.example.com/%2fadmin",
-    ] {
-        assert!(!supported_custom_base(base), "{base} stays on Go");
-    }
-    assert!(supported_opencode_workspace("wrk_workspace123"));
-    for workspace in [
-        "",
-        "workspace123",
-        "wrk_",
-        "wrk_a/b",
-        "wrk_a?b",
-        "symvault://workspace",
-    ] {
-        assert!(
-            !supported_opencode_workspace(workspace),
-            "{workspace:?} stays on Go"
         );
     }
 }
@@ -627,39 +497,24 @@ fn json_pointer_lookup_ignores_missing_and_empty_values() {
 }
 
 #[test]
-fn kimi_device_id_native_gate_accepts_only_absent_or_readable_ascii_files() {
+fn kimi_device_id_trims_like_go_and_keeps_invalid_utf8_bytes() {
     let directory = tempfile::tempdir().expect("temporary directory");
     let path = directory.path().join("device_id");
-    assert!(
-        kimi_device_id_is_native(&path),
-        "missing file is equivalent"
-    );
-    fs::write(&path, b"device-42\n").expect("write ASCII device id");
-    assert!(kimi_device_id_is_native(&path));
-    fs::write(&path, b" device-42\t").expect("write trim-compatible device id");
-    assert!(kimi_device_id_is_native(&path));
-    fs::write(&path, b"device\nid").expect("write embedded newline");
-    assert!(!kimi_device_id_is_native(&path));
-    fs::write(&path, b"device\0id").expect("write embedded NUL");
-    assert!(!kimi_device_id_is_native(&path));
-    fs::write(&path, b"").expect("write empty device id");
-    assert!(kimi_device_id_is_native(&path));
-    fs::write(&path, [0xff]).expect("write invalid UTF-8");
-    assert!(!kimi_device_id_is_native(&path));
-    fs::write(
-        &path,
-        vec![b'x'; usize::try_from(MAX_CREDENTIAL_FILE_BYTES).expect("file size fits usize") + 1],
-    )
-    .expect("write oversized device id");
-    assert!(kimi_device_id_is_native(&path));
-
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::symlink;
-        fs::remove_file(&path).expect("remove device id");
-        let target = directory.path().join("target");
-        fs::write(&target, b"device-42").expect("write symlink target");
-        symlink(target, &path).expect("create device id symlink");
-        assert!(!kimi_device_id_is_native(&path));
+    let home = directory.path().join("cli-home");
+    fs::create_dir_all(&home).expect("cli home");
+    for (contents, expected) in [
+        (&b"device-42\n"[..], Some(&b"device-42"[..])),
+        (b" \tdevice 42\t ", Some(b"device 42")),
+        (b"\xc2\xa0dev\xe2\x80\xa8", Some(b"dev")),
+        (b"dev\xff", Some(b"dev\xff")),
+        (b"\xff \n", Some(b"\xff")),
+        (b"dev\x01ice", Some(b"dev\x01ice")),
+        (b" \n\t", None),
+        (b"", None),
+    ] {
+        fs::write(&path, contents).expect("device id");
+        fs::copy(&path, home.join("device_id")).expect("copy");
+        assert_eq!(super::kimi_device_id_bytes(&home).as_deref(), expected, "{contents:?}");
     }
+    assert_eq!(go_trim_space(b"\xc2\xa0 x \xe3\x80\x80"), b"x");
 }

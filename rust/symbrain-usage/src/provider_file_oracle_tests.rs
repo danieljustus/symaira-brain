@@ -108,12 +108,6 @@ fn compare_record(record: &serde_json::Value) -> bool {
     // as frozen Go; it proves ordering, not host ACL access.
     env("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_FILES_ABSENT");
     let ambiguous = record["ambiguous"].as_bool().expect("ambiguity marker");
-    assert_eq!(
-        super::needs_go_fallback(),
-        ambiguous,
-        "{}: native eligibility",
-        record["id"]
-    );
     let path = record["auth_path"].as_str().expect("path");
     let before = std::fs::read(path).ok();
     assert_eq!(before.is_some(), record["file_present"].as_bool().unwrap());

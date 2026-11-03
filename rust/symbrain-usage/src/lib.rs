@@ -12,6 +12,8 @@ mod go_float;
 #[cfg(test)]
 mod go_float_tests;
 pub use codex_history::scan_codex_history;
+mod go_request;
+mod go_url;
 mod history;
 mod history_files;
 pub use claude_history::scan_claude_history;
@@ -25,7 +27,7 @@ mod transport;
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
 pub use providers::{
     Provider, ProviderSelection, ProviderSpec, UsageError, all_providers, is_secret_reference,
-    is_vault_uri, needs_go_fallback, needs_go_fallback_for_selection, resolve_reference,
+    is_vault_uri, resolve_reference,
     resolve_reference_or_env, secretref_timeout, selected_providers, set_secretref_timeout,
 };
 pub use retry_after::parse_retry_after;
@@ -62,7 +64,7 @@ impl Service {
             opencode_history_selected: selection.explicit_opencode(),
             claude_history_selected: selection.explicit_claude(),
             codex_history_selected: selection.explicit_codex(),
-            transport: Arc::new(UreqTransport::default()),
+            transport: Arc::new(go_request::GoClient(Arc::new(UreqTransport::default()))),
             provider_timeout: DEFAULT_PROVIDER_TIMEOUT,
             max_concurrency: MAX_CONCURRENT_PROVIDERS,
         }
@@ -74,7 +76,7 @@ impl Service {
             claude_history_selected: providers.iter().any(|p| p.id == "claude"),
             codex_history_selected: providers.iter().any(|p| p.id == "codex"),
             providers,
-            transport,
+            transport: Arc::new(go_request::GoClient(transport)),
             provider_timeout: DEFAULT_PROVIDER_TIMEOUT,
             max_concurrency: MAX_CONCURRENT_PROVIDERS,
         }

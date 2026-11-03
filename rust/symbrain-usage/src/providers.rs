@@ -39,8 +39,8 @@ use provider_fetch::fetch_one;
 #[path = "provider_config.rs"]
 pub(crate) mod provider_config;
 pub use provider_config::{
-    ProviderSelection, all_providers, is_secret_reference, is_vault_uri, needs_go_fallback,
-    needs_go_fallback_for_selection, resolve_reference, resolve_reference_or_env,
+    ProviderSelection, all_providers, is_secret_reference, is_vault_uri, resolve_reference,
+    resolve_reference_or_env,
     secretref_timeout, selected_providers, set_secretref_timeout,
 };
 #[cfg(test)]
@@ -74,6 +74,9 @@ pub struct Provider {
     /// Device id the Kimi Code CLI persisted; sent as identity metadata on the
     /// CLI strategy's requests.
     device_id: Option<String>,
+    /// Exact device-id bytes when the file is not valid UTF-8; Go sends them
+    /// verbatim, so `device_id` then only holds a lossy rendering.
+    device_id_bytes: Option<Vec<u8>>,
     enterprise_host: Option<String>,
     kimi_cli_expires_at: Option<f64>,
 }
@@ -118,6 +121,7 @@ impl Provider {
             region: "ai".into(),
             fixture: false,
             device_id: None,
+            device_id_bytes: None,
             enterprise_host: None,
             kimi_cli_expires_at: None,
         }

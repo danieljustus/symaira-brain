@@ -9,6 +9,7 @@ pub(super) fn request(provider: &Provider) -> Request {
     if provider.id == "devin" {
         let body = serde_json::json!({"metadata":{"apiKey":provider.credential(),"ideName":"devin","ideVersion":"1.108.2","extensionName":"devin","extensionVersion":"1.108.2","locale":"en"}}).to_string();
         return Request {
+            header_bytes: std::collections::BTreeMap::new(),
             provider_id: "devin".into(), method: "POST".into(),
             url: "https://server.codeium.com/exa.seat_management_pb.SeatManagementService/GetUserStatus".into(),
             headers: [("Content-Type".into(), "application/json".into()), ("Connect-Protocol-Version".into(), "1".into()), ("Accept".into(), "application/json".into())].into(),
@@ -16,6 +17,7 @@ pub(super) fn request(provider: &Provider) -> Request {
         };
     }
     Request {
+        header_bytes: std::collections::BTreeMap::new(),
         provider_id: provider.id.clone(),
         method: "GET".into(),
         url: "https://api.z.ai/api/monitor/usage/quota/limit".into(),

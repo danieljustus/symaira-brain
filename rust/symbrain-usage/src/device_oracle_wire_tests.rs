@@ -67,7 +67,6 @@ pub(super) fn compare(records: &[Value]) -> Value {
         .filter(|row| row["input"]["kind"] != "retain-go-control")
     {
         let before = prepare(row);
-        assert!(!super::super::needs_go_fallback());
         let transport = Arc::new(wired(row));
         let start = chrono::Utc::now();
         let report =

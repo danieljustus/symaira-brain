@@ -19,6 +19,7 @@ pub(super) fn fetch(
     cancel: &Cancellation,
 ) -> Result<UsageSnapshot, UsageError> {
     let request = Request {
+        header_bytes: std::collections::BTreeMap::new(),
         provider_id: "opencode".into(),
         method: "GET".into(),
         url: URL.into(),
