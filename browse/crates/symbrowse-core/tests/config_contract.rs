@@ -125,6 +125,95 @@ fn config_show_omits_encryption_key_material() {
     fs::remove_dir_all(root).expect("remove config fixture root");
 }
 
+#[test]
+fn retired_compat_is_a_typed_config_error_from_toml_env_and_flag() {
+    const EXPECTED: &str = "invalid configuration: transport_retired: the compat transport (Go/AzureTLS sidecar) has been retired and is no longer available; set mode to static or browser";
+    for source in ["global-toml", "project-toml", "env", "flag"] {
+        let root = test_root(&format!("retired-{source}"));
+        let mut context = context(&root);
+        match source {
+            "global-toml" => {
+                let global = context
+                    .xdg_config_home
+                    .as_ref()
+                    .unwrap()
+                    .join("symbrowse/config.toml");
+                fs::create_dir_all(global.parent().unwrap()).expect("create config directory");
+                fs::write(global, "mode = \"compat\"\n").expect("write global config");
+            }
+            "project-toml" => {
+                fs::write(context.cwd.join(".symbrowse.toml"), "mode = \"compat\"\n")
+                    .expect("write project config");
+            }
+            "env" => {
+                context
+                    .env
+                    .insert("SYMBROWSE_MODE".to_owned(), "compat".to_owned());
+            }
+            _ => context.flags.mode = Some("compat".to_owned()),
+        }
+        let error = load(&context).expect_err(source).to_string();
+        assert_eq!(error, EXPECTED, "{source}");
+        fs::remove_dir_all(root).expect("remove config fixture root");
+    }
+}
+
+#[test]
+fn retired_compat_is_never_absorbed_by_the_static_engine() {
+    let root = test_root("retired-static-engine");
+    let mut context = context(&root);
+    context
+        .env
+        .insert("SYMBROWSE_MODE".to_owned(), "compat".to_owned());
+    context
+        .env
+        .insert("SYMBROWSE_ENGINE".to_owned(), "static".to_owned());
+    let error = load(&context)
+        .expect_err("compat with static engine")
+        .to_string();
+    assert!(error.contains("transport_retired"), "{error}");
+    fs::remove_dir_all(root).expect("remove config fixture root");
+}
+
+#[test]
+fn static_and_browser_modes_still_load_after_compat_retirement() {
+    for (mode, engine) in [
+        ("static", "chrome"),
+        ("browser", "chrome"),
+        ("browser", "firefox"),
+    ] {
+        let root = test_root("retired-unaffected");
+        let mut context = context(&root);
+        context
+            .env
+            .insert("SYMBROWSE_MODE".to_owned(), mode.to_owned());
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".to_owned(), engine.to_owned());
+        let result = load(&context);
+        // static mode + browser engine is the pre-existing engine_not_allowed
+        // contract; only the retired transport changed.
+        match (mode, result) {
+            ("browser", Ok(result)) => assert_eq!(result.config.mode, "browser"),
+            ("static", Err(error)) => {
+                assert!(error.to_string().contains("engine_not_allowed"), "{error}");
+            }
+            (mode, other) => panic!("unexpected {mode}: {other:?}"),
+        }
+        fs::remove_dir_all(root).expect("remove config fixture root");
+    }
+    let root = test_root("retired-unaffected-static-engine");
+    let mut context = context(&root);
+    context
+        .env
+        .insert("SYMBROWSE_ENGINE".to_owned(), "static".to_owned());
+    context
+        .env
+        .insert("SYMBROWSE_MODE".to_owned(), "static".to_owned());
+    assert_eq!(load(&context).expect("static engine").config.mode, "static");
+    fs::remove_dir_all(root).expect("remove config fixture root");
+}
+
 fn context(root: &Path) -> LoadContext {
     let home = root.join("home");
     let cwd = root.join("workspace");

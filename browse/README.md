@@ -224,6 +224,18 @@ Chrome executable override. See the complete [configuration and environment
 reference](docs/config.md), [docs/state.md](docs/state.md) for state encryption,
 and [docs/allowlist.md](docs/allowlist.md) for the network policy.
 
+### Transport modes
+
+The Rust build selects exactly one transport per session: `mode = "static"`
+(JS-free HTTP, no browser identity) or `mode = "browser"` with an explicit
+engine (`chrome`, `safari` or `firefox`). The former `compat` mode (the
+Go/AzureTLS sidecar) is **retired**: selecting it through `mode` in
+`config.toml`, `SYMBROWSE_MODE` or `--mode` fails with the typed
+`transport_retired` error (`config` error code, exit status 9) and never falls
+back to `static` or `browser`. Remove `mode = "compat"` or switch to `static`
+or `browser`. Details: [browser transport
+contract](docs/rust-port/browser-transport-contract.md).
+
 ## Documentation
 
 - [docs/tiers.md](docs/tiers.md) — escalation tiers and `read --engine-hint`

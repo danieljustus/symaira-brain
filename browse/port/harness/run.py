@@ -424,37 +424,19 @@ ALL_SUITES = (
     "chrome-full",
     "safari",
     "browser-transport",
-    "compat-sidecar",
 )
+
+# The Go/AzureTLS `compat` transport is retired; its sidecar and legacy
+# fingerprint suites no longer run. Historical evidence files are retained.
+RETIRED_SUITES = {
+    "compat-sidecar": "the compat transport (Go/AzureTLS sidecar) is retired",
+    "fetch-fingerprints": "FETCH-002 (legacy compat wire fingerprints) is retired with the compat transport",
+}
 
 
 def run_all_suites(root: Path, env: dict[str, str], args: argparse.Namespace) -> None:
     for suite in ALL_SUITES:
         command = [sys.executable, str(Path(__file__).resolve()), "--suite", suite]
-        if suite == "fetch-fingerprints":
-            rust_binary = args.rust or (
-                Path(env["SYMBROWSE_RUST_BINARY"])
-                if env.get("SYMBROWSE_RUST_BINARY")
-                else None
-            )
-            compat_binary = args.compat or (
-                Path(env["SYMBROWSE_COMPAT_BINARY"])
-                if env.get("SYMBROWSE_COMPAT_BINARY")
-                else None
-            )
-            command.extend([
-                "--capture", str(args.capture.resolve()),
-                "--trusted-sha256", args.trusted_sha256,
-            ])
-            if rust_binary is not None and compat_binary is not None:
-                command.extend(["--rust", str(rust_binary.resolve()), "--compat", str(compat_binary.resolve())])
-            if args.historical_oracle:
-                command.extend(["--historical-oracle", str(args.historical_oracle.resolve())])
-            if args.report:
-                command.extend(["--report", str(args.report.resolve())])
-            if args.runtime_root:
-                command.extend(["--runtime-root", str(args.runtime_root.resolve())])
-            command.extend(["--go", args.go, "--repo-root", str(root.parent.resolve())])
         if args.comparison != "bytes" and suite == "fetch-render":
             command.extend(["--comparison", args.comparison])
         if args.native_targets and suite in {"chrome-full", "safari"}:
@@ -496,6 +478,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.native and args.native_targets:
         parser.error("use either --native macos or --native-targets, not both")
+    if args.suite in RETIRED_SUITES:
+        parser.error(f"suite {args.suite!r} is retired: {RETIRED_SUITES[args.suite]}")
     native = args.native_targets or args.native == "macos"
     if args.repeat < 1 or args.repeat > 1000:
         parser.error("--repeat must be between 1 and 1000")
@@ -504,8 +488,6 @@ def main() -> int:
     env.update({"CGO_ENABLED": "0", "GOTOOLCHAIN": "go1.26.6"})
     external_environment(env)
     if args.suite == "all":
-        if not args.capture or not args.trusted_sha256:
-            parser.error("--suite all needs FETCH-002 --capture and --trusted-sha256 artifacts")
         run_all_suites(root, env, args)
         print("all harness suites passed")
         return 0
@@ -533,50 +515,16 @@ def main() -> int:
         ]
     elif args.suite == "browser-transport":
         fixture = json.loads((root / "testdata/port/core/transport-selection.json").read_text())
-        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
+        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 9
         assert {case["id"] for case in fixture["cases"]} == {
             "static-default", "browser-chrome", "browser-safari", "browser-firefox",
             "browser-missing-engine", "static-engine-conflict", "unknown-mode", "unknown-engine",
+            "compat-retired",
         }
-        commands = [["cargo", "test", "-p", "symbrowse-core", "selection_is_exhaustive", "--locked"]]
-    elif args.suite == "fetch-fingerprints":
-        # The capture, historical oracle and both binaries are retained artifacts.
-        # This suite never builds or self-approves any of them.
-        if not args.capture or not args.trusted_sha256:
-            parser.error("fetch-fingerprints needs --capture and an independently reviewed --trusted-sha256")
-        rust_binary = args.rust or (Path(os.environ["SYMBROWSE_RUST_BINARY"]) if os.environ.get("SYMBROWSE_RUST_BINARY") else None)
-        compat_binary = args.compat or (Path(os.environ["SYMBROWSE_COMPAT_BINARY"]) if os.environ.get("SYMBROWSE_COMPAT_BINARY") else None)
-        if (rust_binary is None) != (compat_binary is None):
-            parser.error("fetch-fingerprints needs Rust and Go compat artifacts together when supplied")
-        oracle = args.historical_oracle or (root / "docs/rust-port/rust009-tls-results.json")
-        report = external_file(
-            args.report or external_output(root, env, "target/fetch002-next/fetch002-e2e.json"),
-            env,
-            name="--report",
-        )
-        command = [sys.executable, "port/harness/fetch_fingerprints_validate.py",
-             "--capture", str(args.capture.resolve()),
-             "--trusted-sha256", args.trusted_sha256,
-             "--historical-oracle", str(oracle.resolve()),
-             "--report", str(report.resolve()),
-             "--repo-root", str(root.parent.resolve()),
-             "--go", args.go]
-        if rust_binary is not None and compat_binary is not None:
-            command.extend(["--rust", str(rust_binary.resolve()), "--compat", str(compat_binary.resolve())])
-        runtime_root = args.runtime_root or (
-            Path(env[EXTERNAL_RUNTIME_ENV]) if sys.platform == "darwin" and not env.get("CI") else None
-        )
-        if runtime_root:
-            command.extend(["--runtime-root", str(runtime_root.resolve())])
-        run(command, root, env)
-        print("FETCH-002 diagnostics completed; acceptance remains blocked")
-        return 0
-    elif args.suite == "compat-sidecar":
-        fixture = json.loads((root / "port/harness/cases/compat-sidecar.json").read_text())
-        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
         commands = [
-            ["go", "build", "-trimpath", "-o", str(external_output(root, env, "dist/symbrowse-compat")), "./cmd/symbrowse"],
-            ["cargo", "test", "-p", "symbrowse-compat", "-p", "symbrowse-daemon", "--locked"],
+            ["cargo", "test", "-p", "symbrowse-core", "selection_is_exhaustive", "--locked"],
+            ["cargo", "test", "-p", "symbrowse-core", "retired_compat", "--locked"],
+            ["cargo", "test", "-p", "symbrowse-cli", "--test", "compat_retired", "--locked"],
         ]
     elif args.suite == "workflows":
         commands = [

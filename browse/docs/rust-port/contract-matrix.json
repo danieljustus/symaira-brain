@@ -424,9 +424,9 @@
     {
       "id": "CFG-006",
       "seam": "transport mode and browser-engine selection",
-      "fixture": "TOML, environment and CLI selection for static/browser/compat and chrome/safari/firefox; omitted, conflicting, unknown and unavailable values",
+      "fixture": "TOML, environment and CLI selection for static/browser and chrome/safari/firefox; omitted, conflicting, unknown and retired (compat) values; testdata/port/core/transport-selection.json, crates/symbrowse-core/tests/config_contract.rs and crates/symbrowse-cli/tests/compat_retired.rs",
       "go_oracle": "new target contract; CFG-001 and CFG-005 remain precedence/daemon-propagation compatibility oracles",
-      "expected": "precedence and validation select one explicit transport mode and, in browser mode, one explicit engine; machine-readable config/status identifies the selected mode and engine without exposing browser profile data; unknown, conflicting or unavailable selections return typed errors and never trigger fallback",
+      "expected": "precedence and validation select one explicit transport mode and, in browser mode, one explicit engine; machine-readable config/status identifies the selected mode and engine without exposing browser profile data; unknown, conflicting or unavailable selections return typed errors and never trigger fallback; a selection of the retired `compat` mode from TOML, SYMBROWSE_MODE or --mode returns the typed `transport_retired` error (config error envelope, exit 9, details.code=transport_retired) and is never mapped to static or browser",
       "comparison": "json-semantic",
       "platforms": [
         "all"
@@ -613,10 +613,10 @@
     },
     {
       "id": "FETCH-002",
-      "seam": "legacy Go compatibility transport",
+      "seam": "legacy Go compatibility transport (retired)",
       "fixture": "TLS ClientHello plus HTTP/2 settings/header order capture for six profiles",
       "go_oracle": "run Go oracle against hermetic packet-signature fixture",
-      "expected": "compat mode preserves the pinned Go/AzureTLS wire fingerprint for released legacy callers; it is never presented as the version or identity of an installed browser",
+      "expected": "Retired 2026-11-03 (Daniel-approved): the Go/AzureTLS compat transport and its NDJSON sidecar are removed from the Rust product. The pinned six-profile AzureTLS wire fingerprint is no longer a product contract; the row is kept as an accepted difference. Historical evidence stays under port/evidence and docs/rust-port/rust009-tls-results.json.",
       "comparison": "network",
       "platforms": [
         "darwin-amd64",
@@ -626,14 +626,14 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "todo"
+      "status": "accepted-difference"
     },
     {
       "id": "FETCH-009",
       "seam": "transport-mode selection",
-      "fixture": "static, browser and compat selections; omitted/unknown mode; unavailable requested engine; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
+      "fixture": "static, browser and (retired) compat selections; omitted/unknown mode; unavailable requested engine; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
       "go_oracle": "new target contract; retain FETCH-001/FETCH-002 as compatibility oracles where applicable",
-      "expected": "each request selects exactly one declared mode: static uses the Rust HTTP stack, browser uses the requested real local engine, compat uses the legacy Go transport; selection is reported in machine-readable metadata and never silently falls back between modes or engines",
+      "expected": "each request selects exactly one declared mode: static uses the Rust HTTP stack, browser uses the requested real local engine; the retired compat mode returns the typed `transport_retired` error; selection is reported in machine-readable metadata and never silently falls back between modes or engines",
       "comparison": "json-semantic",
       "platforms": [
         "darwin-amd64",
@@ -659,10 +659,10 @@
     },
     {
       "id": "FETCH-011",
-      "seam": "compat sidecar protocol and lifecycle",
-      "fixture": "version handshake, NDJSON request/response frames, typed errors, timeout, restart, exit and rollback cases",
+      "seam": "compat sidecar protocol and lifecycle (retired)",
+      "fixture": "retired: the Rust compat sidecar client (symbrowse-compat) was removed; port/harness/cases/compat-sidecar.json is retained as historical evidence only",
       "go_oracle": "pinned Go browser-profile transport plus a hermetic sidecar fixture server",
-      "expected": "Rust-to-Go compat traffic has an explicit protocol version, request ID, bounded timeout, stable error codes, private local endpoint permissions and deterministic restart/exit behavior; failure remains typed and does not select another transport",
+      "expected": "Retired 2026-11-03 (Daniel-approved): the Go/AzureTLS compat transport and its NDJSON sidecar are removed from the Rust product. The Rust product never spawns or references the Go sidecar; selecting compat returns the typed `transport_retired` error (see CFG-006) and does not select another transport.",
       "comparison": "process",
       "platforms": [
         "darwin-amd64",
@@ -672,7 +672,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "todo"
+      "status": "accepted-difference"
     },
     {
       "id": "FETCH-003",

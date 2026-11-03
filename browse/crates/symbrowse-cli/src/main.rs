@@ -384,6 +384,7 @@ fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCod
         daemon_codes::PEER_DENIED => ErrorCode::PeerDenied,
         daemon_codes::DAEMON_UNAVAILABLE => ErrorCode::DaemonUnavailable,
         daemon_codes::INVALID_SESSION => ErrorCode::InvalidSession,
+        symbrowse_core::config::TRANSPORT_RETIRED => ErrorCode::Config,
         _ => ErrorCode::OperationFailed,
     };
     match Envelope::failure(mapped, message).render(format) {
@@ -523,6 +524,10 @@ fn run_mcp(
     let config = match load(&context) {
         Ok(result) => result.config,
         Err(error) => {
+            if is_transport_retired(&error.to_string()) {
+                // MCP stdout carries JSON-RPC only: report on stderr.
+                return write_transport_retired(Format::Text, &error.to_string());
+            }
             let _ = writeln!(io::stderr(), "{error}");
             return ExitCode::from(1);
         }
@@ -640,6 +645,9 @@ fn run_daemon(
     let config = match load(&context) {
         Ok(result) => result.config,
         Err(error) => {
+            if is_transport_retired(&error.to_string()) {
+                return write_transport_retired(format, &error.to_string());
+            }
             let _ = writeln!(io::stderr(), "daemon configuration: {error}");
             return ExitCode::from(1);
         }
@@ -658,7 +666,7 @@ fn run_daemon(
     } else {
         mode
     };
-    // Static and compat transports do not accept a browser engine. Keep the
+    // The static transport does not accept a browser engine. Keep the
     // browser default only for browser mode; an inherited engine must not
     // poison an explicit transport selection.
     let engine = if mode != "browser" {
@@ -668,6 +676,9 @@ fn run_daemon(
     };
     let selection_engine = (mode == "browser").then_some(engine.as_str());
     if let Err(error) = symbrowse_core::config::resolve_selection(Some(&mode), selection_engine) {
+        if error.code == symbrowse_core::config::TRANSPORT_RETIRED {
+            return write_transport_retired(format, &error.message);
+        }
         let _ = writeln!(
             io::stderr(),
             "invalid transport selection: {}",
@@ -954,7 +965,37 @@ fn render_config_show(format: Format, flags: FlagOverrides) -> Result<String, St
     Ok(render_show_yaml(&result))
 }
 
+/// True when a configuration or selection failure reports the retired
+/// `compat` transport.
+fn is_transport_retired(message: &str) -> bool {
+    message.contains(symbrowse_core::config::TRANSPORT_RETIRED)
+}
+
+/// Render the retired-transport failure through the existing config error
+/// contract: `config` error code, exit 9, and the stable `transport_retired`
+/// identifier in `details.code`.
+fn write_transport_retired(format: Format, message: &str) -> ExitCode {
+    if format == Format::Text {
+        let _ = writeln!(io::stderr(), "{message}");
+    } else {
+        let mut envelope = Envelope::failure(ErrorCode::Config, message);
+        if let Some(error) = envelope.error.as_mut() {
+            error.hint = "set mode to static or browser".to_owned();
+            error.details = Some(serde_json::json!({
+                "code": symbrowse_core::config::TRANSPORT_RETIRED,
+            }));
+        }
+        if let Ok(output) = envelope.render(format) {
+            let _ = io::stdout().write_all(output.as_bytes());
+        }
+    }
+    ExitCode::from(ErrorCode::Config.exit_code())
+}
+
 fn write_config_error(format: Format, message: &str) -> ExitCode {
+    if is_transport_retired(message) {
+        return write_transport_retired(format, message);
+    }
     if format == Format::Text {
         let _ = writeln!(io::stderr(), "{message}");
     } else {

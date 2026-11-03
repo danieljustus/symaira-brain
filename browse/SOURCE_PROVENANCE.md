@@ -94,6 +94,12 @@ for the existing `symbrowse-engine-chrome` `spike` test.
 
 ## FETCH-002 candidate check — 2026-09-16
 
+> **Superseded (2026-11-03):** the `compat` transport was retired by decision.
+> FETCH-002 and FETCH-011 are accepted differences, the Rust `CompatClient` /
+> `symbrowse-compat` crate was removed, and the `compat-sidecar` and
+> `fetch-fingerprints` harness suites are retired. The record below is
+> historical evidence and is kept unmodified.
+
 The current Brain candidate was checked for the legacy six-profile wire
 compatibility dependency before any new fixture or suite was added. The
 source-bound fingerprint suite is **missing**: `browse/port/harness/run.py`

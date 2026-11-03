@@ -98,6 +98,13 @@ impl SessionSpec {
     }
 
     pub fn validate_selection(&self) -> Result<(), String> {
+        // `compat` is retired; reject it before the static-engine shortcut so
+        // it is never silently served as static.
+        if self.mode == "compat" {
+            return resolve_selection(Some(&self.mode), None)
+                .map(|_| ())
+                .map_err(|error| format!("{}: {}", error.code, error.message));
+        }
         if self.engine == "static" {
             return Ok(());
         }
@@ -200,5 +207,25 @@ mod tests {
         assert!(spec.state_store_dir().ends_with("states"));
         assert!(spec.user_data_dir().ends_with("sessions/alpha"));
         assert!(spec.output_cache_dir().ends_with("out"));
+    }
+
+    #[test]
+    fn retired_compat_mode_is_rejected_even_with_the_static_engine() {
+        for engine in ["static", "chrome", ""] {
+            let mut spec = SessionSpec::for_session("alpha");
+            spec.mode = "compat".into();
+            spec.engine = engine.into();
+            let error = spec.validate_selection().unwrap_err();
+            assert!(
+                error.starts_with("transport_retired: "),
+                "{engine}: {error}"
+            );
+        }
+        for (mode, engine) in [("static", "static"), ("browser", "chrome")] {
+            let mut spec = SessionSpec::for_session("alpha");
+            spec.mode = mode.into();
+            spec.engine = engine.into();
+            spec.validate_selection().unwrap();
+        }
     }
 }
