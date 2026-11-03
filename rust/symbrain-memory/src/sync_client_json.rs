@@ -366,10 +366,17 @@ impl Decoder {
         }
         let target = type_name(ty);
         let mut text = if self.structure.is_some() || !self.fields.is_empty() {
+            let path = self.fields.join(".");
+            // A last token that looks like a slice index drops the phrase.
+            let last = path.rsplit('.').next().unwrap_or("");
+            let into_what = if !last.is_empty() && last.bytes().all(|byte| byte.is_ascii_digit()) {
+                ""
+            } else {
+                "Go struct field "
+            };
             format!(
-                "json: cannot unmarshal {found} into Go struct field {}.{} of type {target}",
+                "json: cannot unmarshal {found} into {into_what}{}.{path} of type {target}",
                 self.structure.unwrap_or(""),
-                self.fields.join(".")
             )
         } else {
             format!("json: cannot unmarshal {found} into Go value of type {target}")

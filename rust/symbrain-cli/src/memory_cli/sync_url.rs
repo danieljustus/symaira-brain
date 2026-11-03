@@ -318,6 +318,7 @@ fn parse_ipv4_fields(input: &str, start: usize, end: usize) -> Result<(), String
     Ok(())
 }
 
+#[allow(clippy::too_many_lines)] // One transcription of `netip.parseIPv6`.
 fn parse_ipv6(input: &str) -> Result<(), String> {
     let mut rest = input;
     let mut zone = "";

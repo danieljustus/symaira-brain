@@ -1,0 +1,62 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "pull_embedding_mismatch_types",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: decode remote response: json: cannot unmarshal string into ChangesResponse.memories.0.embedding.0 of type float32\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[{\"id\":\"e1\",\"content\":\"a\",\"embedding\":[\"x\"],\"updated_at\":\"2026-10-10T08:00:00Z\"}],\"deleted\":[],\"server_time\":\"2026-10-20T12:00:00Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

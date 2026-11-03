@@ -357,7 +357,7 @@ fn normalize_cell(value: rusqlite::types::ValueRef<'_>) -> Value {
     match value {
         ValueRef::Null => Value::Null,
         ValueRef::Integer(number) => json!(number),
-        ValueRef::Real(number) => json!(number),
+        ValueRef::Real(number) => Value::String(format!("real:{:016x}", number.to_bits())),
         ValueRef::Blob(bytes) => {
             use std::fmt::Write as _;
             let mut hex = String::from("hex:");
@@ -582,7 +582,12 @@ fn frozen_go_observations_replay_natively() {
     for path in names {
         fixtures.push(serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap());
     }
-    assert!(fixtures.len() > 100, "fixture set went missing");
+    // MEMORY_SYNC_ONLY=<substring> narrows a debugging run to matching scenarios.
+    let only = std::env::var("MEMORY_SYNC_ONLY").unwrap_or_default();
+    if only.is_empty() {
+        assert!(fixtures.len() > 100, "fixture set went missing");
+    }
+    fixtures.retain(|fixture| fixture["name"].as_str().unwrap().contains(&only));
     let scratch = tempfile::tempdir().unwrap();
     let queue = Mutex::new(fixtures.iter().collect::<Vec<_>>());
     let problems = Mutex::new(Vec::new());

@@ -12,7 +12,7 @@ HOME/XDG root. The observation records every HTTP request the binary sent
 because their nonces are random), stdout, stderr, the exit status and the
 database after the run. Only the frozen Go observations are oracle output.
 """
-import argparse, base64, gzip, hashlib, json, os, re, shutil, socket, sqlite3, subprocess, sys, threading, time
+import argparse, struct, base64, gzip, hashlib, json, os, re, shutil, socket, sqlite3, subprocess, sys, threading, time
 from datetime import datetime, timezone, timedelta
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
@@ -316,6 +316,46 @@ REFUSALS2 = [
 for i, r in enumerate(REFUSALS2):
     scen(f"url_{i:02d}", [step(["memory", "sync", "--remote", r, "--pull"], [])])
 
+# argument spellings, odd content, numbers and times ----------------------------
+scen("flag_single_dash_forms", [step(["memory", "sync", "-remote", "{base}", "-pull", "-json"], [resp(page([], [], T3))])])
+scen("flag_equals_forms", [step(["memory", "sync", "--remote={base}", "--pull=true", "--push=false", "--output=json"], [resp(page([], [], T3))])])
+scen("flag_global_json_first", [step(["--json", "memory", "sync", *R, "--pull"], [resp(page([], [], T3))])])
+scen("flag_output_table_explicit", [step(["memory", "sync", *R, "--pull", "--output", "table"], [resp(page([], [], T3))])])
+scen("flag_output_invalid", [step(["memory", "sync", *R, "--pull", "--output", "yaml"], [])])
+scen("flag_timeout_forms", [step(["memory", "sync", *R, "--pull", "--timeout=1m30s", *RJ], [resp(page([], [], T3))])])
+scen("flag_timeout_fraction", [step(["memory", "sync", *R, "--pull", "--timeout", "1.5s", *RJ], [resp(page([], [], T3))])])
+scen("flag_double_dash", [step(["memory", "sync", *R, "--", "extra"], [])])
+scen("flag_push_false_pull_false", [step(["memory", "sync", *R, "--pull=false", "--push=false", *RJ], [resp(page([], [], T3)), resp(json.dumps({"applied": 0}))])], SEED_BASIC)
+odd = "line1\n\ttab \u2028 \u2029 \u0001 <b>&amp;</b> \U0001f600 \u00e9 \"q\" \\ back"
+scen("push_odd_content", [step(["memory", "sync", *R, "--push", *RJ], [resp(json.dumps({"applied": 1}))])], [
+    mem_sql("odd-1", odd, gotime(T1), metadata=json.dumps({"k\u00e9": "v\u2028<>&", "q\"": "\\"}))])
+scen("push_float_importance", [step(["memory", "sync", *R, "--push", *RJ], [resp(json.dumps({"applied": 5}))])], [
+    f"INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at, importance, decay_factor) VALUES ('f{i}', 'x', 'global', '{{}}', '[]', '{gotime(T1)}', '{gotime(T1)}', {v}, {d})"
+    for i, (v, d) in enumerate([(1e-7, 1e21), (0.1 + 0.2, 0.30000000000000004), (123456789.123456789, 2.0), (1e21, 1e-5), (0.0, 0.00001234)])])
+scen("pull_unicode_escapes", [step(["memory", "sync", *R, "--pull", *RJ], [resp(
+    '{"memories":[{"id":"u1","content":"\\ud83d\\ude00 \\ud800 \\u00e9 \\/ \\b\\f","scope":"global","metadata":{},"created_at":"2026-10-10T08:00:00Z","updated_at":"2026-10-10T08:00:00Z"}],"deleted":[],"server_time":"2026-10-20T12:00:00Z"}')])])
+scen("pull_time_forms", [step(["memory", "sync", *R, "--pull", *RJ], [resp(
+    '{"memories":[{"id":"t1","content":"a","updated_at":"2026-10-10T08:00:00.123456789Z","created_at":"2026-10-10T08:00:00+05:45","valid_from":null,"valid_to":"2026-10-10T08:00:00.1-00:30"},'
+    '{"id":"t2","content":"zero","updated_at":"0001-01-01T00:00:00Z"},{"id":"t3","content":"far","updated_at":"9999-12-31T23:59:59Z"}],"deleted":[{"id":"d1","deleted_at":"2026-10-11T00:00:00.5+01:00"}],"server_time":"2026-10-20T12:00:00.987654321+02:00"}')])])
+scen("pull_time_lowercase_invalid", [step(["memory", "sync", *R, "--pull"], [resp('{"memories":[{"id":"t1","content":"a","updated_at":"2026-10-10t08:00:00z"}],"deleted":[],"server_time":"2026-10-20T12:00:00Z"}')])])
+scen("pull_duplicate_keys_and_case", [step(["memory", "sync", *R, "--pull", *RJ], [resp(
+    '{"MEMORIES":[{"ID":"c1","Content":"case","UPDATED_AT":"2026-10-10T08:00:00Z","id":"c1b","content":"dup1","content":"dup2"}],"Deleted":[],"Server_Time":"2026-10-20T12:00:00Z"}')])])
+scen("pull_embedding_mismatch_types", [step(["memory", "sync", *R, "--pull"], [resp(
+    '{"memories":[{"id":"e1","content":"a","embedding":["x"],"updated_at":"2026-10-10T08:00:00Z"}],"deleted":[],"server_time":"2026-10-20T12:00:00Z"}')])])
+scen("pull_importance_string", [step(["memory", "sync", *R, "--pull"], [resp(
+    '{"memories":[{"id":"e1","content":"a","importance":"high","access_count":1.5,"updated_at":"2026-10-10T08:00:00Z"}],"deleted":[],"server_time":"2026-10-20T12:00:00Z"}')])])
+scen("pull_deleted_missing_time_zero", [step(["memory", "sync", *R, "--pull", *RJ], [resp('{"memories":[],"deleted":[{"id":"l-1"}],"server_time":"2026-10-20T12:00:00Z"}')])], SEED_BASIC)
+scen("pull_many_rows_one_page", [step(["memory", "sync", *R, "--pull", *RJ], [resp(page([rmem(f"b-{i}", f"bulk {i}", "2026-10-10T08:%02d:00Z" % (i % 60)) for i in range(120)], [], T3))])])
+scen("apply_counts_negative_and_float", [step(["memory", "sync", *R, "--push", *RJ], [resp('{"applied":-3,"deleted":2.5,"skipped":"x"}')])], SEED_BASIC)
+scen("apply_counts_null", [step(["memory", "sync", *R, "--push", *RJ], [resp("null")])], SEED_BASIC)
+scen("apply_counts_huge", [step(["memory", "sync", *R, "--push", *RJ], [resp('{"applied":99999999999999999999}')])], SEED_BASIC)
+scen("relay_stored_string", [step(["memory", "sync", *R, *RR, "--push"], [resp('{"stored":"3"}')], relay_passphrase=PASS)], SEED_BASIC)
+scen("relay_blob_null", [step(["memory", "sync", *R, *RR, "--pull", *RJ], [resp('{"blobs":[{"id":"x","updated_at":"2026-10-10T08:00:00Z","blob":null}],"server_time":"2026-10-20T12:00:00Z"}')])])
+scen("relay_legacy_payload", [step(["memory", "sync", *R, *RR, "--pull", *RJ], [resp(relay_page([]))])])
+scen("relay_tombstone_older_than_local", [step(["memory", "sync", *R, *RR, "--pull", *RJ], [resp(relay_page([
+    {"id": "tombstone:l-2", "updated_at": T1, "blob": relay_blob({"deleted": {"id": "l-2", "deleted_at": T1}})},
+    {"id": "l-1", "updated_at": T1, "blob": relay_blob({"memory": rmem("l-1", "same", T1)})}]))])], SEED_BASIC)
+
 REFUSALS = [
     "ftp://x", "example.test", "http://example.test", "http://example.test:8080/x", "localhost:80", "http://", "http:///x", "https://",
     "://x", "ht tp://x", "http://[::1", "http://[::1]:99999x", "http://a b/", "http://exa%mple.com", "http://a%zz.com/", "http://user:pw@host@x/", "http://us er@host/",
@@ -492,6 +532,8 @@ def dump_db(path):
     conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
     now = datetime.now(timezone.utc)
     def norm(v):
+        if isinstance(v, float):
+            return "real:" + struct.pack(">d", v).hex()
         if isinstance(v, bytes):
             return "hex:" + v.hex()
         if isinstance(v, str):
@@ -602,11 +644,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--go"); ap.add_argument("--rust"); ap.add_argument("--out"); ap.add_argument("--fixtures")
     ap.add_argument("--only", default="")
+    ap.add_argument("--missing", action="store_true", help="with --out: freeze only scenarios without a fixture")
     args = ap.parse_args()
     chosen = [s for s in S if args.only in s["name"]]
     if args.out:
         os.makedirs(args.out, exist_ok=True)
         for s in chosen:
+            if args.missing and os.path.exists(os.path.join(args.out, s["name"] + ".json")):
+                continue
             r = run_scenario(args.go, s, "go")
             json.dump(r, open(os.path.join(args.out, s["name"] + ".json"), "w"), indent=1, sort_keys=True, ensure_ascii=False)
             open(os.path.join(args.out, s["name"] + ".json"), "a").write("\n")

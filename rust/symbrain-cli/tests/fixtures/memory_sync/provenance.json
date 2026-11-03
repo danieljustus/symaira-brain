@@ -17,5 +17,12 @@
     "a bearer token with non-ASCII bytes: Go sends the bytes, the native HTTP stack refuses the header (error instead of a request)",
     "https certificate-verification failures use the native TLS stack's wording, not Go's x509 texts; trust anchors are the bundled web PKI roots, not the system store",
     "HTTP(S)_PROXY handling for non-loopback remotes follows the native HTTP stack's environment rules"
-  ]
+  ],
+  "normalizations": [
+    "ports -> {PORT}/{CLOSED}, scratch root -> {root}, Go goroutine traces -> <trace>",
+    "database timestamps within a day of the run -> <now> (local-clock trigger stamps)",
+    "database REAL cells -> real:<IEEE-754 bits hex> (exact comparison; applied by capture.py, and once by script to the first 58 frozen files, whose floats were Python reprs of the sqlite values)",
+    "relay request bodies: each blob replaced by its decrypted payload (random salt/nonce)"
+  ],
+  "scenario_count": 201
 }
