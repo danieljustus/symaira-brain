@@ -86,6 +86,7 @@ pub(super) fn run_set(
         entities,
         staged,
         quantize_binary: config.quantize_binary,
+        prefilter: config.prefilter,
         conflict: symbrain_memory::ConflictConfig {
             enabled: config.conflict_enabled,
             contradiction_threshold: config.conflict_contradiction,

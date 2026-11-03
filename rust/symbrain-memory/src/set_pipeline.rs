@@ -40,6 +40,8 @@ pub struct CliSet {
     pub staged: bool,
     /// `hybrid_search.quantize_to_binary`.
     pub quantize_binary: bool,
+    /// `hybrid_search.prefilter_enabled`.
+    pub prefilter: bool,
     /// The write-path conflict configuration.
     pub conflict: ConflictConfig,
 }
@@ -315,7 +317,7 @@ impl Pipeline<'_> {
             created_at: row.created_at,
             importance: 0.0,
         };
-        let resolutions = match conflict::check(self.conn, &self.request.conflict, &new, log) {
+        let resolutions = match conflict::check(self.conn, &self.request.conflict, &new, self.request.prefilter, log) {
             Ok(resolutions) => resolutions,
             Err(error) => {
                 log.warn(

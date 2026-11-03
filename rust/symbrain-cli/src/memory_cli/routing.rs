@@ -38,11 +38,6 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if verb == "set" && kind::normalize(&parsed.text("kind")).is_none() {
         return false;
     }
-    // Valid operations still retain configuration/DB and governed-write gates
-    // until their source-bound process contracts are completed.
-    if verb == "search" && super::config::load().prefilter {
-        return true;
-    }
     let path = resolve_db_path(Some(&parsed.raw("db")));
     // A database that does not exist yet (or is not a regular file) has no
     // rows to hydrate: the native opener creates it with the shipped modes or

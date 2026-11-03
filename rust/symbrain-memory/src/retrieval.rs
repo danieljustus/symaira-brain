@@ -40,6 +40,8 @@ const RECENCY_HALF_LIFE: f64 = 30.0;
 struct Candidate {
     id: String,
     embedding_dim: i64,
+    /// Sign-bit vector; `None` for a NULL column.
+    binary: Option<Vec<u8>>,
 }
 
 /// Runs the shipped retrieval pipeline for a prepared query vector.
@@ -56,6 +58,26 @@ pub(crate) fn search(
     search_checked(conn, query_vector, query_source, scope, limit, |_| true)
 }
 
+/// `search` with the `hybrid_search.prefilter_enabled` Hamming prefilter.
+pub(crate) fn search_prefiltered(
+    conn: &Connection,
+    query_vector: &[f32],
+    query_source: &str,
+    scope: &str,
+    limit: usize,
+    prefilter: bool,
+) -> Result<Vec<SearchHit>, StoreError> {
+    search_with(
+        conn,
+        query_vector,
+        query_source,
+        scope,
+        limit,
+        prefilter,
+        |_| true,
+    )
+}
+
 /// Checks the caller's read boundary before recording retrieval feedback.
 pub(crate) fn search_checked(
     conn: &Connection,
@@ -63,6 +85,70 @@ pub(crate) fn search_checked(
     query_source: &str,
     scope: &str,
     limit: usize,
+    admitted: impl Fn(&SearchRow) -> bool,
+) -> Result<Vec<SearchHit>, StoreError> {
+    search_with(conn, query_vector, query_source, scope, limit, false, admitted)
+}
+
+/// The shipped `prefilterCandidates`: with the prefilter on, keep the
+/// `max(4*limit, 64)` candidates closest in Hamming distance (ties keep the
+/// earlier candidate); a candidate without a binary vector disables it.
+fn prefilter_ids(candidates: &[Candidate], query_vector: &[f32], limit: usize) -> Vec<String> {
+    let all = || candidates.iter().map(|c| c.id.clone()).collect::<Vec<_>>();
+    if candidates.is_empty() {
+        return all();
+    }
+    let keep = limit.saturating_mul(4).max(64);
+    // At or below the cut-off the shipped selection returns every index in
+    // candidate order, without ranking by distance.
+    if candidates.len() <= keep {
+        return all();
+    }
+    let mut binaries = Vec::with_capacity(candidates.len());
+    for candidate in candidates {
+        match &candidate.binary {
+            Some(bytes) => binaries.push(bytes.as_slice()),
+            None => return all(),
+        }
+    }
+    let query = crate::cli_write::sign_bits(query_vector);
+    let distance = |other: &[u8]| -> usize {
+        if other.len() != query.len() {
+            return 768;
+        }
+        query
+            .chunks_exact(8)
+            .zip(other.chunks_exact(8))
+            .map(|(left, right)| {
+                left.iter()
+                    .zip(right)
+                    .map(|(a, b)| (a ^ b).count_ones() as usize)
+                    .sum::<usize>()
+            })
+            .sum()
+    };
+    let mut order: Vec<(usize, usize)> = binaries
+        .iter()
+        .enumerate()
+        .map(|(index, bytes)| (distance(bytes), index))
+        .collect();
+    // (distance, index) is a total order, so a stable selection of the
+    // smallest `keep` pairs equals the shipped insertion selection.
+    order.sort_unstable();
+    order.truncate(keep);
+    order
+        .into_iter()
+        .map(|(_, index)| candidates[index].id.clone())
+        .collect()
+}
+
+fn search_with(
+    conn: &Connection,
+    query_vector: &[f32],
+    query_source: &str,
+    scope: &str,
+    limit: usize,
+    prefilter: bool,
     admitted: impl Fn(&SearchRow) -> bool,
 ) -> Result<Vec<SearchHit>, StoreError> {
     let buckets = buckets_for(query_vector)?;
@@ -75,10 +161,14 @@ pub(crate) fn search_checked(
         return Ok(Vec::new());
     }
 
-    let ids: Vec<String> = candidates
-        .into_iter()
-        .map(|candidate| candidate.id)
-        .collect();
+    let ids: Vec<String> = if prefilter {
+        prefilter_ids(&candidates, query_vector, limit)
+    } else {
+        candidates
+            .into_iter()
+            .map(|candidate| candidate.id)
+            .collect()
+    };
     let mut hits = hydrate(conn, &ids, query_vector)?;
     score_and_rank(&mut hits, query_vector);
     hits.truncate(limit);
@@ -140,6 +230,10 @@ fn candidates(
             Ok(Candidate {
                 id: row.get(0)?,
                 embedding_dim: row.get::<_, Option<i64>>(2)?.unwrap_or(0),
+                binary: match row.get_ref(1)? {
+                    rusqlite::types::ValueRef::Null => None,
+                    other => Some(other.as_bytes().map(<[u8]>::to_vec).unwrap_or_default()),
+                },
             })
         })?;
         for row in rows {

@@ -150,6 +150,7 @@ pub(crate) fn check(
     conn: &Connection,
     config: &ConflictConfig,
     new: &NewMemory<'_>,
+    prefilter: bool,
     log: &mut crate::slog::LogSink<'_>,
 ) -> Result<Vec<Resolution>, String> {
     let config = config.normalized();
@@ -171,9 +172,15 @@ pub(crate) fn check(
         }]);
     }
     let limit = usize::try_from(config.max_candidates).unwrap_or(10);
-    let results =
-        crate::retrieval::search(conn, new.embedding, new.embedding_source, new.scope, limit)
-            .map_err(|error| format!("conflict: candidate recall: {error}"))?;
+    let results = crate::retrieval::search_prefiltered(
+        conn,
+        new.embedding,
+        new.embedding_source,
+        new.scope,
+        limit,
+        prefilter,
+    )
+    .map_err(|error| format!("conflict: candidate recall: {error}"))?;
 
     let near_dup = narrow(config.near_dup_threshold);
     let contradiction = narrow(config.contradiction_threshold);
