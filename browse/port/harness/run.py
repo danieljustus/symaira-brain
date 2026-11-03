@@ -478,6 +478,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.native and args.native_targets:
         parser.error("use either --native macos or --native-targets, not both")
+    if args.suite in RETIRED_SUITES:
+        parser.error(f"suite {args.suite!r} is retired: {RETIRED_SUITES[args.suite]}")
     native = args.native_targets or args.native == "macos"
     if args.repeat < 1 or args.repeat > 1000:
         parser.error("--repeat must be between 1 and 1000")
@@ -485,8 +487,6 @@ def main() -> int:
     env = os.environ.copy()
     env.update({"CGO_ENABLED": "0", "GOTOOLCHAIN": "go1.26.6"})
     external_environment(env)
-    if args.suite in RETIRED_SUITES:
-        parser.error(f"suite {args.suite!r} is retired: {RETIRED_SUITES[args.suite]}")
     if args.suite == "all":
         run_all_suites(root, env, args)
         print("all harness suites passed")
