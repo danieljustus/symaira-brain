@@ -1038,7 +1038,7 @@ fn snapshot(path: &std::path::Path) -> Vec<String> {
     let wall = Regex::new(r#"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}[^,"]*"#).unwrap();
     let mut mapping: Vec<String> = Vec::new();
     let mut lines = Vec::new();
-    let mut norm = |text: String, mapping: &mut Vec<String>| -> String {
+    let norm = |text: String, mapping: &mut Vec<String>| -> String {
         let mut text = observed
             .replace_all(&text, r#""observed_at":"<T>""#)
             .into_owned();

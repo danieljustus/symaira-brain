@@ -3,6 +3,7 @@
 //! quoted like the text handler does when they contain spaces, `=`, quotes
 //! or non-printable characters.
 
+use std::fmt::Write as _;
 use std::io::Write;
 
 fn needs_quoting(value: &str) -> bool {
@@ -21,7 +22,9 @@ fn quote(value: &str) -> String {
             '\n' => out.push_str("\\n"),
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
-            c if c.is_control() => out.push_str(&format!("\\x{:02x}", c as u32)),
+            c if c.is_control() => {
+                let _ = write!(out, "\\x{:02x}", c as u32);
+            }
             c => out.push(c),
         }
     }

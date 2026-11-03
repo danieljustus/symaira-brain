@@ -63,6 +63,7 @@ struct Revoke {
 }
 
 impl Server {
+    #[allow(clippy::too_many_lines)] // Mirrors the shipped handler step by step.
     pub(super) fn set(&self, body: &[u8], claims: &Claims) -> wire::Reply {
         let Some(input) = sync_decode::set_args(body) else {
             return wire::error_logged(
@@ -119,12 +120,11 @@ impl Server {
             return wire::unsupported();
         }
         let embedding = self.embed(&content);
-        if self.options.conflict_enabled && !input.working {
-            match self.conflict_free(&content, &scope, &embedding) {
-                Some(true) => {}
-                Some(false) => return wire::unsupported(),
-                None => {}
-            }
+        if self.options.conflict_enabled
+            && !input.working
+            && self.conflict_free(&content, &scope, &embedding) == Some(false)
+        {
+            return wire::unsupported();
         }
         let request = DirectWrite {
             content,

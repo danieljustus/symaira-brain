@@ -165,6 +165,7 @@ fn float(value: &Value, target: &mut f64) -> Option<()> {
     }
 }
 
+#[allow(clippy::too_many_lines)] // One arm per field of the shipped struct.
 fn memory(value: &Value) -> Option<PulledMemory> {
     // A JSON null element is a nil pointer in Go and panics the handler;
     // anything else is a type error. Both are refused here.
@@ -175,9 +176,9 @@ fn memory(value: &Value) -> Option<PulledMemory> {
     for (key, value) in map {
         let key = fold(key);
         match key.as_str() {
-            "id" => text(&value, &mut memory.id)?,
-            "content" => text(&value, &mut memory.content)?,
-            "scope" => text(&value, &mut memory.scope)?,
+            "id" => text(value, &mut memory.id)?,
+            "content" => text(value, &mut memory.content)?,
+            "scope" => text(value, &mut memory.scope)?,
             "metadata" => match &value {
                 Value::Null => memory.metadata = None,
                 Value::Object(map) => {
@@ -218,16 +219,16 @@ fn memory(value: &Value) -> Option<PulledMemory> {
                 }
                 _ => return None,
             },
-            "embedding_source" => text(&value, &mut memory.embedding_source)?,
-            "embedding_model" => text(&value, &mut memory.embedding_model)?,
-            "embedding_quantization" => text(&value, &mut memory.embedding_quantization)?,
-            "content_hash" => text(&value, &mut memory.content_hash)?,
-            "created_at" => instant(&value, &mut memory.created_at)?,
-            "updated_at" => instant(&value, &mut memory.updated_at)?,
-            "created_by" => text(&value, &mut memory.created_by)?,
-            "updated_by" => text(&value, &mut memory.updated_by)?,
-            "created_session" => text(&value, &mut memory.created_session)?,
-            "updated_session" => text(&value, &mut memory.updated_session)?,
+            "embedding_source" => text(value, &mut memory.embedding_source)?,
+            "embedding_model" => text(value, &mut memory.embedding_model)?,
+            "embedding_quantization" => text(value, &mut memory.embedding_quantization)?,
+            "content_hash" => text(value, &mut memory.content_hash)?,
+            "created_at" => instant(value, &mut memory.created_at)?,
+            "updated_at" => instant(value, &mut memory.updated_at)?,
+            "created_by" => text(value, &mut memory.created_by)?,
+            "updated_by" => text(value, &mut memory.updated_by)?,
+            "created_session" => text(value, &mut memory.created_session)?,
+            "updated_session" => text(value, &mut memory.updated_session)?,
             "entities" => match &value {
                 Value::Null => {}
                 Value::Array(items) => {
@@ -240,25 +241,25 @@ fn memory(value: &Value) -> Option<PulledMemory> {
                 }
                 _ => return None,
             },
-            "consolidation_status" => text(&value, &mut memory.consolidation_status)?,
-            "consolidated_into_id" => text(&value, &mut memory.consolidated_into_id)?,
-            "importance" => float(&value, &mut memory.importance)?,
-            "valid_from" => optional_instant(&value, &mut memory.valid_from)?,
-            "valid_to" => optional_instant(&value, &mut memory.valid_to)?,
-            "superseded_by" => text(&value, &mut memory.superseded_by)?,
-            "kind" => text(&value, &mut memory.kind)?,
-            "review_status" => text(&value, &mut memory.review_status)?,
-            "decay_factor" => float(&value, &mut memory.decay_factor)?,
-            "retired_at" => optional_instant(&value, &mut memory.retired_at)?,
-            "tier" => text(&value, &mut memory.tier)?,
-            "expires_at" => optional_instant(&value, &mut memory.expires_at)?,
+            "consolidation_status" => text(value, &mut memory.consolidation_status)?,
+            "consolidated_into_id" => text(value, &mut memory.consolidated_into_id)?,
+            "importance" => float(value, &mut memory.importance)?,
+            "valid_from" => optional_instant(value, &mut memory.valid_from)?,
+            "valid_to" => optional_instant(value, &mut memory.valid_to)?,
+            "superseded_by" => text(value, &mut memory.superseded_by)?,
+            "kind" => text(value, &mut memory.kind)?,
+            "review_status" => text(value, &mut memory.review_status)?,
+            "decay_factor" => float(value, &mut memory.decay_factor)?,
+            "retired_at" => optional_instant(value, &mut memory.retired_at)?,
+            "tier" => text(value, &mut memory.tier)?,
+            "expires_at" => optional_instant(value, &mut memory.expires_at)?,
             "access_count" => match &value {
                 Value::Null => {}
                 Value::Number(number) => memory.access_count = number.as_i64()?,
                 _ => return None,
             },
-            "last_access" => optional_instant(&value, &mut memory.last_access)?,
-            "prev_access" => optional_instant(&value, &mut memory.prev_access)?,
+            "last_access" => optional_instant(value, &mut memory.last_access)?,
+            "prev_access" => optional_instant(value, &mut memory.prev_access)?,
             "evidence" => match &value {
                 Value::Null => {}
                 Value::Array(items) => {

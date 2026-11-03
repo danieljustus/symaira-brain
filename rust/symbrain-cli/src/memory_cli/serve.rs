@@ -140,9 +140,9 @@ fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<(i64, Option<OsStr
             match flag_integer::parse_integer(&value) {
                 Ok(number) => port = number,
                 Err(reason) => {
-                    let _ = write!(
+                    let _ = writeln!(
                         stderr,
-                        "invalid value {} for flag -port: {reason}\n",
+                        "invalid value {} for flag -port: {reason}",
                         format_go_quoted(&os_from(&value))
                     );
                     usage(stderr);
@@ -199,7 +199,7 @@ fn build(store: Store) -> Result<Arc<Server>, String> {
             .unwrap_or(10),
         working_ttl: go_duration(&cfg.working_ttl)
             .filter(|ttl| !ttl.is_zero())
-            .unwrap_or(Duration::from_secs(24 * 3600)),
+            .unwrap_or(Duration::from_hours(24)),
     };
     let generator = EmbeddingGenerator::new(&cfg.ollama_url, &cfg.ollama_model);
     Server::new(Arc::new(store), secret, generator, options)
@@ -280,7 +280,7 @@ fn jwt_secret(cfg: &config::Config) -> Result<Vec<u8>, String> {
         && let Some(path) = &path
         && let Ok(data) = std::fs::read(path)
     {
-        secret = flags::go_string(&data).trim().to_owned();
+        flags::go_string(&data).trim().clone_into(&mut secret);
     }
     if secret.is_empty() {
         let Some(path) = path else {
@@ -288,7 +288,11 @@ fn jwt_secret(cfg: &config::Config) -> Result<Vec<u8>, String> {
         };
         let mut bytes = [0_u8; 32];
         getrandom_fill(&mut bytes)?;
-        secret = bytes.iter().map(|byte| format!("{byte:02x}")).collect();
+        secret = bytes
+            .iter()
+            .flat_map(|byte| [byte >> 4, byte & 0x0f])
+            .map(|nibble| char::from_digit(u32::from(nibble), 16).unwrap_or('0'))
+            .collect();
         persist(&path, &secret)
             .map_err(|error| format!("failed to generate JWT secret: {error}"))?;
     }

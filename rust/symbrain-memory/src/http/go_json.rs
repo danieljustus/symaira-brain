@@ -4,6 +4,8 @@
 //! reproduces them. The decoders in `sync_decode` own *whether* a body is
 //! accepted; this module only explains a rejection.
 
+use std::fmt::Write as _;
+
 /// A decoded JSON value that keeps object member order, which decides which
 /// of several type errors Go reports first.
 #[derive(Debug, Clone)]
@@ -448,10 +450,7 @@ impl Parser<'_> {
 /// Go `checkValid`: the first syntax error of the document, if any.
 pub(super) fn syntax_error(input: &[u8]) -> Option<String> {
     let mut check = Check { input, at: 0 };
-    match check.document() {
-        Ok(()) => None,
-        Err(message) => Some(message),
-    }
+    check.document().err()
 }
 
 struct Check<'a> {
@@ -595,7 +594,7 @@ impl Check<'_> {
                     match self.peek() {
                         None => return Err(EOF.to_owned()),
                         Some(b'b' | b'f' | b'n' | b'r' | b't' | b'\\' | b'/' | b'"') => {
-                            self.at += 1
+                            self.at += 1;
                         }
                         Some(b'u') => {
                             self.at += 1;
@@ -701,7 +700,7 @@ pub(super) fn go_quote(text: &str) -> String {
             '\u{c}' => out.push_str("\\f"),
             '\u{b}' => out.push_str("\\v"),
             c if (c as u32) < 0x20 || c as u32 == 0x7f => {
-                out.push_str(&format!("\\x{:02x}", c as u32));
+                let _ = write!(out, "\\x{:02x}", c as u32);
             }
             c => out.push(c),
         }

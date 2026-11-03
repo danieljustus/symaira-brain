@@ -175,9 +175,7 @@ impl Server {
         }
         let (parts, body) = request.into_parts();
         let mut raw = Vec::new();
-        let reads_body = BODY_ROUTES.contains(&path)
-            && (parts.method == Method::POST
-                || (path == "/api/sync/relay" && parts.method == Method::POST));
+        let reads_body = BODY_ROUTES.contains(&path) && parts.method == Method::POST;
         if reads_body {
             let bounded = http_body_util::Limited::new(body, MAX_BODY).collect();
             match tokio::time::timeout(Duration::from_secs(30), bounded).await {
@@ -220,11 +218,11 @@ impl Server {
         claims: &Claims,
     ) -> wire::Reply {
         let allowed = match path {
-            "/api/list" | "/api/stats" => true,
             "/api/rules" | "/api/entities" | "/api/get" => method == Method::GET,
             "/api/search" | "/api/set" | "/api/token/revoke" => method == Method::POST,
             "/api/delete" => method == Method::DELETE || method == Method::POST,
-            // The sync handlers answer their own method errors.
+            // `/api/list`, `/api/stats` and the sync handlers (which answer
+            // their own method errors) accept any method here.
             _ => true,
         };
         if !allowed {

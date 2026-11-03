@@ -26,6 +26,7 @@ mod wire;
 mod write;
 
 /// Options explicitly owned by the caller's memory runtime snapshot.
+#[allow(clippy::struct_excessive_bools)] // Independent switches of the shipped config.
 pub struct Options {
     /// Version returned by the public status endpoint.
     pub version: String,
@@ -62,7 +63,7 @@ impl Default for Options {
             conflict_enabled: false,
             conflict_threshold: 0.80,
             conflict_candidates: 10,
-            working_ttl: std::time::Duration::from_secs(24 * 3600),
+            working_ttl: std::time::Duration::from_hours(24),
         }
     }
 }

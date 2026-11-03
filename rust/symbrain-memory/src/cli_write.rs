@@ -66,6 +66,7 @@ impl Store {
 
     /// The write shared by the CLI and the HTTP server; `extra` carries the
     /// server-only session, working-tier TTL and precomputed embedding.
+    #[allow(clippy::too_many_lines)] // One transaction: row, audit, entities, kind.
     pub(crate) fn set_direct_inner(
         &self,
         request: &DirectWrite,

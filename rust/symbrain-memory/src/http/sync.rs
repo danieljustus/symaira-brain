@@ -40,6 +40,7 @@ fn policy_passes(row: &SyncRow, params: &BTreeMap<String, String>) -> bool {
 }
 
 impl Server {
+    #[allow(clippy::too_many_lines)] // One request: parse, page, filter, render.
     pub(super) fn sync_changes(
         &self,
         method: &Method,
@@ -93,9 +94,8 @@ impl Server {
         let full = params
             .get("include_embeddings")
             .is_some_and(|value| value == "true");
-        let rows = match self.store.sync_changes(since, limit + 1, full) {
-            Ok(rows) => rows,
-            Err(_) => return wire::error(500, "INTERNAL_ERROR", "Failed to fetch changes"),
+        let Ok(rows) = self.store.sync_changes(since, limit + 1, full) else {
+            return wire::error(500, "INTERNAL_ERROR", "Failed to fetch changes");
         };
         let mut rows = if ["max_sensitivity", "min_sharing_level", "client_id"]
             .iter()
@@ -118,9 +118,8 @@ impl Server {
         for row in &mut rows {
             row.redact_pii();
         }
-        let deleted = match self.store.deleted_since(since) {
-            Ok(deleted) => deleted,
-            Err(_) => return wire::error(500, "INTERNAL_ERROR", "Failed to fetch tombstones"),
+        let Ok(deleted) = self.store.deleted_since(since) else {
+            return wire::error(500, "INTERNAL_ERROR", "Failed to fetch tombstones");
         };
         let mut members = Members::default();
         members.raw(
@@ -262,11 +261,8 @@ impl Server {
             {
                 limit = value;
             }
-            let blobs = match self.store.relay_blobs_since(since, limit) {
-                Ok(blobs) => blobs,
-                Err(_) => {
-                    return wire::error(500, "INTERNAL_ERROR", "Failed to fetch relay blobs");
-                }
+            let Ok(blobs) = self.store.relay_blobs_since(since, limit) else {
+                return wire::error(500, "INTERNAL_ERROR", "Failed to fetch relay blobs");
             };
             let rendered = blobs
                 .iter()

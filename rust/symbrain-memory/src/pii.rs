@@ -23,6 +23,7 @@ struct Pattern {
     re: Regex,
 }
 
+#[allow(clippy::too_many_lines)] // The shipped pattern table, in order.
 fn patterns() -> &'static [Pattern] {
     static PATTERNS: OnceLock<Vec<Pattern>> = OnceLock::new();
     PATTERNS.get_or_init(|| {

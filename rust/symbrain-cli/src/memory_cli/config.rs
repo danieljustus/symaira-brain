@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use super::config_schema::{FIELDS, Kind};
 use super::config_value;
 
+#[allow(clippy::struct_excessive_bools)] // Independent switches of the shipped config.
 pub(super) struct Config {
     pub database: OsString,
     pub ollama_url: String,
