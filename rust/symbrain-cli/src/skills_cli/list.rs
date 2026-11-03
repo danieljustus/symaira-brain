@@ -11,7 +11,7 @@ use symbrain_skills::metadata::{self, Options as MetadataOptions, Record, read_e
 
 use super::env::Env;
 use super::flags::{self, Verb};
-use super::{cleaned, finish, json_line, or_dash};
+use super::{finish, json_line, or_dash};
 
 #[derive(Debug, Serialize)]
 struct Entry {
@@ -43,7 +43,8 @@ pub(super) fn run(
         return code;
     }
     let env = Env::load();
-    let (entries, issues) = list_library(&cleaned(&env.cfg.library_dir));
+    // `os.ReadDir` resolves the raw configured path (no lexical clean).
+    let (entries, issues) = list_library(&env.cfg.library_dir);
     let options = MetadataOptions {
         events: read_events_log(&env.log_path),
         log_path: env.log_path.clone(),

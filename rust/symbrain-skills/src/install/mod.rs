@@ -9,6 +9,7 @@ mod event;
 mod event_decode;
 mod lock;
 mod marker;
+mod marker_go;
 mod modes;
 mod ops;
 mod render_status;

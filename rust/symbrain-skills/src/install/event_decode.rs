@@ -263,10 +263,9 @@ fn value_end(bytes: &[u8], start: usize) -> usize {
         }
         _ => {
             let mut index = start;
-            while bytes
-                .get(index)
-                .is_some_and(|byte| !matches!(byte, b' ' | b'\t' | b'\n' | b'\r' | b',' | b'}' | b']'))
-            {
+            while bytes.get(index).is_some_and(|byte| {
+                !matches!(byte, b' ' | b'\t' | b'\n' | b'\r' | b',' | b'}' | b']')
+            }) {
                 index += 1;
             }
             index
@@ -446,8 +445,9 @@ mod tests {
 
     #[test]
     fn go_unmarshal_rules_for_known_fields() {
-        let event = decode(r#"{"TS":"a","ts":"b","ſkill":"x","tarGet":"t","outcome":null}"#.as_bytes())
-            .expect("decodes");
+        let event =
+            decode(r#"{"TS":"a","ts":"b","ſkill":"x","tarGet":"t","outcome":null}"#.as_bytes())
+                .expect("decodes");
         assert_eq!(event.ts, "b");
         assert_eq!(event.skill, "x");
         assert_eq!(event.target, "t");
@@ -468,7 +468,11 @@ mod tests {
             b"{\"ts\":\"a\nb\"}",
             b"\xc2\xa0{}",
         ] {
-            assert!(decode(skipped).is_none(), "{}", String::from_utf8_lossy(skipped));
+            assert!(
+                decode(skipped).is_none(),
+                "{}",
+                String::from_utf8_lossy(skipped)
+            );
         }
         // Unknown members of any shape are ignored.
         assert!(decode(br#"{"x":[{"y":1}],"ts":"a"}"#).is_some());
@@ -478,8 +482,9 @@ mod tests {
     fn invalid_utf8_and_surrogates_become_replacement_characters() {
         let event = decode(b"{\"ts\":\"\xff\xed\xa0\x80\xe3\x81\"}").expect("decodes");
         assert_eq!(event.ts, "\u{fffd}".repeat(6));
-        let event = decode(br#"{"ts":"\ud800","event":"\ud83d\ude00","skill":"\udc00x\ud800\u0041"}"#)
-            .expect("decodes");
+        let event =
+            decode(br#"{"ts":"\ud800","event":"\ud83d\ude00","skill":"\udc00x\ud800\u0041"}"#)
+                .expect("decodes");
         assert_eq!(event.ts, "\u{fffd}");
         assert_eq!(event.event, "\u{1f600}");
         assert_eq!(event.skill, "\u{fffd}x\u{fffd}A");
@@ -488,7 +493,12 @@ mod tests {
     #[test]
     fn nesting_limit_matches_the_go_scanner() {
         let nested = |depth: usize| {
-            format!("{{\"x\":{}{}}}", "[".repeat(depth - 1), "]".repeat(depth - 1)).into_bytes()
+            format!(
+                "{{\"x\":{}{}}}",
+                "[".repeat(depth - 1),
+                "]".repeat(depth - 1)
+            )
+            .into_bytes()
         };
         assert!(decode(&nested(MAX_DEPTH)).is_some());
         assert!(decode(&nested(MAX_DEPTH + 1)).is_none());

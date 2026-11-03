@@ -9,6 +9,12 @@ use std::process::{Command, Output};
 
 use tempfile::TempDir;
 
+mod skills_native_record;
+
+fn expect(root: &TempDir, label: &str, command: &mut Command) -> Output {
+    skills_native_record::expect(label, command, root.path())
+}
+
 fn command(root: &TempDir, args: &[&str]) -> Command {
     let home = root.path().join("home");
     let config = root.path().join("config");
@@ -54,16 +60,6 @@ fn event(ts: &str, skill: &str, target: &str) -> String {
     format!(
         r#"{{"ts":"{ts}","event":"install","skill":"{skill}","target":"{target}","outcome":"ok"}}"#
     )
-}
-
-fn assert_go_fallback(output: &Output, label: &str) {
-    assert_eq!(output.status.code(), Some(1), "{label}");
-    assert!(output.stdout.is_empty(), "{label}");
-    assert!(
-        String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-        "{label}: {:?}",
-        output.stderr
-    );
 }
 
 #[test]
@@ -191,7 +187,7 @@ fn json_escapes_html_and_line_separators_like_go() {
 }
 
 #[test]
-fn undecidable_lines_and_flags_keep_go_fallback() {
+fn undecidable_lines_and_flags_are_native() {
     for (label, line) in [
         ("upper-case key", r#"{"TS":"x","event":"e","outcome":"ok"}"#),
         ("duplicate key", r#"{"ts":"a","ts":"b","outcome":"ok"}"#),
@@ -202,7 +198,8 @@ fn undecidable_lines_and_flags_keep_go_fallback() {
     ] {
         let root = TempDir::new().unwrap();
         write_log(&root, "events.jsonl", &[line]);
-        assert_go_fallback(&run(&root, &["skills", "log", "--json"]), label);
+        let mut log = command(&root, &["skills", "log", "--json"]);
+        expect(&root, &format!("log_exact/line/{label}"), &mut log);
     }
     let root = TempDir::new().unwrap();
     write_log(
@@ -220,7 +217,12 @@ fn undecidable_lines_and_flags_keep_go_fallback() {
         &["skills", "log", "--skill"],
         &["skills", "log", "--", "--limit", "1"],
     ] {
-        assert_go_fallback(&run(&root, args), &args.join(" "));
+        let mut log = command(&root, args);
+        expect(
+            &root,
+            &format!("log_exact/args/{}", args.join(" ")),
+            &mut log,
+        );
     }
 }
 
@@ -360,7 +362,7 @@ mod posix {
     }
 
     #[test]
-    fn unclean_home_error_text_stays_on_go() {
+    fn unclean_home_error_text_is_native() {
         let root = TempDir::new().unwrap();
         std::fs::create_dir_all(entry(&root, "events.jsonl")).unwrap();
         let doubled = root
@@ -369,20 +371,16 @@ mod posix {
             .display()
             .to_string()
             .replace("/home", "//home");
-        let output = command(&root, &["skills", "log"])
-            .env("HOME", doubled)
-            .output()
-            .unwrap();
-        assert_go_fallback(&output, "doubled slash home");
+        let mut log = command(&root, &["skills", "log"]);
+        log.env("HOME", doubled);
+        expect(&root, "log_exact/doubled_slash_home", &mut log);
     }
 
     #[test]
-    fn home_with_dot_dot_stays_on_go() {
+    fn home_with_dot_dot_is_native() {
         let root = TempDir::new().unwrap();
-        let output = command(&root, &["skills", "log"])
-            .env("HOME", root.path().join("home/../home"))
-            .output()
-            .unwrap();
-        assert_go_fallback(&output, "dot-dot home");
+        let mut log = command(&root, &["skills", "log"]);
+        log.env("HOME", root.path().join("home/../home"));
+        expect(&root, "log_exact/dot_dot_home", &mut log);
     }
 }

@@ -8,6 +8,12 @@ use std::process::{Command, Output};
 
 use tempfile::TempDir;
 
+mod skills_native_record;
+
+fn expect(root: &TempDir, label: &str, command: &mut Command) -> Output {
+    skills_native_record::expect(label, command, root.path())
+}
+
 fn command(root: &TempDir, args: &[&str]) -> Command {
     let home = root.path().join("home");
     let config = root.path().join("config");
@@ -245,23 +251,19 @@ fn config_file_targets_variant_is_ignored_like_go() {
 }
 
 #[test]
-fn unknown_flag_or_scope_and_missing_home_keep_go_fallback() {
+fn unknown_flag_or_scope_and_missing_home_are_native() {
     let root = TempDir::new().unwrap();
     for args in [
         &["skills", "targets", "--bogus"][..],
         &["skills", "targets", "--scope", "team"][..],
     ] {
-        let output = run(&root, args);
-        assert_eq!(output.status.code(), Some(1), "{args:?}");
-        assert!(output.stdout.is_empty());
-        assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+        let mut targets = command(&root, args);
+        expect(&root, &format!("targets/{}", args.join(" ")), &mut targets);
     }
     #[cfg(unix)]
     {
         let mut missing_home = command(&root, &["skills", "targets"]);
-        let output = missing_home.env_remove("HOME").output().unwrap();
-        assert_eq!(output.status.code(), Some(1));
-        assert!(output.stdout.is_empty());
-        assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+        missing_home.env_remove("HOME");
+        expect(&root, "targets/missing_home", &mut missing_home);
     }
 }

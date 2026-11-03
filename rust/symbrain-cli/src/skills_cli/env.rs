@@ -216,7 +216,8 @@ fn load_config(defaults: &Config, project_dir: Option<&Path>) -> Config {
 /// Whether a `SYMSKILLS_*` variable is set or a config source is anything but
 /// verifiably absent. Go's bytes carry no #621 render extension then.
 fn has_custom_sources(project_dir: Option<&Path>) -> bool {
-    let absent = |path: &Path| matches!(fs::metadata(path), Err(error) if error.raw_os_error() == Some(2));
+    let absent =
+        |path: &Path| matches!(fs::metadata(path), Err(error) if error.raw_os_error() == Some(2));
     std::env::vars_os().any(|(name, _)| is_symskills_variable(&name))
         || !absent(&config_path())
         || project_dir.is_some_and(|dir| !absent(&join(dir, ".symskills.toml")))
@@ -244,7 +245,9 @@ impl Env {
         Self {
             cfg,
             customised: has_custom_sources(project.as_deref()),
-            home_dir: go_home().unwrap_or_default(),
+            // Go's `filepath.Join` cleans every derived path lexically, so the
+            // home is cleaned once instead of at each join.
+            home_dir: go_home().map(|home| clean(&home)).unwrap_or_default(),
             project_dir: project.unwrap_or_default(),
             log_path: log_path(),
             config_path: config_path(),

@@ -9,7 +9,6 @@ use cap_std::fs::Dir;
 use super::base::{manifest_hashes, read_manifest_for};
 use super::destination::read_link_at;
 use super::drift::{DriftKind, DriftSummary, classify_drift, file_hashes, summarize};
-use super::marker::MarkerState;
 use super::replace::open_trusted_dir;
 use super::status::{InstallStatus, StatusKind, StatusOptions};
 use crate::BundleLoader;
@@ -154,18 +153,6 @@ pub(super) fn conflict_error(drifts: &[super::drift::FileDrift]) -> String {
     format!("conflict in: {}", names.join(", "))
 }
 
-pub(super) fn go_json_error(error: String) -> String {
-    match error.as_str() {
-        "expected value at line 1 column 1" => {
-            "invalid character 'o' looking for beginning of value".to_owned()
-        }
-        "key must be a string at line 1 column 2" => {
-            "invalid character 'b' looking for beginning of object key string".to_owned()
-        }
-        _ => error,
-    }
-}
-
 pub(super) fn resolve_link(path: &Path) -> Option<PathBuf> {
     read_link_at(path).ok()
 }
@@ -191,46 +178,6 @@ pub(super) fn unmanaged(target: &str, name: &str, path: PathBuf) -> InstallStatu
         source_hash: None,
         allow_executable: None,
         error: None,
-        drift: Vec::new(),
-        render_status: None,
-        render_drift: Vec::new(),
-        render_error: None,
-    }
-}
-
-pub(super) fn marker_row(
-    target: &str,
-    name: &str,
-    path: PathBuf,
-    state: MarkerState,
-) -> InstallStatus {
-    let error = match state {
-        MarkerState::Missing => None,
-        MarkerState::Malformed(error) => Some(format!(
-            "reading marker {}: {}",
-            path.display(),
-            go_json_error(error),
-        )),
-        MarkerState::Rejected(error) => Some(format!("reading marker {}: {error}", path.display())),
-        MarkerState::UnsupportedSchema(version) => {
-            Some(format!("unsupported marker schema_version {version}"))
-        }
-        MarkerState::Valid(_) => None,
-    };
-    InstallStatus {
-        target: target.to_owned(),
-        name: name.to_owned(),
-        path,
-        status: if error.is_some() {
-            StatusKind::Stale
-        } else {
-            StatusKind::Unmanaged
-        },
-        mode: None,
-        installed_at: None,
-        source_hash: None,
-        allow_executable: None,
-        error,
         drift: Vec::new(),
         render_status: None,
         render_drift: Vec::new(),

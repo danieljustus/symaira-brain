@@ -1,0 +1,354 @@
+{
+ "lib_bad_utf8_frontmatter": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"parse SKILL.md frontmatter: yaml: invalid leading UTF-8 octet\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_bad_utf8_frontmatter"
+ },
+ "lib_bundle_mode0": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"open skill root: open $ROOT/data/symbrain/skills/library/bad: permission denied\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_bundle_mode0"
+ },
+ "lib_duplicate_key": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"parse SKILL.md frontmatter: yaml: unmarshal errors:\\n  line 2: mapping key \\\"name\\\" already defined at line 1\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_duplicate_key"
+ },
+ "lib_float_version_text": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"x\",\"description\":\"y\",\"path\":\"$ROOT/data/symbrain/skills/library/bad\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null},{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[]}\n",
+  "setup": "lib_float_version_text"
+ },
+ "lib_scalar_frontmatter": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"parse SKILL.md frontmatter: yaml: unmarshal errors:\\n  line 1: cannot unmarshal !!str `just a ...` into map[string]yaml.Node\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_scalar_frontmatter"
+ },
+ "lib_skill_md_abs_symlink": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: path escapes from parent\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_skill_md_abs_symlink"
+ },
+ "lib_skill_md_dangling_symlink": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: no such file or directory\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_skill_md_dangling_symlink"
+ },
+ "lib_skill_md_is_dir": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"SKILL.md must be a regular file\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_skill_md_is_dir"
+ },
+ "lib_skill_md_missing": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: no such file or directory\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_skill_md_missing"
+ },
+ "lib_skill_md_mode0": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: permission denied\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_skill_md_mode0"
+ },
+ "lib_skill_md_symlink_loop": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"read SKILL.md: openat SKILL.md: too many levels of symbolic links\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_skill_md_symlink_loop"
+ },
+ "lib_skill_md_symlink_to_dir": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"SKILL.md must be a regular file\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_skill_md_symlink_to_dir"
+ },
+ "lib_symlinked_dir_skipped": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[]}\n",
+  "setup": "lib_symlinked_dir_skipped"
+ },
+ "lib_tab_indent": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"parse SKILL.md frontmatter: yaml: line 2: found a tab character that violates indentation\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_tab_indent"
+ },
+ "lib_unclosed_flow": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"skills\":[{\"name\":\"good\",\"description\":\"d\",\"path\":\"$ROOT/data/symbrain/skills/library/good\",\"created_at\":\"<TS>\",\"modified_at\":\"<TS>\",\"installs\":[],\"last_used\":null}],\"category_counts\":{},\"issues\":[{\"code\":\"skill_load\",\"severity\":\"error\",\"message\":\"parse SKILL.md frontmatter: yaml: line 1: did not find expected ',' or ']'\",\"path\":\"bad\"}]}\n",
+  "setup": "lib_unclosed_flow"
+ },
+ "list_unclean_library_dir": {
+  "args": [
+   "skills",
+   "list",
+   "--json"
+  ],
+  "code": 0,
+  "env": {
+   "SYMSKILLS_LIBRARY_DIR": "$ROOT/x/../custom-lib//"
+  },
+  "err": "",
+  "out": "{\"skills\":[],\"category_counts\":{},\"issues\":[]}\n",
+  "setup": "list_unclean_library_dir"
+ },
+ "log_limit_invalid": {
+  "args": [
+   "skills",
+   "log",
+   "--limit",
+   "0x2"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "No recorded skill operations.\n",
+  "setup": "log_limit_invalid"
+ },
+ "log_malformed_lines": {
+  "args": [
+   "skills",
+   "log",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "[{\"ts\":\"<TS>\",\"event\":\"dup\",\"skill\":\"b\",\"outcome\":\"\",\"actor\":\"\"},{\"ts\":\"<TS>\",\"event\":\"x\",\"skill\":\"CaseSkill\",\"outcome\":\"ok\",\"actor\":\"cli\"},{\"ts\":\"<TS>\",\"event\":\"install\",\"skill\":\"a\",\"target\":\"claude\",\"outcome\":\"ok\",\"actor\":\"cli\"},{\"ts\":\"\",\"event\":\"\",\"outcome\":\"\",\"actor\":\"\"}]\n",
+  "setup": "log_malformed_lines"
+ },
+ "log_malformed_lines_text": {
+  "args": [
+   "skills",
+   "log"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME\n<TS>\tdup\tb\t-\t\n<TS>\tx\tCaseSkill\t-\tok\n<TS>\tinstall\ta\tclaude\tok\n\t\t-\t-\t\n",
+  "setup": "log_malformed_lines_text"
+ },
+ "log_unknown_flag": {
+  "args": [
+   "skills",
+   "log",
+   "--bogus"
+  ],
+  "code": 2,
+  "env": {},
+  "err": "flag provided but not defined: -bogus\nUsage of skills log:\n  -l int\n    \tmaximum records to return, newest first\n  -limit int\n    \tmaximum records to return, newest first\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -skill string\n    \tlimit to one skill name\n  -target string\n    \tlimit to one harness target\n",
+  "out": "",
+  "setup": "log_unknown_flag"
+ },
+ "no_subcommand": {
+  "args": [
+   "skills"
+  ],
+  "code": 2,
+  "env": {},
+  "err": "symbrain skills \u2014 embedded skill library operations\n\nUsage:\n  symbrain skills <subcommand> [flags]\n\nSubcommands:\n  list        List the skills in the library with their install state\n  status      Classify installed skills against the library (drift report)\n  targets     Show the harness targets skills can be installed into\n  log         Read the local skill operation log\n  sync        Repair drifted installs (use --dry-run to see the plan first)\n  doctor      Report the configured skill paths and target roots\n\nUse --output table|json (or --json) for the result format. status, sync and\ntargets accept --scope user|project; status, sync and log accept --target.\nRun 'symbrain skills <subcommand> --help' for details.\n",
+  "out": "",
+  "setup": "no_subcommand"
+ },
+ "status_bad_scope": {
+  "args": [
+   "skills",
+   "status",
+   "--scope",
+   "galaxy"
+  ],
+  "code": 2,
+  "env": {},
+  "err": "symbrain skills status: unknown scope \"galaxy\" (known: user, project)\n",
+  "out": "",
+  "setup": "status_bad_scope"
+ },
+ "status_opencode_dangling_root": {
+  "args": [
+   "skills",
+   "status",
+   "--target",
+   "opencode",
+   "--json"
+  ],
+  "code": 0,
+  "env": {},
+  "err": "",
+  "out": "{\"installs\":[],\"summary\":{\"in_sync\":0,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+  "setup": "status_opencode_dangling_root"
+ },
+ "status_root_is_file": {
+  "args": [
+   "skills",
+   "status",
+   "--target",
+   "claude"
+  ],
+  "code": 1,
+  "env": {},
+  "err": "symbrain skills status: scan installs: scan skill root $ROOT/home/.claude/skills: open $ROOT/home/.claude/skills: not a directory\n",
+  "out": "",
+  "setup": "status_root_is_file"
+ },
+ "status_root_mode0": {
+  "args": [
+   "skills",
+   "status",
+   "--json"
+  ],
+  "code": 1,
+  "env": {},
+  "err": "symbrain skills status: scan installs: scan skill root $ROOT/home/.claude/skills: open $ROOT/home/.claude/skills: permission denied\n",
+  "out": "",
+  "setup": "status_root_mode0"
+ },
+ "status_root_symlink_loop": {
+  "args": [
+   "skills",
+   "status",
+   "--json"
+  ],
+  "code": 1,
+  "env": {},
+  "err": "symbrain skills status: scan installs: scan skill root $ROOT/home/.claude/skills: open $ROOT/home/.claude/skills: too many levels of symbolic links\n",
+  "out": "",
+  "setup": "status_root_symlink_loop"
+ },
+ "sync_invalid_target_bytes": {
+  "args": [
+   "skills",
+   "sync",
+   "--target",
+   "nope"
+  ],
+  "code": 2,
+  "env": {},
+  "err": "symbrain skills sync: unknown target \"nope\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n",
+  "out": "",
+  "setup": "sync_invalid_target_bytes"
+ },
+ "sync_root_is_file": {
+  "args": [
+   "skills",
+   "sync",
+   "--dry-run"
+  ],
+  "code": 1,
+  "env": {},
+  "err": "symbrain skills sync: scan installs: scan skill root $ROOT/home/.claude/skills: open $ROOT/home/.claude/skills: not a directory\n",
+  "out": "",
+  "setup": "sync_root_is_file"
+ },
+ "unknown_subcommand": {
+  "args": [
+   "skills",
+   "frob"
+  ],
+  "code": 2,
+  "env": {},
+  "err": "symbrain skills: unknown subcommand \"frob\"\n\nsymbrain skills \u2014 embedded skill library operations\n\nUsage:\n  symbrain skills <subcommand> [flags]\n\nSubcommands:\n  list        List the skills in the library with their install state\n  status      Classify installed skills against the library (drift report)\n  targets     Show the harness targets skills can be installed into\n  log         Read the local skill operation log\n  sync        Repair drifted installs (use --dry-run to see the plan first)\n  doctor      Report the configured skill paths and target roots\n\nUse --output table|json (or --json) for the result format. status, sync and\ntargets accept --scope user|project; status, sync and log accept --target.\nRun 'symbrain skills <subcommand> --help' for details.\n",
+  "out": "",
+  "setup": "unknown_subcommand"
+ }
+}

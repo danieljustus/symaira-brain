@@ -35,7 +35,10 @@ pub(super) fn run(
     };
     let env = Env::load();
     if env.home_dir.as_os_str().is_empty() {
-        let _ = writeln!(stderr, "symbrain skills sync: scan installs: {HOME_UNDEFINED}");
+        let _ = writeln!(
+            stderr,
+            "symbrain skills sync: scan installs: {HOME_UNDEFINED}"
+        );
         return exit::GENERIC;
     }
     let dry_run = parsed.dry_run;
@@ -58,7 +61,7 @@ pub(super) fn run(
     let results = match install::sync(&options) {
         Ok(results) => results,
         Err(error) => {
-            let _ = writeln!(stderr, "symbrain skills sync: {error}");
+            let _ = writeln!(stderr, "symbrain skills sync: scan installs: {error}");
             return exit::GENERIC;
         }
     };

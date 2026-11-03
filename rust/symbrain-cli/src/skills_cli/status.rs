@@ -87,11 +87,7 @@ pub(super) fn render_extension(env: &Env, target: Option<&str>) -> Option<PathBu
 /// Go's `os.UserHomeDir` error text for the scan.
 pub(super) const HOME_UNDEFINED: &str = "$HOME is not defined";
 
-pub(super) fn status_options(
-    env: &Env,
-    scope: String,
-    target: Option<String>,
-) -> StatusOptions {
+pub(super) fn status_options(env: &Env, scope: String, target: Option<String>) -> StatusOptions {
     StatusOptions {
         home_dir: env.home_dir.clone(),
         project_dir: Some(env.project_dir.clone()),
@@ -122,7 +118,10 @@ pub(super) fn run(
     };
     let env = Env::load();
     if env.home_dir.as_os_str().is_empty() {
-        let _ = writeln!(stderr, "symbrain skills status: scan installs: {HOME_UNDEFINED}");
+        let _ = writeln!(
+            stderr,
+            "symbrain skills status: scan installs: {HOME_UNDEFINED}"
+        );
         return exit::GENERIC;
     }
     let installs = match install::status(&status_options(&env, scope, target)) {

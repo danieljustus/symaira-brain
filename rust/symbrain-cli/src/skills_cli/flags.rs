@@ -151,7 +151,8 @@ pub(super) fn parse(verb: Verb, args: &[OsString], stderr: &mut dyn Write) -> Re
             _ => match parse_int(&value) {
                 Ok(number) => flags.limit = number,
                 Err(reason) => {
-                    let mut message = format!("invalid value {} for flag -", quote(&value)).into_bytes();
+                    let mut message =
+                        format!("invalid value {} for flag -", quote(&value)).into_bytes();
                     message.extend_from_slice(name);
                     message.extend_from_slice(format!(": {reason}").as_bytes());
                     return fail(verb, stderr, Some(&message));
