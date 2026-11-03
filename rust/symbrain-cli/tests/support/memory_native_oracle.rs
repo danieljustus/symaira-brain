@@ -569,8 +569,12 @@ pub struct Scenario<'a> {
     pub config: String,
     /// Steps run by the Go oracle in a scratch sandbox to build the fixture.
     pub seed: Vec<Vec<OsString>>,
-    /// Direct mutation of the fixture database (fault injection).
-    pub mutate: Option<Box<dyn Fn(&Connection) + 'a>>,
+    /// SQL applied to the fixture database before the steps (fault
+    /// injection); recorded in the fixture and applied to both sides.
+    pub mutate_sql: Vec<String>,
+    /// Scenarios with the same key and seed steps share one recorded seed
+    /// database (`seed-<key>.db`).
+    pub seed_key: Option<&'a str>,
     /// Steps compared between the implementations. `{DB}` is the database.
     pub steps: Vec<Vec<OsString>>,
     pub env: Vec<(&'static str, OsString)>,
@@ -590,7 +594,8 @@ impl<'a> Scenario<'a> {
             rust_bin,
             config: String::new(),
             seed: Vec::new(),
-            mutate: None,
+            mutate_sql: Vec::new(),
+            seed_key: None,
             steps: Vec::new(),
             env: Vec::new(),
             no_db: false,
@@ -611,11 +616,25 @@ pub struct Compared {
     pub db: Vec<String>,
 }
 
+fn first_id(db: &Path) -> OsString {
+    Connection::open_with_flags(db, OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .and_then(|conn| {
+            conn.query_row("SELECT id FROM memories ORDER BY rowid LIMIT 1", [], |row| {
+                row.get::<_, String>(0)
+            })
+        })
+        .map(OsString::from)
+        .unwrap_or_default()
+}
+
+/// `{DB}` is the sandbox database, `{FIRST_ID}` the oldest memory id in it.
 fn expand(args: &[OsString], db: &Path) -> Vec<OsString> {
     args.iter()
         .map(|arg| {
             if arg == OsStr::new("{DB}") {
                 db.as_os_str().to_owned()
+            } else if arg == OsStr::new("{FIRST_ID}") {
+                first_id(db)
             } else {
                 arg.clone()
             }
@@ -623,204 +642,473 @@ fn expand(args: &[OsString], db: &Path) -> Vec<OsString> {
         .collect()
 }
 
-/// Runs a scenario against both implementations and panics with a precise
-/// report on the first difference. Returns the observations.
-pub fn compare(scenario: &Scenario<'_>) -> Compared {
-    // Fixture: produced by the Go oracle itself.
-    let seed_db: Option<PathBuf> = if scenario.no_db {
-        None
-    } else {
-        let seed = Sandbox::new();
-        let embed_server = scenario
-            .embed
-            .as_ref()
-            .map(|h| FakeServer::start(Arc::clone(h)));
-        let config = scenario
-            .config
-            .replace(
-                "{EMBED}",
-                &embed_server.as_ref().map_or_else(
-                    || "owned-invalid-endpoint".to_owned(),
-                    |s| format!("{}/api/embeddings", s.url),
-                ),
-            )
-            .replace("{LLM}", "http://127.0.0.1:1");
-        seed.write_config(&config);
-        // Always create the schema through the oracle.
-        let created = run(
-            Who::Go,
-            &seed,
-            "",
-            &argv(&["list", "--db", seed.db().to_str().unwrap()]),
-            &[],
-        );
-        assert_eq!(
-            created.code,
-            Some(0),
-            "fixture creation: {:?}",
-            String::from_utf8_lossy(&created.stderr)
-        );
-        for step in &scenario.seed {
-            let out = run(Who::Go, &seed, "", &expand(step, &seed.db()), &scenario.env);
-            assert_eq!(
-                out.code,
-                Some(0),
-                "{}: seed step {:?} failed: {}",
-                scenario.name,
-                step,
-                String::from_utf8_lossy(&out.stderr)
-            );
-        }
-        if let Some(mutate) = &scenario.mutate {
-            let conn = Connection::open(seed.db()).expect("mutate connection");
-            mutate(&conn);
-        }
-        // Checkpoint into the main file so the copy is complete.
-        {
-            let conn = Connection::open(seed.db()).expect("checkpoint connection");
-            let _ = conn.execute_batch("PRAGMA wal_checkpoint(TRUNCATE);");
-        }
-        let kept = std::env::temp_dir().join(format!(
-            "memnat-seed-{}-{}.db",
-            std::process::id(),
-            scenario.name
-        ));
-        std::fs::copy(seed.db(), &kept).expect("seed copy");
-        Some(kept)
-    };
+fn expand_config(scenario: &Scenario<'_>, embed: Option<&FakeServer>, llm: Option<&FakeServer>) -> String {
+    scenario
+        .config
+        .replace(
+            "{EMBED}",
+            &embed.map_or_else(
+                || "owned-invalid-endpoint".to_owned(),
+                |s| format!("{}/api/embeddings", s.url),
+            ),
+        )
+        .replace(
+            "{LLM}",
+            &llm.map_or_else(|| "http://127.0.0.1:1".to_owned(), |s| s.url.clone()),
+        )
+}
 
-    let mut compared = Compared {
-        go: Vec::new(),
-        rust: Vec::new(),
-        go_requests: (Vec::new(), Vec::new()),
-        rust_requests: (Vec::new(), Vec::new()),
-        db: Vec::new(),
-    };
-    let mut snapshots: Vec<(Vec<String>, Vec<String>, Vec<Vec<u8>>, Vec<Vec<u8>>)> = Vec::new();
-    let known = seed_db.as_deref().map(known_ids).unwrap_or_default();
-    for who in [Who::Go, Who::Rust] {
-        let sb = Sandbox::new();
-        let embed_server = scenario
-            .embed
-            .as_ref()
-            .map(|h| FakeServer::start(Arc::clone(h)));
-        let llm_server = scenario
-            .llm
-            .as_ref()
-            .map(|h| FakeServer::start(Arc::clone(h)));
-        let config = scenario
-            .config
-            .replace(
-                "{EMBED}",
-                &embed_server.as_ref().map_or_else(
-                    || "owned-invalid-endpoint".to_owned(),
-                    |s| format!("{}/api/embeddings", s.url),
-                ),
-            )
-            .replace(
-                "{LLM}",
-                &llm_server
-                    .as_ref()
-                    .map_or_else(|| "http://127.0.0.1:1".to_owned(), |s| s.url.clone()),
-            );
-        sb.write_config(&config);
-        if let Some(seed) = &seed_db {
-            std::fs::copy(seed, sb.db()).expect("fixture copy");
-        }
-        let mut ids = IdMap::with_known(known.clone());
-        let mut outs = Vec::new();
-        for step in &scenario.steps {
-            let out = run(
-                who,
-                &sb,
-                scenario.rust_bin,
-                &expand(step, &sb.db()),
-                &scenario.env,
-            );
-            outs.push(out);
-        }
-        let normalized: Vec<(Vec<u8>, Vec<u8>)> = outs
-            .iter()
-            .map(|out| {
-                (
-                    normalize_output(&out.stdout, &sb.root, &mut ids),
-                    normalize_output(&out.stderr, &sb.root, &mut ids),
-                )
-            })
-            .collect();
-        let db_state = snapshot(&sb.db(), &mut ids);
-        let tree = manifest(&sb.root);
-        let (stdouts, stderrs): (Vec<_>, Vec<_>) = normalized.into_iter().unzip();
-        snapshots.push((db_state, tree, stdouts, stderrs));
-        let requests = (
-            embed_server
-                .as_ref()
-                .map(FakeServer::requests)
-                .unwrap_or_default(),
-            llm_server
-                .as_ref()
-                .map(FakeServer::requests)
-                .unwrap_or_default(),
-        );
-        match who {
-            Who::Go => {
-                compared.go = outs;
-                compared.go_requests = requests;
-            }
-            Who::Rust => {
-                compared.rust = outs;
-                compared.rust_requests = requests;
+/// Everything one implementation produced for a scenario.
+struct Side {
+    outs: Vec<Outcome>,
+    stdouts: Vec<Vec<u8>>,
+    stderrs: Vec<Vec<u8>>,
+    db: Vec<String>,
+    tree: Vec<String>,
+    requests: (Vec<RecordedRequest>, Vec<RecordedRequest>),
+}
+
+fn run_side(who: Who, scenario: &Scenario<'_>, seed_db: Option<&Path>, known: &BTreeSet<String>) -> Side {
+    let sb = Sandbox::new();
+    let embed_server = scenario
+        .embed
+        .as_ref()
+        .map(|h| FakeServer::start(Arc::clone(h)));
+    let llm_server = scenario
+        .llm
+        .as_ref()
+        .map(|h| FakeServer::start(Arc::clone(h)));
+    sb.write_config(&expand_config(scenario, embed_server.as_ref(), llm_server.as_ref()));
+    if let Some(seed) = seed_db {
+        std::fs::copy(seed, sb.db()).expect("fixture copy");
+        if !scenario.mutate_sql.is_empty() {
+            let conn = Connection::open(sb.db()).expect("mutate connection");
+            for statement in &scenario.mutate_sql {
+                conn.execute_batch(statement).expect("fixture mutation");
             }
         }
     }
+    let mut ids = IdMap::with_known(known.clone());
+    let mut outs = Vec::new();
+    for step in &scenario.steps {
+        outs.push(run(
+            who,
+            &sb,
+            scenario.rust_bin,
+            &expand(step, &sb.db()),
+            &scenario.env,
+        ));
+    }
+    let mut stdouts = Vec::new();
+    let mut stderrs = Vec::new();
+    for out in &outs {
+        stdouts.push(normalize_output(&out.stdout, &sb.root, &mut ids));
+        stderrs.push(normalize_output(&out.stderr, &sb.root, &mut ids));
+    }
+    let db = snapshot(&sb.db(), &mut ids);
+    let tree = manifest(&sb.root);
+    let requests = (
+        embed_server.as_ref().map(FakeServer::requests).unwrap_or_default(),
+        llm_server.as_ref().map(FakeServer::requests).unwrap_or_default(),
+    );
+    Side {
+        outs,
+        stdouts,
+        stderrs,
+        db,
+        tree,
+        requests,
+    }
+}
 
-    let (go_db, go_tree, go_out, go_err) = &snapshots[0];
-    let (rs_db, rs_tree, rs_out, rs_err) = &snapshots[1];
-    for (index, (go, rust)) in compared.go.iter().zip(&compared.rust).enumerate() {
+// --- Fixtures ------------------------------------------------------------
+
+fn sha256_hex(bytes: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+fn encode(bytes: &[u8]) -> serde_json::Value {
+    match std::str::from_utf8(bytes) {
+        Ok(text) => serde_json::Value::String(text.to_owned()),
+        Err(_) => serde_json::json!({"hex": bytes.iter().map(|b| format!("{b:02x}")).collect::<String>()}),
+    }
+}
+
+fn decode(value: &serde_json::Value) -> Vec<u8> {
+    match value {
+        serde_json::Value::String(text) => text.as_bytes().to_vec(),
+        other => {
+            let hex = other["hex"].as_str().expect("hex-encoded bytes");
+            (0..hex.len())
+                .step_by(2)
+                .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).expect("hex"))
+                .collect()
+        }
+    }
+}
+
+fn request_json(request: &RecordedRequest) -> serde_json::Value {
+    let headers: BTreeMap<&String, &String> = request
+        .headers
+        .iter()
+        .filter(|(name, _)| !matches!(name.as_str(), "host" | "content-length"))
+        .collect();
+    serde_json::json!({
+        "request_line": request.request_line,
+        "headers": headers,
+        "body": encode(&request.body),
+    })
+}
+
+fn request_from(value: &serde_json::Value) -> RecordedRequest {
+    RecordedRequest {
+        request_line: value["request_line"].as_str().unwrap_or_default().to_owned(),
+        headers: value["headers"]
+            .as_object()
+            .map(|map| {
+                map.iter()
+                    .map(|(k, v)| (k.clone(), v.as_str().unwrap_or_default().to_owned()))
+                    .collect()
+            })
+            .unwrap_or_default(),
+        body: decode(&value["body"]),
+    }
+}
+
+fn fixture_dir() -> PathBuf {
+    let exe = std::env::current_exe().expect("test executable");
+    let stem = exe.file_stem().and_then(|s| s.to_str()).unwrap_or("memory");
+    // `memory_native_read-1a2b3c` -> `memory_native_read`.
+    let stem = stem.rsplit_once('-').map_or(stem, |(name, _)| name);
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/memory_native")
+        .join(stem)
+}
+
+fn record_mode() -> bool {
+    std::env::var("SYMBRAIN_MEMORY_FIXTURE_RECORD").is_ok_and(|value| value == "1")
+}
+
+fn command_output(program: &str, args: &[&str], dir: &Path) -> String {
+    Command::new(program)
+        .args(args)
+        .current_dir(dir)
+        .output()
+        .map(|out| String::from_utf8_lossy(&out.stdout).trim().to_owned())
+        .unwrap_or_default()
+}
+
+/// Provenance of a recording: the Go sources and toolchain that produced it.
+fn provenance(oracle_bin: &Path) -> serde_json::Value {
+    let root = repo_root();
+    let dirty = command_output(
+        "git",
+        &["status", "--porcelain", "--", "cmd", "internal", "go.mod", "go.sum"],
+        &root,
+    );
+    assert!(
+        dirty.is_empty(),
+        "recording needs a clean Go source tree, found:\n{dirty}"
+    );
+    let rev = |spec: &str| command_output("git", &["rev-parse", spec], &root);
+    let version = command_output("go", &["version", &oracle_bin.to_string_lossy()], &root);
+    let bytes = std::fs::read(oracle_bin).expect("oracle binary");
+    serde_json::json!({
+        "kind": "go-oracle-recording",
+        "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1",
+        "go_source": {
+            "git_head": rev("HEAD"),
+            "tree_cmd": rev("HEAD:cmd"),
+            "tree_internal": rev("HEAD:internal"),
+            "go_mod": rev("HEAD:go.mod"),
+            "go_sum": rev("HEAD:go.sum"),
+        },
+        "go_version": version,
+        "platform": format!("{}/{}", std::env::consts::OS, std::env::consts::ARCH),
+        "oracle_sha256": sha256_hex(&bytes),
+    })
+}
+
+fn payload_hash(body: &serde_json::Value) -> String {
+    sha256_hex(serde_json::to_string(body).expect("payload").as_bytes())
+}
+
+fn side_payload(
+    scenario: &Scenario<'_>,
+    side: &Side,
+    seed_file: &str,
+    seed_sha: &str,
+) -> serde_json::Value {
+    let steps: Vec<serde_json::Value> = side
+        .outs
+        .iter()
+        .enumerate()
+        .map(|(index, out)| {
+            serde_json::json!({
+                "code": out.code,
+                "stdout": encode(&side.stdouts[index]),
+                "stderr": encode(&side.stderrs[index]),
+            })
+        })
+        .collect();
+    serde_json::json!({
+        "scenario": scenario.name,
+        "seed_file": seed_file,
+        "seed_sha256": seed_sha,
+        "mutate_sql": scenario.mutate_sql,
+        "steps": steps,
+        "db": side.db,
+        "tree": side.tree,
+        "requests": {
+            "embed": side.requests.0.iter().map(request_json).collect::<Vec<_>>(),
+            "llm": side.requests.1.iter().map(request_json).collect::<Vec<_>>(),
+        },
+    })
+}
+
+/// Loads and verifies a recorded fixture; a missing or altered fixture fails.
+pub fn load_fixture(dir: &Path, name: &str) -> serde_json::Value {
+    let path = dir.join(format!("{name}.json"));
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|error| {
+        panic!(
+            "missing Go-oracle fixture {} ({error}); record it with SYMBRAIN_MEMORY_FIXTURE_RECORD=1",
+            path.display()
+        )
+    });
+    let document: serde_json::Value = serde_json::from_str(&text).expect("fixture json");
+    verify_fixture(&document, dir, name);
+    document
+}
+
+/// Checks the payload digest and the seed database digest of a fixture.
+pub fn verify_fixture(document: &serde_json::Value, dir: &Path, name: &str) {
+    let payload = &document["payload"];
+    assert_eq!(
+        document["provenance"]["payload_sha256"].as_str(),
+        Some(payload_hash(payload).as_str()),
+        "{name}: fixture payload digest mismatch"
+    );
+    assert_eq!(
+        document["provenance"]["kind"], "go-oracle-recording",
+        "{name}: not a recording"
+    );
+    for field in ["go_version", "platform", "oracle_sha256"] {
+        assert!(
+            document["provenance"][field]
+                .as_str()
+                .is_some_and(|value| !value.is_empty()),
+            "{name}: provenance lacks {field}"
+        );
+    }
+    assert!(
+        document["provenance"]["go_source"]["tree_internal"]
+            .as_str()
+            .is_some_and(|value| value.len() == 40),
+        "{name}: provenance lacks the Go source revision"
+    );
+    let seed_sha = payload["seed_sha256"].as_str().unwrap_or_default();
+    if !seed_sha.is_empty() {
+        let file = payload["seed_file"].as_str().unwrap_or_default();
+        let seed = std::fs::read(dir.join(file))
+            .unwrap_or_else(|error| panic!("{name}: missing seed database {file} ({error})"));
+        assert_eq!(sha256_hex(&seed), seed_sha, "{name}: seed database digest");
+    }
+}
+
+/// Runs a scenario against the recorded Go behavior (default) or, with
+/// `SYMBRAIN_MEMORY_FIXTURE_RECORD=1`, records it from the Go oracle first.
+pub fn compare(scenario: &Scenario<'_>) -> Compared {
+    let dir = fixture_dir();
+    if record_mode() {
+        record(scenario, &dir);
+    }
+    replay(scenario, &dir)
+}
+
+fn seed_file_name(scenario: &Scenario<'_>) -> String {
+    scenario.seed_key.map_or_else(
+        || format!("{}.seed.db", scenario.name),
+        |key| format!("seed-{key}.db"),
+    )
+}
+
+fn build_seed(scenario: &Scenario<'_>, target: &Path) {
+    let seed = Sandbox::new();
+    let embed_server = scenario
+        .embed
+        .as_ref()
+        .map(|h| FakeServer::start(Arc::clone(h)));
+    seed.write_config(&expand_config(scenario, embed_server.as_ref(), None));
+    // Always create the schema through the oracle.
+    let created = run(
+        Who::Go,
+        &seed,
+        "",
+        &argv(&["list", "--db", seed.db().to_str().unwrap()]),
+        &[],
+    );
+    assert_eq!(
+        created.code,
+        Some(0),
+        "fixture creation: {:?}",
+        String::from_utf8_lossy(&created.stderr)
+    );
+    for step in &scenario.seed {
+        let out = run(Who::Go, &seed, "", &expand(step, &seed.db()), &scenario.env);
         assert_eq!(
-            go.code,
-            rust.code,
+            out.code,
+            Some(0),
+            "{}: seed step {:?} failed: {}",
+            scenario.name,
+            step,
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+    // Checkpoint into the main file so the copy is complete.
+    {
+        let conn = Connection::open(seed.db()).expect("checkpoint connection");
+        let _ = conn.execute_batch("PRAGMA wal_checkpoint(TRUNCATE);");
+    }
+    std::fs::copy(seed.db(), target).expect("seed copy");
+}
+
+fn record(scenario: &Scenario<'_>, dir: &Path) {
+    std::fs::create_dir_all(dir).expect("fixture directory");
+    let seed_name = seed_file_name(scenario);
+    let seed_path = dir.join(&seed_name);
+    let mut seed_sha = String::new();
+    if scenario.no_db {
+        let _ = std::fs::remove_file(&seed_path);
+    } else {
+        // A shared seed is built once; delete the file to rebuild it.
+        if scenario.seed_key.is_none() || !seed_path.is_file() {
+            build_seed(scenario, &seed_path);
+        }
+        seed_sha = sha256_hex(&std::fs::read(&seed_path).expect("seed"));
+    }
+    let seed_db = (!scenario.no_db).then_some(seed_path.as_path());
+    let known = seed_db.map(known_ids).unwrap_or_default();
+    let go = run_side(Who::Go, scenario, seed_db, &known);
+    let rust = run_side(Who::Rust, scenario, seed_db, &known);
+    assert_sides(scenario, &go, &rust);
+    let payload = side_payload(scenario, &go, if scenario.no_db { "" } else { &seed_name }, &seed_sha);
+    let mut provenance = provenance(oracle());
+    provenance["payload_sha256"] = serde_json::Value::String(payload_hash(&payload));
+    let document = serde_json::json!({"provenance": provenance, "payload": payload});
+    std::fs::write(
+        dir.join(format!("{}.json", scenario.name)),
+        serde_json::to_string_pretty(&document).expect("fixture") + "\n",
+    )
+    .expect("write fixture");
+}
+
+fn assert_sides(scenario: &Scenario<'_>, go: &Side, rust: &Side) {
+    for (index, (g, r)) in go.outs.iter().zip(&rust.outs).enumerate() {
+        assert_eq!(
+            g.code,
+            r.code,
             "{} step {index}: exit status\n go stderr: {}\n rust stderr: {}",
             scenario.name,
-            String::from_utf8_lossy(&go.stderr),
-            String::from_utf8_lossy(&rust.stderr)
+            String::from_utf8_lossy(&g.stderr),
+            String::from_utf8_lossy(&r.stderr)
         );
         assert_eq!(
-            String::from_utf8_lossy(&go_out[index]),
-            String::from_utf8_lossy(&rs_out[index]),
+            String::from_utf8_lossy(&go.stdouts[index]),
+            String::from_utf8_lossy(&rust.stdouts[index]),
             "{} step {index}: stdout",
             scenario.name
         );
         assert_eq!(
-            go_out[index], rs_out[index],
+            go.stdouts[index], rust.stdouts[index],
             "{} step {index}: stdout bytes",
             scenario.name
         );
         if scenario.stderr_as_set {
-            let mut a: Vec<&[u8]> = go_err[index].split(|b| *b == b'\n').collect();
-            let mut b: Vec<&[u8]> = rs_err[index].split(|b| *b == b'\n').collect();
+            let mut a: Vec<&[u8]> = go.stderrs[index].split(|b| *b == b'\n').collect();
+            let mut b: Vec<&[u8]> = rust.stderrs[index].split(|b| *b == b'\n').collect();
             a.sort_unstable();
             b.sort_unstable();
             assert_eq!(a, b, "{} step {index}: stderr lines", scenario.name);
         } else {
             assert_eq!(
-                String::from_utf8_lossy(&go_err[index]),
-                String::from_utf8_lossy(&rs_err[index]),
+                String::from_utf8_lossy(&go.stderrs[index]),
+                String::from_utf8_lossy(&rust.stderrs[index]),
                 "{} step {index}: stderr",
                 scenario.name
             );
             assert_eq!(
-                go_err[index], rs_err[index],
+                go.stderrs[index], rust.stderrs[index],
                 "{} step {index}: stderr bytes",
                 scenario.name
             );
         }
     }
-    assert_eq!(go_db, rs_db, "{}: database state", scenario.name);
-    assert_eq!(go_tree, rs_tree, "{}: created files", scenario.name);
-    compared.db = go_db.clone();
-    if let Some(seed) = seed_db {
-        let _ = std::fs::remove_file(seed);
+    assert_eq!(go.outs.len(), rust.outs.len(), "{}: step count", scenario.name);
+    assert_eq!(go.db, rust.db, "{}: database state", scenario.name);
+    assert_eq!(go.tree, rust.tree, "{}: created files", scenario.name);
+}
+
+/// Replays the recorded Go behavior against the Rust implementation.
+fn replay(scenario: &Scenario<'_>, dir: &Path) -> Compared {
+    let document = load_fixture(dir, scenario.name);
+    let payload = &document["payload"];
+    assert_eq!(
+        payload["mutate_sql"],
+        serde_json::json!(scenario.mutate_sql),
+        "{}: the scenario's mutations differ from the recording",
+        scenario.name
+    );
+    let seed_path = dir.join(payload["seed_file"].as_str().unwrap_or_default());
+    let seed_db = (!scenario.no_db).then_some(seed_path.as_path());
+    let known = seed_db.map(known_ids).unwrap_or_default();
+    let rust = run_side(Who::Rust, scenario, seed_db, &known);
+
+    let steps = payload["steps"].as_array().expect("recorded steps");
+    assert_eq!(steps.len(), rust.outs.len(), "{}: step count", scenario.name);
+    let mut go_outs = Vec::new();
+    let go_stdouts: Vec<Vec<u8>> = steps.iter().map(|s| decode(&s["stdout"])).collect();
+    let go_stderrs: Vec<Vec<u8>> = steps.iter().map(|s| decode(&s["stderr"])).collect();
+    for (index, step) in steps.iter().enumerate() {
+        go_outs.push(Outcome {
+            code: step["code"].as_i64().map(|c| i32::try_from(c).expect("code")),
+            stdout: go_stdouts[index].clone(),
+            stderr: go_stderrs[index].clone(),
+        });
     }
-    compared
+    let recorded = Side {
+        outs: go_outs.clone(),
+        stdouts: go_stdouts,
+        stderrs: go_stderrs,
+        db: payload["db"]
+            .as_array()
+            .expect("recorded db")
+            .iter()
+            .map(|row| row.as_str().unwrap_or_default().to_owned())
+            .collect(),
+        tree: payload["tree"]
+            .as_array()
+            .expect("recorded tree")
+            .iter()
+            .map(|row| row.as_str().unwrap_or_default().to_owned())
+            .collect(),
+        requests: (Vec::new(), Vec::new()),
+    };
+    assert_sides(scenario, &recorded, &rust);
+    let requests = |key: &str| -> Vec<RecordedRequest> {
+        payload["requests"][key]
+            .as_array()
+            .map(|items| items.iter().map(request_from).collect())
+            .unwrap_or_default()
+    };
+    Compared {
+        go: go_outs,
+        rust: rust.outs,
+        go_requests: (requests("embed"), requests("llm")),
+        rust_requests: rust.requests,
+        db: recorded.db,
+    }
 }

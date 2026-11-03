@@ -151,6 +151,7 @@ pub(crate) fn check(
     config: &ConflictConfig,
     new: &NewMemory<'_>,
     prefilter: bool,
+    observe: crate::retrieval::Observe<'_>,
     log: &mut crate::slog::LogSink<'_>,
 ) -> Result<Vec<Resolution>, String> {
     let config = config.normalized();
@@ -172,13 +173,17 @@ pub(crate) fn check(
         }]);
     }
     let limit = usize::try_from(config.max_candidates).unwrap_or(10);
-    let results = crate::retrieval::search_prefiltered(
+    let results = crate::retrieval::search_with(
         conn,
-        new.embedding,
-        new.embedding_source,
-        new.scope,
-        limit,
-        prefilter,
+        &crate::retrieval::Query {
+            vector: new.embedding,
+            source: new.embedding_source,
+            scope: new.scope,
+            limit,
+            prefilter,
+            filters: &crate::SearchFilters::default(),
+            observe,
+        },
     )
     .map_err(|error| format!("conflict: candidate recall: {error}"))?;
 

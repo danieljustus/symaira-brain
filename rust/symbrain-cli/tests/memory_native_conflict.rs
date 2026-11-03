@@ -116,10 +116,7 @@ fn higher_importance_keeps_the_existing_fact() {
         r#"{"verdicts":[{"pair":0,"verdict":"contradiction"}]}"#,
     ));
     s.seed = vec![set("alpha original statement", &[])];
-    s.mutate = Some(Box::new(|conn| {
-        conn.execute("UPDATE memories SET importance = 5", [])
-            .expect("importance");
-    }));
+    s.mutate_sql = vec!["UPDATE memories SET importance = 5".to_owned()];
     s.steps = vec![set("alpha band statement", &["--json"])];
     let compared = compare(&s);
     assert!(has(&compared.db, "importance\\\""), "{:#?}", compared.db);
@@ -289,13 +286,10 @@ fn project_scope_entities_and_metadata() {
 fn entity_resolved_through_an_alias() {
     let mut s = scenario("alias", BASE);
     s.seed = vec![set("seed note", &["--entities", "Alice"])];
-    s.mutate = Some(Box::new(|conn| {
-        conn.execute(
-            "INSERT INTO entities_aliases(entity_id, alias) SELECT id, 'Al' FROM entities WHERE name='Alice'",
-            [],
-        )
-        .expect("alias");
-    }));
+    s.mutate_sql = vec![
+        "INSERT INTO entities_aliases(entity_id, alias) SELECT id, 'Al' FROM entities WHERE name='Alice'"
+            .to_owned(),
+    ];
     s.steps = vec![set("later note", &["--entities", "al"])];
     compare(&s);
 }

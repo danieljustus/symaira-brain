@@ -177,26 +177,14 @@ fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<(i64, Option<OsStr
 fn build(store: Store) -> Result<Arc<Server>, String> {
     let cfg = config::load();
     let secret = jwt_secret(cfg).map_err(|error| format!("init memory JWT provider: {error}"))?;
-    let normalized = |value: f64, fallback: f64| {
-        if value <= 0.0 || value >= 1.0 {
-            fallback
-        } else {
-            value
-        }
-    };
     let options = Options {
         version: option_env!("SYMBRAIN_VERSION").unwrap_or("dev").to_owned(),
         require_profile: cfg.require_profile,
-        direct_writes: true,
         audit_enabled: cfg.audit_log_enabled,
         trusted_proxies: cfg.trusted_proxies.clone(),
         quantize_binary: cfg.quantize_binary,
-        conflict_enabled: cfg.conflict_enabled,
-        conflict_threshold: normalized(cfg.conflict_contradiction, 0.80),
-        conflict_candidates: usize::try_from(cfg.conflict_max_candidates)
-            .ok()
-            .filter(|count| *count > 0)
-            .unwrap_or(10),
+        prefilter: cfg.prefilter,
+        conflict: super::write::conflict_config(cfg),
         working_ttl: go_duration(&cfg.working_ttl)
             .filter(|ttl| !ttl.is_zero())
             .unwrap_or(Duration::from_hours(24)),

@@ -224,30 +224,6 @@ fn search_prints_the_shipped_usage_for_help() {
 }
 
 #[test]
-fn search_flags_consume_their_values() {
-    let cases = [
-        vec!["search", "alpha", "--db", "/tmp/memory.db"],
-        vec!["search", "alpha", "--limit", "2", "--db", "/tmp/memory.db"],
-        vec![
-            "search",
-            "alpha",
-            "-l",
-            "2",
-            "-s",
-            "global",
-            "--db=/tmp/memory.db",
-        ],
-    ];
-    for case in cases {
-        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
-        assert!(
-            !requires_go_fallback(&args),
-            "{case:?} should stay native so the parser owns the values"
-        );
-    }
-}
-
-#[test]
 fn json_output_escapes_what_the_shipped_encoder_escapes() {
     assert_eq!(
         escape_html("a&b<c>d\u{2028}e\u{2029}"),
@@ -257,69 +233,11 @@ fn json_output_escapes_what_the_shipped_encoder_escapes() {
 
 /// The shapes the native path owns because the shipped implementation
 /// writes them itself instead of going through the flag package.
-#[test]
-fn hand_written_usage_shapes_stay_native() {
-    let native = [
-        vec![],
-        vec!["-h"],
-        vec!["--help"],
-        vec!["help"],
-        vec!["list", "--help"],
-        vec!["search"],
-        vec!["set"],
-        vec!["delete"],
-        vec!["sync"],
-    ];
-    for case in native {
-        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
-        assert!(
-            !requires_go_fallback(&args),
-            "{case:?} is a hand-written usage or help shape and must stay native"
-        );
-    }
-}
-
 /// `memory sync` is decided inside `run_sync` (it can hand an invocation to
 /// the shipped implementation after a read-only request), never by the
 /// pre-run routing gate.
-#[test]
-fn memory_sync_is_routed_by_run_sync_not_the_gate() {
-    for case in [
-        vec!["sync", "--remote", "https://example.test"],
-        vec!["sync", "--remote=https://example.test", "--push"],
-        vec!["sync", "--remote", "http://127.0.0.1:8080"],
-    ] {
-        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
-        assert!(is_sync(&args));
-        assert!(!requires_go_fallback(&args), "{case:?}");
-    }
-    // `serve` is native (#759): no hand-off to the shipped implementation.
-    assert!(!requires_go_fallback(&[OsString::from("serve")]));
-}
-
 /// Everything the shipped implementation refuses before it opens the database
 /// is native.
-#[test]
-fn memory_sync_refusals_are_native() {
-    for case in [
-        vec!["sync", "--pull"],
-        vec!["sync", "-h"],
-        vec!["sync", "--undefined"],
-        vec!["sync", "--timeout=soon", "--remote=https://example.test"],
-        vec!["sync", "stray"],
-        vec!["sync", "--remote", "ftp://example.test"],
-        vec!["sync", "--remote", "http://example.test"],
-        vec!["sync", "--remote", "example.test"],
-        vec!["sync", "--remote", "https://h:80:90"],
-    ] {
-        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
-        assert!(
-            !requires_go_fallback(&args),
-            "{case:?} fails before any database work and must stay native"
-        );
-    }
-}
-
 #[test]
 fn go_durations_follow_parse_duration() {
     use super::sync::valid_duration;

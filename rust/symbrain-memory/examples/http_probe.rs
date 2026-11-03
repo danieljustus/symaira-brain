@@ -15,7 +15,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let generator =
         EmbeddingGenerator::new(&std::env::var("SYMMEMORY_OLLAMA_URL")?, "nomic-embed-text");
     let options = Options {
-        direct_writes: true,
         require_profile: std::env::var("SYMMEMORY_SECURITY_REQUIRE_PROFILE")
             .is_ok_and(|s| s == "true"),
         ..Options::default()

@@ -298,6 +298,39 @@ impl Store {
         )
     }
 
+    /// The service search (`SearchMemoriesFilteredWithTrust`): optional
+    /// Hamming prefilter and the entity, trust and policy filters.
+    ///
+    /// # Errors
+    /// Returns the shipped diagnostics for an unreadable candidate or row.
+    pub fn search_filtered(
+        &self,
+        request: &crate::retrieval::ServiceSearch<'_>,
+    ) -> Result<Vec<crate::search_rows::SearchHit>, StoreError> {
+        let conn = self.lock()?;
+        crate::retrieval::search_with(
+            &conn,
+            &crate::retrieval::Query {
+                vector: request.vector,
+                source: request.source,
+                scope: request.scope,
+                limit: request.limit,
+                prefilter: request.prefilter,
+                filters: request.filters,
+                observe: request.observe,
+            },
+        )
+    }
+
+    /// `ResolveEntity`: the id of the entity named (or aliased) `name`.
+    ///
+    /// # Errors
+    /// Returns the shipped scan diagnostics for an unreadable entity row.
+    pub fn resolve_entity_id(&self, name: &str) -> Result<Option<String>, StoreError> {
+        let conn = self.lock()?;
+        crate::cli_entity::resolve(&conn, name.as_bytes()).map_err(Into::into)
+    }
+
     pub(crate) fn activity_conn(
         &self,
     ) -> Result<std::sync::MutexGuard<'_, Connection>, StoreError> {

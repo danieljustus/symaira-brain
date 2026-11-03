@@ -22,6 +22,27 @@ use crate::{EmbeddingGenerator, Store, StoreError};
 
 const SOURCE_TOOL: &str = "symbrain-cli";
 
+/// Who is writing: the client identity, session and the process-wide
+/// settings the shipped service reads while it stores a memory.
+pub struct Origin<'a> {
+    /// `sourceTool` provenance (`symbrain-cli`, `http`).
+    pub source_tool: &'a str,
+    /// Attribution session (`SessionID`), empty when unknown.
+    pub session: &'a str,
+    /// Working-tier time to live; `None` stores long term.
+    pub working_ttl: Option<chrono::Duration>,
+    /// Apply the governance steps (kind, staged review state) afterwards.
+    pub governed: bool,
+    /// `retention.audit_log_enabled` (the shipped `LogAudit` gate).
+    pub audit_enabled: bool,
+    /// `EmbeddingsGenerator.GenerateVector` of the owning process.
+    pub embed: &'a dyn Fn(&[u8]) -> crate::GeneratedEmbedding,
+    /// Embedding model name recorded for Ollama vectors.
+    pub model: &'a str,
+    /// Retrieval statistics sink (`RetrievalStats.Record`).
+    pub observe: Option<&'a dyn Fn(usize, f64, std::time::Duration)>,
+}
+
 /// A validated CLI write, in the byte-exact form the flags arrived in.
 pub struct CliSet {
     /// Trimmed, non-empty content.
@@ -179,9 +200,12 @@ struct Row<'a> {
     author: &'a [u8],
     superseded_by: &'a str,
     quantize_binary: bool,
+    session: &'a str,
+    tier: &'a str,
+    expires_at: Option<DateTime<Utc>>,
 }
 
-fn insert(conn: &Connection, row: &Row<'_>) -> Result<(), String> {
+fn insert(conn: &Connection, row: &Row<'_>, audit_enabled: bool) -> Result<(), String> {
     let lsh = crate::lsh::compute_lsh(row.vector)?;
     let binary = (row.quantize_binary && !row.vector.is_empty())
         .then(|| crate::cli_write::sign_bits(row.vector));
@@ -189,7 +213,7 @@ fn insert(conn: &Connection, row: &Row<'_>) -> Result<(), String> {
     let now = crate::gotime::format(Utc::now());
     let superseded = (!row.superseded_by.is_empty()).then_some(row.superseded_by);
     conn.execute(
-        "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,CAST(? AS TEXT),?,?,?,?,?,?,?,?,?,?,?,?,CAST(? AS TEXT),CAST(? AS TEXT),'','','raw',NULL,0,?,NULL,?,'long_term',NULL,1,NULL,NULL,'approved','',1,NULL)",
+        "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,CAST(? AS TEXT),?,?,?,?,?,?,?,?,?,?,?,?,CAST(? AS TEXT),CAST(? AS TEXT),?,?,'raw',NULL,0,?,NULL,?,?,?,1,NULL,NULL,'approved','',1,NULL)",
         params![
             row.id,
             Bytes(row.content),
@@ -207,24 +231,43 @@ fn insert(conn: &Connection, row: &Row<'_>) -> Result<(), String> {
             now,
             Bytes(row.author),
             Bytes(row.author),
+            row.session,
+            row.session,
             crate::gotime::format(row.valid_from),
             superseded,
+            row.tier,
+            row.expires_at.map(crate::gotime::format),
         ],
     )
     .map_err(|error| go_sqlite_error(&error))?;
-    audit(conn, "set", row.id, row.scope, row.author, "");
+    audit(
+        conn,
+        audit_enabled,
+        "set",
+        row.id,
+        row.scope,
+        row.session,
+        row.author,
+        "",
+    );
     Ok(())
 }
 
 /// `LogAudit` with byte-exact actor text; failures are ignored like in Go.
+#[allow(clippy::too_many_arguments)] // Mirrors `LogAudit` plus the global gate.
 pub(crate) fn audit(
     conn: &Connection,
+    enabled: bool,
     action: &str,
     memory_id: &str,
     scope: &str,
+    session: &str,
     actor: &[u8],
     detail: &str,
 ) {
+    if !enabled {
+        return;
+    }
     let nonempty = |value: &str| (!value.is_empty()).then(|| value.to_owned());
     let _ = conn.execute(
         "INSERT INTO audit_log(id,action,memory_id,scope,session,actor,detail,created_at) VALUES(?,?,?,?,?,CAST(? AS TEXT),?,?)",
@@ -233,7 +276,7 @@ pub(crate) fn audit(
             action,
             nonempty(memory_id),
             nonempty(scope),
-            Option::<String>::None,
+            nonempty(session),
             NullBytes(actor),
             nonempty(detail),
             crate::gotime::format(Utc::now()),
@@ -287,8 +330,11 @@ fn pending_detail(resolution: &Resolution) -> String {
 struct Pipeline<'a> {
     conn: &'a Connection,
     request: &'a CliSet,
-    generator: &'a EmbeddingGenerator,
+    origin: &'a Origin<'a>,
+    /// The checker handed to `memory.Store` (staged CLI writes pass none).
     checker: bool,
+    /// Whether the primary write runs it (working memories bypass it).
+    primary_checks: bool,
     patterns: BTreeSet<&'static str>,
 }
 
@@ -299,10 +345,12 @@ impl Pipeline<'_> {
     fn save(
         &self,
         row: &Row<'_>,
+        primary: bool,
         log: &mut LogSink<'_>,
     ) -> Result<(Option<SearchRow>, String), String> {
-        if !self.checker {
-            insert(self.conn, row)?;
+        let audit_enabled = self.origin.audit_enabled;
+        if !self.checker || (primary && !self.primary_checks) {
+            insert(self.conn, row, audit_enabled)?;
             return Ok((None, String::new()));
         }
         let hash = sha256_hex(row.content);
@@ -322,6 +370,7 @@ impl Pipeline<'_> {
             &self.request.conflict,
             &new,
             self.request.prefilter,
+            self.origin.observe,
             log,
         ) {
             Ok(resolutions) => resolutions,
@@ -350,9 +399,11 @@ impl Pipeline<'_> {
                 Verdict::Ambiguous => {
                     audit(
                         self.conn,
+                        audit_enabled,
                         "conflict_pending",
                         row.id,
                         row.scope,
+                        row.session,
                         row.author,
                         &pending_detail(resolution),
                     );
@@ -364,18 +415,19 @@ impl Pipeline<'_> {
             superseded_by: &superseded_by,
             ..*row
         };
-        insert(self.conn, &row)?;
+        insert(self.conn, &row, audit_enabled)?;
         for resolution in contradictions {
             if resolution.winner_id == row.id {
                 // The new fact wins: close the loser's validity window at the
                 // winner's creation time.
                 let updated = self.conn.execute(
-                    "UPDATE memories SET superseded_by = ?, valid_to = ?, updated_at = ?, updated_by = CAST(? AS TEXT), updated_session = NULL WHERE id = ? AND (superseded_by IS NULL OR superseded_by = '')",
+                    "UPDATE memories SET superseded_by = ?, valid_to = ?, updated_at = ?, updated_by = CAST(? AS TEXT), updated_session = ? WHERE id = ? AND (superseded_by IS NULL OR superseded_by = '')",
                     params![
                         row.id,
                         crate::gotime::format(row.created_at),
                         crate::gotime::format(Utc::now()),
                         NullBytes(row.author),
+                        (!row.session.is_empty()).then_some(row.session),
                         resolution.loser_id,
                     ],
                 );
@@ -392,9 +444,11 @@ impl Pipeline<'_> {
             }
             audit(
                 self.conn,
+                audit_enabled,
                 "supersede",
                 &resolution.loser_id,
                 row.scope,
+                row.session,
                 row.author,
                 &supersede_detail(resolution),
             );
@@ -409,11 +463,38 @@ impl Store {
     /// # Errors
     /// Returns the shipped error text for a rejected scope, a failed insert
     /// or a governance step that no longer finds the row.
-    #[allow(clippy::too_many_lines)]
     pub fn set_cli(
         &self,
         request: &CliSet,
         generator: &EmbeddingGenerator,
+        log: &mut LogSink<'_>,
+    ) -> Result<String, StoreError> {
+        let embed = |text: &[u8]| generator.generate_bytes(text);
+        let origin = Origin {
+            source_tool: SOURCE_TOOL,
+            session: "",
+            working_ttl: None,
+            governed: true,
+            audit_enabled: true,
+            embed: &embed,
+            model: generator.model(),
+            observe: None,
+        };
+        self.set_service(request, &origin, log)
+    }
+
+    /// `MemoryService.Set`/`SetGoverned` for any client: prepare, embed, the
+    /// conflict check, entities, secondary facts, the redaction audit and
+    /// (when governed) kind and review state.
+    ///
+    /// # Errors
+    /// Returns the shipped error text for a rejected scope, a failed insert
+    /// or a governance step that no longer finds the row.
+    #[allow(clippy::too_many_lines)]
+    pub fn set_service(
+        &self,
+        request: &CliSet,
+        origin: &Origin<'_>,
         log: &mut LogSink<'_>,
     ) -> Result<String, StoreError> {
         let conn = self.lock()?;
@@ -433,11 +514,13 @@ impl Store {
                 quote_bytes(&request.scope)
             )));
         };
+        let working = origin.working_ttl.is_some();
         let mut pipeline = Pipeline {
             conn: &conn,
             request,
-            generator,
+            origin,
             checker: request.conflict.enabled && !request.staged,
+            primary_checks: !working,
             patterns: BTreeSet::new(),
         };
 
@@ -456,7 +539,7 @@ impl Store {
         if scope == "project" {
             user.insert("project_name".into(), active_project());
         }
-        let mut metadata = defaults(SOURCE_TOOL);
+        let mut metadata = defaults(origin.source_tool);
         metadata.insert(
             "observed_at".into(),
             Utc::now()
@@ -474,9 +557,11 @@ impl Store {
 
         // Store.
         let id = crate::write::new_uuid();
-        let embedding = generator.generate_bytes(&content);
+        let expires_at = origin.working_ttl.map(|ttl| Utc::now() + ttl);
+        let tier = if working { "working" } else { "long_term" };
+        let embedding = (origin.embed)(&content);
         let model = if embedding.source == "ollama" {
-            generator.model()
+            origin.model
         } else {
             ""
         };
@@ -494,9 +579,12 @@ impl Store {
             author: &request.author,
             superseded_by: "",
             quantize_binary: request.quantize_binary,
+            session: origin.session,
+            tier,
+            expires_at,
         };
         let (existing, _) = pipeline
-            .save(&row, log)
+            .save(&row, true, log)
             .map_err(|error| invalid(format!("failed to save memory: {error}")))?;
         let stored = existing.map_or_else(
             || Written {
@@ -519,7 +607,14 @@ impl Store {
             },
         );
 
-        crate::cli_entity::link_bytes(&conn, &stored.id, &request.entities, &request.author);
+        crate::cli_entity::link_bytes(
+            &conn,
+            origin.audit_enabled,
+            origin.session,
+            &stored.id,
+            &request.entities,
+            &request.author,
+        );
 
         pipeline.extract(&stored, log);
 
@@ -532,14 +627,19 @@ impl Store {
                 .join(",");
             audit(
                 &conn,
+                origin.audit_enabled,
                 "redaction",
                 &stored.id,
                 &stored.scope,
+                origin.session,
                 &request.author,
                 &detail,
             );
         }
 
+        if !origin.governed {
+            return Ok(stored.id);
+        }
         // SetGoverned.
         let affected = conn
             .execute(
@@ -590,7 +690,7 @@ impl Pipeline<'_> {
             }
 
             let sub_id = crate::write::new_uuid();
-            let embedding = self.generator.generate_bytes(&clean);
+            let embedding = (self.origin.embed)(&clean);
             let mut sub: Metadata = fact
                 .metadata
                 .iter()
@@ -641,7 +741,7 @@ impl Pipeline<'_> {
 
             let now = Utc::now();
             let model = if embedding.source == "ollama" {
-                self.generator.model()
+                self.origin.model
             } else {
                 ""
             };
@@ -658,8 +758,11 @@ impl Pipeline<'_> {
                 author: &self.request.author,
                 superseded_by: "",
                 quantize_binary: self.request.quantize_binary,
+                session: self.origin.session,
+                tier: "long_term",
+                expires_at: None,
             };
-            match self.save(&row, log) {
+            match self.save(&row, false, log) {
                 Ok((None, _)) => {}
                 Ok((Some(found), _)) => {
                     log.info(
@@ -676,7 +779,7 @@ impl Pipeline<'_> {
             for mut span in fact.evidence {
                 span.source = SourceRef {
                     id: primary.id.clone(),
-                    kind: SOURCE_TOOL.to_owned(),
+                    kind: self.origin.source_tool.to_owned(),
                 };
                 for text in [&mut span.evidence_text, &mut span.text] {
                     let redacted = crate::pii::redact_bytes(text.as_bytes());

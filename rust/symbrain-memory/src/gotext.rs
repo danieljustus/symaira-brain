@@ -117,6 +117,36 @@ impl GoView {
     }
 }
 
+/// `strings.TrimSpace` over raw bytes: invalid bytes are not space, so they
+/// stop the trim on either side.
+pub(crate) fn trim_space(bytes: &[u8]) -> &[u8] {
+    let mut start = 0;
+    while let Some(character) = bytes[start..]
+        .utf8_chunks()
+        .next()
+        .and_then(|chunk| chunk.valid().chars().next())
+    {
+        if !character.is_whitespace() {
+            break;
+        }
+        start += character.len_utf8();
+    }
+    let mut end = bytes.len();
+    while end > start {
+        let Some(chunk) = bytes[start..end].utf8_chunks().last() else {
+            break;
+        };
+        if !chunk.invalid().is_empty() {
+            break;
+        }
+        match chunk.valid().chars().next_back() {
+            Some(character) if character.is_whitespace() => end -= character.len_utf8(),
+            _ => break,
+        }
+    }
+    &bytes[start..end]
+}
+
 /// `encoding/json` string encoding of raw bytes under Go 1.27 (the v2 engine
 /// with v1 semantics): an invalid byte is written as a literal U+FFFD.
 pub(crate) fn json_string(bytes: &[u8]) -> String {

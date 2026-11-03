@@ -160,22 +160,27 @@ mod tests {
     fn output_failure_reports_error_after_committed_set() {
         for format in [OutputFormat::Json, OutputFormat::Table] {
             let store = symbrain_memory::Store::open_in_memory().expect("owned store");
-            let request = symbrain_memory::DirectWrite {
-                content: "hello world".into(),
-                scope: "global".into(),
+            let request = symbrain_memory::CliSet {
+                content: b"hello world".to_vec(),
+                scope: b"global".to_vec(),
                 kind: "reference".into(),
                 metadata: [("fixture".into(), "value".into())].into(),
-                author: "cli:symbrain".into(),
+                author: b"cli:symbrain".to_vec(),
                 entities: vec![],
                 staged: false,
                 quantize_binary: false,
-                conflict_enabled: false,
+                prefilter: false,
+                conflict: symbrain_memory::ConflictConfig {
+                    enabled: false,
+                    ..symbrain_memory::ConflictConfig::default()
+                },
             };
             // No URL scheme: hash fallback without contacting any endpoint.
             let generator =
                 symbrain_memory::EmbeddingGenerator::new("owned-invalid-endpoint", "owned-model");
+            let mut sink = Vec::new();
             let id = store
-                .set_direct_cli(&request, &generator)
+                .set_cli(&request, &generator, &mut symbrain_memory::LogSink(&mut sink))
                 .expect("committed set");
             let mut stderr = Vec::new();
             assert_eq!(

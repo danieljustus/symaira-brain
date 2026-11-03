@@ -153,7 +153,6 @@ fn run_native(
         "harness" => Some(harness_cli::run(rest, stdout, stderr, format)),
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
         "memory" if memory_cli::is_sync(rest) => memory_cli::run_sync(rest, stdout, stderr, format),
-        "memory" if memory_cli::requires_go_fallback(rest) => None,
         "memory" if process_stdout => Some(memory_cli::run_with_stdout(
             rest, stdout, stderr, format, true,
         )),

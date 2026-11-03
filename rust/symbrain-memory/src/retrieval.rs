@@ -36,13 +36,136 @@ const RECENCY_WEIGHT: f64 = 0.2;
 const IMPORTANCE_WEIGHT: f64 = 0.2;
 const RECENCY_HALF_LIFE: f64 = 30.0;
 
-/// One LSH-bucket candidate, before hydration.
+/// One LSH-bucket candidate, before hydration: identity, the filter fields
+/// and the sign-bit vector the shipped scan reads.
 struct Candidate {
     id: String,
     embedding_dim: i64,
     /// Sign-bit vector; `None` for a NULL column.
     binary: Option<Vec<u8>>,
+    metadata: serde_json::Map<String, serde_json::Value>,
+    created_at: DateTime<Utc>,
+    superseded_by: String,
 }
+
+/// `db.TrustFilter`.
+#[derive(Debug, Clone, Default)]
+pub struct TrustFilter {
+    /// Minimum `confidence` metadata (`low`, `medium`, `high`).
+    pub min_confidence: String,
+    /// Required `verification_status` metadata.
+    pub verification_status: String,
+    /// Drop memories with a `superseded_by` link.
+    pub exclude_superseded: bool,
+    /// Maximum age of a memory.
+    pub max_age: Option<std::time::Duration>,
+}
+
+/// `db.PolicyFilter`.
+#[derive(Debug, Clone, Default)]
+pub struct PolicyFilter {
+    /// Highest admitted `sensitivity`.
+    pub max_sensitivity: String,
+    /// Lowest admitted `sharing_level`.
+    pub min_sharing_level: String,
+    /// Client the memory must be readable by.
+    pub client_id: String,
+}
+
+/// The filters of `SearchMemoriesFilteredWithTrust` that candidate selection
+/// applies before hydration.
+#[derive(Debug, Clone, Default)]
+pub struct SearchFilters {
+    /// Resolved entity id; only linked memories qualify.
+    pub entity_id: String,
+    /// Trust filter.
+    pub trust: TrustFilter,
+    /// Policy filter.
+    pub policy: PolicyFilter,
+}
+
+fn meta<'a>(candidate: &'a Candidate, key: &str) -> &'a str {
+    candidate
+        .metadata
+        .get(key)
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+}
+
+fn rank(order: &[&str], value: &str, unknown: usize) -> usize {
+    order
+        .iter()
+        .position(|name| *name == value)
+        .unwrap_or(unknown)
+}
+
+fn csv(text: &str) -> impl Iterator<Item = &str> {
+    text.split(',').map(str::trim).filter(|part| !part.is_empty())
+}
+
+impl SearchFilters {
+    fn admits(&self, candidate: &Candidate) -> bool {
+        let trust = &self.trust;
+        if trust.exclude_superseded && !candidate.superseded_by.is_empty() {
+            return false;
+        }
+        if !trust.min_confidence.is_empty() {
+            let confidence = meta(candidate, "confidence");
+            let confidence = if confidence.is_empty() { "medium" } else { confidence };
+            let order = ["low", "medium", "high"];
+            if rank(&order, confidence, 1) < rank(&order, &trust.min_confidence, 1) {
+                return false;
+            }
+        }
+        if !trust.verification_status.is_empty() {
+            let status = meta(candidate, "verification_status");
+            let status = if status.is_empty() { "unverified" } else { status };
+            if status != trust.verification_status {
+                return false;
+            }
+        }
+        if let Some(max_age) = trust.max_age
+            && !max_age.is_zero()
+            && Utc::now()
+                .signed_duration_since(candidate.created_at)
+                .to_std()
+                .is_ok_and(|age| age > max_age)
+        {
+            return false;
+        }
+        let policy = &self.policy;
+        if !policy.max_sensitivity.is_empty() {
+            let sensitivity = meta(candidate, "sensitivity");
+            let sensitivity = if sensitivity.is_empty() { "internal" } else { sensitivity };
+            let order = ["public", "internal", "confidential", "secret"];
+            if rank(&order, sensitivity, 1) > rank(&order, &policy.max_sensitivity, 1) {
+                return false;
+            }
+        }
+        if !policy.min_sharing_level.is_empty() {
+            let sharing = meta(candidate, "sharing_level");
+            let sharing = if sharing.is_empty() { "private" } else { sharing };
+            let order = ["private", "team", "org", "public"];
+            if rank(&order, sharing, 0) < rank(&order, &policy.min_sharing_level, 0) {
+                return false;
+            }
+        }
+        if !policy.client_id.is_empty() {
+            let denied = meta(candidate, "denied_clients");
+            if csv(denied).any(|client| client == policy.client_id) {
+                return false;
+            }
+            let allowed = meta(candidate, "allowed_clients");
+            if !allowed.is_empty() && !csv(allowed).any(|client| client == policy.client_id) {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+/// Retrieval statistics sink (`RetrievalStats.Record`).
+pub(crate) type Observe<'a> = Option<&'a dyn Fn(usize, f64, std::time::Duration)>;
 
 /// Runs the shipped retrieval pipeline for a prepared query vector.
 ///
@@ -55,7 +178,7 @@ pub(crate) fn search(
     scope: &str,
     limit: usize,
 ) -> Result<Vec<SearchHit>, StoreError> {
-    search_checked(conn, query_vector, query_source, scope, limit, |_| true)
+    search_prefiltered(conn, query_vector, query_source, scope, limit, false)
 }
 
 /// `search` with the `hybrid_search.prefilter_enabled` Hamming prefilter.
@@ -69,33 +192,45 @@ pub(crate) fn search_prefiltered(
 ) -> Result<Vec<SearchHit>, StoreError> {
     search_with(
         conn,
-        query_vector,
-        query_source,
-        scope,
-        limit,
-        prefilter,
-        |_| true,
+        &Query {
+            vector: query_vector,
+            source: query_source,
+            scope,
+            limit,
+            prefilter,
+            filters: &SearchFilters::default(),
+            observe: None,
+        },
     )
 }
 
-/// Checks the caller's read boundary before recording retrieval feedback.
-pub(crate) fn search_checked(
-    conn: &Connection,
-    query_vector: &[f32],
-    query_source: &str,
-    scope: &str,
-    limit: usize,
-    admitted: impl Fn(&SearchRow) -> bool,
-) -> Result<Vec<SearchHit>, StoreError> {
-    search_with(
-        conn,
-        query_vector,
-        query_source,
-        scope,
-        limit,
-        false,
-        admitted,
-    )
+/// The public inputs of one service search.
+pub struct ServiceSearch<'a> {
+    /// Query vector.
+    pub vector: &'a [f32],
+    /// Embedding space of the vector.
+    pub source: &'a str,
+    /// Scope filter (empty: all).
+    pub scope: &'a str,
+    /// Result limit.
+    pub limit: usize,
+    /// `hybrid_search.prefilter_enabled`.
+    pub prefilter: bool,
+    /// Entity, trust and policy filters.
+    pub filters: &'a SearchFilters,
+    /// Retrieval statistics sink.
+    pub observe: Option<&'a dyn Fn(usize, f64, std::time::Duration)>,
+}
+
+/// The inputs of one retrieval.
+pub(crate) struct Query<'a> {
+    pub vector: &'a [f32],
+    pub source: &'a str,
+    pub scope: &'a str,
+    pub limit: usize,
+    pub prefilter: bool,
+    pub filters: &'a SearchFilters,
+    pub observe: Observe<'a>,
 }
 
 /// The shipped `prefilterCandidates`: with the prefilter on, keep the
@@ -150,42 +285,43 @@ fn prefilter_ids(candidates: &[Candidate], query_vector: &[f32], limit: usize) -
         .collect()
 }
 
-fn search_with(
-    conn: &Connection,
-    query_vector: &[f32],
-    query_source: &str,
-    scope: &str,
-    limit: usize,
-    prefilter: bool,
-    admitted: impl Fn(&SearchRow) -> bool,
-) -> Result<Vec<SearchHit>, StoreError> {
-    let buckets = buckets_for(query_vector)?;
-    let candidates = candidates(conn, &buckets, query_source, scope)?;
+pub(crate) fn search_with(conn: &Connection, query: &Query<'_>) -> Result<Vec<SearchHit>, StoreError> {
+    let started = std::time::Instant::now();
+    let record = |hits: &[SearchHit]| {
+        if let Some(observe) = query.observe {
+            observe(
+                hits.len(),
+                hits.first().map_or(0.0, |hit| f64::from(hit.score)),
+                started.elapsed(),
+            );
+        }
+    };
+    let buckets = buckets_for(query.vector)?;
+    let candidates = candidates(conn, &buckets, query.source, query.scope, &query.filters.entity_id)?;
     let candidates: Vec<Candidate> = candidates
         .into_iter()
-        .filter(|candidate| Some(candidate.embedding_dim) == i64::try_from(query_vector.len()).ok())
+        .filter(|candidate| Some(candidate.embedding_dim) == i64::try_from(query.vector.len()).ok())
+        .filter(|candidate| query.filters.admits(candidate))
         .collect();
     if candidates.is_empty() {
+        record(&[]);
         return Ok(Vec::new());
     }
 
-    let ids: Vec<String> = if prefilter {
-        prefilter_ids(&candidates, query_vector, limit)
+    let ids: Vec<String> = if query.prefilter {
+        prefilter_ids(&candidates, query.vector, query.limit)
     } else {
         candidates
             .into_iter()
             .map(|candidate| candidate.id)
             .collect()
     };
-    let mut hits = hydrate(conn, &ids, query_vector)?;
-    score_and_rank(&mut hits, query_vector);
-    hits.truncate(limit);
-    if hits.iter().any(|hit| !admitted(&hit.memory)) {
-        return Err(StoreError::Invalid(
-            "read requires the unported memory pipeline".into(),
-        ));
-    }
-    track_access(conn, &hits)?;
+    let mut hits = hydrate(conn, &ids, query.vector)?;
+    score_and_rank(&mut hits, query.vector);
+    hits.truncate(query.limit);
+    record(&hits);
+    // Access tracking is best effort in the shipped search.
+    let _ = track_access(conn, &hits);
     Ok(hits)
 }
 
@@ -203,6 +339,7 @@ fn candidates(
     buckets: &[i64],
     query_source: &str,
     scope: &str,
+    entity_id: &str,
 ) -> Result<Vec<Candidate>, StoreError> {
     let mut candidates = Vec::new();
     let mut start = 0;
@@ -213,18 +350,25 @@ fn candidates(
         let filter = "consolidation_status != 'archived' AND embedding_source = ? AND \
              embedding_quantization = ? AND embedding IS NOT NULL AND lsh_hash IN (";
         let tail = ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > \
-             datetime('now')) AND review_status = 'approved' AND retired_at IS NULL \
-             ORDER BY created_at DESC";
-        let projection = "id, embedding_binary, embedding_dim";
+             datetime('now')) AND review_status = 'approved' AND retired_at IS NULL";
+        let entity = if entity_id.is_empty() {
+            ""
+        } else {
+            " AND id IN (SELECT memory_id FROM memory_entities WHERE entity_id = ?)"
+        };
+        let projection = "id, embedding_binary, embedding_dim, metadata, created_at, valid_from, \
+             valid_to, superseded_by";
         let (sql, mut arguments) = if scope.is_empty() {
             (
-                format!("SELECT {projection} FROM memories WHERE {filter}{placeholders}{tail}"),
+                format!(
+                    "SELECT {projection} FROM memories WHERE {filter}{placeholders}{tail}{entity} ORDER BY created_at DESC"
+                ),
                 Vec::new(),
             )
         } else {
             (
                 format!(
-                    "SELECT {projection} FROM memories WHERE scope = ? AND {filter}{placeholders}{tail}"
+                    "SELECT {projection} FROM memories WHERE scope = ? AND {filter}{placeholders}{tail}{entity} ORDER BY created_at DESC"
                 ),
                 vec![scope.to_owned()],
             )
@@ -232,16 +376,29 @@ fn candidates(
         arguments.push(query_source.to_owned());
         arguments.push(String::new());
         arguments.extend(chunk.iter().map(i64::to_string));
+        if !entity_id.is_empty() {
+            arguments.push(entity_id.to_owned());
+        }
 
         let mut statement = conn.prepare(&sql)?;
         let rows = statement.query_map(rusqlite::params_from_iter(arguments.iter()), |row| {
+            use crate::goscan::{blob, decode_metadata, null_int, null_text, null_time, raw, text, time};
+            let id = text(row, 0, "id")?;
+            let binary = blob(row, 1, "embedding_binary")?;
+            let dim = null_int(row, 2, "embedding_dim")?.unwrap_or(0);
+            let metadata_bytes = raw(row, 3, "metadata")?;
+            let created_at = time(row, 4, "created_at")?;
+            null_time(row, 5, "valid_from")?;
+            null_time(row, 6, "valid_to")?;
+            let superseded_by = null_text(row, 7, "superseded_by")?;
+            let (metadata, _) = decode_metadata(&metadata_bytes)?;
             Ok(Candidate {
-                id: row.get(0)?,
-                embedding_dim: row.get::<_, Option<i64>>(2)?.unwrap_or(0),
-                binary: match row.get_ref(1)? {
-                    rusqlite::types::ValueRef::Null => None,
-                    other => Some(other.as_bytes().map(<[u8]>::to_vec).unwrap_or_default()),
-                },
+                id,
+                embedding_dim: dim,
+                binary,
+                metadata,
+                created_at,
+                superseded_by,
             })
         })?;
         for row in rows {

@@ -1,9 +1,8 @@
 //! Shared, bounded native memory HTTP owner.
 //!
-//! This positive UI/API slice deliberately does not admit the complete legacy
-//! `memory serve` CLI: sync, full configuration and unrestricted write contracts
-//! retain their separately recorded migration gates. Unsupported operations
-//! fail explicitly; there is no hidden Go process or second store.
+//! The native `memory serve` runtime: every route runs the same native
+//! pipelines as the CLI against the one embedded store. There is no hidden Go
+//! process and no second store.
 
 use crate::{EmbeddingGenerator, Store, StoreError};
 use std::sync::Arc;
@@ -32,8 +31,6 @@ pub struct Options {
     pub version: String,
     /// Deny write access when the JWT subject has no stored profile.
     pub require_profile: bool,
-    /// Enable only the proven extraction-free, conflict-disabled direct writes.
-    pub direct_writes: bool,
     /// Whether SQLite mutation auditing is enabled.
     pub audit_enabled: bool,
     /// `security.trusted_proxies`: CIDRs whose forwarded client address is
@@ -41,12 +38,10 @@ pub struct Options {
     pub trusted_proxies: Vec<String>,
     /// `hybrid_search.quantize_to_binary` for synced vectors.
     pub quantize_binary: bool,
-    /// `conflict.enabled`: writes then need the write-path conflict check.
-    pub conflict_enabled: bool,
-    /// `conflict.contradiction_threshold` after the shipped normalisation.
-    pub conflict_threshold: f64,
-    /// `conflict.max_candidates` after the shipped normalisation.
-    pub conflict_candidates: usize,
+    /// `hybrid_search.prefilter_enabled`.
+    pub prefilter: bool,
+    /// The write-path conflict configuration.
+    pub conflict: crate::ConflictConfig,
     /// `working_memory.ttl` after the shipped default.
     pub working_ttl: std::time::Duration,
 }
@@ -56,13 +51,14 @@ impl Default for Options {
         Self {
             version: "dev".into(),
             require_profile: false,
-            direct_writes: false,
             audit_enabled: true,
             trusted_proxies: Vec::new(),
             quantize_binary: false,
-            conflict_enabled: false,
-            conflict_threshold: 0.80,
-            conflict_candidates: 10,
+            prefilter: false,
+            conflict: crate::ConflictConfig {
+                enabled: false,
+                ..crate::ConflictConfig::default()
+            },
             working_ttl: std::time::Duration::from_hours(24),
         }
     }

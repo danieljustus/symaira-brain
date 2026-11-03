@@ -63,10 +63,7 @@ fn owner(options: Options) -> Owner {
 }
 
 fn writer() -> Options {
-    Options {
-        direct_writes: true,
-        ..Options::default()
-    }
+    Options::default()
 }
 
 fn token(sub: &str, jti: &str, exp_offset: i64) -> String {
@@ -396,7 +393,7 @@ fn direct_writes_round_trip_through_the_shared_store() {
             r#"{"query":"x","entity":"y"}"#
         )
         .status,
-        501
+        404
     );
     assert_eq!(
         send(
@@ -424,25 +421,8 @@ fn direct_writes_round_trip_through_the_shared_store() {
 
 #[test]
 fn writes_respect_options_profiles_and_body_limits() {
-    let disabled = owner(Options::default());
     let valid = bearer(&token("alice", "p1", 60));
     let auth = [("Authorization", valid.as_str())];
-    assert_eq!(
-        send(
-            disabled.port,
-            "POST",
-            "/api/set",
-            &auth,
-            r#"{"content":"plain words"}"#
-        )
-        .status,
-        501
-    );
-    assert_eq!(
-        send(disabled.port, "DELETE", "/api/delete?id=x", &auth, "").status,
-        501
-    );
-    drop(disabled);
 
     let strict = owner(Options {
         require_profile: true,

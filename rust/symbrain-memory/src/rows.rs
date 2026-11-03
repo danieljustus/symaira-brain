@@ -38,27 +38,6 @@ pub(crate) fn json<T: serde::de::DeserializeOwned>(
     })
 }
 
-/// A stored metadata column: a JSON object, or JSON `null` when the writer
-/// marshalled a nil map (the shipped decoder yields a nil map, which renders
-/// as `null` again). The flag keeps that distinction.
-pub(crate) fn metadata(
-    row: &Row<'_>,
-    index: usize,
-) -> rusqlite::Result<(serde_json::Map<String, serde_json::Value>, bool)> {
-    match json::<serde_json::Value>(row, index)? {
-        serde_json::Value::Null => Ok((serde_json::Map::new(), true)),
-        serde_json::Value::Object(map) => Ok((map, false)),
-        other => Err(rusqlite::Error::FromSqlConversionFailure(
-            index,
-            rusqlite::types::Type::Text,
-            Box::new(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                format!("metadata is not an object: {other}"),
-            )),
-        )),
-    }
-}
-
 fn parse_time(raw: &str) -> rusqlite::Result<DateTime<Utc>> {
     crate::gotime::parse(raw).ok_or_else(|| {
         rusqlite::Error::FromSqlConversionFailure(

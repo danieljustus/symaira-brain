@@ -5,6 +5,21 @@ use super::{
     OsString, OutputFormat, Write, exit, flags, go_json, kind, open_store,
 };
 
+/// The write-path conflict configuration of the loaded memory config.
+pub(super) fn conflict_config(config: &super::config::Config) -> symbrain_memory::ConflictConfig {
+    symbrain_memory::ConflictConfig {
+        enabled: config.conflict_enabled,
+        contradiction_threshold: config.conflict_contradiction,
+        near_dup_threshold: config.conflict_near_dup,
+        max_candidates: config.conflict_max_candidates,
+        llm: symbrain_memory::LlmSettings {
+            provider: config.conflict_llm_provider.clone(),
+            url: config.conflict_llm_url.clone(),
+            model: config.conflict_llm_model.clone(),
+        },
+    }
+}
+
 pub(super) fn run_set(
     args: &[OsString],
     stdout: &mut dyn Write,
@@ -87,17 +102,7 @@ pub(super) fn run_set(
         staged,
         quantize_binary: config.quantize_binary,
         prefilter: config.prefilter,
-        conflict: symbrain_memory::ConflictConfig {
-            enabled: config.conflict_enabled,
-            contradiction_threshold: config.conflict_contradiction,
-            near_dup_threshold: config.conflict_near_dup,
-            max_candidates: config.conflict_max_candidates,
-            llm: symbrain_memory::LlmSettings {
-                provider: config.conflict_llm_provider.clone(),
-                url: config.conflict_llm_url.clone(),
-                model: config.conflict_llm_model.clone(),
-            },
-        },
+        conflict: conflict_config(config),
     };
     let generator =
         symbrain_memory::EmbeddingGenerator::new(&config.ollama_url, &config.ollama_model);
