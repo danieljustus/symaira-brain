@@ -21,6 +21,12 @@ from external_env import ensure_external_environment as ensure_shared_external_e
 
 FIXTURE = HERE / "fixture.json"
 PINNED_COMMIT_SHA = "9c0e2b259753901a372ed5a688382bb6d4fadd18"
+# The pin covers the Go sources whose grants behaviour this oracle freezes. It
+# deliberately excludes the module files, exactly like the scan oracle: they
+# change on every dependency update, so binding them made `check` fail by
+# construction on routine Dependabot module bumps (it did at the ORACLE-FREEZE
+# #781 base) although no grants source changed. The module files stay pinned by
+# their own hashes and by the dependency gates.
 GO_SOURCE_PATHS = (
     "cmd/symbrain/cmd_guard.go",
     "cmd/symbrain/main.go",
@@ -28,8 +34,6 @@ GO_SOURCE_PATHS = (
     "guard/internal/config/config.go",
     "guard/internal/grant/grant.go",
     "guard/internal/grant/store.go",
-    "go.mod",
-    "go.sum",
 )
 GO_TOOLCHAIN = "go1.26.7"
 
