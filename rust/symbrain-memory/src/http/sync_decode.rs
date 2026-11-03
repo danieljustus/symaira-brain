@@ -34,11 +34,62 @@ pub(super) struct Apply {
 /// Decodes a top-level object (or `null`) into its members; duplicate keys
 /// collapse with the last one winning, as in `encoding/json`.
 pub(super) fn top_level(body: &[u8]) -> Option<Vec<(String, Value)>> {
-    match serde_json::from_slice::<Value>(body).ok()? {
+    let parsed = serde_json::from_slice::<Value>(body)
+        .ok()
+        .or_else(|| serde_json::from_str::<Value>(&lenient(body)?).ok())?;
+    match parsed {
         Value::Null => Some(Vec::new()),
         Value::Object(map) => Some(map.into_iter().collect()),
         _ => None,
     }
+}
+
+/// `encoding/json` accepts what `serde_json` refuses inside strings: invalid
+/// UTF-8 and lone surrogate escapes both decode to U+FFFD. Syntax errors stay
+/// errors.
+fn lenient(body: &[u8]) -> Option<String> {
+    super::go_json::syntax_error(body).is_none().then_some(())?;
+    let text = String::from_utf8_lossy(body);
+    let chars = text.as_bytes();
+    let mut out = String::with_capacity(text.len());
+    let (mut at, mut in_string) = (0_usize, false);
+    let hex = |at: usize| -> Option<u32> {
+        let slice = chars.get(at..at + 4)?;
+        u32::from_str_radix(std::str::from_utf8(slice).ok()?, 16).ok()
+    };
+    while at < chars.len() {
+        let byte = chars[at];
+        if in_string && byte == b'\\' && chars.get(at + 1) == Some(&b'u') {
+            let unit = hex(at + 2)?;
+            let pair = chars.get(at + 6) == Some(&b'\\') && chars.get(at + 7) == Some(&b'u');
+            if (0xd800..0xdc00).contains(&unit)
+                && pair
+                && hex(at + 8).is_some_and(|low| (0xdc00..0xe000).contains(&low))
+            {
+                out.push_str(&text[at..at + 12]);
+                at += 12;
+            } else if (0xd800..0xe000).contains(&unit) {
+                out.push_str("\\ufffd");
+                at += 6;
+            } else {
+                out.push_str(&text[at..at + 6]);
+                at += 6;
+            }
+            continue;
+        }
+        if in_string && byte == b'\\' {
+            out.push_str(&text[at..=at + 1]);
+            at += 2;
+            continue;
+        }
+        if byte == b'"' {
+            in_string = !in_string;
+        }
+        let length = text[at..].chars().next().map_or(1, char::len_utf8);
+        out.push_str(&text[at..at + length]);
+        at += length;
+    }
+    Some(out)
 }
 
 pub(super) fn apply(body: &[u8]) -> Option<Apply> {
@@ -379,6 +430,19 @@ pub(super) fn set_args(body: &[u8]) -> Option<SetArgs> {
         }
     }
     Some(args)
+}
+
+/// `POST /api/token/revoke`: `(token, jti)`.
+pub(super) fn revoke_args(body: &[u8]) -> Option<(String, String)> {
+    let (mut token, mut jti) = (String::new(), String::new());
+    for (key, value) in top_level(body)? {
+        match fold(&key).as_str() {
+            "token" => text(&value, &mut token)?,
+            "jti" => text(&value, &mut jti)?,
+            _ => {}
+        }
+    }
+    Some((token, jti))
 }
 
 /// Arguments of `POST /api/search`; `extended` is set when a filter beyond

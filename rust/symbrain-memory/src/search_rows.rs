@@ -29,6 +29,8 @@ pub struct SearchRow {
     pub scope: String,
     /// Metadata object, as stored.
     pub metadata: serde_json::Map<String, serde_json::Value>,
+    /// The column held JSON `null` (a nil map), rendered as `null`.
+    pub metadata_null: bool,
     /// Stored embedding vector, used for scoring and never rendered.
     pub embedding: Vec<f32>,
     /// Sign-bit embedding, used by the Hamming prefilter and never rendered.
@@ -53,6 +55,8 @@ pub struct SearchRow {
     pub created_session: String,
     /// Session that last updated it.
     pub updated_session: String,
+    /// Linked entity names (single-row loads only), `entities,omitempty`.
+    pub entities: Vec<String>,
     /// Consolidation status.
     pub consolidation_status: String,
     /// Memory this one was consolidated into.
@@ -89,15 +93,18 @@ impl SearchRow {
     /// Reads one full memory row in the shipped column order.
     pub(crate) fn from_row(row: &Row<'_>) -> rusqlite::Result<Self> {
         let embedding_binary: Option<Vec<u8>> = row.get(5)?;
-        let embedding: Vec<f32> = crate::rows::json(row, 4)?;
+        // A nil vector is stored as JSON `null`, which the shipped decoder accepts.
+        let embedding: Vec<f32> = crate::rows::json::<Option<Vec<f32>>>(row, 4)?.unwrap_or_default();
         if embedding.iter().any(|value| !value.is_finite()) {
             return Err(rusqlite::Error::InvalidQuery);
         }
+        let (metadata, metadata_null) = crate::rows::metadata(row, 3)?;
         Ok(Self {
             id: row.get(0)?,
             content: row.get(1)?,
             scope: row.get(2)?,
-            metadata: crate::rows::json(row, 3)?,
+            metadata,
+            metadata_null,
             // The shipped full scan omits `embedding_dim` and derives the
             // length from the vector itself.
             embedding_dim: i64::try_from(embedding.len()).unwrap_or_default(),
@@ -112,6 +119,7 @@ impl SearchRow {
             updated_by: row.get(12)?,
             created_session: row.get(13)?,
             updated_session: row.get(14)?,
+            entities: Vec::new(),
             consolidation_status: row.get(15)?,
             // NULL-tolerant like the shipped scan, which reads these two into
             // `sql.NullString` and keeps the empty string when absent.
@@ -184,7 +192,14 @@ impl SearchRow {
         members.string("id", &self.id);
         members.string("content", &self.content);
         members.string("scope", &self.scope);
-        members.raw("metadata", &metadata_json(&self.metadata));
+        members.raw(
+            "metadata",
+            &if self.metadata_null {
+                "null".to_owned()
+            } else {
+                metadata_json(&self.metadata)
+            },
+        );
         if embedding && !self.embedding.is_empty() {
             let vector = self
                 .embedding
@@ -203,6 +218,14 @@ impl SearchRow {
         members.string_if_present("updated_by", &self.updated_by);
         members.string_if_present("created_session", &self.created_session);
         members.string_if_present("updated_session", &self.updated_session);
+        if !self.entities.is_empty() {
+            let names = self
+                .entities
+                .iter()
+                .map(|name| gojson::quote(name))
+                .collect::<Vec<_>>();
+            members.raw("entities", &format!("[{}]", names.join(",")));
+        }
         members.string("consolidation_status", &self.consolidation_status);
         members.string_if_present("consolidated_into_id", &self.consolidated_into_id);
         members.number("importance", self.importance);

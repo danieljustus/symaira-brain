@@ -154,7 +154,7 @@ impl Store {
                 extra.session, valid_from, tier, expires_at],
         ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
         if audit_enabled {
-            audit(&conn, "set", &id, scope, "", &request.author, "");
+            audit(&conn, "set", &id, scope, &extra.session, &request.author, "");
         }
         crate::cli_entity::link(&conn, &id, &request.entities, &request.author);
         if let Some(kind) = kind {

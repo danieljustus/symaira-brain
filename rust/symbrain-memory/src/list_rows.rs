@@ -32,6 +32,8 @@ pub struct MemoryListRow {
     pub scope: String,
     /// Metadata object, as stored.
     pub metadata: serde_json::Map<String, serde_json::Value>,
+    /// The column held JSON `null` (a nil map), rendered as `null`.
+    pub metadata_null: bool,
     /// Creation timestamp.
     pub created_at: Option<DateTime<Utc>>,
     /// Update timestamp.
@@ -96,7 +98,7 @@ impl MemoryListRow {
         members.string("id", &self.id);
         members.string("content", &self.content);
         members.string("scope", &self.scope);
-        members.raw("metadata", &render_map(&self.metadata));
+        members.raw("metadata", &render_metadata(&self.metadata, self.metadata_null));
         members.time("created_at", self.created_at);
         members.time("updated_at", self.updated_at);
         members.string_if_present("created_by", &self.created_by);
@@ -121,6 +123,18 @@ impl MemoryListRow {
         members.time_if_present("last_access", self.last_access);
         members.time_if_present("prev_access", self.prev_access);
         members.finish()
+    }
+}
+
+/// A nil map renders as `null`, any decoded object as an object.
+fn render_metadata(
+    map: &serde_json::Map<String, serde_json::Value>,
+    null: bool,
+) -> String {
+    if null {
+        "null".to_owned()
+    } else {
+        render_map(map)
     }
 }
 
@@ -152,6 +166,8 @@ pub struct RuleRow {
     pub scope: String,
     /// Metadata object, as stored.
     pub metadata: serde_json::Map<String, serde_json::Value>,
+    /// The column held JSON `null` (a nil map), rendered as `null`.
+    pub metadata_null: bool,
     /// Creation timestamp.
     pub created_at: Option<DateTime<Utc>>,
     /// Update timestamp.
@@ -170,7 +186,7 @@ impl RuleRow {
         members.string("id", &self.id);
         members.string("content", &self.content);
         members.string("scope", &self.scope);
-        members.raw("metadata", &render_map(&self.metadata));
+        members.raw("metadata", &render_metadata(&self.metadata, self.metadata_null));
         members.time("created_at", self.created_at);
         members.time("updated_at", self.updated_at);
         members.string_if_present("created_by", &self.created_by);
@@ -199,11 +215,13 @@ pub(crate) fn list_rules(conn: &Connection, scope: &str) -> rusqlite::Result<Vec
     };
     let mut result = Vec::new();
     while let Some(row) = rows.next()? {
+        let (metadata, metadata_null) = crate::rows::metadata(row, 3)?;
         result.push(RuleRow {
             id: row.get(0)?,
             content: row.get(1)?,
             scope: row.get(2)?,
-            metadata: crate::rows::json(row, 3)?,
+            metadata,
+            metadata_null,
             created_at: time(row, 4)?,
             updated_at: time(row, 5)?,
             created_by: row.get::<_, Option<String>>(6)?.unwrap_or_default(),
@@ -247,11 +265,13 @@ pub(crate) fn list_lite(
 }
 
 pub(crate) fn scan_lite(row: &Row<'_>) -> rusqlite::Result<MemoryListRow> {
+    let (metadata, metadata_null) = crate::rows::metadata(row, 3)?;
     Ok(MemoryListRow {
         id: row.get(0)?,
         content: row.get(1)?,
         scope: row.get(2)?,
-        metadata: crate::rows::json(row, 3)?,
+        metadata,
+        metadata_null,
         created_at: time(row, 4)?,
         updated_at: time(row, 5)?,
         created_by: row.get(6)?,

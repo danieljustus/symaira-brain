@@ -187,7 +187,12 @@ impl Server {
                         .downcast_ref::<http_body_util::LengthLimitError>()
                         .is_some() =>
                 {
-                    return wire::error(413, "INVALID_REQUEST", "request body exceeds size limit");
+                    return wire::error_logged(
+                        413,
+                        "INVALID_REQUEST",
+                        "request body exceeds size limit",
+                        "http: request body too large",
+                    );
                 }
                 _ => return wire::error(400, "INVALID_REQUEST", "Bad request body"),
             }

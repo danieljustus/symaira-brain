@@ -3,12 +3,11 @@
 //! extraction, a write-path conflict, a non-canonical stored row) answer an
 //! explicit `501` before any state changes.
 
-use super::{Server, auth::Claims, read, sync_decode, wire};
+use super::{Server, auth::Claims, go_json, read, sync_decode, wire};
 use crate::cli_write::ServeExtra;
 use crate::DirectWrite;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use rusqlite::OptionalExtension;
-use serde::Deserialize;
 use serde_json::json;
 use std::collections::BTreeMap;
 
@@ -26,10 +25,52 @@ fn cosine(a: &[f32], b: &[f32]) -> f64 {
     }
 }
 
+/// `security.ExtractJTI`: the jti claim of an unverified token, or the
+/// shipped failure wording.
+fn extract_jti(token: &str) -> Result<String, String> {
+    let parts = token.split('.').collect::<Vec<_>>();
+    if parts.len() != 3 {
+        return Err("invalid token structure".into());
+    }
+    // Go pads to a multiple of four and decodes with the padded URL alphabet.
+    let mut padded = parts[1].to_owned();
+    if padded.len() % 4 != 0 {
+        padded.push_str(&"=".repeat(4 - padded.len() % 4));
+    }
+    if let Some(position) = go_json::base64_error(&padded, true) {
+        return Err(format!(
+            "invalid token payload: illegal base64 data at input byte {position}"
+        ));
+    }
+    let decoded = URL_SAFE_NO_PAD
+        .decode(padded.trim_end_matches('='))
+        .map_err(|error| format!("invalid token payload: {error}"))?;
+    let claims = serde_json::from_slice::<super::auth::Claims>(&decoded).map_err(|error| {
+        format!(
+            "invalid token payload: {}",
+            go_json::syntax_error(&decoded).unwrap_or_else(|| error.to_string())
+        )
+    })?;
+    if claims.jti.is_empty() {
+        return Err("token has no jti claim".into());
+    }
+    Ok(claims.jti)
+}
+
+struct Revoke {
+    token: String,
+    jti: String,
+}
+
 impl Server {
     pub(super) fn set(&self, body: &[u8], claims: &Claims) -> wire::Reply {
         let Some(input) = sync_decode::set_args(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Set),
+            );
         };
         if !self.options.direct_writes {
             return wire::unsupported();
@@ -40,12 +81,32 @@ impl Server {
             input.scope.clone()
         };
         if !["global", "project", "agent", "user", "session"].contains(&scope.as_str()) {
-            return wire::error(500, "INTERNAL_ERROR", "Failed to save memory");
+            return wire::error_logged(
+                500,
+                "INTERNAL_ERROR",
+                "Failed to save memory",
+                &format!(
+                    "invalid scope {}: must be one of global, project, agent, user, session",
+                    go_json::go_quote(&scope)
+                ),
+            );
         }
         let (content, mut labels) = crate::pii::redact_with_labels(&input.content);
+        for label in &labels {
+            super::log::warn(
+                "PII redacted from memory content",
+                &[("pattern", (*label).to_owned())],
+            );
+        }
         let mut metadata = BTreeMap::new();
         for (key, value) in &input.metadata {
             let (clean, found) = crate::pii::redact_with_labels(value);
+            for label in &found {
+                super::log::warn(
+                    "PII redacted from memory metadata",
+                    &[("pattern", (*label).to_owned())],
+                );
+            }
             labels.extend(found);
             metadata.insert(key.clone(), clean);
         }
@@ -146,7 +207,10 @@ impl Server {
         }
         let threshold = self.options.conflict_threshold;
         let vector = embedding.vector.clone();
-        match crate::retrieval::search_checked(
+        // The shipped checker searches through the store, which records the
+        // query in the retrieval statistics like any other search.
+        let started = std::time::Instant::now();
+        let outcome = crate::retrieval::search_checked(
             &conn,
             &embedding.vector,
             &embedding.source,
@@ -157,10 +221,21 @@ impl Server {
                     || row.embedding.is_empty()
                     || cosine(&vector, &row.embedding) < threshold
             },
-        ) {
-            Ok(_) => Some(true),
+        );
+        match outcome {
+            Ok(hits) => {
+                self.metrics.record(
+                    hits.len(),
+                    hits.first().map_or(0.0, |hit| f64::from(hit.score)),
+                    started.elapsed(),
+                );
+                Some(true)
+            }
             Err(crate::StoreError::Invalid(_)) => Some(false),
-            Err(_) => None,
+            Err(_) => {
+                self.metrics.record(0, 0.0, started.elapsed());
+                None
+            }
         }
     }
 
@@ -186,7 +261,12 @@ impl Server {
 
     pub(super) fn search(&self, body: &[u8]) -> wire::Reply {
         let Some(input) = sync_decode::search_args(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Search),
+            );
         };
         if input.extended {
             return wire::unsupported();
@@ -236,27 +316,28 @@ impl Server {
     }
 
     pub(super) fn token_revoke(&self, body: &[u8]) -> wire::Reply {
-        #[derive(Deserialize)]
-        struct Revoke {
-            #[serde(default)]
-            jti: String,
-            #[serde(default)]
-            token: String,
-        }
-        let Ok(input) = serde_json::from_slice::<Revoke>(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+        let Some((token, jti)) = sync_decode::revoke_args(body) else {
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Revoke),
+            );
         };
+        let input = Revoke { token, jti };
         let mut jti = input.jti.trim().to_owned();
         if jti.is_empty() && !input.token.trim().is_empty() {
-            let parts = input.token.trim().split('.').collect::<Vec<_>>();
-            let payload = (parts.len() == 3).then(|| parts[1]);
-            let claims = payload
-                .and_then(|p| URL_SAFE_NO_PAD.decode(p.trim_end_matches('=')).ok())
-                .and_then(|p| serde_json::from_slice::<super::auth::Claims>(&p).ok());
-            let Some(claims) = claims.filter(|c| !c.jti.is_empty()) else {
-                return wire::error(400, "INVALID_REQUEST", "Invalid token value");
+            jti = match extract_jti(input.token.trim()) {
+                Ok(jti) => jti,
+                Err(reason) => {
+                    return wire::error_logged(
+                        400,
+                        "INVALID_REQUEST",
+                        "Invalid token value",
+                        &reason,
+                    );
+                }
             };
-            jti = claims.jti;
         }
         if jti.is_empty() {
             return wire::error(

@@ -1,6 +1,6 @@
 //! `/api/sync/changes`, `/api/sync/apply` and `/api/sync/relay`.
 
-use super::{Server, auth::Claims, rfc3339, sync_decode, wire};
+use super::{Server, auth::Claims, go_json, rfc3339, sync_decode, wire};
 use crate::gojson::{self, Members};
 use crate::serve_store::{ApplyMode, RelayBlob, SyncRow};
 use base64::{Engine, engine::general_purpose::STANDARD};
@@ -51,23 +51,38 @@ impl Server {
         let mut since = crate::zero_time();
         if let Some(raw) = params.get("since").filter(|raw| !raw.is_empty()) {
             let Some(parsed) = rfc3339::parse(raw) else {
-                return wire::error(
+                return wire::error_logged(
                     400,
                     "INVALID_REQUEST",
                     "invalid since parameter; expected RFC3339",
+                    &go_json::time_error(raw, go_json::RFC3339).unwrap_or_default(),
                 );
             };
             since = parsed;
         }
         if let Some(cursor) = params.get("cursor").filter(|raw| !raw.is_empty()) {
             let Ok(decoded) = STANDARD.decode(cursor) else {
-                return wire::error(400, "INVALID_REQUEST", "invalid cursor parameter");
+                return wire::error_logged(
+                    400,
+                    "INVALID_REQUEST",
+                    "invalid cursor parameter",
+                    &format!(
+                        "illegal base64 data at input byte {}",
+                        go_json::base64_error(cursor, false).unwrap_or_default()
+                    ),
+                );
             };
+            let text = String::from_utf8_lossy(&decoded);
             let Some(parsed) = std::str::from_utf8(&decoded)
                 .ok()
                 .and_then(rfc3339::parse)
             else {
-                return wire::error(400, "INVALID_REQUEST", "invalid cursor format");
+                return wire::error_logged(
+                    400,
+                    "INVALID_REQUEST",
+                    "invalid cursor format",
+                    &go_json::time_error(&text, go_json::RFC3339_NANO).unwrap_or_default(),
+                );
             };
             since = parsed;
         }
@@ -144,7 +159,12 @@ impl Server {
             return wire::error(405, "METHOD_NOT_ALLOWED", "Method not allowed");
         }
         let Some(request) = sync_decode::apply(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Apply),
+            );
         };
         let mode = ApplyMode {
             quantize_binary: self.options.quantize_binary,
@@ -225,10 +245,11 @@ impl Server {
             let mut since = crate::zero_time();
             if let Some(raw) = params.get("since").filter(|raw| !raw.is_empty()) {
                 let Some(parsed) = rfc3339::parse(raw) else {
-                    return wire::error(
+                    return wire::error_logged(
                         400,
                         "INVALID_REQUEST",
                         "invalid since parameter; expected RFC3339",
+                        &go_json::time_error(raw, go_json::RFC3339_NANO).unwrap_or_default(),
                     );
                 };
                 since = parsed;
@@ -265,7 +286,12 @@ impl Server {
             return wire::error(405, "METHOD_NOT_ALLOWED", "Method not allowed");
         }
         let Some(blobs) = sync_decode::relay(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Relay),
+            );
         };
         let (mut stored, mut skipped) = (0, 0);
         for blob in blobs {

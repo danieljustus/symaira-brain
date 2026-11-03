@@ -10,6 +10,7 @@ use std::sync::Arc;
 
 mod auth;
 mod authority;
+mod go_json;
 mod log;
 mod middleware;
 mod read;

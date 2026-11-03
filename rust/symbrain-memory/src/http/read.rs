@@ -198,7 +198,16 @@ impl Server {
         let result = (|| -> Result<Option<SearchRow>, StoreError> {
             let conn = self.store.lock()?;
             let sql = format!("SELECT {SEARCH_COLUMNS} FROM memories WHERE id=?");
-            let row = conn.query_row(&sql, [id], SearchRow::from_row).optional()?;
+            let mut row = conn.query_row(&sql, [id], SearchRow::from_row).optional()?;
+            if let Some(found) = row.as_mut() {
+                // `EntitiesForMemory`: names ordered case-insensitively.
+                let mut statement = conn.prepare(
+                    "SELECT e.name FROM entities e INNER JOIN memory_entities me ON me.entity_id = e.id WHERE me.memory_id = ? ORDER BY e.name COLLATE NOCASE",
+                )?;
+                found.entities = statement
+                    .query_map([id], |entity| entity.get::<_, String>(0))?
+                    .collect::<Result<Vec<_>, _>>()?;
+            }
             if row.is_some() {
                 conn.execute("UPDATE memories SET access_count=access_count+1,prev_access=last_access,last_access=? WHERE id=?",rusqlite::params![crate::cli_write::timestamp(),id])?;
             }
