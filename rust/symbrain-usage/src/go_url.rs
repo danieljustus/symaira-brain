@@ -5,6 +5,8 @@
 //! target Go would contact (escaped path, dropped fragment, preserved host
 //! case) are part of the contract and are pinned by a Go-generated corpus.
 
+use std::fmt::Write as _;
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Mode {
     Path,
@@ -20,8 +22,22 @@ fn should_escape(byte: u8, mode: Mode) -> bool {
     if matches!(mode, Mode::Host | Mode::Zone)
         && matches!(
             byte,
-            b'!' | b'$' | b'&' | b'\'' | b'(' | b')' | b'*' | b'+' | b',' | b';' | b'=' | b':' | b'['
-                | b']' | b'<' | b'>' | b'"'
+            b'!' | b'$'
+                | b'&'
+                | b'\''
+                | b'('
+                | b')'
+                | b'*'
+                | b'+'
+                | b','
+                | b';'
+                | b'='
+                | b':'
+                | b'['
+                | b']'
+                | b'<'
+                | b'>'
+                | b'"'
         )
     {
         return false;
@@ -47,7 +63,7 @@ fn escape(text: &str, mode: Mode) -> String {
     let mut out = String::with_capacity(text.len());
     for byte in text.bytes() {
         if should_escape(byte, mode) {
-            out.push_str(&format!("%{byte:02X}"));
+            let _ = write!(out, "%{byte:02X}");
         } else {
             out.push(char::from(byte));
         }
@@ -79,7 +95,10 @@ fn unescape(text: &str, mode: Mode) -> Option<String> {
                 {
                     return None;
                 }
-                if mode == Mode::Host && unhex(bytes[index + 1]) < 8 && &bytes[index..index + 3] != b"%25" {
+                if mode == Mode::Host
+                    && unhex(bytes[index + 1]) < 8
+                    && &bytes[index..index + 3] != b"%25"
+                {
                     return None;
                 }
                 if mode == Mode::Zone {
@@ -92,7 +111,10 @@ fn unescape(text: &str, mode: Mode) -> Option<String> {
                 index += 3;
             }
             byte => {
-                if matches!(mode, Mode::Host | Mode::Zone) && byte < 0x80 && should_escape(byte, mode) {
+                if matches!(mode, Mode::Host | Mode::Zone)
+                    && byte < 0x80
+                    && should_escape(byte, mode)
+                {
                     return None;
                 }
                 out.push(byte);
@@ -105,8 +127,8 @@ fn unescape(text: &str, mode: Mode) -> Option<String> {
 
 fn valid_encoded(text: &str, mode: Mode) -> bool {
     text.bytes().all(|byte| match byte {
-        b'!' | b'$' | b'&' | b'\'' | b'(' | b')' | b'*' | b'+' | b',' | b';' | b'=' | b':' | b'@'
-        | b'[' | b']' | b'%' => true,
+        b'!' | b'$' | b'&' | b'\'' | b'(' | b')' | b'*' | b'+' | b',' | b';' | b'=' | b':'
+        | b'@' | b'[' | b']' | b'%' => true,
         byte => !should_escape(byte, mode),
     })
 }
@@ -144,8 +166,23 @@ fn valid_userinfo(text: &str) -> bool {
         character.is_ascii_alphanumeric()
             || matches!(
                 character,
-                '-' | '.' | '_' | ':' | '~' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';'
-                    | '=' | '%' | '@'
+                '-' | '.'
+                    | '_'
+                    | ':'
+                    | '~'
+                    | '!'
+                    | '$'
+                    | '&'
+                    | '\''
+                    | '('
+                    | ')'
+                    | '*'
+                    | '+'
+                    | ','
+                    | ';'
+                    | '='
+                    | '%'
+                    | '@'
             )
     })
 }
@@ -177,10 +214,14 @@ fn parse(raw: &str, via_request: bool) -> Option<GoUrl> {
     let (body, fragment) = if via_request {
         (raw, None)
     } else {
-        raw.split_once('#').map_or((raw, None), |(body, fragment)| (body, Some(fragment)))
+        raw.split_once('#')
+            .map_or((raw, None), |(body, fragment)| (body, Some(fragment)))
     };
-    let colon = body.find(|character: char| !(character.is_ascii_alphabetic()
-        || character.is_ascii_digit() || matches!(character, '+' | '-' | '.')))?;
+    let colon = body.find(|character: char| {
+        !(character.is_ascii_alphabetic()
+            || character.is_ascii_digit()
+            || matches!(character, '+' | '-' | '.'))
+    })?;
     if colon == 0 || body.as_bytes()[colon] != b':' || !body.as_bytes()[0].is_ascii_alphabetic() {
         return None;
     }
@@ -192,13 +233,15 @@ fn parse(raw: &str, via_request: bool) -> Option<GoUrl> {
         force_query = true;
         rest = &rest[..rest.len() - 1];
     } else if let Some((before, query)) = rest.split_once('?') {
-        raw_query = query.to_owned();
+        query.clone_into(&mut raw_query);
         rest = before;
     }
     let authority_and_path = rest.strip_prefix("//")?;
     let (authority, path) = authority_and_path
         .find('/')
-        .map_or((authority_and_path, ""), |index| authority_and_path.split_at(index));
+        .map_or((authority_and_path, ""), |index| {
+            authority_and_path.split_at(index)
+        });
     let (has_user, host_text) = match authority.rfind('@') {
         None => (false, authority),
         Some(index) => {
@@ -214,16 +257,34 @@ fn parse(raw: &str, via_request: bool) -> Option<GoUrl> {
     };
     let host = parse_host(host_text)?;
     let decoded = unescape(path, Mode::Path)?;
-    let raw_path = if escape(&decoded, Mode::Path) == path { String::new() } else { path.to_owned() };
+    let raw_path = if escape(&decoded, Mode::Path) == path {
+        String::new()
+    } else {
+        path.to_owned()
+    };
     let (fragment, raw_fragment) = match fragment {
         None => (String::new(), String::new()),
         Some(text) => {
             let decoded = unescape(text, Mode::Fragment)?;
-            let raw = if escape(&decoded, Mode::Fragment) == text { String::new() } else { text.to_owned() };
+            let raw = if escape(&decoded, Mode::Fragment) == text {
+                String::new()
+            } else {
+                text.to_owned()
+            };
             (decoded, raw)
         }
     };
-    Some(GoUrl { scheme, has_user, host, path: decoded, raw_path, raw_query, force_query, fragment, raw_fragment })
+    Some(GoUrl {
+        scheme,
+        has_user,
+        host,
+        path: decoded,
+        raw_path,
+        raw_query,
+        force_query,
+        fragment,
+        raw_fragment,
+    })
 }
 
 fn split_host_port(host_port: &str) -> (String, String) {
@@ -259,7 +320,8 @@ impl GoUrl {
     fn escaped_fragment(&self) -> String {
         if !self.raw_fragment.is_empty()
             && valid_encoded(&self.raw_fragment, Mode::Fragment)
-            && unescape(&self.raw_fragment, Mode::Fragment).as_deref() == Some(self.fragment.as_str())
+            && unescape(&self.raw_fragment, Mode::Fragment).as_deref()
+                == Some(self.fragment.as_str())
         {
             return self.raw_fragment.clone();
         }
@@ -299,15 +361,29 @@ impl GoUrl {
 
 /// Go's `trustedHTTPSURL`: an HTTPS URL whose authority is not a local or
 /// private-network origin (or, with `allow_loopback`, only a loopback IP).
-pub(crate) fn trusted_https(raw: &str, allow_loopback: bool, private_ip: impl Fn(std::net::IpAddr) -> bool) -> bool {
-    if raw.is_empty() || raw.trim() != raw || raw.bytes().any(|byte| matches!(byte, b'\r' | b'\n' | 0)) {
+#[allow(clippy::case_sensitive_file_extension_comparisons)] // DNS suffixes, not files
+pub(crate) fn trusted_https(
+    raw: &str,
+    allow_loopback: bool,
+    private_ip: impl Fn(std::net::IpAddr) -> bool,
+) -> bool {
+    if raw.is_empty()
+        || raw.trim() != raw
+        || raw.bytes().any(|byte| matches!(byte, b'\r' | b'\n' | 0))
+    {
         return false;
     }
-    let Some(url) = parse(raw, true) else { return false };
+    let Some(url) = parse(raw, true) else {
+        return false;
+    };
     if url.scheme != "https" || url.host.is_empty() || url.has_user || !url.fragment.is_empty() {
         return false;
     }
-    if url.host.bytes().any(|byte| matches!(byte, b'\r' | b'\n' | 0)) {
+    if url
+        .host
+        .bytes()
+        .any(|byte| matches!(byte, b'\r' | b'\n' | 0))
+    {
         return false;
     }
     let (hostname, port) = split_host_port(&url.host);
@@ -331,7 +407,11 @@ pub(crate) fn trusted_https(raw: &str, allow_loopback: bool, private_ip: impl Fn
         return false;
     }
     if let Some(ip) = parse_ip(host) {
-        return if allow_loopback { ip.is_loopback() } else { !private_ip(ip) };
+        return if allow_loopback {
+            ip.is_loopback()
+        } else {
+            !private_ip(ip)
+        };
     }
     !allow_loopback
 }
@@ -342,7 +422,10 @@ fn parse_ip(host: &str) -> Option<std::net::IpAddr> {
         if zone.is_empty() {
             return None;
         }
-        address.parse::<std::net::Ipv6Addr>().ok().map(std::net::IpAddr::V6)
+        address
+            .parse::<std::net::Ipv6Addr>()
+            .ok()
+            .map(std::net::IpAddr::V6)
     } else {
         host.parse::<std::net::IpAddr>().ok()
     }
@@ -353,7 +436,7 @@ fn parse_ip(host: &str) -> Option<std::net::IpAddr> {
 pub(crate) fn request_url(raw: &str) -> Option<String> {
     let mut url = parse(raw, false)?;
     if let Some(colon) = url.host.rfind(':')
-        && colon > url.host.rfind(']').map_or(0, |index| index)
+        && colon > url.host.rfind(']').unwrap_or(0)
         && url.host.ends_with(':')
     {
         url.host.truncate(colon);
@@ -372,7 +455,13 @@ fn punycode(label: &str) -> Option<String> {
         output.push('-');
     }
     let (mut n, mut delta, mut bias) = (128_u32, 0_u32, 72_u32);
-    let digit = |value: u32| char::from(if value < 26 { b'a' + value as u8 } else { b'0' + (value - 26) as u8 });
+    let digit = |value: u32| {
+        char::from(if value < 26 {
+            b'a' + u8::try_from(value).unwrap_or(0)
+        } else {
+            b'0' + u8::try_from(value - 26).unwrap_or(0)
+        })
+    };
     while usize::try_from(handled).ok()? < input.len() {
         let next = input.iter().copied().filter(|code| *code >= n).min()?;
         delta = delta.checked_add((next - n).checked_mul(handled + 1)?)?;
@@ -385,7 +474,13 @@ fn punycode(label: &str) -> Option<String> {
                 let mut q = delta;
                 let mut k = BASE;
                 loop {
-                    let threshold = if k <= bias { 1 } else if k >= bias + 26 { 26 } else { k - bias };
+                    let threshold = if k <= bias {
+                        1
+                    } else if k >= bias + 26 {
+                        26
+                    } else {
+                        k - bias
+                    };
                     if q < threshold {
                         break;
                     }
@@ -395,7 +490,11 @@ fn punycode(label: &str) -> Option<String> {
                 }
                 output.push(digit(q));
                 // Bias adaptation.
-                let mut scaled = if handled == basic { delta / 700 } else { delta / 2 };
+                let mut scaled = if handled == basic {
+                    delta / 700
+                } else {
+                    delta / 2
+                };
                 scaled += scaled / (handled + 1);
                 let mut k = 0;
                 while scaled > ((BASE - 1) * 26) / 2 {
@@ -430,7 +529,9 @@ pub(crate) fn wire_url(url: &str) -> Option<String> {
     let bytes = authority.as_bytes();
     let mut index = 0;
     while index < bytes.len() {
-        if bytes[index] == b'%' && index + 2 < bytes.len() && bytes[index + 1].is_ascii_hexdigit()
+        if bytes[index] == b'%'
+            && index + 2 < bytes.len()
+            && bytes[index + 1].is_ascii_hexdigit()
             && bytes[index + 2].is_ascii_hexdigit()
         {
             decoded.push(unhex(bytes[index + 1]) << 4 | unhex(bytes[index + 2]));

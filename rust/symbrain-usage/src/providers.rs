@@ -40,8 +40,7 @@ use provider_fetch::fetch_one;
 pub(crate) mod provider_config;
 pub use provider_config::{
     ProviderSelection, all_providers, is_secret_reference, is_vault_uri, resolve_reference,
-    resolve_reference_or_env,
-    secretref_timeout, selected_providers, set_secretref_timeout,
+    resolve_reference_or_env, secretref_timeout, selected_providers, set_secretref_timeout,
 };
 #[cfg(test)]
 pub(crate) use provider_config::{

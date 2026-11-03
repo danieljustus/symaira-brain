@@ -5,11 +5,11 @@
 //! available texts and the source tag each state reports. Resolution order per
 //! provider is: environment variable (symvault/keychain capable), then the
 //! provider's own credential file, then — Claude on macOS only — the login
-//! keychain. Claude and Codex files use Go-compatible native decoding; distinct
-//! nondefault Claude tokens retain Go's unspecified map selection. Copilot,
-//! Kimi CLI, and Hermes sources use their proven native contracts at default
-//! or supported home paths. Supported providers may be combined; any unproven
-//! source keeps the report on Go.
+//! keychain. Every configuration is answered natively; there is no Go route.
+//! Where Go's own choice is unspecified (several distinct Claude or Copilot
+//! tokens come out of unordered map iteration) the native choice is the first
+//! token in sorted key order, which is one of Go's possible outcomes.
+//! `scripts/usage-native-gates-oracle` pins the rest against the Go code.
 
 #[cfg(test)]
 use super::Value;

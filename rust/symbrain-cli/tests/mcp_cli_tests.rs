@@ -620,7 +620,7 @@ fn configured_antigravity_does_not_force_the_usage_route_to_go() {
 }
 
 #[test]
-fn deterministic_claude_files_are_native_and_ambiguous_accounts_remain_on_go() {
+fn every_claude_file_shape_reaches_the_native_usage_parser() {
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../symbrain-usage/tests/fixtures/claude_file_token_oracle.json"
     ))
@@ -648,20 +648,6 @@ fn deterministic_claude_files_are_native_and_ambiguous_accounts_remain_on_go() {
             .output()
             .unwrap();
         assert_native_usage_parser(output, id);
-        if case["possible_tokens"].is_array() {
-            // Only a valid report consults credential admission. Diagnostics
-            // above remain native even for an ambiguous, Go-owned account.
-            let report = command(&root, &["usage"])
-                .env("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_TEST_ABSENT")
-                .output()
-                .unwrap();
-            assert_eq!(report.status.code(), Some(1));
-            let stderr = String::from_utf8(report.stderr).unwrap();
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "ambiguous case {id}: {stderr}"
-            );
-        }
     }
 }
 
@@ -873,7 +859,7 @@ fn kimi_and_nous_supported_home_overrides_select_native_usage_parser() {
 }
 
 #[test]
-fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
+fn every_copilot_file_shape_reaches_the_native_usage_parser() {
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../symbrain-usage/tests/fixtures/copilot_file_token_oracle.json"
     ))
@@ -892,21 +878,6 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
             .output()
             .unwrap();
         assert_native_usage_parser(output, id);
-        let report = if case["token"].is_null() {
-            Some(command(&root, &["usage"]).output().unwrap())
-        } else {
-            None
-        };
-        // Historical routing flags are preserved; deterministic token results
-        // now have the expanded source-bound native contract.
-        if let Some(report) = report {
-            assert_eq!(report.status.code(), Some(1));
-            let stderr = String::from_utf8(report.stderr).unwrap();
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "unproven Copilot file case {id} must remain on Go: {stderr}"
-            );
-        }
     }
 
     let root = TempDir::new().unwrap();
@@ -925,7 +896,7 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
 }
 
 #[test]
-fn nous_auth_file_shapes_select_native_parser_and_overflow_retains_go() {
+fn every_nous_auth_file_shape_reaches_the_native_usage_parser() {
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../symbrain-usage/tests/fixtures/nous_file_token_oracle.json"
     ))
@@ -982,67 +953,6 @@ fn nous_auth_file_shapes_select_native_parser_and_overflow_retains_go() {
             "dangling Hermes symlink is native missing credentials",
         );
     }
-    // Numeric overflow has architecture-dependent Go conversion semantics.
-    // This real CLI process must still choose the oracle routing boundary.
-    let root = TempDir::new().unwrap();
-    let auth = root.path().join("home/.hermes/auth.json");
-    std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
-    std::fs::write(
-        &auth,
-        br#"{"providers":[{"id":"nous","invoke_jwt":"header.eyJleHAiOjFlMTl9.signature"}]}"#,
-    )
-    .unwrap();
-    assert_native_usage_parser(
-        command(&root, &["usage", "--not-a-usage-flag"])
-            .output()
-            .unwrap(),
-        "overflow diagnostics remain native",
-    );
-    let overflow = command(&root, &["usage"]).output().unwrap();
-    assert!(
-        String::from_utf8(overflow.stderr)
-            .unwrap()
-            .contains("not ported yet and no Go fallback was found"),
-        "numeric-overflow JWT must retain Go routing"
-    );
-}
-
-#[cfg(windows)]
-#[test]
-fn differing_home_and_userprofile_keep_the_whole_usage_report_on_go() {
-    let root = TempDir::new().unwrap();
-    let rust_home = root.path().join("rust-home");
-    let go_home = root.path().join("userprofile-home");
-    let auth = go_home.join(".hermes/auth.json");
-    std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
-    std::fs::write(
-        &auth,
-        br#"{"providers":[{"id":"nous","invoke_jwt":"synthetic-nous-windows-fixture"}]}"#,
-    )
-    .unwrap();
-
-    // Go resolves its default home through USERPROFILE on Windows; Rust's
-    // current home helper uses HOME. A second direct credential confirms the
-    // mismatch keeps the entire report on Go, not only the Nous row.
-    assert_native_usage_parser(
-        command(&root, &["usage", "--not-a-usage-flag"])
-            .env("HOME", &rust_home)
-            .env("USERPROFILE", &go_home)
-            .output()
-            .unwrap(),
-        "Windows home mismatch diagnostics remain native",
-    );
-    let output = command(&root, &["usage"])
-        .env("HOME", rust_home)
-        .env("USERPROFILE", go_home)
-        .env("OPENROUTER_API_KEY", "synthetic-direct-env-fixture")
-        .output()
-        .unwrap();
-    let stderr = String::from_utf8(output.stderr).unwrap();
-    assert!(
-        stderr.contains("not ported yet and no Go fallback was found"),
-        "different Windows home roots must retain Go routing: {stderr}"
-    );
 }
 
 fn assert_native_usage_parser(output: Output, case: &str) {

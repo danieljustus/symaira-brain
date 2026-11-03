@@ -467,3 +467,69 @@ func gateKey(requests []gateRequest) string {
 	data, _ := json.Marshal(requests)
 	return string(data)
 }
+
+// TestNativeURLCorpus768 records the trust decision, the validated base and the
+// canonical request URL for a generated corpus of custom-base spellings.
+func TestNativeURLCorpus768(t *testing.T) {
+	output := os.Getenv("USAGE_768_URL_OUT")
+	if output == "" {
+		t.Skip("USAGE_768_URL_OUT is required")
+	}
+	hosts := []string{"example.com", "EXAMPLE.com", "a.b.c", "localhost", "a.localhost", "x.local", "x.internal", "10.0.0.1", "8.8.8.8", "[::1]", "[2001:db8::1]", "[2001:db8::1", "2001:db8::1", "exämple.com", "ex ample.com", "a_b.com", "-a.com", "a..b", "example.com.", "1.2.3", "[::ffff:8.8.8.8]", "[fe80::1%25en0]", "[fe80::1%en0]", "0.0.0.0", "100.64.0.1", "198.18.0.1", "203.0.113.5", "xn--e1afmkfd.xn--p1ai", "ex%C3%A4mple.com", "ex%41mple.com", "ex%zzmple.com", ""}
+	ports := []string{"", ":", ":443", ":0", ":65535", ":65536", ":abc", ":08"}
+	paths := []string{"", "/", "//", "/v1", "/v1/", "/v1//", "/a b", "/é", "/%41", "/%zz", "/%", "/a%2fb", "/a/./b", "/a/../b", "/;x,y=z", "/a?b", "/a?", "/a?b=c", "/a#", "/a#b", "?q", "?", "#", "#f", "/\t", "/\x01", "/\x7f", "/a\\b", "/[x]", "/{x}", "/a|b", "/\"q\"", "/'q'", "/a<b>", "/~._-", "/日本"}
+	var raws []string
+	for _, host := range hosts {
+		for _, port := range ports {
+			for _, path := range paths {
+				if (host == "" || port != "") && path != "" && path != "/v1" {
+					continue
+				}
+				raws = append(raws, "https://"+host+port+path)
+			}
+		}
+	}
+	for _, scheme := range []string{"https://", "HTTPS://", "Https://", "http://", "", "https:/", "https:", "https:///", "//", "ftp://", "h t://", "1https://", "+https://"} {
+		for _, userinfo := range []string{"", "u@", "u:p@", "@", ":@", "%41@", "u%zz@", "a b@", "@@", "u@v@"} {
+			for _, rest := range []string{"example.com", "example.com/v1", "example.com:8443/v1/", "[2001:db8::1]:443"} {
+				raws = append(raws, scheme+userinfo+rest)
+			}
+		}
+	}
+	for _, edge := range []string{" https://example.com", "https://example.com ", "\u00a0https://example.com", "https://example.com\u00a0", "https://example.com\u0085", "https://example.com\r", "https://example.com\n", "https://example.com/\n", "https://example.com/%0a", "*", "https://*", "https://example.com/*"} {
+		raws = append(raws, edge)
+	}
+	type row struct {
+		Raw     string `json:"raw"`
+		Trusted bool   `json:"trusted"`
+		Base    string `json:"base,omitempty"`
+		URL     string `json:"url,omitempty"`
+		Err     bool   `json:"err,omitempty"`
+	}
+	var rows []row
+	seen := map[string]bool{}
+	for _, raw := range raws {
+		if seen[raw] {
+			continue
+		}
+		seen[raw] = true
+		entry := row{Raw: raw, Trusted: trustedHTTPSURL(raw, false)}
+		if entry.Trusted {
+			entry.Base = validatedUsageBase(raw, "D")
+			req, err := http.NewRequest(http.MethodGet, strings.TrimRight(entry.Base, "/")+"/x", nil)
+			if err != nil {
+				entry.Err = true
+			} else {
+				entry.URL = req.URL.String()
+			}
+		}
+		rows = append(rows, entry)
+	}
+	data, err := json.Marshal(map[string]any{"schema_version": 1, "go_version": runtime.Version(), "rows": rows})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(output, append(data, '\n'), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}

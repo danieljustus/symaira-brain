@@ -42,7 +42,11 @@ fn former_fallback_gates_match_recorded_go_bytes_without_a_go_binary() {
     assert!(cases.len() >= 60, "oracle lost cases: {}", cases.len());
     let sentinel_dir = tempfile::tempdir().unwrap();
     let sentinel = sentinel_dir.path().join("go-fallback");
-    fs::write(&sentinel, "#!/bin/sh\necho 'unexpected Go fallback' >&2\nexit 97\n").unwrap();
+    fs::write(
+        &sentinel,
+        "#!/bin/sh\necho 'unexpected Go fallback' >&2\nexit 97\n",
+    )
+    .unwrap();
     fs::set_permissions(&sentinel, fs::Permissions::from_mode(0o700)).unwrap();
     for case in cases {
         let id = case["id"].as_str().unwrap();
@@ -58,7 +62,11 @@ fn former_fallback_gates_match_recorded_go_bytes_without_a_go_binary() {
         command
             .args([
                 "usage",
-                if case["output"] == "json" { "--json" } else { "--output=table" },
+                if case["output"] == "json" {
+                    "--json"
+                } else {
+                    "--output=table"
+                },
                 "--providers",
                 &case["ids"]
                     .as_array()
@@ -83,7 +91,13 @@ fn former_fallback_gates_match_recorded_go_bytes_without_a_go_binary() {
             _ => {}
         }
         for (name, value) in case["env"].as_object().unwrap() {
-            command.env(name, value.as_str().unwrap().replace("$HOME", home.to_str().unwrap()));
+            command.env(
+                name,
+                value
+                    .as_str()
+                    .unwrap()
+                    .replace("$HOME", home.to_str().unwrap()),
+            );
         }
         let output = command.output().unwrap();
         assert_eq!(
@@ -91,7 +105,15 @@ fn former_fallback_gates_match_recorded_go_bytes_without_a_go_binary() {
             Some(i32::try_from(case["go"]["exit"].as_i64().unwrap()).unwrap()),
             "{id}: exit"
         );
-        assert_eq!(output.stdout, decode(&case["go"]["stdout_b64"]), "{id}: stdout");
-        assert_eq!(output.stderr, decode(&case["go"]["stderr_b64"]), "{id}: stderr");
+        assert_eq!(
+            output.stdout,
+            decode(&case["go"]["stdout_b64"]),
+            "{id}: stdout"
+        );
+        assert_eq!(
+            output.stderr,
+            decode(&case["go"]["stderr_b64"]),
+            "{id}: stderr"
+        );
     }
 }

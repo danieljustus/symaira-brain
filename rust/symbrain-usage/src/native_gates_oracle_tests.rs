@@ -13,6 +13,7 @@ use super::{ProviderSelection, selected_providers_with_claude_keychain};
 use crate::{FixtureTransport, Response, Service};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
+use std::fmt::Write as _;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -46,8 +47,7 @@ fn child_test_name() -> String {
 /// Child-process entry point; a no-op in the ordinary test run.
 #[test]
 fn native_gates_child() {
-    let (Some(case_path), Some(out_path)) =
-        (std::env::var_os(CASE_ENV), std::env::var_os(OUT_ENV))
+    let (Some(case_path), Some(out_path)) = (std::env::var_os(CASE_ENV), std::env::var_os(OUT_ENV))
     else {
         return;
     };
@@ -71,8 +71,8 @@ fn native_gates_child() {
             )
         })
     });
-    let status = u16::try_from(case["status"].as_u64().filter(|s| *s != 0).unwrap_or(401))
-        .expect("status");
+    let status =
+        u16::try_from(case["status"].as_u64().filter(|s| *s != 0).unwrap_or(401)).expect("status");
     let responses: BTreeMap<String, Response> = ids
         .iter()
         .map(|id| {
@@ -99,7 +99,10 @@ fn native_gates_child() {
                 .header_bytes
                 .iter()
                 .map(|(name, bytes)| {
-                    let hex: String = bytes.iter().map(|byte| format!("{byte:02x}")).collect();
+                    let hex: String = bytes.iter().fold(String::new(), |mut hex, byte| {
+                        let _ = write!(hex, "{byte:02x}");
+                        hex
+                    });
                     (name.to_ascii_lowercase(), hex)
                 })
                 .collect();
@@ -145,18 +148,28 @@ fn apply(home: &Path, files: &[Value]) {
         fs::create_dir_all(path.parent().expect("parent")).expect("parent");
         match entry["kind"].as_str().unwrap_or("file") {
             "dir" => fs::create_dir_all(&path).expect("dir"),
-            "symlink" => std::os::unix::fs::symlink(
-                expand(entry["target"].as_str().expect("target")),
-                &path,
-            )
-            .expect("symlink"),
+            "symlink" => {
+                std::os::unix::fs::symlink(
+                    expand(entry["target"].as_str().expect("target")),
+                    &path,
+                )
+                .expect("symlink");
+            }
             _ => {
                 let mut contents = entry["contents_hex"].as_str().map_or_else(
-                    || entry["contents"].as_str().unwrap_or_default().as_bytes().to_vec(),
+                    || {
+                        entry["contents"]
+                            .as_str()
+                            .unwrap_or_default()
+                            .as_bytes()
+                            .to_vec()
+                    },
                     |hex| {
                         (0..hex.len())
                             .step_by(2)
-                            .map(|index| u8::from_str_radix(&hex[index..index + 2], 16).expect("hex"))
+                            .map(|index| {
+                                u8::from_str_radix(&hex[index..index + 2], 16).expect("hex")
+                            })
                             .collect()
                     },
                 );
@@ -173,19 +186,33 @@ fn apply(home: &Path, files: &[Value]) {
 fn run_case(case: &Value, scratch: &Path) -> Value {
     let home = scratch.join("home");
     fs::create_dir_all(&home).expect("home");
-    apply(&home, case["files"].as_array().map_or(&[][..], Vec::as_slice));
+    apply(
+        &home,
+        case["files"].as_array().map_or(&[][..], Vec::as_slice),
+    );
     let case_path = scratch.join("case.json");
     let out_path = scratch.join("out.json");
     fs::write(&case_path, serde_json::to_vec(case).expect("case")).expect("case file");
     let mut command = Command::new(std::env::current_exe().expect("test binary"));
     command
-        .args(["--exact", &child_test_name(), "--test-threads=1", "--nocapture"])
+        .args([
+            "--exact",
+            &child_test_name(),
+            "--test-threads=1",
+            "--nocapture",
+        ])
         .env_clear()
         .current_dir(&home)
         .env(CASE_ENV, &case_path)
         .env(OUT_ENV, &out_path);
     for (name, value) in case["env"].as_object().into_iter().flatten() {
-        command.env(name, value.as_str().expect("env value").replace("$HOME", home.to_str().expect("UTF-8")));
+        command.env(
+            name,
+            value
+                .as_str()
+                .expect("env value")
+                .replace("$HOME", home.to_str().expect("UTF-8")),
+        );
     }
     match case["home"].as_str().unwrap_or("set") {
         "unset" => {}
@@ -217,22 +244,50 @@ fn sorted_requests(requests: &Value) -> Vec<Value> {
 fn request_mismatch(go: &Value, native: &Value) -> Option<String> {
     for field in ["method", "url", "headers", "raw_headers", "body"] {
         if go[field] != native[field] {
-            return Some(format!("{field}: go {} native {}", go[field], native[field]));
+            return Some(format!(
+                "{field}: go {} native {}",
+                go[field], native[field]
+            ));
         }
     }
     if native["uri_error"].is_string() {
-        return Some(format!("native URI rejected {}: {}", native["url"], native["uri_error"]));
+        return Some(format!(
+            "native URI rejected {}: {}",
+            native["url"], native["uri_error"]
+        ));
     }
     // Go's recorded host is pre-IDNA; compare the ASCII form the wire carries.
     let go_host = go["host"].as_str().and_then(|host| {
-        crate::go_url::wire_url(&format!("https://{}", host.replace('%', "%25").chars().map(|c| if c.is_ascii() { c.to_string() } else { c.to_string().bytes().map(|b| format!("%{b:02X}")).collect() }).collect::<String>()))
+        crate::go_url::wire_url(&format!(
+            "https://{}",
+            host.replace('%', "%25")
+                .chars()
+                .fold(String::new(), |mut out, c| {
+                    if c.is_ascii() {
+                        out.push(c);
+                    } else {
+                        for b in c.to_string().bytes() {
+                            let _ = write!(out, "%{b:02X}");
+                        }
+                    }
+                    out
+                })
+        ))
     });
-    let go_authority = go_host.as_deref().and_then(|url| url.strip_prefix("https://")).map(str::to_owned);
+    let go_authority = go_host
+        .as_deref()
+        .and_then(|url| url.strip_prefix("https://"))
+        .map(str::to_owned);
     let native_authority = native["host"].as_str().map(str::to_owned);
     if go_authority != native_authority || go["request_uri"] != native["request_uri"] {
         return Some(format!(
             "target: go {} {} native {} {} (urls {} / {})",
-            go["host"], go["request_uri"], native["host"], native["request_uri"], go["url"], native["url"]
+            go["host"],
+            go["request_uri"],
+            native["host"],
+            native["request_uri"],
+            go["url"],
+            native["url"]
         ));
     }
     None
@@ -240,7 +295,10 @@ fn request_mismatch(go: &Value, native: &Value) -> Option<String> {
 
 fn observed_mismatch(go: &Value, native: &Value) -> Option<String> {
     if go["report"] != native["report"] {
-        return Some(format!("report: go {} native {}", go["report"], native["report"]));
+        return Some(format!(
+            "report: go {} native {}",
+            go["report"], native["report"]
+        ));
     }
     if go["keychain_calls"] != native["keychain_calls"] {
         return Some(format!(
@@ -248,9 +306,17 @@ fn observed_mismatch(go: &Value, native: &Value) -> Option<String> {
             go["keychain_calls"], native["keychain_calls"]
         ));
     }
-    let (go_requests, native_requests) = (sorted_requests(&go["requests"]), sorted_requests(&native["requests"]));
+    let (go_requests, native_requests) = (
+        sorted_requests(&go["requests"]),
+        sorted_requests(&native["requests"]),
+    );
     if go_requests.len() != native_requests.len() {
-        let urls = |list: &[Value]| list.iter().map(|request| request["url"].to_string()).collect::<Vec<_>>().join(" ");
+        let urls = |list: &[Value]| {
+            list.iter()
+                .map(|request| request["url"].to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        };
         return Some(format!(
             "request count: go {} [{}] native {} [{}]",
             go_requests.len(),
@@ -261,9 +327,13 @@ fn observed_mismatch(go: &Value, native: &Value) -> Option<String> {
     }
     // Both lists are sorted by their own serialization, so pair by method+headers.
     for go_request in &go_requests {
-        let found = native_requests.iter().any(|candidate| request_mismatch(go_request, candidate).is_none());
+        let found = native_requests
+            .iter()
+            .any(|candidate| request_mismatch(go_request, candidate).is_none());
         if !found {
-            let first = native_requests.first().and_then(|candidate| request_mismatch(go_request, candidate));
+            let first = native_requests
+                .first()
+                .and_then(|candidate| request_mismatch(go_request, candidate));
             return Some(format!("request: {}", first.unwrap_or_default()));
         }
     }
@@ -292,9 +362,17 @@ fn native_reports_match_go_for_every_former_gate() {
             .filter_map(|go| observed_mismatch(go, &native))
             .collect();
         if mismatches.len() == observed.len() {
-            failures.push(format!("{id}: {}", mismatches.first().cloned().unwrap_or_default()));
+            failures.push(format!(
+                "{id}: {}",
+                mismatches.first().cloned().unwrap_or_default()
+            ));
         }
     }
     assert!(filter.is_some() || executed == cases.len());
-    assert!(failures.is_empty(), "{} of {executed} cases differ:\n{}", failures.len(), failures.join("\n"));
+    assert!(
+        failures.is_empty(),
+        "{} of {executed} cases differ:\n{}",
+        failures.len(),
+        failures.join("\n")
+    );
 }

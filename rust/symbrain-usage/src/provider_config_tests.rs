@@ -118,7 +118,9 @@ fn claude_file_token_accepts_only_go_equivalent_deterministic_shapes() {
             // a Go outcome; the native choice is the first in sorted key order.
             let got = got.unwrap_or_default();
             assert!(
-                possible.iter().any(|token| token.as_str() == Some(got.as_str())),
+                possible
+                    .iter()
+                    .any(|token| token.as_str() == Some(got.as_str())),
                 "ambiguous account selection {id}: {got}"
             );
         } else {
@@ -149,7 +151,9 @@ fn copilot_file_token_matches_go_for_native_shapes_and_rejects_unproven_files() 
             // a Go outcome; the native choice is the first in sorted key order.
             let got = got.unwrap_or_default();
             assert!(
-                possible.iter().any(|token| token.as_str() == Some(got.as_str())),
+                possible
+                    .iter()
+                    .any(|token| token.as_str() == Some(got.as_str())),
                 "distinct Go map tokens {id}: {got}"
             );
         } else {
@@ -290,7 +294,12 @@ fn kimi_file_token_matches_every_frozen_go_shape() {
         }
         let expected = case["token"].as_str().unwrap();
         let expected = (!expected.is_empty()).then_some(expected);
-        assert_eq!(kimi_store(directory.path()).0.as_deref(), expected, "{}", case["id"]);
+        assert_eq!(
+            kimi_store(directory.path()).0.as_deref(),
+            expected,
+            "{}",
+            case["id"]
+        );
     }
 }
 
@@ -514,7 +523,11 @@ fn kimi_device_id_trims_like_go_and_keeps_invalid_utf8_bytes() {
     ] {
         fs::write(&path, contents).expect("device id");
         fs::copy(&path, home.join("device_id")).expect("copy");
-        assert_eq!(super::kimi_device_id_bytes(&home).as_deref(), expected, "{contents:?}");
+        assert_eq!(
+            super::kimi_device_id_bytes(&home).as_deref(),
+            expected,
+            "{contents:?}"
+        );
     }
     assert_eq!(go_trim_space(b"\xc2\xa0 x \xe3\x80\x80"), b"x");
 }

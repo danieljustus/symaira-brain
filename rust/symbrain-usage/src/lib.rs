@@ -27,8 +27,8 @@ mod transport;
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
 pub use providers::{
     Provider, ProviderSelection, ProviderSpec, UsageError, all_providers, is_secret_reference,
-    is_vault_uri, resolve_reference,
-    resolve_reference_or_env, secretref_timeout, selected_providers, set_secretref_timeout,
+    is_vault_uri, resolve_reference, resolve_reference_or_env, secretref_timeout,
+    selected_providers, set_secretref_timeout,
 };
 pub use retry_after::parse_retry_after;
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
