@@ -46,7 +46,10 @@ pub fn b64url(bytes: &[u8]) -> String {
     const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
     let mut out = String::new();
     for chunk in bytes.chunks(3) {
-        let n = chunk.iter().enumerate().fold(0_u32, |acc, (i, b)| acc | (u32::from(*b) << (16 - 8 * i)));
+        let n = chunk
+            .iter()
+            .enumerate()
+            .fold(0_u32, |acc, (i, b)| acc | (u32::from(*b) << (16 - 8 * i)));
         for i in 0..=chunk.len() {
             out.push(TABLE[((n >> (18 - 6 * i)) & 63) as usize] as char);
         }
@@ -78,7 +81,10 @@ pub fn token_with(secret: &str, claims: &Claims<'_>) -> String {
         )
         .as_bytes(),
     );
-    let signature = b64url(&hmac(secret.as_bytes(), format!("{header}.{payload}").as_bytes()));
+    let signature = b64url(&hmac(
+        secret.as_bytes(),
+        format!("{header}.{payload}").as_bytes(),
+    ));
     format!("{header}.{payload}.{signature}")
 }
 
@@ -173,7 +179,10 @@ impl Server {
         while TcpStream::connect(("127.0.0.1", port)).is_err() {
             assert!(Instant::now() < deadline, "server did not listen");
             if let Some(status) = server.child.try_wait().unwrap() {
-                panic!("server exited early: {status:?}: {}", std::fs::read_to_string(&server.err).unwrap_or_default());
+                panic!(
+                    "server exited early: {status:?}: {}",
+                    std::fs::read_to_string(&server.err).unwrap_or_default()
+                );
             }
             std::thread::sleep(Duration::from_millis(20));
         }
@@ -237,7 +246,16 @@ fn dechunk(mut body: &[u8]) -> Vec<u8> {
         let Some(end) = body.windows(2).position(|w| w == b"\r\n") else {
             return out;
         };
-        let size = usize::from_str_radix(std::str::from_utf8(&body[..end]).unwrap_or("0").split(';').next().unwrap().trim(), 16).unwrap_or(0);
+        let size = usize::from_str_radix(
+            std::str::from_utf8(&body[..end])
+                .unwrap_or("0")
+                .split(';')
+                .next()
+                .unwrap()
+                .trim(),
+            16,
+        )
+        .unwrap_or(0);
         body = &body[end + 2..];
         if size == 0 || body.len() < size {
             return out;
@@ -251,24 +269,42 @@ fn dechunk(mut body: &[u8]) -> Vec<u8> {
 /// carry `Connection: close`).
 pub fn raw(port: u16, request: &str) -> Response {
     let mut stream = TcpStream::connect(("127.0.0.1", port)).unwrap();
-    stream.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
+    stream
+        .set_read_timeout(Some(Duration::from_secs(10)))
+        .unwrap();
     let _ = stream.write_all(request.as_bytes());
     let mut bytes = Vec::new();
     let _ = stream.read_to_end(&mut bytes);
-    let split = bytes.windows(4).position(|w| w == b"\r\n\r\n").unwrap_or_else(|| panic!("no response head: {:?}", String::from_utf8_lossy(&bytes)));
+    let split = bytes
+        .windows(4)
+        .position(|w| w == b"\r\n\r\n")
+        .unwrap_or_else(|| panic!("no response head: {:?}", String::from_utf8_lossy(&bytes)));
     let head = String::from_utf8_lossy(&bytes[..split]).into_owned();
     let mut lines = head.split("\r\n");
-    let status = lines.next().unwrap().split(' ').nth(1).unwrap().parse().unwrap();
+    let status = lines
+        .next()
+        .unwrap()
+        .split(' ')
+        .nth(1)
+        .unwrap()
+        .parse()
+        .unwrap();
     let headers = lines
         .filter_map(|line| line.split_once(':'))
         .map(|(k, v)| (k.to_ascii_lowercase(), v.trim().to_owned()))
         .collect::<Vec<_>>();
-    let chunked = headers.iter().any(|(k, v)| k == "transfer-encoding" && v == "chunked");
+    let chunked = headers
+        .iter()
+        .any(|(k, v)| k == "transfer-encoding" && v == "chunked");
     let raw_body = &bytes[split + 4..];
     Response {
         status,
         headers,
-        body: if chunked { dechunk(raw_body) } else { raw_body.to_vec() },
+        body: if chunked {
+            dechunk(raw_body)
+        } else {
+            raw_body.to_vec()
+        },
     }
 }
 
@@ -287,7 +323,10 @@ pub fn request(
         text.push_str(&format!("{key}: {value}\r\n"));
     }
     if let Some(body) = body {
-        text.push_str(&format!("Content-Type: application/json\r\nContent-Length: {}\r\n", body.len()));
+        text.push_str(&format!(
+            "Content-Type: application/json\r\nContent-Length: {}\r\n",
+            body.len()
+        ));
     }
     text.push_str("Connection: close\r\n\r\n");
     if let Some(body) = body {
@@ -314,7 +353,13 @@ pub fn seed(path: &Path) -> Vec<String> {
         ids.push(memory.id);
     }
     let removed = store
-        .set("epsilon ephemeral entry", "global", "note", serde_json::Map::new(), false)
+        .set(
+            "epsilon ephemeral entry",
+            "global",
+            "note",
+            serde_json::Map::new(),
+            false,
+        )
         .unwrap();
     assert!(store.delete(&removed.id).unwrap());
     ids.push(removed.id);

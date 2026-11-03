@@ -98,7 +98,10 @@ impl MemoryListRow {
         members.string("id", &self.id);
         members.string("content", &self.content);
         members.string("scope", &self.scope);
-        members.raw("metadata", &render_metadata(&self.metadata, self.metadata_null));
+        members.raw(
+            "metadata",
+            &render_metadata(&self.metadata, self.metadata_null),
+        );
         members.time("created_at", self.created_at);
         members.time("updated_at", self.updated_at);
         members.string_if_present("created_by", &self.created_by);
@@ -127,10 +130,7 @@ impl MemoryListRow {
 }
 
 /// A nil map renders as `null`, any decoded object as an object.
-fn render_metadata(
-    map: &serde_json::Map<String, serde_json::Value>,
-    null: bool,
-) -> String {
+fn render_metadata(map: &serde_json::Map<String, serde_json::Value>, null: bool) -> String {
     if null {
         "null".to_owned()
     } else {
@@ -186,7 +186,10 @@ impl RuleRow {
         members.string("id", &self.id);
         members.string("content", &self.content);
         members.string("scope", &self.scope);
-        members.raw("metadata", &render_metadata(&self.metadata, self.metadata_null));
+        members.raw(
+            "metadata",
+            &render_metadata(&self.metadata, self.metadata_null),
+        );
         members.time("created_at", self.created_at);
         members.time("updated_at", self.updated_at);
         members.string_if_present("created_by", &self.created_by);

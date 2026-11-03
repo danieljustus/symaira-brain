@@ -45,8 +45,8 @@ mod write_output;
 use write::{run_delete, run_set};
 mod rules;
 use rules::run_rules;
-mod serve;
 mod query_log;
+mod serve;
 use query_log::run_query_log;
 
 /// Runs `symbrain memory`.

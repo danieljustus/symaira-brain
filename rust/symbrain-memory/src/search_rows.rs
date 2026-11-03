@@ -94,7 +94,8 @@ impl SearchRow {
     pub(crate) fn from_row(row: &Row<'_>) -> rusqlite::Result<Self> {
         let embedding_binary: Option<Vec<u8>> = row.get(5)?;
         // A nil vector is stored as JSON `null`, which the shipped decoder accepts.
-        let embedding: Vec<f32> = crate::rows::json::<Option<Vec<f32>>>(row, 4)?.unwrap_or_default();
+        let embedding: Vec<f32> =
+            crate::rows::json::<Option<Vec<f32>>>(row, 4)?.unwrap_or_default();
         if embedding.iter().any(|value| !value.is_finite()) {
             return Err(rusqlite::Error::InvalidQuery);
         }

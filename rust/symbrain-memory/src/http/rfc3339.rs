@@ -44,7 +44,11 @@ pub(super) fn parse(text: &str) -> Option<DateTime<Utc>> {
         }
         let mut value = 0_u32;
         for index in 0..9 {
-            value = value * 10 + rest.get(1 + index).filter(|_| 1 + index < end).map_or(0, |b| u32::from(b - b'0'));
+            value = value * 10
+                + rest
+                    .get(1 + index)
+                    .filter(|_| 1 + index < end)
+                    .map_or(0, |b| u32::from(b - b'0'));
         }
         nanos = value;
         rest = &rest[end..];

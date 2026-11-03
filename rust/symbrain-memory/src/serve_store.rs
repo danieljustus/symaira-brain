@@ -108,9 +108,8 @@ impl Store {
         while let Some(row) = rows.next()? {
             let id: String = row.get(0)?;
             let ts: Value = row.get(1)?;
-            let at = stored_time(&ts).ok_or_else(|| {
-                StoreError::Invalid("unrecognized oplog timestamp".to_owned())
-            })?;
+            let at = stored_time(&ts)
+                .ok_or_else(|| StoreError::Invalid("unrecognized oplog timestamp".to_owned()))?;
             result.push((id, at));
         }
         Ok(result)
@@ -226,9 +225,8 @@ fn upsert(conn: &Connection, memory: &PulledMemory, mode: ApplyMode) -> Result<b
     } else {
         memory.content_hash.clone()
     };
-    let default = |value: &str, fallback: &str| {
-        if value.is_empty() { fallback } else { value }.to_owned()
-    };
+    let default =
+        |value: &str, fallback: &str| if value.is_empty() { fallback } else { value }.to_owned();
     let status = default(&memory.consolidation_status, "raw");
     let review = default(&memory.review_status, "approved");
     let decay = if memory.decay_factor <= 0.0 || memory.decay_factor > 1.0 {

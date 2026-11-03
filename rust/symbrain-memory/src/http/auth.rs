@@ -58,8 +58,7 @@ impl Auth {
         let decoded = URL_SAFE_NO_PAD
             .decode(payload.trim_end_matches('='))
             .map_err(|_| "illegal base64 data")?;
-        let claims: Claims =
-            serde_json::from_slice(&decoded).map_err(|_| "invalid payload")?;
+        let claims: Claims = serde_json::from_slice(&decoded).map_err(|_| "invalid payload")?;
         if claims.sub.trim().is_empty() {
             return Err("token has empty subject");
         }

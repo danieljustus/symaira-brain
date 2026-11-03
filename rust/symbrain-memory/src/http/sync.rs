@@ -73,10 +73,7 @@ impl Server {
                 );
             };
             let text = String::from_utf8_lossy(&decoded);
-            let Some(parsed) = std::str::from_utf8(&decoded)
-                .ok()
-                .and_then(rfc3339::parse)
-            else {
+            let Some(parsed) = std::str::from_utf8(&decoded).ok().and_then(rfc3339::parse) else {
                 return wire::error_logged(
                     400,
                     "INVALID_REQUEST",
@@ -182,7 +179,8 @@ impl Server {
                 continue;
             }
             if !(memory.scope.is_empty()
-                || ["global", "project", "agent", "user", "session"].contains(&memory.scope.as_str()))
+                || ["global", "project", "agent", "user", "session"]
+                    .contains(&memory.scope.as_str()))
             {
                 invalid_scope += 1;
                 continue;
@@ -204,7 +202,10 @@ impl Server {
                 invalid_id += 1;
                 continue;
             }
-            match self.store.serve_apply_delete(&id, at, self.options.audit_enabled) {
+            match self
+                .store
+                .serve_apply_delete(&id, at, self.options.audit_enabled)
+            {
                 Ok(true) => deleted += 1,
                 Ok(false) => {}
                 Err(_) => return wire::error(500, "INTERNAL_ERROR", "Failed to apply delete"),
@@ -312,6 +313,9 @@ impl Server {
                 }
             }
         }
-        wire::raw_json(200, format!("{{\"skipped\":{skipped},\"stored\":{stored}}}"))
+        wire::raw_json(
+            200,
+            format!("{{\"skipped\":{skipped},\"stored\":{stored}}}"),
+        )
     }
 }

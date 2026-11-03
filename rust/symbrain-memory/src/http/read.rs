@@ -50,13 +50,23 @@ pub(super) fn passes_policy(
     if max_sensitivity.is_empty() && min_sharing.is_empty() && client.is_empty() {
         return true;
     }
-    let get = |key: &str| metadata.get(key).and_then(Value::as_str).unwrap_or_default();
+    let get = |key: &str| {
+        metadata
+            .get(key)
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+    };
     if !max_sensitivity.is_empty() {
         let actual = match get("sensitivity") {
             "" => "internal",
             other => other,
         };
-        let levels = [("public", 0), ("internal", 1), ("confidential", 2), ("secret", 3)];
+        let levels = [
+            ("public", 0),
+            ("internal", 1),
+            ("confidential", 2),
+            ("secret", 3),
+        ];
         if rank(&levels, actual, 1) > rank(&levels, max_sensitivity, 1) {
             return false;
         }

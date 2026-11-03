@@ -176,8 +176,7 @@ fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<(i64, Option<OsStr
 /// MCP/HTTP server around the shared store.
 fn build(store: Store) -> Result<Arc<Server>, String> {
     let cfg = config::load();
-    let secret = jwt_secret(cfg)
-        .map_err(|error| format!("init memory JWT provider: {error}"))?;
+    let secret = jwt_secret(cfg).map_err(|error| format!("init memory JWT provider: {error}"))?;
     let normalized = |value: f64, fallback: f64| {
         if value <= 0.0 || value >= 1.0 {
             fallback
@@ -186,9 +185,7 @@ fn build(store: Store) -> Result<Arc<Server>, String> {
         }
     };
     let options = Options {
-        version: option_env!("SYMBRAIN_VERSION")
-            .unwrap_or("dev")
-            .to_owned(),
+        version: option_env!("SYMBRAIN_VERSION").unwrap_or("dev").to_owned(),
         require_profile: cfg.require_profile,
         direct_writes: true,
         audit_enabled: cfg.audit_log_enabled,
@@ -292,7 +289,8 @@ fn jwt_secret(cfg: &config::Config) -> Result<Vec<u8>, String> {
         let mut bytes = [0_u8; 32];
         getrandom_fill(&mut bytes)?;
         secret = bytes.iter().map(|byte| format!("{byte:02x}")).collect();
-        persist(&path, &secret).map_err(|error| format!("failed to generate JWT secret: {error}"))?;
+        persist(&path, &secret)
+            .map_err(|error| format!("failed to generate JWT secret: {error}"))?;
     }
     Ok(secret.into_bytes())
 }

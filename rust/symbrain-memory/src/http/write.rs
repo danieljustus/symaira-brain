@@ -4,8 +4,8 @@
 //! explicit `501` before any state changes.
 
 use super::{Server, auth::Claims, go_json, read, sync_decode, wire};
-use crate::cli_write::ServeExtra;
 use crate::DirectWrite;
+use crate::cli_write::ServeExtra;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use rusqlite::OptionalExtension;
 use serde_json::json;

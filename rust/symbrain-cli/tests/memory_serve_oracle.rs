@@ -99,7 +99,13 @@ fn bind_failure_reports_the_shipped_wording() {
 fn unusable_database_path_matches_the_oracle() {
     let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
-    let args = ["serve", "--port", "18999", "--db", "/dev/null/impossible.db"];
+    let args = [
+        "serve",
+        "--port",
+        "18999",
+        "--db",
+        "/dev/null/impossible.db",
+    ];
     let expected = run_cli(&go, &args);
     let actual = run_cli(&rust, &args);
     assert_eq!(expected.0, Some(1));
@@ -134,14 +140,18 @@ impl Ctx {
     }
 
     fn normalise(&mut self, body: &str) -> String {
-        let uuid = Regex::new(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}").unwrap();
+        let uuid =
+            Regex::new(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}").unwrap();
         let mut out = body.to_owned();
         let found = uuid
             .find_iter(body)
             .map(|m| m.as_str().to_owned())
             .collect::<Vec<_>>();
         for id in found {
-            if SEEDED.with(|s| s.borrow().contains(&id)) || id == "00000000-0000-4000-8000-000000000001" || id.starts_with("0000") {
+            if SEEDED.with(|s| s.borrow().contains(&id))
+                || id == "00000000-0000-4000-8000-000000000001"
+                || id.starts_with("0000")
+            {
                 continue;
             }
             let index = match self.new_ids.iter().position(|known| *known == id) {
@@ -155,7 +165,9 @@ impl Ctx {
         }
         let before_wall_clock = out.clone();
         let time = Regex::new(r#""server_time":"[^"]*""#).unwrap();
-        let out = time.replace_all(&out, r#""server_time":"<T>""#).into_owned();
+        let out = time
+            .replace_all(&out, r#""server_time":"<T>""#)
+            .into_owned();
         // Wall-clock values produced by the servers (latency measurements and
         // instants after the seed was written). Seeded instants and the fixed
         // 2030/2001 instants sent by the tests stay exact.
@@ -222,14 +234,24 @@ const KEPT_HEADERS: &[&str] = &[
     "connection",
 ];
 
-fn observe(ctx: &mut Ctx, name: &str, method: &str, target: &str, headers: &[(&str, &str)], body: Option<&str>) -> Observation {
+fn observe(
+    ctx: &mut Ctx,
+    name: &str,
+    method: &str,
+    target: &str,
+    headers: &[(&str, &str)],
+    body: Option<&str>,
+) -> Observation {
     let target = ctx.sub(target);
     let body = body.map(|b| ctx.sub(b));
     let headers = headers
         .iter()
         .map(|(k, v)| (*k, ctx.sub(v)))
         .collect::<Vec<_>>();
-    let borrowed = headers.iter().map(|(k, v)| (*k, v.as_str())).collect::<Vec<_>>();
+    let borrowed = headers
+        .iter()
+        .map(|(k, v)| (*k, v.as_str()))
+        .collect::<Vec<_>>();
     pace(ctx);
     let response = request(ctx.port, method, &target, &borrowed, body.as_deref());
     let mut kept = BTreeMap::new();
@@ -250,7 +272,13 @@ fn observe(ctx: &mut Ctx, name: &str, method: &str, target: &str, headers: &[(&s
             }
         }
         None => {
-            kept.insert("transfer-encoding".into(), response.header("transfer-encoding").unwrap_or("").to_owned());
+            kept.insert(
+                "transfer-encoding".into(),
+                response
+                    .header("transfer-encoding")
+                    .unwrap_or("")
+                    .to_owned(),
+            );
         }
     }
     let text = ctx.normalise(&response.text());
@@ -307,26 +335,124 @@ fn run_scenario(binary: &std::path::Path, seed_db: &std::path::Path) -> Outcome 
 
     // public status + static
     step!("status", "GET", "/api/status", &[], None);
-    step!("status-post", "POST", "/api/status", &[("X-Requested-With", "XMLHttpRequest")], Some("{}"));
+    step!(
+        "status-post",
+        "POST",
+        "/api/status",
+        &[("X-Requested-With", "XMLHttpRequest")],
+        Some("{}")
+    );
     step!("root-html", "GET", "/", &[], None);
     step!("unknown-path", "GET", "/nope", &[], None);
     step!("api-subpath", "GET", "/api/status/", &[], None);
 
     // authentication failures
     step!("stats-no-auth", "GET", "/api/stats", &[], None);
-    step!("stats-basic-auth", "GET", "/api/stats", &[("Authorization", "Basic abc")], None);
-    step!("stats-garbage", "GET", "/api/stats", &[("Authorization", "Bearer abc")], None);
+    step!(
+        "stats-basic-auth",
+        "GET",
+        "/api/stats",
+        &[("Authorization", "Basic abc")],
+        None
+    );
+    step!(
+        "stats-garbage",
+        "GET",
+        "/api/stats",
+        &[("Authorization", "Bearer abc")],
+        None
+    );
     let bad_sig = format!("Bearer {}x", token("reader", "j"));
-    step!("stats-bad-signature", "GET", "/api/stats", &[("Authorization", bad_sig.as_str())], None);
-    let expired = format!("Bearer {}", token_with(SECRET, &Claims { sub: "reader", jti: "j-exp", iss: "symaira-memory", exp_offset: -10 }));
-    step!("stats-expired", "GET", "/api/stats", &[("Authorization", expired.as_str())], None);
-    let wrong_iss = format!("Bearer {}", token_with(SECRET, &Claims { sub: "reader", jti: "j-iss", iss: "other", exp_offset: 100 }));
-    step!("stats-wrong-issuer", "GET", "/api/stats", &[("Authorization", wrong_iss.as_str())], None);
-    let wrong_key = format!("Bearer {}", token_with("another-secret", &Claims { sub: "reader", jti: "j-key", iss: "symaira-memory", exp_offset: 100 }));
-    step!("stats-wrong-key", "GET", "/api/stats", &[("Authorization", wrong_key.as_str())], None);
-    let empty_sub = format!("Bearer {}", token_with(SECRET, &Claims { sub: " ", jti: "j-sub", iss: "symaira-memory", exp_offset: 100 }));
-    step!("stats-empty-subject", "GET", "/api/stats", &[("Authorization", empty_sub.as_str())], None);
-    step!("stats-ok", "GET", "/api/stats", &[("Authorization", reader.as_str())], None);
+    step!(
+        "stats-bad-signature",
+        "GET",
+        "/api/stats",
+        &[("Authorization", bad_sig.as_str())],
+        None
+    );
+    let expired = format!(
+        "Bearer {}",
+        token_with(
+            SECRET,
+            &Claims {
+                sub: "reader",
+                jti: "j-exp",
+                iss: "symaira-memory",
+                exp_offset: -10
+            }
+        )
+    );
+    step!(
+        "stats-expired",
+        "GET",
+        "/api/stats",
+        &[("Authorization", expired.as_str())],
+        None
+    );
+    let wrong_iss = format!(
+        "Bearer {}",
+        token_with(
+            SECRET,
+            &Claims {
+                sub: "reader",
+                jti: "j-iss",
+                iss: "other",
+                exp_offset: 100
+            }
+        )
+    );
+    step!(
+        "stats-wrong-issuer",
+        "GET",
+        "/api/stats",
+        &[("Authorization", wrong_iss.as_str())],
+        None
+    );
+    let wrong_key = format!(
+        "Bearer {}",
+        token_with(
+            "another-secret",
+            &Claims {
+                sub: "reader",
+                jti: "j-key",
+                iss: "symaira-memory",
+                exp_offset: 100
+            }
+        )
+    );
+    step!(
+        "stats-wrong-key",
+        "GET",
+        "/api/stats",
+        &[("Authorization", wrong_key.as_str())],
+        None
+    );
+    let empty_sub = format!(
+        "Bearer {}",
+        token_with(
+            SECRET,
+            &Claims {
+                sub: " ",
+                jti: "j-sub",
+                iss: "symaira-memory",
+                exp_offset: 100
+            }
+        )
+    );
+    step!(
+        "stats-empty-subject",
+        "GET",
+        "/api/stats",
+        &[("Authorization", empty_sub.as_str())],
+        None
+    );
+    step!(
+        "stats-ok",
+        "GET",
+        "/api/stats",
+        &[("Authorization", reader.as_str())],
+        None
+    );
 
     // reads
     let auth = [("Authorization", reader.as_str())];
@@ -335,145 +461,574 @@ fn run_scenario(binary: &std::path::Path, seed_db: &std::path::Path) -> Outcome 
     step!("list-limit-1", "GET", "/api/list?limit=1", &auth, None);
     step!("list-limit-0", "GET", "/api/list?limit=0", &auth, None);
     step!("list-limit-junk", "GET", "/api/list?limit=abc", &auth, None);
-    step!("list-limit-huge", "GET", "/api/list?limit=999999", &auth, None);
-    step!("list-public-only", "GET", "/api/list?max_sensitivity=public", &auth, None);
-    step!("list-team", "GET", "/api/list?min_sharing_level=team", &auth, None);
-    step!("list-client", "GET", "/api/list?client_id=blocked", &auth, None);
-    step!("list-post", "POST", "/api/list", &[("Authorization", reader.as_str())], Some("{}"));
+    step!(
+        "list-limit-huge",
+        "GET",
+        "/api/list?limit=999999",
+        &auth,
+        None
+    );
+    step!(
+        "list-public-only",
+        "GET",
+        "/api/list?max_sensitivity=public",
+        &auth,
+        None
+    );
+    step!(
+        "list-team",
+        "GET",
+        "/api/list?min_sharing_level=team",
+        &auth,
+        None
+    );
+    step!(
+        "list-client",
+        "GET",
+        "/api/list?client_id=blocked",
+        &auth,
+        None
+    );
+    step!(
+        "list-post",
+        "POST",
+        "/api/list",
+        &[("Authorization", reader.as_str())],
+        Some("{}")
+    );
     step!("get-missing-param", "GET", "/api/get", &auth, None);
     step!("get-not-found", "GET", "/api/get?id=nope", &auth, None);
     step!("get-pii", "GET", "/api/get?id={m0}", &auth, None);
     step!("get-plain", "GET", "/api/get?id={m1}", &auth, None);
-    step!("get-client-denied", "GET", "/api/get?id={m2}&client_id=blocked", &auth, None);
-    step!("get-client-ok", "GET", "/api/get?id={m2}&client_id=agent-one", &auth, None);
-    step!("get-client-not-listed", "GET", "/api/get?id={m2}&client_id=stranger", &auth, None);
+    step!(
+        "get-client-denied",
+        "GET",
+        "/api/get?id={m2}&client_id=blocked",
+        &auth,
+        None
+    );
+    step!(
+        "get-client-ok",
+        "GET",
+        "/api/get?id={m2}&client_id=agent-one",
+        &auth,
+        None
+    );
+    step!(
+        "get-client-not-listed",
+        "GET",
+        "/api/get?id={m2}&client_id=stranger",
+        &auth,
+        None
+    );
     step!("get-post", "POST", "/api/get?id={m1}", &auth, Some("{}"));
     step!("rules", "GET", "/api/rules", &auth, None);
-    step!("rules-scope", "GET", "/api/rules?scope=project", &auth, None);
-    step!("rules-empty-scope", "GET", "/api/rules?scope=session", &auth, None);
+    step!(
+        "rules-scope",
+        "GET",
+        "/api/rules?scope=project",
+        &auth,
+        None
+    );
+    step!(
+        "rules-empty-scope",
+        "GET",
+        "/api/rules?scope=session",
+        &auth,
+        None
+    );
     step!("entities", "GET", "/api/entities", &auth, None);
     step!("entities-post", "POST", "/api/entities", &auth, Some("{}"));
 
     // search (basic shapes; extended filters are a documented native limit)
-    step!("search", "POST", "/api/search", &auth, Some(r#"{"query":"alpha rocket"}"#));
-    step!("search-limit", "POST", "/api/search", &auth, Some(r#"{"query":"garden journal","limit":1}"#));
-    step!("search-scope", "POST", "/api/search", &auth, Some(r#"{"query":"harbor","scope":"global","limit":3}"#));
-    step!("search-miss", "POST", "/api/search", &auth, Some(r#"{"query":"zzzz qqqq","scope":"session"}"#));
+    step!(
+        "search",
+        "POST",
+        "/api/search",
+        &auth,
+        Some(r#"{"query":"alpha rocket"}"#)
+    );
+    step!(
+        "search-limit",
+        "POST",
+        "/api/search",
+        &auth,
+        Some(r#"{"query":"garden journal","limit":1}"#)
+    );
+    step!(
+        "search-scope",
+        "POST",
+        "/api/search",
+        &auth,
+        Some(r#"{"query":"harbor","scope":"global","limit":3}"#)
+    );
+    step!(
+        "search-miss",
+        "POST",
+        "/api/search",
+        &auth,
+        Some(r#"{"query":"zzzz qqqq","scope":"session"}"#)
+    );
     step!("search-bad-json", "POST", "/api/search", &auth, Some("{"));
-    step!("search-type-error", "POST", "/api/search", &auth, Some(r#"{"limit":"x"}"#));
+    step!(
+        "search-type-error",
+        "POST",
+        "/api/search",
+        &auth,
+        Some(r#"{"limit":"x"}"#)
+    );
     step!("search-get", "GET", "/api/search", &auth, None);
     step!("status-after-search", "GET", "/api/status", &[], None);
     step!("stats-after-search", "GET", "/api/stats", &auth, None);
 
     // writes
     let wauth = [("Authorization", writer.as_str())];
-    step!("set-read-only", "POST", "/api/set", &auth, Some(r#"{"content":"nope"}"#));
+    step!(
+        "set-read-only",
+        "POST",
+        "/api/set",
+        &auth,
+        Some(r#"{"content":"nope"}"#)
+    );
     step!("set-get", "GET", "/api/set", &wauth, None);
     step!("set-bad-json", "POST", "/api/set", &wauth, Some("[]"));
-    step!("set-bad-scope", "POST", "/api/set", &wauth, Some(r#"{"content":"x","scope":"galaxy"}"#));
-    let set = observe(&mut ctx, "set-ok", "POST", "/api/set", &wauth, Some(r#"{"content":"omega quartz lantern","metadata":{"team":"blue","sensitivity":"public"}}"#));
-    let set_id = json_id(&set.body.replace("<NEW0>", &ctx.new_ids.first().cloned().unwrap_or_default()), "id");
+    step!(
+        "set-bad-scope",
+        "POST",
+        "/api/set",
+        &wauth,
+        Some(r#"{"content":"x","scope":"galaxy"}"#)
+    );
+    let set = observe(
+        &mut ctx,
+        "set-ok",
+        "POST",
+        "/api/set",
+        &wauth,
+        Some(
+            r#"{"content":"omega quartz lantern","metadata":{"team":"blue","sensitivity":"public"}}"#,
+        ),
+    );
+    let set_id = json_id(
+        &set.body
+            .replace("<NEW0>", &ctx.new_ids.first().cloned().unwrap_or_default()),
+        "id",
+    );
     obs.push(set);
     if let Some(id) = set_id {
         ctx.ids.insert("s0".into(), id);
     }
-    let pii = observe(&mut ctx, "set-pii", "POST", "/api/set", &wauth, Some(r#"{"content":"mail bob@example.org the key sk-abcdefghijklmnopqrstuv","scope":"user","metadata":{"phone":"+49 170 1234567"},"session_id":"sess-1","entities":["Bob","alice"]}"#));
+    let pii = observe(
+        &mut ctx,
+        "set-pii",
+        "POST",
+        "/api/set",
+        &wauth,
+        Some(
+            r#"{"content":"mail bob@example.org the key sk-abcdefghijklmnopqrstuv","scope":"user","metadata":{"phone":"+49 170 1234567"},"session_id":"sess-1","entities":["Bob","alice"]}"#,
+        ),
+    );
     let pii_id = ctx.new_ids.get(1).cloned();
     obs.push(pii);
     if let Some(id) = pii_id {
         ctx.ids.insert("s1".into(), id);
     }
-    step!("set-working", "POST", "/api/set", &wauth, Some(r#"{"content":"ephemeral kumquat","working":true}"#));
-    step!("set-project", "POST", "/api/set", &wauth, Some(r#"{"content":"theta prism lattice note","scope":"project"}"#));
-    step!("set-unknown-subject", "POST", "/api/set", &[("Authorization", nobody.as_str())], Some(r#"{"content":"sigma lattice"}"#));
+    step!(
+        "set-working",
+        "POST",
+        "/api/set",
+        &wauth,
+        Some(r#"{"content":"ephemeral kumquat","working":true}"#)
+    );
+    step!(
+        "set-project",
+        "POST",
+        "/api/set",
+        &wauth,
+        Some(r#"{"content":"theta prism lattice note","scope":"project"}"#)
+    );
+    step!(
+        "set-unknown-subject",
+        "POST",
+        "/api/set",
+        &[("Authorization", nobody.as_str())],
+        Some(r#"{"content":"sigma lattice"}"#)
+    );
     step!("get-set-ok", "GET", "/api/get?id={s0}", &auth, None);
     step!("get-set-pii", "GET", "/api/get?id={s1}", &auth, None);
     step!("list-after-set", "GET", "/api/list", &auth, None);
-    step!("delete-missing-param", "DELETE", "/api/delete", &wauth, None);
-    step!("delete-not-found", "DELETE", "/api/delete?id=nope", &wauth, None);
+    step!(
+        "delete-missing-param",
+        "DELETE",
+        "/api/delete",
+        &wauth,
+        None
+    );
+    step!(
+        "delete-not-found",
+        "DELETE",
+        "/api/delete?id=nope",
+        &wauth,
+        None
+    );
     step!("delete-get", "GET", "/api/delete?id={s0}", &wauth, None);
-    step!("delete-read-only", "DELETE", "/api/delete?id={s0}", &auth, None);
+    step!(
+        "delete-read-only",
+        "DELETE",
+        "/api/delete?id={s0}",
+        &auth,
+        None
+    );
     step!("delete-ok", "DELETE", "/api/delete?id={s0}", &wauth, None);
-    step!("delete-post-ok", "POST", "/api/delete?id={s1}", &wauth, Some("{}"));
-    step!("delete-again", "DELETE", "/api/delete?id={s0}", &wauth, None);
+    step!(
+        "delete-post-ok",
+        "POST",
+        "/api/delete?id={s1}",
+        &wauth,
+        Some("{}")
+    );
+    step!(
+        "delete-again",
+        "DELETE",
+        "/api/delete?id={s0}",
+        &wauth,
+        None
+    );
 
     // sync
     step!("changes", "GET", "/api/sync/changes", &auth, None);
-    step!("changes-limit", "GET", "/api/sync/changes?limit=2", &auth, None);
-    step!("changes-embeddings", "GET", "/api/sync/changes?limit=1&include_embeddings=true", &auth, None);
-    step!("changes-since", "GET", "/api/sync/changes?since=2100-01-01T00:00:00Z", &auth, None);
-    step!("changes-bad-since", "GET", "/api/sync/changes?since=yesterday", &auth, None);
-    step!("changes-bad-cursor", "GET", "/api/sync/changes?cursor=***", &auth, None);
-    step!("changes-bad-cursor-format", "GET", "/api/sync/changes?cursor=eWVzdGVyZGF5", &auth, None);
-    step!("changes-policy", "GET", "/api/sync/changes?max_sensitivity=public", &auth, None);
-    step!("changes-post", "POST", "/api/sync/changes", &auth, Some("{}"));
+    step!(
+        "changes-limit",
+        "GET",
+        "/api/sync/changes?limit=2",
+        &auth,
+        None
+    );
+    step!(
+        "changes-embeddings",
+        "GET",
+        "/api/sync/changes?limit=1&include_embeddings=true",
+        &auth,
+        None
+    );
+    step!(
+        "changes-since",
+        "GET",
+        "/api/sync/changes?since=2100-01-01T00:00:00Z",
+        &auth,
+        None
+    );
+    step!(
+        "changes-bad-since",
+        "GET",
+        "/api/sync/changes?since=yesterday",
+        &auth,
+        None
+    );
+    step!(
+        "changes-bad-cursor",
+        "GET",
+        "/api/sync/changes?cursor=***",
+        &auth,
+        None
+    );
+    step!(
+        "changes-bad-cursor-format",
+        "GET",
+        "/api/sync/changes?cursor=eWVzdGVyZGF5",
+        &auth,
+        None
+    );
+    step!(
+        "changes-policy",
+        "GET",
+        "/api/sync/changes?max_sensitivity=public",
+        &auth,
+        None
+    );
+    step!(
+        "changes-post",
+        "POST",
+        "/api/sync/changes",
+        &auth,
+        Some("{}")
+    );
     // The first page's cursor, from the oracle-visible body.
     pace(&mut ctx);
-    let page = request(ctx.port, "GET", "/api/sync/changes?limit=1", &[("Authorization", reader.as_str())], None);
+    let page = request(
+        ctx.port,
+        "GET",
+        "/api/sync/changes?limit=1",
+        &[("Authorization", reader.as_str())],
+        None,
+    );
     if let Some(cursor) = json_id(&page.text(), "next_cursor") {
-        ctx.ids.insert("cursor".into(), cursor.replace('=', "%3D").replace('+', "%2B"));
-        step!("changes-cursor", "GET", "/api/sync/changes?limit=1&cursor={cursor}", &auth, None);
+        ctx.ids.insert(
+            "cursor".into(),
+            cursor.replace('=', "%3D").replace('+', "%2B"),
+        );
+        step!(
+            "changes-cursor",
+            "GET",
+            "/api/sync/changes?limit=1&cursor={cursor}",
+            &auth,
+            None
+        );
     }
 
     let apply_new = "11111111-1111-4111-8111-111111111111";
     let apply_body = format!(
         r#"{{"memories":[{{"id":"{apply_new}","content":"pushed memory for bob@example.org","scope":"global","metadata":{{"k":"v","token":"Abc123_def-456.GhIjKlMnOp"}},"embedding":null,"created_at":"{FIXED_TIME}","updated_at":"{FIXED_TIME}","created_by":"peer","kind":"note","review_status":"approved","tier":"long_term","access_count":3,"importance":0.5}},{{"id":"","content":"no id"}},{{"id":"not-a-uuid","content":"bad id"}},{{"id":"22222222-2222-4222-8222-222222222222","scope":"galaxy","content":"bad scope"}},{{"id":"{{m1}}","content":"older update","scope":"global","updated_at":"2001-01-01T00:00:00Z","created_at":"2001-01-01T00:00:00Z"}}],"deleted":[{{"id":"{{m3}}","deleted_at":"{FIXED_TIME}"}},{{"id":"33333333-3333-4333-8333-333333333333","deleted_at":"{FIXED_TIME}"}},{{"id":"junk","deleted_at":"{FIXED_TIME}"}},{{"id":"","deleted_at":"{FIXED_TIME}"}}]}}"#
     );
-    step!("apply-read-only", "POST", "/api/sync/apply", &auth, Some(apply_body.as_str()));
+    step!(
+        "apply-read-only",
+        "POST",
+        "/api/sync/apply",
+        &auth,
+        Some(apply_body.as_str())
+    );
     step!("apply-get", "GET", "/api/sync/apply", &wauth, None);
-    step!("apply-bad-json", "POST", "/api/sync/apply", &wauth, Some(r#"{"memories":[{"id":1}]}"#));
-    step!("apply-not-object", "POST", "/api/sync/apply", &wauth, Some("[]"));
-    step!("apply-trailing", "POST", "/api/sync/apply", &wauth, Some("{} {}"));
-    step!("apply-ok", "POST", "/api/sync/apply", &wauth, Some(apply_body.as_str()));
-    step!("apply-again", "POST", "/api/sync/apply", &wauth, Some(apply_body.as_str()));
+    step!(
+        "apply-bad-json",
+        "POST",
+        "/api/sync/apply",
+        &wauth,
+        Some(r#"{"memories":[{"id":1}]}"#)
+    );
+    step!(
+        "apply-not-object",
+        "POST",
+        "/api/sync/apply",
+        &wauth,
+        Some("[]")
+    );
+    step!(
+        "apply-trailing",
+        "POST",
+        "/api/sync/apply",
+        &wauth,
+        Some("{} {}")
+    );
+    step!(
+        "apply-ok",
+        "POST",
+        "/api/sync/apply",
+        &wauth,
+        Some(apply_body.as_str())
+    );
+    step!(
+        "apply-again",
+        "POST",
+        "/api/sync/apply",
+        &wauth,
+        Some(apply_body.as_str())
+    );
     step!("apply-empty", "POST", "/api/sync/apply", &wauth, Some("{}"));
-    step!("apply-null", "POST", "/api/sync/apply", &wauth, Some("null"));
-    let vector = (0..768).map(|i| if i % 7 == 0 { "0.0625" } else if i % 11 == 0 { "-0.03125" } else { "0" }).collect::<Vec<_>>().join(",");
+    step!(
+        "apply-null",
+        "POST",
+        "/api/sync/apply",
+        &wauth,
+        Some("null")
+    );
+    let vector = (0..768)
+        .map(|i| {
+            if i % 7 == 0 {
+                "0.0625"
+            } else if i % 11 == 0 {
+                "-0.03125"
+            } else {
+                "0"
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(",");
     let vector_body = format!(
         r#"{{"memories":[{{"id":"44444444-4444-4444-8444-444444444444","content":"vector peer memory","scope":"project","embedding":[{vector}],"embedding_source":"ollama","embedding_model":"nomic-embed-text","updated_at":"2030-01-02T03:04:06Z","created_at":"2030-01-02T03:04:06Z"}}]}}"#
     );
-    step!("apply-vector", "POST", "/api/sync/apply", &wauth, Some(vector_body.as_str()));
-    step!("changes-after-apply", "GET", "/api/sync/changes?since=2029-01-01T00:00:00Z&include_embeddings=true", &auth, None);
+    step!(
+        "apply-vector",
+        "POST",
+        "/api/sync/apply",
+        &wauth,
+        Some(vector_body.as_str())
+    );
+    step!(
+        "changes-after-apply",
+        "GET",
+        "/api/sync/changes?since=2029-01-01T00:00:00Z&include_embeddings=true",
+        &auth,
+        None
+    );
     step!("changes-deleted", "GET", "/api/sync/changes", &auth, None);
 
     let relay = r#"{"blobs":[{"id":"b1","updated_at":"2030-01-02T03:04:05.123456789Z","blob":"aGVsbG8="},{"id":"b2","updated_at":"2030-01-02T03:04:06Z","blob":"d29ybGQ="},{"id":"","blob":"eA=="},{"id":"b3","updated_at":"2030-01-02T03:04:07Z","blob":""}]}"#;
-    step!("relay-read-only", "POST", "/api/sync/relay", &auth, Some(relay));
+    step!(
+        "relay-read-only",
+        "POST",
+        "/api/sync/relay",
+        &auth,
+        Some(relay)
+    );
     step!("relay-post", "POST", "/api/sync/relay", &wauth, Some(relay));
-    step!("relay-post-again", "POST", "/api/sync/relay", &wauth, Some(relay));
-    step!("relay-bad-blob", "POST", "/api/sync/relay", &wauth, Some(r#"{"blobs":[{"id":"x","blob":"***"}]}"#));
+    step!(
+        "relay-post-again",
+        "POST",
+        "/api/sync/relay",
+        &wauth,
+        Some(relay)
+    );
+    step!(
+        "relay-bad-blob",
+        "POST",
+        "/api/sync/relay",
+        &wauth,
+        Some(r#"{"blobs":[{"id":"x","blob":"***"}]}"#)
+    );
     step!("relay-get", "GET", "/api/sync/relay", &wauth, None);
-    step!("relay-get-since", "GET", "/api/sync/relay?since=2030-01-02T03:04:05.5Z&limit=1", &wauth, None);
-    step!("relay-get-bad-since", "GET", "/api/sync/relay?since=x", &wauth, None);
+    step!(
+        "relay-get-since",
+        "GET",
+        "/api/sync/relay?since=2030-01-02T03:04:05.5Z&limit=1",
+        &wauth,
+        None
+    );
+    step!(
+        "relay-get-bad-since",
+        "GET",
+        "/api/sync/relay?since=x",
+        &wauth,
+        None
+    );
     step!("relay-delete", "DELETE", "/api/sync/relay", &wauth, None);
 
     // revocation
-    step!("revoke-empty", "POST", "/api/token/revoke", &auth, Some("{}"));
-    step!("revoke-bad-token", "POST", "/api/token/revoke", &auth, Some(r#"{"token":"abc"}"#));
+    step!(
+        "revoke-empty",
+        "POST",
+        "/api/token/revoke",
+        &auth,
+        Some("{}")
+    );
+    step!(
+        "revoke-bad-token",
+        "POST",
+        "/api/token/revoke",
+        &auth,
+        Some(r#"{"token":"abc"}"#)
+    );
     step!("revoke-get", "GET", "/api/token/revoke", &auth, None);
     let victim = token("victim", "jti-victim");
-    step!("victim-before", "GET", "/api/stats", &[("Authorization", format!("Bearer {victim}").as_str())], None);
+    step!(
+        "victim-before",
+        "GET",
+        "/api/stats",
+        &[("Authorization", format!("Bearer {victim}").as_str())],
+        None
+    );
     let revoke_body = format!(r#"{{"token":"{victim}"}}"#);
-    step!("revoke-token", "POST", "/api/token/revoke", &auth, Some(revoke_body.as_str()));
-    step!("victim-after", "GET", "/api/stats", &[("Authorization", format!("Bearer {victim}").as_str())], None);
-    step!("revoke-jti", "POST", "/api/token/revoke", &auth, Some(r#"{"jti":" jti-reader2 "}"#));
+    step!(
+        "revoke-token",
+        "POST",
+        "/api/token/revoke",
+        &auth,
+        Some(revoke_body.as_str())
+    );
+    step!(
+        "victim-after",
+        "GET",
+        "/api/stats",
+        &[("Authorization", format!("Bearer {victim}").as_str())],
+        None
+    );
+    step!(
+        "revoke-jti",
+        "POST",
+        "/api/token/revoke",
+        &auth,
+        Some(r#"{"jti":" jti-reader2 "}"#)
+    );
 
     // CORS, CSRF and Host guard
-    step!("preflight-extension", "OPTIONS", "/api/list", &[("Origin", "chrome-extension://abc")], None);
+    step!(
+        "preflight-extension",
+        "OPTIONS",
+        "/api/list",
+        &[("Origin", "chrome-extension://abc")],
+        None
+    );
     step!("preflight-no-origin", "OPTIONS", "/api/list", &[], None);
-    step!("preflight-web", "OPTIONS", "/api/list", &[("Origin", "https://evil.example")], None);
-    step!("list-extension", "GET", "/api/list?limit=1", &[("Authorization", reader.as_str()), ("Origin", "moz-extension://x")], None);
+    step!(
+        "preflight-web",
+        "OPTIONS",
+        "/api/list",
+        &[("Origin", "https://evil.example")],
+        None
+    );
+    step!(
+        "list-extension",
+        "GET",
+        "/api/list?limit=1",
+        &[
+            ("Authorization", reader.as_str()),
+            ("Origin", "moz-extension://x")
+        ],
+        None
+    );
     step!("csrf-blocked", "POST", "/api/search", &[], Some("{}"));
-    step!("csrf-xhr", "POST", "/api/search", &[("X-Requested-With", "XMLHttpRequest")], Some("{}"));
-    step!("csrf-local-origin", "POST", "/api/search", &[("Origin", "http://localhost:3000")], Some("{}"));
-    step!("host-evil", "GET", "/api/status", &[("Host", "evil.example")], None);
-    step!("host-localhost", "GET", "/api/status", &[("Host", "localhost:1")], None);
-    step!("host-ipv6", "GET", "/api/status", &[("Host", "[::1]:1")], None);
-    step!("body-too-large", "POST", "/api/search", &[("Authorization", reader.as_str())], Some(&format!(r#"{{"query":"{}"}}"#, "a".repeat(1 << 20))));
+    step!(
+        "csrf-xhr",
+        "POST",
+        "/api/search",
+        &[("X-Requested-With", "XMLHttpRequest")],
+        Some("{}")
+    );
+    step!(
+        "csrf-local-origin",
+        "POST",
+        "/api/search",
+        &[("Origin", "http://localhost:3000")],
+        Some("{}")
+    );
+    step!(
+        "host-evil",
+        "GET",
+        "/api/status",
+        &[("Host", "evil.example")],
+        None
+    );
+    step!(
+        "host-localhost",
+        "GET",
+        "/api/status",
+        &[("Host", "localhost:1")],
+        None
+    );
+    step!(
+        "host-ipv6",
+        "GET",
+        "/api/status",
+        &[("Host", "[::1]:1")],
+        None
+    );
+    step!(
+        "body-too-large",
+        "POST",
+        "/api/search",
+        &[("Authorization", reader.as_str())],
+        Some(&format!(r#"{{"query":"{}"}}"#, "a".repeat(1 << 20)))
+    );
 
     drop(ctx);
     let (exit, stdout, stderr) = server.terminate();
     let db = snapshot(&root.db());
-    Outcome { observations: obs, exit, stdout, stderr, db }
+    Outcome {
+        observations: obs,
+        exit,
+        stdout,
+        stderr,
+        db,
+    }
 }
 
 fn snapshot(path: &std::path::Path) -> Vec<String> {
@@ -484,21 +1039,38 @@ fn snapshot(path: &std::path::Path) -> Vec<String> {
     let mut mapping: Vec<String> = Vec::new();
     let mut lines = Vec::new();
     let mut norm = |text: String, mapping: &mut Vec<String>| -> String {
-        let mut text = observed.replace_all(&text, r#""observed_at":"<T>""#).into_owned();
-        let found = uuid.find_iter(&text).map(|m| m.as_str().to_owned()).collect::<Vec<_>>();
+        let mut text = observed
+            .replace_all(&text, r#""observed_at":"<T>""#)
+            .into_owned();
+        let found = uuid
+            .find_iter(&text)
+            .map(|m| m.as_str().to_owned())
+            .collect::<Vec<_>>();
         for id in found {
-            if SEEDED.with(|s| s.borrow().contains(&id)) || id.chars().all(|c| matches!(c, '1'..='4' | '-' | '8')) {
+            if SEEDED.with(|s| s.borrow().contains(&id))
+                || id.chars().all(|c| matches!(c, '1'..='4' | '-' | '8'))
+            {
                 continue;
             }
-            let index = mapping.iter().position(|known| *known == id).unwrap_or_else(|| {
-                mapping.push(id.clone());
-                mapping.len() - 1
-            });
+            let index = mapping
+                .iter()
+                .position(|known| *known == id)
+                .unwrap_or_else(|| {
+                    mapping.push(id.clone());
+                    mapping.len() - 1
+                });
             text = text.replace(&id, &format!("<NEW{index}>"));
         }
         text = wall
             .replace_all(&text, |caps: &regex::Captures| {
-                if caps[0].contains("2030-") || caps[0].contains("2001-") || caps[0].contains("2026-01") { caps[0].to_owned() } else { "<T>".to_owned() }
+                if caps[0].contains("2030-")
+                    || caps[0].contains("2001-")
+                    || caps[0].contains("2026-01")
+                {
+                    caps[0].to_owned()
+                } else {
+                    "<T>".to_owned()
+                }
             })
             .into_owned();
         text
@@ -506,13 +1078,34 @@ fn snapshot(path: &std::path::Path) -> Vec<String> {
     // Rows are listed in a content-based order, then ids are mapped, so the
     // per-process UUIDs cannot reorder the comparison.
     let tables: &[(&str, &str)] = &[
-        ("memories", "SELECT content, scope, metadata, embedding, embedding_dim, embedding_source, embedding_model, embedding_quantization, content_hash, lsh_hash, created_at, updated_at, created_by, updated_by, created_session, updated_session, consolidation_status, consolidated_into_id, importance, valid_from, valid_to, superseded_by, tier, expires_at IS NOT NULL, access_count, last_access IS NOT NULL, prev_access IS NOT NULL, review_status, kind, decay_factor, retired_at, embedding_binary IS NOT NULL, id FROM memories ORDER BY content, scope"),
-        ("entities", "SELECT name, type, aliases, description, created_by, id FROM entities ORDER BY name"),
-        ("memory_entities", "SELECT (SELECT content FROM memories m WHERE m.id=memory_id), (SELECT name FROM entities e WHERE e.id=entity_id) FROM memory_entities ORDER BY 1,2"),
-        ("audit_log", "SELECT action, memory_id, target_type, target_id, scope, session, actor, detail FROM audit_log ORDER BY action, actor, detail, scope"),
-        ("sync_oplog", "SELECT op, memory_id, ts FROM sync_oplog ORDER BY event_id"),
-        ("jwt_revocations", "SELECT jti FROM jwt_revocations ORDER BY jti"),
-        ("sync_relay", "SELECT id, updated_at, hex(blob) FROM sync_relay ORDER BY id"),
+        (
+            "memories",
+            "SELECT content, scope, metadata, embedding, embedding_dim, embedding_source, embedding_model, embedding_quantization, content_hash, lsh_hash, created_at, updated_at, created_by, updated_by, created_session, updated_session, consolidation_status, consolidated_into_id, importance, valid_from, valid_to, superseded_by, tier, expires_at IS NOT NULL, access_count, last_access IS NOT NULL, prev_access IS NOT NULL, review_status, kind, decay_factor, retired_at, embedding_binary IS NOT NULL, id FROM memories ORDER BY content, scope",
+        ),
+        (
+            "entities",
+            "SELECT name, type, aliases, description, created_by, id FROM entities ORDER BY name",
+        ),
+        (
+            "memory_entities",
+            "SELECT (SELECT content FROM memories m WHERE m.id=memory_id), (SELECT name FROM entities e WHERE e.id=entity_id) FROM memory_entities ORDER BY 1,2",
+        ),
+        (
+            "audit_log",
+            "SELECT action, memory_id, target_type, target_id, scope, session, actor, detail FROM audit_log ORDER BY action, actor, detail, scope",
+        ),
+        (
+            "sync_oplog",
+            "SELECT op, memory_id, ts FROM sync_oplog ORDER BY event_id",
+        ),
+        (
+            "jwt_revocations",
+            "SELECT jti FROM jwt_revocations ORDER BY jti",
+        ),
+        (
+            "sync_relay",
+            "SELECT id, updated_at, hex(blob) FROM sync_relay ORDER BY id",
+        ),
     ];
     for (table, sql) in tables {
         let mut statement = conn.prepare(sql).unwrap();
@@ -598,7 +1191,12 @@ fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
             body_failures.push(describe_difference(want, got));
         }
     }
-    assert!(body_failures.is_empty(), "{} differing rejected bodies:\n{}", body_failures.len(), body_failures.join("\n"));
+    assert!(
+        body_failures.is_empty(),
+        "{} differing rejected bodies:\n{}",
+        body_failures.len(),
+        body_failures.join("\n")
+    );
     let (go_log, rust_log) = (stderr_shape(&bodies_go.1), stderr_shape(&bodies_rust.1));
     let log_failures = go_log
         .iter()
@@ -615,10 +1213,18 @@ fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
         log_failures.join("\n")
     );
     assert!(
-        go_log.iter().filter(|line| line.starts_with("ERROR HTTP error")).count() >= 50,
+        go_log
+            .iter()
+            .filter(|line| line.starts_with("ERROR HTTP error"))
+            .count()
+            >= 50,
         "the rejected bodies must reach the decoder error log"
     );
-    assert!(expected.observations.len() > 100, "scenario must execute: {}", expected.observations.len());
+    assert!(
+        expected.observations.len() > 100,
+        "scenario must execute: {}",
+        expected.observations.len()
+    );
     // Guard against a vacuous pass: the matrix must reach success paths, not
     // only rejections (a broken token or seed would turn everything into 401).
     let mut by_status = BTreeMap::new();
@@ -626,9 +1232,19 @@ fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
         *by_status.entry(observation.status).or_insert(0usize) += 1;
     }
     eprintln!("oracle status distribution: {by_status:?}");
-    assert!(by_status.get(&200).copied().unwrap_or(0) >= 40, "{by_status:?}");
-    assert!(by_status.contains_key(&401) && by_status.contains_key(&403) && by_status.contains_key(&404));
-    assert!(!by_status.contains_key(&429), "pacing must keep the matrix under the limiter: {by_status:?}");
+    assert!(
+        by_status.get(&200).copied().unwrap_or(0) >= 40,
+        "{by_status:?}"
+    );
+    assert!(
+        by_status.contains_key(&401)
+            && by_status.contains_key(&403)
+            && by_status.contains_key(&404)
+    );
+    assert!(
+        !by_status.contains_key(&429),
+        "pacing must keep the matrix under the limiter: {by_status:?}"
+    );
     let mut failures = Vec::new();
     for (want, got) in expected.observations.iter().zip(&actual.observations) {
         if want != got {
@@ -636,7 +1252,12 @@ fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
         }
     }
     assert_eq!(expected.observations.len(), actual.observations.len());
-    assert!(failures.is_empty(), "{} differing observations:\n{}", failures.len(), failures.join("\n"));
+    assert!(
+        failures.is_empty(),
+        "{} differing observations:\n{}",
+        failures.len(),
+        failures.join("\n")
+    );
     assert_eq!(actual.exit, expected.exit, "SIGTERM exit code");
     assert_eq!(expected.exit, Some(0));
     assert_eq!(actual.stdout.lines().count(), 1);
@@ -674,7 +1295,13 @@ fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
         actual.db.len(),
         db_differences.join("\n")
     );
-    assert!(expected.db.iter().any(|l| l.starts_with("memories:") && l.contains("omega quartz lantern")) || true);
+    assert!(
+        expected
+            .db
+            .iter()
+            .any(|l| l.starts_with("memories:") && l.contains("omega quartz lantern"))
+            || true
+    );
 }
 
 #[test]
@@ -693,7 +1320,12 @@ fn rate_limit_and_cors_headers_match_the_oracle() {
             let response = request(server.port, "GET", "/api/status", &[], None);
             statuses.push(response.status);
             if response.status == 429 {
-                last = Some((response.header("retry-after").map(str::to_owned), response.header("content-type").map(str::to_owned), response.text(), response.header("content-security-policy").is_some()));
+                last = Some((
+                    response.header("retry-after").map(str::to_owned),
+                    response.header("content-type").map(str::to_owned),
+                    response.text(),
+                    response.header("content-security-policy").is_some(),
+                ));
             }
         }
         let (exit, _, _) = server.terminate();
@@ -703,7 +1335,12 @@ fn rate_limit_and_cors_headers_match_the_oracle() {
     assert_eq!(results[0].0.iter().filter(|s| **s == 200).count(), 20);
     assert_eq!(
         results[0].1,
-        Some((Some("60".into()), Some("application/json".into()), "{\"error\":\"rate limit exceeded\"}".into(), false))
+        Some((
+            Some("60".into()),
+            Some("application/json".into()),
+            "{\"error\":\"rate limit exceeded\"}".into(),
+            false
+        ))
     );
 }
 
@@ -716,7 +1353,11 @@ fn jwt_secret_creation_and_persistence_match_the_oracle() {
         let root = Root::new();
         let mut command = root.command(binary, &["serve", "--port", &free_port().to_string()]);
         command.env_remove("JWT_SECRET_KEY");
-        let mut child = command.stdout(std::process::Stdio::null()).stderr(std::process::Stdio::null()).spawn().unwrap();
+        let mut child = command
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
         let secret_path = root.path("cfg/symbrain/memory/jwt.secret");
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(20);
         while !secret_path.exists() && std::time::Instant::now() < deadline {
@@ -727,10 +1368,29 @@ fn jwt_secret_creation_and_persistence_match_the_oracle() {
         let _ = child.wait();
         use std::os::unix::fs::PermissionsExt;
         let text = std::fs::read_to_string(&secret_path).unwrap();
-        let mode = std::fs::metadata(&secret_path).unwrap().permissions().mode() & 0o777;
-        let dir_mode = std::fs::metadata(secret_path.parent().unwrap()).unwrap().permissions().mode() & 0o777;
-        let parent_mode = std::fs::metadata(root.path("cfg/symbrain")).unwrap().permissions().mode() & 0o777;
-        shapes.push((text.len(), text.ends_with('\n'), text.trim().chars().all(|c| c.is_ascii_hexdigit()), mode, dir_mode, parent_mode));
+        let mode = std::fs::metadata(&secret_path)
+            .unwrap()
+            .permissions()
+            .mode()
+            & 0o777;
+        let dir_mode = std::fs::metadata(secret_path.parent().unwrap())
+            .unwrap()
+            .permissions()
+            .mode()
+            & 0o777;
+        let parent_mode = std::fs::metadata(root.path("cfg/symbrain"))
+            .unwrap()
+            .permissions()
+            .mode()
+            & 0o777;
+        shapes.push((
+            text.len(),
+            text.ends_with('\n'),
+            text.trim().chars().all(|c| c.is_ascii_hexdigit()),
+            mode,
+            dir_mode,
+            parent_mode,
+        ));
     }
     assert_eq!(shapes[0], shapes[1]);
     assert_eq!(shapes[0].0, 65);
@@ -841,7 +1501,11 @@ const BAD_BODIES: &[(&str, &str, &str)] = &[
     ("POST", "/api/search", r#"{"query":"\ud800"}"#),
     ("POST", "/api/set", r#"{"content":"x","content":2}"#),
     ("POST", "/api/set", r#"{"CONTENT":"fold"}"#),
-    ("POST", "/api/set", r#"{"content":null,"entities":null,"metadata":null}"#),
+    (
+        "POST",
+        "/api/set",
+        r#"{"content":null,"entities":null,"metadata":null}"#,
+    ),
     ("POST", "/api/search", r#"{"limit":1.5}"#),
     ("POST", "/api/search", r#"{"limit":99999999999999999999}"#),
     ("POST", "/api/search", r#"{"limit":true}"#),
@@ -856,24 +1520,80 @@ const BAD_BODIES: &[(&str, &str, &str)] = &[
     ("POST", "/api/token/revoke", r#"{"token":"a.e30.c"}"#),
     ("POST", "/api/sync/relay", r#"{"blobs":{}}"#),
     ("POST", "/api/sync/relay", r#"{"blobs":[1]}"#),
-    ("POST", "/api/sync/relay", r#"{"blobs":[{"id":"a","updated_at":"zz","blob":"AA=="}]}"#),
-    ("POST", "/api/sync/relay", r#"{"blobs":[{"id":"a","updated_at":5}]}"#),
-    ("POST", "/api/sync/relay", r#"{"blobs":[{"id":"a","blob":5}]}"#),
-    ("POST", "/api/sync/relay", r#"{"blobs":[{"id":"a","blob":"***"}]}"#),
+    (
+        "POST",
+        "/api/sync/relay",
+        r#"{"blobs":[{"id":"a","updated_at":"zz","blob":"AA=="}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/relay",
+        r#"{"blobs":[{"id":"a","updated_at":5}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/relay",
+        r#"{"blobs":[{"id":"a","blob":5}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/relay",
+        r#"{"blobs":[{"id":"a","blob":"***"}]}"#,
+    ),
     ("POST", "/api/sync/apply", r#"{"memories":{}}"#),
     ("POST", "/api/sync/apply", r#"{"memories":[1]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"importance":"x"}]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"access_count":1.5}]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"embedding":["a"]}]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"created_at":"bad"}]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"created_at":"2030-13-01T00:00:00Z"}]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"created_at":5}]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"metadata":{"k":1}}]}"#),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"importance":"x"}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"access_count":1.5}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"embedding":["a"]}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"created_at":"bad"}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"created_at":"2030-13-01T00:00:00Z"}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"created_at":5}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"metadata":{"k":1}}]}"#,
+    ),
     ("POST", "/api/sync/apply", r#"{"deleted":[{"id":1}]}"#),
-    ("POST", "/api/sync/apply", r#"{"deleted":[{"deleted_at":"x"}]}"#),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"deleted":[{"deleted_at":"x"}]}"#,
+    ),
     ("POST", "/api/sync/apply", r#"{"deleted":[5]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[null,{"id":"x","content":5}]}"#),
-    ("POST", "/api/sync/apply", r#"{"memories":[{"importance":"x"}],"deleted":[{"deleted_at":"x"}]}"#),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[null,{"id":"x","content":5}]}"#,
+    ),
+    (
+        "POST",
+        "/api/sync/apply",
+        r#"{"memories":[{"importance":"x"}],"deleted":[{"deleted_at":"x"}]}"#,
+    ),
     ("GET", "/api/sync/changes?since=2030-01-02", ""),
     ("GET", "/api/sync/changes?since=2030-01-02T03:04:05", ""),
     ("GET", "/api/sync/changes?since=2030-13-02T03:04:05Z", ""),
@@ -892,7 +1612,14 @@ fn run_bodies(binary: &std::path::Path, seed_db: &std::path::Path) -> (Vec<Obser
     for (index, (method, path, body)) in BAD_BODIES.iter().enumerate() {
         let name = format!("bad-{index}-{method}-{path}");
         let body = (!body.is_empty() || *method == "POST").then_some(*body);
-        observations.push(observe(&mut ctx, &name, method, path, &[("Authorization", writer.as_str())], body));
+        observations.push(observe(
+            &mut ctx,
+            &name,
+            method,
+            path,
+            &[("Authorization", writer.as_str())],
+            body,
+        ));
     }
     drop(ctx);
     let (_, _, stderr) = server.terminate();
@@ -948,7 +1675,13 @@ fn run_sync(
     let running = Server::start(&server_root, server, &[], &[]);
     let remote = format!("http://127.0.0.1:{}", running.port);
     let bearer_token = token("writer", "jti-sync");
-    let mut args = vec!["sync", "--remote", remote.as_str(), "--token", bearer_token.as_str()];
+    let mut args = vec![
+        "sync",
+        "--remote",
+        remote.as_str(),
+        "--token",
+        bearer_token.as_str(),
+    ];
     args.extend_from_slice(extra);
     let mut command = client_root.command(client, &args);
     if let Some(go) = handoff {
@@ -959,7 +1692,8 @@ fn run_sync(
     let output = command.output().unwrap();
     let _ = running.terminate();
     let port = Regex::new(&format!(":{}", remote.rsplit(':').next().unwrap())).unwrap();
-    let wall = Regex::new(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(\.\d+)?(Z| \+0000 UTC)?").unwrap();
+    let wall =
+        Regex::new(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(\.\d+)?(Z| \+0000 UTC)?").unwrap();
     let elapsed = Regex::new(r"\b\d+(\.\d+)?(ms|µs|s)\b").unwrap();
     let shape = |bytes: &[u8]| -> Vec<String> {
         String::from_utf8_lossy(bytes)
@@ -995,25 +1729,94 @@ fn remote_sync_clients_behave_identically_against_the_native_server() {
     // `--pull` with the Go fallback absent proves the native client itself
     // ran; the other native runs may hand off to the oracle binary.
     #[allow(clippy::type_complexity)]
-    let cases: Vec<(&str, &std::path::Path, bool, bool, Vec<&str>, Option<&std::path::Path>)> = vec![
-        ("native client pulls only", rust.as_path(), true, false, vec!["--pull"], None),
-        ("native client, default run", rust.as_path(), true, false, vec![], Some(go.as_path())),
-        ("native client pushes (hand-off)", rust.as_path(), false, true, vec![], Some(go.as_path())),
-        ("shipped client pulls", go.as_path(), true, false, vec![], None),
-        ("shipped client pushes", go.as_path(), false, true, vec![], None),
-        ("shipped client pushes only", go.as_path(), false, true, vec!["--push"], None),
-        ("shipped client, both seeded", go.as_path(), true, true, vec![], None),
+    let cases: Vec<(
+        &str,
+        &std::path::Path,
+        bool,
+        bool,
+        Vec<&str>,
+        Option<&std::path::Path>,
+    )> = vec![
+        (
+            "native client pulls only",
+            rust.as_path(),
+            true,
+            false,
+            vec!["--pull"],
+            None,
+        ),
+        (
+            "native client, default run",
+            rust.as_path(),
+            true,
+            false,
+            vec![],
+            Some(go.as_path()),
+        ),
+        (
+            "native client pushes (hand-off)",
+            rust.as_path(),
+            false,
+            true,
+            vec![],
+            Some(go.as_path()),
+        ),
+        (
+            "shipped client pulls",
+            go.as_path(),
+            true,
+            false,
+            vec![],
+            None,
+        ),
+        (
+            "shipped client pushes",
+            go.as_path(),
+            false,
+            true,
+            vec![],
+            None,
+        ),
+        (
+            "shipped client pushes only",
+            go.as_path(),
+            false,
+            true,
+            vec!["--push"],
+            None,
+        ),
+        (
+            "shipped client, both seeded",
+            go.as_path(),
+            true,
+            true,
+            vec![],
+            None,
+        ),
     ];
     let mut failures = Vec::new();
     for (label, client, server_seeded, client_seeded, extra, handoff) in &cases {
         let (expected, actual) = std::thread::scope(|scope| {
-            let a = scope.spawn(|| run_sync(&go, client, *server_seeded, *client_seeded, extra, *handoff));
-            let b = scope.spawn(|| run_sync(&rust, client, *server_seeded, *client_seeded, extra, *handoff));
+            let a = scope
+                .spawn(|| run_sync(&go, client, *server_seeded, *client_seeded, extra, *handoff));
+            let b = scope.spawn(|| {
+                run_sync(
+                    &rust,
+                    client,
+                    *server_seeded,
+                    *client_seeded,
+                    extra,
+                    *handoff,
+                )
+            });
             (a.join().unwrap(), b.join().unwrap())
         });
         let mut diffs = Vec::new();
         if expected.exit != actual.exit {
-            diffs.push(format!("exit go-server={:?} rust-server={:?}", expected.exit, actual.exit));
+            diffs.push(format!(
+                "exit go-server={:?} rust-server={:?}",
+                expected.exit, actual.exit
+            ));
         }
         for (name, a, b) in [
             ("stdout", &expected.stdout, &actual.stdout),
@@ -1033,10 +1836,17 @@ fn remote_sync_clients_behave_identically_against_the_native_server() {
             }
         }
         // The exchange must have moved data, not failed identically.
-        eprintln!("{label}: exit={:?} stdout={:?}", expected.exit, expected.stdout);
+        eprintln!(
+            "{label}: exit={:?} stdout={:?}",
+            expected.exit, expected.stdout
+        );
         assert_eq!(expected.exit, Some(0), "{label}: the exchange must succeed");
         assert!(
-            expected.stdout.iter().any(|line| line.contains("Pulled memories:   4") || line.contains("Pushed memories:   4"))
+            expected
+                .stdout
+                .iter()
+                .any(|line| line.contains("Pulled memories:   4")
+                    || line.contains("Pushed memories:   4"))
                 || *label == "shipped client, both seeded",
             "{label}: the exchange must move the seeded memories"
         );
@@ -1070,12 +1880,21 @@ fn unported_pipelines_fail_closed_without_side_effects() {
     let mut statuses = Vec::new();
     for (path, body) in [
         // secondary-fact extraction keywords
-        ("/api/set", r#"{"content":"the vault stores a project preference"}"#),
+        (
+            "/api/set",
+            r#"{"content":"the vault stores a project preference"}"#,
+        ),
         // exact duplicate of a stored memory: the shipped conflict resolver runs
-        ("/api/set", r#"{"content":"gamma harbor log","scope":"global"}"#),
+        (
+            "/api/set",
+            r#"{"content":"gamma harbor log","scope":"global"}"#,
+        ),
         // extended search filters
         ("/api/search", r#"{"query":"harbor","entity":"Alice"}"#),
-        ("/api/search", r#"{"query":"harbor","max_sensitivity":"public"}"#),
+        (
+            "/api/search",
+            r#"{"query":"harbor","max_sensitivity":"public"}"#,
+        ),
     ] {
         std::thread::sleep(std::time::Duration::from_millis(700));
         let response = request(server.port, "POST", path, &headers, Some(body));

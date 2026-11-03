@@ -297,7 +297,8 @@ pub fn redact_map(map: &BTreeMap<String, String>) -> BTreeMap<String, String> {
 
 /// `isNumeric`: only digits, spaces and hyphens (an empty string counts).
 fn is_numeric(text: &str) -> bool {
-    text.chars().all(|c| c.is_ascii_digit() || c == ' ' || c == '-')
+    text.chars()
+        .all(|c| c.is_ascii_digit() || c == ' ' || c == '-')
 }
 
 /// Luhn checksum over the digit characters, 13 to 16 digits.
@@ -382,19 +383,28 @@ mod tests {
 
     #[test]
     fn redacts_each_class_like_the_shipped_guard() {
-        assert_eq!(redact("mail me at a.b@example.com now"), "mail me at [REDACTED_EMAIL] now");
+        assert_eq!(
+            redact("mail me at a.b@example.com now"),
+            "mail me at [REDACTED_EMAIL] now"
+        );
         assert_eq!(
             redact("db postgres://user:pw@host:5432/x end"),
             "db [REDACTED_URL_CREDENTIALS] end"
         );
-        assert_eq!(redact("key sk-abcdefghijklmnopqrstuv"), "key [REDACTED_API_KEY]");
+        assert_eq!(
+            redact("key sk-abcdefghijklmnopqrstuv"),
+            "key [REDACTED_API_KEY]"
+        );
         // Phone numbers contain '+', are not numeric and end up as API keys.
         assert_eq!(redact("call +49 170 1234567"), "call [REDACTED_API_KEY]");
         assert_eq!(
             redact("card 4111 1111 1111 1111 ok"),
             "card [REDACTED_CARD_NUMBER] ok"
         );
-        assert_eq!(redact("not 4111 1111 1111 1112 ok"), "not 4111 1111 1111 1112 ok");
+        assert_eq!(
+            redact("not 4111 1111 1111 1112 ok"),
+            "not 4111 1111 1111 1112 ok"
+        );
     }
 
     #[test]

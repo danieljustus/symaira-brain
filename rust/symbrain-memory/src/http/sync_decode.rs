@@ -231,7 +231,10 @@ fn memory(value: &Value) -> Option<PulledMemory> {
             "entities" => match &value {
                 Value::Null => {}
                 Value::Array(items) => {
-                    if !items.iter().all(|i| matches!(i, Value::String(_) | Value::Null)) {
+                    if !items
+                        .iter()
+                        .all(|i| matches!(i, Value::String(_) | Value::Null))
+                    {
                         return None;
                     }
                 }
@@ -259,7 +262,10 @@ fn memory(value: &Value) -> Option<PulledMemory> {
             "evidence" => match &value {
                 Value::Null => {}
                 Value::Array(items) => {
-                    if !items.iter().all(|i| matches!(i, Value::Object(_) | Value::Null)) {
+                    if !items
+                        .iter()
+                        .all(|i| matches!(i, Value::Object(_) | Value::Null))
+                    {
                         return None;
                     }
                 }

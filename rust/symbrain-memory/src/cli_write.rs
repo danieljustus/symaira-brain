@@ -135,10 +135,7 @@ impl Store {
             .then(|| sign_bits(&embedding.vector));
         let metadata = go_json(&metadata)?;
         let (tier, expires_at) = extra.working_ttl.map_or(("long_term", None), |ttl| {
-            (
-                "working",
-                Some(crate::gotime::format(Utc::now() + ttl)),
-            )
+            ("working", Some(crate::gotime::format(Utc::now() + ttl)))
         });
         let id = crate::write::new_uuid();
         let created_at = timestamp();
@@ -154,7 +151,15 @@ impl Store {
                 extra.session, valid_from, tier, expires_at],
         ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
         if audit_enabled {
-            audit(&conn, "set", &id, scope, &extra.session, &request.author, "");
+            audit(
+                &conn,
+                "set",
+                &id,
+                scope,
+                &extra.session,
+                &request.author,
+                "",
+            );
         }
         crate::cli_entity::link(&conn, &id, &request.entities, &request.author);
         if let Some(kind) = kind {

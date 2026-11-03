@@ -89,7 +89,11 @@ const DELETED: StructTy = StructTy {
 
 const RELAY_BLOB: StructTy = StructTy {
     name: "db.RelayBlob",
-    fields: &[("id", Ty::Str), ("updated_at", Ty::Time), ("blob", Ty::Bytes)],
+    fields: &[
+        ("id", Ty::Str),
+        ("updated_at", Ty::Time),
+        ("blob", Ty::Bytes),
+    ],
 };
 
 /// The anonymous request structs, with the Go type text used when the whole
@@ -167,10 +171,7 @@ pub(super) fn unmarshal_error(body: &[u8], shape: &Shape) -> String {
     if let Some(message) = syntax_error(body) {
         return message;
     }
-    let mut parser = Parser {
-        bytes: body,
-        at: 0,
-    };
+    let mut parser = Parser { bytes: body, at: 0 };
     parser.space();
     let root = parser.value();
     let Some(root) = root else {
@@ -255,7 +256,11 @@ impl Walk {
                 }
             }
             Ty::Int | Ty::Int64 => {
-                let name = if matches!(ty, Ty::Int) { "int" } else { "int64" };
+                let name = if matches!(ty, Ty::Int) {
+                    "int"
+                } else {
+                    "int64"
+                };
                 match node {
                     Node::Number(text) if text.parse::<i64>().is_ok() => {}
                     Node::Number(_) => self.mismatch(node, name, path, true),
@@ -263,7 +268,11 @@ impl Walk {
                 }
             }
             Ty::F64 | Ty::F32 => {
-                let name = if matches!(ty, Ty::F64) { "float64" } else { "float32" };
+                let name = if matches!(ty, Ty::F64) {
+                    "float64"
+                } else {
+                    "float32"
+                };
                 if !matches!(node, Node::Number(_)) {
                     self.mismatch(node, name, path, false);
                 }
@@ -411,11 +420,9 @@ impl Parser<'_> {
             }
             _ => {
                 let start = self.at;
-                while self
-                    .bytes
-                    .get(self.at)
-                    .is_some_and(|byte| matches!(byte, b'0'..=b'9' | b'-' | b'+' | b'.' | b'e' | b'E'))
-                {
+                while self.bytes.get(self.at).is_some_and(|byte| {
+                    matches!(byte, b'0'..=b'9' | b'-' | b'+' | b'.' | b'e' | b'E')
+                }) {
                     self.at += 1;
                 }
                 Some(Node::Number(
@@ -468,7 +475,10 @@ impl Check<'_> {
     fn bad(&self, context: &str) -> String {
         match self.peek() {
             None => EOF.to_owned(),
-            Some(byte) => format!("invalid character {} {context}", quote_char(&self.input[self.at..], byte)),
+            Some(byte) => format!(
+                "invalid character {} {context}",
+                quote_char(&self.input[self.at..], byte)
+            ),
         }
     }
 
@@ -584,7 +594,9 @@ impl Check<'_> {
                     self.at += 1;
                     match self.peek() {
                         None => return Err(EOF.to_owned()),
-                        Some(b'b' | b'f' | b'n' | b'r' | b't' | b'\\' | b'/' | b'"') => self.at += 1,
+                        Some(b'b' | b'f' | b'n' | b'r' | b't' | b'\\' | b'/' | b'"') => {
+                            self.at += 1
+                        }
                         Some(b'u') => {
                             self.at += 1;
                             for _ in 0..4 {
@@ -723,7 +735,12 @@ pub(super) fn time_error(value: &str, layout: &str) -> Option<String> {
             go_quote(element)
         ))
     };
-    let range = |what: &str| Some(format!("parsing time {}: {what} out of range", go_quote(value)));
+    let range = |what: &str| {
+        Some(format!(
+            "parsing time {}: {what} out of range",
+            go_quote(value)
+        ))
+    };
     let digits = |at: usize, count: usize| -> Option<u32> {
         let slice = bytes.get(at..at + count)?;
         slice
@@ -862,16 +879,31 @@ mod tests {
     fn syntax_errors_use_the_shipped_wording() {
         assert_eq!(set("{"), "unexpected end of JSON input");
         assert_eq!(set(""), "unexpected end of JSON input");
-        assert_eq!(set("{\"a\":1,}"), "invalid character '}' looking for beginning of object key string");
+        assert_eq!(
+            set("{\"a\":1,}"),
+            "invalid character '}' looking for beginning of object key string"
+        );
         assert_eq!(set("{\"a\" 1}"), "invalid character '1' after object key");
-        assert_eq!(set("{\"a\":1 \"b\"}"), "invalid character '\"' after object key:value pair");
+        assert_eq!(
+            set("{\"a\":1 \"b\"}"),
+            "invalid character '\"' after object key:value pair"
+        );
         assert_eq!(set("{} {}"), "invalid character '{' after top-level value");
         assert_eq!(set("nul"), "unexpected end of JSON input");
-        assert_eq!(set("nulx"), "invalid character 'x' in literal null (expecting 'l')");
+        assert_eq!(
+            set("nulx"),
+            "invalid character 'x' in literal null (expecting 'l')"
+        );
         assert_eq!(set("[1 2]"), "invalid character '2' after array element");
         assert_eq!(set("-x"), "invalid character 'x' in numeric literal");
-        assert_eq!(set(r#"{"a":"\u12G4"}"#), "invalid escape sequence `\\u12G4` in string");
-        assert_eq!(set(r#"{"a":"\u"}"#), "invalid escape sequence `\\u\"}` in string");
+        assert_eq!(
+            set(r#"{"a":"\u12G4"}"#),
+            "invalid escape sequence `\\u12G4` in string"
+        );
+        assert_eq!(
+            set(r#"{"a":"\u"}"#),
+            "invalid escape sequence `\\u\"}` in string"
+        );
         assert_eq!(set("1.x"), "invalid character 'x' in numeric literal");
     }
 
@@ -889,7 +921,9 @@ mod tests {
             set(r#"{"entities":[1]}"#),
             "json: cannot unmarshal number into .entities.0 of type string"
         );
-        assert!(set("[]").starts_with("json: cannot unmarshal array into Go value of type struct { Content string"));
+        assert!(set("[]").starts_with(
+            "json: cannot unmarshal array into Go value of type struct { Content string"
+        ));
         assert_eq!(
             unmarshal_error(br#"{"limit":1.5}"#, &Shape::Search),
             "json: cannot unmarshal number 1.5 into Go struct field .limit of type int"
