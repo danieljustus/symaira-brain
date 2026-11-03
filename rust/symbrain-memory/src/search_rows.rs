@@ -150,6 +150,17 @@ impl SearchRow {
         }
     }
 
+    /// Applies the complete shipped `security.Redact` guard (HTTP response
+    /// boundary and sync ingestion) to content and metadata values.
+    pub fn redact_pii(&mut self) {
+        self.content = crate::pii::redact(&self.content);
+        for value in self.metadata.values_mut() {
+            if let serde_json::Value::String(text) = value {
+                *text = crate::pii::redact(text);
+            }
+        }
+    }
+
     /// Renders the memory the way the shipped struct marshals it.
     ///
     /// The shipped CLI clears the embedding (and the binary vector is never
@@ -157,11 +168,32 @@ impl SearchRow {
     /// markers and number spellings follow the shipped struct.
     #[must_use]
     pub fn to_go_json(&self) -> String {
+        self.render(false)
+    }
+
+    /// Like [`Self::to_go_json`] but keeps the stored embedding, which the
+    /// shipped HTTP responses marshal between `metadata` and
+    /// `embedding_source` (`embedding,omitempty`).
+    #[must_use]
+    pub fn to_go_json_embedded(&self) -> String {
+        self.render(true)
+    }
+
+    fn render(&self, embedding: bool) -> String {
         let mut members = Members::default();
         members.string("id", &self.id);
         members.string("content", &self.content);
         members.string("scope", &self.scope);
         members.raw("metadata", &metadata_json(&self.metadata));
+        if embedding && !self.embedding.is_empty() {
+            let vector = self
+                .embedding
+                .iter()
+                .map(|v| gojson::number_f32(*v))
+                .collect::<Vec<_>>()
+                .join(",");
+            members.raw("embedding", &format!("[{vector}]"));
+        }
         members.string_if_present("embedding_source", &self.embedding_source);
         members.string_if_present("embedding_model", &self.embedding_model);
         members.string_if_present("embedding_quantization", &self.embedding_quantization);

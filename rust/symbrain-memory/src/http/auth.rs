@@ -37,28 +37,44 @@ impl Auth {
         }
     }
 
-    pub fn verify(&self, token: &str) -> Option<Claims> {
-        let mut parts = token.split('.');
-        let (header, payload, signature) = (parts.next()?, parts.next()?, parts.next()?);
-        if parts.next().is_some() {
-            return None;
-        }
-        let mut mac = Hmac::<Sha256>::new_from_slice(&self.secret).ok()?;
+    /// Signature, claim shape and in-memory revocation, in the shipped order;
+    /// the error is the shipped diagnostic (logged, never returned to peers).
+    pub fn verify(&self, token: &str) -> Result<Claims, &'static str> {
+        let parts = token.split('.').collect::<Vec<_>>();
+        let [header, payload, signature] = parts[..] else {
+            return Err("invalid token structure");
+        };
+        let mut mac =
+            Hmac::<Sha256>::new_from_slice(&self.secret).map_err(|_| "invalid signature")?;
         mac.update(format!("{header}.{payload}").as_bytes());
-        let signature_bytes = URL_SAFE_NO_PAD.decode(signature).ok()?;
+        let signature_bytes = URL_SAFE_NO_PAD
+            .decode(signature)
+            .map_err(|_| "invalid signature")?;
         if URL_SAFE_NO_PAD.encode(&signature_bytes) != signature {
-            return None;
+            return Err("invalid signature");
         }
-        mac.verify_slice(&signature_bytes).ok()?;
-        let claims: Claims = serde_json::from_slice(&URL_SAFE_NO_PAD.decode(payload).ok()?).ok()?;
-        if claims.sub.trim().is_empty()
-            || claims.iss != "symaira-memory"
-            || chrono::Utc::now().timestamp() > claims.exp
-            || self.revoked.lock().ok()?.contains(&claims.jti)
+        mac.verify_slice(&signature_bytes)
+            .map_err(|_| "invalid signature")?;
+        let decoded = URL_SAFE_NO_PAD
+            .decode(payload.trim_end_matches('='))
+            .map_err(|_| "illegal base64 data")?;
+        let claims: Claims =
+            serde_json::from_slice(&decoded).map_err(|_| "invalid payload")?;
+        if claims.sub.trim().is_empty() {
+            return Err("token has empty subject");
+        }
+        if claims.iss != "symaira-memory" {
+            return Err("invalid issuer");
+        }
+        if self
+            .revoked
+            .lock()
+            .map_err(|_| "token has been revoked")?
+            .contains(&claims.jti)
         {
-            return None;
+            return Err("token has been revoked");
         }
-        Some(claims)
+        Ok(claims)
     }
 
     pub fn revoke_in_memory(&self, jti: &str) -> bool {
@@ -70,19 +86,28 @@ impl Auth {
 }
 
 impl Server {
-    pub(super) fn authenticate(&self, header: &str) -> Option<Claims> {
-        let claims = self.auth.verify(header.strip_prefix("Bearer ")?)?;
-        let conn = self.store.lock().ok()?;
+    pub(super) fn authenticate(&self, header: &str) -> Result<Claims, &'static str> {
+        let token = header
+            .strip_prefix("Bearer ")
+            .ok_or("invalid token structure")?;
+        let claims = self.auth.verify(token)?;
+        let conn = self.store.lock().map_err(|_| "token has been revoked")?;
         // The existing Go provider ignores persistent lookup errors. No open
         // access is introduced; signature, expiry and in-memory denial still apply.
         let revoked: bool = conn
             .query_row(
-                "SELECT EXISTS(SELECT 1 FROM jwt_revocations WHERE jti=?)",
+                "SELECT COUNT(*) > 0 FROM jwt_revocations WHERE jti=?",
                 [&claims.jti],
                 |row| row.get(0),
             )
             .unwrap_or(false);
-        (!revoked).then_some(claims)
+        if revoked {
+            return Err("token has been revoked");
+        }
+        if chrono::Utc::now().timestamp() > claims.exp {
+            return Err("token expired");
+        }
+        Ok(claims)
     }
 
     pub(super) fn write_authorized(&self, claims: &Claims) -> Result<(), &'static str> {
@@ -104,6 +129,13 @@ impl Server {
             }
             Some(role) if !["readwrite", "admin"].contains(&role) => {
                 Err("insufficient permissions: read-only profile")
+            }
+            None => {
+                super::log::warn(
+                    "JWT subject has no matching profile; granting default access",
+                    &[("subject", claims.sub.clone())],
+                );
+                Ok(())
             }
             _ => Ok(()),
         }

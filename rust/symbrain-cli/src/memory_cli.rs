@@ -45,6 +45,7 @@ mod write_output;
 use write::{run_delete, run_set};
 mod rules;
 use rules::run_rules;
+mod serve;
 mod query_log;
 use query_log::run_query_log;
 
@@ -99,6 +100,7 @@ pub(super) fn run_with_stdout(
         "set" => run_set(rest, stdout, stderr, format, process_stdout),
         "delete" => run_delete(rest, stdout, stderr, format),
         "rules" => run_rules(rest, stdout, stderr, format),
+        "serve" => serve::run(rest, stdout, stderr),
         "query-log" => run_query_log(rest, stdout, stderr, format),
         // Reached only through direct calls: the CLI routes `sync` through
         // `run_sync`, which can hand an invocation to the shipped

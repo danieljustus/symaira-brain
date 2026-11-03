@@ -11,7 +11,7 @@ use rusqlite::{Connection, Row};
 use crate::gojson::Members;
 
 /// Column list of the shipped lite projection.
-const LITE_COLUMNS: &str = "id, content, scope, metadata, created_at, updated_at, created_by, \
+pub(crate) const LITE_COLUMNS: &str = "id, content, scope, metadata, created_at, updated_at, created_by, \
      updated_by, created_session, updated_session, consolidation_status, consolidated_into_id, \
      importance, valid_from, valid_to, superseded_by, tier, expires_at, access_count, last_access, \
      prev_access, review_status, kind, decay_factor, retired_at";
@@ -77,6 +77,17 @@ pub struct MemoryListRow {
 }
 
 impl MemoryListRow {
+    /// Applies the complete shipped `security.Redact` guard to content and
+    /// metadata values (the HTTP response boundary).
+    pub fn redact_pii(&mut self) {
+        self.content = crate::pii::redact(&self.content);
+        for value in self.metadata.values_mut() {
+            if let serde_json::Value::String(text) = value {
+                *text = crate::pii::redact(text);
+            }
+        }
+    }
+
     /// Renders the row the way the shipped encoder does: field order, empty
     /// fields omitted, Go float and timestamp rendering.
     #[must_use]
@@ -235,7 +246,7 @@ pub(crate) fn list_lite(
     Ok(result)
 }
 
-fn scan_lite(row: &Row<'_>) -> rusqlite::Result<MemoryListRow> {
+pub(crate) fn scan_lite(row: &Row<'_>) -> rusqlite::Result<MemoryListRow> {
     Ok(MemoryListRow {
         id: row.get(0)?,
         content: row.get(1)?,
