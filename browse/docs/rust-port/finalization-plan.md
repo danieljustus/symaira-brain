@@ -1,5 +1,11 @@
 # Go→Rust migration finalization plan
 
+> **Superseded in part (2026-11-03):** the `compat` (Go/AzureTLS sidecar)
+> transport described below was retired by decision. Selecting `compat` returns
+> the typed `transport_retired` error; see
+> [`browser-transport-contract.md`](browser-transport-contract.md). References
+> to `compat` / `symbrowse-compat` are historical.
+
 > **For Hermes:** Execute this plan as dependency-ordered vertical slices. Each
 > implementation slice gets a focused review, a differential/native evidence
 > review, and its own commit. Do not combine independent phases.

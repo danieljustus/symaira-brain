@@ -9,6 +9,18 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Removed
+- Browse: the `compat` transport (Go/AzureTLS sidecar) is retired. The Rust
+  `symbrowse-compat` sidecar client and the daemon's `compat` fetch path are
+  removed, and the `compat-sidecar` and `fetch-fingerprints` harness suites
+  are retired; contract rows FETCH-002 and FETCH-011 become accepted
+  differences. Selecting `compat` via `mode` in `config.toml`,
+  `SYMBROWSE_MODE` or `--mode` now returns the typed `transport_retired`
+  error (`config` error code, exit status 9) instead of starting a sidecar;
+  it is never mapped to `static` or `browser`. The `static` and `browser`
+  modes are unchanged. Migration: drop `mode = "compat"` or choose `static`
+  or `browser`. The Go sidecar sources remain until the Go removal.
+
 ### Changed
 - The Rust migration plan preserves the reachable Memory web interface and
   retires the unused legacy TUI target, which the shipped Brain command tree

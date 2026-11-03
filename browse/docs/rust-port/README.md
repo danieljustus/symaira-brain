@@ -49,7 +49,7 @@ Non-goals:
 
 - redesigning commands, schemas, storage or risk policy during the port;
 - importing sibling Symaira repositories at compile time;
-- reducing the browser surface to Chrome, or representing a static/compat
+- reducing the browser surface to Chrome, or representing the static
   transport as a real Chrome, Safari or Firefox browser;
 - deleting Go before one stable Rust release has operated without unexplained
   parity defects;
@@ -75,16 +75,15 @@ lifecycle. Never normalize an unexplained mismatch.
 
 The transport contract is explicit: `static` is an honest Rust HTTP client;
 `browser` uses the explicitly requested local `chrome`, `safari` or `firefox`
-engine and its native network/browser state; `compat` retains the pinned
-Go/AzureTLS path for legacy callers. A requested mode or engine either works or
+engine and its native network/browser state. The former `compat`
+(Go/AzureTLS) mode is retired: selecting it returns the typed
+`transport_retired` error. A requested mode or engine either works or
 returns a typed error. It never silently becomes another mode or browser.
 
 ## Stop rules
 
 Stop and reassess when any of these holds:
 
-- the legacy compat TLS/HTTP2 profile cannot be isolated behind its versioned
-  local protocol, timeout, restart and rollback contract;
 - a requested real Chrome, Safari or Firefox engine cannot meet its own native
   lifecycle/capability gate without a silent fallback or new privilege/install
   contract;
@@ -107,7 +106,7 @@ Stop and reassess when any of these holds:
   version-slice measurement; explicitly not the cutover value gate.
 - [`architecture.md`](architecture.md) — target boundaries and dependency choices.
 - [`browser-transport-contract.md`](browser-transport-contract.md) — explicit
-  static/browser/compat and Chrome/Safari/Firefox acceptance contract.
+  static/browser (compat retired) and Chrome/Safari/Firefox acceptance contract.
 - [`upstream-evaluation.md`](upstream-evaluation.md) — reuse/fork/build decision.
 - [`contract-matrix.json`](contract-matrix.json) — stable observable contract IDs.
 - [`implementation-plan.md`](implementation-plan.md) — ordered vertical slices.

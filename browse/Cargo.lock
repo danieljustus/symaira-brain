@@ -1908,15 +1908,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "symbrowse-compat"
-version = "0.0.0"
-dependencies = [
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "symbrowse-core"
 version = "0.0.0"
 dependencies = [
@@ -1948,7 +1939,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
- "symbrowse-compat",
  "symbrowse-core",
  "symbrowse-engine",
  "symbrowse-engine-chrome",

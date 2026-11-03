@@ -1,5 +1,11 @@
 # Symaira Browse Go→Rust Migration Implementation Plan
 
+> **Superseded in part (2026-11-03):** the `compat` (Go/AzureTLS sidecar)
+> transport described below was retired by decision. Selecting `compat` returns
+> the typed `transport_retired` error; see
+> [`browser-transport-contract.md`](browser-transport-contract.md). References
+> to `compat` / `symbrowse-compat` are historical.
+
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
 **Goal:** Replace the Go backend with an idiomatic Rust implementation only after executable parity, native release verification, reversible cutover and a measured value gain.
