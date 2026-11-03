@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use super::config_schema::{FIELDS, Kind};
 use super::config_value;
 
+#[allow(clippy::struct_excessive_bools)] // Independent switches of the shipped config.
 pub(super) struct Config {
     pub database: OsString,
     pub ollama_url: String,
@@ -16,6 +17,14 @@ pub(super) struct Config {
     pub prefilter: bool,
     pub conflict_enabled: bool,
     pub quantize_binary: bool,
+    pub jwt_secret: String,
+    pub jwt_secret_path: String,
+    pub require_profile: bool,
+    pub trusted_proxies: Vec<String>,
+    pub audit_log_enabled: bool,
+    pub working_ttl: String,
+    pub conflict_threshold: f64,
+    pub conflict_max_candidates: i64,
 }
 
 impl Default for Config {
@@ -27,6 +36,14 @@ impl Default for Config {
             prefilter: false,
             conflict_enabled: true,
             quantize_binary: false,
+            jwt_secret: String::new(),
+            jwt_secret_path: String::new(),
+            require_profile: false,
+            trusted_proxies: Vec::new(),
+            audit_log_enabled: true,
+            working_ttl: "24h".to_owned(),
+            conflict_threshold: 0.0,
+            conflict_max_candidates: 0,
         }
     }
 }
@@ -100,6 +117,17 @@ fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
             apply(config, path, value);
         } else if let Some(value) = item.as_bool() {
             apply(config, path, if value { "true" } else { "false" });
+        } else if let Some(value) = item.as_float() {
+            apply(config, path, &value.to_string());
+        } else if let Some(value) = item.as_integer() {
+            apply(config, path, &value.to_string());
+        } else if let Some(array) = item.as_array()
+            && path == "security.trusted_proxies"
+        {
+            config.trusted_proxies = array
+                .iter()
+                .filter_map(|entry| entry.as_str().map(str::to_owned))
+                .collect();
         }
     }
     Some(())
@@ -119,6 +147,21 @@ fn apply(config: &mut Config, path: &str, value: &str) {
         "ollama.model" => value.clone_into(&mut config.ollama_model),
         "hybrid_search.prefilter_enabled" => {
             config.prefilter = config_value::parse_bool(value).unwrap_or(false);
+        }
+        "jwt.secret" => value.clone_into(&mut config.jwt_secret),
+        "jwt.secret_path" => value.clone_into(&mut config.jwt_secret_path),
+        "security.require_profile" => {
+            config.require_profile = config_value::parse_bool(value).unwrap_or(false);
+        }
+        "retention.audit_log_enabled" => {
+            config.audit_log_enabled = config_value::parse_bool(value).unwrap_or(true);
+        }
+        "working_memory.ttl" => value.clone_into(&mut config.working_ttl),
+        "conflict.contradiction_threshold" => {
+            config.conflict_threshold = value.parse().unwrap_or(0.0);
+        }
+        "conflict.max_candidates" => {
+            config.conflict_max_candidates = value.parse().unwrap_or(0);
         }
         "conflict.enabled" => {
             config.conflict_enabled = config_value::parse_bool(value).unwrap_or(true);

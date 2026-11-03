@@ -19,6 +19,14 @@ pub struct DirectWrite {
     pub conflict_enabled: bool,
 }
 
+/// Server-only inputs of [`Store::set_direct_inner`].
+#[derive(Default)]
+pub(crate) struct ServeExtra {
+    pub session: String,
+    pub working_ttl: Option<chrono::Duration>,
+    pub embedding: Option<crate::GeneratedEmbedding>,
+}
+
 impl Store {
     /// Persists the extraction-free, conflict-free CLI service contract.
     ///
@@ -45,6 +53,28 @@ impl Store {
         source_tool: &str,
         kind: Option<&str>,
         audit_enabled: bool,
+    ) -> Result<String, StoreError> {
+        self.set_direct_inner(
+            request,
+            generator,
+            source_tool,
+            kind,
+            audit_enabled,
+            &ServeExtra::default(),
+        )
+    }
+
+    /// The write shared by the CLI and the HTTP server; `extra` carries the
+    /// server-only session, working-tier TTL and precomputed embedding.
+    #[allow(clippy::too_many_lines)] // One transaction: row, audit, entities, kind.
+    pub(crate) fn set_direct_inner(
+        &self,
+        request: &DirectWrite,
+        generator: &EmbeddingGenerator,
+        source_tool: &str,
+        kind: Option<&str>,
+        audit_enabled: bool,
+        extra: &ServeExtra,
     ) -> Result<String, StoreError> {
         if !crate::direct_content_supported(&request.content)
             || request
@@ -92,7 +122,10 @@ impl Store {
             metadata.insert("project_name".into(), name);
         }
         let valid_from = timestamp();
-        let embedding = generator.generate(&request.content);
+        let embedding = extra
+            .embedding
+            .clone()
+            .unwrap_or_else(|| generator.generate(&request.content));
         let model = if embedding.source == "ollama" {
             generator.model()
         } else {
@@ -102,20 +135,32 @@ impl Store {
             .quantize_binary
             .then(|| sign_bits(&embedding.vector));
         let metadata = go_json(&metadata)?;
+        let (tier, expires_at) = extra.working_ttl.map_or(("long_term", None), |ttl| {
+            ("working", Some(crate::gotime::format(Utc::now() + ttl)))
+        });
         let id = crate::write::new_uuid();
         let created_at = timestamp();
         let conn = self.lock()?;
         // Go preserves Prepare creation time and observes Save update time.
         let updated_at = timestamp();
         conn.execute(
-            "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'','','raw',NULL,0,?,NULL,NULL,'long_term',NULL,1,NULL,NULL,'approved','',1,NULL)",
+            "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'raw',NULL,0,?,NULL,NULL,?,?,1,NULL,NULL,'approved','',1,NULL)",
             params![id, request.content, scope, metadata, embedding_json(&embedding.vector), binary,
                 i64::try_from(embedding.vector.len()).unwrap_or(768), embedding.source, model, "",
                 crate::write::content_hash(&request.content), crate::lsh::compute_lsh(&embedding.vector).map_err(StoreError::Invalid)?,
-                created_at, updated_at, request.author, request.author, valid_from],
+                created_at, updated_at, request.author, request.author, extra.session,
+                extra.session, valid_from, tier, expires_at],
         ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
         if audit_enabled {
-            audit(&conn, "set", &id, scope, "", &request.author, "");
+            audit(
+                &conn,
+                "set",
+                &id,
+                scope,
+                &extra.session,
+                &request.author,
+                "",
+            );
         }
         crate::cli_entity::link(&conn, &id, &request.entities, &request.author);
         if let Some(kind) = kind {
@@ -210,7 +255,7 @@ fn active_project() -> String {
 
 // encoding/json uses the float32 shortest representation with its own fixed/
 // scientific boundary. Keep negative zero and normalize exponent signs only.
-fn embedding_json(vector: &[f32]) -> String {
+pub(crate) fn embedding_json(vector: &[f32]) -> String {
     let values = vector
         .iter()
         .map(|value| {
@@ -228,7 +273,7 @@ fn embedding_json(vector: &[f32]) -> String {
     format!("[{}]", values.join(","))
 }
 
-fn sign_bits(vector: &[f32]) -> Vec<u8> {
+pub(crate) fn sign_bits(vector: &[f32]) -> Vec<u8> {
     let mut bytes = vec![0_u8; 96];
     for (index, value) in vector.iter().take(768).enumerate() {
         if *value <= 0.0 {

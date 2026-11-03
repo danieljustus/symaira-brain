@@ -143,7 +143,7 @@ impl Store {
                 }
             }
             for delete in &page.deleted {
-                if apply_remote_delete(&transaction, delete)? {
+                if apply_remote_delete(&transaction, delete, true)? {
                     applied.deletes += 1;
                 }
             }
@@ -161,7 +161,7 @@ impl Store {
 /// `time.Time` as the shipped driver reads it back from a column: its own
 /// rendering, or the `strftime` form the oplog trigger writes. Other spellings
 /// are not claimed.
-fn stored_time(value: &Value) -> Option<DateTime<Utc>> {
+pub(crate) fn stored_time(value: &Value) -> Option<DateTime<Utc>> {
     let Value::Text(text) = value else {
         return None;
     };
@@ -179,11 +179,11 @@ fn stored_time(value: &Value) -> Option<DateTime<Utc>> {
     Some(Utc.from_utc_datetime(&naive))
 }
 
-fn optional_time(time: Option<DateTime<Utc>>) -> Option<String> {
+pub(crate) fn optional_time(time: Option<DateTime<Utc>>) -> Option<String> {
     time.map(render_cursor)
 }
 
-fn non_null(value: &str) -> Option<String> {
+pub(crate) fn non_null(value: &str) -> Option<String> {
     (!value.is_empty()).then(|| value.to_owned())
 }
 
@@ -364,7 +364,11 @@ fn update(conn: &Connection, memory: &PulledMemory, derived: &Derived) -> Option
 }
 
 /// `ApplyRemoteDelete`.
-fn apply_remote_delete(conn: &Connection, delete: &PulledDelete) -> Option<bool> {
+pub(crate) fn apply_remote_delete(
+    conn: &Connection,
+    delete: &PulledDelete,
+    audit_enabled: bool,
+) -> Option<bool> {
     let local: Option<Value> = conn
         .query_row(
             "SELECT updated_at FROM memories WHERE id = ?",
@@ -413,7 +417,7 @@ fn apply_remote_delete(conn: &Connection, delete: &PulledDelete) -> Option<bool>
         params![delete.id, render_cursor(delete.deleted_at)],
     )
     .ok()?;
-    if let Some((scope, created_by, created_session)) = identity {
+    if let Some((scope, created_by, created_session)) = identity.filter(|_| audit_enabled) {
         audit(
             conn,
             "delete",
@@ -618,7 +622,10 @@ mod tests {
             id: "gone".into(),
             deleted_at: at("2026-10-26 02:00:00 +0000 UTC"),
         };
-        assert_eq!(apply_remote_delete(&transaction, &delete), Some(false));
+        assert_eq!(
+            apply_remote_delete(&transaction, &delete, true),
+            Some(false)
+        );
         // Even before a page/transaction boundary, the upsert sees the delete.
         assert_eq!(
             upsert_if_newer(

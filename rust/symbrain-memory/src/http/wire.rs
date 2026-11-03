@@ -73,6 +73,20 @@ pub(super) fn raw_json(status: u16, data: impl AsRef<str>) -> Reply {
     bytes(status, "application/json", rendered, exact)
 }
 
+/// An error reply whose internal cause is logged like the shipped
+/// `writeJSONError` (`ERROR HTTP error code=… msg=… err=…`).
+pub(super) fn error_logged(status: u16, code: &str, message: &str, internal: &str) -> Reply {
+    super::log::error(
+        "HTTP error",
+        &[
+            ("code", code.to_owned()),
+            ("msg", message.to_owned()),
+            ("err", internal.to_owned()),
+        ],
+    );
+    error(status, code, message)
+}
+
 pub(super) fn error(status: u16, code: &str, message: &str) -> Reply {
     raw_json(status, json!({"code":code,"error":message}).to_string())
 }

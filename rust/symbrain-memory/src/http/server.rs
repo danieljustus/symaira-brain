@@ -1,6 +1,6 @@
 //! Bounded explicit loopback listener and graceful ownership of connection tasks.
 
-use super::Server;
+use super::{Server, log};
 use hyper_util::rt::{TokioIo, TokioTimer};
 use std::{convert::Infallible, future::Future, net::TcpListener, sync::Arc, time::Duration};
 
@@ -72,5 +72,66 @@ impl Server {
             while tasks.join_next().await.is_some() {}
         }
         Ok(())
+    }
+}
+
+/// Go's wording of the `net.Listen` failures a CLI user can hit.
+fn go_listen_reason(error: &std::io::Error) -> String {
+    match error.raw_os_error() {
+        Some(48 | 98) => "address already in use".to_owned(),
+        Some(13) => "permission denied".to_owned(),
+        Some(49 | 99) => "cannot assign requested address".to_owned(),
+        _ => {
+            let text = error.to_string();
+            let base = text.split(" (os error").next().unwrap_or(&text);
+            let mut chars = base.chars();
+            chars
+                .next()
+                .map(|first| first.to_lowercase().collect::<String>() + chars.as_str())
+                .unwrap_or_default()
+        }
+    }
+}
+
+impl Server {
+    /// `StartHTTPServer`: binds `127.0.0.1:port`, logs the listening line,
+    /// serves until SIGINT/SIGTERM and then shuts down gracefully.
+    ///
+    /// # Errors
+    /// Returns the shipped `failed to bind to …` wording when the port is not
+    /// available, or the runtime/accept error.
+    pub fn run_loopback(self: Arc<Self>, port: u16) -> Result<(), String> {
+        let address = format!("127.0.0.1:{port}");
+        let listener = TcpListener::bind(&address).map_err(|error| {
+            format!(
+                "failed to bind to {address}: listen tcp {address}: bind: {}",
+                go_listen_reason(&error)
+            )
+        })?;
+        log::info(
+            "Symaira Memory API listening",
+            &[
+                ("addr", address.clone()),
+                ("url", format!("http://{address}")),
+            ],
+        );
+        let runtime = tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(2)
+            .enable_all()
+            .build()
+            .map_err(|error| error.to_string())?;
+        runtime.block_on(async move {
+            use tokio::signal::unix::{SignalKind, signal};
+            let mut terminate = signal(SignalKind::terminate()).map_err(|e| e.to_string())?;
+            let mut interrupt = signal(SignalKind::interrupt()).map_err(|e| e.to_string())?;
+            self.serve_until(listener, async move {
+                tokio::select! {
+                    _ = terminate.recv() => {},
+                    _ = interrupt.recv() => {},
+                }
+            })
+            .await
+            .map_err(|error| error.to_string())
+        })
     }
 }

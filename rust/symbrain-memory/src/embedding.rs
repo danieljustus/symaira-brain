@@ -79,6 +79,13 @@ impl EmbeddingGenerator {
         &self.model
     }
 
+    /// One Ollama attempt: a validated vector, or `None` for any failure.
+    pub(crate) fn try_ollama(&self, text: &str) -> Option<Vec<f32>> {
+        self.query_ollama(text).filter(|vector| {
+            vector.len() == DIMENSIONS && vector.iter().all(|value| value.is_finite())
+        })
+    }
+
     /// Produces the embedding for `text`.
     #[must_use]
     pub fn generate(&self, text: &str) -> GeneratedEmbedding {
