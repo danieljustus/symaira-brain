@@ -1,0 +1,7 @@
+[skill]
+name = "variant-fixture"
+version = "1.0.0"
+
+[terms.report_dir]
+default = "~/.local/state/symskills/reports"
+hermes = "~/.hermes/reports"

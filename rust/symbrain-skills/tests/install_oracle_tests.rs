@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 mod common;
 
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
 use symbrain_skills::install::{InstallOptions, StatusOptions, install_rendered, status};
 use symbrain_skills::{RenderMetadata, load_bundle, materialize, render_target};
 
@@ -137,14 +136,12 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
     }
 }
 
+/// The Go sources that produced this fixture are gone; their digests are frozen inside the
+/// fixture (sealed by `scripts/oracle-freeze`). Check the recorded provenance is complete and
+/// well-formed instead of re-hashing live Go files.
 fn check_provenance(fixture: &OracleFixture) {
     assert_eq!(fixture.schema_version, 1);
-    let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    assert_eq!(
-        fixture.generator_sha256,
-        sha256(&repo.join("scripts/skills-install-oracle/main.go")),
-        "Go install-oracle generator changed"
-    );
+    assert!(is_sha256_hex(&fixture.generator_sha256), "generator digest");
     let expected_sources = BTreeSet::from([
         "internal/skills/install/install.go",
         "internal/skills/install/status.go",
@@ -160,18 +157,13 @@ fn check_provenance(fixture: &OracleFixture) {
             .collect::<BTreeSet<_>>(),
         expected_sources
     );
-    for (source, expected) in &fixture.go_sources {
-        assert_eq!(
-            sha256(&repo.join(source)),
-            *expected,
-            "Go install/status source changed: {source}"
-        );
+    for (source, digest) in &fixture.go_sources {
+        assert!(is_sha256_hex(digest), "recorded digest of {source}");
     }
 }
 
-fn sha256(path: &Path) -> String {
-    let bytes = fs::read(path).unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
-    format!("{:x}", Sha256::digest(bytes))
+fn is_sha256_hex(value: &str) -> bool {
+    value.len() == 64 && value.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
 }
 
 fn write_oracle_skill(root: &Path, body: &str) {

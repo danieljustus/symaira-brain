@@ -1,0 +1,32 @@
+{
+  "user": {
+    "email": "dev@example.com",
+    "privy_did": "did:privy:abc123"
+  },
+  "organisation": {
+    "id": "org_1",
+    "slug": "example",
+    "name": "Example Org"
+  },
+  "subscription": {
+    "plan": "pro",
+    "tier": 3,
+    "monthly_charge": 20.0,
+    "monthly_credits": 100.0,
+    "current_period_end": "2026-09-01T00:00:00Z",
+    "credits_remaining": 42.5,
+    "rollover_credits": 7.5
+  },
+  "paid_service_access": {
+    "allowed": true,
+    "paid_access": true,
+    "organisation_id": "org_1",
+    "has_active_subscription": true,
+    "active_subscription_is_paid": true,
+    "subscription_tier": 3,
+    "subscription_monthly_charge": 20.0,
+    "subscription_credits_remaining": 42.5,
+    "purchased_credits_remaining": 15.0,
+    "total_usable_credits": 57.5
+  }
+}

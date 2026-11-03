@@ -2289,6 +2289,651 @@
      "-": "no Go inputs"
     }
    }
+  },
+  {
+   "id": "usage-go-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo provider response bodies (internal/usage/testdata) used by the request oracle replay",
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-usage/tests/fixtures/go_testdata/claude-admin-cost.json": "internal/usage/testdata/claude-admin-cost.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/claude-oauth-usage.json": "internal/usage/testdata/claude-oauth-usage.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/codex-wham-usage.json": "internal/usage/testdata/codex-wham-usage.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/copilot-user.json": "internal/usage/testdata/copilot-user.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-api-usages.json": "internal/usage/testdata/kimi-api-usages.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-api-usages.json": "internal/usage/testdata/kimi-fallback-api-usages.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-web-usages.json": "internal/usage/testdata/kimi-fallback-web-usages.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/moonshot-balance-cn.json": "internal/usage/testdata/moonshot-balance-cn.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/nous-account.json": "internal/usage/testdata/nous-account.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/opencode-subscription-no-reset.json": "internal/usage/testdata/opencode-subscription-no-reset.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/openrouter-credits.json": "internal/usage/testdata/openrouter-credits.json"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/claude-admin-cost.json",
+     "sha256": "6a355b64bf396700e67c760453b36522741d050e81b983b6fd13d0cad8a2a417",
+     "bytes": 81,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/claude-oauth-usage.json",
+     "sha256": "2d09ed97340b4255c4d8e5dd2b420b5a705a58af1818efb876c6def8bbaf27a2",
+     "bytes": 272,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/codex-wham-usage.json",
+     "sha256": "a5a668395b600519b908eb6f3b7be2d30e77e02a8c96ee83a9be6a78fca965d7",
+     "bytes": 1035,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/copilot-user.json",
+     "sha256": "5fab73597cc59b3583351776695e192eb634c6529c4f57ac8d1b777c3eb77fa3",
+     "bytes": 783,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-api-usages.json",
+     "sha256": "6f7aa1afda2388dd3a46ea01ba0dd5fd9d33a5f2979296f1423fb02c51d5a113",
+     "bytes": 390,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-api-usages.json",
+     "sha256": "869f1038b6deaa02bc9c20d3438bbafb3d3f49cb5dad9f6c7a6b23607a2362c2",
+     "bytes": 417,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-web-usages.json",
+     "sha256": "2e2bb70ba3f7e85a4e06b3823260e8a157b1d6ffceb455100e2adcbe5cef2ad2",
+     "bytes": 561,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/moonshot-balance-cn.json",
+     "sha256": "f8fabcd2c694645238e2c54f2b06524f677b32edfda64f6317bf8cd7b2466a86",
+     "bytes": 89,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/nous-account.json",
+     "sha256": "67c29fce5584869c7f7d3aa95eaa481b59268ce49b8e021b18a3762340b81c9a",
+     "bytes": 782,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/opencode-subscription-no-reset.json",
+     "sha256": "ef2c8b85e37335d0118ecdb2b4adeecdd528f4e8a8b814a3ed0afd68d0c36fc1",
+     "bytes": 76,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-usage/tests/fixtures/go_testdata/openrouter-credits.json",
+     "sha256": "4458d54a23942354c367d685dee5f2b6db948601843fa18ca55727bd49ebdc80",
+     "bytes": 324,
+     "last_modified_commit": ""
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "eda559e0314438042709c7294416fe895f910157",
+    "origin": "go-repo-testdata",
+    "go_toolchain": "go1.26.7",
+    "platform": "any",
+    "go_inputs": {
+     "internal/usage/testdata/claude-admin-cost.json": "da680abf9204bf9b5d854524eea7b5405ef49e17",
+     "internal/usage/testdata/claude-oauth-usage.json": "aca76d28c55c323c541ddfcabcea06e1bbcae058",
+     "internal/usage/testdata/codex-wham-usage.json": "a69d4feae68c2dcd75cda50feda6d115b289f9ce",
+     "internal/usage/testdata/copilot-user.json": "e3b475bfcc9c05534b69e6b0e32f5e9b9edcf56c",
+     "internal/usage/testdata/kimi-api-usages.json": "2760bf2486aeeaafea079a6c682ed19bd0a9115f",
+     "internal/usage/testdata/kimi-fallback-api-usages.json": "570e390ebe1f6dd75f61815c139a53595a066c24",
+     "internal/usage/testdata/kimi-fallback-web-usages.json": "b628c35faea823768f96bbafc2a813640fabd187",
+     "internal/usage/testdata/moonshot-balance-cn.json": "46476087e99b4c18f36fb22ab6dd6ca6a9b46246",
+     "internal/usage/testdata/nous-account.json": "fea3999f68008854b4ba999570e7477645c55f60",
+     "internal/usage/testdata/opencode-subscription-no-reset.json": "929c4ee0ebdfbd9cf2d2f2af8c95386040816579",
+     "internal/usage/testdata/openrouter-credits.json": "c023f39406a970daf4525bfa9ca58e1c4e94a3dd"
+    }
+   }
+  },
+  {
+   "id": "skills-render-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo render golden/source trees (internal/skills/render/testdata)",
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/README.md": "internal/skills/render/testdata/golden/README.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/.symskills.json": "internal/skills/render/testdata/golden/antigravity/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/SKILL.md": "internal/skills/render/testdata/golden/antigravity/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/scripts/helper.sh": "internal/skills/render/testdata/golden/antigravity/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/.symskills.json": "internal/skills/render/testdata/golden/claude/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/SKILL.md": "internal/skills/render/testdata/golden/claude/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/scripts/helper.sh": "internal/skills/render/testdata/golden/claude/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/.symskills.json": "internal/skills/render/testdata/golden/codex/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/SKILL.md": "internal/skills/render/testdata/golden/codex/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/agents/openai.yaml": "internal/skills/render/testdata/golden/codex/agents/openai.yaml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/scripts/helper.sh": "internal/skills/render/testdata/golden/codex/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/.symskills.json": "internal/skills/render/testdata/golden/hermes/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/SKILL.md": "internal/skills/render/testdata/golden/hermes/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/scripts/helper.sh": "internal/skills/render/testdata/golden/hermes/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/.symskills.json": "internal/skills/render/testdata/golden/openclaw/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/SKILL.md": "internal/skills/render/testdata/golden/openclaw/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/scripts/helper.sh": "internal/skills/render/testdata/golden/openclaw/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/.symskills.json": "internal/skills/render/testdata/golden/opencode/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/SKILL.md": "internal/skills/render/testdata/golden/opencode/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/scripts/helper.sh": "internal/skills/render/testdata/golden/opencode/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/SKILL.md": "internal/skills/render/testdata/inline-manifest/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/symskills.toml": "internal/skills/render/testdata/inline-manifest/symskills.toml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/SKILL.md": "internal/skills/render/testdata/oracle-edge/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/symskills.toml": "internal/skills/render/testdata/oracle-edge/symskills.toml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/SKILL.md": "internal/skills/render/testdata/source/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/overlays/opencode/prepend.md": "internal/skills/render/testdata/source/overlays/opencode/prepend.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/scripts/helper.sh": "internal/skills/render/testdata/source/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/symskills.toml": "internal/skills/render/testdata/source/symskills.toml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/README.md": "internal/skills/render/testdata/variant-golden/README.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/.symskills.json": "internal/skills/render/testdata/variant-golden/antigravity/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/SKILL.md": "internal/skills/render/testdata/variant-golden/antigravity/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/antigravity/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/.symskills.json": "internal/skills/render/testdata/variant-golden/claude/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/SKILL.md": "internal/skills/render/testdata/variant-golden/claude/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/claude/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/.symskills.json": "internal/skills/render/testdata/variant-golden/codex/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/SKILL.md": "internal/skills/render/testdata/variant-golden/codex/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/agents/openai.yaml": "internal/skills/render/testdata/variant-golden/codex/agents/openai.yaml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/codex/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/.symskills.json": "internal/skills/render/testdata/variant-golden/hermes/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/SKILL.md": "internal/skills/render/testdata/variant-golden/hermes/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/hermes/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/.symskills.json": "internal/skills/render/testdata/variant-golden/openclaw/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/SKILL.md": "internal/skills/render/testdata/variant-golden/openclaw/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/openclaw/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/.symskills.json": "internal/skills/render/testdata/variant-golden/opencode/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/SKILL.md": "internal/skills/render/testdata/variant-golden/opencode/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/opencode/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/SKILL.md": "internal/skills/render/testdata/variant-source/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/dispatch.md": "internal/skills/render/testdata/variant-source/overlays/claude/blocks/dispatch.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/worker-execution.md": "internal/skills/render/testdata/variant-source/overlays/claude/blocks/worker-execution.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/hermes/blocks/dispatch.md": "internal/skills/render/testdata/variant-source/overlays/hermes/blocks/dispatch.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/references/execution-contract.md": "internal/skills/render/testdata/variant-source/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/symskills.toml": "internal/skills/render/testdata/variant-source/symskills.toml"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/README.md",
+     "sha256": "d576f7dbdab7b06d8543ce25c8d98a19e32dc91878d804b00ffbd4c6044ad890",
+     "bytes": 2330,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/.symskills.json",
+     "sha256": "cc273dff0e325c52c374527bd4d025202bc7f29c2fcca68714f36880f855fcb9",
+     "bytes": 697,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/SKILL.md",
+     "sha256": "043a7a0f4a91a2ca0127c4ab5c891c9e184d8694164e93e669b90e1965a88aa4",
+     "bytes": 523,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/scripts/helper.sh",
+     "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a",
+     "bytes": 92,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/.symskills.json",
+     "sha256": "e2e90ef8bce9b21d9e00d0ec3217f0aab813254142cff742ae643c74627ea9c9",
+     "bytes": 697,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/SKILL.md",
+     "sha256": "8a831a8221727931d56f0f814ee0a03466e1c387d03d99672f5566bf71630054",
+     "bytes": 518,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/scripts/helper.sh",
+     "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a",
+     "bytes": 92,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/.symskills.json",
+     "sha256": "4495b37d2d581634d0f434c43943d4bcbaed6c5b5e31c89f7820b54e03e1d137",
+     "bytes": 1008,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/SKILL.md",
+     "sha256": "343928fe461c3c94c2bf0c4397c7e3356cc28fb5a22363d0ed729c4ee9fb077e",
+     "bytes": 523,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/agents/openai.yaml",
+     "sha256": "2924e33fda1e0a90a8dbac08ef637c8be2c6c115d19c477a2e8cf481c73e38e9",
+     "bytes": 176,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/scripts/helper.sh",
+     "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a",
+     "bytes": 92,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/.symskills.json",
+     "sha256": "e06e99d1add634e1e1437884c6e4cf882920a35f0e16d38a223aed1edf4b4fd2",
+     "bytes": 697,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/SKILL.md",
+     "sha256": "1d2272bfe5123db2870f46cacc0b0bf30289482d928fdcb4695434f9194eab46",
+     "bytes": 518,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/scripts/helper.sh",
+     "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a",
+     "bytes": 92,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/.symskills.json",
+     "sha256": "7b09fd77e994e16bae6a72d186035727138e71d02134437eb0a65af1018fa65b",
+     "bytes": 697,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/SKILL.md",
+     "sha256": "fc5f0617885665506408439b0a2790f3e62f5257496d5f6fe1d931cf5b42a7c6",
+     "bytes": 520,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/scripts/helper.sh",
+     "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a",
+     "bytes": 92,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/.symskills.json",
+     "sha256": "d6967dfe9dcf53fd9389df2fe3ced1f20dbbdee6b0c4e21957d0da4312bb7eae",
+     "bytes": 697,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/SKILL.md",
+     "sha256": "b1b30116e5ae6fb5381c53440d8a5c03e8b66980b61092197b3eac064576ab81",
+     "bytes": 663,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/scripts/helper.sh",
+     "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a",
+     "bytes": 92,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/SKILL.md",
+     "sha256": "1db370cbebb1ef92e4c0bfb9bc7af8ca422740281929d3ec3617948262a15c3b",
+     "bytes": 139,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/symskills.toml",
+     "sha256": "ed8c93292d8b064b5cf616309bacba1717d4547abbe87556744f4d06d645044f",
+     "bytes": 411,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/SKILL.md",
+     "sha256": "eb82b196ca01e4162e1d224dcf9c129437c7da86e3f729eef97afbbb66a0b1de",
+     "bytes": 175,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/symskills.toml",
+     "sha256": "d5f4af7cefdd81c9ada34639275a7282f1fb4c9e7688f1a1ccc3bfcfe50d234b",
+     "bytes": 175,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/source/SKILL.md",
+     "sha256": "a9408e835d26bf0709fb692c8e01437b494491ad774a33e4bc6f1766dd8ee2bd",
+     "bytes": 494,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/source/overlays/opencode/prepend.md",
+     "sha256": "b7de034788e17e15c3fd39bc4ed468609958de3f88bbe6ccd1efd270a1b09530",
+     "bytes": 137,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/source/scripts/helper.sh",
+     "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a",
+     "bytes": 92,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/source/symskills.toml",
+     "sha256": "11eaf91b747da25f3167b0ba33bd08ecc6722852aad8bad700a573ad94fe8860",
+     "bytes": 244,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/README.md",
+     "sha256": "de631758a2e0dc3c71539d8588d10f19073c00153b4f37b7c207af672b7dbfd8",
+     "bytes": 1694,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/.symskills.json",
+     "sha256": "7809eb4bc62348e9eae313ad68ca2be19f6ada8cf1fc7aa756d2912e6cf071bf",
+     "bytes": 716,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/SKILL.md",
+     "sha256": "25c0a05aa9667ebe1f6ff5f46b04f36659912837b5420a472d4770ef68d3c6b4",
+     "bytes": 573,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/references/execution-contract.md",
+     "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea",
+     "bytes": 138,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/.symskills.json",
+     "sha256": "f5c5ad7a169ba9b9e2781cc55de6628b8694f81c2b6bfd706aee710d6d7c6b8b",
+     "bytes": 716,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/SKILL.md",
+     "sha256": "57d33ce591fa43ce544cec5b62aeb606bddee5c3744ba4cde3e8d71c2bb2b3f4",
+     "bytes": 632,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/references/execution-contract.md",
+     "sha256": "4d9502dc3f0235f2ee13083fe3a70e07ee95548c1b81685e6970caa556c9695c",
+     "bytes": 141,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/.symskills.json",
+     "sha256": "b49c58d6c9af9c0a7039cf7dd77bfcdc0b66120d164b2e54590f0f444a3c05e2",
+     "bytes": 1027,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/SKILL.md",
+     "sha256": "4b077172eaeb7ed4bdf276b4cdb0c394939e2aedb3b53373096c7b9c0e0e38af",
+     "bytes": 567,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/agents/openai.yaml",
+     "sha256": "db2e26075aec307f3f34afc1be3c5ea1ece2a9a0e6820a6489d1080427789997",
+     "bytes": 175,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/references/execution-contract.md",
+     "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea",
+     "bytes": 138,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/.symskills.json",
+     "sha256": "309d8b2537c49ca5f6f05e365f5142296867c919ddd21dd5dd6e6c15dcbc0b8b",
+     "bytes": 716,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/SKILL.md",
+     "sha256": "d40469251a036ea2d9de1051fbb328ac0f792d80624f6fba0c7dd13e82e66f17",
+     "bytes": 606,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/references/execution-contract.md",
+     "sha256": "f3d06f0ed50f0e6707dafd3a1cbeeecd13268b23b93dfff4be1549c599a16fe7",
+     "bytes": 129,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/.symskills.json",
+     "sha256": "20f8dc8a463ac5b3c8fbccfa5424a2b5b20d018ade0052b3e2713cd1a6283bfd",
+     "bytes": 716,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/SKILL.md",
+     "sha256": "8026f5877a1d63116ceb2128666761b6663ea6f631e37698ff712a04db9b3bf4",
+     "bytes": 570,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/references/execution-contract.md",
+     "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea",
+     "bytes": 138,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/.symskills.json",
+     "sha256": "778c48c970305a3f82415a41a7fd96bb4b41dd1e47726d3647afd3e564a17a73",
+     "bytes": 716,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/SKILL.md",
+     "sha256": "0cab6d61e3fa22f8ca5d7eb7e093223f7ac76290b84c87eef40e8fae14f5ceb9",
+     "bytes": 570,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/references/execution-contract.md",
+     "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea",
+     "bytes": 138,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/SKILL.md",
+     "sha256": "c691dbfa8ae24136fefa865c21137bc70586455c5c9ba1d35c0f21aee4681976",
+     "bytes": 812,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/dispatch.md",
+     "sha256": "716126293afc6a340f69614f3acfc271c6e28f64b51ffef1b51dc131c91f138c",
+     "bytes": 68,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/worker-execution.md",
+     "sha256": "3cd8fd0fda6e2f11ae8a693a3e2f1de3c4207a8ba35aed1f6d928b8e9c41a2a7",
+     "bytes": 133,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/hermes/blocks/dispatch.md",
+     "sha256": "a87fa3ad298f30ed4952dcc19f0727e78fce5b26bb21d1de515162983926c483",
+     "bytes": 71,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/references/execution-contract.md",
+     "sha256": "0822dbc4ad3e0ae7ef6842a5a72dd5be36ecc89c617769ded055218d6cd16eda",
+     "bytes": 185,
+     "last_modified_commit": ""
+    },
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/symskills.toml",
+     "sha256": "ddd47f01f061dcdd468a5c678d77ab0a10b50e355b1c4fe459c8bae855f9c8ff",
+     "bytes": 145,
+     "last_modified_commit": ""
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "eda559e0314438042709c7294416fe895f910157",
+    "origin": "go-repo-testdata",
+    "go_toolchain": "go1.26.7",
+    "platform": "any",
+    "go_inputs": {
+     "internal/skills/render/testdata/golden/README.md": "dd16b3cc733bd7917d3a772628d9452d81992a5d",
+     "internal/skills/render/testdata/golden/antigravity/.symskills.json": "30cde704b43149b7667c08e98ba1b2cd16b678b4",
+     "internal/skills/render/testdata/golden/antigravity/SKILL.md": "1cc3120b4678bafdc21042194ed9291fd60d1383",
+     "internal/skills/render/testdata/golden/antigravity/scripts/helper.sh": "ffb5703759f2961e62d1e9d7979659f17610416f",
+     "internal/skills/render/testdata/golden/claude/.symskills.json": "5dd69bd2ecd4c3a08c8557d27d1c72aef1514347",
+     "internal/skills/render/testdata/golden/claude/SKILL.md": "407e031c050152d42145c955eadbee7d92dcb521",
+     "internal/skills/render/testdata/golden/claude/scripts/helper.sh": "ffb5703759f2961e62d1e9d7979659f17610416f",
+     "internal/skills/render/testdata/golden/codex/.symskills.json": "560cff048e5c21fa721267428639f6e7e47713bd",
+     "internal/skills/render/testdata/golden/codex/SKILL.md": "8e6d5249d09fa0147bcae7b3a3f7c1bd6b6e51d4",
+     "internal/skills/render/testdata/golden/codex/agents/openai.yaml": "b31b8ef4e578282b9c48a750c0871dfb6e982d01",
+     "internal/skills/render/testdata/golden/codex/scripts/helper.sh": "ffb5703759f2961e62d1e9d7979659f17610416f",
+     "internal/skills/render/testdata/golden/hermes/.symskills.json": "42d5e068f8cfb5abd872ed5cf3fad9c10faddaaf",
+     "internal/skills/render/testdata/golden/hermes/SKILL.md": "1df913a2b5b1516e936f667203027d5ae5f224ac",
+     "internal/skills/render/testdata/golden/hermes/scripts/helper.sh": "ffb5703759f2961e62d1e9d7979659f17610416f",
+     "internal/skills/render/testdata/golden/openclaw/.symskills.json": "9adbefa63400ac795ac93740dcd63ec2eb6a257e",
+     "internal/skills/render/testdata/golden/openclaw/SKILL.md": "b915b2089a80db42d83559e663d492efe76a8d8e",
+     "internal/skills/render/testdata/golden/openclaw/scripts/helper.sh": "ffb5703759f2961e62d1e9d7979659f17610416f",
+     "internal/skills/render/testdata/golden/opencode/.symskills.json": "5d60123c1fb5b9631e4fcb9ad5403baf094e91cb",
+     "internal/skills/render/testdata/golden/opencode/SKILL.md": "8028f2546fa5ab357508f6dba6c6164823b7ae66",
+     "internal/skills/render/testdata/golden/opencode/scripts/helper.sh": "ffb5703759f2961e62d1e9d7979659f17610416f",
+     "internal/skills/render/testdata/inline-manifest/SKILL.md": "65df7a9b3d6c3f4dd2ccb1d63b46f741536dbac2",
+     "internal/skills/render/testdata/inline-manifest/symskills.toml": "bc73ecbd38fc1dfecf436e45fd9167ccb06b5b82",
+     "internal/skills/render/testdata/oracle-edge/SKILL.md": "d140fd7219e3eb56f06284ae18d5cc45879290b6",
+     "internal/skills/render/testdata/oracle-edge/symskills.toml": "a96ab8344e940ef314d1ab6bab55ffa2c7d88a4d",
+     "internal/skills/render/testdata/source/SKILL.md": "463e266a5e4a10ed9fcb93e0ae549e460640a158",
+     "internal/skills/render/testdata/source/overlays/opencode/prepend.md": "900e9a66461d3881303d724152acdd5b7f8dde31",
+     "internal/skills/render/testdata/source/scripts/helper.sh": "ffb5703759f2961e62d1e9d7979659f17610416f",
+     "internal/skills/render/testdata/source/symskills.toml": "5ddee7a8aef4f3641ed78a2edf82a0ec63b47bd1",
+     "internal/skills/render/testdata/variant-golden/README.md": "d6cab615b6224de88e9d143bb8ae3bab39ef95c8",
+     "internal/skills/render/testdata/variant-golden/antigravity/.symskills.json": "5783af97551ee4dda60c00c268c3be6cd77d5f5d",
+     "internal/skills/render/testdata/variant-golden/antigravity/SKILL.md": "f06a5ead5bb5d71ba4ad79664db0ee60a5b6c666",
+     "internal/skills/render/testdata/variant-golden/antigravity/references/execution-contract.md": "93131421b4bf9976abc9cf16e321353649130de3",
+     "internal/skills/render/testdata/variant-golden/claude/.symskills.json": "f17195b3e133512197741633a6064a15a4b253ba",
+     "internal/skills/render/testdata/variant-golden/claude/SKILL.md": "062915f2be1cfde74caa24834b13cfaea0527918",
+     "internal/skills/render/testdata/variant-golden/claude/references/execution-contract.md": "2aa52b9050ea375361ef74a545974ad929aa7640",
+     "internal/skills/render/testdata/variant-golden/codex/.symskills.json": "a23f8ca05045531c4bdebd850703d666f6bca2f7",
+     "internal/skills/render/testdata/variant-golden/codex/SKILL.md": "cb6524704f51640eacb23e9e50b23cb968217f67",
+     "internal/skills/render/testdata/variant-golden/codex/agents/openai.yaml": "915ad4a9a33f05693d272df3c62885d8e516a0dd",
+     "internal/skills/render/testdata/variant-golden/codex/references/execution-contract.md": "93131421b4bf9976abc9cf16e321353649130de3",
+     "internal/skills/render/testdata/variant-golden/hermes/.symskills.json": "52e2835cdf17e52ac35aa89498b158dfafba290a",
+     "internal/skills/render/testdata/variant-golden/hermes/SKILL.md": "00127f4f35d2ebe3d617ca1cb1d1d16cfbcfe08c",
+     "internal/skills/render/testdata/variant-golden/hermes/references/execution-contract.md": "18797cddb47b0809494826eb6c64a2c45d650db5",
+     "internal/skills/render/testdata/variant-golden/openclaw/.symskills.json": "83bc13b0a95d5d6a8141983799dfc51a479a720c",
+     "internal/skills/render/testdata/variant-golden/openclaw/SKILL.md": "562132b725d8d6a7d81c10504e8d7367643b00fc",
+     "internal/skills/render/testdata/variant-golden/openclaw/references/execution-contract.md": "93131421b4bf9976abc9cf16e321353649130de3",
+     "internal/skills/render/testdata/variant-golden/opencode/.symskills.json": "ed036b6418bd1bbe8f3cc2ece082d5e1826e1624",
+     "internal/skills/render/testdata/variant-golden/opencode/SKILL.md": "4483c81ad301b02d8d6262a76a4111366b3d17da",
+     "internal/skills/render/testdata/variant-golden/opencode/references/execution-contract.md": "93131421b4bf9976abc9cf16e321353649130de3",
+     "internal/skills/render/testdata/variant-source/SKILL.md": "a6746ad720934dbe79bdbfbdacb332bab1e82756",
+     "internal/skills/render/testdata/variant-source/overlays/claude/blocks/dispatch.md": "30753074c5047b19b953d18962210778ab046cc7",
+     "internal/skills/render/testdata/variant-source/overlays/claude/blocks/worker-execution.md": "514543b61ff0e205e565b1721a3a001fce650aef",
+     "internal/skills/render/testdata/variant-source/overlays/hermes/blocks/dispatch.md": "69d62a38fd75616492f490a5da7f62af0ff36e2e",
+     "internal/skills/render/testdata/variant-source/references/execution-contract.md": "8f8805091df26433986fa04ca94f234a59edf4be",
+     "internal/skills/render/testdata/variant-source/symskills.toml": "881c54431e954e312781cf3f1373df0dadfd5d86"
+    }
+   }
+  },
+  {
+   "id": "skills-relative-root-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo relative-root skill fixture (scripts/skills-oracle/fixtures); directory name is part of the oracle",
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-skills/tests/fixtures/relative-root/SKILL.md": "scripts/skills-oracle/fixtures/relative-root/SKILL.md"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-skills/tests/fixtures/relative-root/SKILL.md",
+     "sha256": "c58bae7287026cb4706e565092d3550c200c99e7aa9cdf558f46c0df98d84227",
+     "bytes": 185,
+     "last_modified_commit": ""
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "eda559e0314438042709c7294416fe895f910157",
+    "origin": "go-repo-testdata",
+    "go_toolchain": "go1.26.7",
+    "platform": "any",
+    "go_inputs": {
+     "scripts/skills-oracle/fixtures/relative-root/SKILL.md": "be3c23757882fb9bfcc88bafdc96c93ccedf393a"
+    }
+   }
+  },
+  {
+   "id": "harness-nonutf8-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "Go harness list/install/uninstall transcripts with non-UTF-8 HOME and environment bytes",
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_harness_nonutf8.py",
+    "note": "needs a symbrain-go binary; historical tooling"
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/harness_nonutf8_go.darwin.json",
+     "sha256": "6cf7e890459be87d2ce0c6f959ac8d3eea0128d92f79db219bd08a6d733dcce6",
+     "bytes": 9617,
+     "last_modified_commit": ""
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "eda559e0314438042709c7294416fe895f910157",
+    "origin": "pinned-go-recorded",
+    "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
+    "platform": "darwin",
+    "go_inputs": {
+     "go.mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9"
+    }
+   }
+  },
+  {
+   "id": "skills-status-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Go `skills status --json` reports for 6 targets x {clean, render-edit}",
+   "record": {
+    "kind": "script",
+    "producer": "rust/symbrain-cli/tests/skills_render_drift.rs record mode (SYMBRAIN_SKILLS_STATUS_RECORD_GO)",
+    "note": "historical tooling"
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/skills_status_go_oracle.json",
+     "sha256": "104da2fa5e0cb5a93a06cbe7fae6f6ade8825b9c7194bcce70df34c87c0fc50d",
+     "bytes": 12397,
+     "last_modified_commit": ""
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "eda559e0314438042709c7294416fe895f910157",
+    "origin": "pinned-go-recorded",
+    "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
+    "platform": "any",
+    "go_inputs": {
+     "go.mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9"
+    }
+   }
   }
  ]
 }

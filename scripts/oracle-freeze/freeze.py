@@ -174,6 +174,16 @@ def seal(root: Path = ROOT, only: set[str] | None = None, verified: dict | None 
             if toolchain == "go.mod":
                 toolchain = go_toolchain_default
         entries = []
+        if kind == "copy":
+            # A byte-for-byte copy of a Go-repo test input (or of another sealed fixture);
+            # refuse to seal a copy that drifted from the source it claims to mirror.
+            for dst, src in sorted(record["copies"].items()):
+                source_blob = git_tree(src, head)
+                if source_blob is not None:
+                    dst_blob = subprocess.run(["git", "hash-object", dst], cwd=root, check=True,
+                                              capture_output=True, text=True).stdout.strip()
+                    if dst_blob != source_blob:
+                        raise FreezeError([f"{group['id']}: {dst} is not a byte copy of {src}@HEAD"])
         for rel in group["fixtures"]:
             path = root / rel
             if not path.is_file():

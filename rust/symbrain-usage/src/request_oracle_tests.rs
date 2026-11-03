@@ -558,7 +558,7 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
                 Response {
                     status: 200,
                     body: include_bytes!(
-                        "../../../internal/usage/testdata/kimi-fallback-api-usages.json"
+                        "../tests/fixtures/go_testdata/kimi-fallback-api-usages.json"
                     )
                     .to_vec(),
                     headers: BTreeMap::new(),
@@ -569,7 +569,7 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
                 Response {
                     status: 200,
                     body: include_bytes!(
-                        "../../../internal/usage/testdata/moonshot-balance-cn.json"
+                        "../tests/fixtures/go_testdata/moonshot-balance-cn.json"
                     )
                     .to_vec(),
                     headers: BTreeMap::new(),
@@ -579,7 +579,7 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
                 "nous".into(),
                 Response {
                     status: 200,
-                    body: include_bytes!("../../../internal/usage/testdata/nous-account.json")
+                    body: include_bytes!("../tests/fixtures/go_testdata/nous-account.json")
                         .to_vec(),
                     headers: BTreeMap::new(),
                 },
@@ -589,7 +589,7 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
                 Response {
                     status: 200,
                     body: include_bytes!(
-                        "../../../internal/usage/testdata/opencode-subscription-no-reset.json"
+                        "../tests/fixtures/go_testdata/opencode-subscription-no-reset.json"
                     )
                     .to_vec(),
                     headers: BTreeMap::new(),
@@ -600,7 +600,7 @@ fn combined_native_providers_match_the_production_go_report_and_overrides() {
                 Response {
                     status: 200,
                     body: include_bytes!(
-                        "../../../internal/usage/testdata/openrouter-credits.json"
+                        "../tests/fixtures/go_testdata/openrouter-credits.json"
                     )
                     .to_vec(),
                     headers: BTreeMap::new(),
@@ -689,7 +689,7 @@ fn nous_environment_credential_precedes_the_default_file() {
             "nous".into(),
             Response {
                 status: 200,
-                body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+                body: include_bytes!("../tests/fixtures/go_testdata/nous-account.json").to_vec(),
                 headers: BTreeMap::new(),
             },
         )]
@@ -726,7 +726,7 @@ fn kimi_cli_and_web_fallback_reports_match_production_go_chains() {
     };
     let cli_success = Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/kimi-fallback-api-usages.json")
+        body: include_bytes!("../tests/fixtures/go_testdata/kimi-fallback-api-usages.json")
             .to_vec(),
         headers: BTreeMap::new(),
     };
@@ -782,7 +782,7 @@ fn kimi_cli_and_web_fallback_reports_match_production_go_chains() {
 
     let web_success = Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/kimi-fallback-web-usages.json")
+        body: include_bytes!("../tests/fixtures/go_testdata/kimi-fallback-web-usages.json")
             .to_vec(),
         headers: BTreeMap::new(),
     };
@@ -1087,7 +1087,7 @@ fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
     .expect("Go authenticated Claude Admin report");
     let (mut report, transport) = authenticated_claude_admin_report(Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/claude-admin-cost.json").to_vec(),
+        body: include_bytes!("../tests/fixtures/go_testdata/claude-admin-cost.json").to_vec(),
         headers: BTreeMap::new(),
     });
     assert_eq!(report.providers.len(), 1);
@@ -1297,7 +1297,7 @@ fn assert_claude_oauth_report_matches_scenario(
     let (report, transport) = authenticated_claude_oauth_report(
         Response {
             status: 200,
-            body: include_bytes!("../../../internal/usage/testdata/claude-oauth-usage.json")
+            body: include_bytes!("../tests/fixtures/go_testdata/claude-oauth-usage.json")
                 .to_vec(),
             headers: BTreeMap::new(),
         },
@@ -1376,7 +1376,7 @@ fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
 
     let (mut report, transport) = authenticated_codex_report(Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/codex-wham-usage.json").to_vec(),
+        body: include_bytes!("../tests/fixtures/go_testdata/codex-wham-usage.json").to_vec(),
         headers: BTreeMap::new(),
     });
     assert_eq!(report.providers.len(), 1);
@@ -1717,7 +1717,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
 
     let (mut report, transport) = authenticated_kimi_report(Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/kimi-api-usages.json").to_vec(),
+        body: include_bytes!("../tests/fixtures/go_testdata/kimi-api-usages.json").to_vec(),
         headers: BTreeMap::new(),
     });
     assert_eq!(report.providers.len(), 1);
@@ -1730,7 +1730,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
     assert_eq!(usage.error, None);
     let snapshot = usage.snapshot.as_mut().expect("Kimi snapshot");
     let response: Value = serde_json::from_slice(include_bytes!(
-        "../../../internal/usage/testdata/kimi-api-usages.json"
+        "../tests/fixtures/go_testdata/kimi-api-usages.json"
     ))
     .expect("Go Kimi response fixture");
     for (meter, response_time) in [
@@ -1840,7 +1840,7 @@ fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
 
     let (mut report, transport) = authenticated_nous_report(Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+        body: include_bytes!("../tests/fixtures/go_testdata/nous-account.json").to_vec(),
         headers: BTreeMap::new(),
     });
     assert_eq!(report.providers.len(), 1);
@@ -1917,7 +1917,7 @@ fn authenticated_nous_live_jwt_file_matches_go_production_constructor() {
         (
             Response {
                 status: 200,
-                body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+                body: include_bytes!("../tests/fixtures/go_testdata/nous-account.json").to_vec(),
                 headers: BTreeMap::new(),
             },
             &oracle["success"],
@@ -2155,7 +2155,7 @@ fn authenticated_codex_file_report_matches_go_success_and_failure_oracles() {
         serde_json::from_str(CODEX_FILE_REPORT_ORACLE).expect("Go Codex file report oracle");
     let (mut report, transport) = authenticated_codex_file_report(Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/codex-wham-usage.json").to_vec(),
+        body: include_bytes!("../tests/fixtures/go_testdata/codex-wham-usage.json").to_vec(),
         headers: BTreeMap::new(),
     });
     let codex = &mut report.providers[1];
@@ -2213,7 +2213,7 @@ fn authenticated_copilot_file_report_matches_go_success_and_failure_oracles() {
         serde_json::from_str(COPILOT_FILE_REPORT_ORACLE).expect("Go Copilot file report oracle");
     let (mut report, transport) = authenticated_copilot_file_report(Response {
         status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/copilot-user.json").to_vec(),
+        body: include_bytes!("../tests/fixtures/go_testdata/copilot-user.json").to_vec(),
         headers: BTreeMap::new(),
     });
     let copilot = &mut report.providers[0];

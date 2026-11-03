@@ -1,0 +1,5 @@
+interface:
+  display_name: "variant-fixture"
+  short_description: "A canonical fixture skill exercising harness variants per target"
+policy:
+  allow_implicit_invocation: true

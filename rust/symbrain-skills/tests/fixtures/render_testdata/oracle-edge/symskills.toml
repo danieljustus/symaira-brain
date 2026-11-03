@@ -1,0 +1,12 @@
+[skill]
+name = "edge"
+version = "1"
+source = "fixture"
+requires = ["subagents"]
+
+[targets.hermes]
+enabled = true
+alias = "edge-hermes"
+
+[terms.report_dir]
+default = "reports"
