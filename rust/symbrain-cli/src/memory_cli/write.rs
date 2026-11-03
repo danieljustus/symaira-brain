@@ -23,8 +23,8 @@ pub(super) fn run_set(
         let _ = write!(stderr, "{MEMORY_SET_USAGE_ERROR}");
         return exit::USAGE;
     }
-    let content = flags::go_string(&flags::bytes(&parsed.positional[0]));
-    let content = content.trim();
+    let content = flags::bytes(&parsed.positional[0]);
+    let content = trim_space(&content);
     if content.is_empty() {
         let _ = writeln!(stderr, "symbrain memory set: content is required");
         return exit::USAGE;
@@ -49,34 +49,62 @@ pub(super) fn run_set(
     };
     let scope = parsed.text("scope");
     let staged = parsed.staged;
+
+    let mut metadata = std::collections::BTreeMap::new();
+    let raw_metadata = parsed.bytes_of("metadata");
+    if !flags::go_string(raw_metadata).trim().is_empty() {
+        match symbrain_memory::gojson_decode::decode_string_map(raw_metadata) {
+            Ok(decoded) => metadata = decoded.unwrap_or_default(),
+            Err(error) => {
+                let _ = writeln!(
+                    stderr,
+                    "symbrain memory set: --metadata must be a JSON object: {error}"
+                );
+                return exit::USAGE;
+            }
+        }
+    }
+    let entities = parsed
+        .bytes_of("entities")
+        .split(|byte| *byte == b',')
+        .map(|name| trim_space(name).to_vec())
+        .filter(|name| !name.is_empty())
+        .collect::<Vec<_>>();
+
     let store = match open_store(stderr, "set", Some(&parsed.raw("db"))) {
         Ok(s) => s,
         Err(code) => return code,
     };
 
-    // This route is gated to non-redacting, extraction-free writes with no
-    // conflict checker (staged writes bypass it in Go regardless of config).
-    let request = symbrain_memory::DirectWrite {
-        content: content.to_owned(),
-        scope: scope.clone(),
-        kind: kind.to_owned(),
-        metadata: parse_metadata(&parsed.text("metadata")).unwrap_or_default(),
-        author: parsed.text("author"),
-        staged,
-        quantize_binary: super::config::load().quantize_binary,
-        conflict_enabled: super::config::load().conflict_enabled,
-        entities: parsed
-            .text("entities")
-            .split(',')
-            .map(str::trim)
-            .filter(|name| !name.is_empty())
-            .map(str::to_owned)
-            .collect(),
-    };
     let config = super::config::load();
+    let request = symbrain_memory::CliSet {
+        content: content.to_vec(),
+        scope: parsed.bytes_of("scope").to_vec(),
+        kind: kind.to_owned(),
+        metadata,
+        author: parsed.bytes_of("author").to_vec(),
+        entities,
+        staged,
+        quantize_binary: config.quantize_binary,
+        prefilter: config.prefilter,
+        conflict: symbrain_memory::ConflictConfig {
+            enabled: config.conflict_enabled,
+            contradiction_threshold: config.conflict_contradiction,
+            near_dup_threshold: config.conflict_near_dup,
+            max_candidates: config.conflict_max_candidates,
+            llm: symbrain_memory::LlmSettings {
+                provider: config.conflict_llm_provider.clone(),
+                url: config.conflict_llm_url.clone(),
+                model: config.conflict_llm_model.clone(),
+            },
+        },
+    };
     let generator =
         symbrain_memory::EmbeddingGenerator::new(&config.ollama_url, &config.ollama_model);
-    match store.set_direct_cli(&request, &generator) {
+    let mut log = symbrain_memory::LogSink(stderr);
+    let result = store.set_cli(&request, &generator, &mut log);
+    let stderr = log.0;
+    match result {
         Ok(id) => super::write_output::finish_set(
             super::write_output::SetReply {
                 id: &id,
@@ -94,6 +122,36 @@ pub(super) fn run_set(
             exit::GENERIC
         }
     }
+}
+
+/// `strings.TrimSpace` over raw bytes: invalid bytes are not space, so they
+/// stop the trim on either side.
+pub(super) fn trim_space(bytes: &[u8]) -> &[u8] {
+    let mut start = 0;
+    while let Some(character) = bytes[start..]
+        .utf8_chunks()
+        .next()
+        .and_then(|chunk| chunk.valid().chars().next())
+    {
+        if !character.is_whitespace() {
+            break;
+        }
+        start += character.len_utf8();
+    }
+    let mut end = bytes.len();
+    while end > start {
+        let Some(chunk) = bytes[start..end].utf8_chunks().last() else {
+            break;
+        };
+        if !chunk.invalid().is_empty() {
+            break;
+        }
+        match chunk.valid().chars().next_back() {
+            Some(character) if character.is_whitespace() => end -= character.len_utf8(),
+            _ => break,
+        }
+    }
+    &bytes[start..end]
 }
 
 pub(super) fn run_delete(
@@ -151,50 +209,4 @@ pub(super) fn run_delete(
 /// Renders a string as the shipped encoder does, including its HTML escaping.
 pub(super) fn go_json_string(value: &str) -> String {
     go_json(&value.to_owned())
-}
-
-/// Admission is conservative: untouched Go remains the oracle for redaction,
-/// extraction, conflict resolution and invalid metadata JSON diagnostics.
-pub(super) fn direct_write_supported(parsed: &flags::Args) -> bool {
-    // Go can store raw non-UTF8 actor/entity bytes in SQLite. The native
-    // string model cannot claim those states by silently replacing the bytes.
-    if parsed.raw("author").to_str().is_none() || parsed.raw("entities").to_str().is_none() {
-        return false;
-    }
-    let config = super::config::load();
-    if !parsed.staged && config.conflict_enabled {
-        return false;
-    }
-    let content = flags::go_string(&flags::bytes(&parsed.positional[0]));
-    if !symbrain_memory::direct_content_supported(content.trim()) {
-        return false;
-    }
-    if parsed.text("scope") == "project" && !symbrain_memory::direct_project_supported() {
-        return false;
-    }
-    let Some(meta) = parse_metadata(&parsed.text("metadata")) else {
-        return false;
-    };
-    meta.values()
-        .all(|value| symbrain_memory::direct_text_supported(value))
-        && ["", "global", "project", "agent", "user", "session"]
-            .contains(&parsed.text("scope").as_str())
-}
-
-fn parse_metadata(raw: &str) -> Option<std::collections::BTreeMap<String, String>> {
-    if raw.trim().is_empty() {
-        return Some(std::collections::BTreeMap::new());
-    }
-    // Typed decoding validates every duplicate occurrence before replacement.
-    // A wrong value followed by a string is still an error in Go Unmarshal.
-    let values =
-        serde_json::from_str::<Option<std::collections::BTreeMap<String, Option<String>>>>(raw)
-            .ok()?;
-    Some(
-        values
-            .unwrap_or_default()
-            .into_iter()
-            .map(|(key, value)| (key, value.unwrap_or_default()))
-            .collect(),
-    )
 }

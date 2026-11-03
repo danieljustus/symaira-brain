@@ -38,14 +38,6 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if verb == "set" && kind::normalize(&parsed.text("kind")).is_none() {
         return false;
     }
-    if verb == "set" && !super::write::direct_write_supported(&parsed) {
-        return true;
-    }
-    // Valid operations still retain configuration/DB and governed-write gates
-    // until their source-bound process contracts are completed.
-    if verb == "search" && super::config::load().prefilter {
-        return true;
-    }
     let path = resolve_db_path(Some(&parsed.raw("db")));
     // A database that does not exist yet (or is not a regular file) has no
     // rows to hydrate: the native opener creates it with the shipped modes or
@@ -57,18 +49,6 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         && !symbrain_memory::direct_reads_supported(&path, verb)
     {
         return true;
-    }
-    if verb == "set" {
-        let entities = parsed
-            .text("entities")
-            .split(',')
-            .map(str::trim)
-            .filter(|name| !name.is_empty())
-            .map(str::to_owned)
-            .collect::<Vec<_>>();
-        if !symbrain_memory::direct_entities_supported(&path, &entities) {
-            return true;
-        }
     }
     if verb == "delete" {
         let Some(id) = parsed.positional[0].to_str() else {

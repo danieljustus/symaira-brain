@@ -255,20 +255,22 @@ fn active_project() -> String {
 
 // encoding/json uses the float32 shortest representation with its own fixed/
 // scientific boundary. Keep negative zero and normalize exponent signs only.
+pub(crate) fn f32_json(value: f32) -> String {
+    let magnitude = value.abs();
+    if magnitude != 0.0 && !(1e-6..1e21).contains(&magnitude) {
+        let scientific = format!("{value:e}");
+        let (mantissa, exponent) = scientific.split_once('e').unwrap_or((&scientific, "0"));
+        let exponent = exponent.parse::<i32>().unwrap_or(0);
+        format!("{mantissa}e{exponent:+}")
+    } else {
+        format!("{value}")
+    }
+}
+
 pub(crate) fn embedding_json(vector: &[f32]) -> String {
     let values = vector
         .iter()
-        .map(|value| {
-            let magnitude = value.abs();
-            if magnitude != 0.0 && !(1e-6..1e21).contains(&magnitude) {
-                let scientific = format!("{value:e}");
-                let (mantissa, exponent) = scientific.split_once('e').unwrap_or((&scientific, "0"));
-                let exponent = exponent.parse::<i32>().unwrap_or(0);
-                format!("{mantissa}e{exponent:+}")
-            } else {
-                format!("{value}")
-            }
-        })
+        .map(|value| f32_json(*value))
         .collect::<Vec<_>>();
     format!("[{}]", values.join(","))
 }

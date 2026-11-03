@@ -274,6 +274,30 @@ impl Store {
         crate::retrieval::search(&conn, query_vector, query_source, scope, limit)
     }
 
+    /// [`Self::search_ranked`] honouring `hybrid_search.prefilter_enabled`.
+    ///
+    /// # Errors
+    /// Returns a `StoreError` when the vector does not fit the embedding
+    /// dimension or SQLite access fails.
+    pub fn search_ranked_prefiltered(
+        &self,
+        query_vector: &[f32],
+        query_source: &str,
+        scope: &str,
+        limit: usize,
+        prefilter: bool,
+    ) -> Result<Vec<crate::search_rows::SearchHit>, StoreError> {
+        let conn = self.lock()?;
+        crate::retrieval::search_prefiltered(
+            &conn,
+            query_vector,
+            query_source,
+            scope,
+            limit,
+            prefilter,
+        )
+    }
+
     pub(crate) fn activity_conn(
         &self,
     ) -> Result<std::sync::MutexGuard<'_, Connection>, StoreError> {

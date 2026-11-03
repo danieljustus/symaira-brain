@@ -192,7 +192,7 @@ fn build(store: Store) -> Result<Arc<Server>, String> {
         trusted_proxies: cfg.trusted_proxies.clone(),
         quantize_binary: cfg.quantize_binary,
         conflict_enabled: cfg.conflict_enabled,
-        conflict_threshold: normalized(cfg.conflict_threshold, 0.80),
+        conflict_threshold: normalized(cfg.conflict_contradiction, 0.80),
         conflict_candidates: usize::try_from(cfg.conflict_max_candidates)
             .ok()
             .filter(|count| *count > 0)

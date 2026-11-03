@@ -42,11 +42,12 @@ pub(super) fn run_search(
     let embedding =
         symbrain_memory::EmbeddingGenerator::new(&config.ollama_url, &config.ollama_model)
             .generate(&query);
-    let mut hits = match store.search_ranked(
+    let mut hits = match store.search_ranked_prefiltered(
         &embedding.vector,
         &embedding.source,
         scope.as_str(),
         usize::try_from(limit).unwrap_or(usize::MAX),
+        config.prefilter,
     ) {
         Ok(hits) => hits,
         Err(err) => {
