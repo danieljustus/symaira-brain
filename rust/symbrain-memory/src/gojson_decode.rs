@@ -41,7 +41,7 @@ fn is_format(c: char) -> bool {
         0xad | 0x600..=0x605 | 0x61c | 0x6dd | 0x70f | 0x180e | 0x200b..=0x200f
         | 0x202a..=0x202e | 0x2060..=0x2064 | 0x2066..=0x206f | 0xfeff
         | 0xfff9..=0xfffb | 0xe0001 | 0xe0020..=0xe007f
-        | 0xe000..=0xf8ff | 0xf0000..=0x10ffff)
+        | 0xe000..=0xf8ff | 0xf0000..=0x0010_ffff)
 }
 
 /// `unicode.IsPrint` (approximated for the non-ASCII tail).
@@ -375,6 +375,17 @@ fn array(b: &[u8], mut pos: usize, depth: usize) -> Walk<usize> {
     }
 }
 
+const PAIRS: [(&str, &str); 5] = [
+    ("object name", "object key"),
+    ("at start of value", "looking for beginning of value"),
+    (
+        "at start of string",
+        "looking for beginning of object key string",
+    ),
+    ("after object value", "after object key:value pair"),
+    ("in number", "in numeric literal"),
+];
+
 /// `transformSyntacticError`: drops the "(expecting ...)" hint (except for
 /// literals) and applies the historical wording.
 fn transform(message: &str) -> String {
@@ -384,16 +395,6 @@ fn transform(message: &str) -> String {
     {
         text = &text[..index];
     }
-    const PAIRS: [(&str, &str); 5] = [
-        ("object name", "object key"),
-        ("at start of value", "looking for beginning of value"),
-        (
-            "at start of string",
-            "looking for beginning of object key string",
-        ),
-        ("after object value", "after object key:value pair"),
-        ("in number", "in numeric literal"),
-    ];
     let mut out = String::with_capacity(text.len());
     let mut rest = text;
     'scan: while !rest.is_empty() {

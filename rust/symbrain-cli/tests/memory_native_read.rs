@@ -59,7 +59,7 @@ const CONFIG: &str = "ollama.url = \"{EMBED}\"\n[conflict]\nenabled = false\n[hy
 
 fn seeded<'a>(name: &'a str, config: &str, documents: usize) -> Scenario<'a> {
     let mut scenario = Scenario::new(name, BIN);
-    scenario.config = config.to_owned();
+    config.clone_into(&mut scenario.config);
     scenario.embed = Some(embedder());
     scenario.seed = (0..documents)
         .map(|index| set(&format!("doc{index} marker")))
@@ -106,7 +106,7 @@ const PLAIN_CONFIG: &str = "ollama.url = \"{EMBED}\"\n[conflict]\nenabled = fals
 
 fn plain(name: &str, mutations: &[&str]) -> Scenario<'static> {
     let mut scenario = Scenario::new(Box::leak(name.to_owned().into_boxed_str()), BIN);
-    scenario.config = PLAIN_CONFIG.to_owned();
+    PLAIN_CONFIG.clone_into(&mut scenario.config);
     scenario.embed = Some(embedder());
     scenario.seed_key = Some("rows3");
     scenario.seed = (0..3)
@@ -182,7 +182,10 @@ fn embedding_hydration_matches_for_every_stored_shape() {
 #[test]
 fn timestamp_and_numeric_hydration_matches() {
     let shapes = [
-        ("created-invalid", "UPDATE memories SET created_at='invalid' WHERE rowid=2"),
+        (
+            "created-invalid",
+            "UPDATE memories SET created_at='invalid' WHERE rowid=2",
+        ),
         (
             "created-leap",
             "UPDATE memories SET created_at='2000-01-01 00:00:60 +0000 UTC' WHERE rowid=2",
@@ -199,12 +202,18 @@ fn timestamp_and_numeric_hydration_matches() {
             "created-integer",
             "UPDATE memories SET created_at=1700000000 WHERE rowid=2",
         ),
-        ("created-empty", "UPDATE memories SET created_at='' WHERE rowid=2"),
+        (
+            "created-empty",
+            "UPDATE memories SET created_at='' WHERE rowid=2",
+        ),
         (
             "updated-invalid",
             "UPDATE memories SET updated_at='not a time' WHERE rowid=2",
         ),
-        ("valid-to-invalid", "UPDATE memories SET valid_to='x' WHERE rowid=2"),
+        (
+            "valid-to-invalid",
+            "UPDATE memories SET valid_to='x' WHERE rowid=2",
+        ),
         (
             "importance-text",
             "UPDATE memories SET importance='high' WHERE rowid=2",
@@ -213,14 +222,23 @@ fn timestamp_and_numeric_hydration_matches() {
             "access-count-real",
             "UPDATE memories SET access_count=1.5 WHERE rowid=2",
         ),
-        ("scope-blob", "UPDATE memories SET scope=x'ff00fe' WHERE rowid=2"),
+        (
+            "scope-blob",
+            "UPDATE memories SET scope=x'ff00fe' WHERE rowid=2",
+        ),
         (
             "content-blob",
             "UPDATE memories SET content=x'ff00fe41' WHERE rowid=2",
         ),
-        ("content-int", "UPDATE memories SET content=42 WHERE rowid=2"),
+        (
+            "content-int",
+            "UPDATE memories SET content=42 WHERE rowid=2",
+        ),
         ("kind-empty", "UPDATE memories SET kind='' WHERE rowid=2"),
-        ("expires-text", "UPDATE memories SET expires_at='soon' WHERE rowid=2"),
+        (
+            "expires-text",
+            "UPDATE memories SET expires_at='soon' WHERE rowid=2",
+        ),
         (
             "last-access-fractional",
             "UPDATE memories SET last_access='2020-01-02 03:04:05.5 +0000 UTC' WHERE rowid=2",
@@ -245,15 +263,24 @@ fn rules_hydration_matches() {
         ("plain", vec![good.clone()]),
         (
             "metadata-broken",
-            vec![good.clone(), insert("r2", "global", "broken", "2020-01-02 03:04:05 +0000 UTC")],
+            vec![
+                good.clone(),
+                insert("r2", "global", "broken", "2020-01-02 03:04:05 +0000 UTC"),
+            ],
         ),
         (
             "metadata-number",
-            vec![good.clone(), insert("r2", "global", "{\"a\":1}", "2020-01-02 03:04:05 +0000 UTC")],
+            vec![
+                good.clone(),
+                insert("r2", "global", "{\"a\":1}", "2020-01-02 03:04:05 +0000 UTC"),
+            ],
         ),
         (
             "metadata-null",
-            vec![good.clone(), insert("r2", "global", "null", "2020-01-02 03:04:05 +0000 UTC")],
+            vec![
+                good.clone(),
+                insert("r2", "global", "null", "2020-01-02 03:04:05 +0000 UTC"),
+            ],
         ),
         (
             "created-invalid",
@@ -261,7 +288,15 @@ fn rules_hydration_matches() {
         ),
         (
             "scoped",
-            vec![good, insert("r2", "project:x", "{\"k\":\"v\"}", "2021-01-02 03:04:05.5 +0000 UTC")],
+            vec![
+                good,
+                insert(
+                    "r2",
+                    "project:x",
+                    "{\"k\":\"v\"}",
+                    "2021-01-02 03:04:05.5 +0000 UTC",
+                ),
+            ],
         ),
     ];
     for (label, statements) in cases {
@@ -327,14 +362,26 @@ fn delete_matches_for_stored_rows_and_identifiers() {
 #[test]
 fn delete_of_malformed_rows_matches() {
     for (label, sql) in [
-        ("metadata", "UPDATE memories SET metadata='broken' WHERE rowid=1"),
-        ("embedding", "UPDATE memories SET embedding='broken' WHERE rowid=1"),
-        ("created", "UPDATE memories SET created_at='invalid' WHERE rowid=1"),
+        (
+            "metadata",
+            "UPDATE memories SET metadata='broken' WHERE rowid=1",
+        ),
+        (
+            "embedding",
+            "UPDATE memories SET embedding='broken' WHERE rowid=1",
+        ),
+        (
+            "created",
+            "UPDATE memories SET created_at='invalid' WHERE rowid=1",
+        ),
         (
             "leap",
             "UPDATE memories SET created_at='2000-01-01 00:00:60 +0000 UTC' WHERE rowid=1",
         ),
-        ("importance", "UPDATE memories SET importance='x' WHERE rowid=1"),
+        (
+            "importance",
+            "UPDATE memories SET importance='x' WHERE rowid=1",
+        ),
     ] {
         let mut s = plain(&format!("delete-malformed-{label}"), &[sql]);
         s.steps = vec![

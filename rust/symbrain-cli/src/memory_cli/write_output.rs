@@ -180,7 +180,11 @@ mod tests {
                 symbrain_memory::EmbeddingGenerator::new("owned-invalid-endpoint", "owned-model");
             let mut sink = Vec::new();
             let id = store
-                .set_cli(&request, &generator, &mut symbrain_memory::LogSink(&mut sink))
+                .set_cli(
+                    &request,
+                    &generator,
+                    &mut symbrain_memory::LogSink(&mut sink),
+                )
                 .expect("committed set");
             let mut stderr = Vec::new();
             assert_eq!(

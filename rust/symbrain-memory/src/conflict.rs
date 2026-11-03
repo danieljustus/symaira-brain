@@ -146,6 +146,7 @@ fn policy_winner(new: &NewMemory<'_>, candidate: &SearchRow) -> (bool, &'static 
 }
 
 /// `Checker.Check`. The error text is what the shipped checker wraps.
+#[allow(clippy::too_many_lines)]
 pub(crate) fn check(
     conn: &Connection,
     config: &ConflictConfig,
@@ -273,13 +274,13 @@ pub(crate) fn check(
                 resolution.rule = rule;
                 let candidate_id = resolution.candidate.id.clone();
                 if new_wins {
-                    resolution.winner_id = new.id.to_owned();
+                    new.id.clone_into(&mut resolution.winner_id);
                     resolution.loser_id = candidate_id;
                     resolution.winner_actor = new.created_by.to_vec();
                     resolution.loser_actor = old_actor;
                 } else {
                     resolution.winner_id = candidate_id;
-                    resolution.loser_id = new.id.to_owned();
+                    new.id.clone_into(&mut resolution.loser_id);
                     resolution.winner_actor = old_actor;
                     resolution.loser_actor = new.created_by.to_vec();
                 }
@@ -287,8 +288,8 @@ pub(crate) fn check(
             Verdict::Repeat => {
                 resolution.verdict = Verdict::Contradiction;
                 resolution.rule = "repeat";
-                resolution.winner_id = new.id.to_owned();
-                resolution.loser_id = resolution.candidate.id.clone();
+                new.id.clone_into(&mut resolution.winner_id);
+                resolution.loser_id.clone_from(&resolution.candidate.id);
                 resolution.winner_actor = new.created_by.to_vec();
                 resolution.loser_actor = old_actor;
             }

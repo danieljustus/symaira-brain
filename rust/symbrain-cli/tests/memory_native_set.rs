@@ -13,9 +13,9 @@ use std::ffi::OsString;
 const BIN: &str = env!("CARGO_BIN_EXE_symbrain");
 const CONFIG: &str = "ollama.url = \"{EMBED}\"\n";
 
-fn scenario<'a>(name: &'a str) -> Scenario<'a> {
+fn scenario(name: &str) -> Scenario<'_> {
     let mut scenario = Scenario::new(name, BIN);
-    scenario.config = CONFIG.to_owned();
+    CONFIG.clone_into(&mut scenario.config);
     scenario
 }
 

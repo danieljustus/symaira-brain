@@ -191,6 +191,7 @@ fn word(text: &str) -> Verdict {
 /// `parseVerdictResponse`: strict JSON first, then token salvage; the result
 /// always has `want` entries.
 pub(crate) fn parse_response(raw: &str, want: usize) -> Vec<Verdict> {
+    static TOKEN: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     if want == 0 {
         return Vec::new();
     }
@@ -205,7 +206,6 @@ pub(crate) fn parse_response(raw: &str, want: usize) -> Vec<Verdict> {
         }
         return out;
     }
-    static TOKEN: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     let token =
         TOKEN.get_or_init(|| go_regex(r#"(?i)"verdict"\s*:\s*"(repeat|contradiction|ambiguous)""#));
     for (index, found) in token.captures_iter(raw).enumerate() {

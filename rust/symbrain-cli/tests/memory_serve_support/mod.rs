@@ -25,7 +25,8 @@ pub fn record_mode() -> bool {
 
 /// Directory of the frozen Go observations of this test binary.
 pub fn fixture_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/memory_native/memory_serve_oracle")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/memory_native/memory_serve_oracle")
 }
 
 fn digest(bytes: &[u8]) -> String {
@@ -47,8 +48,19 @@ fn git(args: &[&str]) -> String {
 }
 
 fn provenance(name: &str, command: &str, oracle_bin: &Path) -> serde_json::Value {
-    let dirty = git(&["status", "--porcelain", "--", "cmd", "internal", "go.mod", "go.sum"]);
-    assert!(dirty.is_empty(), "recording needs a clean Go source tree:\n{dirty}");
+    let dirty = git(&[
+        "status",
+        "--porcelain",
+        "--",
+        "cmd",
+        "internal",
+        "go.mod",
+        "go.sum",
+    ]);
+    assert!(
+        dirty.is_empty(),
+        "recording needs a clean Go source tree:\n{dirty}"
+    );
     let version = Command::new("go")
         .arg("version")
         .arg(oracle_bin)
@@ -88,13 +100,16 @@ where
         let value = go(&oracle);
         let payload = serde_json::to_value(&value).expect("payload");
         let mut provenance = provenance(name, command, &oracle);
-        provenance["payload_sha256"] =
-            serde_json::Value::String(digest(serde_json::to_string(&payload).expect("payload").as_bytes()));
+        provenance["payload_sha256"] = serde_json::Value::String(digest(
+            serde_json::to_string(&payload).expect("payload").as_bytes(),
+        ));
         std::fs::create_dir_all(fixture_dir()).expect("fixture directory");
         std::fs::write(
             &path,
-            serde_json::to_string_pretty(&serde_json::json!({"provenance": provenance, "payload": payload}))
-                .expect("fixture")
+            serde_json::to_string_pretty(
+                &serde_json::json!({"provenance": provenance, "payload": payload}),
+            )
+            .expect("fixture")
                 + "\n",
         )
         .expect("write fixture");
@@ -106,7 +121,14 @@ where
     let document: serde_json::Value = serde_json::from_str(&text).expect("fixture json");
     assert_eq!(
         document["provenance"]["payload_sha256"].as_str(),
-        Some(digest(serde_json::to_string(&document["payload"]).expect("payload").as_bytes()).as_str()),
+        Some(
+            digest(
+                serde_json::to_string(&document["payload"])
+                    .expect("payload")
+                    .as_bytes()
+            )
+            .as_str()
+        ),
         "{name}: fixture payload digest"
     );
     assert_eq!(document["provenance"]["kind"], "go-oracle-recording");

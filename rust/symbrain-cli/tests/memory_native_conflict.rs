@@ -79,7 +79,7 @@ fn set(content: &str, extra: &[&str]) -> Vec<OsString> {
 
 fn scenario<'a>(name: &'a str, config: &str) -> Scenario<'a> {
     let mut scenario = Scenario::new(name, BIN);
-    scenario.config = config.to_owned();
+    config.clone_into(&mut scenario.config);
     scenario.embed = Some(embedder());
     scenario
 }

@@ -155,7 +155,8 @@ impl Members {
     pub(crate) fn time_if_present<Tz>(&mut self, name: &str, value: Option<DateTime<Tz>>)
     where
         Tz: chrono::TimeZone,
-        Tz::Offset: std::fmt::Display, {
+        Tz::Offset: std::fmt::Display,
+    {
         if let Some(rendered) = timestamp(value) {
             self.rendered
                 .push(format!("{}:{}", quote(name), quote(&rendered)));
@@ -167,7 +168,8 @@ impl Members {
     pub(crate) fn time<Tz>(&mut self, name: &str, value: Option<DateTime<Tz>>)
     where
         Tz: chrono::TimeZone,
-        Tz::Offset: std::fmt::Display, {
+        Tz::Offset: std::fmt::Display,
+    {
         match timestamp(value) {
             Some(rendered) => self
                 .rendered

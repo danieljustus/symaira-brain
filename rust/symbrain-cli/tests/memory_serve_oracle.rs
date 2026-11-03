@@ -88,7 +88,11 @@ fn bind_failure_reports_the_shipped_wording() {
     // The port differs per run: it is recorded as `<port>`.
     let run = |binary: &std::path::Path| {
         let (code, out, err) = run_cli(binary, &args);
-        (code, out.replace(&port, "<port>"), err.replace(&port, "<port>"))
+        (
+            code,
+            out.replace(&port, "<port>"),
+            err.replace(&port, "<port>"),
+        )
     };
     let expected: (Option<i32>, String, String) = frozen(
         "bind_failure",
@@ -1389,7 +1393,8 @@ fn jwt_secret_shape(binary: &std::path::Path) -> SecretShape {
     let _ = child.wait();
     use std::os::unix::fs::PermissionsExt;
     let text = std::fs::read_to_string(&secret_path).unwrap();
-    let mode = |path: &std::path::Path| std::fs::metadata(path).unwrap().permissions().mode() & 0o777;
+    let mode =
+        |path: &std::path::Path| std::fs::metadata(path).unwrap().permissions().mode() & 0o777;
     (
         text.len(),
         text.ends_with('\n'),
@@ -1662,8 +1667,10 @@ fn shared_seed() -> &'static std::path::PathBuf {
             std::fs::copy(&path, &db).unwrap();
             std::fs::write(
                 &meta,
-                serde_json::to_string_pretty(&serde_json::json!({"ids": ids, "seeded_at": seeded_at}))
-                    .unwrap()
+                serde_json::to_string_pretty(
+                    &serde_json::json!({"ids": ids, "seeded_at": seeded_at}),
+                )
+                .unwrap()
                     + "\n",
             )
             .unwrap();
@@ -1865,15 +1872,30 @@ fn pipelines_run(binary: &std::path::Path, seed_db: &std::path::Path) -> Pipelin
     let mut responses = Vec::new();
     for (path, body) in [
         // secondary-fact extraction keywords
-        ("/api/set", r#"{"content":"the vault stores a project preference"}"#),
-        ("/api/set", r#"{"content":"I like tea. I use vim","scope":"global"}"#),
+        (
+            "/api/set",
+            r#"{"content":"the vault stores a project preference"}"#,
+        ),
+        (
+            "/api/set",
+            r#"{"content":"I like tea. I use vim","scope":"global"}"#,
+        ),
         // PII redaction on the write path
-        ("/api/set", r#"{"content":"reach me at carol@example.com please"}"#),
+        (
+            "/api/set",
+            r#"{"content":"reach me at carol@example.com please"}"#,
+        ),
         // exact duplicate of a stored memory: the write-path conflict resolver runs
-        ("/api/set", r#"{"content":"gamma harbor log","scope":"global"}"#),
+        (
+            "/api/set",
+            r#"{"content":"gamma harbor log","scope":"global"}"#,
+        ),
         // extended search filters
         ("/api/search", r#"{"query":"harbor","entity":"Alice"}"#),
-        ("/api/search", r#"{"query":"harbor","max_sensitivity":"public"}"#),
+        (
+            "/api/search",
+            r#"{"query":"harbor","max_sensitivity":"public"}"#,
+        ),
     ] {
         std::thread::sleep(std::time::Duration::from_millis(700));
         let response = request(server.port, "POST", path, &headers, Some(body));
@@ -1883,10 +1905,13 @@ fn pipelines_run(binary: &std::path::Path, seed_db: &std::path::Path) -> Pipelin
                 if SEEDED.with(|ids| ids.borrow().contains(&id)) {
                     return id;
                 }
-                let index = seen.iter().position(|known| *known == id).unwrap_or_else(|| {
-                    seen.push(id);
-                    seen.len() - 1
-                });
+                let index = seen
+                    .iter()
+                    .position(|known| *known == id)
+                    .unwrap_or_else(|| {
+                        seen.push(id);
+                        seen.len() - 1
+                    });
                 format!("<NEW{index}>")
             })
             .into_owned();

@@ -68,7 +68,12 @@ pub(super) fn run_rules(
                         .unwrap_or_default();
                     super::read::write_row(
                         stdout,
-                        &[&rule.id, &rule.scope, &created, &table_content(&rule.content)],
+                        &[
+                            &rule.id,
+                            &rule.scope,
+                            &created,
+                            &table_content(&rule.content),
+                        ],
                     );
                 }
             }

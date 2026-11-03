@@ -100,7 +100,9 @@ fn rank(order: &[&str], value: &str, unknown: usize) -> usize {
 }
 
 fn csv(text: &str) -> impl Iterator<Item = &str> {
-    text.split(',').map(str::trim).filter(|part| !part.is_empty())
+    text.split(',')
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
 }
 
 impl SearchFilters {
@@ -111,7 +113,11 @@ impl SearchFilters {
         }
         if !trust.min_confidence.is_empty() {
             let confidence = meta(candidate, "confidence");
-            let confidence = if confidence.is_empty() { "medium" } else { confidence };
+            let confidence = if confidence.is_empty() {
+                "medium"
+            } else {
+                confidence
+            };
             let order = ["low", "medium", "high"];
             if rank(&order, confidence, 1) < rank(&order, &trust.min_confidence, 1) {
                 return false;
@@ -119,7 +125,11 @@ impl SearchFilters {
         }
         if !trust.verification_status.is_empty() {
             let status = meta(candidate, "verification_status");
-            let status = if status.is_empty() { "unverified" } else { status };
+            let status = if status.is_empty() {
+                "unverified"
+            } else {
+                status
+            };
             if status != trust.verification_status {
                 return false;
             }
@@ -136,7 +146,11 @@ impl SearchFilters {
         let policy = &self.policy;
         if !policy.max_sensitivity.is_empty() {
             let sensitivity = meta(candidate, "sensitivity");
-            let sensitivity = if sensitivity.is_empty() { "internal" } else { sensitivity };
+            let sensitivity = if sensitivity.is_empty() {
+                "internal"
+            } else {
+                sensitivity
+            };
             let order = ["public", "internal", "confidential", "secret"];
             if rank(&order, sensitivity, 1) > rank(&order, &policy.max_sensitivity, 1) {
                 return false;
@@ -144,7 +158,11 @@ impl SearchFilters {
         }
         if !policy.min_sharing_level.is_empty() {
             let sharing = meta(candidate, "sharing_level");
-            let sharing = if sharing.is_empty() { "private" } else { sharing };
+            let sharing = if sharing.is_empty() {
+                "private"
+            } else {
+                sharing
+            };
             let order = ["private", "team", "org", "public"];
             if rank(&order, sharing, 0) < rank(&order, &policy.min_sharing_level, 0) {
                 return false;
@@ -260,14 +278,9 @@ fn prefilter_ids(candidates: &[Candidate], query_vector: &[f32], limit: usize) -
             return 768;
         }
         query
-            .chunks_exact(8)
-            .zip(other.chunks_exact(8))
-            .map(|(left, right)| {
-                left.iter()
-                    .zip(right)
-                    .map(|(a, b)| (a ^ b).count_ones() as usize)
-                    .sum::<usize>()
-            })
+            .iter()
+            .zip(other)
+            .map(|(a, b)| (a ^ b).count_ones() as usize)
             .sum()
     };
     let mut order: Vec<(usize, usize)> = binaries
@@ -285,7 +298,10 @@ fn prefilter_ids(candidates: &[Candidate], query_vector: &[f32], limit: usize) -
         .collect()
 }
 
-pub(crate) fn search_with(conn: &Connection, query: &Query<'_>) -> Result<Vec<SearchHit>, StoreError> {
+pub(crate) fn search_with(
+    conn: &Connection,
+    query: &Query<'_>,
+) -> Result<Vec<SearchHit>, StoreError> {
     let started = std::time::Instant::now();
     let record = |hits: &[SearchHit]| {
         if let Some(observe) = query.observe {
@@ -297,7 +313,13 @@ pub(crate) fn search_with(conn: &Connection, query: &Query<'_>) -> Result<Vec<Se
         }
     };
     let buckets = buckets_for(query.vector)?;
-    let candidates = candidates(conn, &buckets, query.source, query.scope, &query.filters.entity_id)?;
+    let candidates = candidates(
+        conn,
+        &buckets,
+        query.source,
+        query.scope,
+        &query.filters.entity_id,
+    )?;
     let candidates: Vec<Candidate> = candidates
         .into_iter()
         .filter(|candidate| Some(candidate.embedding_dim) == i64::try_from(query.vector.len()).ok())
@@ -382,7 +404,9 @@ fn candidates(
 
         let mut statement = conn.prepare(&sql)?;
         let rows = statement.query_map(rusqlite::params_from_iter(arguments.iter()), |row| {
-            use crate::goscan::{blob, decode_metadata, null_int, null_text, null_time, raw, text, time};
+            use crate::goscan::{
+                blob, decode_metadata, null_int, null_text, null_time, raw, text, time,
+            };
             let id = text(row, 0, "id")?;
             let binary = blob(row, 1, "embedding_binary")?;
             let dim = null_int(row, 2, "embedding_dim")?.unwrap_or(0);
@@ -459,14 +483,12 @@ fn score_and_rank(hits: &mut [SearchHit], query_vector: &[f32]) {
         }
         #[allow(clippy::cast_possible_truncation)]
         {
-            hit.score =
-                (composite_score(
-                    relevance,
-                    hit.memory.created_at.map(|time| time.with_timezone(&Utc)),
-                    hit.memory.importance,
-                    now,
-                )
-                    * decay) as f32;
+            hit.score = (composite_score(
+                relevance,
+                hit.memory.created_at.map(|time| time.with_timezone(&Utc)),
+                hit.memory.importance,
+                now,
+            ) * decay) as f32;
         }
     }
     hits.sort_by(|left, right| {

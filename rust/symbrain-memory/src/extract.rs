@@ -142,10 +142,10 @@ fn clean_captured(text: &str) -> String {
         "always",
         "immer",
     ] {
-        if lower(&value).starts_with(&format!("{filler} ")) {
-            if let Some(rest) = value.get(filler.len() + 1..) {
-                value = rest.to_owned();
-            }
+        if lower(&value).starts_with(&format!("{filler} "))
+            && let Some(rest) = value.get(filler.len() + 1..)
+        {
+            value = rest.to_owned();
         }
     }
     value.trim().to_owned()

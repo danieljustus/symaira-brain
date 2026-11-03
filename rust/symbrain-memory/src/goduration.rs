@@ -3,7 +3,10 @@
 use crate::slog::quote_bytes;
 
 fn invalid(original: &str) -> String {
-    format!("time: invalid duration {}", quote_bytes(original.as_bytes()))
+    format!(
+        "time: invalid duration {}",
+        quote_bytes(original.as_bytes())
+    )
 }
 
 /// `time.ParseDuration`: nanoseconds, or the shipped error text.
@@ -11,6 +14,7 @@ fn invalid(original: &str) -> String {
 /// # Errors
 /// Returns the Go diagnostic for a malformed, unit-less, unknown-unit or
 /// overflowing duration.
+#[allow(clippy::too_many_lines)]
 pub(crate) fn parse(original: &str) -> Result<i64, String> {
     const LIMIT: u64 = 1 << 63;
     let mut rest = original;
@@ -103,7 +107,11 @@ pub(crate) fn parse(original: &str) -> Result<i64, String> {
         }
         whole *= unit;
         if fraction > 0 {
-            #[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            #[allow(
+                clippy::cast_precision_loss,
+                clippy::cast_possible_truncation,
+                clippy::cast_sign_loss
+            )]
             let extra = (fraction as f64 * (unit as f64 / scale)) as u64;
             whole = whole.checked_add(extra).ok_or_else(|| invalid(original))?;
             if whole > LIMIT {
@@ -161,7 +169,10 @@ mod tests {
         assert_eq!(parse("-2m"), Ok(-120_000_000_000));
         assert_eq!(parse("0"), Ok(0));
         assert_eq!(parse("").unwrap_err(), "time: invalid duration \"\"");
-        assert_eq!(parse("5").unwrap_err(), "time: missing unit in duration \"5\"");
+        assert_eq!(
+            parse("5").unwrap_err(),
+            "time: missing unit in duration \"5\""
+        );
         assert_eq!(
             parse("5x").unwrap_err(),
             "time: unknown unit \"x\" in duration \"5x\""

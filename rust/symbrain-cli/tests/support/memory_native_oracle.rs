@@ -7,7 +7,7 @@
 //! stdout and stderr bytes, the whole database state and a manifest of the
 //! created files. The Rust process never has a Go fallback available.
 
-#![allow(dead_code)]
+#![allow(dead_code, clippy::pedantic)]
 
 use rusqlite::{Connection, OpenFlags, types::ValueRef};
 use std::collections::{BTreeMap, BTreeSet};
@@ -252,9 +252,7 @@ fn score_json() -> &'static regex::bytes::Regex {
 
 fn score_table() -> &'static regex::bytes::Regex {
     static RE: OnceLock<regex::bytes::Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        regex::bytes::Regex::new(r"(?m)^[0-9]\.[0-9]{6}\t").expect("regex")
-    })
+    RE.get_or_init(|| regex::bytes::Regex::new(r"(?m)^[0-9]\.[0-9]{6}\t").expect("regex"))
 }
 
 fn replace_bytes(haystack: &[u8], needle: &[u8], with: &[u8]) -> Vec<u8> {
@@ -657,9 +655,11 @@ pub struct Compared {
 fn first_id(db: &Path) -> OsString {
     Connection::open_with_flags(db, OpenFlags::SQLITE_OPEN_READ_ONLY)
         .and_then(|conn| {
-            conn.query_row("SELECT id FROM memories ORDER BY rowid LIMIT 1", [], |row| {
-                row.get::<_, String>(0)
-            })
+            conn.query_row(
+                "SELECT id FROM memories ORDER BY rowid LIMIT 1",
+                [],
+                |row| row.get::<_, String>(0),
+            )
         })
         .map(OsString::from)
         .unwrap_or_default()
@@ -682,7 +682,11 @@ fn expand(args: &[OsString], db: &Path) -> Vec<OsString> {
         .collect()
 }
 
-fn expand_config(scenario: &Scenario<'_>, embed: Option<&FakeServer>, llm: Option<&FakeServer>) -> String {
+fn expand_config(
+    scenario: &Scenario<'_>,
+    embed: Option<&FakeServer>,
+    llm: Option<&FakeServer>,
+) -> String {
     scenario
         .config
         .replace(
@@ -708,7 +712,12 @@ struct Side {
     requests: (Vec<RecordedRequest>, Vec<RecordedRequest>),
 }
 
-fn run_side(who: Who, scenario: &Scenario<'_>, seed_db: Option<&Path>, known: &BTreeSet<String>) -> Side {
+fn run_side(
+    who: Who,
+    scenario: &Scenario<'_>,
+    seed_db: Option<&Path>,
+    known: &BTreeSet<String>,
+) -> Side {
     let sb = Sandbox::new();
     let embed_server = scenario
         .embed
@@ -718,7 +727,11 @@ fn run_side(who: Who, scenario: &Scenario<'_>, seed_db: Option<&Path>, known: &B
         .llm
         .as_ref()
         .map(|h| FakeServer::start(Arc::clone(h)));
-    sb.write_config(&expand_config(scenario, embed_server.as_ref(), llm_server.as_ref()));
+    sb.write_config(&expand_config(
+        scenario,
+        embed_server.as_ref(),
+        llm_server.as_ref(),
+    ));
     if let Some(seed) = seed_db {
         std::fs::copy(seed, sb.db()).expect("fixture copy");
         if !scenario.mutate_sql.is_empty() {
@@ -765,8 +778,14 @@ fn run_side(who: Who, scenario: &Scenario<'_>, seed_db: Option<&Path>, known: &B
     let db = snapshot(&sb.db(), &mut ids);
     let tree = manifest(&sb.root);
     let requests = (
-        embed_server.as_ref().map(FakeServer::requests).unwrap_or_default(),
-        llm_server.as_ref().map(FakeServer::requests).unwrap_or_default(),
+        embed_server
+            .as_ref()
+            .map(FakeServer::requests)
+            .unwrap_or_default(),
+        llm_server
+            .as_ref()
+            .map(FakeServer::requests)
+            .unwrap_or_default(),
     );
     Side {
         outs,
@@ -791,7 +810,9 @@ fn sha256_hex(bytes: &[u8]) -> String {
 fn encode(bytes: &[u8]) -> serde_json::Value {
     match std::str::from_utf8(bytes) {
         Ok(text) => serde_json::Value::String(text.to_owned()),
-        Err(_) => serde_json::json!({"hex": bytes.iter().map(|b| format!("{b:02x}")).collect::<String>()}),
+        Err(_) => {
+            serde_json::json!({"hex": bytes.iter().map(|b| format!("{b:02x}")).collect::<String>()})
+        }
     }
 }
 
@@ -823,7 +844,10 @@ fn request_json(request: &RecordedRequest) -> serde_json::Value {
 
 fn request_from(value: &serde_json::Value) -> RecordedRequest {
     RecordedRequest {
-        request_line: value["request_line"].as_str().unwrap_or_default().to_owned(),
+        request_line: value["request_line"]
+            .as_str()
+            .unwrap_or_default()
+            .to_owned(),
         headers: value["headers"]
             .as_object()
             .map(|map| {
@@ -864,7 +888,15 @@ fn provenance(oracle_bin: &Path) -> serde_json::Value {
     let root = repo_root();
     let dirty = command_output(
         "git",
-        &["status", "--porcelain", "--", "cmd", "internal", "go.mod", "go.sum"],
+        &[
+            "status",
+            "--porcelain",
+            "--",
+            "cmd",
+            "internal",
+            "go.mod",
+            "go.sum",
+        ],
         &root,
     );
     assert!(
@@ -1045,7 +1077,9 @@ fn build_seed(scenario: &Scenario<'_>, target: &Path) {
 fn record(scenario: &Scenario<'_>, dir: &Path) {
     // Scenarios of different tests share seeds; build each one only once.
     static SEEDS: Mutex<()> = Mutex::new(());
-    let _guard = SEEDS.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    let _guard = SEEDS
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     std::fs::create_dir_all(dir).expect("fixture directory");
     let seed_name = seed_file_name(scenario);
     let seed_path = dir.join(&seed_name);
@@ -1064,7 +1098,12 @@ fn record(scenario: &Scenario<'_>, dir: &Path) {
     let go = run_side(Who::Go, scenario, seed_db, &known);
     let rust = run_side(Who::Rust, scenario, seed_db, &known);
     assert_sides(scenario, &go, &rust);
-    let payload = side_payload(scenario, &go, if scenario.no_db { "" } else { &seed_name }, &seed_sha);
+    let payload = side_payload(
+        scenario,
+        &go,
+        if scenario.no_db { "" } else { &seed_name },
+        &seed_sha,
+    );
     let mut provenance = provenance(oracle());
     provenance["payload_sha256"] = serde_json::Value::String(payload_hash(&payload));
     let document = serde_json::json!({"provenance": provenance, "payload": payload});
@@ -1143,13 +1182,20 @@ fn replay(scenario: &Scenario<'_>, dir: &Path) -> Compared {
     let rust = run_side(Who::Rust, scenario, seed_db, &known);
 
     let steps = payload["steps"].as_array().expect("recorded steps");
-    assert_eq!(steps.len(), rust.outs.len(), "{}: step count", scenario.name);
+    assert_eq!(
+        steps.len(),
+        rust.outs.len(),
+        "{}: step count",
+        scenario.name
+    );
     let mut go_outs = Vec::new();
     let go_stdouts: Vec<Vec<u8>> = steps.iter().map(|s| decode(&s["stdout"])).collect();
     let go_stderrs: Vec<Vec<u8>> = steps.iter().map(|s| decode(&s["stderr"])).collect();
     for (index, step) in steps.iter().enumerate() {
         go_outs.push(Outcome {
-            code: step["code"].as_i64().map(|c| i32::try_from(c).expect("code")),
+            code: step["code"]
+                .as_i64()
+                .map(|c| i32::try_from(c).expect("code")),
             stdout: go_stdouts[index].clone(),
             stderr: go_stderrs[index].clone(),
         });

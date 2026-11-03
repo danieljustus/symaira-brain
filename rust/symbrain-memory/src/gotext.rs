@@ -9,6 +9,8 @@
 //! non-ASCII, non-space rune (exactly what `U+FFFD` is to Go), and
 //! [`GoView::restore`] writes the original bytes back.
 
+use std::fmt::Write as _;
+
 /// A byte string viewed as Rust text without losing invalid bytes.
 #[derive(Debug, Clone)]
 pub(crate) struct GoView {
@@ -172,7 +174,7 @@ pub(crate) fn json_string(bytes: &[u8]) -> String {
             '\u{2028}' => out.push_str("\\u2028"),
             '\u{2029}' => out.push_str("\\u2029"),
             c if u32::from(c) < 0x20 => {
-                out.push_str(&format!("\\u{:04x}", u32::from(c)));
+                let _ = write!(out, "\\u{:04x}", u32::from(c));
             }
             c => out.push(c),
         }

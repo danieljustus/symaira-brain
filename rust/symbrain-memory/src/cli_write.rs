@@ -19,7 +19,11 @@ impl Store {
 
     /// The identifier is bound as the exact `TEXT` bytes Go binds, valid
     /// UTF-8 or not.
-    fn delete_service_bytes(&self, id_bytes: &[u8], audit_enabled: bool) -> Result<bool, StoreError> {
+    fn delete_service_bytes(
+        &self,
+        id_bytes: &[u8],
+        audit_enabled: bool,
+    ) -> Result<bool, StoreError> {
         let id = RawText(id_bytes);
         let conn = self.lock()?;
         // `GetMemory`: the full-row hydration, with its scan diagnostics.
@@ -48,7 +52,15 @@ impl Store {
         };
         conn.execute("DELETE FROM memories WHERE id=?", [&id])?;
         if audit_enabled {
-            audit(&conn, "delete", &String::from_utf8_lossy(id_bytes), &scope, &session, &author, "");
+            audit(
+                &conn,
+                "delete",
+                &String::from_utf8_lossy(id_bytes),
+                &scope,
+                &session,
+                &author,
+                "",
+            );
         }
         Ok(true)
     }

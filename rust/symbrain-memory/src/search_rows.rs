@@ -170,8 +170,10 @@ impl SearchRow {
     #[must_use]
     pub fn created_at_seconds(&self) -> String {
         self.created_at
-            .map(|time| time.with_timezone(&Utc))
-            .unwrap_or_else(|| DateTime::<Utc>::from_timestamp(0, 0).unwrap_or_default())
+            .map_or_else(
+                || DateTime::<Utc>::from_timestamp(0, 0).unwrap_or_default(),
+                |time| time.with_timezone(&Utc),
+            )
             .to_rfc3339_opts(SecondsFormat::Secs, true)
     }
 

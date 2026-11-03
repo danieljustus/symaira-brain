@@ -4,6 +4,7 @@
 //! package: `2006/01/02 15:04:05 LEVEL message key=value ...` in local time.
 //! Values are quoted exactly when the text handler would quote them.
 
+use std::fmt::Write as _;
 use std::io::Write;
 
 /// A destination for log lines; the CLI passes its stderr.
@@ -77,14 +78,14 @@ pub(crate) fn quote(value: &str) -> String {
             '\t' => out.push_str("\\t"),
             '\u{b}' => out.push_str("\\v"),
             c if u32::from(c) < 0x20 || c == '\u{7f}' => {
-                out.push_str(&format!("\\x{:02x}", u32::from(c)));
+                let _ = write!(out, "\\x{:02x}", u32::from(c));
             }
             c if c.is_control() => {
                 let code = u32::from(c);
                 if code < 0x10000 {
-                    out.push_str(&format!("\\u{code:04x}"));
+                    let _ = write!(out, "\\u{code:04x}");
                 } else {
-                    out.push_str(&format!("\\U{code:08x}"));
+                    let _ = write!(out, "\\U{code:08x}");
                 }
             }
             c => out.push(c),
@@ -101,7 +102,7 @@ pub(crate) fn quote_bytes(value: &[u8]) -> String {
         let quoted = quote(chunk.valid());
         out.push_str(&quoted[1..quoted.len() - 1]);
         for byte in chunk.invalid() {
-            out.push_str(&format!("\\x{byte:02x}"));
+            let _ = write!(out, "\\x{byte:02x}");
         }
     }
     out.push('"');

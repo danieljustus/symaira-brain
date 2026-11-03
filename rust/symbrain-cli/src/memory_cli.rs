@@ -26,13 +26,13 @@ use help::{
     MEMORY_SEARCH_USAGE, MEMORY_SEARCH_USAGE_ERROR, MEMORY_SET_USAGE, MEMORY_SET_USAGE_ERROR,
     MEMORY_USAGE, QUERY_LOG_USAGE,
 };
+mod paths;
 mod sync;
 mod sync_decode;
 mod sync_entry;
 mod sync_http;
 mod sync_native;
 mod sync_pull;
-mod paths;
 use paths::{open_store, resolve_db_path};
 mod read;
 use read::{run_list, table_content};

@@ -37,7 +37,11 @@ impl std::error::Error for GoText {}
 
 /// Wraps a diagnostic text so it survives a `rusqlite::Result` boundary.
 pub(crate) fn go_error(text: String) -> rusqlite::Error {
-    rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Null, Box::new(GoText(text)))
+    rusqlite::Error::FromSqlConversionFailure(
+        0,
+        rusqlite::types::Type::Null,
+        Box::new(GoText(text)),
+    )
 }
 
 /// The dynamic type name Go prints for a driver value.
@@ -155,7 +159,11 @@ fn value<'a>(row: &'a Row<'_>, index: usize, name: &str) -> rusqlite::Result<Val
 pub(crate) fn text(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<String> {
     let value = value(row, index, name)?;
     if matches!(value, ValueRef::Null) {
-        return Err(column(index, name, "converting NULL to string is unsupported"));
+        return Err(column(
+            index,
+            name,
+            "converting NULL to string is unsupported",
+        ));
     }
     Ok(lossy(&as_bytes(value)))
 }
@@ -164,7 +172,11 @@ pub(crate) fn text(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<
 pub(crate) fn raw(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<Vec<u8>> {
     let value = value(row, index, name)?;
     if matches!(value, ValueRef::Null) {
-        return Err(column(index, name, "converting NULL to string is unsupported"));
+        return Err(column(
+            index,
+            name,
+            "converting NULL to string is unsupported",
+        ));
     }
     Ok(as_bytes(value))
 }
@@ -246,7 +258,11 @@ fn parse_float(text: &[u8]) -> Result<f64, &'static str> {
 pub(crate) fn float(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<f64> {
     let value = value(row, index, name)?;
     match value {
-        ValueRef::Null => Err(column(index, name, "converting NULL to float64 is unsupported")),
+        ValueRef::Null => Err(column(
+            index,
+            name,
+            "converting NULL to float64 is unsupported",
+        )),
         ValueRef::Real(number) => Ok(number),
         other => {
             let text = as_bytes(other);
@@ -276,23 +292,22 @@ fn parse_int(text: &[u8]) -> Result<i64, &'static str> {
 pub(crate) fn int(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<i64> {
     let value = value(row, index, name)?;
     match value {
-        ValueRef::Null => Err(column(index, name, "converting NULL to int64 is unsupported")),
+        ValueRef::Null => Err(column(
+            index,
+            name,
+            "converting NULL to int64 is unsupported",
+        )),
         ValueRef::Integer(number) => Ok(number),
         other => {
             let text = as_bytes(other);
-            parse_int(&text).map_err(|reason| {
-                column(index, name, &parse_error(other, &text, "int64", reason))
-            })
+            parse_int(&text)
+                .map_err(|reason| column(index, name, &parse_error(other, &text, "int64", reason)))
         }
     }
 }
 
 /// A `sql.NullInt64` destination.
-pub(crate) fn null_int(
-    row: &Row<'_>,
-    index: usize,
-    name: &str,
-) -> rusqlite::Result<Option<i64>> {
+pub(crate) fn null_int(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<Option<i64>> {
     if matches!(value(row, index, name)?, ValueRef::Null) {
         return Ok(None);
     }
@@ -300,11 +315,7 @@ pub(crate) fn null_int(
 }
 
 /// A `[]byte` destination (`NULL` is a nil slice).
-pub(crate) fn blob(
-    row: &Row<'_>,
-    index: usize,
-    name: &str,
-) -> rusqlite::Result<Option<Vec<u8>>> {
+pub(crate) fn blob(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<Option<Vec<u8>>> {
     match value(row, index, name)? {
         ValueRef::Null => Ok(None),
         ValueRef::Text(bytes) | ValueRef::Blob(bytes) => Ok(Some(bytes.to_vec())),
@@ -335,7 +346,11 @@ fn time_value(value: ValueRef<'_>) -> Result<DateTime<FixedOffset>, String> {
 }
 
 /// A `time.Time` destination.
-pub(crate) fn time(row: &Row<'_>, index: usize, name: &str) -> rusqlite::Result<DateTime<FixedOffset>> {
+pub(crate) fn time(
+    row: &Row<'_>,
+    index: usize,
+    name: &str,
+) -> rusqlite::Result<DateTime<FixedOffset>> {
     time_value(value(row, index, name)?).map_err(|reason| column(index, name, &reason))
 }
 
@@ -391,9 +406,10 @@ impl Cursor<'_> {
     /// Fractional seconds introduced by `.` or `,`; `None` leaves the value.
     fn fraction(&mut self) -> u32 {
         let digits = match self.rest {
-            [b'.' | b',', first, ..] if first.is_ascii_digit() => {
-                self.rest[1..].iter().take_while(|b| b.is_ascii_digit()).count()
-            }
+            [b'.' | b',', first, ..] if first.is_ascii_digit() => self.rest[1..]
+                .iter()
+                .take_while(|b| b.is_ascii_digit())
+                .count(),
             _ => return 0,
         };
         let taken = &self.rest[1..=digits];
@@ -424,18 +440,55 @@ struct Layout {
 }
 
 const LAYOUTS: [Layout; 7] = [
-    Layout { separator: b' ', seconds: true, zone: true, time: true },
-    Layout { separator: b'T', seconds: true, zone: true, time: true },
-    Layout { separator: b' ', seconds: true, zone: false, time: true },
-    Layout { separator: b'T', seconds: true, zone: false, time: true },
-    Layout { separator: b' ', seconds: false, zone: false, time: true },
-    Layout { separator: b'T', seconds: false, zone: false, time: true },
-    Layout { separator: b' ', seconds: false, zone: false, time: false },
+    Layout {
+        separator: b' ',
+        seconds: true,
+        zone: true,
+        time: true,
+    },
+    Layout {
+        separator: b'T',
+        seconds: true,
+        zone: true,
+        time: true,
+    },
+    Layout {
+        separator: b' ',
+        seconds: true,
+        zone: false,
+        time: true,
+    },
+    Layout {
+        separator: b'T',
+        seconds: true,
+        zone: false,
+        time: true,
+    },
+    Layout {
+        separator: b' ',
+        seconds: false,
+        zone: false,
+        time: true,
+    },
+    Layout {
+        separator: b'T',
+        seconds: false,
+        zone: false,
+        time: true,
+    },
+    Layout {
+        separator: b' ',
+        seconds: false,
+        zone: false,
+        time: false,
+    },
 ];
 
 /// `time.Parse` for one driver layout.
 fn parse_layout(text: &str, layout: &Layout) -> Option<DateTime<FixedOffset>> {
-    let mut cursor = Cursor { rest: text.as_bytes() };
+    let mut cursor = Cursor {
+        rest: text.as_bytes(),
+    };
     let year = cursor.year()?;
     cursor.literal(b'-')?;
     let month = cursor.number(true)?;
@@ -479,7 +532,11 @@ fn parse_layout(text: &str, layout: &Layout) -> Option<DateTime<FixedOffset>> {
     if !cursor.rest.is_empty() {
         return None;
     }
-    let date = chrono::NaiveDate::from_ymd_opt(i32::try_from(year).ok()?, u32::try_from(month).ok()?, u32::try_from(day).ok()?)?;
+    let date = chrono::NaiveDate::from_ymd_opt(
+        i32::try_from(year).ok()?,
+        u32::try_from(month).ok()?,
+        u32::try_from(day).ok()?,
+    )?;
     let naive = date.and_hms_nano_opt(
         u32::try_from(hour).ok()?,
         u32::try_from(minute).ok()?,
@@ -499,7 +556,9 @@ fn parse_string_form(raw: &str) -> Option<DateTime<FixedOffset>> {
         text = &raw[..position];
     }
     let text = text.trim_matches(|c: char| c.is_whitespace());
-    let mut cursor = Cursor { rest: text.as_bytes() };
+    let mut cursor = Cursor {
+        rest: text.as_bytes(),
+    };
     let year = cursor.year()?;
     cursor.literal(b'-')?;
     let month = cursor.number(true)?;

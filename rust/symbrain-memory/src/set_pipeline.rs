@@ -342,6 +342,7 @@ impl Pipeline<'_> {
     /// `storeWithConflictCheck` (or the plain `SaveMemory` without a
     /// checker). Returns the stored memory and whether the write was
     /// deduplicated onto an existing row.
+    #[allow(clippy::too_many_lines)]
     fn save(
         &self,
         row: &Row<'_>,
@@ -668,6 +669,7 @@ impl Store {
 impl Pipeline<'_> {
     /// Secondary-fact extraction (`PatternExtractor.ExtractFacts` and the
     /// per-fact save/evidence loop of `memory.Store`).
+    #[allow(clippy::too_many_lines)]
     fn extract(&mut self, primary: &Written, log: &mut LogSink<'_>) {
         for fact in extract::extract_facts(&primary.content) {
             let redacted = crate::pii::redact_bytes(fact.content.as_bytes());
