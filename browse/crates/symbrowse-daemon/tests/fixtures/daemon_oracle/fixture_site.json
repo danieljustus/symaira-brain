@@ -1,0 +1,51 @@
+{
+ "/index.html": {
+  "content_type": "text/html",
+  "body": "<!doctype html><html><head><title>Fixture Page</title></head><body><h1 id=h>Hello fixture</h1><a href='/second.html'>second</a><input id=name type=text value=''><button id=b>Go</button><script>localStorage.setItem('seed','1');sessionStorage.setItem('sess','2');console.log('hello-log');console.warn('hello-warn');</script></body></html>",
+  "headers": {}
+ },
+ "/second.html": {
+  "content_type": "text/html",
+  "body": "<html><head><title>Second</title></head><body><p>two</p></body></html>",
+  "headers": {}
+ },
+ "/boom.html": {
+  "content_type": "text/html",
+  "body": "<html><head><title>Boom</title></head><body><script>setTimeout(function(){throw new Error('boom-error')},0)</script></body></html>",
+  "headers": {}
+ },
+ "/cookie.html": {
+  "content_type": "text/html",
+  "body": "<html><head><title>Cookie</title></head><body>cookie page</body></html>",
+  "headers": {
+   "Set-Cookie": "sid=abc123; Path=/"
+  }
+ },
+ "/frames.html": {
+  "content_type": "text/html",
+  "body": "<html><head><title>Frames</title></head><body><iframe id=f1 name=f1 src='/inner.html'></iframe></body></html>",
+  "headers": {}
+ },
+ "/inner.html": {
+  "content_type": "text/html",
+  "body": "<html><body><p id=in>inner</p></body></html>",
+  "headers": {}
+ },
+ "/api.json": {
+  "content_type": "application/json",
+  "body": "{\"ok\":true}",
+  "headers": {}
+ },
+ "/download.txt": {
+  "content_type": "application/octet-stream",
+  "body": "download-body\n",
+  "headers": {
+   "Content-Disposition": "attachment; filename=\"fixture.txt\""
+  }
+ },
+ "/scroll.html": {
+  "content_type": "text/html",
+  "body": "<html><head><title>Scroll</title></head><body style='height:5000px'><p>tall</p></body></html>",
+  "headers": {}
+ }
+}

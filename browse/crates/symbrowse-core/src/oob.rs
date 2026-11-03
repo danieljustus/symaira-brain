@@ -82,6 +82,17 @@ impl Manager {
         state.prompts.insert(prompt.id.clone(), prompt.clone());
         prompt
     }
+    /// The newest pending prompt (Go `Manager.Active`): newest `created_at`,
+    /// ties broken by the lexicographically greater id.
+    pub fn active(&self) -> Option<Prompt> {
+        let state = self.state.lock().ok()?;
+        state
+            .prompts
+            .values()
+            .filter(|prompt| prompt.status == Status::Pending)
+            .max_by(|a, b| (&a.created_at, &a.id).cmp(&(&b.created_at, &b.id)))
+            .cloned()
+    }
     pub fn get(&self, id: &str) -> Option<Prompt> {
         self.state.lock().ok()?.prompts.get(id).cloned()
     }

@@ -183,8 +183,21 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     assert_eq!(framed["success"], true, "frame page: {framed}");
     let frames = request(&socket, "frame.tree", json!({}));
     assert_eq!(frames["success"], true, "frame response: {frames}");
-    let listed = frames["data"]["frames"].as_array().expect("frame tree");
-    assert!(listed.len() >= 2, "frame response: {frames}");
+    // Go's frame.tree returns a nested tree (`children`), not a flat list.
+    fn flatten<'a>(nodes: &'a [Value], out: &mut Vec<&'a Value>) {
+        for node in nodes {
+            out.push(node);
+            if let Some(children) = node["children"].as_array() {
+                flatten(children, out);
+            }
+        }
+    }
+    let mut listed = Vec::new();
+    flatten(
+        frames["data"]["frames"].as_array().expect("frame tree"),
+        &mut listed,
+    );
+    assert!(listed.len() >= 3, "frame response: {frames}");
     assert!(
         listed.iter().any(|frame| frame["parent_id"].is_string()),
         "frame response: {frames}"
@@ -310,9 +323,10 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     assert_eq!(auto_off["success"], true, "dialog auto off: {auto_off}");
     assert_eq!(auto_off["data"], json!({"auto_mode":"off"}));
 
-    let unsupported = request(&socket, "network.har", json!({}));
-    assert_eq!(unsupported["success"], false);
-    assert_eq!(unsupported["error"]["code"], "unsupported");
+    // Go implements network.har; an empty action is rejected like Go does.
+    let bad_har = request(&socket, "network.har", json!({}));
+    assert_eq!(bad_har["success"], false);
+    assert_eq!(bad_har["error"]["code"], "invalid_har_action");
 
     // The one-second idle budget lets the production accept loop stop and run
     // its owned socket/profile cleanup without touching any user browser.

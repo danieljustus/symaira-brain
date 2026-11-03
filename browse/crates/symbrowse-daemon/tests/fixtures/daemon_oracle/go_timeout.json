@@ -1,0 +1,48 @@
+{
+  "provenance": {
+    "generator": "browse/crates/symbrowse-daemon/tests/fixtures/daemon_oracle/capture.py",
+    "scenarios": "scenarios_timeout.json",
+    "go_version": "go version go1.27.3 darwin/arm64",
+    "platform": "darwin/arm64",
+    "argv": [
+      "daemon",
+      "--session",
+      "oracle",
+      "--headless",
+      "--allow-private"
+    ],
+    "chrome": "/Applications/Google Chrome.app (headless, temp profile)",
+    "binary_source_commit": "ff87f4cdbf9a13d5dc259e6883c6072b33690965"
+  },
+  "results": [
+    {
+      "name": "operation_timeout_keeps_connection_usable",
+      "pipeline": [
+        {
+          "cmd": "eval",
+          "args": {
+            "expression": "1+1"
+          }
+        },
+        {
+          "cmd": "daemon.ping"
+        }
+      ],
+      "responses": [
+        {
+          "success": false,
+          "error": {
+            "code": "operation_timeout",
+            "message": "daemon operation exceeded its timeout"
+          }
+        },
+        {
+          "success": true,
+          "data": {
+            "pong": true
+          }
+        }
+      ]
+    }
+  ]
+}

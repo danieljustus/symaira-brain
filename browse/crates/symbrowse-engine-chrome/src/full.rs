@@ -329,6 +329,7 @@ pub struct ChromePage {
     page: Page,
     websocket_address: String,
     dialogs: DialogMonitor,
+    pub(crate) events: crate::parity::RuntimeMonitor,
 }
 
 #[derive(Clone)]
@@ -488,9 +489,11 @@ impl ChromePage {
                 }
             }
         });
+        let events = crate::parity::RuntimeMonitor::start(&page).await?;
         Ok(Self {
             page,
             websocket_address,
+            events,
             dialogs: DialogMonitor {
                 state,
                 _task: Arc::new(task),
@@ -1337,16 +1340,11 @@ mod tests {
 
     #[test]
     fn aborted_navigation_follows_go_polling_contract() {
-        let go_navigation = std::fs::read_to_string(
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("../../internal/engine/navigation.go"),
-        )
-        .expect("read Go navigation oracle");
-        assert!(
-            go_navigation.contains("if _, err := s.engine.Navigate(ctx, s.page, url); err != nil")
-        );
-        assert!(!go_navigation.contains("result.ErrorText"));
-
+        // Go's NavigationService.navigate() ignores Page.navigate's errorText
+        // and then polls readyState; the frozen daemon oracle
+        // (symbrowse-daemon/tests/fixtures/daemon_oracle/go_chrome.json,
+        // step `state_load` opening an empty-404 origin) records that Go
+        // reports success there.  No Go sources are read at test time.
         let aborted: page::NavigateReturns = serde_json::from_value(json!({
             "frameId": "frame-id",
             "errorText": "net::ERR_ABORTED"
@@ -1380,7 +1378,9 @@ mod tests {
         assert!(value.interfaces.contains(&"TabManager".to_owned()));
         assert!(value.interfaces.contains(&"FileTransfer".to_owned()));
         assert!(value.unsupported.contains(&"A11yAuditor".to_owned()));
-        assert!(value.unsupported.contains(&"SettingsEngine".to_owned()));
+        assert!(value.interfaces.contains(&"SettingsEngine".to_owned()));
+        assert!(value.interfaces.contains(&"RuntimeEvents".to_owned()));
+        assert!(value.unsupported.contains(&"ScriptDisabler".to_owned()));
         assert!(!value.interfaces.iter().any(|name| name == "HAR"));
     }
 
