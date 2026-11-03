@@ -1849,6 +1849,7 @@ dependencies = [
  "hyper-util",
  "percent-encoding",
  "regex",
+ "ring",
  "rusqlite",
  "serde",
  "serde_json",
