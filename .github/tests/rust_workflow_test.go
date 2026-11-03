@@ -252,11 +252,12 @@ func makeRecipe(t *testing.T, name string) string {
 
 func TestRustMakeGatesUseLockedReadOnlyChecks(t *testing.T) {
 	parity := makeRecipe(t, "rust-guard-check")
-	requireCommand(t, string(repositoryFile(t, "Makefile")), "GO_ORACLE_TOOLCHAIN :=", "go.mod)")
-	requireCommand(t, parity, "GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go run", "./guard/scripts/guard-oracle", "-check")
-	requireCommand(t, parity, "GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go test", "./guard/internal/capability", "-count=1")
-	if !strings.Contains(parity, "TestCapabilityOracle") || !strings.Contains(parity, "Fixture") || !strings.Contains(parity, "RejectsDrift") {
-		t.Error("missing pinned capability fixture and drift-rejection tests")
+	// ORACLE-FREEZE-781: the guard gate replays sealed fixtures and never runs Go.
+	if !strings.Contains(string(repositoryFile(t, "Makefile")), "rust-guard-check: guard-oracle-check") {
+		t.Error("rust-guard-check must depend on the sealed guard-oracle-check fixture verification")
+	}
+	if strings.Contains(parity, "go run") || strings.Contains(parity, "go test") || strings.Contains(parity, "GOTOOLCHAIN") {
+		t.Error("rust-guard-check must not invoke Go")
 	}
 	requireCommand(t, parity, "cargo fmt", "--all", "--check")
 	for _, command := range []string{"check", "clippy", "test"} {
