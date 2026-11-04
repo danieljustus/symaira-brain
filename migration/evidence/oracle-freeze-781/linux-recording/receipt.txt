@@ -1,0 +1,8 @@
+run_url=https://github.com/danieljustus/symaira-brain/actions/runs/41868248776
+head=51fed3de950d797a5f8471910f5145cafc541546
+go_oracle_source=990780a1fe6c273c09cbe83f07817c6bd5dcb23c
+Linux runnervm48cm3 7.0.0-1017-azure #17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+Python 3.12.3
+go version go1.26.7 linux/amd64
+92221d13260fe8d4c91fec669fcf8ccf2b9cc03a15dfd003ffb59163ff0f3571  /home/runner/work/_temp/out/init_differential_go.linux.json
+21a6227aee25a9411d17bc615038b701ca375f1261977d2fc6acca9ae46a78f7  /home/runner/work/_temp/out/rust_differential_go.linux.json

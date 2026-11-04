@@ -1,0 +1,68 @@
+name: Record Linux Go transcripts (one-off)
+
+# Temporary recorder for #781/#783: freezes the Linux Go transcripts that the
+# Go-free parity-smoke and init-differential gates replay on ubuntu-latest.
+# The Go source is the pre-removal oracle revision; the case definitions come
+# from the checked-out (Rust-only) branch so the recording matches the replay.
+on:
+  push:
+    branches: [tmp/record-linux-oracle]
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Check out the pre-removal Go oracle source
+        run: git worktree add --detach "$RUNNER_TEMP/go-oracle" 990780a1fe6c273c09cbe83f07817c6bd5dcb23c
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: ${{ runner.temp }}/go-oracle/go.mod
+          cache: false
+
+      - name: Build the Go oracle
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          set -euo pipefail
+          go -C "$RUNNER_TEMP/go-oracle" build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go" ./cmd/symbrain
+          mkdir -p "$RUNNER_TEMP/out"
+          go version "$RUNNER_TEMP/symbrain-go" | tee "$RUNNER_TEMP/out/go-version.txt"
+
+      - name: Record the black-box CLI differential transcripts
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/out"
+          python3 scripts/rust-differential.py record "$RUNNER_TEMP/out/rust_differential_go.linux.json" "$RUNNER_TEMP/symbrain-go"
+
+      - name: Record the init differential transcripts
+        run: |
+          set -euo pipefail
+          python3 scripts/init-oracle/compare.py record --repo-root "$PWD" --work-dir "$RUNNER_TEMP/init-record" --fixture "$RUNNER_TEMP/out/init_differential_go.linux.json"
+
+      - name: Receipt
+        run: |
+          {
+            echo "run_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "head=$GITHUB_SHA"
+            echo "go_oracle_source=990780a1fe6c273c09cbe83f07817c6bd5dcb23c"
+            uname -a
+            python3 --version
+            go version
+          } > "$RUNNER_TEMP/out/receipt.txt"
+          sha256sum "$RUNNER_TEMP"/out/*.json | tee -a "$RUNNER_TEMP/out/receipt.txt"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: linux-go-transcripts
+          path: ${{ runner.temp }}/out/
+          if-no-files-found: error
+          retention-days: 14

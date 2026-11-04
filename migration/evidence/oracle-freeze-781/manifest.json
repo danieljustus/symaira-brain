@@ -5232,6 +5232,77 @@
      "internal/memory": "ced54afe5eade7daa7d90ab3aab5401fce1c1c1f"
     }
    }
+  },
+  {
+   "id": "rust-differential-linux",
+   "origin": "pinned-go-recorded",
+   "description": "Black-box CLI differential: 890 Go transcripts (stdout/stderr/exit/side effects) replayed by `make parity-smoke` on Linux",
+   "record": {
+    "kind": "script",
+    "producer": "scripts/rust-differential.py record FIXTURE GO_BINARY",
+    "note": "recorded after the Go removal by a one-off GitHub workflow on the replay platform",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 linux/amd64",
+     "platform": "linux/amd64 (GitHub ubuntu-latest, Ubuntu 24.04)",
+     "recorder_run": "https://github.com/danieljustus/symaira-brain/actions/runs/41868248776",
+     "gotoolchain": "go1.26.7 (go.mod pin, actions/setup-go)",
+     "worktree_commit": "990780a1fe6c273c09cbe83f07817c6bd5dcb23c",
+     "command": "python3 scripts/rust-differential.py record rust_differential_go.linux.json <symbrain-go built: CGO_ENABLED=0 go -C <990780a1 worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain>",
+     "case_definitions_commit": "5b16fd9e09c1b081e121faaad1239b845f12d802"
+    }
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/rust_differential_go.linux.json",
+     "sha256": "21a6227aee25a9411d17bc615038b701ca375f1261977d2fc6acca9ae46a78f7",
+     "bytes": 745599,
+     "last_modified_commit": ""
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "4052464f801a222203652ba48d4622305a538360",
+    "origin": "pinned-go-recorded",
+    "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
+    "platform": "linux",
+    "go_inputs": {
+     "-": "no Go inputs"
+    }
+   }
+  },
+  {
+   "id": "init-differential-linux",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain init black-box transcripts of the pinned Go binary (linux)",
+   "record": {
+    "kind": "script",
+    "producer": "scripts/init-oracle/compare.py record (builds the pinned 9c0e2b25 Go source itself)",
+    "note": "recorded after the Go removal by a one-off GitHub workflow on the replay platform",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 linux/amd64",
+     "platform": "linux/amd64 (GitHub ubuntu-latest, Ubuntu 24.04)",
+     "recorder_run": "https://github.com/danieljustus/symaira-brain/actions/runs/41868248776",
+     "gotoolchain": "go1.26.7 (go.mod pin, actions/setup-go)",
+     "pinned_commit": "9c0e2b259753901a372ed5a688382bb6d4fadd18",
+     "case_definitions_commit": "5b16fd9e09c1b081e121faaad1239b845f12d802"
+    }
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/init_differential_go.linux.json",
+     "sha256": "92221d13260fe8d4c91fec669fcf8ccf2b9cc03a15dfd003ffb59163ff0f3571",
+     "bytes": 418205,
+     "last_modified_commit": ""
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "4052464f801a222203652ba48d4622305a538360",
+    "origin": "pinned-go-recorded",
+    "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
+    "platform": "linux",
+    "go_inputs": {
+     "-": "no Go inputs"
+    }
+   }
   }
  ]
 }
