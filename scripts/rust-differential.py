@@ -6017,6 +6017,11 @@ def prepare_root(root_path: Path, go_binary: Path) -> dict[str, str]:
         "XDG_STATE_HOME": str(root_path / "state"),
         "PROJECT": str(root_path / "project"),
         "SYMBRAIN_GO_BINARY": str(go_binary),
+        # A local Ollama (default localhost:11434) would turn memory
+        # embeddings into host state: `memory set/search` report "ollama"
+        # where a host without it reports "hash-fallback". Nothing listens on
+        # the discard port, so both roots take the deterministic fallback.
+        "SYMMEMORY_OLLAMA_URL": "http://127.0.0.1:9/api/embeddings",
     }
     if os.name == "nt":
         # subprocess replaces the parent environment, so keep the Windows
@@ -6093,12 +6098,8 @@ KNOWN_NATIVE_GAPS = {
     # unreadable library/base roots); the native-skills owner must close each one. They are
     # reported loudly on every run, and a gap that starts matching fails the run until it is
     # removed from this list, so the list can only shrink.
-    "skills_status_config_fallback_base_ancestor_search_only",
-    "skills_status_config_fallback_base_ancestor_search_only_111",
     "skills_status_config_fallback_base_symlinked_ancestor_json",
     "skills_status_config_fallback_empty_library_value",
-    "skills_status_config_fallback_library_ancestor_search_only",
-    "skills_status_config_fallback_library_ancestor_search_only_111",
     "skills_status_config_fallback_library_is_file",
     "skills_status_config_fallback_library_mode_000_json",
     "skills_status_config_fallback_library_mode_444_json",
@@ -6106,6 +6107,15 @@ KNOWN_NATIVE_GAPS = {
     "skills_status_config_fallback_library_symlinked_ancestor_json",
     "skills_status_config_fallback_relative_library_json",
 }
+if sys.platform == "darwin":
+    # Search-only ancestors: the native run matches the Go transcripts recorded
+    # on the ubuntu runner and differs only from the macOS ones.
+    KNOWN_NATIVE_GAPS |= {
+        "skills_status_config_fallback_base_ancestor_search_only",
+        "skills_status_config_fallback_base_ancestor_search_only_111",
+        "skills_status_config_fallback_library_ancestor_search_only",
+        "skills_status_config_fallback_library_ancestor_search_only_111",
+    }
 
 
 def native_only_env(env: dict[str, str]) -> dict[str, str]:

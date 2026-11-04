@@ -2962,23 +2962,42 @@
      "platform": "darwin/arm64",
      "command": "env SYMAIRA_EXTERNAL_BASE=<dir> SYMAIRA_EXTERNAL_RUNTIME_ROOT=<dir> bash scripts/run-external-env.sh python3 scripts/rust-differential.py record rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json <symbrain-go built: GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0 go -C <worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain>",
      "gotoolchain": "go1.26.7 (go.mod pin)"
-    }
+    },
+    "rerecorded": [
+     {
+      "cases": [
+       "memory_search_db_override",
+       "memory_search_limit_and_db",
+       "memory_search_seeded",
+       "memory_search_seeded_limit",
+       "memory_search_seeded_limit_zero",
+       "memory_search_seeded_scope",
+       "memory_search_two_candidates_limit",
+       "memory_search_two_candidates_limit_one"
+      ],
+      "reason": "the original recording host ran Ollama, so these search transcripts reported embedding_source \"ollama\"; the harness now pins SYMMEMORY_OLLAMA_URL to a closed port and the cases were re-recorded under it",
+      "go_version": "go version go1.26.7 darwin/arm64",
+      "worktree_commit": "990780a1fe6c273c09cbe83f07817c6bd5dcb23c",
+      "command": "SYMBRAIN_DIFFERENTIAL_CASE_PREFIX=memory_ python3 scripts/rust-differential.py record <tmp> <symbrain-go built from 990780a1 with GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0>; only the 8 changed search cases merged (the other 33 differed at most in UUIDs the replay normalizes)",
+      "cross_check": "stdout of all 8 re-recorded cases is byte-identical to the independently recorded linux transcripts"
+     }
+    ]
    },
    "fixtures": [
     {
      "path": "rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json",
-     "sha256": "80c6a8989e3723ed07fe7f2a82742e0bb5f1a07741dfd3d11d82348d6a05e3da",
-     "bytes": 751004,
-     "last_modified_commit": "679482c7af315a09696dd5586134b9b5397eb55c"
+     "sha256": "a86a7ec6dd52fd1e8812b16425c7bbdb4c74e15f7d25bf72da1ad4b7504a00b5",
+     "bytes": 750484,
+     "last_modified_commit": "6e7f43162fd5ce8bd05d5b28550647715226b9c2"
     }
    ],
    "provenance": {
-    "sealed_at_commit": "990780a1fe6c273c09cbe83f07817c6bd5dcb23c",
+    "sealed_at_commit": "1ce56ba8c104fd6055dcdb6d9f1896769f86fd15",
     "origin": "pinned-go-recorded",
     "go_toolchain": "per producer script (pinned Go revision named by the producer/fixture)",
     "platform": "darwin",
     "go_inputs": {
-     "go.mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9"
+     "go.mod": "absent"
     }
    }
   },
