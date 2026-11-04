@@ -109,7 +109,8 @@ impl Homes {
 /// seed Go-era state are not changed by a backup they never asked for.
 #[must_use]
 pub fn disabled() -> bool {
-    let value = std::env::var_os(DISABLE_ENV).map(|value| value.to_string_lossy().to_ascii_lowercase());
+    let value =
+        std::env::var_os(DISABLE_ENV).map(|value| value.to_string_lossy().to_ascii_lowercase());
     match value.as_deref() {
         Some("off" | "0" | "false" | "no") => true,
         Some("on" | "1" | "true" | "yes") => false,

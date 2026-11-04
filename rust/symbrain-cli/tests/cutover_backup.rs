@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 const BIN: &str = env!("CARGO_BIN_EXE_symbrain");
-/// Memory store written by the Go release (see fixtures/memory_native/README.md).
+/// Memory store written by the Go release (see `fixtures/memory_native/README.md`).
 const GO_SEED: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/tests/fixtures/memory_native/memory_serve_oracle/seed.db"
@@ -65,7 +65,10 @@ fn first_rust_run_backs_up_go_state_once_and_reads_it_unchanged() {
     seed_home(temp.path());
     let first = run(temp.path(), "on", LIST);
     assert!(first.status.success(), "{first:?}");
-    assert_eq!(first.stdout, expected.stdout, "backup must not change the read");
+    assert_eq!(
+        first.stdout, expected.stdout,
+        "backup must not change the read"
+    );
     let stderr = String::from_utf8_lossy(&first.stderr);
     assert!(
         stderr.contains("symbrain: backed up existing state (2 files) to "),
@@ -83,7 +86,11 @@ fn first_rust_run_backs_up_go_state_once_and_reads_it_unchanged() {
     let second = run(temp.path(), "on", LIST);
     assert!(second.status.success());
     assert_eq!(second.stdout, expected.stdout);
-    assert!(second.stderr.is_empty(), "{:?}", String::from_utf8_lossy(&second.stderr));
+    assert!(
+        second.stderr.is_empty(),
+        "{:?}",
+        String::from_utf8_lossy(&second.stderr)
+    );
     assert_eq!(backups(temp.path()).len(), 1, "the backup runs once");
 }
 
@@ -100,7 +107,10 @@ fn documented_restore_recovers_the_go_state() {
     fs::remove_file(temp.path().join(".config/symbrain/profiles/work.toml")).unwrap();
     assert!(symaira_cutover::verify_restore(&backup).is_err());
 
-    for (label, original) in [("config", ".config/symbrain"), ("data", ".local/share/symbrain")] {
+    for (label, original) in [
+        ("config", ".config/symbrain"),
+        ("data", ".local/share/symbrain"),
+    ] {
         let original = temp.path().join(original);
         fs::create_dir_all(&original).unwrap();
         let status = Command::new("cp")
@@ -114,7 +124,10 @@ fn documented_restore_recovers_the_go_state() {
     symaira_cutover::verify_restore(&backup).unwrap();
     let after = run(temp.path(), "on", LIST);
     assert!(after.status.success());
-    assert_eq!(after.stdout, before.stdout, "restored state reads identically");
+    assert_eq!(
+        after.stdout, before.stdout,
+        "restored state reads identically"
+    );
 }
 
 #[test]

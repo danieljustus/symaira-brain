@@ -45,7 +45,8 @@ fn start_daemon() -> Daemon {
     fs::write(&security, "#!/bin/sh\nexit 44\n").unwrap();
     fs::set_permissions(&security, fs::Permissions::from_mode(0o700)).unwrap();
     let endpoint = if cfg!(target_os = "macos") {
-        home.join("Library/Caches/symbrowse/run").join(format!("{SESSION}.sock"))
+        home.join("Library/Caches/symbrowse/run")
+            .join(format!("{SESSION}.sock"))
     } else {
         root.join("r/symbrowse").join(format!("{SESSION}.sock"))
     };
