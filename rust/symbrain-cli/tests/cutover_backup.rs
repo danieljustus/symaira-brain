@@ -29,6 +29,8 @@ fn seed_home(home: &Path) {
 fn run(home: &Path, backup: &str, args: &[&str]) -> Output {
     Command::new(BIN)
         .env_clear()
+        // Keep coverage profiles out of the crate directory (the child's cwd).
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .env("HOME", home)
         .env("PATH", "/usr/bin:/bin")
         .env("SYMAIRA_CUTOVER_BACKUP", backup)

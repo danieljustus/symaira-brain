@@ -202,6 +202,7 @@ fn run_case(case: &Value, scratch: &Path) -> Value {
             "--nocapture",
         ])
         .env_clear()
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .current_dir(&home)
         .env(CASE_ENV, &case_path)
         .env(OUT_ENV, &out_path);

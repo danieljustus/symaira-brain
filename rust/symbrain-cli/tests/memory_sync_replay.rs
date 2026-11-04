@@ -467,6 +467,7 @@ fn run_fixture(fixture: &Value, scratch: &Path) -> Vec<String> {
     let command = |args: &[String], extra: &[(String, String)]| {
         let mut command = Command::new(binary);
         command.env_clear();
+        command.envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)));
         command.envs(env.iter().map(|(k, v)| (*k, v.clone())));
         command.envs(extra.iter().cloned());
         command.current_dir(root.join("project")).args(args);

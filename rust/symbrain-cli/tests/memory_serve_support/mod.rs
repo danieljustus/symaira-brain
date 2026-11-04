@@ -261,6 +261,7 @@ impl Root {
             .env("LC_ALL", "C.UTF-8")
             .env("JWT_SECRET_KEY", SECRET)
             .env("SYMBRAIN_GO_BINARY", self.path("absent-go"))
+            .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
             .current_dir(self.path("proj"))
             .args(["memory"])
             .args(args);
