@@ -1837,6 +1837,9 @@ def _status_cfg_xdg_dotdot_through_symlink(root: Path, env: dict[str, str]) -> N
 # expected side, and PATH is pinned on both sides because the report embeds
 # `binary:<path>` evidence from `exec.LookPath`.
 TARGETS_CONFIG_PREFIX = "skills_status_config_targets_"
+# Every `skills targets` case pins it: the frozen Go transcripts were recorded
+# with no harness CLI on PATH, so replaying against the host PATH would turn a
+# locally installed `claude` or `codex` into a false mismatch.
 TARGETS_ENV = {"PATH": "/usr/bin:/bin"} if os.name == "posix" else None
 
 
@@ -3689,42 +3692,50 @@ CASES = (
         "skills_targets_dynamic_root_native",
         ("skills", "targets", "--json"),
         setup=setup_skills_opencode_unmanaged_skill,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_mixed_json",
         ("skills", "targets", "--json"),
         setup=setup_skills_targets_mixed,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_mixed_table",
         ("skills", "targets"),
         setup=setup_skills_targets_mixed,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_empty_root_json",
         ("skills", "targets", "--json"),
         setup=setup_skills_targets_empty_root,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_managed_only_json",
         ("skills", "targets", "--json"),
         setup=setup_skills_targets_managed_only,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_config_dir_evidence_json",
         ("skills", "targets", "--json"),
         setup=setup_skills_targets_config_dir_evidence,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_project_scope_json",
         ("skills", "targets", "--scope", "project", "--json"),
         setup=setup_skills_targets_project_scope,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_symlink_entry_json",
         ("skills", "targets", "--json"),
         setup=setup_skills_targets_symlink_entry,
         posix_only=True,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_targets_unknown_scope_fallback",
@@ -3754,6 +3765,7 @@ CASES = (
     Case(
         "skills_targets_default_json",
         ("skills", "targets", "--json"),
+        env_overrides=TARGETS_ENV,
     ),
     Case("skills_status_unknown_target", ("skills", "status", "--target", "bogus")),
     Case("skills_status_unknown_flag", ("skills", "status", "--bogus")),
@@ -4269,6 +4281,7 @@ CASES = (
         setup=_status_cfg_home_unset_abs_xdg,
         expect_fallback=True,
         posix_only=True,
+        env_overrides=TARGETS_ENV,
     ),
     Case(
         "skills_status_config_fallback_targets_home_unset_abs_xdg",
@@ -4276,6 +4289,7 @@ CASES = (
         setup=_status_cfg_home_unset_abs_xdg,
         expect_fallback=True,
         posix_only=True,
+        env_overrides=TARGETS_ENV,
     ),
     # The missing-home gate runs before the classified-unsafe-marker rule: Go
     # fails on `$HOME is not defined` before it ever scans the linked root.
