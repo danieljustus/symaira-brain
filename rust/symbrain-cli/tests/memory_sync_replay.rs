@@ -535,7 +535,7 @@ fn run_fixture(fixture: &Value, scratch: &Path) -> Vec<String> {
             "stderr": sanitize(&String::from_utf8_lossy(&output.stderr), server.port, closed_port, &root_text),
             "exit": output.status.code().unwrap_or(-1),
         });
-        let want = &fixture["observed"][index];
+        let want = &host_kernel_errno(&fixture["observed"][index]);
         if &got != want {
             problems.push(format!(
                 "{name} step {index}\n want: {}\n  got: {}",
@@ -565,6 +565,23 @@ fn run_fixture(fixture: &Value, scratch: &Path) -> Vec<String> {
         ));
     }
     problems
+}
+
+/// The Go observations were recorded on Darwin, where dialing 127.0.0.1:0
+/// fails with EADDRNOTAVAIL. Linux answers the same dial with ECONNREFUSED,
+/// which Go prints as "connection refused"; the difference is the kernel's,
+/// not the implementation's.
+fn host_kernel_errno(want: &Value) -> Value {
+    let mut want = want.clone();
+    if !cfg!(target_os = "macos")
+        && let Some(stderr) = want["stderr"].as_str()
+    {
+        want["stderr"] = json!(stderr.replace(
+            "connect: can't assign requested address",
+            "connect: connection refused"
+        ));
+    }
+    want
 }
 
 #[test]
