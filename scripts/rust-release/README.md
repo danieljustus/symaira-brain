@@ -1,77 +1,48 @@
-# Rust release candidate pipeline
+# Rust release pipeline
 
-`.github/workflows/rust-release.yml` builds the release archives from the Rust
-CLI. It runs on manual dispatch and on pull requests that change it. It never
-creates a tag, a GitHub release or a tap update: the published `v*` release
-still comes from GoReleaser in `release.yml`. Making these archives the default
-release is the cutover in #782.
-
-## What a run produces
+`.github/workflows/release.yml` publishes a release on every `v*` tag:
 
 | Job | Output |
 |---|---|
-| `build` (three native runners) | `symbrain_<version>_<os>_<arch>.tar.gz` for macOS arm64 and Linux amd64/arm64. Each archive contains `symbrain`, the `symbrain-go` fallback, `AGENTS.md`, `LICENSE` and `README.md`, and is smoke-tested on its own platform. |
-| `bundle` | `checksums.txt`, the three-archive contract check, one CycloneDX SBOM per archive, and the Homebrew formula rendered from the checksums. |
-| `sign` (only with `sign=true`) | Developer ID signed and notarized darwin binaries, repackaged archives, refreshed checksums, SBOMs and tap files, and a keyless cosign signature and certificate for every file. |
+| `test` | `make rust-check` and the release-tooling unit tests on the tagged commit. |
+| `build` (three native runners) | `symbrain_<version>_<os>_<arch>.tar.gz` for macOS arm64 and Linux amd64/arm64. Each archive contains only `symbrain`, `AGENTS.md`, `LICENSE` and `README.md` (no Go fallback) and is smoke-tested on its own platform. |
+| `release` | Developer ID signed and notarized darwin binary, `checksums.txt`, the archive contract check, one CycloneDX SBOM per archive, a keyless cosign signature and certificate for every asset, the GitHub release (read back and re-verified) and the Homebrew formula pushed to `danieljustus/homebrew-tap`. |
+| `macos-gui-dmg`, `bump-homebrew` | Signed and notarized GUI DMG and the Homebrew cask. |
 
-Candidate versions are `<workspace version>-candidate.<commit>`. Unsigned
-archives are reproducible for the same commit. Linux builds run on Ubuntu 22.04, so they
-need glibc 2.35 or newer. Apple cannot staple a notarization ticket to a bare
-command-line binary: Gatekeeper checks it online instead.
+Linux builds run on Ubuntu 22.04, so they need glibc 2.35 or newer. Apple
+cannot staple a notarization ticket to a bare command-line binary: Gatekeeper
+checks it online instead.
+
+`.github/workflows/rust-release.yml` builds the same three archives as an
+unpublished, unsigned candidate on manual dispatch and on pull requests that
+change the release tooling. It never creates a tag, release or tap update.
 
 ```sh
-gh workflow run rust-release.yml --ref main            # unsigned candidate
-gh workflow run rust-release.yml --ref main -f sign=true
+gh workflow run rust-release.yml --ref main   # unpublished candidate
 ```
 
-A signed run submits the darwin binaries to Apple and writes entries to the
-public Rekor transparency log.
+## Tools
 
-## Verifying a signed bundle
+| Script | Purpose |
+|---|---|
+| `package.py archive` | Reproducible archive for one platform (same inputs + `SOURCE_DATE_EPOCH` → same bytes). |
+| `package.py checksums` | `checksums.txt` in `sha256sum` format. |
+| `package.py verify` | Release contract: exactly the three archives, exact members and modes, documentation identical to the tree, matching checksums. |
+| `smoke.py` | Native smoke test of one archive: no Go fallback, `version`, `help` and native flag validation. |
+| `manifests.py` | Homebrew formula (`Formula/symbrain.rb`) from a `checksums.txt`. |
 
-Download the `rust-release-signed-<version>` artifact, then:
+## Verifying a release
 
 ```sh
-identity=https://github.com/danieljustus/symaira-brain/.github/workflows/rust-release.yml@refs/heads/main
+identity=https://github.com/danieljustus/symaira-brain/.github/workflows/release.yml@refs/tags/v<version>
 cosign verify-blob --certificate checksums.txt.pem --signature checksums.txt.sig \
   --certificate-identity "$identity" \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com checksums.txt
 shasum -a 256 -c checksums.txt
-go run ./scripts/dist-oracle -hybrid-candidate-check -platforms all -version <version> -assets <dir with archives and checksums.txt>
+python3 scripts/rust-release/package.py verify --version <version> --dir <dir with archives and checksums.txt>
 codesign --verify --strict --check-notarization -R '=anchor apple generic and certificate leaf[subject.OU] = "M4744F3TAA" and identifier "com.symaira.brain.cli"' symbrain
 ```
 
-The notary receipts (`notary-*-info.json`) must all report `Accepted`.
-
-## Homebrew
-
-`scripts/rust-release/manifests.py` renders `symbrain.rb` (for
-`danieljustus/homebrew-tap`, `Formula/`) from a `checksums.txt`. It
-installs `symbrain` and `symbrain-go`, so the fallback is on `PATH`. It is
-a review artifact only; the cutover publishes it. New candidates exclude
-Windows and macOS Intel. Scoop generation is retained only for the explicit
-`--legacy-go` historical rollback mode; no workflow publishes Scoop.
-
-## Rolling back to v0.12.x
-
-The v0.12.x GoReleaser assets stay on their GitHub releases. To point the tap
-and bucket back at them, render the Go-only layout from the old release's
-checksums and publish the two files:
-
-```sh
-gh release download v0.12.0 --repo danieljustus/symaira-brain --pattern checksums.txt --dir rollback
-python3 scripts/rust-release/manifests.py --version 0.12.0 --checksums rollback/checksums.txt --out rollback --legacy-go
-```
-
-For v0.12.0, `rollback/symbrain.rb` is byte-identical to the formula
-GoReleaser published (`scripts/rust-release/test_manifests.py` checks this
-against the recorded copy). After the tap and bucket are updated, users run
-`brew update && brew reinstall symbrain`; Scoop users install or update
-`symaira/symbrain` from the bucket.
-
-## Historical distribution evidence
-
-`go run ./scripts/dist-oracle -check` retains the immutable v0.11.0 manifest
-and the pre-#990 configuration snapshot. It is a historical contract check,
-not current platform support. Candidate checks use the current `.goreleaser.yml`
-and require only the three supported CLI targets.
+There is no rollback to the Go releases (v0.12.x and earlier): their assets
+stay on their GitHub releases as history, but the tap is never pointed back at
+them.

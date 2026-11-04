@@ -11,7 +11,6 @@ Go-recorded oracle output is replayed from committed, sha256-sealed fixtures. No
 | `freeze.py seal [--group G]` | Re-seals after a deliberate re-record (Go not needed). |
 | `test_freeze.py` | Negative controls for the gate (`make oracle-freeze-selftest`). |
 | `require_ran.py` | Fails a test command that passed zero cases. |
-| `record*.py` | **Historical tooling, needs Go, not part of any gate.** Deleted with the Go sources. |
 
 ## Fixture kinds (`record.kind`)
 
@@ -21,11 +20,14 @@ Go-recorded oracle output is replayed from committed, sha256-sealed fixtures. No
   tree is deleted; `seal` refuses a copy that differs from the source blob at HEAD.
 * `none` – hand-authored, no Go involved.
 
-## Re-recording (rare, needs Go)
+## Re-recording
 
-`record_harness_nonutf8.py`, `record_usage_evidence.py {credential|hermes|files|copilot-kimi}`,
-`scripts/rust-differential.py record`, and `SYMBRAIN_SKILLS_STATUS_RECORD_GO=… cargo test -p symbrain-cli
---test skills_render_drift`. After re-recording run `freeze.py seal --group <id>`.
+The Go sources and the Go recorders were removed with the Rust cutover
+(2026-11-04), so the fixtures are final. A deliberate re-record runs the
+historical recorder from a checkout that predates the removal (the
+`sealed_at_commit` and `go_inputs` provenance name the exact revision), copies
+the result here and re-seals it with `make oracle-freeze-seal` (no Go needed
+for sealing).
 
 Replays that mutate process-wide environment variables run in a child test process
 (`rust/symbrain-usage/tests/support/frozen_go_evidence.rs::in_child`).

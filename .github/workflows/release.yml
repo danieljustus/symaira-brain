@@ -1,5 +1,10 @@
 name: Release
 
+# A v* tag builds the Rust CLI on its three supported native targets, signs and
+# notarizes the macOS binary, signs every asset with cosign, publishes the
+# GitHub release and the Homebrew formula, then the GUI DMG and cask.
+# There is no Go build and no Go fallback in any archive.
+
 on:
   push:
     tags:
@@ -21,143 +26,120 @@ jobs:
   test:
     name: Pre-release checks
     runs-on: ubuntu-latest
-    env:
-      # Several tests exercise HOME fallback paths. Do not let runner-level
-      # XDG variables redirect their fixtures to /home/runner/.config.
-      XDG_CONFIG_HOME: ""
-      XDG_DATA_HOME: ""
-      XDG_CACHE_HOME: ""
-      XDG_STATE_HOME: ""
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           ref: ${{ inputs.tag || github.ref }}
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-          cache: true
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
 
-      - name: Format check
+      - name: Install pinned Rust audit tools
         run: |
-          # gofmt walks the raw filesystem and is not module-boundary-aware
-          # like go build/go vet, so it must be pointed away from nested Go
-          # modules explicitly (currently only browse/, the Browse source
-          # intake receiving copy — see browse/SOURCE_PROVENANCE.md; add
-          # more -not -path exclusions if another nested go.mod is added).
-          set -euo pipefail
-          # Keep discovery NUL-delimited and invoke gofmt in bounded batches:
-          # expanding every path in one command can exceed macOS ARG_MAX, while
-          # the array preserves spaces and other whitespace in each path.
-          fmt_tmp="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/symbrain-gofmt.XXXXXX")"
-          trap 'rm -rf "$fmt_tmp"' EXIT
-          files_tmp="$fmt_tmp/files"
-          fmt_out="$fmt_tmp/gofmt.out"
-          : >"$fmt_out"
+          cargo install cargo-audit --version 0.22.2 --locked
+          cargo install cargo-deny --version 0.20.2 --locked
 
-          # Retained original evidence must keep its historical bytes.
-          if ! find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './migration/evidence/*' -print0 >"$files_tmp"; then
-            echo "::error::find failed while collecting Go source files"
-            exit 1
-          fi
+      - name: Rust quality gate, advisories and dependency policy
+        run: make rust-check
 
-          batch=()
-          check_batch() {
-            if ! gofmt -l "${batch[@]}" >>"$fmt_out"; then
-              echo "::error::gofmt failed while checking a batch of Go source files"
-              exit 1
-            fi
-            batch=()
-          }
+      - name: Release tooling
+        run: python3 -m unittest discover -s scripts/rust-release -p 'test_*.py'
 
-          while IFS= read -r -d '' path; do
-            batch+=("$path")
-            if [ "${#batch[@]}" -eq 100 ]; then
-              check_batch
-            fi
-          done <"$files_tmp"
-          if [ "${#batch[@]}" -gt 0 ]; then
-            check_batch
-          fi
-
-          if [ -s "$fmt_out" ]; then
-            echo "gofmt needs to be run on:"
-            cat "$fmt_out"
-            exit 1
-          fi
-
-      - name: Vet
-        run: go vet ./...
-
-      - name: Build (CGO-free)
-        run: go build ./...
-        env:
-          CGO_ENABLED: "0"
-
-      - name: Test (race detector)
-        # The memory/db package alone exceeds Go's default 10m test timeout
-        # on shared ubuntu runners when its benchmark-style tests run under
-        # -race (see TestEmbeddingRecommendation). Raise the bound instead
-        # of dropping -race.
-        run: go test -race -timeout 30m ./...
-
-  govulncheck:
-    name: govulncheck
-    runs-on: ubuntu-latest
+  build:
+    name: build (${{ matrix.os }}/${{ matrix.arch }})
+    if: github.event_name == 'push'
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          # Ubuntu 22.04 keeps the glibc floor at 2.35 for the dynamically linked CLI.
+          - { os: linux, arch: amd64, runner: ubuntu-22.04 }
+          - { os: linux, arch: arm64, runner: ubuntu-22.04-arm }
+          - { os: darwin, arch: arm64, runner: macos-15 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "12.0"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ inputs.tag || github.ref }}
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
-          go-version-file: go.mod
-          cache: true
+          python-version: "3.13"
 
-      - name: govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+      - name: Determine version
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::not a SemVer tag: $tag"; exit 1; }
+          {
+            echo "VERSION=${tag#v}"
+            echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)"
+          } >> "$GITHUB_ENV"
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Build Rust CLI
+        run: SYMBRAIN_VERSION="$VERSION" cargo build --locked --release -p symbrain-cli
+
+      - name: Package and smoke-test the archive
+        run: |
+          set -euo pipefail
+          python scripts/rust-release/package.py archive --version "$VERSION" \
+            --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" \
+            --rust target/release/symbrain --out "$RUNNER_TEMP/dist"
+          python scripts/rust-release/smoke.py --archive-dir "$RUNNER_TEMP/dist" --version "$VERSION"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-${{ matrix.os }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/dist/
+          if-no-files-found: error
+          retention-days: 7
 
   release:
     name: Release
-    runs-on: ubuntu-latest
-    needs: [test, govulncheck]
+    needs: [test, build]
+    if: ${{ !cancelled() && needs.test.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: macos-15
+    timeout-minutes: 90
     environment: release
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           ref: ${{ inputs.tag || github.ref }}
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-        with:
-          cosign-release: 'v2.4.3'
-
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+          python-version: "3.13"
 
       - name: Check if release already exists (avoid rerun deadlock)
         id: check_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
           EVENT_NAME: ${{ github.event_name }}
           INPUT_TAG: ${{ inputs.tag }}
         run: |
+          set -euo pipefail
           if [[ "$EVENT_NAME" == "workflow_dispatch" && ! "$INPUT_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Manual recovery requires an explicit SemVer release tag"
             exit 1
           fi
-          if gh release view "$RELEASE_TAG" --repo ${{ github.repository }} 2>/dev/null; then
+          VERSION="${RELEASE_TAG#v}"
+          {
+            echo "VERSION=$VERSION"
+            echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)"
+          } >> "$GITHUB_ENV"
+          if gh release view "$RELEASE_TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
@@ -167,33 +149,181 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build and publish (first run)
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         if: steps.check_release.outputs.exists != 'true'
-        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
-          distribution: goreleaser
-          version: '~> v2'
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          pattern: release-*
+          path: ${{ runner.temp }}/dist
+          merge-multiple: true
 
-      - name: Build and push Homebrew formula only (rerun)
-        if: steps.check_release.outputs.exists == 'true' && github.event_name != 'workflow_dispatch'
-        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
-        with:
-          distribution: goreleaser
-          version: '~> v2'
-          args: release --clean --skip-upload
+      - name: Import signing certificate
+        if: steps.check_release.outputs.exists != 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          for secret in CERTIFICATE_P12 CERTIFICATE_PASSWORD KEYCHAIN_PASSWORD; do
+            if [ -z "${!secret:-}" ]; then
+              echo "::error::$secret must be configured in the release environment."
+              exit 1
+            fi
+          done
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
+          echo -n "$CERTIFICATE_P12" | base64 --decode -o "$CERTIFICATE_PATH"
+          security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" -f pkcs12 -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep "Developer ID Application" | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          TEAM_ID=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep "Developer ID Application" | head -1 | sed 's/.*(\([A-Z0-9]*\)).*/\1/')
+          if [ -z "$IDENTITY" ] || [[ ! "$TEAM_ID" =~ ^[A-Z0-9]{10}$ ]]; then
+            echo "::error::No Developer ID Application identity found."
+            exit 1
+          fi
+          {
+            echo "CODESIGN_IDENTITY=$IDENTITY"
+            echo "TEAM_ID=$TEAM_ID"
+          } >> "$GITHUB_ENV"
+
+      - name: Sign, notarize and repackage the darwin binary
+        if: steps.check_release.outputs.exists != 'true'
+        env:
+          NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          for secret in NOTARY_API_KEY NOTARY_API_KEY_ID NOTARY_API_ISSUER_ID; do
+            if [ -z "${!secret:-}" ]; then
+              echo "::error::$secret must be configured in the release environment."
+              exit 1
+            fi
+          done
+          API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
+          export API_KEY_PATH
+          dist="$RUNNER_TEMP/dist"
+          archive="$dist/symbrain_${VERSION}_darwin_arm64.tar.gz"
+          work="$RUNNER_TEMP/darwin-arm64"
+          mkdir -p "$work"
+          tar -xzf "$archive" -C "$work"
+          codesign --force --options runtime --timestamp --identifier com.symaira.brain.cli \
+            --sign "$CODESIGN_IDENTITY" "$work/symbrain"
+          BIN_IDENTIFIER=com.symaira.brain.cli bash scripts/notarize-and-verify.sh \
+            "$work/symbrain" bin "$RUNNER_TEMP/notary-darwin-arm64-symbrain"
+          rm "$archive"
+          python scripts/rust-release/package.py archive --version "$VERSION" --os darwin --arch arm64 \
+            --rust "$work/symbrain" --out "$dist"
+          python scripts/rust-release/package.py checksums --dir "$dist"
+          python scripts/rust-release/package.py verify --version "$VERSION" --dir "$dist"
+
+      - name: Install Syft
+        if: steps.check_release.outputs.exists != 'true'
+        uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+
+      - name: Generate CycloneDX SBOMs
+        if: steps.check_release.outputs.exists != 'true'
+        run: |
+          set -euo pipefail
+          for archive in "$RUNNER_TEMP"/dist/symbrain_*.tar.gz; do
+            syft "$archive" --output "cyclonedx-json=$archive.sbom.json"
+            python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["bomFormat"]=="CycloneDX" and d.get("components"), sys.argv[1]' "$archive.sbom.json"
+          done
+
+      - name: Install Cosign
+        if: steps.check_release.outputs.exists != 'true'
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: 'v2.4.3'
+
+      - name: Sign every asset with cosign and verify the signatures
+        if: steps.check_release.outputs.exists != 'true'
+        env:
+          IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/release.yml@${{ github.ref }}
+        run: |
+          set -euo pipefail
+          for asset in "$RUNNER_TEMP"/dist/*; do
+            cosign sign-blob --yes --output-certificate "$asset.pem" --output-signature "$asset.sig" "$asset"
+            cosign verify-blob --certificate "$asset.pem" --signature "$asset.sig" \
+              --certificate-identity "$IDENTITY" \
+              --certificate-oidc-issuer https://token.actions.githubusercontent.com "$asset"
+          done
+
+      - name: Publish the GitHub release and read it back
+        if: steps.check_release.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          prerelease=()
+          if [[ "$VERSION" == *-* ]]; then prerelease=(--prerelease); fi
+          gh release create "$RELEASE_TAG" --verify-tag --title "$RELEASE_TAG" --generate-notes \
+            "${prerelease[@]}" "$RUNNER_TEMP"/dist/*
+          readback="$(mktemp -d "$RUNNER_TEMP/release-readback.XXXXXX")"
+          gh release download "$RELEASE_TAG" --pattern 'symbrain_*.tar.gz' --pattern checksums.txt --dir "$readback"
+          python scripts/rust-release/package.py verify --version "$VERSION" --dir "$readback"
+          cmp "$RUNNER_TEMP/dist/checksums.txt" "$readback/checksums.txt"
+
+      - name: Publish the Homebrew formula from the published checksums
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TAP_TOKEN:-}" ]; then
+            echo "::error::HOMEBREW_TAP_GITHUB_TOKEN must be configured in the release environment."
+            exit 1
+          fi
+          published="$(mktemp -d "$RUNNER_TEMP/published.XXXXXX")"
+          gh release download "$RELEASE_TAG" --pattern checksums.txt --dir "$published"
+          python scripts/rust-release/manifests.py --version "$VERSION" --checksums "$published/checksums.txt" --out "$RUNNER_TEMP/manifests"
+          tap="$RUNNER_TEMP/homebrew-tap"
+          git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/danieljustus/homebrew-tap.git" "$tap"
+          mkdir -p "$tap/Formula"
+          cp "$RUNNER_TEMP/manifests/symbrain.rb" "$tap/Formula/symbrain.rb"
+          cd "$tap"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/symbrain.rb
+          if git diff --cached --quiet; then
+            echo "Formula already current"
+            exit 0
+          fi
+          git commit -m "Brew formula update for symbrain version $RELEASE_TAG"
+          git push
+
+      - name: Retain notarization read-back receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cli-notarization-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/notary-*.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Clean up signing material
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/certificate.p12" "$RUNNER_TEMP/AuthKey.p8"
+          if [ -n "${KEYCHAIN_PATH:-}" ] && [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain "$KEYCHAIN_PATH"
+          fi
 
   macos-gui-dmg:
     name: macOS GUI DMG
     runs-on: macos-26
     environment: release
     needs: [release]
+    if: ${{ !cancelled() && needs.release.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -387,7 +517,7 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Homebrew distribution. The CLI Formula (Formula/symbrain.rb) is already
-  # pushed by GoReleaser (`brews:`) in the `release` job; this job publishes
+  # pushed by the `release` job; this job publishes
   # the macOS GUI as a cask (Casks/symbrain.rb) in danieljustus/homebrew-tap
   # once the signed+notarized DMG is on the release, so the tap can never point
   # at a partial release.

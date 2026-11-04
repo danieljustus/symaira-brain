@@ -3150,6 +3150,2088 @@
      "internal/managed/manifest.json": "5eb73017bf693f6227a29ca47a49eb0190607dee"
     }
    }
+  },
+  {
+   "id": "memory-sync-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain memory sync observations of the real Go CLI against scripted fake servers (darwin)",
+   "record": {
+    "kind": "script",
+    "producer": "rust/symbrain-cli/tests/fixtures/memory_sync/capture.py --go GO_BIN --out DIR (needs the deleted Go sources)",
+    "toolchain": "go1.27.3",
+    "note": "provenance.json in the fixture directory names the capture commit and build command"
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/apply_counts_huge.json",
+     "sha256": "55286cb241f078b0149c95128cc73aa62b76ad95521c6671341713dbbb5ddae8",
+     "bytes": 4812,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/apply_counts_negative_and_float.json",
+     "sha256": "b607e71a4a81409b31db4814d4635adf0221c446effbb04859c4a4f7d8864af6",
+     "bytes": 4843,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/apply_counts_null.json",
+     "sha256": "8c95e7c1dcbdb4412aebf22aeeb9c93edc4313779b96651d4f9cb8234664a0a0",
+     "bytes": 4782,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/apply_http_error_after_pull.json",
+     "sha256": "c6142be07fcfb5e4a1b03a47e8627d2c129113189f14a44955976dcae88f817d",
+     "bytes": 6586,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/auth_failure_401.json",
+     "sha256": "8fc853cc24aa82d51a4b7f98f93ebca681bd2bf019eb4188d1b014ede7bdd816",
+     "bytes": 1155,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/auth_failure_403_nocode.json",
+     "sha256": "1b911e7a3853567a03d1a9d8f6b2a0f25b1afc50b250c9e97e48f63d26807d74",
+     "bytes": 4457,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/auth_flag_beats_env.json",
+     "sha256": "581358f02972680c55bc86432d93b59ac6592e0a9295d3bac5011a56ca56e996",
+     "bytes": 4996,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/auth_token_env.json",
+     "sha256": "c73e01022920201649d457dadaafb8ddb7a9f5109e84b5c0f1b670b150f6697f",
+     "bytes": 1555,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/auth_token_flag.json",
+     "sha256": "4a76cc79eaa6868784291d12c011ed301e993721c22547503af9a44cd37700ea",
+     "bytes": 1520,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/both_json.json",
+     "sha256": "cf0954ddbd8ca85e6ce3accbb762f66a8a01141f22ffce1d0d9933ce91145d3a",
+     "bytes": 6971,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/both_table_nothing_to_push.json",
+     "sha256": "242315cf4f6687e839500b39a74888751b9b0922e114b518295ebf45b8537f6a",
+     "bytes": 1323,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/capture.py",
+     "sha256": "99ec0f6144a25167d59a6565792f027a24efb0ab361ca67adbafa9251458e6d6",
+     "bytes": 44848,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/env_db_path.json",
+     "sha256": "a41e6daf3d2f560a69e0e1ae2780d96a088cfdc291cfcd0ca51425e5f657e209",
+     "bytes": 2861,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_allow_insecure_warning.json",
+     "sha256": "b0320901f771a4403875cc0c7dce3452015e7992838118eeb9b5d9ffb2932511",
+     "bytes": 1596,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_bad_stored_cursor.json",
+     "sha256": "aecb0ad3a031026b5e08351a6895eca8a7353e5bb3b83f75c45d9174acde39af",
+     "bytes": 914,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_bad_timeout.json",
+     "sha256": "e8863f5b295b5ad114df18d1d89ba8d7cd5d7aeed95b4c2160f058657b7e4d2d",
+     "bytes": 2365,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_db_override.json",
+     "sha256": "807b21fee248b03633dc76b31ecaa40fa512dd299305527c1fb4f0359c30f5d7",
+     "bytes": 2946,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_db_unopenable.json",
+     "sha256": "f1ceb23b20494df182335e1c0eefeecbe35f26fc4d2eb1b1467d572a4d96d64f",
+     "bytes": 912,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_double_dash.json",
+     "sha256": "21992cbbba24afa86b731422f1398df67d02036ea6244df3896bce1a51a19f82",
+     "bytes": 618,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_equals_forms.json",
+     "sha256": "7abc965d8c6393caf7bb42100cd83025f15162c40a7dafa7f52e39034d7191a3",
+     "bytes": 1471,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_global_json_first.json",
+     "sha256": "0f0b68c3888dbc427c7ac693d9c19e30adabfe6dd5da5cafd94dd1eae10b4c24",
+     "bytes": 1426,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_help.json",
+     "sha256": "b1b2edfcce4b4e64fc21dfaa050c9e9f3b23bdc77f46a2c3f0dcebd9ca8ff914",
+     "bytes": 2205,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_missing_remote.json",
+     "sha256": "a4c386f7f9192315dcf57b029b9ee0d0a4b2e8cc5226923e3c818336929d94fe",
+     "bytes": 2267,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_output_invalid.json",
+     "sha256": "2fcfb09588bd140758cf95918c2cbae7ec406b3c6cb8ac0be434ebea4488bd3d",
+     "bytes": 673,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_output_json_long.json",
+     "sha256": "20b47f9c5ebd1d9f3d0e6ada2b8dfa3fa2ea94e5a6313ea30f7719b529b60ca7",
+     "bytes": 1453,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_output_table_explicit.json",
+     "sha256": "e85ff73778e7faf52960ee657813e2c5590b6629915f03077106d6ac7b76b835",
+     "bytes": 1409,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_pull_and_push_explicit.json",
+     "sha256": "ed87afda06b9f50b170ddd86678d348c64a6eccd1a5b0eff1d5f33c8859c5aac",
+     "bytes": 5268,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_push_false_pull_false.json",
+     "sha256": "6929af1c6b4de6e801dba43bd0428a7485eb725b8aa873a53c5bb0f60ef45502",
+     "bytes": 5275,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_relay_without_passphrase.json",
+     "sha256": "1fe3c0bd878e043db0524f7f15bd849aad84518af570b1d360c67d6ef643c2ce",
+     "bytes": 695,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_single_dash_forms.json",
+     "sha256": "705e54a00523532529b89b9b1c62313fe06a3b28ae5069159d396e07a1624365",
+     "bytes": 1420,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_timeout_forms.json",
+     "sha256": "c3b986f12b7d3c7c17939a591b6ff604a877ef5fb53974e615fc244c42e3990f",
+     "bytes": 1468,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_timeout_fraction.json",
+     "sha256": "a88126bb4f3fec1bee162fbc13d12ea5ed1dde47584934cf1d1644656e1f54a7",
+     "bytes": 1483,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_unexpected_argument.json",
+     "sha256": "df6ec29f960232379a01d5396378b4e85d9853bbd0b5e7420623355a8c3c9d31",
+     "bytes": 606,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/flag_unknown_flag.json",
+     "sha256": "f26d020c4f6b40d53f91d027f4cb9f1ba16eee8f4fced5fad5d2032406b3d80d",
+     "bytes": 2322,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/http_204_empty.json",
+     "sha256": "0ad171eedc9c014dc5092ae7c6d4c7439011de29a292aa7201b8274b49ac8c11",
+     "bytes": 984,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/http_300_is_success.json",
+     "sha256": "d7c10cf4da460610b2a37092be5474e8f326cd3514bf95cc5acb26c5eb2d1614",
+     "bytes": 1423,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/http_304.json",
+     "sha256": "47af1963c6e326188853da72e8cffd1aabe025692285fd875c14ed88ec16fdeb",
+     "bytes": 979,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/http_429_json_code.json",
+     "sha256": "7ec52ce6a534c4a7f25f2af69054eec95671998cd5a612412e6d16b0c023c940",
+     "bytes": 1060,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/http_500_text.json",
+     "sha256": "c88de270cdfd1b76d0c6ce48688cf3993e1b06a749d36f38acffcb4af16542c7",
+     "bytes": 982,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_apply_array.json",
+     "sha256": "dafba00c65ad071a0cf82a0e70774b351af91a23ff9e67fc47abeca52991f598",
+     "bytes": 4494,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_apply_response.json",
+     "sha256": "e509a18222b96570062b8fad2768a79efaed88bc8dc164d241c96a30a7e820a0",
+     "bytes": 4480,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_array_top.json",
+     "sha256": "870cad57ee5121926c02340238dfb2193b50b8d6630731375fd66a3aa001c8df",
+     "bytes": 1098,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_bad_time.json",
+     "sha256": "86a793026c74852d4d4d35b7d786e39142f6390265cad36829c9890fdbef7f63",
+     "bytes": 1174,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_empty_body.json",
+     "sha256": "e37717bd81a367e85ddf4d1f8702b1fd3cec67a2dbd00a97648c42eee7590e30",
+     "bytes": 1018,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_empty_memory_id.json",
+     "sha256": "6dd40f205127a80b0cc6f76ea32eebea69d66e3f5640cbe2451619dbcad41447",
+     "bytes": 2727,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_memory_field_type.json",
+     "sha256": "d7c028374524d333a52bf4bf3714affca2a58870b4fe5fe89e58bb11e76e3a8b",
+     "bytes": 1218,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_metadata_nonstring.json",
+     "sha256": "b5a9c4ee3bcaf3d11674605e4724f41a6742522409823ef5a872e016bd385423",
+     "bytes": 1254,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_missing_times.json",
+     "sha256": "6d13564146b544e86473dfb5b360d0509e90c37afab738dddfb051ddf59fa0fd",
+     "bytes": 2695,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_not_json.json",
+     "sha256": "f5b0746d06ac1b9dda0f9aefc2856ad7ebc86de431998acc1dd4464a5844e92e",
+     "bytes": 1082,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_null_memory_element.json",
+     "sha256": "486ac11c6ba7237b8843861934726a3ddaea49a797291570f5d247240e6ccf87",
+     "bytes": 1116,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_null_top.json",
+     "sha256": "b13e2ae747b74f04c4c3d1c67be9ba66373a771bdc3a891b3b4875754f438e8f",
+     "bytes": 1353,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_relay_response.json",
+     "sha256": "527bdbf341483c98457fba43a8a0d82b88b422ebfd16627b9888c8e51cacfd33",
+     "bytes": 3877,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_trailing_garbage.json",
+     "sha256": "2a951d8ead33b839cb3c189edc083ce923ff997369ffc36269dda8234ba0c38b",
+     "bytes": 1439,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_truncated.json",
+     "sha256": "2c179adb16fc9e1b49612ea256e3300c5a1457905d97d7681cb1a26a0aeed428",
+     "bytes": 1074,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_unknown_fields.json",
+     "sha256": "42a7a0f1dbb4b71f3442cacbf4ae732ce8532d4dd1fec8fbb6e4de1f8979a44d",
+     "bytes": 1452,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_wrong_types.json",
+     "sha256": "0b5792af8685e1031d0946b740cba6ca4e4e0937ba1882a1d35e43b4afe60de8",
+     "bytes": 1191,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_big_response.json",
+     "sha256": "164ed0135666883285eced2fc4d6e542a8a21bfa4b20b7fe4e2e1f46639be197",
+     "bytes": 1110,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_chunked_response.json",
+     "sha256": "488b84409f0f7569b573b2bc62824b215e0f3d8eaf9b1cb8385bc96012d93157",
+     "bytes": 2898,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_connection_refused.json",
+     "sha256": "16c4e89863d7b4e8109d91f269f3db1a857f4e34fc0d512d8c4a414895199db0",
+     "bytes": 815,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_connection_refused_localhost.json",
+     "sha256": "f86c13b4258586a8a17771141a92084245aab0ddd791af9b7281c9399ada8978",
+     "bytes": 3509,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_content_length_lie.json",
+     "sha256": "c8328ddcfe0ffeb444965c8c1e94e1680b78824346b4d57eeae0a75ac75d3958",
+     "bytes": 1378,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_drop_connection.json",
+     "sha256": "bd90d24ed9bb3214ee2779d9c092cf6095ff5a1854e54b67bfe379ef8b15588a",
+     "bytes": 1081,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_fragment_swallows_path.json",
+     "sha256": "c48a3f9e1edd98bdb3085c4bc061ecb955187bcceb8afd7dc2be1f849f93d02b",
+     "bytes": 1433,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_gzip_invalid.json",
+     "sha256": "c7513adff94cc2c3d98ae37d2d3774f25fde8791a368bd7398ea7e3f0514e080",
+     "bytes": 1053,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_gzip_response.json",
+     "sha256": "f6b31dfc4b9dfedcab90d9447e181f5f5e5235e93f917380412b5859539eec03",
+     "bytes": 2884,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_prefix_trailing_slash.json",
+     "sha256": "c6f26ef442aacc852db22afc38092afd2029267a5ce22cc6acaf0ff21da3b886",
+     "bytes": 1472,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_query_in_remote.json",
+     "sha256": "3c12a38662c5d80318c0e1cbc77eefb434fddc752257670ccc04ae1c6c8aa58d",
+     "bytes": 1453,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_302_get.json",
+     "sha256": "b6ea84482280e6cd71cf28db95945c68fc4339689d978e5c1f3d43f618158042",
+     "bytes": 1979,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_302_post.json",
+     "sha256": "d7ed17186f133ccea4028310d7df8c4bf702b06f9846eb70b72848058a82e35d",
+     "bytes": 5195,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_307_post.json",
+     "sha256": "bfcd81e5621cd428f97b684c90dbf851cb5a5d54c09c01b616e18509f589ce1d",
+     "bytes": 6052,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_bad_scheme.json",
+     "sha256": "d35f76f3ce31076c0f11842c09991ae547ffecb1718c88c3d10b040ab350d902",
+     "bytes": 1042,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_loop.json",
+     "sha256": "e73d02dc595b35fbde1d33b62a9cc40b458f48489a73b9092cc564e58940132f",
+     "bytes": 4504,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_no_location.json",
+     "sha256": "e2283f86a082ae0bd4573d07ff66dbd9d6311f06e579fa7228c9484c4ff617f0",
+     "bytes": 995,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_negative.json",
+     "sha256": "8dc87c1a87579165cf580315c288cb4742b74c639ed02eb6ed18b6dd1e799b50",
+     "bytes": 770,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_stall.json",
+     "sha256": "539c9f1f515448d02e0fa33eeccbae4afd3699952e60a5e1fb912a39088a28ca",
+     "bytes": 1246,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_stall_body.json",
+     "sha256": "cbd8b684777db1235fe1ee8f5690a09f74751a42b3ddca51c44b0d82fd980d38",
+     "bytes": 1187,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_zero.json",
+     "sha256": "2defc07b161894706a9c6cf79af88e8eeb6efd61c3893b3cf4e87cfc0ac51103",
+     "bytes": 778,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_truncated_body.json",
+     "sha256": "1a3137f12ed514154deb87e79a17b46185e6860d379f1c923b04744d40e9dd67",
+     "bytes": 1099,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/net_userinfo_basic_auth.json",
+     "sha256": "cf456855eca809fccf30292227962f7050dc32481451f1903e038f59c5eb8296",
+     "bytes": 1554,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/passphrase_env_flag_precedence.json",
+     "sha256": "2691ba03cf8bc02d7de571e8bb8937ad0c62f374b0ca5053fa3f10ea41cdfbd7",
+     "bytes": 1643,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/provenance.json",
+     "sha256": "15bf5231e6a27298b2d3f14ba248194ab96ebf189c6c2815e6f3652f3bf0eec5",
+     "bytes": 2421,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_audit_disabled.json",
+     "sha256": "da64de721cdf05a77564f405749c06c211747d1e4ea0f8bdc9119b634e9db1e7",
+     "bytes": 5582,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_audit_enabled.json",
+     "sha256": "d8ea895fe0bba28309f94d47a63c23155ce646cf52a3d4fbf6c990bbd0bbc726",
+     "bytes": 5502,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_cursor_persisted.json",
+     "sha256": "d47d728589cd617f17dc26e0d5bfb9bc7e5f9613b7104f3dcf8e948c6f3ed560",
+     "bytes": 4025,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_db_from_config.json",
+     "sha256": "2689044c842ad0e7bddb59d33d3254f6676714ce6675230eacfa23f0675af07e",
+     "bytes": 1682,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_deleted_missing_time_zero.json",
+     "sha256": "a26e7aa521a4c20f149b3d7d27ef746f58a24e7bdff8b29a88965138e716b116",
+     "bytes": 4151,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_duplicate_keys_and_case.json",
+     "sha256": "6dfbfb4da505732951ae717292bcdff832eea51fa1e110e62caf6be0b7d48d9b",
+     "bytes": 2717,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_embedding_mismatch_types.json",
+     "sha256": "3ee2d8c153ec0d14026a11ec9d77ceadd39283ba865a7fd8ec7f4386fa6b852f",
+     "bytes": 1253,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_equal_timestamp_not_applied.json",
+     "sha256": "a56df590ab196589b01169537ee2db3f44400226a2336d651d87739b6a84d69a",
+     "bytes": 4421,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_full_memory.json",
+     "sha256": "9fa56244f8316ec2cd5d2ffecf900bf20a3f2c9eb3dce91d7447a709e3232b5e",
+     "bytes": 2060,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_full_memory_quantize.json",
+     "sha256": "522c6e0fe8fb8f72422b60b995cce1255fc600532b218c216ba895e888472f5e",
+     "bytes": 2152,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_importance_string.json",
+     "sha256": "bcc036ad2949a051ac48fa9ef1a98e8ace7deab3cda324e95961b439adcf8397",
+     "bytes": 1284,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_invalid_config_ignored.json",
+     "sha256": "c64ff0e6a453ea57ab3326575d86ad2d5f27abba9f647ccc54d984c51bd47539",
+     "bytes": 2965,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_json.json",
+     "sha256": "c66ee07c34c79d2ddef5208c4bbe17ea4569184f7a1557c25a0900a16f74bfe9",
+     "bytes": 6560,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_many_rows_one_page.json",
+     "sha256": "7a4647a49f2f9f18df7addceff931534f43544a5a46b07f429e00ade1ce5584c",
+     "bytes": 175986,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_offset_zones.json",
+     "sha256": "45af5947bee8f1c60e7d9b2d059c0398a41fe110d217089cb165f0a9a6e44748",
+     "bytes": 5019,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_paged.json",
+     "sha256": "7069341435f060b464e54e654ba6b5dd303d8a375d719f416e2eeb67f5b040b7",
+     "bytes": 4951,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_stored_cursor_iso.json",
+     "sha256": "10548602fb15972a76e55c329fc1d76d74062ef1402119875c3ba388b51cd327",
+     "bytes": 1548,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_stored_cursor_since.json",
+     "sha256": "09738783325de9b08dac20a3cd1d433b3517a852cc03fe91f3706d91ce87adbf",
+     "bytes": 1570,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_table.json",
+     "sha256": "650bef24d190f10917bcfe2657a2665167de9cdd4b1748b6a65be03239d25f05",
+     "bytes": 5512,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_time_forms.json",
+     "sha256": "5ed2409eb4606b627486a42301bcf15bfe96a8c9ae5aef70bc5ec5d5ccc8fcb5",
+     "bytes": 5435,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_time_lowercase_invalid.json",
+     "sha256": "eb656e03f3384890c3b265d41ca4eccb190bb091ce74a67ead1e28f4eea83ee1",
+     "bytes": 1248,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_unicode_escapes.json",
+     "sha256": "59095512dbdc24a0518f1068e66076871cea5ecc5369a67fc06c02b09b50f011",
+     "bytes": 2785,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/pull_update_existing.json",
+     "sha256": "1edb5bc87dd722d8c575fd6b7519be0a63a8168bb4143e8952fa16ce1a5d73a2",
+     "bytes": 4700,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_batches.json",
+     "sha256": "0f24a52919d473283c79b8e2582f2b898f0a2e8c056cae37862f0128eb771a74",
+     "bytes": 318178,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_float_importance.json",
+     "sha256": "39681c481461a3c251ae3c1e765bf7486562deafa038b7b7ca8eb01f9dc0fe70",
+     "bytes": 9297,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_full_row.json",
+     "sha256": "e7f5d5b6629e0a7c98b823d6b7e17abdd560b76b83558438693a2574c6f63231",
+     "bytes": 4409,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_iso_updated_at.json",
+     "sha256": "9e7d2eb8c8f83a6fbbf04b945ecffe4a52b4f0e52b9a68928d9314693c212cf2",
+     "bytes": 4491,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_json.json",
+     "sha256": "9b764a19c9f669e51584817975c98df0380fb717e6779b732d248176859aba66",
+     "bytes": 4818,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_odd_content.json",
+     "sha256": "660827314d16d780ce176dfc2c1019e9a974f54c0763c7f2e8ae8e08ed0dd566",
+     "bytes": 3344,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_second_run_empty.json",
+     "sha256": "29e0b524645fe2b46f60eb9185f7408baf76411f701c6ff6d8a1e6ac435b8f37",
+     "bytes": 5511,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_stored_cursor_filters.json",
+     "sha256": "738ed26bfc23902736d88a771466d1514ed10a986e196bc617a5c7fcad40dd63",
+     "bytes": 4297,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_sync_exclude.json",
+     "sha256": "699e0f9ef83469bdd77b987bcdaed3dbc9c0ee8abd6b9bcf6547e638847b0bdc",
+     "bytes": 5803,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/push_table_camel_counts.json",
+     "sha256": "dbaadfac37aaeed30c53e935023e2bf7610b3807e3a8542fa2953ebe6d7bb8a4",
+     "bytes": 4724,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_00.json",
+     "sha256": "55f6f545ea57cd9e2b354f8ebe1b828b20185e25d1fb707b1619f7f2be00da04",
+     "bytes": 642,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_01.json",
+     "sha256": "c05ee5848dcdf1fe6ebad269e74932e9987bd0877ff58a974458bea5c17490c8",
+     "bytes": 628,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_02.json",
+     "sha256": "5f1ecbe643b352b814ceb0d5b6fc1e365f692d6fbc98dca8ff37b22be2f116b8",
+     "bytes": 692,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_03.json",
+     "sha256": "09d3cc9cb7b0d672656000e9618917d055029f08e42b1dfd7e7f59d8a23b3afb",
+     "bytes": 713,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_04.json",
+     "sha256": "923d6c20c8a3fa9e828192a749a4ddacd65f3fb4cef1200fdfd525e4b2bd7f6b",
+     "bytes": 658,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_05.json",
+     "sha256": "bbf5e1f070b8276731ca709e65129088bd6ae4223a809541afb2f08ebe6a1edb",
+     "bytes": 640,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_06.json",
+     "sha256": "199c2bf8155859d9b7421e69b5a0773636cd406be813e92ef8d7742cb951bd0a",
+     "bytes": 646,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_07.json",
+     "sha256": "a1b50999c6d7099f80c06ba12992c75aeb269a691304e331b083a42e31ad4c45",
+     "bytes": 675,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_08.json",
+     "sha256": "ea04445afd1880685d76313c7315479845dfe6641c290ef7dd36d9fe36d2277e",
+     "bytes": 617,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_09.json",
+     "sha256": "21f1f213adb238770159faaa5c97befe51f011b24db8109bd863f7f45ff8157c",
+     "bytes": 655,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_10.json",
+     "sha256": "30e3b6bb7d3fd052b17e1ab62796fd0482358c07a21cb24d7aafba98d1508394",
+     "bytes": 634,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_11.json",
+     "sha256": "b246a150d685504be90bd280706252ac52dce2fd50c479cd51ccbd9b2fc98273",
+     "bytes": 674,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_12.json",
+     "sha256": "ab51c1c41b2456a99617647e4747bb325a14be2e6beed661895326d248299d15",
+     "bytes": 651,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_13.json",
+     "sha256": "c196d1b1634218d864eb72cde74413fc1eca1b426c8d8111a91ad9152ea4e2b1",
+     "bytes": 665,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_14.json",
+     "sha256": "7ece906bc6cbb6d505d24675d5a493ec138ea27058f7040473faa1d91b0dccf6",
+     "bytes": 656,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_15.json",
+     "sha256": "fb4864483727b33db9346f2396672a02e671a836fe00244adf33a91e50338630",
+     "bytes": 701,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_16.json",
+     "sha256": "bbf44b10f45c58b51deb5cbc6877eca89b38d6ddffef88391df2b23e30c443fd",
+     "bytes": 661,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_17.json",
+     "sha256": "263bbf9d21e5e1ff5109260fb45b4246bb42dc7563052375e71c898d7373d6ae",
+     "bytes": 658,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_18.json",
+     "sha256": "7e8f8912f0d7e3920292c1ea5210cd8215381737cc0b80d3c2fba373557175dc",
+     "bytes": 651,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_19.json",
+     "sha256": "e0b853d7225de2e5999d3b805cedffbc42e5b1765adf7b7c8aea04b875b92eeb",
+     "bytes": 673,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_20.json",
+     "sha256": "689787dc8adec5d066d49e5dbea0d0fbec366ad7597498abbff8cd79c78cda5a",
+     "bytes": 670,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_21.json",
+     "sha256": "87813e630df1f0418343e318142d88723b0fb723ca4ef82ed65d2b52c392d262",
+     "bytes": 657,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_22.json",
+     "sha256": "e3461d1f5cd97146c35e1db8808b65b6e5458a5fbbde33837b5f27e4e77c4d91",
+     "bytes": 692,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_23.json",
+     "sha256": "2ae68c232bcfb6b8a32ad223eb542f8d7451ad4073977e60bc43ac7ff3cb413b",
+     "bytes": 722,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_24.json",
+     "sha256": "0728a68473f0b73798af6230719a2b3301d72aed0b9c8c7e44d5b30fead8ad11",
+     "bytes": 686,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_25.json",
+     "sha256": "34fd622cdc48cede2429808c6751f0174201b5db35c3116a05d4f4f1a03806ab",
+     "bytes": 671,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_26.json",
+     "sha256": "8a5b2e6e366366570bdc578cfa894672587be292ef65d1b3d3c9c32d1ba2fcb8",
+     "bytes": 798,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_27.json",
+     "sha256": "ef292b183e32fa87c1fde0f42343066fea6723f242b33cf7abacdef7d377c63c",
+     "bytes": 710,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_28.json",
+     "sha256": "ee67100f93c134666006d63eb8f229e7393201a4a09c18529b4fc5193ccdcad7",
+     "bytes": 651,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_29.json",
+     "sha256": "df215a4b56381612410c63cd0697b22ba0cd12a9cf298f33b117d344f7e8bd2b",
+     "bytes": 669,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_30.json",
+     "sha256": "d2bf2cc887f7cc72ee3a1ae9a0493f02418c9561e1c48b4ffc00a2f9f1934426",
+     "bytes": 665,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_31.json",
+     "sha256": "e066ecef381a5d06b77b843b10e5679e96413b4bf235af91346b7b84f230a122",
+     "bytes": 689,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_32.json",
+     "sha256": "da787631363c4eda2ed832456944a59b06ab73ea6881ffd1ebe5b93b4b8ff555",
+     "bytes": 686,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_33.json",
+     "sha256": "974ec4b9a7c565274f4c57a9c5f35c18909ad899b5f111fd0d1af77c1f995c13",
+     "bytes": 797,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_34.json",
+     "sha256": "4b711f9b14591de9e0e1d5bf5f0a3508e977910a2c34624d91726fbf78273aab",
+     "bytes": 668,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_35.json",
+     "sha256": "2ae229abcb98c37aaebea7bd763702c81b0f6834fd4620d3d46deb611b83677e",
+     "bytes": 698,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_36.json",
+     "sha256": "ffed0671f661b67a7de1175d6ff8c0699677ed0fe0ff9735eb69bae0012c70a8",
+     "bytes": 704,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_37.json",
+     "sha256": "f990f51c618a4f280c821acd49fe422523c36af76e860e2b161bf3f2c420b261",
+     "bytes": 673,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_38.json",
+     "sha256": "278dade692cae442b1be2782068b8da39c48d00b10c38185d4cb4f164fda6cfb",
+     "bytes": 658,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_39.json",
+     "sha256": "d9327123e059a472e26098e703643faaff435ef0864039896659638ff14a5e1e",
+     "bytes": 644,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_allow_insecure_nonloopback_then_dns.json",
+     "sha256": "a6cb8e935278e870ad258014a3fef497739bcce09befe3ab22ed0613a8a45746",
+     "bytes": 990,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_bad_base64.json",
+     "sha256": "81b0cda1295598dcd85ce36b45e7659647ed92b91fe13c33e153ccb89bb8e758",
+     "bytes": 1386,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_blob_null.json",
+     "sha256": "39afa56b037e3c193f34ce97a4e92e4d01f03ff84d705d3eff154b845b472766",
+     "bytes": 1306,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_both_table_env.json",
+     "sha256": "b10e6fb62bac08927176c3aac03f34c32b4e5ef609f31a47a8170d0067eb8ffc",
+     "bytes": 7767,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_corrupt_payload.json",
+     "sha256": "6bc06134f73334f37cd0aa66be20e194406b434ad64001f8b66b2d2661d0ed62",
+     "bytes": 1415,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_empty_passphrase_env.json",
+     "sha256": "4fcecbe1a651e375316aa550151fb2cddfb2311d23a40c8291d6e69e8650f0cc",
+     "bytes": 824,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_http_error.json",
+     "sha256": "1f5f4ea4cb84a1ab6bd381cccaf7a4ef886a9f587deed40949974d448e8bf888",
+     "bytes": 3901,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_legacy_payload.json",
+     "sha256": "f3fcd8d9bc43cb28c972419595e9a7abfad551fb93f00b426b51004282ab9f27",
+     "bytes": 1547,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_paged_cursor.json",
+     "sha256": "bad52d3b3178fb0b8387d7b09270006bbc9274961ea5c2cf173ea73d2f1e6702",
+     "bytes": 821174,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_pull.json",
+     "sha256": "6b9be8c8f3df4b08a9cfd1f3d55cb7313b5c101bca0301681863b72b06893ffd",
+     "bytes": 5600,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_pull_cursor_query.json",
+     "sha256": "fdc2918c3ab86c3c93e223a7e96924a47d5b786ef3af134dc80688326f470e5b",
+     "bytes": 1701,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_push.json",
+     "sha256": "65c1a3951c750529f04fce5550bf1965e41620c94d90bf87b8cfdc84beabdd23",
+     "bytes": 5228,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_push_batches.json",
+     "sha256": "04d123e18c40df11977738728b3fbbd15abf0373eb11fedc29bed0f28a9e9201",
+     "bytes": 342192,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_push_full_row.json",
+     "sha256": "75472d5770970352f4bd24811b080b76317dfd6f850011bb25af54e980b28fb5",
+     "bytes": 3606,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_server_time_precedence.json",
+     "sha256": "1807d0cb4bb9b4b505f945aa59079a9bc2b1f432060e6e5c4b4a4a1437aaa917",
+     "bytes": 5682,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_short_blob.json",
+     "sha256": "3d85e664ea7d1b9bbe89bec55f9b24f15e4e10b04b5e091da46bf6f0220a6e44",
+     "bytes": 1291,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_stored_string.json",
+     "sha256": "86268fce9c002b738cdd418919e5a004d3203a584b4afb70f42c7ae5e2a4487e",
+     "bytes": 5196,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_tombstone_older_than_local.json",
+     "sha256": "9ec4b36528c6fb77ca25f9a49a179a89467ba07fd38e3800438b58751fc21369",
+     "bytes": 4947,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/relay_wrong_passphrase.json",
+     "sha256": "9dfabcb87d25bca2d6a8e84b6a7cae8fe0a8bc5694769a1404ee5ddfdbe83c9b",
+     "bytes": 1712,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/remote_tombstone_retained_pages.json",
+     "sha256": "419b98850db690312584d31eb3bf9351cb69c7b33e18263ee9c2f88b48a93313",
+     "bytes": 2347,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/token_newline_env.json",
+     "sha256": "10f04702729132167b21ca26bc7667a353a8efa0ebbffcff947aac57f562dfd5",
+     "bytes": 1052,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/token_symvault_literal.json",
+     "sha256": "dbdd5a4ebc96cc8dca183cbbcaf23cfbfdc55708abd346d2d12cb0ef3fadc66c",
+     "bytes": 1493,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/token_with_space.json",
+     "sha256": "171ba240b99ff6ed4429df5fc90b62b4f50d4010cac995ec8e9048d123cb0b40",
+     "bytes": 1444,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/tombstone_conflicts.json",
+     "sha256": "50bef6a84c37d6116fd54b293795eb757d74d51c3f7bfa15e3c3c6c39f97df47",
+     "bytes": 7204,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/tombstone_resurrect.json",
+     "sha256": "db67cb911bb5638a531d8a140f7370e52227ac32cd32b6c7ec025fdca8036e24",
+     "bytes": 5636,
+     "last_modified_commit": "1dba845c2b7bd6977587f27a094a862219c84d14"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_00.json",
+     "sha256": "f43d38ae604e2ec7324ae44d4fe40a7b8ea869b38e51c9e2c1d25b5531bb5d6b",
+     "bytes": 775,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_01.json",
+     "sha256": "9b63a22df83c7db90220597071de5bdd14950a7415c762e87e767b95a437767a",
+     "bytes": 707,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_02.json",
+     "sha256": "1ad374b96822f473a7987119a83effa1b0b4643dba947da27d173717194d2c71",
+     "bytes": 795,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_03.json",
+     "sha256": "b6cb75490382d33d393ceb1b24625b69e693e4ec877afa44d313953d5a995dad",
+     "bytes": 689,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_04.json",
+     "sha256": "a527690d5e28eff9c945ed10e1fd8da7f7dfa260c736cee20ff59b7948cdc31a",
+     "bytes": 604,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_05.json",
+     "sha256": "31012a796a03b90ba2371cd54008600953ab74625ab4b5700328705504ae10cc",
+     "bytes": 634,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_06.json",
+     "sha256": "5b206b5119e547d088faf38dcfe20b6cbf5f842226e76527a5e34a9cfe689ed8",
+     "bytes": 647,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_07.json",
+     "sha256": "6ca2d4b895d8f1f2568e9ac3b5ed154be11ed15f5cc0b4ab01d537416b4ac3f4",
+     "bytes": 690,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_08.json",
+     "sha256": "8d681eeac5d373120871a744021f049c1b91b0a801fda668e51cb50125fdbcb4",
+     "bytes": 718,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_09.json",
+     "sha256": "ec012285c91eb47d60c2d70620cb1bdaafabcfa530d547b30ba3b35c58bed981",
+     "bytes": 745,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_10.json",
+     "sha256": "dce279779731719d074f1459e50bdd03999addda77761bc195ba6876b3c8ed09",
+     "bytes": 762,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_11.json",
+     "sha256": "06adaeabd7b1a4262862017ebf51aadbde34a9063df60faac9b5bad01830939b",
+     "bytes": 774,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_12.json",
+     "sha256": "3bb86d991671aaa1680d8f374a9916cb61941a2b2090a75467e2b95bf78f16af",
+     "bytes": 824,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_13.json",
+     "sha256": "ae1f2e030f03d37dd41fd69112ef191c714ef39957c6ae1a0d043515e945e8ef",
+     "bytes": 820,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_14.json",
+     "sha256": "88edc48352322a575a248f6b84c317d024b4ea1236ef0ec322719ea4767de13c",
+     "bytes": 819,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_15.json",
+     "sha256": "d88528b1988a7ac4a1a14c4712f4b52ef6ea52dfb017d75989128bff806ecea8",
+     "bytes": 821,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_16.json",
+     "sha256": "e76d721823b8af26b6e058c65f21586d49fca972344a8080b7d283d0b30cd5c0",
+     "bytes": 819,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_17.json",
+     "sha256": "2d42282ee47e796060310d432bf46eae36ad812e5a3bda18f7a775ea3f7358c6",
+     "bytes": 694,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_18.json",
+     "sha256": "9c43f63f41e2af8ea90d8740c62d06484d7f953d33e6eb1af8f7acb3fa542dee",
+     "bytes": 804,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_19.json",
+     "sha256": "0fcb22b768be935db87a84dcdff4467692b5c464d26081697911ca625278c516",
+     "bytes": 677,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_20.json",
+     "sha256": "c861264f82d668670766d96bcb626ad7457ba745aeeef3becb42753c0f8d9d7f",
+     "bytes": 627,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_21.json",
+     "sha256": "9935d5b881a4eb5eefb578ca7f52f7bf7aae730052b9b653b818eb4f42db1c21",
+     "bytes": 818,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_22.json",
+     "sha256": "8566471df4b526ccbe377f778399a9fb89db4d0ec28dc67f87d42b495c087074",
+     "bytes": 804,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_sync/url_23.json",
+     "sha256": "38d9b9c12aaf821ca830b49497f71cdf5fc07c4b81a7d4925510f64028c35c74",
+     "bytes": 809,
+     "last_modified_commit": "41fb0fa178fb7654917ea82847c3d763fc9af833"
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "2c2327098479d66857b5d50cd930142304587a3a",
+    "origin": "pinned-go-recorded",
+    "go_toolchain": "go1.27.3",
+    "platform": "darwin",
+    "go_inputs": {
+     "go.mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+     "cmd/symbrain": "06f80ab22141dfa1cb745f7cfa547ba4aac9ff62",
+     "internal/memory": "ced54afe5eade7daa7d90ab3aab5401fce1c1c1f"
+    }
+   }
+  },
+  {
+   "id": "memory-native-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain memory list/rules/search/set/delete/serve observations of the real Go CLI with Go-produced seed databases (darwin)",
+   "record": {
+    "kind": "script",
+    "producer": "memory_native recorders described in rust/symbrain-cli/tests/fixtures/memory_native/README.md (needs the deleted Go sources)",
+    "toolchain": "go1.27.3",
+    "note": "every recording carries its own provenance block and payload_sha256"
+   },
+   "fixtures": [
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/README.md",
+     "sha256": "7bd59673b946e2de067cd4b25dfd0904cd5ef42d2cc1c7d375ce23f1dc905c69",
+     "bytes": 2320,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/alias.json",
+     "sha256": "68028400c8e3e3765e76996c692a1502a947b1ae28f1474ec4dd35df5b077731",
+     "bytes": 9419,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/alias.seed.db",
+     "sha256": "85ff2932b37d979c81327b1b3ccb160e0ec9d25a6ae15820fe76259141cc267d",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/band-pending.json",
+     "sha256": "4c21f308525ec0074c482e6b5b7913cf85e0c131a683e1ab3441301c0b2b0cb6",
+     "bytes": 8997,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/band-pending.seed.db",
+     "sha256": "df67233ad05034e64085c25342ff91c4e7c9663d4416809cae695141759c7ab4",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/disabled.json",
+     "sha256": "e4a6528a5f46761e84c4e22048b68ead1ec4283e0c463dc41706dbb8cb003382",
+     "bytes": 8650,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/disabled.seed.db",
+     "sha256": "b347232979f246493786ffcf6b4c9ed99fcc24a0fbdfaf7b4faf3849f62f224a",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/errors.json",
+     "sha256": "2be279058aed62bbea2d7273b79a5d2221d54a70741245ea419c9105e1420ccf",
+     "bytes": 9172,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/errors.seed.db",
+     "sha256": "33b9b8dd2dfe2a8f06fa34cf9eb0806ae6728b6d34449d20f88b0dca4fab8461",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/facts-conflict.json",
+     "sha256": "799256a65ac9d4164dcb74eb8cdaef278844b85d2bc3626906853411c7b78318",
+     "bytes": 17272,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/facts-conflict.seed.db",
+     "sha256": "35391c883d8798696b447cae1ac0828afcd7bb6a8f5a4be74f0fc5b7d0f45e56",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/importance.json",
+     "sha256": "8f25dcb7de69e752836a255a18ab6dc3063292e3f3e6fd0f45534a5306a47037",
+     "bytes": 11882,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/importance.seed.db",
+     "sha256": "b6d433856c02cbfc521896072839682a2b4d17967dee9a0a5d1be448036d4648",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-401.json",
+     "sha256": "c4057b5a7bad1c2619ccb3d670a358c072f4819b1fc0e04d97e7debd960dfb6d",
+     "bytes": 11844,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-401.seed.db",
+     "sha256": "05c066b8492aeecdf356a256b076ac55d279cb3dd1a44185fe1260ace99711b7",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-404.json",
+     "sha256": "3fa53903d35c6f37010a79eca70a99afe3f87a81907bde9543932ddc5e282dac",
+     "bytes": 11854,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-404.seed.db",
+     "sha256": "e8f680205389051502f0d496682f92e1222c1156a1e4adbcaafa10c82ddb25e1",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-429.json",
+     "sha256": "817ec9706e05eb57fbc36dfafb71e898ba94a6853cc0d11e4ee7e6f070554db6",
+     "bytes": 11847,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-429.seed.db",
+     "sha256": "a6d885f85be7a70f574b7a1864b047cab89e17290bfa9344becb833651e5993a",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-500.json",
+     "sha256": "2bc864e239eba3348e7d6391543048949f9e133cfd3f36e9933323377519a923",
+     "bytes": 11844,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-500.seed.db",
+     "sha256": "1c6666bcc9b805a0b59b792e637f1dbb107c5bc5c947dfbd7e40933f8a88c8b2",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-ambiguous.json",
+     "sha256": "6f5f51c40e18b8f7a927271000e7dbeb0403003cb83481006a7d992bdcb2aaae",
+     "bytes": 11744,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-ambiguous.seed.db",
+     "sha256": "5dfbb6a275e57a37c1abc412676d4c6e285c28fd36e720388901bc637cd81903",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-contradiction.json",
+     "sha256": "da46476fdd2e55e0733493f3200f4048ba8ab6cdd7bddbdc4bdbcda0e267f0c8",
+     "bytes": 11602,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-contradiction.seed.db",
+     "sha256": "02cfc8ca2018fdbc1d5113776212d0e342e290e2c24acaf66b50f417130085e3",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-garbage.json",
+     "sha256": "cf543d92e01063c87f46181ec3503649dce34a0815693de00d49f7ee581085c5",
+     "bytes": 11740,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-garbage.seed.db",
+     "sha256": "3fc488350225df8b200c8a6cd6042e6bd040a8de5e01b47f566d769d8c73ec7a",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-repeat.json",
+     "sha256": "99bb0c7a9e3ede14ebb8667fc7e0097872785a74e5996b599fa7a5232059d7bf",
+     "bytes": 11588,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-repeat.seed.db",
+     "sha256": "fe13503ef30d962e8b7244f655b80b18464c5e4a731b431dce3e76e28106c7b8",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-salvaged.json",
+     "sha256": "c4fc21240ab7ca9a1d5738108eb3a64af2a95b1fe85424759a33a19e90800372",
+     "bytes": 11592,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-salvaged.seed.db",
+     "sha256": "108cc475946446db2cd85a1435e7cc020516f58b022a98bc33e0ff9bd6381be9",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-unreachable.json",
+     "sha256": "a91e1d0112c42126e1b68bf08fa766f121a9a3c9e14a5f5a63fed778adf3df9b",
+     "bytes": 9334,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-unreachable.seed.db",
+     "sha256": "06ea212b50099a4847285816b2efa27cc8dcf7cc5c7fa6e5c48246a476cde9b1",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/near-dup.json",
+     "sha256": "ffdb14327f603a360c4a282e893b81ad1ec026424ff1190d1160916cd9547fec",
+     "bytes": 8898,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/near-dup.seed.db",
+     "sha256": "7b2e60f7df1716f541f31917c603b1908859d3b921fa5cbea39716dac81a244e",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/ollama-source.json",
+     "sha256": "54ec4a9e29b2567b71e16ab9599d77b2adf3208f792804b4bf6f0c709dac3685",
+     "bytes": 9152,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/ollama-source.seed.db",
+     "sha256": "0108a0627281d8d5bde704f44e5f81c9914673f0af13d731ad3d67ea0e050f8d",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/openai-nokey.json",
+     "sha256": "86347d9458eb9379eb110896253b96acd07ee1b36a435d91bce22b5d3a19fcdf",
+     "bytes": 9274,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/openai-nokey.seed.db",
+     "sha256": "5afd86bac1bdab34da61c6f99580bf5953a7af69862e6c36a88096826169ba02",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/pii-meta.json",
+     "sha256": "cfc848ddc1b23b9859cfbc1465f3dcd6e6da321b6d0f8bf38caa2239acbd1e54",
+     "bytes": 13217,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/pii-meta.seed.db",
+     "sha256": "713ffd658a10869f80ccb6301003a62bd9848d454ce1ce22a9cbce6c248cfa00",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/project-entities.json",
+     "sha256": "92ad93deeb2df99d43271d8aff867eb4542c9ac1d524483c4bee4b8c674933fe",
+     "bytes": 10655,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/project-entities.seed.db",
+     "sha256": "38ad9c561fd4857fc3ab1435ae308352c8205f9dd54a76711da385fee5f6c1da",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/quantize.json",
+     "sha256": "2834578ebdc9af8a111a8fd83c5a0f7862720c8b81c8013bf25db3aaca620a8e",
+     "bytes": 5575,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/quantize.seed.db",
+     "sha256": "89ff49db8a3fa9d8f38b3352b0b6bdb4a969f57f911a687c7e253eac251db405",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/raw-bytes.json",
+     "sha256": "9715d476438abe5faf2a73d18e3c908d23530470803ced5e8e6e43ac57d2286b",
+     "bytes": 5918,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/raw-bytes.seed.db",
+     "sha256": "06741dcec89b720c4b0418de7866a4d6cd6f8f1642356636c420f836d6d66abc",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/thresholds.json",
+     "sha256": "5516b32cbd14310ead49b746d421d1eab58dfd64439abe73bcd4d7f199d2feff",
+     "bytes": 9085,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/thresholds.seed.db",
+     "sha256": "222c39c329b10781c692facb1e5566cccfe344645867478aea723be7052dd795",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-escaped-id.json",
+     "sha256": "76a76d137cc07d9fd8012a1203b431a6682bc3c968efff6e61e04d0352893d72",
+     "bytes": 11870,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-created.json",
+     "sha256": "a8357541cdb20530cef30c688f639af0b63d1cf38dc703415c002522e2339bb3",
+     "bytes": 12153,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-embedding.json",
+     "sha256": "8b2f121a9c81fc843e43a6953b4cd903a66c65e4efc6fb7e94b5f213e6c162e8",
+     "bytes": 12622,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-importance.json",
+     "sha256": "27da19819653772b1320820d9d9a3056d9c3fab12170c8a042619b56d74b007b",
+     "bytes": 12153,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-leap.json",
+     "sha256": "ed6262c28875db373de61908a48e3942192bd95d7328f7da80e059ebc25f66e1",
+     "bytes": 12169,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-metadata.json",
+     "sha256": "c4252ddfc32c5eb12373d81a3aa2703db66537eb3e7dd8a775a31acaf3113ac7",
+     "bytes": 11676,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-non-utf8-id.json",
+     "sha256": "a26c847d94bcfef153b50f7d7e3ee799546695dde7831efdb0b0260941cc5828",
+     "bytes": 12063,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-plain.json",
+     "sha256": "41ad9016b69abc46f3f9b275547df07a9b0e0748b6fd7e2d4d33b0cd8288ae95",
+     "bytes": 9288,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-trimmed-id.json",
+     "sha256": "7c4d5d88667fb216b880ba297dec6cee76f07cb7cc7de4dc2d2cacabb71f5a45",
+     "bytes": 11060,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-broken.json",
+     "sha256": "b910ac6f97cf5c9c0f17e130b0dc7c85454cc78c45a87390341735c7aec2304a",
+     "bytes": 14459,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-empty-list.json",
+     "sha256": "9b2e6b86c9bb9ba651a475db9c0784edfb8e4dc6b215d0229eceb8f6a1671fe3",
+     "bytes": 16626,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-empty.json",
+     "sha256": "335b40df0e42508ce0453676fb0cf20d2fa61caf7f85dee922c6b2008b8bdb44",
+     "bytes": 14398,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-integers.json",
+     "sha256": "2a84ec6c98a2ce6881883b63650ea1e9794d77afb6b2c54f5d591e0531dc4089",
+     "bytes": 16634,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-nan-text.json",
+     "sha256": "0c28fe30491949a1a0ea241428801e503a3c18129a4bdff609fe43ca2a55651c",
+     "bytes": 14459,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-null-member.json",
+     "sha256": "1cd9846f224368286071a11c564252ddd2e27cd98f49a97efc4510754f99a498",
+     "bytes": 16635,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-null.json",
+     "sha256": "71fbc1718f6871c1cc224f154a8d1c2a08477dc9f5fe13727b7a099f4171cfdb",
+     "bytes": 16624,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-object.json",
+     "sha256": "a3fd986ec709e21e2fa6d716cfcb5c776320b6230ccfa6e6dafb855113adb0a1",
+     "bytes": 14469,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-overflow.json",
+     "sha256": "3377be832a550c5ef28864a6b5f437bf3ae53c52e9e3cb962d8c0f77a605ab51",
+     "bytes": 14473,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-short.json",
+     "sha256": "fb496abe9679a89df238dfdfe34d48be52621115f50ab7211e36e0db486bc881",
+     "bytes": 16627,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-strings.json",
+     "sha256": "80aef0b49cccecff577009fd12266b1c8f7f4dd43244b8a666f5403636612b1d",
+     "bytes": 14468,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-trailing.json",
+     "sha256": "3e7ad892e1280a6763cce7bb69b43b5dd0230ac8c630e54ead4a84da4afb6f86",
+     "bytes": 14445,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-array.json",
+     "sha256": "ab0921edd6ee14e462e99a80b6b1ed126e3664c2d9d77490abe715124f79130e",
+     "bytes": 13385,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-big-key.json",
+     "sha256": "63df4f6fbbbe6ed46dc8bb9eddafea2a15d27e85092a07ea2781a0737a71e3ec",
+     "bytes": 18536,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-broken.json",
+     "sha256": "733f4c9f9de33476bf0696d40814e55f3c3c8f0ac3bffbd350066f52acbeea1e",
+     "bytes": 13330,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-duplicate-keys.json",
+     "sha256": "f31495225b31b61ab3b885874353a58e6ea7a1711b0682ca9f4d042081a3352e",
+     "bytes": 18547,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-empty.json",
+     "sha256": "a008966104c58eaded25e75f6d6e1f21b4311cb9d3bc79ca3844644b32bbbd22",
+     "bytes": 13221,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-escapes.json",
+     "sha256": "4837072a747bcf1cc346dca2862684e49fe8ca5bc0b091368960a6f578d45be1",
+     "bytes": 18616,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-false.json",
+     "sha256": "4aa5ce15f7809906ed4b0e32bfe16b7d220b8faaa87a9295b5532001060ed4e4",
+     "bytes": 13387,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-nested.json",
+     "sha256": "245b0e2eae90aa9b506ab352d61b79fc149340d5be0119ec0df29421d5ea78a5",
+     "bytes": 13436,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-null-member.json",
+     "sha256": "3c6b08478bf3a55e03b914d2ea1506b0120c76de2e95f03e775c9208616026e4",
+     "bytes": 18504,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-null.json",
+     "sha256": "0493a1fd4af760b0b245bd0725b0ef3277e6950675d9b42d65a3aa837cffbefd",
+     "bytes": 18461,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-number-member.json",
+     "sha256": "14fbe200b3fff5fffdd03bee103fbc8038bd289586591e7b7962f9711115c335",
+     "bytes": 13411,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-spaced.json",
+     "sha256": "0b0c01af8ab41d8700ff4283c1dbc83ab697a39aa924e4964f4884c570913a3a",
+     "bytes": 18515,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-trailing.json",
+     "sha256": "1f3964483898ce6d7ee8ee32f9c9b992ae0d9a0d1b5b9649cf56569a60bc7734",
+     "bytes": 13322,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-conflict.json",
+     "sha256": "fcf73e0eaf1865d40d6497749e6dfd9b4e5c47c9297aff74c3f2382292b7eb43",
+     "bytes": 24275,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-conflict.seed.db",
+     "sha256": "956442c70100b681338310bce45e9f83611b699e68f9de1f002a27f95a617b9f",
+     "bytes": 454656,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-no-binary.json",
+     "sha256": "6c79f9633896a02b89798b190d78f580ca8d0384c36b0e52aa2e8f03c6f08d17",
+     "bytes": 303071,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-no-binary.seed.db",
+     "sha256": "ef0661c4b117da2cd904bf43e0fc7d58cc0309e7b09c1fd5b825cb7cf99c0938",
+     "bytes": 864256,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-small.json",
+     "sha256": "308075e5c1eac6c260b551946650de0813b3432db07c7dbf5eda301be6ffa5b6",
+     "bytes": 75403,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-small.seed.db",
+     "sha256": "bc1c8af1e585a80b96f06ab8ad10797beba05433bf58f78911a915bbc33aa77d",
+     "bytes": 516096,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter.json",
+     "sha256": "6d450e84bc750d8de6d7ca835bb7a8b0086a0c1fbabe5829ab40e72c5acec6fd",
+     "bytes": 372345,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter.seed.db",
+     "sha256": "0e3d6590926946dcbfd64634ca30dee17089fe416652ca1c74b8f765bb503200",
+     "bytes": 864256,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-access-count-real.json",
+     "sha256": "8500e4997bc2b549195a4556eb395f0e585cbca2caf0146b06918ada8590a030",
+     "bytes": 13983,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-content-blob.json",
+     "sha256": "8bac2abc23ec94a9ed907f971d7add71460b0d515660093abc0c8be5322577dc",
+     "bytes": 19864,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-content-int.json",
+     "sha256": "e87fa613f0b840c4c62ecf2e97b759c09855e519ee2580ccdfe19e0c217dde02",
+     "bytes": 19271,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-empty.json",
+     "sha256": "bfdbcde6b1158f4f5aa6da86e3653bb71e48bff75e4328b16eed7340ca88168c",
+     "bytes": 13950,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-integer.json",
+     "sha256": "bad67a2a74ae6d122443b49652c455024cc25ae99f778fbbf26c18a7b20ff843",
+     "bytes": 13962,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-invalid.json",
+     "sha256": "e6e7b88a835e227f796261e0ffac4247f28514417cb7645853b5b7aa6dd9be32",
+     "bytes": 13966,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-leap.json",
+     "sha256": "c4ccf985acd68d8d570892e77cb48c97a4bb5966f695e8c657796ea5d8e6804b",
+     "bytes": 13982,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-offset.json",
+     "sha256": "288439f21ca5880705b6efabad4aea2088d4599f3491b4209a367b2206926c2b",
+     "bytes": 19404,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-rfc3339.json",
+     "sha256": "8190614b40de6b1fed0f47ccd878e60ece8d9154b71f3cc7669b89b17078eeb2",
+     "bytes": 19332,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-expires-text.json",
+     "sha256": "090d647e9b0b0b9f59f3643012618cc33d5b2952ef0bd572eeb220e95c5d16c3",
+     "bytes": 13965,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-importance-text.json",
+     "sha256": "74ef39503b7e186d392352d40da1ffe786e50d16f472fad6aa4de7f293bda1bd",
+     "bytes": 13985,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-kind-empty.json",
+     "sha256": "5f346635b2465b75ddacbe85cb8a15a57e495c817be9baf9a2cf765b70b01676",
+     "bytes": 19272,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-last-access-fractional.json",
+     "sha256": "16646c4dcd1db8ed9c4562c0f8896afc2b5f0600ba09056ba30f932cd499fe6e",
+     "bytes": 19412,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-scope-blob.json",
+     "sha256": "c49440daf841e4ceeba343e28036348406556000b5d58f04e3f70fb0fc59992f",
+     "bytes": 19885,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-updated-invalid.json",
+     "sha256": "2c9bd83e9e6aeed83722548dd412b9cd7878119c803ac7c91f7072511f77c049",
+     "bytes": 13974,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-valid-to-invalid.json",
+     "sha256": "c6ea72c111ea3e712b17047c460438a87eb515882bbddeb8fac9c934599f86cd",
+     "bytes": 13951,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-created-invalid.json",
+     "sha256": "7f56ab197ae42b0f107d483ccd6e49b83ca9edd2db4ff4b0fb507c5291b462a0",
+     "bytes": 12819,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-metadata-broken.json",
+     "sha256": "74675c3a5250143fbf294c5d84bdb927e00c9c16a6ec625818d6a97dbd6f89a9",
+     "bytes": 12840,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-metadata-null.json",
+     "sha256": "c7b32d5e01c576c8975425732487cc29f8b0ab713c9b1e3df1365888d99908af",
+     "bytes": 12834,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-metadata-number.json",
+     "sha256": "871e245358c44bfcd144ed97abc2fd69fd9d58a3e40087029c68c1129f5954b3",
+     "bytes": 12850,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-plain.json",
+     "sha256": "a58956b737aa0a102470117333291ae97f96f2cc4d9415ccd4f61c7793d92aa7",
+     "bytes": 12544,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-scoped.json",
+     "sha256": "92f5f6e86cb74e7db2060cff4080d790a6d201cd16e8f0c4e7ea8d5135b54f84",
+     "bytes": 13020,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/seed-rows3.db",
+     "sha256": "3d3daf3f33ebe0967d3c2b431761a45654fccb59cbec454c78b85953570d524b",
+     "bytes": 446464,
+     "last_modified_commit": "b9b5b85b8488a96f8c3c79530d4edec73434c13a"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/dedupe.json",
+     "sha256": "05c39299b09419ac231557be695861aa91ea308ea1e2105f51f29c54cc2b3627",
+     "bytes": 5547,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/dedupe.seed.db",
+     "sha256": "ad93ec9047d8e214430b919d8ff08fd6484a8eb4e296c7fb727ddf484130311e",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/extract.json",
+     "sha256": "ab0e9df98c91a7d75051d894c19f3b149fa2b0672e86ed40ee376f5a9c476e11",
+     "bytes": 11250,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/extract.seed.db",
+     "sha256": "a7b7e9b01fb1a73397217a8d4e95f22e61ce065c8e3d7abc1b99179e30ba46aa",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/pii.json",
+     "sha256": "493b68e4118563207938c693143555c00e4f741a0cc6fa309aa7ebf7df32aa76",
+     "bytes": 5325,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/pii.seed.db",
+     "sha256": "4b77d6a2596e488399b9389d406c5f074f6dc40bf40bdf3745e4585b4ac09044",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/plain-default.json",
+     "sha256": "0abfd7e61ed5a5b3b82e6a092e4aa04214ea1fae3d364d56e1a5cea979b11306",
+     "bytes": 8219,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/plain-default.seed.db",
+     "sha256": "e1d627edee199a52985c33c2982e13c1875f6ed6c43c82fb7b6207c60825cba7",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/staged.json",
+     "sha256": "78a798251dd701086bf55e076a7a82acbd5f314dce8d228593c1d3cdd14fe6cf",
+     "bytes": 8363,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/staged.seed.db",
+     "sha256": "f4e07c7bd9230c3315ec0e2026a911517d15b770a8a7b744873448412538ed10",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/table.json",
+     "sha256": "e529502f17bce8af197478853b853f30e1adc437e6d899fe9f5f4851bb7ef30f",
+     "bytes": 4976,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/table.seed.db",
+     "sha256": "337dd295315b93a83a9a37c1157ba7c1903bf8d3acdb6c34ca05d59919b046aa",
+     "bytes": 434176,
+     "last_modified_commit": "1ce855074bb5394190a404f17c86c24320402f9c"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/bind_failure.json",
+     "sha256": "f9630b8e05b1fdc594be62a1ddc151b85c576bdfcf99c11ba6afdb6836db438d",
+     "bytes": 1264,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/flag_errors.json",
+     "sha256": "85fff72eb9662e268a7b985ca1bd312cc65004c263dbdaf2493ede049288c7b5",
+     "bytes": 13118,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/jwt_secret.json",
+     "sha256": "f2443f51bfad98a09f6f9602e7cba0244ea397aa7f0ac47ddd00afee451be28e",
+     "bytes": 1155,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/pipelines.json",
+     "sha256": "f8103277bc705f4c999a373d084b903e8ef52f31ef54f6effd80ecc1797a5be2",
+     "bytes": 6533,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/rate_limit.json",
+     "sha256": "2f5a89841e63573cf6dd2045665890c713f6bcb72248e21cebe9829be6860211",
+     "bytes": 1518,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/remote_sync.json",
+     "sha256": "167b738df49fe63f2f3caf30900e3612faf2a92c2e101a2263452f2024526617",
+     "bytes": 22166,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/route_matrix.json",
+     "sha256": "861ddec07185824d8dae3f20db7b5729b28397f1978b8b22556f862a05a5ea11",
+     "bytes": 231350,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/seed.db",
+     "sha256": "3cbc9860a9def8388b42388151407a76f0a3deb1dde8b4c045ade34b5b449d14",
+     "bytes": 450560,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/seed.json",
+     "sha256": "8a7fc1637ef9251736fa2f091acad15c6721edb8cc65d36b4f37d9c78e40686b",
+     "bytes": 284,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    },
+    {
+     "path": "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/unusable_database_path.json",
+     "sha256": "37ffa074acf95914fc34f8bd59a664cd05d0cf0860589383ab9088e1ba553d38",
+     "bytes": 1244,
+     "last_modified_commit": "7d31e171dc039d4a6138e7a411198956834a2874"
+    }
+   ],
+   "provenance": {
+    "sealed_at_commit": "2c2327098479d66857b5d50cd930142304587a3a",
+    "origin": "pinned-go-recorded",
+    "go_toolchain": "go1.27.3",
+    "platform": "darwin",
+    "go_inputs": {
+     "go.mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+     "cmd/symbrain": "06f80ab22141dfa1cb745f7cfa547ba4aac9ff62",
+     "internal/memory": "ced54afe5eade7daa7d90ab3aab5401fce1c1c1f"
+    }
+   }
   }
  ]
 }

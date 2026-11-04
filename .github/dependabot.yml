@@ -1,11 +1,14 @@
 version: 2
 updates:
-  - package-ecosystem: "gomod"
-    directory: "/"
+  - package-ecosystem: "cargo"
+    directories:
+      - "/"
+      - "/browse"
+      - "/fuzz"
     schedule:
       interval: "weekly"
     groups:
-      go-minor-patch:
+      cargo-minor-patch:
         update-types:
           - "minor"
           - "patch"

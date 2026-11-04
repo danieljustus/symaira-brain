@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-"""Tests for package.py; the bundle check uses the real dist-oracle when Go is available."""
+"""Tests for package.py: reproducible archives and the release-contract check."""
 
 from __future__ import annotations
 
 import hashlib
 import os
 import shutil
-import subprocess
 import sys
 import tarfile
 import tempfile
 import unittest
-import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -25,15 +23,14 @@ class Package(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp(prefix="rust-release-test-"))
         self.addCleanup(shutil.rmtree, self.tmp)
-        self.rust, self.go = self.tmp / "rust-bin", self.tmp / "go-bin"
+        self.rust = self.tmp / "rust-bin"
         self.rust.write_bytes(b"rust")
-        self.go.write_bytes(b"go")
 
     def build(self, out: Path, goos: str, goarch: str, epoch: str = "1700000000") -> Path:
         os.environ["SOURCE_DATE_EPOCH"] = epoch
         self.addCleanup(os.environ.pop, "SOURCE_DATE_EPOCH", None)
         package.main(["archive", "--version", VERSION, "--os", goos, "--arch", goarch,
-                      "--rust", str(self.rust), "--go", str(self.go), "--out", str(out)])
+                      "--rust", str(self.rust), "--out", str(out)])
         return out / package.archive_name(VERSION, goos, goarch)
 
     def test_tarball_members_modes_and_reproducibility(self):
@@ -42,7 +39,7 @@ class Package(unittest.TestCase):
         self.assertEqual(first.read_bytes(), second.read_bytes())
         with tarfile.open(first) as archive:
             info = {m.name: m for m in archive.getmembers()}
-        self.assertEqual(sorted(info), ["AGENTS.md", "LICENSE", "README.md", "symbrain", "symbrain-go"])
+        self.assertEqual(sorted(info), ["AGENTS.md", "LICENSE", "README.md", "symbrain"])
         self.assertEqual(info["symbrain"].mode, 0o755)
         self.assertEqual(info["README.md"].mode, 0o644)
         self.assertEqual({(m.uid, m.gid, m.mtime) for m in info.values()}, {(0, 0, 1700000000)})
@@ -55,7 +52,7 @@ class Package(unittest.TestCase):
     def test_rejects_v_prefixed_version(self):
         with self.assertRaises(SystemExit):
             package.main(["archive", "--version", "v0.12.1", "--os", "linux", "--arch", "amd64",
-                          "--rust", str(self.rust), "--go", str(self.go), "--out", str(self.tmp)])
+                          "--rust", str(self.rust), "--out", str(self.tmp)])
 
     def test_checksums_cover_every_archive_in_sha256sum_format(self):
         out = self.tmp / "bundle"
@@ -67,20 +64,36 @@ class Package(unittest.TestCase):
             digest, name = line.split("  ")
             self.assertEqual(digest, hashlib.sha256((out / name).read_bytes()).hexdigest())
 
-    @unittest.skipUnless(shutil.which("go"), "dist-oracle needs Go")
     def test_full_bundle_passes_the_release_contract_check(self):
         out = self.tmp / "bundle"
         for goos, goarch in package.PLATFORMS:
             self.build(out, goos, goarch)
         package.write_checksums(out)
-        check = ["go", "run", "./scripts/dist-oracle", "-hybrid-candidate-check", "-platforms", "all",
-                 "-version", VERSION, "-assets", str(out)]
-        result = subprocess.run(check, cwd=package.ROOT, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("PASS 3 archives", result.stdout)
-        (out / package.archive_name(VERSION, "darwin", "arm64")).unlink()
+        self.assertEqual(package.verify(VERSION, out), [])
+        self.assertEqual(package.main(["verify", "--version", VERSION, "--dir", str(out)]), 0)
+
+    def test_contract_rejects_missing_tampered_and_extra_archives(self):
+        out = self.tmp / "bundle"
+        for goos, goarch in package.PLATFORMS:
+            self.build(out, goos, goarch)
         package.write_checksums(out)
-        self.assertNotEqual(subprocess.run(check, cwd=package.ROOT, capture_output=True).returncode, 0)
+        darwin = out / package.archive_name(VERSION, "darwin", "arm64")
+        darwin.write_bytes(darwin.read_bytes() + b"x")
+        self.assertIn(f"{darwin.name}: checksum mismatch", package.verify(VERSION, out))
+        darwin.unlink()
+        package.write_checksums(out)
+        self.assertIn(f"missing archive {darwin.name}", package.verify(VERSION, out))
+        self.assertEqual(package.main(["verify", "--version", VERSION, "--dir", str(out)]), 1)
+
+    def test_contract_rejects_a_go_fallback_member(self):
+        out = self.tmp / "bundle"
+        for goos, goarch in package.PLATFORMS:
+            self.build(out, goos, goarch)
+        name = package.archive_name(VERSION, "linux", "amd64")
+        entries = package.members(self.rust) + [("symbrain-go", b"go", 0o755)]
+        package.write_archive(out / name, sorted(entries), 1700000000)
+        package.write_checksums(out)
+        self.assertTrue(any("members" in problem for problem in package.verify(VERSION, out)))
 
 
 if __name__ == "__main__":

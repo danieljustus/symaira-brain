@@ -153,7 +153,9 @@ def seal(root: Path = ROOT, only: set[str] | None = None, verified: dict | None 
         previous = {g["id"]: g for g in load(root / "migration/evidence/oracle-freeze-781/manifest.json")["groups"]}
     head = git("rev-parse", "HEAD")
     go_toolchain_default = ""
-    for line in (root / "go.mod").read_text().splitlines():
+    go_mod = root / "go.mod"
+    # The Go sources are gone; re-seals keep the toolchain the record names.
+    for line in (go_mod.read_text().splitlines() if go_mod.exists() else []):
         if line.startswith("go "):
             go_toolchain_default = "go" + line.split()[1]
             break

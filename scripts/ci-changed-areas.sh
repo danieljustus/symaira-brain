@@ -4,7 +4,7 @@
 # GitHub-hosted macOS jobs they can affect in .github/workflows/ci.yml and
 # prints `native=true|false` and `gui=true|false` for $GITHUB_OUTPUT.
 #
-#   native: rust-migration-macos, rust-mcp-fuzz-smoke, rust-init-native
+#   native: build-test-macos, rust-mcp-fuzz-smoke
 #   gui:    gui (Xcode build of the Swift app and SymBrainCore tests)
 #
 # Fail-closed by design: a path this table does not list as inert or
@@ -41,7 +41,7 @@ while IFS= read -r path || [ -n "$path" ]; do
     scripts/check-app-icons.sh | scripts/build-module-packages.sh | \
     scripts/create-symaira-dmg.sh | *.swift)
       native=true; gui=true ;;
-    # Native-only: Go, Rust, the migration oracles and other scripts. The gui
+    # Native-only: Rust, the frozen migration evidence and other scripts. The gui
     # job never reads these, so only native jobs run for them.
     *.go | go.mod | go.sum | Makefile | Cargo.toml | Cargo.lock | rust-toolchain.toml | \
     deny.toml | cmd/* | internal/* | rust/* | migration/* | browse/* | operate/* | \

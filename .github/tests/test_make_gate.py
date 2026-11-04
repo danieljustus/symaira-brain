@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Go-free policy tests for the Makefile gates and dependency policy (ORACLE-FREEZE-781).
 
-These replace the Makefile/deny.toml assertions of the Go tests in
-rust_workflow_test.go. Workflow-YAML assertions stay in the Go tests until the
-CI workflows are rewritten by the coordinator.
+No gate target may reach a Go toolchain or Go binary, even transitively.
 """
 from __future__ import annotations
 
