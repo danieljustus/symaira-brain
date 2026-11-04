@@ -10,6 +10,23 @@ the [Unreleased] section is moved into a dated version section.
 ## [Unreleased]
 
 ### Removed
+- **Go implementation removed; symbrain is Rust-only.** The Go sources
+  (`cmd/`, `internal/`, `guard/cmd`, `guard/internal`, `browse/cmd`,
+  `browse/internal`), `go.mod`/`go.sum`, GoReleaser, the Go CI jobs and the
+  live Go-oracle differential harnesses are gone. The Rust CLI no longer looks
+  for a `symbrain-go` fallback (`SYMBRAIN_GO_BINARY` is ignored); every command
+  is native. Release archives contain only `symbrain` and the documentation,
+  and the Homebrew formula installs only `symbrain`. There is no rollback to
+  the Go releases. The Go behavior stays pinned by 519 sealed, replayed
+  fixtures (`scripts/oracle-freeze`). Paired release-binary measurements on
+  macOS arm64 (60 alternating runs per workload): median RSS 40–65% lower,
+  p95 latency at most 3.4% higher on one workload and lower on the others.
+- Browse: the public Go `formflow` package (in-process web-form automation
+  API) is removed with the Go sources. No repository imported it and its Go
+  module path no longer resolves; `browse/docs/form-automation-contract.md` is
+  kept as the contract for a future Rust port.
+- `symbrain setup --from-source --modules browse` builds the Rust
+  `symbrowse-cli` with Cargo instead of `go build`; no Go toolchain is needed.
 - Browse: the `compat` transport (Go/AzureTLS sidecar) is retired. The Rust
   `symbrowse-compat` sidecar client and the daemon's `compat` fetch path are
   removed, and the `compat-sidecar` and `fetch-fingerprints` harness suites

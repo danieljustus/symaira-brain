@@ -5,40 +5,37 @@ of getting set up and what's expected in a pull request.
 
 ## Prerequisites
 
-- Go 1.26 or newer
-- `CGO_ENABLED=0` (the release build is CGO-free)
+- [rustup](https://rustup.rs); the toolchain pinned in `rust-toolchain.toml`
+  is installed automatically.
+- For `make rust-check`: `cargo install cargo-audit --version 0.22.2 --locked`
+  and `cargo install cargo-deny --version 0.20.2 --locked`.
 
 ## Dev setup
 
 ```bash
 git clone https://github.com/danieljustus/symaira-brain.git
 cd symaira-brain
-make build       # CGO_ENABLED=0 go build -o symbrain ./cmd/symbrain
-make test        # go test ./...
+make build       # release symbrain binary
+make test        # cargo test --workspace
 ```
 
 Other useful targets:
 
 ```bash
-make test-race   # go test -race ./...
-make lint        # golangci-lint if available, else go vet
-make fmt         # gofmt -w -s .
-make fmt-check   # fail if gofmt would change any file
-make vet         # go vet ./...
+make lint        # rustfmt check + clippy -D warnings
+make fmt         # cargo fmt --all
+make fmt-check   # fail if rustfmt would change any file
+make rust-check  # complete gate, as in CI
+make parity-smoke init-differential   # frozen Go-transcript replays
 ```
 
-The following command covers Go checks, not the full CI matrix. Before opening a
-PR, run it; see the [CI workflow](workflows/ci.yml) for Rust migration,
-native-platform, module, and GUI jobs.
-
-```bash
-go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
-```
+See the [CI workflow](workflows/ci.yml) for the browse, Swift, GUI, fuzz and
+coverage jobs.
 
 ## Code style
 
-- Format with `gofmt -s` (`make fmt-check` enforces this in CI).
-- Follow the architectural conventions, package layout, and boundary
+- Format with rustfmt (`make fmt-check` enforces this in CI).
+- Follow the architectural conventions, crate layout, and boundary
   rules in [AGENTS.md](../AGENTS.md) — this file only covers setup and
   process; AGENTS.md is the source of truth for how the code is
   organized and why.
@@ -51,7 +48,7 @@ go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 - Reference the issue a PR addresses (e.g. `Closes #123`) where one
   exists.
 - Make sure `make test` and `make lint` pass locally before requesting
-  review. CI runs race-enabled Go tests and the Go lint/build gate, plus the
-  Rust, native-platform, module, and GUI jobs; see [the workflow](workflows/ci.yml).
+  review. CI runs the complete Rust gate on Linux and macOS plus the browse,
+  module, and GUI jobs; see [the workflow](workflows/ci.yml).
 - Fill in the PR template's Testing and Checklist sections — reviewers
   use them to verify what was actually exercised.

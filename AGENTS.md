@@ -19,8 +19,8 @@ Product targets are **macOS on Apple Silicon, iOS, and Web**. Native Windows and
 MCP gateway, with one profile per harness connection controlling what that
 harness is allowed to see.
 
-Two of the three now live in this repository: memory (`internal/memory`) and
-skills (`internal/skills`) were absorbed by the repo consolidation on
+Two of the three now live in this repository: memory (`rust/symbrain-memory`) and
+skills (`rust/symbrain-skills`) were absorbed by the repo consolidation on
 2026-08-21 (steps 4 and 7), together with guard (`guard/`). Only `symvault`
 remains a separate process, deliberately — the secret store assumes its caller
 is untrusted. The separate credential process is defense-in-depth alongside service-side authorization, scoped grants and protected IPC; it is not a complete same-user sandbox.
@@ -35,8 +35,8 @@ Symbrain is explicitly **not**:
   unless a profile declares them.
 - **A second `symguard`.** See "Brain ↔ Guard Boundary" below.
 - **A second `symskills`.** Skill rendering/installation was absorbed on
-  2026-08-21 and now runs in-process through `internal/skills` (driven by
-  `internal/skillsrunner`). No external `symskills` binary is resolved or
+  2026-08-21 and now runs in-process through `rust/symbrain-skills` (driven by
+  `symbrain sync` / `symbrain skills`). No external `symskills` binary is resolved or
   executed, and the CLI surface lives here as `symbrain skills`.
 - **A remote memory or credential store.** Memory and skills are embedded
   in-process (absorbed 2026-08-21); credentials stay behind the separate
@@ -72,110 +72,113 @@ Consequences:
 
 ## Project Structure
 
+The Go implementation was removed after the Rust cutover (2026-11-04). Its
+observable behavior stays pinned by sealed, replayed fixtures
+(`scripts/oracle-freeze`, `migration/evidence/oracle-freeze-781`).
+
 ```
 symaira-brain/
-├── cmd/symbrain/          # Go CLI entrypoint and migration oracle (main package)
-│   └── main.go
-├── internal/              # Private packages (not importable outside this module)
-│   ├── profile/           # Profile schema (TOML), loading, validation, defaults
-│   ├── policy/            # Exposure policy: allow/deny lists, mode presets
-│   ├── broker/            # MCP client: spawn, initialize, tools/list, tools/call,
-│   │                      #   child lifecycle (health, crash-restart with backoff)
-│   ├── gateway/           # MCP server side: handshake, catalog merge,
-│   │                      #   namespacing, routing, error mapping
-│   ├── catalog/           # Tool catalog: namespacing rules, collision detection
-│   ├── audit/             # JSONL audit log, redaction rules
-│   ├── instructions/      # Canonical instructions source + managed blocks
-│   ├── adapter/           # One small module per harness (claude, codex, cursor,
-│   │                      #   opencode, antigravity): instructions + MCP config
-│   ├── harness/           # Harness registry: config paths, formats, backup
-│   ├── memory/            # Absorbed symmemory: store, entities, consolidation
-│   ├── skills/            # Absorbed symskills: skill SSOT, MCP tools
-│   └── skillsrunner/      # In-process render+install pipeline used by
-│                          #   `symbrain sync` and `symbrain skills`
-├── rust/                  # Incremental native Rust crates and shared test support
+├── rust/                  # Root Cargo workspace members
+│   ├── symbrain-cli/      # `symbrain` binary: argument parsing and command dispatch
+│   ├── symbrain-core/     # Shared primitives: config, XDG paths, exit codes, output
+│   ├── symbrain-policy/   # Profile schema (TOML), exposure policy, mode presets
+│   ├── symbrain-broker/   # MCP client: child spawn, lifecycle, crash-restart
+│   ├── symbrain-gateway/  # MCP server side: handshake, catalog merge, routing
+│   ├── symbrain-mcp/      # JSON-RPC and MCP stdio framing
+│   ├── symbrain-catalog/  # Tool catalog: namespacing rules, collision detection
+│   ├── symbrain-audit/    # JSONL audit log, redaction rules
+│   ├── symbrain-instructions/ # Canonical instructions source + managed blocks
+│   ├── symbrain-adapter/  # Per-harness instruction adapters
+│   ├── symbrain-harness/  # Harness registry: config paths, formats, backup
+│   ├── symbrain-memory/   # Absorbed symmemory: store, entities, consolidation
+│   ├── symbrain-skills/   # Absorbed symskills: skill SSOT, render and install
+│   ├── symbrain-activity/ # Bounded activity read contracts
+│   ├── symbrain-patterns/ # Recurring gateway episode promotion
+│   ├── symbrain-usage/    # AI provider usage reporting
+│   ├── symbrain-managed/  # Managed core manifest, verification, extraction
+│   ├── symbrain-guard-core/ # Guard model and static policy kernel
+│   ├── symguard-cli/      # Guard command handlers and standalone `symguard`
+│   ├── symaira-cutover/   # One-time backup of Go-era state on the first Rust run
+│   └── test-support/      # Shared test helper module (coverage environment)
 ├── Cargo.toml, Cargo.lock # Root Rust workspace and locked dependencies
 ├── rust-toolchain.toml    # Pinned Rust toolchain and components
-├── browse/                # Optional web-worker sources; separate module gates
-├── operate/               # Optional OS-automation worker sources
-├── scope/                 # Optional machine-inventory/diagnostics sources
+├── browse/                # Optional web worker: its own Cargo workspace (symbrowse)
+├── operate/               # Optional OS-automation worker sources (SwiftPM)
+├── scope/                 # Optional machine-inventory/diagnostics sources (SwiftPM)
 ├── Sources/               # Native SwiftUI apps (macOS + iOS)
 │   ├── SymBrainCore/      # Static library: CLI client, models, view models
 │   ├── SymBrainApp/       # macOS application (NavigationSplitView dashboard)
 │   └── SymBrainMobile/    # iOS companion (read-only overview)
 ├── Tests/                 # Swift unit tests
 │   └── SymBrainCoreTests/ # Decoding tests for CLI JSON shapes
-├── guard/                 # Nested module: symguard security gateway (own go.mod,
-│   │                      #   module github.com/danieljustus/symaira-guard) —
-│   │                      #   absorbed 2026-08-21 (repo consolidation step 7,
-│   │                      #   relicensed MIT → Apache-2.0)
-│   ├── cmd/symguard/      #   CLI entrypoint (main package)
-│   └── internal/          #   private packages: policy, capability, audit, approval, …
+├── guard/                 # Guard module docs, assets and recorded oracle inputs
+│                          #   (absorbed 2026-08-21, relicensed MIT → Apache-2.0)
+├── fuzz/                  # cargo-fuzz targets for MCP framing
+├── migration/             # Contract matrix and immutable migration evidence
+├── scripts/               # Release, coverage and fixture-gate tooling
 ├── docs/                  # Tracked ADRs/handoffs; other private planning is ignored
 ├── project.yml            # Xcode project generation (xcodegen)
-├── go.mod, go.sum
 ├── Makefile
 ├── README.md
 ├── LICENSE                # Apache-2.0
 └── AGENTS.md              # This file
 ```
 
-**Go package layout rules:**
-- Use `cmd/` for the CLI entrypoint, `internal/` for all private logic.
-- No `pkg/` directory — all library code stays internal until there is a
-  proven external consumer.
-- Each package under `internal/` maps to one subsystem. Keep package scope
-  narrow.
-- New subsystems get their own `internal/<name>/` directory with at least a
-  `doc.go` package comment.
+**Crate layout rules:**
+- `symbrain-cli` owns argument parsing and dispatch only; behavior lives in
+  library crates under `rust/`.
+- Each crate maps to one subsystem. Keep crate scope narrow and expose the
+  smallest public API its callers need.
+- New subsystems get their own `rust/<name>/` crate with a crate-level `//!`
+  doc comment, added to the root workspace.
 
 ---
 
-## Go Coding Standards
+## Rust Coding Standards
 
-### Module and Dependencies
+### Toolchain and Dependencies
 
-- Module path: `github.com/danieljustus/symaira-brain`
-- Use the Go toolchain declared in `go.mod`; build with `CGO_ENABLED=0`.
-- Depends on `symaira-corekit` (pinned to a tagged release, no `replace`
-  directive on `main`) for: `configkit`, `logkit`, `exitcodes`, `fsutil`,
-  `versionkit`, `updatecheck`.
+- Use the toolchain pinned in `rust-toolchain.toml`. Build and test with
+  `--locked`; never update `Cargo.lock` as a side effect.
 - **Minimal dependencies.** Prefer the standard library. When a dependency is
-  needed, justify it explicitly.
+  needed, justify it explicitly; `deny.toml` (cargo-deny) and cargo-audit gate
+  licenses, sources and advisories.
+- No `unsafe` unless unavoidable and documented; crates default to
+  `#![deny(unsafe_code)]`.
 
 ### Error Handling
 
-- Return errors, do not panic. Use `fmt.Errorf("context: %w", err)` for
-  wrapping.
-- Check errors immediately at the call site. Do not ignore errors.
-- Use `corekit/exitcodes` to map errors to the process exit code.
+- Return `Result`, do not panic in production paths. Add context where an
+  error crosses a boundary.
+- Check errors at the call site. Do not ignore them silently.
+- Map errors to the process exit code through `symbrain_core::exit`.
 
 ### Naming
 
-- Package names: short, lowercase, single-word (`profile`, `policy`, `audit`).
-- Exported types: PascalCase. Unexported: camelCase.
-- Avoid stuttering: `profile.Profile` is fine, `profile.ProfileConfig` is not.
+- Crate and module names: short, lowercase, snake_case modules.
+- Types: `UpperCamelCase`; functions and variables: `snake_case`.
+- Avoid stuttering: `profile::Profile` is fine, `profile::ProfileConfig` is not.
 
-### Package Layout
+### File Layout
 
-- Each package has a clear, single responsibility.
-- Package-level `doc.go` or file-level doc comment explains purpose.
+- Each module has a clear, single responsibility and a `//!` doc comment.
 - Keep files under 400 lines. Split when a file grows beyond that.
 
-### Formatting
+### Formatting and Lint
 
-- Run `make fmt` before committing Go changes. It applies `gofmt -w -s` to
-  owned source while excluding linked checkouts and immutable migration evidence.
-- `make lint` runs `go vet ./...` and the owned-source `gofmt` check.
-  `golangci-lint` is a separate supplementary check, not invoked by that target.
+- Run `make fmt` (`cargo fmt --all`) before committing.
+- `make lint` runs the rustfmt check and `cargo clippy --all-targets
+  --all-features -- -D warnings`.
 
 ---
 
 ## Testing Conventions
 
 - Table-driven tests for function-level unit tests.
-- Co-locate tests with source: `config_test.go` next to `config.go`.
-- Use `t.TempDir()` for filesystem tests — never hardcode temp paths.
+- Co-locate unit tests with the module (`#[cfg(test)]` or a sibling
+  `*_tests.rs`); process-level tests live in each crate's `tests/`.
+- Use `tempfile::TempDir` for filesystem tests and disposable HOME/XDG roots
+  for process tests — never hardcode temp paths or touch real user state.
 - Prioritize tests for: profile/policy evaluation (table-driven, every preset
   matrix), catalog collision detection, adapter output (golden files per
   harness), instructions managed-block idempotency (sync twice = identical
@@ -183,14 +186,16 @@ symaira-brain/
 - Integration tests against the broker use a fake MCP child binary
   (JSON-RPC over stdio) checked into the repo — no test may assume a real
   Symaira binary is present (CI containers have none).
-- The Go CI gate runs `go test -race ./...`. Root Rust, optional modules,
-  Swift/native-platform and differential-evidence gates are separate; passing
-  the Go gate alone does not establish complete repository or native parity.
-  Local verification is optional but recommended before pushing.
+- Go-recorded oracle fixtures are immutable evidence. A deliberate change to a
+  frozen fixture needs a reviewed re-seal (`make oracle-freeze-seal`); the
+  gate fails on any unregistered or changed fixture.
+- CI runs `make rust-check parity-smoke init-differential` on Linux and macOS,
+  plus the browse, Swift, GUI, fuzz and coverage jobs. Local verification is
+  optional but recommended before pushing.
 
 ```bash
-make test          # or: go test ./...
-make test-race      # go test -race ./...
+make test          # cargo test --workspace --all-features --locked
+make rust-check    # complete gate
 ```
 
 ---
@@ -230,7 +235,7 @@ Body explains *what* and *why*, not *how*. Reference issues with `Refs #N`,
 The binary is always named `symbrain`. Do not use alternative names.
 
 ```bash
-go build -o symbrain ./cmd/symbrain
+cargo build --release --locked -p symbrain-cli   # target/release/symbrain
 ```
 
 ### Standalone-First
@@ -240,25 +245,24 @@ go build -o symbrain ./cmd/symbrain
 - **No compile-time imports of separately released tools.** Since the
   consolidation this means `symvault` and any tool outside this repo; memory,
   skills and guard are now packages here and are linked directly. The MCP
-  client (broker) that talks to external children lives in `internal/broker`.
-- Children are found at runtime via `exec.LookPath` with a timeout, never
+  client (broker) that talks to external children lives in `rust/symbrain-broker`.
+- Children are found at runtime via a PATH lookup with a timeout, never
   assumed to be present.
 - If a child binary is missing, the corresponding server is simply left out
   of the catalog and `symbrain doctor` explains why — never a hard error.
 
 > **Verified (2026-08-25).** Skill rendering and installation for `symbrain sync`
-> run in-process through `internal/skills` via `internal/skillsrunner` — no
+> run in-process through the embedded skills runner — no
 > external `symskills` binary is resolved or executed. Removing the archived
 > binary from `PATH` does not skip any requested target; render/install
 > failures surface in JSON and human output with a non-zero exit status.
 
-```go
+```rust
 // Good — graceful degradation
-path, err := exec.LookPath("symvault")
-if err != nil {
+let Some(path) = path_lookup(OsStr::new("symvault")) else {
     // server omitted from catalog; doctor reports it as a warning, not fatal
-    return nil
-}
+    return None;
+};
 ```
 
 ### Secret References
@@ -267,8 +271,9 @@ Config values that name a secret (e.g. `jwt.secret`) accept a `symvault://<path>
 URI, resolved via a `symvault get <path> --print` subprocess (5s timeout,
 env-var fallback). `vault://<path>` is accepted as a deprecated alias for
 backward compatibility — both resolve to the identical path and behavior.
-New configs and error messages should use `symvault://`; see
-`internal/memory/secrets/resolve.go`.
+New configs and error messages should use `symvault://`; see the secret
+reference handling in `rust/symbrain-cli/src/memory_cli/serve.rs` and
+`rust/symbrain-usage/src/provider_config/references.rs`.
 
 ### XDG Paths
 
@@ -284,14 +289,14 @@ When running as an MCP gateway (`symbrain mcp --profile <name>`; `serve` remains
 a deprecated compatibility alias):
 
 - stdin/stdout are the MCP JSON-RPC transport.
-- All diagnostic output goes to stderr (`corekit/logkit`, which logs to
-  stderr).
+- All diagnostic output goes to stderr.
 - Never write non-JSON-RPC data to stdout while serving.
 
 ### snake_case JSON
 
 All MCP/API JSON payloads and every `--json` CLI output use snake_case field
-names. Go structs use idiomatic CamelCase with `json:"snake_case"` tags.
+names. Rust structs use `snake_case` fields with serde; keep JSON field names
+stable (guard pins schemas and the frozen fixtures pin the bytes).
 
 ### Exit Codes
 
@@ -320,7 +325,7 @@ workspace is macOS only (GUIDELINES.md section 12).
 
 - Keep README.md updated with build instructions, usage, and project overview.
 - Code comments explain *why*, not *what*.
-- Package-level doc comments are mandatory for every package.
+- Crate-level doc comments are mandatory for every crate.
 
 ---
 
@@ -360,7 +365,6 @@ make build
 
 # Test
 make test
-make test-race
 
 # Lint
 make lint
@@ -368,18 +372,15 @@ make lint
 # Format
 make fmt
 
-# Go-only local check
-make lint && make test-race && make build
-
-# Root Rust checks; separate from optional-module/native-platform gates
+# Focused and complete root checks
 make rust-fast
-make rust-check
+make rust-check parity-smoke init-differential
 ```
 
-`make rust-check` includes the pinned Go oracle comparisons and root Rust
-formatting, checking, Clippy, tests, audit and dependency-policy checks. It is
-not a substitute for the applicable native-platform and optional-module CI
-workflows under `.github/workflows/`.
+`make rust-check` covers formatting, checking, Clippy, tests, doc tests,
+cargo-audit, cargo-deny and the sealed Go-oracle fixture gate. It is not a
+substitute for the browse, Swift, GUI and native-platform workflows under
+`.github/workflows/`.
 
 ---
 
