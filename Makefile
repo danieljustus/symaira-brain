@@ -140,7 +140,10 @@ parity-smoke:
 INIT_RUST_BINARY ?= target/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,)
 INIT_OS := $(shell uname -s | tr "[:upper:]" "[:lower:]")
 INIT_FIXTURE := rust/symbrain-cli/tests/fixtures/init_differential_go.$(INIT_OS).json
+INIT_ORACLE_COMMIT := $(shell sed -n 's/^PINNED_COMMIT_SHA = "\([0-9a-f]*\)"$$/\1/p' scripts/init-oracle/compare.py)
 init-differential:
+	@# The oracle tests read the pinned Go tree from git; CI checkouts are shallow.
+	git cat-file -e "$(INIT_ORACLE_COMMIT)^{commit}" 2>/dev/null || git fetch --no-tags --depth=1 origin "$(INIT_ORACLE_COMMIT)"
 	$(EXTERNAL_RUN) cargo build -p symbrain-cli --locked
 	$(EXTERNAL_RUN) $(PYTHON) scripts/init-oracle/test_compare.py
 	$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle"
