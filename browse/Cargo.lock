@@ -1891,6 +1891,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "symaira-cutover"
+version = "0.12.1"
+dependencies = [
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "symbrowse-cli"
 version = "0.0.0"
 dependencies = [
@@ -1900,6 +1908,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "symaira-cutover",
  "symbrowse-core",
  "symbrowse-daemon",
  "symbrowse-engine",
