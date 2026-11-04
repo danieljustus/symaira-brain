@@ -1,6 +1,16 @@
 use chrono::{DateTime, FixedOffset};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
+
+fn sha256_hex(bytes: impl AsRef<[u8]>) -> String {
+    use std::fmt::Write as _;
+    Sha256::digest(bytes)
+        .iter()
+        .fold(String::new(), |mut out, byte| {
+            let _ = write!(out, "{byte:02x}");
+            out
+        })
+}
 use std::path::PathBuf;
 use symbrain_guard_core::external_decision::{ExternalDecisionAudit, evaluate_at};
 use symbrain_guard_core::go_json::to_go_json_vec;
@@ -10,7 +20,7 @@ const SHA256: &str = "73057e5841975dafafd5c7ec40c43d459e766d6ca9567f277823569c76
 const PIN: &str = "0b585d52915a824664e1377d0a995dff3f5405cd";
 
 fn validate(bytes: &[u8]) -> Result<Value, String> {
-    if format!("{:x}", Sha256::digest(bytes)) != SHA256 {
+    if sha256_hex(bytes) != SHA256 {
         return Err("reviewed Go capture hash mismatch".into());
     }
     let fixture: Value = serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
@@ -20,7 +30,7 @@ fn validate(bytes: &[u8]) -> Result<Value, String> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let generator = std::fs::read(root.join("guard/scripts/guard-decide-oracle/review_cases.py"))
         .map_err(|error| error.to_string())?;
-    if fixture["generator_sha256"] != format!("{:x}", Sha256::digest(generator)) {
+    if fixture["generator_sha256"] != sha256_hex(generator) {
         return Err("generator changed".into());
     }
     let sources = fixture["source_files"]
