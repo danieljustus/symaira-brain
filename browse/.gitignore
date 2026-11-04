@@ -15,6 +15,7 @@
 # Go
 *.test
 *.out
+!testdata/port/mcp/*.out
 vendor/
 
 # Config / secrets

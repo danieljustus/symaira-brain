@@ -213,7 +213,7 @@ def main() -> int:
     api = oracle_api(source, args.go_tool)
     rows = []
     with tempfile.TemporaryDirectory(prefix="bk-tools-", dir=registry.process.private_temporary_parent()) as directory:
-        provider = key_test_environment.build_provider(Path(directory), args.go_tool)
+        provider = key_test_environment.build_provider(Path(directory))
         provider_digest = registry.process.digest(provider)
         control_source = Path(directory) / "key-control.go"
         shutil.copyfile(HERE / "state_key_control.go.in", control_source)

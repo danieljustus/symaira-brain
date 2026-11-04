@@ -68,24 +68,19 @@ pub(super) fn complete_no_descriptions(args: &[String]) -> String {
 }
 
 fn help_for_context(context: &[String]) -> Option<String> {
-    if context.is_empty() {
-        return Some(super::root_help());
-    }
-    let command = match context[0].as_str() {
-        "workflow" => "flow",
-        other => other,
-    };
-    if !super::implemented_help_command(command) {
-        return None;
-    }
-    let suffix: Vec<_> = context[1..]
+    let tree = crate::app::tree();
+    let words: Vec<String> = context
         .iter()
         .take_while(|value| !value.starts_with('-'))
-        .map(String::as_str)
+        .cloned()
         .collect();
-    super::help_catalog::help(command, &suffix)
-        .map(str::to_owned)
-        .or_else(|| super::command_help(command, &suffix))
+    let found = crate::cobra::find(tree, &words);
+    if found.legacy_error.is_some()
+        || !found.args.is_empty() && !context.is_empty() && found.index == 0
+    {
+        return None;
+    }
+    Some(tree.nodes[found.index].help.clone())
 }
 
 fn command_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
@@ -115,13 +110,15 @@ fn command_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
 
 fn flag_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
     let mut in_flags = false;
+    let mut in_global = false;
     let mut candidates = Vec::new();
     let mut seen = HashSet::new();
-    let mut help_candidates = Vec::new();
+    let mut local_candidates = Vec::new();
     for line in help.lines() {
         let trimmed = line.trim();
         if trimmed == "Flags:" || trimmed == "Global Flags:" {
             in_flags = true;
+            in_global = trimmed == "Global Flags:";
             continue;
         }
         if !in_flags {
@@ -178,16 +175,18 @@ fn flag_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
                 }
                 let item = (candidate.clone(), description);
                 if seen.insert(candidate) {
-                    if item.0 == "--help" {
-                        help_candidates.push(item);
-                    } else {
+                    // Cobra completes inherited flags first, then the
+                    // command's own flags (each group sorted by name).
+                    if in_global {
                         candidates.push(item);
+                    } else {
+                        local_candidates.push(item);
                     }
                 }
             }
         }
     }
-    candidates.extend(help_candidates);
+    candidates.extend(local_candidates);
     candidates
 }
 
@@ -201,9 +200,7 @@ fn split_name_description(value: &str) -> Option<(&str, &str)> {
 #[cfg(test)]
 mod tests {
     use super::{complete, complete_no_descriptions, script, script_without_descriptions};
-    use crate::{Action, parse};
     use sha2::{Digest, Sha256};
-    use std::ffi::OsString;
 
     #[test]
     fn cobra_scripts_match_the_pinned_go_oracle_bytes() {
@@ -254,11 +251,15 @@ mod tests {
     }
 
     #[test]
-    fn hidden_completion_uses_only_the_implemented_command_tree() {
+    fn hidden_completion_lists_the_cobra_command_tree() {
         let root = complete(&[String::new()]);
         assert!(root.contains("click\tClick an element"));
-        assert!(!root.contains("doctor\t"));
-        assert!(!root.contains("auth\t"));
+        assert!(root.contains("doctor\tCheck browser discovery"));
+        assert!(root.contains("auth\tCredential management through symvault"));
+        assert!(
+            !root.contains("compat-sidecar"),
+            "retired command must not be offered"
+        );
 
         let children = complete(&["state".into(), String::new()]);
         assert!(children.contains("clear\tDelete one named state"));
@@ -268,9 +269,10 @@ mod tests {
 
     #[test]
     fn hidden_completion_matches_cobra_flag_candidates_and_order() {
+        // Cobra completes inherited (global) flags first, then local ones.
         assert_eq!(
             complete(&["click".into(), "--".into()]),
-            "--session\tsession name\n--json\tprint the unified machine-readable output envelope (shorthand for --output json)\n--output\toutput format: text, json or yaml (--json is shorthand for --output json)\n--help\thelp for click\n:4\n"
+            "--json\tprint the unified machine-readable output envelope (shorthand for --output json)\n--output\toutput format: text, json or yaml (--json is shorthand for --output json)\n--help\thelp for click\n--session\tsession name\n:4\n"
         );
     }
 
@@ -278,48 +280,11 @@ mod tests {
     fn no_description_protocol_drops_candidate_descriptions_only() {
         assert_eq!(
             complete_no_descriptions(&["click".into(), "--".into()]),
-            "--session\n--json\n--output\n--help\n:4\n"
+            "--json\n--output\n--help\n--session\n:4\n"
         );
         assert_eq!(
             complete_no_descriptions(&["state".into(), "".into()]),
             "clean\nclear\nkey\nlist\nload\nsave\nshow\n:4\n"
         );
-    }
-
-    #[test]
-    fn parser_exposes_only_supported_shell_generators_and_hidden_protocol() {
-        for shell in ["bash", "zsh", "fish", "powershell"] {
-            let args = [OsString::from("completion"), OsString::from(shell)];
-            assert!(
-                matches!(parse(&args), Ok(Action::Completion { shell: actual, no_descriptions: false }) if actual == shell)
-            );
-        }
-        let request = [
-            OsString::from("__complete"),
-            OsString::from("state"),
-            OsString::new(),
-        ];
-        assert!(
-            matches!(parse(&request), Ok(Action::CompletionRequest { args, no_descriptions: false }) if args == vec!["state".to_owned(), String::new()])
-        );
-        let no_desc_request = [
-            OsString::from("__completeNoDesc"),
-            OsString::from("state"),
-            OsString::new(),
-        ];
-        assert!(matches!(
-            parse(&no_desc_request),
-            Ok(Action::CompletionRequest { args, no_descriptions: true })
-                if args == vec!["state".to_owned(), String::new()]
-        ));
-        assert!(matches!(
-            parse(&[OsString::from("completion"), OsString::from("bash"), OsString::from("--no-descriptions")]),
-            Ok(Action::Completion { shell, no_descriptions: true }) if shell == "bash"
-        ));
-        assert!(matches!(
-            parse(&[OsString::from("completion"), OsString::from("bash"), OsString::from("--help")]),
-            Ok(Action::Help(help)) if help.contains("completion bash")
-        ));
-        assert!(parse(&[OsString::from("completion"), OsString::from("auth")]).is_err());
     }
 }

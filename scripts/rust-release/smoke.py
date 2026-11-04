@@ -4,10 +4,10 @@
   smoke.py --dir extracted --version V
   smoke.py --archive-dir dist --version V   # extracts the single archive in dist
 
-Checks that `symbrain version` reports V, and that a command the Rust CLI
-hands to its Go fallback reaches the packaged `symbrain-go` through PATH and
-produces exactly the Go oracle's exit code, stdout and stderr. The environment
-is minimal and owned: an empty HOME/XDG tree and no SYMBRAIN_GO_BINARY.
+Checks that the archive holds no Go fallback, that `symbrain version` reports
+V, that `symbrain help` succeeds and that a malformed flag is rejected by the
+native CLI itself. The environment is minimal and owned: an empty HOME/XDG
+tree and a PATH of the extracted archive plus the system directories.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-FALLBACK_ARGS = ["skills", "targets", "--candidate-smoke-unknown"]
+MALFORMED_ARGS = ["skills", "targets", "--candidate-smoke-unknown"]
 
 
 def environment(candidate: Path, scratch: Path) -> dict[str, str]:
@@ -68,10 +68,12 @@ def main(argv: list[str]) -> int:
         return main(["--dir", str(extracted), "--version", args.version])
     candidate = args.dir.resolve()
     exe = ".exe" if os.name == "nt" else ""
-    rust, go = candidate / ("symbrain" + exe), candidate / ("symbrain-go" + exe)
-    for binary in [rust, go]:
-        if not binary.is_file() or (os.name != "nt" and not os.access(binary, os.X_OK)):
-            raise SystemExit(f"missing executable {binary.name}")
+    rust = candidate / ("symbrain" + exe)
+    if not rust.is_file() or (os.name != "nt" and not os.access(rust, os.X_OK)):
+        raise SystemExit(f"missing executable {rust.name}")
+    leftovers = sorted(p.name for p in candidate.iterdir() if p.name.startswith("symbrain-go"))
+    if leftovers:
+        raise SystemExit(f"archive still ships a Go fallback: {leftovers}")
 
     with tempfile.TemporaryDirectory(prefix="symbrain-release-smoke-") as raw:
         scratch = Path(raw)
@@ -82,18 +84,14 @@ def main(argv: list[str]) -> int:
         version = run(rust, ["version"], env, work)
         if version.returncode != 0 or args.version.encode() not in version.stdout:
             raise SystemExit(f"symbrain version did not report {args.version}: {version!r}")
-
-        native, oracle = run(rust, FALLBACK_ARGS, env, work), run(go, FALLBACK_ARGS, env, work)
-        if b"no Go fallback was found" in native.stderr:
-            raise SystemExit("Rust CLI did not find the packaged symbrain-go on PATH")
-        if native.returncode == 0 or (native.returncode, native.stdout, native.stderr) != (
-                oracle.returncode, oracle.stdout, oracle.stderr):
-            raise SystemExit(f"fallback output differs from the Go oracle:\nrust={native!r}\ngo={oracle!r}")
-        if not oracle.stderr:
-            raise SystemExit("Go oracle did not report the malformed flag")
-    print(f"release smoke: PASS {args.version}: version reported; Rust reached the packaged symbrain-go and matched Go")
+        usage = run(rust, ["help"], env, work)
+        if usage.returncode != 0 or b"Usage:" not in usage.stdout:
+            raise SystemExit(f"symbrain help failed: {usage!r}")
+        malformed = run(rust, MALFORMED_ARGS, env, work)
+        if malformed.returncode == 0 or not malformed.stderr or b"Go fallback" in malformed.stderr:
+            raise SystemExit(f"native CLI did not reject the malformed flag itself: {malformed!r}")
+    print(f"release smoke: PASS {args.version}: Rust-only archive; version, help and flag validation are native")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

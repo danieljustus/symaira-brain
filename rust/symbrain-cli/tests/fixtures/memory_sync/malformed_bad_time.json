@@ -1,0 +1,64 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "malformed_bad_time",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: decode remote response: parsing time \"yesterday\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"yesterday\" as \"2006\"\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[],\"deleted\":[],\"server_time\":\"yesterday\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

@@ -40,13 +40,18 @@ const FIELDS: [&str; 26] = [
     "approval_timeout",
 ];
 
-/// Explicit transport selection; browser engines never describe static/compat.
+/// Stable code for a selection of the retired `compat` (Go/AzureTLS) transport.
+pub const TRANSPORT_RETIRED: &str = "transport_retired";
+
+/// Operator-facing explanation attached to [`TRANSPORT_RETIRED`].
+pub const COMPAT_RETIRED_MESSAGE: &str = "the compat transport (Go/AzureTLS sidecar) has been retired and is no longer available; set mode to static or browser";
+
+/// Explicit transport selection; browser engines never describe static.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TransportMode {
     Static,
     Browser,
-    Compat,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -83,13 +88,18 @@ pub fn resolve_selection(
     let mode = match mode.unwrap_or("browser") {
         "static" => TransportMode::Static,
         "browser" => TransportMode::Browser,
-        "compat" => TransportMode::Compat,
+        // Retired transport: fail with a stable typed error. Never map it to
+        // static or browser.
+        "compat" => {
+            return Err(SelectionError {
+                code: TRANSPORT_RETIRED,
+                message: COMPAT_RETIRED_MESSAGE.into(),
+            });
+        }
         value => {
             return Err(SelectionError {
                 code: "invalid_transport_mode",
-                message: format!(
-                    "unknown transport mode {value:?}: use static, browser, or compat"
-                ),
+                message: format!("unknown transport mode {value:?}: use static or browser"),
             });
         }
     };
@@ -635,6 +645,13 @@ fn validate(config: &Config) -> std::result::Result<(), ConfigError> {
             config.autosave
         )));
     }
+    // A retired transport is rejected before any engine shortcut so that
+    // `engine = "static"` can never silently absorb `mode = "compat"`.
+    if config.mode == "compat" {
+        return Err(ConfigError(format!(
+            "{TRANSPORT_RETIRED}: {COMPAT_RETIRED_MESSAGE}"
+        )));
+    }
     if config.engine == "static" {
         return Ok(());
     }
@@ -722,6 +739,19 @@ mod selection_tests {
                 .unwrap_err()
                 .code,
             "invalid_browser_engine"
+        );
+    }
+
+    #[test]
+    fn retired_compat_is_a_typed_error_for_every_engine_shape() {
+        for engine in [None, Some(""), Some("chrome"), Some("static"), Some("wat")] {
+            let error = resolve_selection(Some("compat"), engine).unwrap_err();
+            assert_eq!(error.code, TRANSPORT_RETIRED, "engine={engine:?}");
+            assert_eq!(error.message, COMPAT_RETIRED_MESSAGE);
+        }
+        assert_eq!(
+            resolve_selection(Some("wat"), None).unwrap_err().message,
+            "unknown transport mode \"wat\": use static or browser"
         );
     }
 }

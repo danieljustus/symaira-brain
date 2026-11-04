@@ -1,0 +1,43 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_36",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://[fe80::1%25en0]/",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 2,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: remote memory sync requires an https URL: http://[fe80::1%25en0]/ (pass --allow-insecure-http to override)\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://[fe80::1%25en0]/",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

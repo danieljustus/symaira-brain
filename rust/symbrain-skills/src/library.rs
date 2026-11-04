@@ -12,12 +12,9 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use ambient_authority::ambient_authority;
-use cap_std::fs::Dir;
-
-use crate::load::{InputReadError, ReadBudget, read_skill_document};
+use crate::load::ReadBudget;
 use crate::model::{
-    Issue, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError, parse_skill_md,
+    Issue, MAX_INPUT_SIZE, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError,
 };
 
 /// One library skill, as `skills list` reports it.
@@ -84,9 +81,12 @@ pub fn library_paths(library_dir: &Path) -> Result<Vec<PathBuf>, SkillError> {
 
 /// Reads every loadable skill directory in the library.
 ///
-/// Non-directory entries are ignored, exactly like the Go loader. Entries are
-/// returned in directory-name order and their categories are canonicalized
-/// across the whole library.
+/// Mirrors Go's `skill.ListLibrary`: only real directories are inspected (a
+/// symlink to a directory is skipped), each `SKILL.md` is read through the
+/// bundle root with `os.Root` semantics and every failure becomes a
+/// `skill_load` issue carrying Go's error text. Entries are returned in
+/// directory-name order and their categories are canonicalized across the
+/// whole library.
 #[must_use]
 pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
     let entries = match read_library_entries(library_dir) {
@@ -95,32 +95,23 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
             return (Vec::new(), Vec::new());
         }
         Err(error) => {
-            let bounded = matches!(error, LibraryReadError::InputBound);
+            let (code, message) = match &error {
+                LibraryReadError::InputBound => ("library_input_bound", error.to_string()),
+                LibraryReadError::Io(source) => (
+                    "library_read",
+                    format!(
+                        "open {}: {}",
+                        library_dir.display(),
+                        crate::gotext::io_text(source)
+                    ),
+                ),
+            };
             return (
                 Vec::new(),
                 vec![Issue {
-                    code: if bounded {
-                        "library_input_bound"
-                    } else {
-                        "library_read"
-                    }
-                    .to_owned(),
+                    code: code.to_owned(),
                     severity: "error".to_owned(),
-                    message: error.to_string(),
-                    path: library_dir.display().to_string(),
-                }],
-            );
-        }
-    };
-    let library_cap = match Dir::open_ambient_dir(library_dir, ambient_authority()) {
-        Ok(directory) => directory,
-        Err(error) => {
-            return (
-                Vec::new(),
-                vec![Issue {
-                    code: "library_read".to_owned(),
-                    severity: "error".to_owned(),
-                    message: error.to_string(),
+                    message,
                     path: library_dir.display().to_string(),
                 }],
             );
@@ -131,57 +122,44 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
     let mut loaded = Vec::new();
     let mut issues = Vec::new();
     for entry in entries {
-        let root = entry.path();
-        if !root.is_dir() {
+        if !entry.file_type().is_ok_and(|kind| kind.is_dir()) {
             continue;
         }
         let name = entry.file_name();
         let issue_path = name.to_string_lossy().into_owned();
-        let relative = PathBuf::from(&name).join("SKILL.md");
-        let bytes = match read_skill_document(
-            &library_cap,
-            &relative,
-            &format!("{issue_path}/SKILL.md"),
-            Some(&mut budget),
-        ) {
+        let root = absolute(&crate::gotext::join(library_dir, &name));
+        let bytes = match crate::library_go_read::read_skill_md(&root, MAX_INPUT_SIZE) {
             Ok(bytes) => bytes,
-            Err(error) => {
-                let stop = matches!(error, InputReadError::Budget(_));
-                let rejected = !matches!(error, InputReadError::Read(_));
-                issues.push(load_issue(&error, &issue_path, rejected));
-                if stop {
-                    break;
-                }
+            Err(message) => {
+                issues.push(load_issue(&message, &issue_path));
                 continue;
             }
         };
-        let parsed = match parse_skill_md(&bytes) {
-            Ok(parsed) => parsed,
+        if let Err(error) = budget.charge(bytes.len() as u64) {
+            issues.push(load_issue(&error, &issue_path));
+            break;
+        }
+        let frontmatter = match crate::model::parse_frontmatter_go(&bytes) {
+            Ok(frontmatter) => frontmatter,
             Err(error) => {
-                issues.push(load_issue(&error, &issue_path, false));
+                issues.push(load_issue(&error, &issue_path));
                 continue;
             }
         };
-        let frontmatter = parsed.frontmatter;
         loaded.push(LibraryEntry {
             name: frontmatter.name,
             description: frontmatter.description,
             category: normalize_category(&frontmatter.category),
-            path: absolute(&root),
+            path: root.display().to_string(),
         });
     }
     canonicalize_categories(&mut loaded);
     (loaded, issues)
 }
 
-fn load_issue(error: &impl std::fmt::Display, path: &str, rejected: bool) -> Issue {
+fn load_issue(error: &impl std::fmt::Display, path: &str) -> Issue {
     Issue {
-        code: if rejected {
-            "skill_input_rejected"
-        } else {
-            "skill_load"
-        }
-        .to_owned(),
+        code: "skill_load".to_owned(),
         severity: "error".to_owned(),
         message: error.to_string(),
         path: path.to_owned(),
@@ -213,9 +191,12 @@ fn normalize_category(category: &str) -> String {
     category.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
-fn absolute(path: &Path) -> String {
-    std::path::absolute(path)
-        .unwrap_or_else(|_| path.to_path_buf())
-        .display()
-        .to_string()
+/// `filepath.Abs`: join the working directory when relative, then clean.
+fn absolute(path: &Path) -> PathBuf {
+    let joined = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir().map_or_else(|_| path.to_path_buf(), |cwd| cwd.join(path))
+    };
+    crate::gotext::clean(&joined)
 }

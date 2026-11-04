@@ -1,0 +1,43 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_01",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "example.test",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 2,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: parse remote URL: missing scheme in \"example.test\"\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "example.test",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

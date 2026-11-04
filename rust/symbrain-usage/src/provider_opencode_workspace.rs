@@ -104,8 +104,9 @@ fn decode(raw: &str) -> Option<String> {
             byte
         });
     }
-    // Wire strings are UTF-8. Non-UTF-8 decoded URL bytes are not a native
-    // parity claim; the credential/live-fetch Go fallback remains in force.
+    // Go keeps raw bytes; a lossy decode only changes bytes that can never
+    // match the `wrk_` workspace-id alphabet, so the accept/reject decision is
+    // identical (pinned by the Go-recorded workspace cases).
     Some(String::from_utf8_lossy(&bytes).into_owned())
 }
 

@@ -1,0 +1,43 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_07",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "https://",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: pull from https://: request https:: Get \"https:/api/sync/changes?limit=500\": http: no Host in request URL\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "https://",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

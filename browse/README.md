@@ -13,7 +13,7 @@ symbrain setup --from-source /absolute/path/to/symaira-brain --modules browse --
 ~/.symaira/bin/symbrowse version
 ```
 
-The managed binary receives a provenance sidecar. The nested source remains independently buildable for development with `go build ./cmd/symbrowse` from this directory. The command reference below describes the direct `symbrowse` interface; it does not imply a new published release channel.
+The managed binary receives a provenance sidecar. The nested Rust workspace remains independently buildable for development with `cargo build --release --locked -p symbrowse-cli` from this directory. The command reference below describes the direct `symbrowse` interface; it does not imply a new published release channel.
 
 ## Why symbrowse
 
@@ -22,18 +22,17 @@ The managed binary receives a provenance sidecar. The nested source remains inde
 - **Stable element references** — deterministic `@ref`s across navigation and re-renders, so an agent's plan doesn't break when the DOM reflows.
 - **Out-of-band handoff** — hand control to a human for 2FA, CAPTCHA, or approval mid-session, then resume agent control without losing state.
 - **Direct-consumer friendly** — `symbrowse` remains a direct CLI/MCP worker interface and does not require Brain memory, a gateway or an agent profile; Brain only owns its source and managed-install path.
-- **Consumable form automation** — the public `formflow` package exposes typed, evidence-capturing web-form automation (navigate → fill → submit, CAPTCHA/bot-wall detection, confirmation links, per-host pacing) as an in-process Go API; see [docs/form-automation-contract.md](docs/form-automation-contract.md).
 
 ## Development build
 
-The supported user-facing installation is the managed Brain route above. For source development in this nested module (requires **Go 1.26.6**):
+The supported user-facing installation is the managed Brain route above. For source development in this nested Cargo workspace (toolchain pinned in `rust-toolchain.toml`):
 
 ```sh
-go build ./cmd/symbrowse
-./symbrowse version
+cargo build --release --locked -p symbrowse-cli
+./target/release/symbrowse version
 ```
 
-Do not add a `go install` or Homebrew recipe for this Brain-owned source tree before the separate signed-release and package-manager migration gate is approved.
+Do not add a `cargo install` or Homebrew recipe for this Brain-owned source tree before the separate signed-release and package-manager migration gate is approved.
 
 ## Quick start
 
@@ -224,6 +223,18 @@ Chrome executable override. See the complete [configuration and environment
 reference](docs/config.md), [docs/state.md](docs/state.md) for state encryption,
 and [docs/allowlist.md](docs/allowlist.md) for the network policy.
 
+### Transport modes
+
+The Rust build selects exactly one transport per session: `mode = "static"`
+(JS-free HTTP, no browser identity) or `mode = "browser"` with an explicit
+engine (`chrome`, `safari` or `firefox`). The former `compat` mode (the
+Go/AzureTLS sidecar) is **retired**: selecting it through `mode` in
+`config.toml`, `SYMBROWSE_MODE` or `--mode` fails with the typed
+`transport_retired` error (`config` error code, exit status 9) and never falls
+back to `static` or `browser`. Remove `mode = "compat"` or switch to `static`
+or `browser`. Details: [browser transport
+contract](docs/rust-port/browser-transport-contract.md).
+
 ## Documentation
 
 - [docs/tiers.md](docs/tiers.md) — escalation tiers and `read --engine-hint`
@@ -250,23 +261,18 @@ as its siblings.
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution workflow.
-Run these checks from the `browse/` module directory. Browse has no module-local
-Makefile; the repository-root Makefile targets Brain's root Go module and
-excludes Browse from its formatting check. The Browse CI job runs
-`go build ./...` and `go vet ./...`; it omits Browse's Go tests because they can
-exercise live Chrome and network I/O. Run those tests only in a suitable
-environment:
+Run these checks from the `browse/` workspace directory. Browse has no
+workspace-local Makefile. Real-Chrome end-to-end tests stay opt-in behind
+`SYMBROWSE_E2E=1`, so the default test run touches no live browser:
 
 ```sh
-test -z "$(find . -type f -name '*.go' -not -path './.git/*' -exec gofmt -l {} +)"
-go build ./...
-go test ./...
-go test -race ./...
-go vet ./...
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+cargo test --workspace --locked
 ```
 
-See the [CI workflow](../.github/workflows/ci.yml) for Browse's additional Rust
-build and CLI/MCP smoke checks.
+See the [CI workflow](../.github/workflows/ci.yml) for Browse's CLI/MCP smoke
+checks and the native browse workflows.
 
 Changes to the default branch are squash-merged only.
 

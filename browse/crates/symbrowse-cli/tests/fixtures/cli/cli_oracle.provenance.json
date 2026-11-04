@@ -1,0 +1,20 @@
+{
+ "tool": "record_oracle.py",
+ "oracle": "Go symbrowse CLI (browse/cmd/symbrowse) built from the worktree commit",
+ "worktree_commit": "a48d8f4b9d6362cdc2c8046b489ad4d44cf1c7c4",
+ "go_version": "go version go1.27.3 darwin/arm64",
+ "platform": "darwin",
+ "go_binary": "symbrowse-go",
+ "argv": [
+  "--go",
+  "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/coord-20261103/bin/symbrowse-go",
+  "--out",
+  "cli_oracle.json",
+  "--commit",
+  "a48d8f4b9d6362cdc2c8046b489ad4d44cf1c7c4",
+  "--scratch",
+  "/Users/daniel/.hermes/cache/scratch/rec"
+ ],
+ "scenario_count": 535,
+ "method": "recording fake daemon on the session socket; isolated HOME/cwd/TMPDIR; env -i style environment"
+}

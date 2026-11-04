@@ -1,0 +1,25 @@
+[package]
+name = "symaira-cutover"
+description = "One-time automatic backup of pre-Rust Symaira state on the first Rust run"
+version = "0.12.1"
+edition = "2024"
+rust-version = "1.98"
+license = "Apache-2.0"
+repository = "https://github.com/danieljustus/symaira-brain"
+publish = false
+
+# Shared by symbrain, symguard (root workspace) and symbrowse (browse/
+# workspace), so versions are pinned here instead of inherited.
+[dependencies]
+serde_json = "1.0.145"
+sha2 = "0.10.9"
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }

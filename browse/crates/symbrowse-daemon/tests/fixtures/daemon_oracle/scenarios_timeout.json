@@ -1,0 +1,22 @@
+{
+ "session": "oracle",
+ "env": {
+  "SYMBROWSE_OPERATION_TIMEOUT": "1"
+ },
+ "steps": [
+  {
+   "name": "operation_timeout_keeps_connection_usable",
+   "pipeline": [
+    {
+     "cmd": "eval",
+     "args": {
+      "expression": "1+1"
+     }
+    },
+    {
+     "cmd": "daemon.ping"
+    }
+   ]
+  }
+ ]
+}

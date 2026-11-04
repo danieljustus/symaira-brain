@@ -63,10 +63,7 @@ fn owner(options: Options) -> Owner {
 }
 
 fn writer() -> Options {
-    Options {
-        direct_writes: true,
-        ..Options::default()
-    }
+    Options::default()
 }
 
 fn token(sub: &str, jti: &str, exp_offset: i64) -> String {
@@ -297,7 +294,7 @@ fn bearer_tokens_are_verified_and_revocable() {
         serde_json::json!({"entities":null})
     );
     assert_eq!(send(port, "GET", "/api/search", &auth, "").status, 405);
-    assert_eq!(send(port, "GET", "/api/stats", &auth, "").status, 501);
+    assert_eq!(send(port, "GET", "/api/stats", &auth, "").status, 200);
     assert_eq!(send(port, "GET", "/api/get", &auth, "").status, 400);
 
     assert_eq!(
@@ -393,10 +390,10 @@ fn direct_writes_round_trip_through_the_shared_store() {
             "POST",
             "/api/search",
             &auth,
-            r#"{"query":"x","filter":"y"}"#
+            r#"{"query":"x","entity":"y"}"#
         )
         .status,
-        501
+        404
     );
     assert_eq!(
         send(
@@ -407,7 +404,7 @@ fn direct_writes_round_trip_through_the_shared_store() {
             r#"{"content":"a","working":true}"#
         )
         .status,
-        501
+        200
     );
 
     let delete = send(port, "DELETE", &format!("/api/delete?id={id}"), &auth, "");
@@ -424,25 +421,8 @@ fn direct_writes_round_trip_through_the_shared_store() {
 
 #[test]
 fn writes_respect_options_profiles_and_body_limits() {
-    let disabled = owner(Options::default());
     let valid = bearer(&token("alice", "p1", 60));
     let auth = [("Authorization", valid.as_str())];
-    assert_eq!(
-        send(
-            disabled.port,
-            "POST",
-            "/api/set",
-            &auth,
-            r#"{"content":"plain words"}"#
-        )
-        .status,
-        501
-    );
-    assert_eq!(
-        send(disabled.port, "DELETE", "/api/delete?id=x", &auth, "").status,
-        501
-    );
-    drop(disabled);
 
     let strict = owner(Options {
         require_profile: true,

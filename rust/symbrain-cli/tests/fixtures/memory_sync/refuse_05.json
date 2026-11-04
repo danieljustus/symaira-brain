@@ -1,0 +1,43 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_05",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 2,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: remote memory sync requires an https URL: http URL \"http://\" has no host\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

@@ -12,6 +12,7 @@ name = "symbrain"
 path = "src/main.rs"
 
 [dependencies]
+symaira-cutover.workspace = true
 symguard-cli.workspace = true
 chrono.workspace = true
 serde.workspace = true
@@ -33,6 +34,8 @@ symbrain-patterns.workspace = true
 symbrain-policy.workspace = true
 symbrain-skills.workspace = true
 symbrain-usage.workspace = true
+# Go inflates gzip response bodies transparently; same pinned crate symbrain-managed locks.
+flate2 = "=1.1.10"
 ureq.workspace = true
 toml_edit.workspace = true
 tempfile.workspace = true

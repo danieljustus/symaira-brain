@@ -1,9 +1,11 @@
-//! One middleware and route owner; unported routes remain explicit migration limits.
+//! One middleware and route owner mirroring the shipped `httpMux` chain:
+//! rate limit → request log → security headers → CSRF → Host guard → per
+//! route CORS → authentication → role → handler.
 
-use super::{Server, auth::Claims, authority, middleware, read, wire};
+use super::{Server, auth::Claims, authority, log, middleware, read, wire};
 use http_body_util::BodyExt;
 use hyper::{Method, Request, body::Incoming};
-use std::{net::IpAddr, sync::Arc, time::Duration};
+use std::{net::IpAddr, sync::Arc, time::Duration, time::Instant};
 
 const MAX_BODY: usize = 1 << 20;
 const API_ROUTES: &[&str] = &[
@@ -21,6 +23,21 @@ const API_ROUTES: &[&str] = &[
     "/api/entities",
     "/api/token/revoke",
 ];
+/// Routes wrapped in `RequireRole(RoleReadWrite)`.
+const WRITE_ROUTES: &[&str] = &[
+    "/api/set",
+    "/api/delete",
+    "/api/sync/apply",
+    "/api/sync/relay",
+];
+/// Routes whose handler reads a JSON body for a POST.
+const BODY_ROUTES: &[&str] = &[
+    "/api/set",
+    "/api/search",
+    "/api/token/revoke",
+    "/api/sync/apply",
+    "/api/sync/relay",
+];
 
 impl Server {
     pub(super) async fn handle(
@@ -28,6 +45,7 @@ impl Server {
         request: Request<Incoming>,
         peer: IpAddr,
     ) -> wire::Reply {
+        let started = Instant::now();
         let host = match authority::effective_host(&request) {
             Ok(host) => host,
             Err(rejection) => return wire::protocol_error(rejection.reason()),
@@ -43,11 +61,12 @@ impl Server {
             self.listener_port
                 .load(std::sync::atomic::Ordering::Relaxed),
         );
-        let cors = api
-            && origin_allowed
-            && middleware::csrf_allowed(&method, request.headers())
-            && middleware::loopback_host(host);
-        let mut reply = if !self.limiter.allow(peer) {
+        let csrf = middleware::csrf_allowed(&method, request.headers());
+        let loopback = middleware::loopback_host(host);
+        let cors = api && origin_allowed && csrf && loopback;
+        let key = self.limiter.key(peer, request.headers());
+        let host_text = host.to_owned();
+        let mut reply = if !self.limiter.allow(&key) {
             let mut reply = wire::bytes(
                 429,
                 "application/json",
@@ -58,9 +77,25 @@ impl Server {
                 .headers_mut()
                 .insert("retry-after", hyper::header::HeaderValue::from_static("60"));
             return reply;
-        } else if !middleware::csrf_allowed(&method, request.headers()) {
+        } else if !csrf {
+            log::warn(
+                "CSRF blocked request",
+                &[
+                    ("method", method.to_string()),
+                    ("path", path.clone()),
+                    ("origin", origin.clone()),
+                ],
+            );
             wire::error(403, "FORBIDDEN", "CSRF validation failed")
-        } else if !middleware::loopback_host(host) {
+        } else if !loopback {
+            log::warn(
+                "Host header validation rejected",
+                &[
+                    ("host", host_text),
+                    ("method", method.to_string()),
+                    ("path", path.clone()),
+                ],
+            );
             wire::error(403, "FORBIDDEN", "non-loopback Host header rejected")
         } else if api && !origin_allowed {
             wire::error(403, "FORBIDDEN", "origin not allowed")
@@ -77,6 +112,15 @@ impl Server {
         if cors {
             wire::cors_headers(&mut reply, &origin);
         }
+        log::info(
+            "HTTP request",
+            &[
+                ("method", method.to_string()),
+                ("path", path),
+                ("status", reply.status().as_u16().to_string()),
+                ("duration", log::duration(started.elapsed())),
+            ],
+        );
         if head {
             // Keep the full representation length while never sending a body.
             use hyper::body::Body;
@@ -101,31 +145,38 @@ impl Server {
             return static_asset(path, request.method());
         }
         if path == "/api/status" {
-            return wire::raw_json(200,serde_json::json!({"status":"healthy","version":self.options.version,"server":"symaira-memory","embedding_backend":"ollama"}).to_string());
+            return wire::raw_json(
+                200,
+                serde_json::json!({"status":"healthy","version":self.options.version,"server":"symaira-memory","embedding_backend":self.metrics.backend()}).to_string(),
+            );
         }
         let authorization = middleware::header(request.headers(), "authorization");
         if !authorization.starts_with("Bearer ") {
             return wire::error(401, "FORBIDDEN", "missing or invalid Authorization header");
         }
-        let Some(claims) = self.authenticate(authorization) else {
-            return wire::error(401, "FORBIDDEN", "invalid or expired token");
+        let claims = match self.authenticate(authorization) {
+            Ok(claims) => claims,
+            Err(reason) => {
+                log::error(
+                    "HTTP error",
+                    &[
+                        ("code", "FORBIDDEN".to_owned()),
+                        ("msg", "invalid or expired token".to_owned()),
+                        ("err", reason.to_owned()),
+                    ],
+                );
+                return wire::error(401, "FORBIDDEN", "invalid or expired token");
+            }
         };
-        if [
-            "/api/set",
-            "/api/delete",
-            "/api/sync/apply",
-            "/api/sync/relay",
-        ]
-        .contains(&path)
+        if WRITE_ROUTES.contains(&path)
             && let Err(message) = self.write_authorized(&claims)
         {
             return wire::error(403, "FORBIDDEN", message);
         }
         let (parts, body) = request.into_parts();
         let mut raw = Vec::new();
-        if ["/api/set", "/api/search", "/api/token/revoke"].contains(&path)
-            && parts.method == Method::POST
-        {
+        let reads_body = BODY_ROUTES.contains(&path) && parts.method == Method::POST;
+        if reads_body {
             let bounded = http_body_util::Limited::new(body, MAX_BODY).collect();
             match tokio::time::timeout(Duration::from_secs(30), bounded).await {
                 Ok(Ok(collected)) => raw = collected.to_bytes().to_vec(),
@@ -134,7 +185,12 @@ impl Server {
                         .downcast_ref::<http_body_util::LengthLimitError>()
                         .is_some() =>
                 {
-                    return wire::error(413, "INVALID_REQUEST", "request body exceeds size limit");
+                    return wire::error_logged(
+                        413,
+                        "INVALID_REQUEST",
+                        "request body exceeds size limit",
+                        "http: request body too large",
+                    );
                 }
                 _ => return wire::error(400, "INVALID_REQUEST", "Bad request body"),
             }
@@ -162,17 +218,19 @@ impl Server {
         claims: &Claims,
     ) -> wire::Reply {
         let allowed = match path {
-            "/api/list" => true,
             "/api/rules" | "/api/entities" | "/api/get" => method == Method::GET,
             "/api/search" | "/api/set" | "/api/token/revoke" => method == Method::POST,
             "/api/delete" => method == Method::DELETE || method == Method::POST,
-            _ => return wire::unsupported(),
+            // `/api/list`, `/api/stats` and the sync handlers (which answer
+            // their own method errors) accept any method here.
+            _ => true,
         };
         if !allowed {
             return wire::error(405, "METHOD_NOT_ALLOWED", "Method not allowed");
         }
         match path {
             "/api/list" => self.list(params),
+            "/api/stats" => wire::raw_json(200, self.metrics.document()),
             "/api/rules" => self.rules(params),
             "/api/entities" => self.entities(),
             "/api/get" => self.get(params),
@@ -180,7 +238,10 @@ impl Server {
             "/api/set" => self.set(body, claims),
             "/api/delete" => self.delete(params),
             "/api/token/revoke" => self.token_revoke(body),
-            _ => wire::unsupported(),
+            "/api/sync/changes" => self.sync_changes(method, params),
+            "/api/sync/apply" => self.sync_apply(method, body, claims),
+            "/api/sync/relay" => self.sync_relay(method, params, body),
+            _ => wire::error(404, "NOT_FOUND", "not found"),
         }
     }
 }

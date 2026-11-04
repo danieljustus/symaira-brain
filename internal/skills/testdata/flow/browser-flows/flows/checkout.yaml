@@ -1,6 +1,0 @@
-$schema: https://symaira.dev/schemas/symbrowse-flow.json
-name: checkout
-description: Walk through the checkout page
-steps:
-  - action: navigate
-    url: https://example.test/checkout

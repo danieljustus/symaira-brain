@@ -1,0 +1,55 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "token_newline_env",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {
+    "SYMBRAIN_MEMORY_SYNC_TOKEN": "bad\ntoken"
+   },
+   "exit": 1,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: request http://127.0.0.1:{PORT}: Get \"http://127.0.0.1:{PORT}/api/sync/changes?limit=500\": net/http: invalid header field value for \"Authorization\"\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {
+    "SYMBRAIN_MEMORY_SYNC_TOKEN": "bad\ntoken"
+   },
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[],\"deleted\":[],\"server_time\":\"2026-10-18T17:45:10Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

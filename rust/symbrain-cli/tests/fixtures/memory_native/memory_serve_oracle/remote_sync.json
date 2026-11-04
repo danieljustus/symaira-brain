@@ -1,0 +1,271 @@
+{
+  "payload": [
+    [
+      "client pulls only",
+      {
+        "client_db": [
+          "memories: beta garden journal | project | {} | null | 0 |  |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 0 | <T>",
+          "memories: contact [REDACTED_EMAIL] about [REDACTED_API_KEY] | global | {\"note\":\"call [REDACTED_API_KEY]\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | null | 0 |  |  |  | 9ae16fa4fe3f0cdf8c784fb8eb32458bc781f7216c02a0bb92530a4c267fa265 | 0 | <T>",
+          "memories: delta mountain diary | agent | {} | null | 0 |  |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 0 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | null | 0 |  |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 0 | <T>",
+          "audit_log: set | c6918517-639b-4341-8ebb-ab49fca460c3 | NULL | NULL | agent | NULL | mcp | NULL",
+          "audit_log: set | 078b450d-17a3-4770-9a1b-44a15be50039 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | 95921f54-82f2-439c-b286-034d7a8f1206 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | NULL | NULL | project | NULL | mcp | NULL",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>"
+        ],
+        "exit": 0,
+        "server_db": [
+          "memories: beta garden journal | project | {} | vector(len=1564,fnv=1f3421a8968015b0) | 768 | hash-fallback |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 42183 | <T>",
+          "memories: contact alice@example.com about sk-abcdefghijklmnopqrstuv | global | {\"note\":\"call +49 170 1234567\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | vector(len=1564,fnv=fa5ace2b2fbb4278) | 768 | hash-fallback |  |  | 6e9202339d14dd6d5218b69221071f7d82ef0a279f2672922bdf24d90723ba02 | 63504 | <T>",
+          "memories: delta mountain diary | agent | {} | vector(len=1564,fnv=ddaf31e4756d39d0) | 768 | hash-fallback |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 7976 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | vector(len=1564,fnv=1fe935b180463df8) | 768 | hash-fallback |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 48049 | <T>",
+          "entities: Alice | person | [\"Al\",\"A.\"] | desc <b>& | seed | ent-1",
+          "entities: Zeta Project | person | [] | desc <b>& |  | ent-2",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: upsert | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>"
+        ],
+        "stderr": [],
+        "stdout": [
+          "Remote:            http://127.0.0.1:<port>",
+          "Mode:              pull",
+          "Encrypted relay:   false",
+          "Cursor:            <T>",
+          "Server time:       <T>",
+          "Pulled memories:   4",
+          "Pulled deletes:    0",
+          "Pushed memories:   0",
+          "Pushed deletes:    0"
+        ]
+      }
+    ],
+    [
+      "client, default run",
+      {
+        "client_db": [
+          "memories: beta garden journal | project | {} | null | 0 |  |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 0 | <T>",
+          "memories: contact [REDACTED_EMAIL] about [REDACTED_API_KEY] | global | {\"note\":\"call [REDACTED_API_KEY]\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | null | 0 |  |  |  | 9ae16fa4fe3f0cdf8c784fb8eb32458bc781f7216c02a0bb92530a4c267fa265 | 0 | <T>",
+          "memories: delta mountain diary | agent | {} | null | 0 |  |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 0 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | null | 0 |  |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 0 | <T>",
+          "audit_log: set | c6918517-639b-4341-8ebb-ab49fca460c3 | NULL | NULL | agent | NULL | mcp | NULL",
+          "audit_log: set | 078b450d-17a3-4770-9a1b-44a15be50039 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | 95921f54-82f2-439c-b286-034d7a8f1206 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | NULL | NULL | project | NULL | mcp | NULL",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>"
+        ],
+        "exit": 0,
+        "server_db": [
+          "memories: beta garden journal | project | {} | vector(len=1564,fnv=1f3421a8968015b0) | 768 | hash-fallback |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 42183 | <T>",
+          "memories: contact alice@example.com about sk-abcdefghijklmnopqrstuv | global | {\"note\":\"call +49 170 1234567\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | vector(len=1564,fnv=fa5ace2b2fbb4278) | 768 | hash-fallback |  |  | 6e9202339d14dd6d5218b69221071f7d82ef0a279f2672922bdf24d90723ba02 | 63504 | <T>",
+          "memories: delta mountain diary | agent | {} | vector(len=1564,fnv=ddaf31e4756d39d0) | 768 | hash-fallback |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 7976 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | vector(len=1564,fnv=1fe935b180463df8) | 768 | hash-fallback |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 48049 | <T>",
+          "entities: Alice | person | [\"Al\",\"A.\"] | desc <b>& | seed | ent-1",
+          "entities: Zeta Project | person | [] | desc <b>& |  | ent-2",
+          "audit_log: sync | NULL | NULL | NULL | NULL | NULL | writer | applied=0 skipped=4 deleted=0 invalidScope=0 invalidID=0",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: upsert | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>"
+        ],
+        "stderr": [],
+        "stdout": [
+          "Remote:            http://127.0.0.1:<port>",
+          "Mode:              both",
+          "Encrypted relay:   false",
+          "Cursor:            <T>",
+          "Server time:       <T>",
+          "Pulled memories:   4",
+          "Pulled deletes:    0",
+          "Pushed memories:   0",
+          "Pushed deletes:    0"
+        ]
+      }
+    ],
+    [
+      "client pushes",
+      {
+        "client_db": [
+          "memories: beta garden journal | project | {} | vector(len=1564,fnv=1f3421a8968015b0) | 768 | hash-fallback |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 42183 | <T>",
+          "memories: contact alice@example.com about sk-abcdefghijklmnopqrstuv | global | {\"note\":\"call +49 170 1234567\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | vector(len=1564,fnv=fa5ace2b2fbb4278) | 768 | hash-fallback |  |  | 6e9202339d14dd6d5218b69221071f7d82ef0a279f2672922bdf24d90723ba02 | 63504 | <T>",
+          "memories: delta mountain diary | agent | {} | vector(len=1564,fnv=ddaf31e4756d39d0) | 768 | hash-fallback |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 7976 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | vector(len=1564,fnv=1fe935b180463df8) | 768 | hash-fallback |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 48049 | <T>",
+          "entities: Alice | person | [\"Al\",\"A.\"] | desc <b>& | seed | ent-1",
+          "entities: Zeta Project | person | [] | desc <b>& |  | ent-2",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: upsert | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>"
+        ],
+        "exit": 0,
+        "server_db": [
+          "memories: beta garden journal | project | {} | null | 0 |  |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 0 | <T>",
+          "memories: contact [REDACTED_EMAIL] about [REDACTED_API_KEY] | global | {\"note\":\"call [REDACTED_API_KEY]\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | null | 0 |  |  |  | 9ae16fa4fe3f0cdf8c784fb8eb32458bc781f7216c02a0bb92530a4c267fa265 | 0 | <T>",
+          "memories: delta mountain diary | agent | {} | null | 0 |  |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 0 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | null | 0 |  |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 0 | <T>",
+          "audit_log: set | c6918517-639b-4341-8ebb-ab49fca460c3 | NULL | NULL | agent | NULL | mcp | NULL",
+          "audit_log: set | 078b450d-17a3-4770-9a1b-44a15be50039 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | 95921f54-82f2-439c-b286-034d7a8f1206 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | NULL | NULL | project | NULL | mcp | NULL",
+          "audit_log: sync | NULL | NULL | NULL | NULL | NULL | writer | applied=4 skipped=0 deleted=0 invalidScope=0 invalidID=0",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>"
+        ],
+        "stderr": [],
+        "stdout": [
+          "Remote:            http://127.0.0.1:<port>",
+          "Mode:              both",
+          "Encrypted relay:   false",
+          "Cursor:            <T>",
+          "Server time:       <T>",
+          "Pulled memories:   0",
+          "Pulled deletes:    0",
+          "Pushed memories:   4",
+          "Pushed deletes:    0"
+        ]
+      }
+    ],
+    [
+      "client pushes only",
+      {
+        "client_db": [
+          "memories: beta garden journal | project | {} | vector(len=1564,fnv=1f3421a8968015b0) | 768 | hash-fallback |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 42183 | <T>",
+          "memories: contact alice@example.com about sk-abcdefghijklmnopqrstuv | global | {\"note\":\"call +49 170 1234567\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | vector(len=1564,fnv=fa5ace2b2fbb4278) | 768 | hash-fallback |  |  | 6e9202339d14dd6d5218b69221071f7d82ef0a279f2672922bdf24d90723ba02 | 63504 | <T>",
+          "memories: delta mountain diary | agent | {} | vector(len=1564,fnv=ddaf31e4756d39d0) | 768 | hash-fallback |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 7976 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | vector(len=1564,fnv=1fe935b180463df8) | 768 | hash-fallback |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 48049 | <T>",
+          "entities: Alice | person | [\"Al\",\"A.\"] | desc <b>& | seed | ent-1",
+          "entities: Zeta Project | person | [] | desc <b>& |  | ent-2",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: upsert | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>"
+        ],
+        "exit": 0,
+        "server_db": [
+          "memories: beta garden journal | project | {} | null | 0 |  |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 0 | <T>",
+          "memories: contact [REDACTED_EMAIL] about [REDACTED_API_KEY] | global | {\"note\":\"call [REDACTED_API_KEY]\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | null | 0 |  |  |  | 9ae16fa4fe3f0cdf8c784fb8eb32458bc781f7216c02a0bb92530a4c267fa265 | 0 | <T>",
+          "memories: delta mountain diary | agent | {} | null | 0 |  |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 0 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | null | 0 |  |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 0 | <T>",
+          "audit_log: set | c6918517-639b-4341-8ebb-ab49fca460c3 | NULL | NULL | agent | NULL | mcp | NULL",
+          "audit_log: set | 078b450d-17a3-4770-9a1b-44a15be50039 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | 95921f54-82f2-439c-b286-034d7a8f1206 | NULL | NULL | global | NULL | mcp | NULL",
+          "audit_log: set | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | NULL | NULL | project | NULL | mcp | NULL",
+          "audit_log: sync | NULL | NULL | NULL | NULL | NULL | writer | applied=4 skipped=0 deleted=0 invalidScope=0 invalidID=0",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>"
+        ],
+        "stderr": [],
+        "stdout": [
+          "Remote:            http://127.0.0.1:<port>",
+          "Mode:              push",
+          "Encrypted relay:   false",
+          "Cursor:            <T>",
+          "Pulled memories:   0",
+          "Pulled deletes:    0",
+          "Pushed memories:   4",
+          "Pushed deletes:    0"
+        ]
+      }
+    ],
+    [
+      "client, both seeded",
+      {
+        "client_db": [
+          "memories: beta garden journal | project | {} | vector(len=1564,fnv=1f3421a8968015b0) | 768 | hash-fallback |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 42183 | <T>",
+          "memories: contact alice@example.com about sk-abcdefghijklmnopqrstuv | global | {\"note\":\"call +49 170 1234567\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | vector(len=1564,fnv=fa5ace2b2fbb4278) | 768 | hash-fallback |  |  | 6e9202339d14dd6d5218b69221071f7d82ef0a279f2672922bdf24d90723ba02 | 63504 | <T>",
+          "memories: delta mountain diary | agent | {} | vector(len=1564,fnv=ddaf31e4756d39d0) | 768 | hash-fallback |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 7976 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | vector(len=1564,fnv=1fe935b180463df8) | 768 | hash-fallback |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 48049 | <T>",
+          "entities: Alice | person | [\"Al\",\"A.\"] | desc <b>& | seed | ent-1",
+          "entities: Zeta Project | person | [] | desc <b>& |  | ent-2",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: upsert | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>"
+        ],
+        "exit": 0,
+        "server_db": [
+          "memories: beta garden journal | project | {} | vector(len=1564,fnv=1f3421a8968015b0) | 768 | hash-fallback |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 42183 | <T>",
+          "memories: contact alice@example.com about sk-abcdefghijklmnopqrstuv | global | {\"note\":\"call +49 170 1234567\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | vector(len=1564,fnv=fa5ace2b2fbb4278) | 768 | hash-fallback |  |  | 6e9202339d14dd6d5218b69221071f7d82ef0a279f2672922bdf24d90723ba02 | 63504 | <T>",
+          "memories: delta mountain diary | agent | {} | vector(len=1564,fnv=ddaf31e4756d39d0) | 768 | hash-fallback |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 7976 | <T>",
+          "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | vector(len=1564,fnv=1fe935b180463df8) | 768 | hash-fallback |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 48049 | <T>",
+          "entities: Alice | person | [\"Al\",\"A.\"] | desc <b>& | seed | ent-1",
+          "entities: Zeta Project | person | [] | desc <b>& |  | ent-2",
+          "audit_log: sync | NULL | NULL | NULL | NULL | NULL | writer | applied=0 skipped=4 deleted=0 invalidScope=0 invalidID=0",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+          "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+          "sync_oplog: upsert | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+          "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+          "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>"
+        ],
+        "stderr": [],
+        "stdout": [
+          "Remote:            http://127.0.0.1:<port>",
+          "Mode:              both",
+          "Encrypted relay:   false",
+          "Cursor:            <T>",
+          "Server time:       <T>",
+          "Pulled memories:   0",
+          "Pulled deletes:    0",
+          "Pushed memories:   0",
+          "Pushed deletes:    0"
+        ]
+      }
+    ]
+  ],
+  "provenance": {
+    "command": "symbrain memory sync --remote <memory serve on a free port> --token <HS256 writer token> [flags]; shipped client against shipped server",
+    "fixture": "remote_sync",
+    "go_source": {
+      "git_head": "1ce855074bb5394190a404f17c86c24320402f9c",
+      "go_mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+      "go_sum": "d527200e8f13fd16eb27b802bbe5b6ee19cd6a0c",
+      "tree_cmd": "6a47d5ab34dcd2f8e676684bd4a349da152765e9",
+      "tree_internal": "8ebcacdf27d3e1dc2e9d2a1d5b4e1d04ac57f5fe"
+    },
+    "go_version": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/MEM-NATIVE/oracle/symbrain: go1.27.3",
+    "kind": "go-oracle-recording",
+    "oracle_sha256": "6e81245f3c1ca3008f9e92ee175ca211c089c3a166be250d405e9123a18b47ff",
+    "payload_sha256": "f75cf74199ee22c2bf17516f0fbf33307003df465bd48d1c0877ea71d849c94a",
+    "platform": "macos/aarch64",
+    "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1 SYMBRAIN_MEMORY_SERVE_GO_ORACLE=<go build of ./cmd/symbrain>",
+    "seed_sha256": "3cbc9860a9def8388b42388151407a76f0a3deb1dde8b4c045ade34b5b449d14"
+  }
+}

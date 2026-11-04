@@ -42,11 +42,12 @@ pub(super) fn run_search(
     let embedding =
         symbrain_memory::EmbeddingGenerator::new(&config.ollama_url, &config.ollama_model)
             .generate(&query);
-    let mut hits = match store.search_ranked(
+    let mut hits = match store.search_ranked_prefiltered(
         &embedding.vector,
         &embedding.source,
         scope.as_str(),
         usize::try_from(limit).unwrap_or(usize::MAX),
+        config.prefilter,
     ) {
         Ok(hits) => hits,
         Err(err) => {
@@ -75,14 +76,15 @@ pub(super) fn run_search(
             } else {
                 let _ = writeln!(stdout, "SCORE\tID\tSCOPE\tCREATED\tCONTENT");
                 for hit in &hits {
-                    let _ = writeln!(
+                    super::read::write_row(
                         stdout,
-                        "{:.6}\t{}\t{}\t{}\t{}",
-                        f64::from(hit.score),
-                        hit.memory.id,
-                        hit.memory.scope,
-                        hit.memory.created_at_seconds(),
-                        table_content(&hit.memory.content)
+                        &[
+                            &format!("{:.6}", f64::from(hit.score)),
+                            &hit.memory.id,
+                            &hit.memory.scope,
+                            &hit.memory.created_at_seconds(),
+                            &table_content(&hit.memory.content),
+                        ],
                     );
                 }
             }

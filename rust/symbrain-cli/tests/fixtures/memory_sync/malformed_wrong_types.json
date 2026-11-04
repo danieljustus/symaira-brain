@@ -1,0 +1,64 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "malformed_wrong_types",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: decode remote response: json: cannot unmarshal string into Go struct field ChangesResponse.memories of type []*db.Memory\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":\"nope\",\"deleted\":[],\"server_time\":\"2026-10-20T12:00:00Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

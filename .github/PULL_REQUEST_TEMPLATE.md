@@ -17,5 +17,5 @@
 ## Checklist
 
 - [ ] `make test` passes
-- [ ] `make fmt-check` passes (gofmt clean)
+- [ ] `make fmt-check` passes (rustfmt clean)
 - [ ] Follows the conventions in [AGENTS.md](../AGENTS.md)

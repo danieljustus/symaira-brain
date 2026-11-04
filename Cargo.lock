@@ -1633,6 +1633,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "symaira-cutover"
+version = "0.12.1"
+dependencies = [
+ "serde_json",
+ "sha2",
+ "tempfile",
+]
+
+[[package]]
 name = "symbrain-activity"
 version = "0.12.1"
 dependencies = [
@@ -1700,6 +1709,7 @@ name = "symbrain-cli"
 version = "0.12.1"
 dependencies = [
  "chrono",
+ "flate2",
  "process-wrap",
  "regex",
  "rusqlite",
@@ -1708,6 +1718,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "signal-hook",
+ "symaira-cutover",
  "symbrain-activity",
  "symbrain-adapter",
  "symbrain-audit",
@@ -1849,6 +1860,7 @@ dependencies = [
  "hyper-util",
  "percent-encoding",
  "regex",
+ "ring",
  "rusqlite",
  "serde",
  "serde_json",
@@ -1929,6 +1941,7 @@ dependencies = [
  "chrono",
  "serde",
  "serde_json",
+ "symaira-cutover",
  "symbrain-audit",
  "symbrain-core",
  "symbrain-guard-core",

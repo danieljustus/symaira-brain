@@ -63,15 +63,15 @@ pub(super) fn run_list(
                 for row in &rows {
                     let created = row
                         .created_at
-                        .map(|time| time.format("%Y-%m-%dT%H:%M:%SZ").to_string())
+                        .map(|time| {
+                            time.with_timezone(&chrono::Utc)
+                                .format("%Y-%m-%dT%H:%M:%SZ")
+                                .to_string()
+                        })
                         .unwrap_or_default();
-                    let _ = writeln!(
+                    write_row(
                         stdout,
-                        "{}\t{}\t{}\t{}",
-                        row.id,
-                        row.scope,
-                        created,
-                        table_content(&row.content)
+                        &[&row.id, &row.scope, &created, &table_content(&row.content)],
                     );
                 }
             }
@@ -79,6 +79,20 @@ pub(super) fn run_list(
     }
 
     exit::OK
+}
+
+/// Writes one tab-separated table row; stored bytes that are not valid
+/// UTF-8 are written back unchanged, like the shipped table writer.
+pub(super) fn write_row(out: &mut dyn Write, fields: &[&str]) {
+    let mut line = Vec::new();
+    for (index, field) in fields.iter().enumerate() {
+        if index > 0 {
+            line.push(b'\t');
+        }
+        line.extend_from_slice(&symbrain_memory::raw_bytes(field));
+    }
+    line.push(b'\n');
+    let _ = out.write_all(&line);
 }
 
 /// Collapses tab, carriage return and newline so one memory stays on one row.

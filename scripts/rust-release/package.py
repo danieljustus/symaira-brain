@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Build the release archives for the Rust CLI and its Go fallback.
+"""Build and verify the release archives of the Rust CLI.
 
   package.py archive --version V --os linux --arch amd64 \
-      --rust target/release/symbrain --go /tmp/symbrain-go --out dist
+      --rust target/release/symbrain --out dist
   package.py checksums --dir dist
+  package.py verify --version V --dir dist
 
-Archive names and documentation members follow `.goreleaser.yml`
-(`symbrain_<version>_<os>_<arch>.tar.gz`, `.zip` on Windows). Until the Go
-fallback is removed (#771), each archive also carries `symbrain-go`, which the
-Rust CLI finds on PATH next to itself. Output is byte-for-byte reproducible for
-the same inputs and SOURCE_DATE_EPOCH.
+Archive names and documentation members keep the GoReleaser layout of the Go
+releases (`symbrain_<version>_<os>_<arch>.tar.gz`). Each archive holds only
+`symbrain` and the documentation; there is no Go fallback. Output is
+byte-for-byte reproducible for the same inputs and SOURCE_DATE_EPOCH.
 """
 
 from __future__ import annotations
@@ -22,39 +22,25 @@ import os
 import re
 import sys
 import tarfile
-import time
-import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DOCS = ["AGENTS.md", "LICENSE", "README.md"]
 PLATFORMS = [("darwin", "arm64"), ("linux", "amd64"), ("linux", "arm64")]
 VERSION = re.compile(r"^[0-9A-Za-z.+-]+$")
-ZIP_EPOCH = 315532800  # 1980-01-01, the earliest ZIP timestamp
 
 
 def archive_name(version: str, goos: str, goarch: str) -> str:
-    return f"symbrain_{version}_{goos}_{goarch}." + ("zip" if goos == "windows" else "tar.gz")
+    return f"symbrain_{version}_{goos}_{goarch}.tar.gz"
 
 
-def members(goos: str, rust: Path, go: Path) -> list[tuple[str, bytes, int]]:
-    exe = ".exe" if goos == "windows" else ""
+def members(rust: Path) -> list[tuple[str, bytes, int]]:
     entries = [(name, (ROOT / name).read_bytes(), 0o644) for name in DOCS]
-    entries += [("symbrain" + exe, rust.read_bytes(), 0o755), ("symbrain-go" + exe, go.read_bytes(), 0o755)]
+    entries.append(("symbrain", rust.read_bytes(), 0o755))
     return sorted(entries)
 
 
 def write_archive(path: Path, entries: list[tuple[str, bytes, int]], epoch: int) -> None:
-    if path.suffix == ".zip":
-        stamp = time.gmtime(max(epoch, ZIP_EPOCH))[:6]
-        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
-            for name, data, mode in entries:
-                info = zipfile.ZipInfo(name, stamp)
-                info.create_system = 3  # Unix, so the mode bits below are honoured
-                info.external_attr = (0o100000 | mode) << 16
-                info.compress_type = zipfile.ZIP_DEFLATED
-                archive.writestr(info, data)
-        return
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.PAX_FORMAT) as archive:
         for name, data, mode in entries:
@@ -68,13 +54,52 @@ def write_archive(path: Path, entries: list[tuple[str, bytes, int]], epoch: int)
 
 
 def write_checksums(directory: Path) -> Path:
-    archives = sorted(p for p in directory.iterdir() if p.name.endswith((".tar.gz", ".zip")))
+    archives = sorted(p for p in directory.iterdir() if p.name.endswith(".tar.gz"))
     if not archives:
         raise SystemExit(f"no archives in {directory}")
     lines = [f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n" for p in archives]
     target = directory / "checksums.txt"
     target.write_text("".join(lines), encoding="ascii", newline="\n")
     return target
+
+
+def verify(version: str, directory: Path) -> list[str]:
+    """Return every release-contract violation of a complete bundle."""
+    problems = []
+    expected = {archive_name(version, goos, goarch) for goos, goarch in PLATFORMS}
+    present = {p.name for p in directory.iterdir() if p.name.endswith(".tar.gz")}
+    problems += [f"missing archive {name}" for name in sorted(expected - present)]
+    problems += [f"unexpected archive {name}" for name in sorted(present - expected)]
+    sums = directory / "checksums.txt"
+    listed = {}
+    if sums.is_file():
+        for line in sums.read_text(encoding="ascii").splitlines():
+            digest, _, name = line.partition("  ")
+            listed[name] = digest
+    else:
+        problems.append("missing checksums.txt")
+    if sums.is_file() and set(listed) != present:
+        problems.append(f"checksums.txt lists {sorted(listed)}, bundle has {sorted(present)}")
+    docs = {name: (ROOT / name).read_bytes() for name in DOCS}
+    for name in sorted(expected & present):
+        path = directory / name
+        if listed.get(name) != hashlib.sha256(path.read_bytes()).hexdigest():
+            problems.append(f"{name}: checksum mismatch")
+        with tarfile.open(path) as archive:
+            entries = {m.name: m for m in archive.getmembers()}
+            if sorted(entries) != sorted([*DOCS, "symbrain"]):
+                problems.append(f"{name}: members {sorted(entries)}")
+                continue
+            for member, info in entries.items():
+                mode = 0o755 if member == "symbrain" else 0o644
+                if not info.isfile() or info.mode != mode or (info.uid, info.gid) != (0, 0):
+                    problems.append(f"{name}: {member} is not a root-owned {oct(mode)} file")
+                data = archive.extractfile(info).read()
+                if member in docs and data != docs[member]:
+                    problems.append(f"{name}: {member} differs from the source tree")
+                if member == "symbrain" and not data:
+                    problems.append(f"{name}: empty symbrain binary")
+    return problems
 
 
 def main(argv: list[str]) -> int:
@@ -85,14 +110,24 @@ def main(argv: list[str]) -> int:
     build.add_argument("--os", required=True, choices=sorted({p[0] for p in PLATFORMS}))
     build.add_argument("--arch", required=True, choices=sorted({p[1] for p in PLATFORMS}))
     build.add_argument("--rust", required=True, type=Path)
-    build.add_argument("--go", required=True, type=Path)
     build.add_argument("--out", required=True, type=Path)
     sums = commands.add_parser("checksums")
     sums.add_argument("--dir", required=True, type=Path)
+    check = commands.add_parser("verify")
+    check.add_argument("--version", required=True)
+    check.add_argument("--dir", required=True, type=Path)
     args = parser.parse_args(argv)
 
     if args.command == "checksums":
         print(write_checksums(args.dir))
+        return 0
+    if args.command == "verify":
+        problems = verify(args.version, args.dir)
+        for problem in problems:
+            print(f"release contract: FAIL {problem}", file=sys.stderr)
+        if problems:
+            return 1
+        print(f"release contract: PASS {len(PLATFORMS)} archives for {args.version}")
         return 0
     if not VERSION.fullmatch(args.version) or args.version.startswith("v"):
         raise SystemExit(f"invalid version {args.version!r} (no leading v)")
@@ -101,7 +136,7 @@ def main(argv: list[str]) -> int:
     epoch = int(os.environ.get("SOURCE_DATE_EPOCH", "0"))
     args.out.mkdir(parents=True, exist_ok=True)
     path = args.out / archive_name(args.version, args.os, args.arch)
-    write_archive(path, members(args.os, args.rust, args.go), epoch)
+    write_archive(path, members(args.rust), epoch)
     print(path)
     return 0
 

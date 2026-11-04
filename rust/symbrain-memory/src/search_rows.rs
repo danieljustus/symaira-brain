@@ -6,7 +6,7 @@
 //! are parsed with [`crate::gotime`] so a database written by either
 //! implementation reads the same.
 
-use chrono::{DateTime, SecondsFormat, Utc};
+use chrono::{DateTime, FixedOffset, SecondsFormat, Utc};
 use rusqlite::Row;
 
 use crate::gojson::{self, Members};
@@ -29,6 +29,8 @@ pub struct SearchRow {
     pub scope: String,
     /// Metadata object, as stored.
     pub metadata: serde_json::Map<String, serde_json::Value>,
+    /// The column held JSON `null` (a nil map), rendered as `null`.
+    pub metadata_null: bool,
     /// Stored embedding vector, used for scoring and never rendered.
     pub embedding: Vec<f32>,
     /// Sign-bit embedding, used by the Hamming prefilter and never rendered.
@@ -42,9 +44,9 @@ pub struct SearchRow {
     /// Quantization level of the embedding space.
     pub embedding_quantization: String,
     /// Creation timestamp.
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: Option<DateTime<FixedOffset>>,
     /// Update timestamp.
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<FixedOffset>>,
     /// Actor that created the memory.
     pub created_by: String,
     /// Actor that last updated it.
@@ -53,6 +55,8 @@ pub struct SearchRow {
     pub created_session: String,
     /// Session that last updated it.
     pub updated_session: String,
+    /// Linked entity names (single-row loads only), `entities,omitempty`.
+    pub entities: Vec<String>,
     /// Consolidation status.
     pub consolidation_status: String,
     /// Memory this one was consolidated into.
@@ -60,21 +64,21 @@ pub struct SearchRow {
     /// Importance weight.
     pub importance: f64,
     /// Validity window start.
-    pub valid_from: Option<DateTime<Utc>>,
+    pub valid_from: Option<DateTime<FixedOffset>>,
     /// Validity window end.
-    pub valid_to: Option<DateTime<Utc>>,
+    pub valid_to: Option<DateTime<FixedOffset>>,
     /// Memory that superseded this one.
     pub superseded_by: String,
     /// Working or long-term tier.
     pub tier: String,
     /// Expiry of a working-tier memory.
-    pub expires_at: Option<DateTime<Utc>>,
+    pub expires_at: Option<DateTime<FixedOffset>>,
     /// Number of times retrieved.
     pub access_count: i64,
     /// Last retrieval timestamp.
-    pub last_access: Option<DateTime<Utc>>,
+    pub last_access: Option<DateTime<FixedOffset>>,
     /// Retrieval timestamp before the most recent one.
-    pub prev_access: Option<DateTime<Utc>>,
+    pub prev_access: Option<DateTime<FixedOffset>>,
     /// `approved` or `staged`.
     pub review_status: String,
     /// Semantic kind.
@@ -82,53 +86,82 @@ pub struct SearchRow {
     /// Aging multiplier in `(0, 1]`.
     pub decay_factor: f64,
     /// When set, the memory is retired.
-    pub retired_at: Option<DateTime<Utc>>,
+    pub retired_at: Option<DateTime<FixedOffset>>,
 }
 
 impl SearchRow {
-    /// Reads one full memory row in the shipped column order.
+    /// Reads one full memory row in the shipped column order with the
+    /// shipped `scanMemory` conversions and diagnostics.
     pub(crate) fn from_row(row: &Row<'_>) -> rusqlite::Result<Self> {
-        let embedding_binary: Option<Vec<u8>> = row.get(5)?;
-        let embedding: Vec<f32> = crate::rows::json(row, 4)?;
-        if embedding.iter().any(|value| !value.is_finite()) {
-            return Err(rusqlite::Error::InvalidQuery);
-        }
+        use crate::goscan::{blob, float, int, null_text, null_time, raw, text, time};
+        let id = text(row, 0, "id")?;
+        let content = text(row, 1, "content")?;
+        let scope = text(row, 2, "scope")?;
+        let metadata_bytes = raw(row, 3, "metadata")?;
+        let embedding_bytes = raw(row, 4, "embedding")?;
+        let embedding_binary = blob(row, 5, "embedding_binary")?;
+        let embedding_source = text(row, 6, "embedding_source")?;
+        let embedding_model = text(row, 7, "embedding_model")?;
+        let embedding_quantization = text(row, 8, "embedding_quantization")?;
+        let created_at = time(row, 9, "created_at")?;
+        let updated_at = time(row, 10, "updated_at")?;
+        let created_by = text(row, 11, "created_by")?;
+        let updated_by = text(row, 12, "updated_by")?;
+        let created_session = text(row, 13, "created_session")?;
+        let updated_session = text(row, 14, "updated_session")?;
+        let consolidation_status = text(row, 15, "consolidation_status")?;
+        let consolidated_into_id = null_text(row, 16, "consolidated_into_id")?;
+        let importance = float(row, 17, "importance")?;
+        let valid_from = null_time(row, 18, "valid_from")?;
+        let valid_to = null_time(row, 19, "valid_to")?;
+        let superseded_by = null_text(row, 20, "superseded_by")?;
+        let tier = text(row, 21, "tier")?;
+        let expires_at = null_time(row, 22, "expires_at")?;
+        let access_count = int(row, 23, "access_count")?;
+        let last_access = null_time(row, 24, "last_access")?;
+        let prev_access = null_time(row, 25, "prev_access")?;
+        let review_status = text(row, 26, "review_status")?;
+        let kind = text(row, 27, "kind")?;
+        let decay_factor = float(row, 28, "decay_factor")?;
+        let retired_at = null_time(row, 29, "retired_at")?;
+        let (metadata, metadata_null) = crate::goscan::decode_metadata(&metadata_bytes)?;
+        let embedding = crate::goscan::decode_embedding(&embedding_bytes)?;
         Ok(Self {
-            id: row.get(0)?,
-            content: row.get(1)?,
-            scope: row.get(2)?,
-            metadata: crate::rows::json(row, 3)?,
+            id,
+            content,
+            scope,
+            metadata,
+            metadata_null,
             // The shipped full scan omits `embedding_dim` and derives the
             // length from the vector itself.
             embedding_dim: i64::try_from(embedding.len()).unwrap_or_default(),
             embedding,
             embedding_binary,
-            embedding_source: row.get(6)?,
-            embedding_model: row.get(7)?,
-            embedding_quantization: row.get(8)?,
-            created_at: crate::gotime::parse_optional(row.get::<_, Option<String>>(9)?.as_ref()),
-            updated_at: crate::gotime::parse_optional(row.get::<_, Option<String>>(10)?.as_ref()),
-            created_by: row.get(11)?,
-            updated_by: row.get(12)?,
-            created_session: row.get(13)?,
-            updated_session: row.get(14)?,
-            consolidation_status: row.get(15)?,
-            // NULL-tolerant like the shipped scan, which reads these two into
-            // `sql.NullString` and keeps the empty string when absent.
-            consolidated_into_id: row.get::<_, Option<String>>(16)?.unwrap_or_default(),
-            importance: row.get(17)?,
-            valid_from: crate::gotime::parse_optional(row.get::<_, Option<String>>(18)?.as_ref()),
-            valid_to: crate::gotime::parse_optional(row.get::<_, Option<String>>(19)?.as_ref()),
-            superseded_by: row.get::<_, Option<String>>(20)?.unwrap_or_default(),
-            tier: row.get(21)?,
-            expires_at: crate::gotime::parse_optional(row.get::<_, Option<String>>(22)?.as_ref()),
-            access_count: row.get(23)?,
-            last_access: crate::gotime::parse_optional(row.get::<_, Option<String>>(24)?.as_ref()),
-            prev_access: crate::gotime::parse_optional(row.get::<_, Option<String>>(25)?.as_ref()),
-            review_status: row.get(26)?,
-            kind: row.get(27)?,
-            decay_factor: row.get(28)?,
-            retired_at: crate::gotime::parse_optional(row.get::<_, Option<String>>(29)?.as_ref()),
+            embedding_source,
+            embedding_model,
+            embedding_quantization,
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
+            created_by,
+            updated_by,
+            created_session,
+            updated_session,
+            entities: Vec::new(),
+            consolidation_status,
+            consolidated_into_id,
+            importance,
+            valid_from,
+            valid_to,
+            superseded_by,
+            tier,
+            expires_at,
+            access_count,
+            last_access,
+            prev_access,
+            review_status,
+            kind,
+            decay_factor,
+            retired_at,
         })
     }
 
@@ -137,7 +170,10 @@ impl SearchRow {
     #[must_use]
     pub fn created_at_seconds(&self) -> String {
         self.created_at
-            .unwrap_or_else(|| DateTime::<Utc>::from_timestamp(0, 0).unwrap_or_default())
+            .map_or_else(
+                || DateTime::<Utc>::from_timestamp(0, 0).unwrap_or_default(),
+                |time| time.with_timezone(&Utc),
+            )
             .to_rfc3339_opts(SecondsFormat::Secs, true)
     }
 
@@ -150,6 +186,17 @@ impl SearchRow {
         }
     }
 
+    /// Applies the complete shipped `security.Redact` guard (HTTP response
+    /// boundary and sync ingestion) to content and metadata values.
+    pub fn redact_pii(&mut self) {
+        self.content = crate::pii::redact(&self.content);
+        for value in self.metadata.values_mut() {
+            if let serde_json::Value::String(text) = value {
+                *text = crate::pii::redact(text);
+            }
+        }
+    }
+
     /// Renders the memory the way the shipped struct marshals it.
     ///
     /// The shipped CLI clears the embedding (and the binary vector is never
@@ -157,11 +204,39 @@ impl SearchRow {
     /// markers and number spellings follow the shipped struct.
     #[must_use]
     pub fn to_go_json(&self) -> String {
+        self.render(false)
+    }
+
+    /// Like [`Self::to_go_json`] but keeps the stored embedding, which the
+    /// shipped HTTP responses marshal between `metadata` and
+    /// `embedding_source` (`embedding,omitempty`).
+    #[must_use]
+    pub fn to_go_json_embedded(&self) -> String {
+        self.render(true)
+    }
+
+    fn render(&self, embedding: bool) -> String {
         let mut members = Members::default();
         members.string("id", &self.id);
         members.string("content", &self.content);
         members.string("scope", &self.scope);
-        members.raw("metadata", &metadata_json(&self.metadata));
+        members.raw(
+            "metadata",
+            &if self.metadata_null {
+                "null".to_owned()
+            } else {
+                metadata_json(&self.metadata)
+            },
+        );
+        if embedding && !self.embedding.is_empty() {
+            let vector = self
+                .embedding
+                .iter()
+                .map(|v| gojson::number_f32(*v))
+                .collect::<Vec<_>>()
+                .join(",");
+            members.raw("embedding", &format!("[{vector}]"));
+        }
         members.string_if_present("embedding_source", &self.embedding_source);
         members.string_if_present("embedding_model", &self.embedding_model);
         members.string_if_present("embedding_quantization", &self.embedding_quantization);
@@ -171,6 +246,14 @@ impl SearchRow {
         members.string_if_present("updated_by", &self.updated_by);
         members.string_if_present("created_session", &self.created_session);
         members.string_if_present("updated_session", &self.updated_session);
+        if !self.entities.is_empty() {
+            let names = self
+                .entities
+                .iter()
+                .map(|name| gojson::quote(name))
+                .collect::<Vec<_>>();
+            members.raw("entities", &format!("[{}]", names.join(",")));
+        }
         members.string("consolidation_status", &self.consolidation_status);
         members.string_if_present("consolidated_into_id", &self.consolidated_into_id);
         members.number("importance", self.importance);

@@ -2,46 +2,30 @@
 # Portable agent-context layer for AI harnesses
 
 BINARY := symbrain
-MODULE := github.com/danieljustus/symaira-brain
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-# Keep fixture checks on the Go toolchain declared by this checkout.
-GO_ORACLE_TOOLCHAIN := $(shell awk '$$1 == "go" { print "go" $$2; exit }' go.mod)
-GO_ORACLE_REF ?= HEAD
-OPENCODE_ORACLE_REVISION := a92385d2deecc08d1fd96869908b81b7abd355fe
-OPENCODE_ORACLE_TOOLCHAIN := go1.26.7
-LDFLAGS := -X main.version=$(VERSION)
+# The repository is Rust-only. The historical Go behavior is replayed from
+# committed, sha256-sealed fixtures (scripts/oracle-freeze); no target needs a
+# Go toolchain.
 
 EXTERNAL_ARTIFACT_ROOT := .
-EXTERNAL_GO_ARTIFACT_ROOT := target/go
 EXTERNAL_CARGO_TARGET_DIR := target
 ifeq ($(strip $(CI)),)
 ifeq ($(shell uname -s),Darwin)
 EXTERNAL_WORKTREE_KEY := $(shell printf '%s' '$(CURDIR)' | shasum -a 256 | cut -c1-16)
 SYMAIRA_EXTERNAL_BASE := $(or $(SYMAIRA_EXTERNAL_BASE),/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain)
 EXTERNAL_ARTIFACT_ROOT := $(SYMAIRA_EXTERNAL_BASE)/artifacts
-EXTERNAL_GO_ARTIFACT_ROOT := $(EXTERNAL_ARTIFACT_ROOT)/go
 EXTERNAL_CARGO_TARGET_DIR := $(SYMAIRA_EXTERNAL_BASE)/cargo-target/$(EXTERNAL_WORKTREE_KEY)
 endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash "$(CURDIR)/scripts/run-external-env.sh"
 
-.PHONY: rust-coverage build build-rust parity-smoke rust-go-printable-check usage-oracle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-config-toml-oracle-check skills-raw-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint actionlint fmt-check fmt vet clean
+.PHONY: rust-coverage build build-rust parity-smoke parity-smoke-record-fixture init-differential oracle-freeze-check oracle-freeze-selftest workflow-policy-check rust-replay-checks usage-gateway-lifecycle-check rust-go-printable-check usage-oracle-check usage-opencode-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-runner-oracle-check skills-config-toml-oracle-check skills-raw-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check cli-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test guard-scan-parity rust-guard-check memory-oracle-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race coverage lint actionlint fmt-check fmt vet clean oracle-freeze-seal
 
-## coverage: Run tests and write machine-readable coverage artifacts
-coverage:
+## coverage: Rust workspace line coverage (floor enforced) plus coverage.json and the badge files
+coverage: rust-coverage
 	@set -eu; \
-	 $(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)"; \
-	 tmp_dir="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$${TMPDIR:-/tmp}/symbrain.XXXXXX"')"; \
-	 trap 'rm -rf "$$tmp_dir"' EXIT; \
-	 profile="$${COVERAGE_PROFILE:-$(EXTERNAL_ARTIFACT_ROOT)/coverage.out}"; \
-	 test_log="$${COVERAGE_LOG:-$$tmp_dir/test.log}"; \
-	 if [ -z "$${COVERAGE_PROFILE:-}" ]; then \
-		 if ! $(EXTERNAL_RUN) go test ./... -coverprofile="$$profile" > "$$test_log" 2>&1; then cat "$$test_log"; exit 1; fi; \
-		 cat "$$test_log"; \
-	 fi; \
-	 $(EXTERNAL_RUN) python3 scripts/rust-coverage/go_oracles.py --baseline "$$profile" --out "$(EXTERNAL_ARTIFACT_ROOT)/coverage-combined.out" --receipt "$(EXTERNAL_ARTIFACT_ROOT)/coverage-oracles.json"; \
-	 $(EXTERNAL_RUN) python3 scripts/rust-coverage/go_oracles.py --summary-only "$(EXTERNAL_ARTIFACT_ROOT)/coverage-combined.out" --out "$(EXTERNAL_ARTIFACT_ROOT)/coverage.json"; \
-	 total="$$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["total"])' "$(EXTERNAL_ARTIFACT_ROOT)/coverage.json")"; \
+	 summary="$(EXTERNAL_CARGO_TARGET_DIR)/coverage/summary.json"; \
+	 total="$$(python3 scripts/rust-coverage/badge.py "$$summary" "$(EXTERNAL_ARTIFACT_ROOT)/coverage.json")"; \
 	 printf '{\n  "schemaVersion": 1,\n  "label": "coverage",\n  "message": "%s%%",\n  "color": "blue"\n}\n' "$$total" > "$(EXTERNAL_ARTIFACT_ROOT)/badge.json"; \
 	printf '%s\n' \
 		'<?xml version="1.0" encoding="UTF-8"?>' \
@@ -65,165 +49,108 @@ coverage:
 		'  </g>' \
 		'</svg>' > "$(EXTERNAL_ARTIFACT_ROOT)/badge.svg"
 
-## build: Compile the symbrain binary
+## build: Compile the Rust symbrain binary (release)
 build:
-	$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)"
-	$(EXTERNAL_RUN) env CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o "$(EXTERNAL_ARTIFACT_ROOT)/$(BINARY)" ./cmd/symbrain
+	$(EXTERNAL_RUN) env SYMBRAIN_VERSION="$(VERSION)" cargo build --release --locked -p symbrain-cli
 
-## build-rust: Build the incremental Rust entrypoint and its Go fallback
+## build-rust: Build every Rust workspace member
 build-rust:
-	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "$(LDFLAGS)" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
-	$(EXTERNAL_RUN) env SYMBRAIN_VERSION="$(VERSION)" CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" cargo build --workspace --locked
+	$(EXTERNAL_RUN) env SYMBRAIN_VERSION="$(VERSION)" cargo build --workspace --locked
 
-## parity-smoke: Compare migrated Rust CLI slices against the pinned Go oracle
-parity-smoke: rust-go-printable-check
-	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
-	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" cargo build --workspace --locked
-	./guard/scripts/guard-scan-oracle/run.sh parity "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
-	$(EXTERNAL_RUN) python3 scripts/rust-differential.py "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
+# ---------------------------------------------------------------------------
+# Go-free fixture replay
+# ---------------------------------------------------------------------------
+PYTHON ?= python3
+ORACLE_FREEZE := $(EXTERNAL_RUN) $(PYTHON) scripts/oracle-freeze/freeze.py
+REQUIRE_RAN := $(EXTERNAL_RUN) $(PYTHON) scripts/oracle-freeze/require_ran.py
 
-## rust-go-printable-check: Ensure the pinned Go IsPrint table is current
-rust-go-printable-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run scripts/generate-go-printable-table.go -check
+## oracle-freeze-check: FAIL unless every committed Go-oracle fixture matches its sealed sha256 + provenance
+oracle-freeze-check:
+	$(ORACLE_FREEZE) verify
 
-.PHONY: usage-opencode-check usage-opencode-historical-check
-## usage-opencode-check: Verify pinned OpenCode request/parse corpus without rewriting it
-usage-opencode-check:
-	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(OPENCODE_ORACLE_TOOLCHAIN) go run ./scripts/usage-request-oracle/opencode -oracle-revision $(OPENCODE_ORACLE_REVISION) -oracle-toolchain $(OPENCODE_ORACLE_TOOLCHAIN) -check
+## oracle-freeze-selftest: negative controls for the fixture gate (mutated field, missing file, forged hash, ...)
+oracle-freeze-selftest:
+	$(EXTERNAL_RUN) $(PYTHON) -m unittest discover -s scripts/oracle-freeze -p 'test_*.py'
 
-## usage-opencode-historical-check: Revalidate the frozen generator against its authentic immutable source.
-usage-opencode-historical-check:
-	@test "$$(git -C "$(HISTORICAL_USAGE_ROOT)" rev-parse HEAD)" = b807eae643c627ae31166b90176d5a0de6f4e647
-	@test -z "$$(git -C "$(HISTORICAL_USAGE_ROOT)" status --porcelain=v1 --untracked-files=all)"
-	$(MAKE) -C "$(HISTORICAL_USAGE_ROOT)" usage-opencode-check
+## workflow-policy-check: Go-free static policy checks of this Makefile, deny.toml and the gate closure
+workflow-policy-check:
+	$(EXTERNAL_RUN) $(PYTHON) -m unittest discover -s .github/tests -p 'test_*.py'
 
-## usage-oracle-check: Ensure native Usage fixtures remain derived from Go
-usage-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/usage-oracle -check
+## oracle-freeze-seal: re-seal hashes after a deliberate, reviewed fixture change
+oracle-freeze-seal:
+	$(ORACLE_FREEZE) seal
 
-.PHONY: usage-gateway-lifecycle-check
-## usage-gateway-lifecycle-check: Verify production Go usage discovery is lazy and per-call
-usage-gateway-lifecycle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" test -count=1 ./internal/gateway -run '^TestUsageDiscoveryIsDeferredAndRepeatedPerCall$$'
+# Per-oracle names kept for muscle memory and CI: each verifies only its own
+# sealed group.
+rust-go-printable-check: ; $(ORACLE_FREEZE) verify --group go-printable-table
+usage-oracle-check: ; $(ORACLE_FREEZE) verify --group usage-oracle --group usage-request-oracle --group secret-oracle
+usage-opencode-check: ; $(ORACLE_FREEZE) verify --group usage-opencode-dependency-update
+activity-cli-oracle-check: ; $(ORACLE_FREEZE) verify --group activity-cli-oracle
+policy-oracle-check: ; $(ORACLE_FREEZE) verify --group policy-oracle
+xdg-oracle-check: ; $(ORACLE_FREEZE) verify --group xdg-oracle
+cli-oracle-check: ; $(ORACLE_FREEZE) verify --group cli-oracle
+catalog-oracle-check: ; $(ORACLE_FREEZE) verify --group catalog-oracle
+audit-oracle-check: ; $(ORACLE_FREEZE) verify --group audit-oracle
+patterns-activity-oracle-check: ; $(ORACLE_FREEZE) verify --group patterns-activity-oracle
+mcp-oracle-check: ; $(ORACLE_FREEZE) verify --group mcp-oracle
+gateway-oracle-check: ; $(ORACLE_FREEZE) verify --group gateway-oracle
+broker-oracle-check: ; $(ORACLE_FREEZE) verify --group broker-oracle
+managed-oracle-check: ; $(ORACLE_FREEZE) verify --group managed-oracle
+skills-oracle-check: ; $(ORACLE_FREEZE) verify --group skills-oracle --group skills-install-oracle
+skills-runner-oracle-check: ; $(ORACLE_FREEZE) verify --group skills-runner-oracle
+skills-config-toml-oracle-check: ; $(ORACLE_FREEZE) verify --group skills-config-toml-oracle
+skills-raw-oracle-check: ; $(ORACLE_FREEZE) verify --group skills-native-oracle
+instructions-oracle-check: ; $(ORACLE_FREEZE) verify --group instructions-oracle
+adapters-oracle-check: ; $(ORACLE_FREEZE) verify --group adapters-oracle
+install-oracle-check: ; $(ORACLE_FREEZE) verify --group install-oracle-darwin --group install-oracle-linux --group install-oracle-windows
+profile-remove-oracle-check: ; $(ORACLE_FREEZE) verify --group profile-remove-oracle-darwin --group profile-remove-oracle-linux
+guard-oracle-check: ; $(ORACLE_FREEZE) verify --group guard-oracle --group guard-capability-oracle
+guard-doctor-oracle-check: ; $(ORACLE_FREEZE) verify --group guard-doctor-oracle
+guard-scan-oracle-check: ; $(ORACLE_FREEZE) verify --group guard-scan-oracle --group guard-grants-oracle --group guard-decide-oracle
+memory-oracle-check: ; $(ORACLE_FREEZE) verify --group memory-sync-oracle --group memory-native-oracle
 
-## activity-cli-oracle-check: Ensure native bounded activity CLI bytes remain pinned to production Go
-activity-cli-oracle-check:
-	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
-	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) CGO_ENABLED=0 go run ./scripts/activity-cli-oracle -go-binary "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" -check
-
-## policy-oracle-check: Ensure the profile/policy oracle expectations are current
-policy-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/policy-oracle -check
-
-## xdg-oracle-check: Ensure XDG and legacy path precedence expectations match Go
-xdg-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/xdg-oracle -check
-
-## cli-oracle-check: Ensure the frozen CLI command-tree expectations match Go
-cli-oracle-check:
-	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
-	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) CGO_ENABLED=0 go run ./scripts/cli-oracle -go-binary "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" -check
-
-## db-memory-oracle-check: Ensure the frozen memory SQLite facts match Go
-db-memory-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/db-memory-oracle -check
-
-## guard-oracle-check: Ensure Guard model/static-kernel expectations match Go
-guard-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./guard/scripts/guard-oracle -check
-
-## guard-doctor-oracle-check: Ensure the frozen guard doctor fixture matches Go
-guard-doctor-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./guard/scripts/guard-doctor-oracle -check
-
-## guard-scan-oracle-check: Ensure Guard scan fixtures and source bindings are current
-guard-scan-oracle-check:
-	./guard/scripts/guard-scan-oracle/run.sh check
-
-## guard-scan-oracle-test: Run Guard scan oracle fixture tests
+## guard-scan-oracle-test: Run Guard scan oracle fixture tests (python unittest, no Go toolchain)
 guard-scan-oracle-test:
 	./guard/scripts/guard-scan-oracle/run.sh test
 
-## catalog-oracle-check: Ensure the catalog oracle expectations are current
-catalog-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/catalog-oracle -check
+## guard-scan-parity: replay the frozen Guard scan bytes against the freshly built native binary
+guard-scan-parity: build-rust
+	./guard/scripts/guard-scan-oracle/run.sh parity "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 
-## audit-oracle-check: Ensure the audit oracle expectations are current
-audit-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/audit-oracle -check
+## usage-gateway-lifecycle-check: production usage discovery is lazy and per call
+usage-gateway-lifecycle-check:
+	$(REQUIRE_RAN) --min 1 -- cargo test --locked -p symbrain-gateway --test usage_tests -- --exact production_usage_discovery_is_lazy_and_per_call
 
-## patterns-activity-oracle-check: Ensure behavioral context expectations are current
-patterns-activity-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/patterns-activity-oracle -check
+## rust-replay-checks: every Go-free fixture/contract replay that is not a plain cargo test
+rust-replay-checks: oracle-freeze-selftest oracle-freeze-check workflow-policy-check usage-gateway-lifecycle-check guard-scan-oracle-test
 
-## mcp-oracle-check: Ensure JSON-RPC framing expectations are current
-mcp-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/mcp-oracle -check
+# ---------------------------------------------------------------------------
+# Parity against the frozen Go transcripts
+# ---------------------------------------------------------------------------
+PARITY_OS := $(shell uname -s | tr "[:upper:]" "[:lower:]")
+PARITY_FIXTURE := rust/symbrain-cli/tests/fixtures/rust_differential_go.$(PARITY_OS).json
 
-## gateway-oracle-check: Ensure gateway behavior expectations are current
-gateway-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/gateway-oracle -check
+## parity-smoke: Replay the frozen Go transcripts of the black-box CLI differential against the Rust binary
+parity-smoke:
+	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev cargo build --workspace --locked
+	./guard/scripts/guard-scan-oracle/run.sh parity "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
+	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev $(PYTHON) scripts/rust-differential.py replay "$(PARITY_FIXTURE)" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 
-## skills-runner-oracle-check: Ensure skills-runner expectations are current
-skills-runner-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/skills-runner-oracle -check
-
-## broker-oracle-check: Ensure child lifecycle expectations are current
-broker-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/broker-oracle -check
-
-## managed-oracle-check: Ensure manifest/archive expectations are current
-managed-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" test ./internal/managed -run TestRustManagedOracleFixture -count=1
-
-## skills-oracle-check: Ensure skill model fixtures match the Go loader
-skills-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/skills-oracle -check
-
-## skills-config-toml-oracle-check: Ensure the symskills config TOML decode fixture matches the real Go decoders
-skills-config-toml-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/skills-config-toml-oracle -check
-
-## skills-raw-oracle-check: Ensure the recorded MCP raw-Skills replies still equal the real Go binary's (needs full git history and Go 1.26.7)
-skills-raw-oracle-check:
-	python3 scripts/skills-native-oracle/raw_layer_oracle.py check
-
-## instructions-oracle-check: Ensure instruction fixtures match the Go implementation
-instructions-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/instructions-oracle -check
-
-## adapters-oracle-check: Ensure instruction adapter fixtures match the Go implementation
-adapters-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/adapters-oracle -check
-
-## install-oracle-check: Ensure install/uninstall expectations match the Go source
-install-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/install-oracle -check
-
-## profile-remove-oracle-check: Ensure profile removal expectations match the Go source
-profile-remove-oracle-check:
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/profile-remove-oracle -check
-
-.PHONY: init-differential
+## init-differential: Replay the frozen Go transcripts of `symbrain init` against the Rust binary
 INIT_RUST_BINARY ?= target/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,)
+INIT_OS := $(shell uname -s | tr "[:upper:]" "[:lower:]")
+INIT_FIXTURE := rust/symbrain-cli/tests/fixtures/init_differential_go.$(INIT_OS).json
+INIT_ORACLE_COMMIT := $(shell sed -n 's/^PINNED_COMMIT_SHA = "\([0-9a-f]*\)"$$/\1/p' scripts/init-oracle/compare.py)
 init-differential:
-	@set -eu; \
-	 root="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$${TMPDIR:-/tmp}/symbrain.XXXXXX"')"; source="$$root/source"; \
-	 trap 'git worktree remove --force "$$source" >/dev/null 2>&1 || true; rm -rf "$$root"' EXIT INT TERM; \
-	 git worktree add --quiet --detach "$$source" HEAD; \
-	 $(EXTERNAL_RUN) cargo build -p symbrain-cli --locked; \
-	 $(EXTERNAL_RUN) python3 "$$source/scripts/init-oracle/test_compare.py"; \
-	 $(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle"; \
-	 $(EXTERNAL_RUN) python3 "$$source/scripts/init-oracle/compare.py" --repo-root "$$source" --rust-binary "$(if $(CI),$(INIT_RUST_BINARY),$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,))" --output "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle/report.json"
+	@# The oracle tests read the pinned Go tree from git; CI checkouts are shallow.
+	git cat-file -e "$(INIT_ORACLE_COMMIT)^{commit}" 2>/dev/null || git fetch --no-tags --depth=1 origin "$(INIT_ORACLE_COMMIT)"
+	$(EXTERNAL_RUN) cargo build -p symbrain-cli --locked
+	$(EXTERNAL_RUN) $(PYTHON) scripts/init-oracle/test_compare.py
+	$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle"
+	$(EXTERNAL_RUN) $(PYTHON) scripts/init-oracle/compare.py replay --fixture "$(INIT_FIXTURE)" --rust-binary "$(if $(CI),$(INIT_RUST_BINARY),$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,))" --output "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle/report.json"
 
-## rust-guard-check: Check the existing Guard library against its Go oracles
-rust-guard-check:
-	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go run ./guard/scripts/guard-oracle -check
-	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go test ./guard/internal/capability -run '^TestCapabilityOracle(Fixture|RejectsDrift)$$' -count=1 -v
+## rust-guard-check: Guard model/static-kernel/capability fixtures (sealed) + the Rust workspace checks
+rust-guard-check: guard-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
@@ -249,18 +176,14 @@ rust-fast:
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo test -p symbrain-cli -p symbrain-skills -p symbrain-guard-core --locked
 
-## rust-check: Run the complete fast Rust quality gate
+## rust-check: Run the complete Go-free Rust quality gate
 #
-# cli-oracle, xdg-oracle, db-memory-oracle and guard-doctor-oracle were kept
-# out of this list after PR #628's first CI run hung/failed on all four: the
-# fixtures were calibrated to the recording machine, not a portable
-# environment (#627 PATH leak, #630 isolation-root shape, #631 wiring an
-# unverified oracle into the gate). #627 (PATH pinned to an empty directory)
-# and #630 (isolation root resolved past symlinked temp-dir ancestors, both
-# in scripts/cli-oracle and in the cli_tree_tests.rs consumer) are fixed and
-# all four pass locally; per #631 they are wired back in this same change so
-# CI proves them before merge, rather than being re-added on faith.
-rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check usage-gateway-lifecycle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-config-toml-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
+# Go oracle output is replayed from committed fixtures with provenance
+# (scripts/oracle-freeze, migration/evidence/oracle-freeze-781). The gate FAILS
+# when a fixture is missing, changed or unregistered; it never skips. No target
+# below invokes a Go toolchain or Go binary (enforced by
+# .github/tests/test_make_gate.py through `make -n`).
+rust-check: rust-replay-checks
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
@@ -288,65 +211,33 @@ rust-fuzz-smoke: rust-fuzz-build
 	$(EXTERNAL_RUN) cargo +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
 	$(EXTERNAL_RUN) cargo +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
 
-## test: Run all tests
+## test: Run all Rust tests
 test:
-	$(EXTERNAL_RUN) go test ./...
+	$(EXTERNAL_RUN) cargo test --workspace --all-features --locked
 
-## test-race: Run all tests with the race detector
-test-race:
-	$(EXTERNAL_RUN) go test -race ./...
+## test-race: Alias of `test`; Rust has no -race flag (data races are compile errors)
+test-race: test
 
-## test-memory-large: Run bounded embedding storage measurements explicitly.
-## Override MEMORY_STORAGE_SCALE up to 10000 only when the disk budget is known.
-MEMORY_STORAGE_SCALE ?= 1000
-MEMORY_LARGE_TEST_TIMEOUT ?= 20m
-test-memory-large:
-	$(EXTERNAL_RUN) env SYMBRAIN_MEMORY_STORAGE_SCALE=$(MEMORY_STORAGE_SCALE) go test -tags memory_large -timeout $(MEMORY_LARGE_TEST_TIMEOUT) -run 'TestEmbedding(StorageSize|BackupSize|Recommendation)$$' -count=1 ./internal/memory/db
-
-## vet: Run go vet static analysis
+## vet: Rust static analysis (clippy, warnings are errors)
 vet:
-	$(EXTERNAL_RUN) go vet ./...
+	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 
-## lint: Deterministic lint gate (go vet + gofmt check, matches CI)
-lint: vet fmt-check
+## lint: Deterministic lint gate (rustfmt check + clippy -D warnings)
+lint: fmt-check vet
 
-# gofmt walks the raw filesystem and does not respect Go module boundaries
-# the way `go build ./...`/`go vet ./...` do, so a bare `gofmt .` would
-# sweep into any nested Go module (its own go.mod) that lives in this repo.
-# browse/ is one such nested module (source-intake receiving copy, see
-# browse/SOURCE_PROVENANCE.md); add further -not -path exclusions here if
-# another nested go.mod directory is introduced later.
-# Keep file discovery in find so its POSIX `-exec ... {} +` batching stays
-# below the platform's exec limit instead of expanding every path in make.
-# Linked checkouts are independent trees, not sources owned by this checkout.
-# Original evidence is immutable input data, not formatter-owned source.
-GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './.worktrees/*' -not -path './migration/evidence/*' -exec
-
-## fmt: Format owned Go source files
+## fmt: Format Rust sources
 fmt:
-	$(GOFMT_FIND) gofmt -w -s {} +
+	$(EXTERNAL_RUN) cargo fmt --all
 
-## fmt-check: Fail if gofmt would change any owned source file
+## fmt-check: Fail if rustfmt would change any Rust source
+fmt-check:
+	$(EXTERNAL_RUN) cargo fmt --all --check
+
 # Same check as .github/workflows/actionlint.yml; needs actionlint and shellcheck on PATH.
 actionlint:
 	actionlint -color
 
-fmt-check:
-	@set -eu; \
-	tmp_dir="$$(mktemp -d)"; \
-	trap 'rm -rf "$$tmp_dir"' EXIT; \
-	if ! $(GOFMT_FIND) gofmt -l {} + >"$$tmp_dir/unformatted"; then \
-		echo "gofmt failed" >&2; \
-		exit 1; \
-	fi; \
-	if [ -s "$$tmp_dir/unformatted" ]; then \
-		echo "gofmt needed on:"; \
-		cat "$$tmp_dir/unformatted"; \
-		exit 1; \
-	fi
-
-## clean: Remove build artifacts and test cache
+## clean: Remove build artifacts
 clean:
 	$(EXTERNAL_RUN) rm -f "$(EXTERNAL_ARTIFACT_ROOT)/$(BINARY)"
-	$(EXTERNAL_RUN) go clean -testcache
 	$(EXTERNAL_RUN) cargo clean

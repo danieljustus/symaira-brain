@@ -1,4 +1,4 @@
-//! Native `symbrain skills` empty-log and Go-fallback byte contracts.
+//! Native `symbrain skills` empty-log and Go byte contracts.
 
 #![cfg(unix)]
 #![deny(unsafe_code)]
@@ -8,10 +8,11 @@ mod coverage;
 
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use std::path::PathBuf;
-use std::process::{Command, Output};
+use std::process::Command;
 
 use tempfile::TempDir;
+
+mod skills_native_record;
 
 fn command(root: &TempDir, args: &[&str]) -> Command {
     let root = root.path().canonicalize().unwrap();
@@ -40,23 +41,6 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
         .current_dir(project)
         .args(args);
     command
-}
-
-fn fallback(root: &TempDir) -> PathBuf {
-    let path = root.path().join("go-fallback");
-    fs::write(
-        &path,
-        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 23\n",
-    )
-    .unwrap();
-    fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
-    path
-}
-
-fn assert_fake_fallback(output: &Output) {
-    assert_eq!(output.status.code(), Some(23));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
 }
 
 #[test]
@@ -108,7 +92,6 @@ corrupt
     .unwrap();
 
     let output = command(&root, &["skills", "log", "--json"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
@@ -135,10 +118,7 @@ fn unavailable_log_path_is_reported_natively_with_go_text() {
     fs::create_dir_all(&share_dir).unwrap();
     fs::write(share_dir.join("symskills"), b"not a directory").unwrap();
 
-    let output = command(&root, &["skills", "log"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
-        .output()
-        .unwrap();
+    let output = command(&root, &["skills", "log"]).output().unwrap();
     assert_eq!(output.status.code(), Some(1));
     assert!(output.stdout.is_empty());
     assert_eq!(
@@ -151,7 +131,7 @@ fn unavailable_log_path_is_reported_natively_with_go_text() {
 }
 
 #[test]
-fn log_flags_filter_and_limit_natively_but_invalid_args_use_go() {
+fn log_flags_filter_and_limit_natively_and_invalid_args_report_natively() {
     for args in [
         &["skills", "log", "--skill", "demo"][..],
         &["skills", "log", "--target", "claude"][..],
@@ -167,19 +147,13 @@ fn log_flags_filter_and_limit_natively_but_invalid_args_use_go() {
 "#,
         )
         .unwrap();
-        let output = command(&root, args)
-            .env("SYMBRAIN_GO_BINARY", fallback(&root))
-            .output()
-            .unwrap();
+        let output = command(&root, args).output().unwrap();
         assert!(output.status.success(), "stderr: {:?}", output.stderr);
     }
 
     let root = TempDir::new().unwrap();
-    let output = command(&root, &["skills", "log", "--bogus"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
-        .output()
-        .unwrap();
-    assert_fake_fallback(&output);
+    let mut log = command(&root, &["skills", "log", "--bogus"]);
+    skills_native_record::expect("log/bogus_flag", &mut log, root.path());
 }
 
 #[test]
@@ -272,10 +246,7 @@ fn unreadable_log_is_reported_natively_with_go_text() {
     permissions.set_mode(0o000);
     fs::set_permissions(&path, permissions).unwrap();
 
-    let output = command(&root, &["skills", "log"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
-        .output()
-        .unwrap();
+    let output = command(&root, &["skills", "log"]).output().unwrap();
     if fs::File::open(&path).is_ok() {
         // Running as root: mode 000 does not restrict the owner.
         return;

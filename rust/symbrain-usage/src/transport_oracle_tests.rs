@@ -10,6 +10,7 @@ pub(super) fn compare() -> Value {
             );
             let transport = super::wire::wired(&json!({"id":id}));
             let result = transport.request(Request {
+                header_bytes: std::collections::BTreeMap::new(),
                 provider_id: "antigravity".into(),
                 method: "GET".into(),
                 url: format!(

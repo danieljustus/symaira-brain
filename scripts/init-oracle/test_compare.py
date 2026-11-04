@@ -513,5 +513,53 @@ class BuildFailureEvidence(unittest.TestCase):
                 self.assertFalse((root / "bin/oracle").exists())
 
 
+class RecordReplay(unittest.TestCase):
+    """The Go transcript is frozen once and replayed without any Go binary."""
+
+    def _record(self, base: Path, script_body: str) -> dict:
+        (base / "bin").mkdir(parents=True, exist_ok=True)
+        go = create_test_script(base / "bin" / "go_bin", script_body)
+        runner = CaseRunner(go_binary=go, rust_binary=Path("/nonexistent"), base_dir=base, mode="record")
+        return {"cid": runner.run_case("cid", "round trip", lambda seed: (seed / "keep").write_text("x"), ["--flag"])}
+
+    BODY = (
+        "import os, sys\n"
+        "root = os.environ['HOME']\n"
+        "os.makedirs(root, exist_ok=True)\n"
+        "open(os.path.join(root, 'created.txt'), 'w').write('made in ' + root)\n"
+        "sys.stdout.write('ran in ' + root + '\\n')\n"
+    )
+
+    def test_replay_passes_for_an_identical_binary_and_normalises_the_root(self):
+        with tempfile.TemporaryDirectory() as record_dir, tempfile.TemporaryDirectory() as replay_dir:
+            recorded = self._record(Path(record_dir), self.BODY)
+            self.assertIn("<RUN_ROOT>", base64.b64decode(recorded["cid"]["go"]["stdout_b64"]).decode())
+            same = create_test_script(Path(replay_dir) / "rust_bin", self.BODY)
+            runner = CaseRunner(go_binary=Path("/nonexistent"), rust_binary=same, base_dir=Path(replay_dir), mode="replay", recorded=recorded)
+            result = runner.run_case("cid", "round trip", lambda seed: (seed / "keep").write_text("x"), ["--flag"])
+            self.assertEqual(result["status"], "pass", result["diffs"])
+
+    def test_replay_rejects_a_diverging_binary(self):
+        with tempfile.TemporaryDirectory() as record_dir, tempfile.TemporaryDirectory() as replay_dir:
+            recorded = self._record(Path(record_dir), self.BODY)
+            different = create_test_script(Path(replay_dir) / "rust_bin", self.BODY.replace("ran in", "RAN IN"))
+            runner = CaseRunner(go_binary=Path("/nonexistent"), rust_binary=different, base_dir=Path(replay_dir), mode="replay", recorded=recorded)
+            result = runner.run_case("cid", "round trip", lambda seed: (seed / "keep").write_text("x"), ["--flag"])
+            self.assertEqual(result["status"], "fail")
+            self.assertTrue(any("stdout mismatch" in d for d in result["diffs"]))
+
+    def test_replay_fails_on_a_case_without_a_recorded_transcript(self):
+        with tempfile.TemporaryDirectory() as replay_dir:
+            runner = CaseRunner(go_binary=Path("/nonexistent"), rust_binary=Path("/nonexistent"), base_dir=Path(replay_dir), mode="replay", recorded={})
+            with self.assertRaises(KeyError):
+                runner.run_case("cid", "missing", lambda seed: None, [])
+
+    def test_replay_main_fails_closed_without_a_fixture(self):
+        with tempfile.TemporaryDirectory() as td:
+            import compare as compare_module
+            rc = compare_module.main(["replay", "--fixture", str(Path(td) / "absent.json"), "--rust-binary", "/bin/true", "--output", str(Path(td) / "o.json")])
+            self.assertEqual(rc, 1)
+
+
 if __name__ == "__main__":
     unittest.main()

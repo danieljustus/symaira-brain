@@ -1,0 +1,43 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_12",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://a b/",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 2,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: parse remote URL: parse \"http://a b/\": invalid character \" \" in host name\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://a b/",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

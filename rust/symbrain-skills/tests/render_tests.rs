@@ -10,7 +10,7 @@ use symbrain_skills::{
 
 fn fixture(name: &str) -> std::path::PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../internal/skills/render/testdata")
+        .join("tests/fixtures/render_testdata")
         .join(name)
 }
 

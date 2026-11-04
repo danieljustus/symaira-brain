@@ -28,11 +28,11 @@ pub(super) fn request_for(
         ("cursor", _) => ("GET", "https://cursor.com/api/usage-summary".into(), None),
         ("grok", _) => ("GET", "https://cli-chat-proxy.grok.com/v1/billing?format=credits".into(), None),
         ("kimi", "web") => ("POST", "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages".into(), None),
-        ("kimi", _) => ("GET", format!("{}/coding/v1/usages", validated_base(provider.base_url.as_deref().unwrap_or("https://api.kimi.com"), "https://api.kimi.com")), None),
+        ("kimi", _) => ("GET", go_request_url(&format!("{}/coding/v1/usages", checked_base(provider, "https://api.kimi.com").trim_end_matches('/'))), None),
         ("moonshot", _) => ("GET", format!("https://api.moonshot.{}/v1/users/me/balance", provider.region), None),
-        ("nous", _) => ("GET", format!("{}/api/oauth/account", validated_base(provider.base_url.as_deref().unwrap_or("https://portal.nousresearch.com"), "https://portal.nousresearch.com")), None),
-        ("openrouter", "credits" | "key") => ("GET", format!("{}/{}", validated_base(provider.base_url.as_deref().unwrap_or("https://openrouter.ai/api/v1"), "https://openrouter.ai/api/v1"), source), None),
-        ("openrouter", _) => ("GET", format!("{}/auth/key", validated_base(provider.base_url.as_deref().unwrap_or("https://openrouter.ai/api/v1"), "https://openrouter.ai/api/v1")), None),
+        ("nous", _) => ("GET", go_request_url(&format!("{}/api/oauth/account", checked_base(provider, "https://portal.nousresearch.com").trim_end_matches('/'))), None),
+        ("openrouter", "credits" | "key") => ("GET", go_request_url(&format!("{}/{}", checked_base(provider, "https://openrouter.ai/api/v1"), source)), None),
+        ("openrouter", _) => ("GET", go_request_url(&format!("{}/auth/key", checked_base(provider, "https://openrouter.ai/api/v1"))), None),
         ("opencode", "workspace_get") => ("GET", "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f".into(), None),
         ("opencode", "workspace_post") => ("POST", "https://opencode.ai/_server".into(), Some("[]".into())),
         ("opencode", "web_post") => ("POST", "https://opencode.ai/_server".into(), Some(go_json_string_array(argument.unwrap_or("")))),
@@ -62,8 +62,12 @@ pub(super) fn request_for(
         // oracle tests compare names case-insensitively.
         headers.insert("anthropic-beta".into(), "oauth-2025-04-20".into());
     }
+    let mut header_bytes = BTreeMap::new();
     if id == "kimi" && source == "cli" {
         headers.extend(kimi_headers(provider.device_id.as_deref()));
+        if let Some(bytes) = provider.device_id_bytes.clone() {
+            header_bytes.insert("X-Msh-Device-Id".into(), bytes);
+        }
     }
     if id == "grok" {
         headers.insert("X-XAI-Token-Auth".into(), "xai-grok-cli".into());
@@ -109,6 +113,7 @@ pub(super) fn request_for(
         headers.insert("Content-Type".into(), "application/json".into());
     }
     Request {
+        header_bytes,
         provider_id: id.into(),
         method: method.into(),
         url,
@@ -119,90 +124,30 @@ pub(super) fn request_for(
 
 pub(crate) fn validated_base(raw: &str, fallback: &str) -> String {
     if is_trusted_https(raw) {
-        raw.trim_end_matches('/').to_string()
+        // Go's `validatedUsageBase` trims exactly one trailing slash.
+        raw.strip_suffix('/').unwrap_or(raw).to_string()
     } else {
         fallback.into()
     }
 }
 pub(crate) fn trusted_https_url(raw: &str, allow_loopback: bool) -> bool {
-    if raw.is_empty() || raw.trim() != raw || raw.bytes().any(|byte| byte < 0x20 || byte == 0x7f) {
-        return false;
-    }
-    let Some(authority_and_path) = raw.strip_prefix("https://") else {
-        return false;
-    };
-    let authority_end = authority_and_path
-        .find(['/', '?', '#'])
-        .unwrap_or(authority_and_path.len());
-    if authority_and_path.as_bytes().get(authority_end) == Some(&b'#') {
-        return false;
-    }
-    let authority = &authority_and_path[..authority_end];
-    let remainder = &authority_and_path[authority_end..];
-    if authority.is_empty()
-        || authority.contains('@')
-        || authority.bytes().any(|byte| byte <= b' ' || byte == 0x7f)
-        || authority.contains('%')
-    {
-        return false;
-    }
-    let path = remainder.split('?').next().unwrap_or(remainder);
-    if !valid_percent_encoding(path) {
-        return false;
-    }
-    let host = if let Some(bracketed) = authority.strip_prefix('[') {
-        let Some(end) = bracketed.find(']') else {
-            return false;
-        };
-        let host = &bracketed[..end];
-        if host.parse::<std::net::Ipv6Addr>().is_err() {
-            return false;
-        }
-        let remainder = &bracketed[end + 1..];
-        if let Some(port) = remainder.strip_prefix(':') {
-            if !valid_port(port) {
-                return false;
-            }
-        } else if !remainder.is_empty() {
-            return false;
-        }
-        host
-    } else {
-        if authority.matches(':').count() > 1 {
-            return false;
-        }
-        if let Some((host, port)) = authority.rsplit_once(':') {
-            if !valid_port(port) {
-                return false;
-            }
-            host
-        } else {
-            authority
-        }
-    };
-    let host = host.trim_end_matches('.').to_ascii_lowercase();
-    if host.is_empty()
-        || host == "localhost"
-        || host.ends_with(".localhost")
-        || host == "local"
-        || host.as_bytes().ends_with(b".local")
-        || host.ends_with(".internal")
-        || host.ends_with(".home.arpa")
-    {
-        return false;
-    }
-    if let Ok(ip) = host.parse::<std::net::IpAddr>() {
-        return if allow_loopback {
-            ip.is_loopback()
-        } else {
-            !is_private_ip(ip)
-        };
-    }
-    !allow_loopback
+    crate::go_url::trusted_https(raw, allow_loopback, is_private_ip)
 }
 
-fn valid_port(port: &str) -> bool {
-    port.parse::<u16>().is_ok_and(|value| value != 0)
+/// The provider's stored base (already trimmed once by `validated_base` when it
+/// was read from the environment) if it is still trusted, else the default.
+fn checked_base<'a>(provider: &'a Provider, default: &'a str) -> &'a str {
+    provider
+        .base_url
+        .as_deref()
+        .filter(|base| trusted_https_url(base, false))
+        .unwrap_or(default)
+}
+
+/// The URL string Go's `http.NewRequest` + `URL.String()` produces; the
+/// composed URL is only ever built from a base that passed the trust check.
+fn go_request_url(composed: &str) -> String {
+    crate::go_url::request_url(composed).unwrap_or_else(|| composed.to_owned())
 }
 
 fn is_private_ip(ip: std::net::IpAddr) -> bool {

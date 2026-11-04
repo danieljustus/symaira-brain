@@ -91,8 +91,8 @@ jobs:
           esac
 
           # Keep dispatch validation aligned with the runtime manifest.
-          if ! jq -e --arg core "$CORE" '.cores[$core] != null' internal/managed/manifest.json >/dev/null; then
-            echo "::error::Core $CORE has no entry in internal/managed/manifest.json"
+          if ! jq -e --arg core "$CORE" '.cores[$core] != null' rust/symbrain-managed/assets/manifest.json >/dev/null; then
+            echo "::error::Core $CORE has no entry in rust/symbrain-managed/assets/manifest.json"
             exit 1
           fi
 
@@ -116,13 +116,13 @@ jobs:
           CORE="${{ steps.validate.outputs.core }}"
           TAG="${{ steps.validate.outputs.tag }}"
           REPO="danieljustus/symaira-vault"
-          MANIFEST="internal/managed/manifest.json"
+          MANIFEST="rust/symbrain-managed/assets/manifest.json"
 
           # SHA256 in the manifest is keyed by exact release asset filename
           # and must be computed independently of checksums.txt (which
           # travels over the same channel as the archives and proves
           # nothing about their integrity on its own — see the SHA256
-          # field doc in internal/managed/manifest.go). So: discover the
+          # field doc in rust/symbrain-managed/src/manifest.rs). So: discover the
           # published archive names for this core, download each one
           # fresh, and hash the downloaded bytes ourselves.
           ASSET_PREFIX=$(jq -r --arg core "$CORE" '.cores[$core].asset_prefix' "$MANIFEST")
@@ -165,7 +165,7 @@ jobs:
 
           CORE="${{ steps.validate.outputs.core }}"
           TAG="${{ steps.validate.outputs.tag }}"
-          MANIFEST="internal/managed/manifest.json"
+          MANIFEST="rust/symbrain-managed/assets/manifest.json"
 
           echo "Updating $MANIFEST: $CORE -> $TAG"
 

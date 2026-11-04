@@ -1,0 +1,2153 @@
+{
+ "schema_version": 1,
+ "task_id": "ORACLE-FREEZE-781",
+ "coverage_roots": [
+  "rust/*/tests/fixtures/**"
+ ],
+ "coverage_exclusions": [
+  "rust/symbrain-memory/**"
+ ],
+ "groups": [
+  {
+   "id": "go-printable-table",
+   "origin": "go-generator",
+   "description": "Go strconv.IsPrint tables rendered as Rust source",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-core/src/go_printable.rs"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "scripts/generate-go-printable-table.go"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "scripts/generate-go-printable-table.go"
+   ]
+  },
+  {
+   "id": "usage-oracle",
+   "origin": "go-generator",
+   "description": "Usage provider graph, parser cases and authenticated reports",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/antigravity_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/claude_file_token_oracle.json",
+    "rust/symbrain-usage/tests/fixtures/claude_keychain_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/claude_keychain_token_oracle.json",
+    "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/codex_file_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/combined_native_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/copilot_file_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json",
+    "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/kimi_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/kimi_fallback_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/kimi_file_access_oracle.json",
+    "rust/symbrain-usage/tests/fixtures/kimi_file_token_oracle.json",
+    "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/nous_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/nous_env_file_precedence_report.json",
+    "rust/symbrain-usage/tests/fixtures/nous_file_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/nous_file_token_oracle.json",
+    "rust/symbrain-usage/tests/fixtures/opencode_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json",
+    "rust/symbrain-usage/tests/fixtures/provider_cases.json",
+    "rust/symbrain-usage/tests/fixtures/provider_graph.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/usage-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/usage-oracle",
+    "internal/usage/testdata"
+   ]
+  },
+  {
+   "id": "usage-request-oracle",
+   "origin": "go-generator",
+   "description": "HTTP requests and provider error text per usage strategy",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_requests.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/usage-request-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": true,
+    "go_binary_flag": null,
+    "check_arg": null,
+    "normalize": [
+     "server-fn:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    ]
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/usage-request-oracle/main.go"
+   ]
+  },
+  {
+   "id": "usage-opencode-dependency-update",
+   "origin": "go-generator",
+   "description": "OpenCode discovery/parse corpus after the 2026-10-08 Go dependency update",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/opencode_discovery_go_dependency_update_20261008.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/usage-request-oracle/opencode",
+     "-oracle-revision",
+     "a92385d2deecc08d1fd96869908b81b7abd355fe",
+     "-oracle-toolchain",
+     "go1.26.7"
+    ],
+    "env": {},
+    "toolchain": "go1.26.7",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/usage-request-oracle/opencode"
+   ]
+  },
+  {
+   "id": "secret-oracle",
+   "origin": "go-generator",
+   "description": "Secret reference resolution cases",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/secret_oracle.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/secret-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/secret-oracle"
+   ]
+  },
+  {
+   "id": "activity-cli-oracle",
+   "origin": "go-generator",
+   "description": "Bounded activity CLI bytes from the production Go binary",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/activity_cli_oracle.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/activity-cli-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": "-go-binary",
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/activity-cli-oracle"
+   ]
+  },
+  {
+   "id": "cli-oracle",
+   "origin": "go-generator",
+   "description": "Frozen CLI command-tree transcript",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/cli-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": "-go-binary",
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/cli-oracle"
+   ]
+  },
+  {
+   "id": "policy-oracle",
+   "origin": "go-generator",
+   "description": "Profile/policy evaluation matrix",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-policy/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/policy-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/policy-oracle"
+   ]
+  },
+  {
+   "id": "xdg-oracle",
+   "origin": "go-generator",
+   "description": "XDG and legacy path precedence",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-core/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/xdg-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/xdg-oracle"
+   ]
+  },
+  {
+   "id": "catalog-oracle",
+   "origin": "go-generator",
+   "description": "Tool catalog namespacing/collisions",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-catalog/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/catalog-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/catalog-oracle"
+   ]
+  },
+  {
+   "id": "audit-oracle",
+   "origin": "go-generator",
+   "description": "Audit JSONL entries, chain hashes and redaction",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-audit/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/audit-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/audit-oracle"
+   ]
+  },
+  {
+   "id": "patterns-activity-oracle",
+   "origin": "go-generator",
+   "description": "Behavioural context (patterns/activity)",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-activity/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/patterns-activity-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/patterns-activity-oracle"
+   ]
+  },
+  {
+   "id": "mcp-oracle",
+   "origin": "go-generator",
+   "description": "JSON-RPC framing",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-mcp/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/mcp-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/mcp-oracle"
+   ]
+  },
+  {
+   "id": "gateway-oracle",
+   "origin": "go-generator",
+   "description": "Gateway handshake/catalog/routing/cancellation transcript",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-gateway/tests/fixtures/gateway_cases.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/gateway-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/gateway-oracle",
+    "internal/broker/testdata"
+   ]
+  },
+  {
+   "id": "broker-oracle",
+   "origin": "go-generator",
+   "description": "Broker child lifecycle defaults",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-broker/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/broker-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/broker-oracle"
+   ]
+  },
+  {
+   "id": "managed-oracle",
+   "origin": "go-generator",
+   "description": "Managed manifest/archive behaviour",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-managed/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go-test",
+    "args": [
+     "test",
+     "./internal/managed",
+     "-run",
+     "TestRustManagedOracleFixture",
+     "-count=1"
+    ],
+    "env": {
+     "UPDATE_RUST_MANAGED_ORACLE": "1"
+    },
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": null,
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "internal/managed"
+   ]
+  },
+  {
+   "id": "skills-oracle",
+   "origin": "go-generator",
+   "description": "Skill model/loader fixtures",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/skills-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/skills-oracle"
+   ]
+  },
+  {
+   "id": "skills-config-toml-oracle",
+   "origin": "go-generator",
+   "description": "symskills config TOML decoders",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/config_toml_oracle.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/skills-config-toml-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/skills-config-toml-oracle"
+   ]
+  },
+  {
+   "id": "skills-runner-oracle",
+   "origin": "go-generator",
+   "description": "Skills runner defaults and env resolution",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/runner_oracle.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/skills-runner-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/skills-runner-oracle"
+   ]
+  },
+  {
+   "id": "skills-install-oracle",
+   "origin": "go-generator",
+   "description": "Skills install/status transcript",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/install_status_oracle.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/skills-install-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/skills-install-oracle"
+   ]
+  },
+  {
+   "id": "instructions-oracle",
+   "origin": "go-generator",
+   "description": "Managed instruction blocks (needs git history)",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-instructions/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/instructions-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/instructions-oracle"
+   ]
+  },
+  {
+   "id": "adapters-oracle",
+   "origin": "go-generator",
+   "description": "Harness adapter instructions/MCP config",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-adapter/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/adapters-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/adapters-oracle"
+   ]
+  },
+  {
+   "id": "install-oracle-darwin",
+   "origin": "go-generator",
+   "description": "install/uninstall transcripts (GOOS=darwin)",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-harness/tests/fixtures/install_oracle_darwin.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/install-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/install-oracle"
+   ]
+  },
+  {
+   "id": "profile-remove-oracle-darwin",
+   "origin": "go-generator",
+   "description": "profile removal transcripts (GOOS=darwin)",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_darwin.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/profile-remove-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/profile-remove-oracle"
+   ]
+  },
+  {
+   "id": "guard-oracle",
+   "origin": "go-generator",
+   "description": "Guard model/static-kernel expectations",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-guard-core/tests/fixtures/oracle_expectations.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./guard/scripts/guard-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "guard/internal",
+    "guard/cmd",
+    "guard/scripts/guard-oracle"
+   ]
+  },
+  {
+   "id": "guard-doctor-oracle",
+   "origin": "go-generator",
+   "description": "Guard doctor transcript",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-guard-core/tests/fixtures/doctor_oracle.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./guard/scripts/guard-doctor-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null,
+    "check_arg": "-check",
+    "normalize": []
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "guard/internal",
+    "guard/cmd",
+    "guard/scripts/guard-doctor-oracle"
+   ]
+  },
+  {
+   "id": "install-oracle-linux",
+   "origin": "go-generator-foreign-platform",
+   "description": "install-oracle-linux: recorded by the same Go generator on linux",
+   "platform": "linux",
+   "fixtures": [
+    "rust/symbrain-harness/tests/fixtures/install_oracle_linux.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/install-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/install-oracle"
+   ]
+  },
+  {
+   "id": "install-oracle-windows",
+   "origin": "go-generator-foreign-platform",
+   "description": "install-oracle-windows: recorded by the same Go generator on windows",
+   "platform": "windows",
+   "fixtures": [
+    "rust/symbrain-harness/tests/fixtures/install_oracle_windows.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/install-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/install-oracle"
+   ]
+  },
+  {
+   "id": "profile-remove-oracle-linux",
+   "origin": "go-generator-foreign-platform",
+   "description": "profile-remove-oracle-linux: recorded by the same Go generator on linux",
+   "platform": "linux",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_linux.json"
+   ],
+   "record": {
+    "kind": "go",
+    "args": [
+     "run",
+     "./scripts/profile-remove-oracle"
+    ],
+    "env": {},
+    "toolchain": "go.mod",
+    "stdout_to_fixture": false,
+    "go_binary_flag": null
+   },
+   "go_inputs": [
+    "go.mod",
+    "go.sum",
+    "internal",
+    "cmd",
+    "scripts/profile-remove-oracle"
+   ]
+  },
+  {
+   "id": "init-differential-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain init black-box transcripts of the pinned Go binary (darwin)",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/init_differential_go.darwin.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "make record-init-differential (scripts/init-oracle/compare.py record)",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "guard-scan-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Guard scan bytes from one pinned Go revision",
+   "platform": "any",
+   "fixtures": [
+    "guard/scripts/guard-scan-oracle/fixture.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "guard/scripts/guard-scan-oracle/run.sh write",
+    "note": "builds the pinned Go revision named in the fixture (source_commit)"
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "guard-grants-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Guard grants bytes from one pinned Go revision",
+   "platform": "any",
+   "fixtures": [
+    "guard/scripts/guard-grants-oracle/fixture.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "guard/scripts/guard-grants-oracle/run.sh write",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "guard-decide-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Guard decide cases and recorded Go outputs",
+   "platform": "any",
+   "fixtures": [
+    "guard/scripts/guard-decide-oracle/cases.json",
+    "rust/symbrain-guard-core/tests/fixtures/external_decision.json",
+    "rust/symbrain-guard-core/tests/fixtures/external_decision_review.json",
+    "rust/symbrain-guard-core/tests/fixtures/external_repair_oracle.json",
+    "rust/symbrain-guard-core/tests/fixtures/go_json_parity.json",
+    "rust/symbrain-guard-core/tests/fixtures/external_repair_trust_anchor.rs"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "guard/scripts/guard-decide-oracle/oracle.py",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "guard-capability-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Guard capability model recorded from guard/internal/capability",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-guard-core/tests/fixtures/capability_oracle.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "go test ./guard/internal/capability (SYMBRAIN_CAPABILITY_UPDATE)",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "skills-native-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "MCP raw-skills replies, skills tools and native-fallback transcripts from the pinned Go binary",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/skills_raw_go_oracle.json",
+    "rust/symbrain-cli/tests/fixtures/skills_tools_go_oracle.json",
+    "rust/symbrain-cli/tests/fixtures/skills_native_go_oracle.json",
+    "rust/symbrain-cli/tests/fixtures/skills_native_fallback_oracle.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/skills-native-oracle/{raw_layer_oracle,tools_oracle}.py",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "config-harness-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Config/harness/project-path/sync-target shapes from the pinned Go binary",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/config_harness_go_shapes.json",
+    "rust/symbrain-cli/tests/fixtures/sync_target_go_shapes.json",
+    "rust/symbrain-harness/tests/fixtures/go_parse_errors.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/config-harness-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "project-path-oracle-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "Project path shapes (GOOS=darwin)",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/project_path_go_shapes.darwin.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/config-harness-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "project-path-oracle-linux",
+   "origin": "pinned-go-recorded",
+   "description": "Project path shapes (GOOS=linux)",
+   "platform": "linux",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/project_path_go_shapes.linux.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/config-harness-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "activity-validation-767",
+   "origin": "pinned-go-recorded",
+   "description": "Activity validation process transcripts",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/activity_validation_767.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/activity-validation-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "vault-admin-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain vault admin/unicode transcripts",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/vault_admin_go.json",
+    "rust/symbrain-cli/tests/fixtures/vault_unicode_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/vault-admin-oracle/replay.py",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-native-gates-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Usage opt-in gates / URL corpus",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/usage_native_gates_cli.json",
+    "rust/symbrain-usage/tests/fixtures/usage_url_corpus.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/usage-native-gates-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-native-gates-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "Usage native-gates Go transcript (darwin)",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_native_gates_darwin.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/usage-native-gates-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-native-gates-linux",
+   "origin": "pinned-go-recorded",
+   "description": "Usage native-gates Go transcript (linux)",
+   "platform": "linux",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_native_gates_linux.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/usage-native-gates-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-fetch-620",
+   "origin": "pinned-go-recorded",
+   "description": "Usage fetch transcripts",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_fetch_620.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/usage-fetch-oracle/run.sh",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-credential-current-copilot",
+   "origin": "pinned-go-recorded",
+   "description": "Current Copilot CLI shapes",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/current_copilot_cli.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/usage-credential-oracle/current_cli_parity.py",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-opencode-historical",
+   "origin": "pinned-go-recorded",
+   "description": "OpenCode discovery corpus from the immutable historical checkout",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/opencode_discovery.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "make usage-opencode-historical-check (HISTORICAL_USAGE_ROOT b807eae6)",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-sdk-linux-amd64",
+   "origin": "pinned-go-recorded",
+   "description": "Go SDK decimal/float transcripts recorded on linux/amd64",
+   "platform": "linux",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/retry_decimal_sdk_linux_amd64.json",
+    "rust/symbrain-core/tests/fixtures/go_json_float_sdk_linux_amd64.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/usage-retry-after-oracle/oracle.py",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-history-corpora",
+   "origin": "recorded-corpus",
+   "description": "Recorded provider history corpora (captured from Go readers)",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/claude-current-cases.json",
+    "rust/symbrain-usage/tests/fixtures/claude-history-cases.json",
+    "rust/symbrain-usage/tests/fixtures/codex-history-cases.json",
+    "rust/symbrain-usage/tests/fixtures/grok-history-cases.json",
+    "rust/symbrain-usage/tests/fixtures/opencode-history-cases.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "see rust/symbrain-usage/tests/*history*_tests.rs",
+    "note": ""
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "harness-golden",
+   "origin": "hand-authored",
+   "description": "Hand-authored before/after golden configs for harness adapters",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-harness/tests/fixtures/golden/antigravity/before.json",
+    "rust/symbrain-harness/tests/fixtures/golden/antigravity/after.json",
+    "rust/symbrain-harness/tests/fixtures/golden/claude-desktop/before.json",
+    "rust/symbrain-harness/tests/fixtures/golden/claude-desktop/after.json",
+    "rust/symbrain-harness/tests/fixtures/golden/claude/before.json",
+    "rust/symbrain-harness/tests/fixtures/golden/claude/after.json",
+    "rust/symbrain-harness/tests/fixtures/golden/cursor/before.json",
+    "rust/symbrain-harness/tests/fixtures/golden/cursor/after.json",
+    "rust/symbrain-harness/tests/fixtures/golden/opencode/before.json",
+    "rust/symbrain-harness/tests/fixtures/golden/opencode/after.json",
+    "rust/symbrain-harness/tests/fixtures/golden/codex/before.toml",
+    "rust/symbrain-harness/tests/fixtures/golden/codex/after.toml"
+   ],
+   "record": {
+    "kind": "none"
+   },
+   "go_inputs": []
+  },
+  {
+   "id": "mcp-gateway-protocol",
+   "origin": "hand-authored",
+   "description": "Hand-authored gateway protocol cases and generated test parts",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-mcp/tests/fixtures/gateway_protocol_cases.json",
+    "rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part1.rs",
+    "rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part2.rs"
+   ],
+   "record": {
+    "kind": "none"
+   },
+   "go_inputs": []
+  },
+  {
+   "id": "usage-synthetic",
+   "origin": "hand-authored",
+   "description": "Synthetic OpenCode v2 database shapes (no Go involved)",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/opencode-v2-synthetic.json"
+   ],
+   "record": {
+    "kind": "none"
+   },
+   "go_inputs": []
+  },
+  {
+   "id": "usage-go-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo provider response bodies (internal/usage/testdata) used by the request oracle replay",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/go_testdata/claude-admin-cost.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/claude-oauth-usage.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/codex-wham-usage.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/copilot-user.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-api-usages.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-api-usages.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-web-usages.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/moonshot-balance-cn.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/nous-account.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/opencode-subscription-no-reset.json",
+    "rust/symbrain-usage/tests/fixtures/go_testdata/openrouter-credits.json"
+   ],
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-usage/tests/fixtures/go_testdata/claude-admin-cost.json": "internal/usage/testdata/claude-admin-cost.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/claude-oauth-usage.json": "internal/usage/testdata/claude-oauth-usage.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/codex-wham-usage.json": "internal/usage/testdata/codex-wham-usage.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/copilot-user.json": "internal/usage/testdata/copilot-user.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-api-usages.json": "internal/usage/testdata/kimi-api-usages.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-api-usages.json": "internal/usage/testdata/kimi-fallback-api-usages.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/kimi-fallback-web-usages.json": "internal/usage/testdata/kimi-fallback-web-usages.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/moonshot-balance-cn.json": "internal/usage/testdata/moonshot-balance-cn.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/nous-account.json": "internal/usage/testdata/nous-account.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/opencode-subscription-no-reset.json": "internal/usage/testdata/opencode-subscription-no-reset.json",
+     "rust/symbrain-usage/tests/fixtures/go_testdata/openrouter-credits.json": "internal/usage/testdata/openrouter-credits.json"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "go_inputs": [
+    "internal/usage/testdata/claude-admin-cost.json",
+    "internal/usage/testdata/claude-oauth-usage.json",
+    "internal/usage/testdata/codex-wham-usage.json",
+    "internal/usage/testdata/copilot-user.json",
+    "internal/usage/testdata/kimi-api-usages.json",
+    "internal/usage/testdata/kimi-fallback-api-usages.json",
+    "internal/usage/testdata/kimi-fallback-web-usages.json",
+    "internal/usage/testdata/moonshot-balance-cn.json",
+    "internal/usage/testdata/nous-account.json",
+    "internal/usage/testdata/opencode-subscription-no-reset.json",
+    "internal/usage/testdata/openrouter-credits.json"
+   ]
+  },
+  {
+   "id": "skills-render-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo render golden/source trees (internal/skills/render/testdata)",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/README.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/scripts/helper.sh",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/scripts/helper.sh",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/agents/openai.yaml",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/scripts/helper.sh",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/scripts/helper.sh",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/scripts/helper.sh",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/scripts/helper.sh",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/symskills.toml",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/symskills.toml",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/source/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/source/overlays/opencode/prepend.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/source/scripts/helper.sh",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/source/symskills.toml",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/README.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/references/execution-contract.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/references/execution-contract.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/agents/openai.yaml",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/references/execution-contract.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/references/execution-contract.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/references/execution-contract.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/.symskills.json",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/references/execution-contract.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/SKILL.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/dispatch.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/worker-execution.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/hermes/blocks/dispatch.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/references/execution-contract.md",
+    "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/symskills.toml"
+   ],
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/README.md": "internal/skills/render/testdata/golden/README.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/.symskills.json": "internal/skills/render/testdata/golden/antigravity/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/SKILL.md": "internal/skills/render/testdata/golden/antigravity/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/antigravity/scripts/helper.sh": "internal/skills/render/testdata/golden/antigravity/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/.symskills.json": "internal/skills/render/testdata/golden/claude/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/SKILL.md": "internal/skills/render/testdata/golden/claude/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/claude/scripts/helper.sh": "internal/skills/render/testdata/golden/claude/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/.symskills.json": "internal/skills/render/testdata/golden/codex/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/SKILL.md": "internal/skills/render/testdata/golden/codex/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/agents/openai.yaml": "internal/skills/render/testdata/golden/codex/agents/openai.yaml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/codex/scripts/helper.sh": "internal/skills/render/testdata/golden/codex/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/.symskills.json": "internal/skills/render/testdata/golden/hermes/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/SKILL.md": "internal/skills/render/testdata/golden/hermes/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/hermes/scripts/helper.sh": "internal/skills/render/testdata/golden/hermes/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/.symskills.json": "internal/skills/render/testdata/golden/openclaw/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/SKILL.md": "internal/skills/render/testdata/golden/openclaw/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/openclaw/scripts/helper.sh": "internal/skills/render/testdata/golden/openclaw/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/.symskills.json": "internal/skills/render/testdata/golden/opencode/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/SKILL.md": "internal/skills/render/testdata/golden/opencode/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/golden/opencode/scripts/helper.sh": "internal/skills/render/testdata/golden/opencode/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/SKILL.md": "internal/skills/render/testdata/inline-manifest/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/inline-manifest/symskills.toml": "internal/skills/render/testdata/inline-manifest/symskills.toml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/SKILL.md": "internal/skills/render/testdata/oracle-edge/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/oracle-edge/symskills.toml": "internal/skills/render/testdata/oracle-edge/symskills.toml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/SKILL.md": "internal/skills/render/testdata/source/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/overlays/opencode/prepend.md": "internal/skills/render/testdata/source/overlays/opencode/prepend.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/scripts/helper.sh": "internal/skills/render/testdata/source/scripts/helper.sh",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/source/symskills.toml": "internal/skills/render/testdata/source/symskills.toml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/README.md": "internal/skills/render/testdata/variant-golden/README.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/.symskills.json": "internal/skills/render/testdata/variant-golden/antigravity/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/SKILL.md": "internal/skills/render/testdata/variant-golden/antigravity/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/antigravity/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/antigravity/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/.symskills.json": "internal/skills/render/testdata/variant-golden/claude/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/SKILL.md": "internal/skills/render/testdata/variant-golden/claude/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/claude/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/claude/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/.symskills.json": "internal/skills/render/testdata/variant-golden/codex/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/SKILL.md": "internal/skills/render/testdata/variant-golden/codex/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/agents/openai.yaml": "internal/skills/render/testdata/variant-golden/codex/agents/openai.yaml",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/codex/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/codex/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/.symskills.json": "internal/skills/render/testdata/variant-golden/hermes/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/SKILL.md": "internal/skills/render/testdata/variant-golden/hermes/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/hermes/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/hermes/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/.symskills.json": "internal/skills/render/testdata/variant-golden/openclaw/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/SKILL.md": "internal/skills/render/testdata/variant-golden/openclaw/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/openclaw/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/openclaw/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/.symskills.json": "internal/skills/render/testdata/variant-golden/opencode/.symskills.json",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/SKILL.md": "internal/skills/render/testdata/variant-golden/opencode/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-golden/opencode/references/execution-contract.md": "internal/skills/render/testdata/variant-golden/opencode/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/SKILL.md": "internal/skills/render/testdata/variant-source/SKILL.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/dispatch.md": "internal/skills/render/testdata/variant-source/overlays/claude/blocks/dispatch.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/claude/blocks/worker-execution.md": "internal/skills/render/testdata/variant-source/overlays/claude/blocks/worker-execution.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/overlays/hermes/blocks/dispatch.md": "internal/skills/render/testdata/variant-source/overlays/hermes/blocks/dispatch.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/references/execution-contract.md": "internal/skills/render/testdata/variant-source/references/execution-contract.md",
+     "rust/symbrain-skills/tests/fixtures/render_testdata/variant-source/symskills.toml": "internal/skills/render/testdata/variant-source/symskills.toml"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "go_inputs": [
+    "internal/skills/render/testdata/golden/README.md",
+    "internal/skills/render/testdata/golden/antigravity/.symskills.json",
+    "internal/skills/render/testdata/golden/antigravity/SKILL.md",
+    "internal/skills/render/testdata/golden/antigravity/scripts/helper.sh",
+    "internal/skills/render/testdata/golden/claude/.symskills.json",
+    "internal/skills/render/testdata/golden/claude/SKILL.md",
+    "internal/skills/render/testdata/golden/claude/scripts/helper.sh",
+    "internal/skills/render/testdata/golden/codex/.symskills.json",
+    "internal/skills/render/testdata/golden/codex/SKILL.md",
+    "internal/skills/render/testdata/golden/codex/agents/openai.yaml",
+    "internal/skills/render/testdata/golden/codex/scripts/helper.sh",
+    "internal/skills/render/testdata/golden/hermes/.symskills.json",
+    "internal/skills/render/testdata/golden/hermes/SKILL.md",
+    "internal/skills/render/testdata/golden/hermes/scripts/helper.sh",
+    "internal/skills/render/testdata/golden/openclaw/.symskills.json",
+    "internal/skills/render/testdata/golden/openclaw/SKILL.md",
+    "internal/skills/render/testdata/golden/openclaw/scripts/helper.sh",
+    "internal/skills/render/testdata/golden/opencode/.symskills.json",
+    "internal/skills/render/testdata/golden/opencode/SKILL.md",
+    "internal/skills/render/testdata/golden/opencode/scripts/helper.sh",
+    "internal/skills/render/testdata/inline-manifest/SKILL.md",
+    "internal/skills/render/testdata/inline-manifest/symskills.toml",
+    "internal/skills/render/testdata/oracle-edge/SKILL.md",
+    "internal/skills/render/testdata/oracle-edge/symskills.toml",
+    "internal/skills/render/testdata/source/SKILL.md",
+    "internal/skills/render/testdata/source/overlays/opencode/prepend.md",
+    "internal/skills/render/testdata/source/scripts/helper.sh",
+    "internal/skills/render/testdata/source/symskills.toml",
+    "internal/skills/render/testdata/variant-golden/README.md",
+    "internal/skills/render/testdata/variant-golden/antigravity/.symskills.json",
+    "internal/skills/render/testdata/variant-golden/antigravity/SKILL.md",
+    "internal/skills/render/testdata/variant-golden/antigravity/references/execution-contract.md",
+    "internal/skills/render/testdata/variant-golden/claude/.symskills.json",
+    "internal/skills/render/testdata/variant-golden/claude/SKILL.md",
+    "internal/skills/render/testdata/variant-golden/claude/references/execution-contract.md",
+    "internal/skills/render/testdata/variant-golden/codex/.symskills.json",
+    "internal/skills/render/testdata/variant-golden/codex/SKILL.md",
+    "internal/skills/render/testdata/variant-golden/codex/agents/openai.yaml",
+    "internal/skills/render/testdata/variant-golden/codex/references/execution-contract.md",
+    "internal/skills/render/testdata/variant-golden/hermes/.symskills.json",
+    "internal/skills/render/testdata/variant-golden/hermes/SKILL.md",
+    "internal/skills/render/testdata/variant-golden/hermes/references/execution-contract.md",
+    "internal/skills/render/testdata/variant-golden/openclaw/.symskills.json",
+    "internal/skills/render/testdata/variant-golden/openclaw/SKILL.md",
+    "internal/skills/render/testdata/variant-golden/openclaw/references/execution-contract.md",
+    "internal/skills/render/testdata/variant-golden/opencode/.symskills.json",
+    "internal/skills/render/testdata/variant-golden/opencode/SKILL.md",
+    "internal/skills/render/testdata/variant-golden/opencode/references/execution-contract.md",
+    "internal/skills/render/testdata/variant-source/SKILL.md",
+    "internal/skills/render/testdata/variant-source/overlays/claude/blocks/dispatch.md",
+    "internal/skills/render/testdata/variant-source/overlays/claude/blocks/worker-execution.md",
+    "internal/skills/render/testdata/variant-source/overlays/hermes/blocks/dispatch.md",
+    "internal/skills/render/testdata/variant-source/references/execution-contract.md",
+    "internal/skills/render/testdata/variant-source/symskills.toml"
+   ]
+  },
+  {
+   "id": "skills-relative-root-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo relative-root skill fixture (scripts/skills-oracle/fixtures); directory name is part of the oracle",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/relative-root/SKILL.md"
+   ],
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-skills/tests/fixtures/relative-root/SKILL.md": "scripts/skills-oracle/fixtures/relative-root/SKILL.md"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "go_inputs": [
+    "scripts/skills-oracle/fixtures/relative-root/SKILL.md"
+   ]
+  },
+  {
+   "id": "harness-nonutf8-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "Go harness list/install/uninstall transcripts with non-UTF-8 HOME and environment bytes",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/harness_nonutf8_go.darwin.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_harness_nonutf8.py",
+    "note": "needs a symbrain-go binary; historical tooling",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "worktree_commit": "990780a1fe6c273c09cbe83f07817c6bd5dcb23c",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_harness_nonutf8.py <symbrain-go built: GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0 go -C <worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain> <fixture> <go version> <commit>; symbrain-go = CGO_ENABLED=0 go -C <worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain",
+     "gotoolchain": "go1.26.7 (go.mod pin)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "skills-status-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "Go `skills status --json` reports for 6 targets x {clean, render-edit}",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/skills_status_go_oracle.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "rust/symbrain-cli/tests/skills_render_drift.rs record mode (SYMBRAIN_SKILLS_STATUS_RECORD_GO)",
+    "note": "recorded with go1.27.3 (HEAD eda559e03); report JSON contains no Go-version-dependent text",
+    "recorded_with": {
+     "go_version": "go version go1.27.3 darwin/arm64",
+     "worktree_commit": "eda559e0314438042709c7294416fe895f910157",
+     "platform": "darwin/arm64",
+     "command": "SYMBRAIN_SKILLS_STATUS_RECORD_GO=<symbrain-go> SYMBRAIN_SKILLS_STATUS_RECORD_OUT=<path> cargo test -p symbrain-cli --test skills_render_drift"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "rust-differential-darwin",
+   "origin": "pinned-go-recorded",
+   "description": "Black-box CLI differential: 890 Go transcripts (stdout/stderr/exit/side effects) replayed by `make parity-smoke`",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "make record-parity-smoke (scripts/rust-differential.py record FIXTURE GO_BINARY)",
+    "note": "historical tooling; linux/windows transcripts must be recorded on those platforms",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "worktree_commit": "990780a1fe6c273c09cbe83f07817c6bd5dcb23c",
+     "platform": "darwin/arm64",
+     "command": "env SYMAIRA_EXTERNAL_BASE=<dir> SYMAIRA_EXTERNAL_RUNTIME_ROOT=<dir> bash scripts/run-external-env.sh python3 scripts/rust-differential.py record rust/symbrain-cli/tests/fixtures/rust_differential_go.darwin.json <symbrain-go built: GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0 go -C <worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain>",
+     "gotoolchain": "go1.26.7 (go.mod pin)"
+    },
+    "rerecorded": [
+     {
+      "cases": [
+       "memory_search_db_override",
+       "memory_search_limit_and_db",
+       "memory_search_seeded",
+       "memory_search_seeded_limit",
+       "memory_search_seeded_limit_zero",
+       "memory_search_seeded_scope",
+       "memory_search_two_candidates_limit",
+       "memory_search_two_candidates_limit_one"
+      ],
+      "reason": "the original recording host ran Ollama, so these search transcripts reported embedding_source \"ollama\"; the harness now pins SYMMEMORY_OLLAMA_URL to a closed port and the cases were re-recorded under it",
+      "go_version": "go version go1.26.7 darwin/arm64",
+      "worktree_commit": "990780a1fe6c273c09cbe83f07817c6bd5dcb23c",
+      "command": "SYMBRAIN_DIFFERENTIAL_CASE_PREFIX=memory_ python3 scripts/rust-differential.py record <tmp> <symbrain-go built from 990780a1 with GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0>; only the 8 changed search cases merged (the other 33 differed at most in UUIDs the replay normalizes)",
+      "cross_check": "stdout of all 8 re-recorded cases is byte-identical to the independently recorded linux transcripts"
+     }
+    ]
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-768-credential",
+   "origin": "pinned-go-recorded",
+   "description": "Go 44-case credential reference constructor/request corpus (11 providers x 4 references) + recorded home trees",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_credential_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py credential",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py credential <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-768-hermes",
+   "origin": "pinned-go-recorded",
+   "description": "Go 96-case Hermes file/JWT corpus + recorded home trees + Go HEAD CR/LF probe",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_hermes_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py hermes",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py hermes <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-768-provider-files",
+   "origin": "pinned-go-recorded",
+   "description": "Go 86-case Claude/Codex provider-file corpus + recorded home trees",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_provider_files_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py files",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py files <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "usage-768-copilot-kimi",
+   "origin": "pinned-go-recorded",
+   "description": "Go 89-case Copilot/Kimi corpus, 97-case local-files baseline, 16 owner and 22 path cases + recorded trees",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/usage_768_copilot_kimi_go.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/oracle-freeze/record_usage_evidence.py copilot-kimi",
+    "note": "historical tooling; needs Go",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 darwin/arm64",
+     "gotoolchain": "go1.26.7",
+     "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+     "worktree_commit": "ab9111c5b (recorder), source = git archive dcddcef0",
+     "platform": "darwin/arm64",
+     "command": "python3 scripts/oracle-freeze/record_usage_evidence.py copilot-kimi <git-archive-dcddcef0-dir> <fixture> <scratch> --go 'dev-external go'  (GOTOOLCHAIN=go1.26.7, GOPROXY=off)"
+    }
+   },
+   "go_inputs": [
+    "go.mod"
+   ]
+  },
+  {
+   "id": "managed-manifest-testdata",
+   "origin": "go-repo-testdata",
+   "description": "Go-repo managed core manifest (internal/managed/manifest.json) read by the black-box differential",
+   "platform": "any",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/managed_manifest.json"
+   ],
+   "record": {
+    "kind": "copy",
+    "copies": {
+     "rust/symbrain-cli/tests/fixtures/managed_manifest.json": "internal/managed/manifest.json"
+    },
+    "note": "byte copy of Go-repo test input taken before the Go sources are deleted"
+   },
+   "go_inputs": [
+    "internal/managed/manifest.json"
+   ]
+  },
+  {
+   "id": "memory-sync-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain memory sync observations of the real Go CLI against scripted fake servers (darwin)",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/memory_sync/apply_counts_huge.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/apply_counts_negative_and_float.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/apply_counts_null.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/apply_http_error_after_pull.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/auth_failure_401.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/auth_failure_403_nocode.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/auth_flag_beats_env.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/auth_token_env.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/auth_token_flag.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/both_json.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/both_table_nothing_to_push.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/capture.py",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/env_db_path.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_allow_insecure_warning.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_bad_stored_cursor.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_bad_timeout.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_db_override.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_db_unopenable.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_double_dash.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_equals_forms.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_global_json_first.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_help.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_missing_remote.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_output_invalid.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_output_json_long.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_output_table_explicit.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_pull_and_push_explicit.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_push_false_pull_false.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_relay_without_passphrase.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_single_dash_forms.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_timeout_forms.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_timeout_fraction.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_unexpected_argument.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/flag_unknown_flag.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/http_204_empty.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/http_300_is_success.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/http_304.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/http_429_json_code.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/http_500_text.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_apply_array.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_apply_response.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_array_top.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_bad_time.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_empty_body.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_empty_memory_id.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_memory_field_type.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_metadata_nonstring.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_missing_times.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_not_json.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_null_memory_element.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_null_top.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_relay_response.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_trailing_garbage.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_truncated.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_unknown_fields.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/malformed_wrong_types.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_big_response.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_chunked_response.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_connection_refused.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_connection_refused_localhost.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_content_length_lie.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_drop_connection.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_fragment_swallows_path.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_gzip_invalid.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_gzip_response.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_prefix_trailing_slash.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_query_in_remote.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_302_get.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_302_post.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_307_post.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_bad_scheme.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_loop.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_redirect_no_location.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_negative.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_stall.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_stall_body.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_timeout_zero.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_truncated_body.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/net_userinfo_basic_auth.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/passphrase_env_flag_precedence.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/provenance.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_audit_disabled.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_audit_enabled.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_cursor_persisted.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_db_from_config.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_deleted_missing_time_zero.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_duplicate_keys_and_case.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_embedding_mismatch_types.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_equal_timestamp_not_applied.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_full_memory.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_full_memory_quantize.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_importance_string.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_invalid_config_ignored.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_json.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_many_rows_one_page.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_offset_zones.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_paged.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_stored_cursor_iso.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_stored_cursor_since.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_table.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_time_forms.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_time_lowercase_invalid.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_unicode_escapes.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/pull_update_existing.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_batches.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_float_importance.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_full_row.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_iso_updated_at.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_json.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_odd_content.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_second_run_empty.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_stored_cursor_filters.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_sync_exclude.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/push_table_camel_counts.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_00.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_01.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_02.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_03.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_04.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_05.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_06.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_07.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_08.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_09.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_10.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_11.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_12.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_13.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_14.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_15.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_16.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_17.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_18.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_19.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_20.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_21.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_22.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_23.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_24.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_25.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_26.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_27.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_28.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_29.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_30.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_31.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_32.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_33.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_34.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_35.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_36.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_37.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_38.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_39.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/refuse_allow_insecure_nonloopback_then_dns.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_bad_base64.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_blob_null.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_both_table_env.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_corrupt_payload.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_empty_passphrase_env.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_http_error.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_legacy_payload.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_paged_cursor.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_pull.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_pull_cursor_query.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_push.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_push_batches.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_push_full_row.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_server_time_precedence.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_short_blob.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_stored_string.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_tombstone_older_than_local.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/relay_wrong_passphrase.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/remote_tombstone_retained_pages.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/token_newline_env.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/token_symvault_literal.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/token_with_space.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/tombstone_conflicts.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/tombstone_resurrect.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_00.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_01.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_02.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_03.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_04.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_05.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_06.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_07.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_08.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_09.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_10.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_11.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_12.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_13.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_14.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_15.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_16.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_17.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_18.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_19.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_20.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_21.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_22.json",
+    "rust/symbrain-cli/tests/fixtures/memory_sync/url_23.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "rust/symbrain-cli/tests/fixtures/memory_sync/capture.py --go GO_BIN --out DIR (needs the deleted Go sources)",
+    "toolchain": "go1.27.3",
+    "note": "provenance.json in the fixture directory names the capture commit and build command"
+   },
+   "go_inputs": [
+    "go.mod",
+    "cmd/symbrain",
+    "internal/memory"
+   ]
+  },
+  {
+   "id": "memory-native-oracle",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain memory list/rules/search/set/delete/serve observations of the real Go CLI with Go-produced seed databases (darwin)",
+   "platform": "darwin",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/memory_native/README.md",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/alias.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/alias.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/band-pending.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/band-pending.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/disabled.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/disabled.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/errors.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/errors.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/facts-conflict.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/facts-conflict.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/importance.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/importance.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-401.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-401.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-404.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-404.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-429.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-429.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-500.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-500.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-ambiguous.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-ambiguous.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-contradiction.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-contradiction.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-garbage.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-garbage.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-repeat.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-repeat.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-salvaged.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-salvaged.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-unreachable.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/llm-unreachable.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/near-dup.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/near-dup.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/ollama-source.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/ollama-source.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/openai-nokey.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/openai-nokey.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/pii-meta.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/pii-meta.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/project-entities.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/project-entities.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/quantize.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/quantize.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/raw-bytes.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/raw-bytes.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/thresholds.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_conflict/thresholds.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-escaped-id.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-created.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-embedding.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-importance.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-leap.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-malformed-metadata.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-non-utf8-id.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-plain.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/delete-trimmed-id.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-broken.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-empty-list.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-empty.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-integers.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-nan-text.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-null-member.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-null.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-object.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-overflow.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-short.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-strings.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/embedding-trailing.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-array.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-big-key.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-broken.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-duplicate-keys.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-empty.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-escapes.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-false.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-nested.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-null-member.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-null.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-number-member.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-spaced.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/meta-trailing.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-conflict.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-conflict.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-no-binary.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-no-binary.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-small.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter-small.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/prefilter.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-access-count-real.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-content-blob.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-content-int.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-empty.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-integer.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-invalid.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-leap.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-offset.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-created-rfc3339.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-expires-text.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-importance-text.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-kind-empty.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-last-access-fractional.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-scope-blob.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-updated-invalid.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/row-valid-to-invalid.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-created-invalid.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-metadata-broken.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-metadata-null.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-metadata-number.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-plain.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/rules-scoped.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_read/seed-rows3.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/dedupe.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/dedupe.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/extract.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/extract.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/pii.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/pii.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/plain-default.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/plain-default.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/staged.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/staged.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/table.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_native_set/table.seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/bind_failure.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/flag_errors.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/jwt_secret.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/pipelines.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/rate_limit.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/remote_sync.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/route_matrix.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/seed.db",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/seed.json",
+    "rust/symbrain-cli/tests/fixtures/memory_native/memory_serve_oracle/unusable_database_path.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "memory_native recorders described in rust/symbrain-cli/tests/fixtures/memory_native/README.md (needs the deleted Go sources)",
+    "toolchain": "go1.27.3",
+    "note": "every recording carries its own provenance block and payload_sha256"
+   },
+   "go_inputs": [
+    "go.mod",
+    "cmd/symbrain",
+    "internal/memory"
+   ]
+  },
+  {
+   "id": "rust-differential-linux",
+   "origin": "pinned-go-recorded",
+   "description": "Black-box CLI differential: 890 Go transcripts (stdout/stderr/exit/side effects) replayed by `make parity-smoke` on Linux",
+   "platform": "linux",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/rust_differential_go.linux.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/rust-differential.py record FIXTURE GO_BINARY",
+    "note": "recorded after the Go removal by a one-off GitHub workflow on the replay platform",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 linux/amd64",
+     "platform": "linux/amd64 (GitHub ubuntu-latest, Ubuntu 24.04)",
+     "recorder_run": "https://github.com/danieljustus/symaira-brain/actions/runs/41868248776",
+     "gotoolchain": "go1.26.7 (go.mod pin, actions/setup-go)",
+     "worktree_commit": "990780a1fe6c273c09cbe83f07817c6bd5dcb23c",
+     "command": "python3 scripts/rust-differential.py record rust_differential_go.linux.json <symbrain-go built: CGO_ENABLED=0 go -C <990780a1 worktree> build -ldflags \"-X main.version=dev\" -o symbrain-go ./cmd/symbrain>",
+     "case_definitions_commit": "5b16fd9e09c1b081e121faaad1239b845f12d802"
+    }
+   },
+   "go_inputs": []
+  },
+  {
+   "id": "init-differential-linux",
+   "origin": "pinned-go-recorded",
+   "description": "symbrain init black-box transcripts of the pinned Go binary (linux)",
+   "platform": "linux",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/init_differential_go.linux.json"
+   ],
+   "record": {
+    "kind": "script",
+    "producer": "scripts/init-oracle/compare.py record (builds the pinned 9c0e2b25 Go source itself)",
+    "note": "recorded after the Go removal by a one-off GitHub workflow on the replay platform",
+    "recorded_with": {
+     "go_version": "go version go1.26.7 linux/amd64",
+     "platform": "linux/amd64 (GitHub ubuntu-latest, Ubuntu 24.04)",
+     "recorder_run": "https://github.com/danieljustus/symaira-brain/actions/runs/41868248776",
+     "gotoolchain": "go1.26.7 (go.mod pin, actions/setup-go)",
+     "pinned_commit": "9c0e2b259753901a372ed5a688382bb6d4fadd18",
+     "case_definitions_commit": "5b16fd9e09c1b081e121faaad1239b845f12d802"
+    }
+   },
+   "go_inputs": []
+  }
+ ]
+}

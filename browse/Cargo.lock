@@ -1891,28 +1891,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "symaira-cutover"
+version = "0.12.1"
+dependencies = [
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "symbrowse-cli"
 version = "0.0.0"
 dependencies = [
+ "html5ever",
+ "markup5ever_rcdom",
  "reqwest",
  "serde",
  "serde_json",
  "sha2",
+ "symaira-cutover",
  "symbrowse-core",
  "symbrowse-daemon",
+ "symbrowse-engine",
  "symbrowse-mcp",
  "symbrowse-protocol",
  "tempfile",
  "time",
- "tokio",
-]
-
-[[package]]
-name = "symbrowse-compat"
-version = "0.0.0"
-dependencies = [
- "serde",
- "serde_json",
  "tokio",
 ]
 
@@ -1948,7 +1951,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
- "symbrowse-compat",
  "symbrowse-core",
  "symbrowse-engine",
  "symbrowse-engine-chrome",

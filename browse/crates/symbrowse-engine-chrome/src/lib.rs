@@ -10,12 +10,14 @@ mod connection;
 mod events;
 mod full;
 mod launch;
+mod parity;
 
 pub use full::{
     Artifact, ChromeCapabilities, ChromePage, ChromeSession, DialogInfo, FindOptions, FrameInfo,
     InteractionResult, NetworkCapture, NetworkEvent, ScreenshotOptions, UnsupportedOperation,
     capabilities,
 };
+pub use parity::{ConsoleEntry, ErrorEntry, NetworkRequestEntry, NetworkRoute};
 
 /// Canonical capability partition used by the daemon handshake. Only names
 /// backed by commands in `DispatchRuntime` are advertised here.
@@ -33,8 +35,10 @@ pub fn canonical_capabilities() -> symbrowse_engine::capabilities::Capabilities 
             "NavigationStateProvider",
             "NetworkEvents",
             "NetworkPolicyReporter",
+            "RuntimeEvents",
             "ScreenshotEngine",
             "ScreenshotOptionsEngine",
+            "SettingsEngine",
             "TabManager",
         ],
     )

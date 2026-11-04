@@ -2,6 +2,50 @@
 
 > **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
 
+## Status: Go removed (2026-11-04)
+
+The repository is Rust-only. The Go sources, `go.mod`/`go.sum`, GoReleaser,
+the Go CI jobs, the live Go-oracle differential workflows and the Rust CLI's
+`symbrain-go` fallback route are removed; `make rust-check`, `parity-smoke`,
+`init-differential` and the browse workspace gate pass with no Go toolchain on
+`PATH` (evidence under the local NVMe evidence root
+`rust-only-local-20261104/`). The Go behavior stays pinned by the sealed
+fixture gate (`scripts/oracle-freeze`, 521 fixtures in 66 groups, including
+the memory-sync and memory-native observations registered at removal and the
+Linux parity/init transcripts recorded on the ubuntu runner from the
+pre-removal oracle source; see `migration/evidence/oracle-freeze-781/linux-recording`).
+
+Value gate (paired release binaries, macOS arm64, 60 alternating runs per
+workload, empty HOME/XDG per run, `/usr/bin/time -l` peak RSS):
+
+| Binary | Workload | p95 Rust/Go | median RSS Rust/Go |
+|---|---|---|---|
+| symbrain | version | 0.761 | 0.480 |
+| symbrain | help | 0.847 | 0.472 |
+| symbrain | memory list --json | 1.034 | 0.595 |
+| symbrain | profile list --json | 0.903 | 0.480 |
+| symbrowse | version --json | 0.950 | 0.352 |
+| symbrowse | --help | 0.601 | 0.347 |
+| symbrowse | config show --json | 0.872 | 0.359 |
+
+Stripped size: symbrain 1.041× (larger), symbrowse 0.548×. The gate
+(≥20% size or median-RSS improvement, ≤10% p95 regression) passes on RSS for
+every workload; the worst p95 change is +3.4%. These are startup-dominated CLI
+paths on one host, not a throughput benchmark.
+
+Recorders that regenerate Go fixtures only run from a checkout that predates
+the removal; the fixture provenance names the exact revision.
+
+## Cutover decision (2026-10-30)
+
+The maintainer replaced the dual-binary cutover (#782) with the EraseMe model.
+The stable release ships Rust symbrain/symguard/symbrowse only: no Go fallback
+binary, no rollback to v0.12.x and no seven-day observation window. Go sources
+are removed at the cutover. Data safety stays a cutover gate: Rust must open
+existing Go-created memory, skills, guard and browse state unchanged, and the
+first Rust run creates an automatic backup whose restore is verified. Windows
+is out of scope. Remaining work is completed locally and pushed once complete.
+
 
 Memory803's isolated coherent-workspace successor normally integrates reviewed
 standalone Guard805 so the unchanged complete runtime plan has its real

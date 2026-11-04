@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/release/danieljustus/symaira-brain?label=Release)](https://github.com/danieljustus/symaira-brain/releases/latest)
 [![Coverage](https://raw.githubusercontent.com/danieljustus/symaira-brain/coverage-data/badge.svg)](https://github.com/danieljustus/symaira-brain/tree/coverage-data)
 [![License](https://img.shields.io/github/license/danieljustus/symaira-brain)](LICENSE)
-[![Go Version](https://img.shields.io/badge/Go-1.26%2B-00ADD8)](go.mod)
+[![Rust](https://img.shields.io/badge/Rust-pinned%20toolchain-DEA584)](rust-toolchain.toml)
 
 ![Symaira Brain](docs/assets/social-preview.png)
 
@@ -99,10 +99,10 @@ The fastest way is Homebrew:
 brew install danieljustus/tap/symbrain
 ```
 
-Or install a tagged release directly from the module path:
+Or install from source with Cargo:
 
 ```bash
-go install github.com/danieljustus/symaira-brain/cmd/symbrain@latest
+cargo install --locked --git https://github.com/danieljustus/symaira-brain symbrain-cli
 ```
 
 To build from source instead, see the [Building](#building) section.
@@ -399,7 +399,7 @@ symbrain setup --from-source /path/to/symaira-brain
 
 What this does, per module:
 
-- builds the binary from the in-repo module sources (`go build` for
+- builds the binary from the in-repo module sources (`cargo build` for
   `browse/`, `swift build` for `operate/` and `scope/` — the Swift modules
   are macOS-only and skip cleanly elsewhere),
 - installs it atomically into the managed directory (`~/.symaira/bin`),
@@ -416,11 +416,7 @@ never silently overwritten with a download. Replacing it requires an
 explicit `symbrain setup --from-source` re-run or `doctor --fix
 --force-release`.
 
-In the Rust migration entrypoint, release `setup --fix` and
-`--force-release` run natively when the typed configuration loads successfully.
 Repairs preserve intentional source builds unless replacement is requested.
-Source builds (`--from-source`/`--modules`), configuration-load failure
-diagnostics and `doctor --fix` still use the Go implementation under #765.
 
 Repeatable local replacement packages (archive + SHA-256 + provenance
 manifest per module) come from:
@@ -489,7 +485,7 @@ Implemented today:
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile. `--json` emits a JSON array of entries |
 | `symbrain vault` | Passthrough to symvault |
 | `symbrain guard` | Absorbed symguard commands (decide, scan, doctor, grants, version) |
-| `symbrain version` | Print version, Go runtime, and OS/arch (`--output table|json`, default `table`) |
+| `symbrain version` | Print version, Rust toolchain, and OS/arch (`--output table|json`, default `table`) |
 | `symbrain help` | Show this help message |
 
 
@@ -674,83 +670,52 @@ Or build from source:
 ```bash
 git clone https://github.com/danieljustus/symaira-brain.git
 cd symaira-brain
-go build -o symbrain ./cmd/symbrain
-./symbrain version
+cargo build --release --locked -p symbrain-cli
+./target/release/symbrain version
 ```
 
-Requirements: Go 1.26+, `CGO_ENABLED=0` (the release build is CGO-free; see
-`make build`).
-
-Activity validation acceptance: `scripts/activity-validation-oracle/run.sh /tmp/activity-validation.json`
-compares the native CLI with the immutable Go baseline in disposable roots.
+Requirements: the Rust toolchain pinned in `rust-toolchain.toml` (rustup
+installs it automatically). No Go toolchain is needed for anything in this
+repository.
 
 ### Development
 
 ```bash
-make build       # CGO_ENABLED=0 go build -o symbrain ./cmd/symbrain
-make test        # go test ./...
-make test-race   # go test -race ./...
-make lint        # go vet + gofmt check (matches CI)
-make fmt         # gofmt -w -s .
-
-# Go-only local check (not the full CI matrix):
-go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
+make build        # release symbrain binary
+make test         # cargo test --workspace
+make lint         # rustfmt check + clippy -D warnings
+make fmt          # cargo fmt --all
+make rust-check   # complete gate: fmt, check, clippy, tests, doc tests,
+                  # cargo-audit, cargo-deny and the sealed oracle fixtures
+make parity-smoke # replay the frozen Go CLI transcripts against the Rust binary
 ```
 
-CI also runs Rust migration, native-platform, module, and GUI jobs; see [the CI
-workflow](.github/workflows/ci.yml).
-
-The incremental Rust workspace includes `symbrain-guard-core`.
-Its [PR workflow](.github/workflows/rust.yml) runs the existing Go fixture
-checks (including the revision-pinned capability oracle), locked Rust
-checks/tests, and independent dependency-policy jobs on every PR to `main`.
-Use the toolchain in `rust-toolchain.toml` and the pinned audit tools:
+`make rust-check` needs the pinned audit tools:
 
 ```bash
 cargo install cargo-audit --version 0.22.2 --locked
 cargo install cargo-deny --version 0.20.2 --locked
-go test ./.github/tests -count=1
-make rust-guard-check
-make rust-audit
-make rust-deny
 ```
 
-`rust-audit` reads `Cargo.lock`; `rust-deny` checks the locked dependency
-graph for all platforms against [deny.toml](deny.toml). Failures block
-their jobs. These library and dependency checks do not establish native
-MCP process/stdio behavior. The native-target CI work tracked in
-[#532](https://github.com/danieljustus/symaira-brain/issues/532) is complete;
-the current per-contract evidence and remaining platform gates, including
-fuzzing, are recorded in the
-[contract matrix](migration/contract-matrix.csv). Go remains the production
-implementation and rollback path.
+The Go implementation was removed after the Rust cutover. Its observable
+behavior stays pinned: every Go-recorded oracle output is a committed,
+sha256-sealed fixture with provenance (`scripts/oracle-freeze`,
+`migration/evidence/oracle-freeze-781`), replayed by the Rust tests and by
+`make parity-smoke` / `make init-differential`. The gate fails on a missing,
+changed or unregistered fixture and never skips. The contract-by-contract
+history is in the [contract matrix](migration/contract-matrix.csv) and
+[MIGRATION-RUST.md](MIGRATION-RUST.md).
 
-Credentialed usage regression checks run with
-`scripts/usage-fetch-oracle/run.sh /tmp/usage-fetch-620.json`. The isolated
-fixture transport covers all ten providers, full request walks, JSON/table
-output and negative controls; see [the acceptance contract](scripts/usage-fetch-oracle/README.md).
-
-The root Rust workspace enforces an 80% line-coverage floor on every PR and
-main push. Run `make rust-coverage` with the pinned `cargo-llvm-cov 0.6.21` and
-LLVM tools; see [the coverage policy and measured scope](scripts/rust-coverage/README.md).
-CI retains the complete denominator and per-crate reports. The Go coverage badge
-also includes instrumented execution of four existing oracle generators,
-retaining all unit-suite statements and reporting product-code diagnostics
-separately. This coverage policy does not replace native-platform parity gates.
+The root Rust workspace enforces an 80% line-coverage floor. Run
+`make coverage` (or `make rust-coverage` without the badge files) with the
+pinned `cargo-llvm-cov 0.6.21` and LLVM tools; see [the coverage policy and
+measured scope](scripts/rust-coverage/README.md).
 
 See [AGENTS.md](AGENTS.md) for coding conventions, package layout, and the
 full architectural boundary rules referenced above. See
 [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the PR process, and
 [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for community
 expectations.
-
-The Claude/Codex file gate (`scripts/usage-provider-files-oracle/run.sh`) requires
-86 source cases, 85 complete reports, one retained ambiguous-account gate, 151
-CLI comparisons and five actual failure controls in isolated credential roots.
-
-The Hermes usage credential gate (`scripts/usage-hermes-oracle/run.sh`) retains
-96 actual Go/native constructor and request cases, 104 CLI comparisons, and five
-real failure controls, including duplicate-array shrink/regrowth regressions.
 
 ## Native Apps
 

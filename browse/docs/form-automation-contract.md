@@ -1,5 +1,9 @@
 # Web-form automation contract (formflow)
 
+> **Historical (2026-11-04).** The Go `formflow` package was removed with the
+> Go implementation; no Rust equivalent exists yet and no repository imported
+> it. This document is retained as the contract for a future port.
+
 The `formflow` package is the consumable web-form automation surface of
 symbrowse for downstream Symaira products (issue #280). First consumer:
 [symaira-eraseme](https://github.com/danieljustus/symaira-eraseme) (Go

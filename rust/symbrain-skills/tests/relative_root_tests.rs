@@ -8,7 +8,7 @@ use symbrain_skills::{load_bundle, validate};
 mod common;
 
 fn relative_root_fixture() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../scripts/skills-oracle/fixtures/relative-root")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/relative-root")
 }
 
 #[test]

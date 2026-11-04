@@ -20,11 +20,11 @@ fn stable_versions_and_major_zero_guard_match_go() {
 }
 
 #[test]
-fn update_hint_does_not_recommend_unimplemented_apply() {
-    let hint = upgrade_hint("v0.8.0", "v0.9.0");
-    assert!(hint.contains("v0.9.0 is available (current: v0.8.0)"));
-    assert!(hint.contains("cannot apply them"));
-    assert!(!hint.contains("run `symbrowse upgrade`"));
+fn update_hint_matches_go_wording() {
+    assert_eq!(
+        upgrade_hint("v0.8.0", "v0.9.0"),
+        "symbrowse v0.9.0 is available (current: v0.8.0); run `symbrowse upgrade` to apply it"
+    );
 }
 
 #[test]

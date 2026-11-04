@@ -1,80 +1,109 @@
-//! HTTP mutations retain service provenance, profile authorization and Store ownership.
+//! HTTP mutations retain service provenance, profile authorization and Store
+//! ownership. Set, delete and search run the same native pipelines as the
+//! CLI (`MemoryService.Set`, `Delete`, `Search`): redaction, conflict check,
+//! entity linking, secondary facts and every stored-row diagnostic.
 
-use super::{Server, auth::Claims, read, wire};
-use crate::DirectWrite;
+use super::{Server, auth::Claims, go_json, read, sync_decode, wire};
+use crate::{CliSet, Origin};
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
-use serde::Deserialize;
 use serde_json::json;
 use std::collections::BTreeMap;
 
-#[derive(Default, Deserialize)]
-struct Set {
-    #[serde(default)]
-    content: String,
-    #[serde(default)]
-    scope: String,
-    #[serde(default)]
-    metadata: BTreeMap<String, String>,
-    #[serde(default)]
-    session_id: String,
-    #[serde(default)]
-    entities: Vec<String>,
-    #[serde(default)]
-    working: bool,
+/// `security.ExtractJTI`: the jti claim of an unverified token, or the
+/// shipped failure wording.
+fn extract_jti(token: &str) -> Result<String, String> {
+    let parts = token.split('.').collect::<Vec<_>>();
+    if parts.len() != 3 {
+        return Err("invalid token structure".into());
+    }
+    // Go pads to a multiple of four and decodes with the padded URL alphabet.
+    let mut padded = parts[1].to_owned();
+    if padded.len() % 4 != 0 {
+        padded.push_str(&"=".repeat(4 - padded.len() % 4));
+    }
+    if let Some(position) = go_json::base64_error(&padded, true) {
+        return Err(format!(
+            "invalid token payload: illegal base64 data at input byte {position}"
+        ));
+    }
+    let decoded = URL_SAFE_NO_PAD
+        .decode(padded.trim_end_matches('='))
+        .map_err(|error| format!("invalid token payload: {error}"))?;
+    let claims = serde_json::from_slice::<super::auth::Claims>(&decoded).map_err(|error| {
+        format!(
+            "invalid token payload: {}",
+            go_json::syntax_error(&decoded).unwrap_or_else(|| error.to_string())
+        )
+    })?;
+    if claims.jti.is_empty() {
+        return Err("token has no jti claim".into());
+    }
+    Ok(claims.jti)
 }
 
-#[derive(Default, Deserialize)]
-struct Search {
-    #[serde(default)]
-    query: String,
-    #[serde(default)]
-    scope: String,
-    #[serde(default)]
-    limit: i64,
-    #[serde(flatten)]
-    remaining: BTreeMap<String, serde_json::Value>,
+struct Revoke {
+    token: String,
+    jti: String,
 }
 
 impl Server {
     pub(super) fn set(&self, body: &[u8], claims: &Claims) -> wire::Reply {
-        let Ok(input) = serde_json::from_slice::<Set>(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+        let Some(input) = sync_decode::set_args(body) else {
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Set),
+            );
         };
-        if !self.options.direct_writes
-            || input.working
-            || !input.session_id.is_empty()
-            || !input.entities.is_empty()
-        {
-            return wire::unsupported();
-        }
-        if !crate::direct_content_supported(&input.content)
-            || input
-                .metadata
-                .values()
-                .any(|value| !crate::direct_text_supported(value))
-        {
-            return wire::unsupported();
-        }
-        let request = DirectWrite {
-            content: input.content,
-            scope: input.scope,
-            metadata: input.metadata,
-            author: claims.sub.clone(),
+        let author = if claims.sub.is_empty() {
+            "api".to_owned()
+        } else {
+            claims.sub.clone()
+        };
+        let request = CliSet {
+            content: input.content.clone().into_bytes(),
+            scope: input.scope.clone().into_bytes(),
             kind: String::new(),
-            entities: Vec::new(),
+            metadata: input.metadata.clone(),
+            author: author.into_bytes(),
+            entities: input
+                .entities
+                .iter()
+                .map(|name| name.clone().into_bytes())
+                .collect(),
             staged: false,
-            quantize_binary: false,
-            conflict_enabled: false,
+            quantize_binary: self.options.quantize_binary,
+            prefilter: self.options.prefilter,
+            conflict: self.options.conflict.clone(),
         };
-        match self.store.set_direct_service(
-            &request,
-            &self.generator,
-            "http",
-            None,
-            self.options.audit_enabled,
-        ) {
+        let embed = |text: &[u8]| self.embed(&String::from_utf8_lossy(text));
+        let observe = |results: usize, top: f64, latency: std::time::Duration| {
+            self.metrics.record(results, top, latency);
+        };
+        let origin = Origin {
+            source_tool: "http",
+            session: &input.session_id,
+            working_ttl: input.working.then(|| {
+                chrono::Duration::from_std(self.options.working_ttl)
+                    .unwrap_or_else(|_| chrono::Duration::hours(24))
+            }),
+            governed: false,
+            audit_enabled: self.options.audit_enabled,
+            embed: &embed,
+            model: self.generator.model(),
+            observe: Some(&observe),
+        };
+        let mut stderr = std::io::stderr();
+        let mut log = crate::LogSink(&mut stderr);
+        match self.store.set_service(&request, &origin, &mut log) {
             Ok(id) => wire::raw_json(200, json!({"id":id,"status":"success"}).to_string()),
-            Err(_) => wire::error(500, "INTERNAL_ERROR", "Failed to save memory"),
+            Err(error) => wire::error_logged(
+                500,
+                "INTERNAL_ERROR",
+                "Failed to save memory",
+                &error.to_string(),
+            ),
         }
     }
 
@@ -83,93 +112,142 @@ impl Server {
         if id.is_empty() {
             return wire::error(400, "INVALID_REQUEST", "missing required parameter: id");
         }
-        if !self.options.direct_writes
-            || !self
-                .store
-                .lock()
-                .is_ok_and(|conn| crate::cli_delete_admission::checked(&conn, id).is_ok())
-        {
-            return wire::unsupported();
-        }
         match self.store.delete_service(id, self.options.audit_enabled) {
             Ok(true) => wire::raw_json(200, "{\"deleted\":true}"),
             Ok(false) => wire::error(404, "NOT_FOUND", &format!("memory not found: {id}")),
-            Err(_) => wire::error(500, "INTERNAL_ERROR", "failed to delete memory"),
+            Err(error) => wire::error_logged(
+                500,
+                "INTERNAL_ERROR",
+                "failed to delete memory",
+                &error.to_string(),
+            ),
         }
     }
 
     pub(super) fn search(&self, body: &[u8]) -> wire::Reply {
-        let Ok(input) = serde_json::from_slice::<Search>(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+        let Some(input) = sync_decode::search_args(body) else {
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Search),
+            );
         };
-        if !crate::direct_text_supported(&input.query)
-            || input.remaining.values().any(|value| {
-                !matches!(
-                    value,
-                    serde_json::Value::Null | serde_json::Value::Bool(false)
-                ) && value.as_str() != Some("")
-                    && value.as_i64() != Some(0)
-            })
-        {
-            return wire::unsupported();
-        }
-        let embedding = self.generator.generate(&input.query);
         let limit = if input.limit <= 0 {
             5
         } else {
             usize::try_from(input.limit).unwrap_or(usize::MAX)
         };
-        let result = self.store.lock().and_then(|conn| {
-            crate::retrieval::search_checked(
-                &conn,
-                &embedding.vector,
-                &embedding.source,
-                &input.scope,
-                limit,
-                read::safe_row,
-            )
+        let mut filters = crate::SearchFilters {
+            entity_id: String::new(),
+            trust: crate::TrustFilter {
+                min_confidence: input.min_confidence.clone(),
+                verification_status: input.verification.clone(),
+                exclude_superseded: input.exclude_superseded,
+                max_age: None,
+            },
+            policy: crate::PolicyFilter {
+                max_sensitivity: input.max_sensitivity.clone(),
+                min_sharing_level: input.min_sharing_level.clone(),
+                client_id: input.client_id.clone(),
+            },
+        };
+        if !input.max_age.is_empty() {
+            match crate::goduration::parse_max_age(&input.max_age) {
+                Ok(nanos) => {
+                    filters.trust.max_age = u64::try_from(nanos)
+                        .ok()
+                        .map(std::time::Duration::from_nanos);
+                }
+                Err(reason) => {
+                    return wire::error_logged(
+                        400,
+                        "INVALID_REQUEST",
+                        "invalid max_age parameter",
+                        &reason,
+                    );
+                }
+            }
+        }
+        if !input.entity.is_empty() {
+            match self.store.resolve_entity_id(&input.entity) {
+                Ok(Some(id)) => filters.entity_id = id,
+                Ok(None) => {
+                    return wire::error(
+                        404,
+                        "NOT_FOUND",
+                        &format!("entity not found: {}", input.entity),
+                    );
+                }
+                Err(error) => {
+                    return wire::error_logged(
+                        500,
+                        "INTERNAL_ERROR",
+                        "Search failed",
+                        &format!("resolve entity: {error}"),
+                    );
+                }
+            }
+        }
+        let embedding = self.embed(&input.query);
+        let observe = |results: usize, top: f64, latency: std::time::Duration| {
+            self.metrics.record(results, top, latency);
+        };
+        let result = self.store.search_filtered(&crate::ServiceSearch {
+            vector: &embedding.vector,
+            source: &embedding.source,
+            scope: &input.scope,
+            limit,
+            prefilter: self.options.prefilter,
+            filters: &filters,
+            observe: Some(&observe),
         });
         match result {
-            Ok(hits) => {
+            Ok(mut hits) => {
+                for hit in &mut hits {
+                    hit.memory.redact_pii();
+                }
                 let rendered = hits
                     .iter()
                     .map(|hit| {
                         format!(
                             "{{\"memory\":{},\"similarity_score\":{}}}",
-                            read::full_json(&hit.memory),
+                            hit.memory.to_go_json_embedded(),
                             crate::gojson::number_f32(hit.score)
                         )
                     })
                     .collect::<Vec<_>>();
                 wire::raw_json(200, read::array(&rendered))
             }
-            Err(crate::StoreError::Invalid(_)) => wire::unsupported(),
-            Err(_) => wire::error(500, "INTERNAL_ERROR", "Search failed"),
+            Err(error) => {
+                wire::error_logged(500, "INTERNAL_ERROR", "Search failed", &error.to_string())
+            }
         }
     }
 
     pub(super) fn token_revoke(&self, body: &[u8]) -> wire::Reply {
-        #[derive(Deserialize)]
-        struct Revoke {
-            #[serde(default)]
-            jti: String,
-            #[serde(default)]
-            token: String,
-        }
-        let Ok(input) = serde_json::from_slice::<Revoke>(body) else {
-            return wire::error(400, "INVALID_REQUEST", "Bad request body");
+        let Some((token, jti)) = sync_decode::revoke_args(body) else {
+            return wire::error_logged(
+                400,
+                "INVALID_REQUEST",
+                "Bad request body",
+                &go_json::unmarshal_error(body, &go_json::Shape::Revoke),
+            );
         };
+        let input = Revoke { token, jti };
         let mut jti = input.jti.trim().to_owned();
         if jti.is_empty() && !input.token.trim().is_empty() {
-            let parts = input.token.trim().split('.').collect::<Vec<_>>();
-            let payload = (parts.len() == 3).then(|| parts[1]);
-            let claims = payload
-                .and_then(|p| URL_SAFE_NO_PAD.decode(p).ok())
-                .and_then(|p| serde_json::from_slice::<super::auth::Claims>(&p).ok());
-            let Some(claims) = claims.filter(|c| !c.jti.is_empty()) else {
-                return wire::error(400, "INVALID_REQUEST", "Invalid token value");
+            jti = match extract_jti(input.token.trim()) {
+                Ok(jti) => jti,
+                Err(reason) => {
+                    return wire::error_logged(
+                        400,
+                        "INVALID_REQUEST",
+                        "Invalid token value",
+                        &reason,
+                    );
+                }
             };
-            jti = claims.jti;
         }
         if jti.is_empty() {
             return wire::error(

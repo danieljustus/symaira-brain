@@ -7,34 +7,23 @@ Thanks for helping improve Symaira Browse. Please read [AGENTS.md](../AGENTS.md)
 1. Create a focused branch from the current default branch.
 2. Keep the change limited to one issue when practical.
 3. Add tests for behavior changes and preserve standalone-first operation.
-4. Run the checks from `browse/`; Browse has no module-local Makefile. The
-   repository-root Make targets operate on Brain's root Go module:
+4. Run the checks from `browse/`; Browse has no workspace-local Makefile:
 
    ```sh
-   test -z "$(find . -type f -name '*.go' -not -path './.git/*' -exec gofmt -l {} +)"
-   go build ./...
-   go vet ./...
+   cargo fmt --all --check
+   cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+   cargo test --workspace --locked
    ```
 
-   The Browse CI job runs the build and vet checks, then builds the Rust
-   workspace and exercises the CLI/MCP smoke tests. It does not run Browse's Go
-   test suites because they can touch live Chrome and network I/O. Run those
-   tests only in a suitable environment:
-
-   ```sh
-   go test ./...
-   go test -race ./...
-   ```
-
-   See the [CI workflow](../.github/workflows/ci.yml) for the repository's
-   other jobs.
+   Real-Chrome end-to-end tests stay opt-in behind `SYMBROWSE_E2E=1`. See the
+   [CI workflow](../.github/workflows/ci.yml) for the repository's other jobs.
 
 5. Do not commit binaries, credentials, local configuration, or generated reports.
 6. Describe the behavior change, checks run, and any residual risk in the pull request.
 
 ## Design boundaries
 
-- Keep the core build CGO-free and on Go 1.26.6.
+- Build with the toolchain pinned in `rust-toolchain.toml` and `--locked`.
 - Do not add compile-time dependencies on sibling Symaira repositories.
 - Preserve stable JSON output contracts as they are introduced.
 - Treat browser content as untrusted input and keep policy decisions explicit.

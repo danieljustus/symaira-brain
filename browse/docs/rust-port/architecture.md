@@ -14,8 +14,7 @@ symbrowse-cli
           ├─ symbrowse-engine-chrome
           ├─ symbrowse-engine-safari  (cfg macOS)
           ├─ symbrowse-engine-firefox
-          ├─ symbrowse-fetch (static)
-          └─ symbrowse-compat (temporary Go sidecar)
+          └─ symbrowse-fetch (static)
 ```
 
 ### Crates
@@ -29,7 +28,6 @@ symbrowse-cli
 | `symbrowse-engine-chrome` | Chrome discovery/launch/attach, CDP commands/events | CLI rendering, MCP schemas |
 | `symbrowse-engine-safari` | Apple Events attach and WebDriver BiDi adapter | non-macOS unconditional code |
 | `symbrowse-engine-firefox` | Firefox discovery/launch/attach and WebDriver BiDi adapter | Chrome/Safari-specific protocol types |
-| `symbrowse-compat` | temporary, versioned local IPC client for the pinned Go/AzureTLS browser-profile transport | static/browser transport substitution |
 | `symbrowse-daemon` | local IPC, peer validation, sessions, deadlines, autostart/locks | CLI presentation |
 | `symbrowse-mcp` | exact tool registry, stdio framing, daemon proxy, MCP budgets/errors | browser implementation |
 | `symbrowse-cli` | Clap parser, command dispatch, text/JSON/YAML writers, exit mapping | business logic |
@@ -83,13 +81,14 @@ contract row, not a crate default.
   raw execute path. Keep it behind `symbrowse-engine-chrome`.
 - Transport selection is explicit and mutually exclusive: `static` uses the
   owned Rust HTTP stack; `browser` uses the selected real local Chrome, Safari
-  or Firefox; `compat` uses the pinned Go/AzureTLS transport. No mode or engine
-  may silently fall back to another one.
+  or Firefox. The former `compat` (Go/AzureTLS) mode is retired and returns the
+  typed `transport_retired` error. No mode or engine may silently fall back to
+  another one.
 - Static HTTP: plain `reqwest`/Hyper is acceptable only for `static`; it must
   not claim browser identity or TLS/HTTP2 impersonation.
-- Compat: preserve the legacy TLS/HTTP2 fingerprint only as a clearly named
-  transitional mode behind versioned local IPC. It is not evidence of the
-  installed browser's current network identity.
+- Compat: retired. The Go/AzureTLS sidecar and its Rust client
+  (`symbrowse-compat`) were removed; the legacy TLS/HTTP2 fingerprint is no
+  longer a product contract.
 - HTML: evaluate `html5ever`/`scraper` plus a renderer through production
   fixtures; no crate is selected until Markdown bytes and DOM edge cases match.
 - Safari: retain direct Apple Events subprocess behavior and implement BiDi over
@@ -99,7 +98,7 @@ contract row, not a crate default.
 
 ## High-risk seams
 
-1. Legacy compat TLS/HTTP2/HTTP3 fingerprints and decompression behavior.
+1. Decompression behavior of the static transport (legacy compat fingerprints are retired).
 2. Native Chrome, Safari and Firefox discovery, automation preconditions,
    browser-state isolation and process cleanup.
 3. Full CDP event coverage: frames, dialogs, file transfer, network recording,

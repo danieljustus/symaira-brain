@@ -1,0 +1,66 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {
+  "config/symmemory/config.toml": "[database]\npath = \"{root}/custom/cfg.db\"\n"
+ },
+ "name": "pull_db_from_config",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"pull\",\"encrypted_relay\":false,\"cursor\":\"2026-10-18T17:45:10Z\",\"server_time\":\"2026-10-18T17:45:10Z\",\"pulled_memories_applied\":1,\"pulled_deletes_applied\":0,\"pushed_memories\":0,\"pushed_deletes\":0,\"relay_blobs_fetched\":0,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[{\"id\":\"n-1\",\"content\":\"new\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-18T17:45:10Z\",\"updated_at\":\"2026-10-18T17:45:10Z\",\"consolidation_status\":\"raw\",\"importance\":0.5,\"review_status\":\"approved\",\"tier\":\"long_term\",\"access_count\":1}],\"deleted\":[],\"server_time\":\"2026-10-18T17:45:10Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

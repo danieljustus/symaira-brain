@@ -36,14 +36,6 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-
-      - name: Resolve pinned supplemental Go toolchain
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: '1.26.7'
-          cache: false
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
@@ -87,52 +79,15 @@ jobs:
           python3 port/harness/run.py --suite daemon 2>&1 | tee "$RUNNER_TEMP/browse-daemon-lifecycle.log"
           python3 port/harness/run.py --suite daemon-races --repeat 50 2>&1 | tee "$RUNNER_TEMP/browse-daemon-races.log"
 
-      - name: Compare immutable integrated Go and actual native daemon
-        env:
-          CGO_ENABLED: '0'
+      - name: Verify native state-key ownership
         run: |
           set -euo pipefail
-          oracle="$RUNNER_TEMP/browse-daemon-go-source"
-          go_binary="$RUNNER_TEMP/symbrowse-daemon-go"
           rust_binary="$GITHUB_WORKSPACE/browse/target/release/symbrowse"
-          if [ "${OS:-}" = Windows_NT ]; then
-            go_binary="$(cygpath -m "$go_binary.exe")"
-            rust_binary="$(cygpath -m "$rust_binary.exe")"
-          fi
-          git worktree add --detach "$oracle" dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
-          go -C "$oracle/browse" build -o "$go_binary" ./cmd/symbrowse
-          python3 port/harness/daemon_process.py --go "$go_binary" --rust "$rust_binary" \
-            --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-process.json"
-          python3 port/harness/daemon_registry.py --go "$go_binary" --rust "$rust_binary" \
-            --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-registry.json"
-          store_probe="$GITHUB_WORKSPACE/browse/target/release/examples/state_key_store_probe"
-          if [ "${OS:-}" = Windows_NT ]; then
-            store_probe="$(cygpath -m "$store_probe.exe")"
-          fi
-          python3 port/harness/daemon_state_key.py --go "$go_binary" --rust "$rust_binary" \
-            --rust-store-probe "$store_probe" --go-source "$oracle" \
-            --out "$RUNNER_TEMP/browse-daemon-state-key.json" \
-            2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key.log"
           source_probe="$GITHUB_WORKSPACE/browse/target/release/examples/startup_key_source_probe"
-          if [ "${OS:-}" = Windows_NT ]; then
-            source_probe="$(cygpath -m "$source_probe.exe")"
-          fi
           python3 port/harness/daemon_state_key_ownership.py --rust "$rust_binary" \
             --rust-source-probe "$source_probe" \
             --out "$RUNNER_TEMP/browse-daemon-state-key-ownership.json" \
             2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key-ownership.log"
-          python3 port/harness/daemon_provider_discovery.py --go "$go_binary" --rust "$rust_binary" \
-            --go-source "$oracle" --rust-source-probe "$source_probe" \
-            --out "$RUNNER_TEMP/browse-daemon-provider-discovery.json" \
-            2>&1 | tee "$RUNNER_TEMP/browse-daemon-provider-discovery.log"
-          fixture_binary="$RUNNER_TEMP/symbrowse-mcp-go-v0.8.0"
-          if [ "${OS:-}" = Windows_NT ]; then
-            fixture_binary="$(cygpath -m "$fixture_binary.exe")"
-          fi
-          go -C "$oracle/browse" build -ldflags '-X main.version=v0.8.0' -o "$fixture_binary" ./cmd/symbrowse
-          python3 port/harness/daemon_mcp.py --go "$go_binary" --go-fixture "$fixture_binary" \
-            --rust "$rust_binary" --go-source "$oracle" --workspace \
-            --out "$RUNNER_TEMP/browse-daemon-mcp.json"
 
       - name: Retain exact-head daemon receipt
         if: always()
@@ -144,7 +99,6 @@ jobs:
             echo "runner=${{ matrix.runner }}"
             rustc -Vv
             cargo -V
-            go version
           } > "$RECEIPT"
       - name: Upload native daemon receipt
         if: always()
@@ -164,20 +118,7 @@ jobs:
             ${{ runner.temp }}/browse-daemon-client-deadlines/**
             ${{ runner.temp }}/browse-daemon-lifecycle.log
             ${{ runner.temp }}/browse-daemon-races.log
-            ${{ runner.temp }}/browse-daemon-process.json
-            ${{ runner.temp }}/browse-daemon-registry.json
-            ${{ runner.temp }}/browse-daemon-registry.raw.json
-            ${{ runner.temp }}/browse-daemon-registry.progress.jsonl
-            ${{ runner.temp }}/browse-daemon-registry.progress.cli/**
-            ${{ runner.temp }}/browse-daemon-state-key.json
-            ${{ runner.temp }}/browse-daemon-state-key.raw.json
-            ${{ runner.temp }}/browse-daemon-state-key.log
             ${{ runner.temp }}/browse-daemon-state-key-ownership.json
             ${{ runner.temp }}/browse-daemon-state-key-ownership.log
-            ${{ runner.temp }}/browse-daemon-provider-discovery.json
-            ${{ runner.temp }}/browse-daemon-provider-discovery.raw.json
-            ${{ runner.temp }}/browse-daemon-provider-discovery.log
-            ${{ runner.temp }}/browse-daemon-mcp.json
-            ${{ runner.temp }}/browse-daemon-mcp.json.tests.log
           if-no-files-found: error
           retention-days: 14

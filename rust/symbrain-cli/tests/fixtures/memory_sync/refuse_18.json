@@ -1,0 +1,43 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "refuse_18",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://[1.2.3.4]/",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 2,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: parse remote URL: parse \"http://[1.2.3.4]/\": invalid IP-literal\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "http://[1.2.3.4]/",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

@@ -58,7 +58,7 @@ Run 'symguard <command> --help' for details on a specific command.
 
 $ symguard version
 symguard dev
-  go      go1.26.5
+  rust    rustc 1.98.0
   os/arch darwin/arm64
   built   2026-01-01 (compile-time placeholder)
 
@@ -66,7 +66,7 @@ $ symguard doctor
 symguard doctor
 
   Version:   dev
-  Go:        go1.26.5
+  Rust:      rustc 1.98.0
   OS/Arch:   darwin/arm64
 
   binary           ok
@@ -267,11 +267,11 @@ Not a chat frontend, not a SIEM, not a cloud-only SaaS, not a VPN replacement, n
 
 ## Install
 
-The released Go command set is available through `symbrain guard`. A scoped
-Rust standalone `symguard` is now buildable from source for #770
-([decision](../docs/adr/0011-standalone-rust-guard.md)); remaining doctor/audit
-diagnostic contracts and native acceptance are still pending. It shares the
-Guard-owned implementation with Brain, and has no legacy fallback.
+The Guard command set is available through `symbrain guard`. The standalone
+Rust `symguard` is buildable from source
+([decision](../docs/adr/0011-standalone-rust-guard.md)). It shares the
+Guard-owned implementation with Brain; there is no Go implementation or
+fallback anymore.
 
 ```sh
 cargo build --locked -p symguard-cli
@@ -290,24 +290,21 @@ symbrain guard doctor
 
 ## Build
 
-Requires Go 1.26+. Minimal external dependencies:
-[`BurntSushi/toml`](https://github.com/BurntSushi/toml) (TOML config
-parsing), [`danieljustus/symaira-corekit`](https://github.com/danieljustus/symaira-corekit)
-(version handshake and update checks), and
-[`golang.org/x/term`](https://golang.org/x/term) (TTY detection for default
-output formats). These live in the root module of `symaira-brain`; the guard
-packages are compiled as part of it.
+Guard is two crates of the root Rust workspace: `symbrain-guard-core` (model
+and static policy kernel) and `symguard-cli` (command handlers and the
+standalone binary). They build with the toolchain pinned in
+`rust-toolchain.toml`.
 
 ```bash
 # From the repository root
-go build -o symbrain ./cmd/symbrain
+cargo build --release --locked -p symguard-cli      # standalone symguard
+cargo build --release --locked -p symbrain-cli      # symbrain guard …
 
-# Run tests (guard packages are covered by the root ./...)
-go test ./...
-
-# Lint (golangci-lint or go vet fallback)
-go vet ./...
+# Test and lint
+cargo test -p symbrain-guard-core -p symguard-cli --locked
+make lint
 ```
+
 
 ## Usage
 
@@ -340,22 +337,14 @@ symbrain guard grants revoke --all
 
 ## Development
 
-The guard packages are part of the `symaira-brain` repository
-(`guard/` directory), not a standalone checkout.
+The guard crates are part of the `symaira-brain` repository
+(`rust/symbrain-guard-core`, `rust/symguard-cli`), not a standalone checkout.
 
 ```bash
-# From the repository root
 git clone https://github.com/danieljustus/symaira-brain.git
 cd symaira-brain
-
-# Build (guard is compiled into symbrain)
-go build -o symbrain ./cmd/symbrain
-
-# Test (guard packages are covered by the root ./...)
-go test ./...
-
-# Lint
-go vet ./...
+cargo test -p symbrain-guard-core -p symguard-cli --locked
+make rust-check   # complete root gate
 ```
 
 ## Status

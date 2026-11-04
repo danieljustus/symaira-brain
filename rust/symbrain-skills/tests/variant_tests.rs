@@ -27,7 +27,7 @@ fn has(problems: &[symbrain_skills::variant::Problem], code: &str) -> bool {
 #[test]
 fn variant_fixture_matches_each_target_resolution() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../internal/skills/render/testdata/variant-source");
+        .join("tests/fixtures/render_testdata/variant-source");
     let bundle = symbrain_skills::load_bundle(&root).expect("variant fixture");
     let targets = [
         "antigravity",
@@ -302,7 +302,7 @@ fn diagnostic_messages_match_go_oracle() {
 fn variant_outputs_match_go_target_goldens() {
     let oracle: Value = serde_json::from_slice(&common::skills_oracle()).expect("oracle JSON");
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../internal/skills/render/testdata/variant-source");
+        .join("tests/fixtures/render_testdata/variant-source");
     let bundle = symbrain_skills::load_bundle(&root).expect("variant fixture");
     for case in oracle["variant_cases"].as_array().expect("variant cases") {
         let target = case["target"].as_str().expect("target");

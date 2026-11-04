@@ -1,9 +1,8 @@
-"""Failure controls for the coverage floor and preserved Go denominator."""
+"""Failure controls for the Rust coverage floor and its complete denominator."""
 import copy
 import importlib.util
 import json
 from pathlib import Path
-import tempfile
 import unittest
 
 HERE = Path(__file__).resolve().parent
@@ -18,7 +17,6 @@ def load(name):
 
 
 report = load("report")
-go = load("go_oracles")
 
 
 class CoverageControls(unittest.TestCase):
@@ -52,26 +50,3 @@ class CoverageControls(unittest.TestCase):
                 altered["data"][0]["totals"][metric][key] -= sum(f["summary"][metric][key] for f in removed)
         with self.assertRaisesRegex(ValueError, "missing workspace member"):
             report.summarize(altered, self.policy, self.members)
-
-    def test_go_merge_keeps_unexecuted_blocks_and_rejects_scope_changes(self):
-        baseline = {"product.go:1.1,2.1": (3, 1), "scripts/unused.go:1.1,2.1": (9, 0)}
-        merged = go.merge_profiles("mode: atomic", baseline, {"product.go:1.1,2.1": (3, 2)})
-        self.assertEqual(merged["scripts/unused.go:1.1,2.1"], (9, 0))
-        self.assertEqual(go.counts(merged)["count"], 12)
-        self.assertEqual(merged["product.go:1.1,2.1"], (3, 3))
-        for extra in ({"new.go:1.1,2.1": (1, 1)}, {"product.go:1.1,2.1": (4, 1)}):
-            with self.assertRaisesRegex(ValueError, "denominator"):
-                go.merge_profiles("mode: atomic", baseline, extra)
-
-    def test_go_set_mode_does_not_inflate_counts(self):
-        merged = go.merge_profiles("mode: set", {"a.go:1.1,2.1": (3, 1)}, {"a.go:1.1,2.1": (3, 1)})
-        self.assertEqual(merged["a.go:1.1,2.1"], (3, 1))
-
-    def test_go_empty_duplicate_and_negative_profiles_fail(self):
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "coverage.out"
-            for text in ("mode: atomic\n", "mode: atomic\na.go:1.1,2.1 3 0\na.go:1.1,2.1 3 1\n",
-                         "mode: atomic\na.go:1.1,2.1 3 -1\n"):
-                path.write_text(text)
-                with self.assertRaises(ValueError):
-                    go.read_profile(path)

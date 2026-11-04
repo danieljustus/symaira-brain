@@ -1,10 +1,7 @@
 #![deny(unsafe_code)]
 
-use std::env;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::io::{self, Write};
-use std::path::PathBuf;
-use std::process::{Command, Stdio};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_core::version::{self, VersionInfo};
@@ -41,27 +38,9 @@ mod vault_config;
 
 const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide <request-id> --approve|--deny\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
 
-/// Execution strategy for commands delegated to the Go oracle or child processes.
-pub trait FallbackExecutor {
-    /// Executes an unmigrated command with the provided arguments and diagnostics writer.
-    fn execute(&self, args: &[OsString], stderr: &mut dyn Write) -> u8;
-}
-
-/// Production executor that spawns the Go fallback child process with inherited stdio.
-///
-/// Inherited stdio preserves interactive streaming for protocols like MCP (JSON-RPC over
-/// stdin/stdout) and prevents buffering or stdio pollution across process boundaries.
-pub struct InheritedProcessExecutor;
-
-impl FallbackExecutor for InheritedProcessExecutor {
-    fn execute(&self, args: &[OsString], stderr: &mut dyn Write) -> u8 {
-        run_go_fallback(args, stderr)
-    }
-}
-
-/// Runs `symbrain` with the production inherited-process fallback executor.
+/// Runs `symbrain` with in-memory writers. Every command is native.
 pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
-    run_with_executor(args, stdout, stderr, &InheritedProcessExecutor)
+    run_native(args, stdout, stderr, false)
 }
 
 /// Runs the CLI on its actual process standard streams.
@@ -73,34 +52,6 @@ pub fn run_stdio(args: &[OsString]) -> u8 {
     let mut stdout = io::stdout();
     let mut stderr = io::stderr();
     run_native(args, &mut stdout, &mut stderr, true)
-        .unwrap_or_else(|| InheritedProcessExecutor.execute(args, &mut stderr))
-}
-
-/// Runs `symbrain` with an explicit fallback executor strategy.
-pub fn run_with_executor<E: FallbackExecutor>(
-    args: &[OsString],
-    stdout: &mut dyn Write,
-    stderr: &mut dyn Write,
-    executor: &E,
-) -> u8 {
-    if let Some(code) = run_in_process(args, stdout, stderr) {
-        code
-    } else {
-        executor.execute(args, stderr)
-    }
-}
-
-/// Attempts to execute a command natively in-process without invoking any fallback.
-///
-/// Returns `Some(code)` if the command was recognized and handled in-process, writing
-/// all output directly to `stdout` and `stderr`.
-/// Returns `None` if the command is unmigrated and requires fallback execution.
-pub fn run_in_process(
-    args: &[OsString],
-    stdout: &mut dyn Write,
-    stderr: &mut dyn Write,
-) -> Option<u8> {
-    run_native(args, stdout, stderr, false)
 }
 
 fn run_native(
@@ -108,14 +59,14 @@ fn run_native(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     process_stdout: bool,
-) -> Option<u8> {
+) -> u8 {
     let peeked = peek_command(args);
     let (format, normalized) = if is_output_command(&peeked) {
         match output::extract_format(args) {
             Ok(result) => result,
             Err(err) => {
                 let _ = writeln!(stderr, "symbrain: {err}");
-                return Some(exit::USAGE);
+                return exit::USAGE;
             }
         }
     } else {
@@ -124,49 +75,47 @@ fn run_native(
 
     if normalized.is_empty() {
         if write!(stdout, "{USAGE}").is_err() {
-            return Some(exit::GENERIC);
+            return exit::GENERIC;
         }
-        return Some(exit::USAGE);
+        return exit::USAGE;
     }
 
     let cmd = normalized[0].to_string_lossy();
     let rest = &normalized[1..];
 
     match cmd.as_ref() {
-        "help" | "--help" | "-h" => Some(write_usage(stdout)),
-        "version" => Some(run_version(rest, stdout, stderr, format)),
-        "config" => Some(config_cli::run(rest, stdout, stderr)),
+        "help" | "--help" | "-h" => write_usage(stdout),
+        "version" => run_version(rest, stdout, stderr, format),
+        "config" => config_cli::run(rest, stdout, stderr),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
-        "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
-        "setup" if process_stdout => Some(setup_cli::run_with_stdout(rest, stdout, stderr, true)),
-        "setup" => Some(setup_cli::run(rest, stdout, stderr)),
-        "doctor" if process_stdout => Some(doctor_cli::run_with_stdout(
-            rest, stdout, stderr, format, true,
-        )),
-        "doctor" => Some(doctor_cli::run(rest, stdout, stderr, format)),
-        "install" => Some(install_cli::run_install(rest, stdout, stderr)),
-        "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),
-        "mcp" => Some(mcp_cli::run(rest, stderr)),
-        "serve" => Some(mcp_cli::run_serve(rest, stderr)),
-        "usage" if usage_cli::requires_go_fallback(rest) => None,
-        "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
-        "init" => Some(init_cli::run(rest, stdout, stderr)),
-        "harness" => Some(harness_cli::run(rest, stdout, stderr, format)),
-        "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
+        "audit" => audit_cli::run(rest, stdout, stderr, format),
+        "setup" if process_stdout => setup_cli::run_with_stdout(rest, stdout, stderr, true),
+        "setup" => setup_cli::run(rest, stdout, stderr),
+        "doctor" if process_stdout => {
+            doctor_cli::run_with_stdout(rest, stdout, stderr, format, true)
+        }
+        "doctor" => doctor_cli::run(rest, stdout, stderr, format),
+        "install" => install_cli::run_install(rest, stdout, stderr),
+        "uninstall" => install_cli::run_uninstall(rest, stdout, stderr),
+        "mcp" => mcp_cli::run(rest, stderr),
+        "serve" => mcp_cli::run_serve(rest, stderr),
+        "usage" => usage_cli::run(rest, stdout, stderr, format),
+        "init" => init_cli::run(rest, stdout, stderr),
+        "harness" => harness_cli::run(rest, stdout, stderr, format),
+        "sync" => sync_cli::run(rest, stdout, stderr, format),
         "memory" if memory_cli::is_sync(rest) => memory_cli::run_sync(rest, stdout, stderr, format),
-        "memory" if memory_cli::requires_go_fallback(rest) => None,
-        "memory" if process_stdout => Some(memory_cli::run_with_stdout(
-            rest, stdout, stderr, format, true,
-        )),
-        "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
+        "memory" if process_stdout => {
+            memory_cli::run_with_stdout(rest, stdout, stderr, format, true)
+        }
+        "memory" => memory_cli::run(rest, stdout, stderr, format),
         "skills" => skills_cli::run(rest, stdout, stderr, format),
-        "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),
-        "vault" => Some(vault_admin::run(args, stdout, stderr)),
-        "guard" => guard_cli::run(rest, stdout, stderr),
+        "activity" => activity_cli::run(rest, stdout, stderr, format),
+        "vault" => vault_admin::run(args, stdout, stderr),
+        "guard" => guard_cli::run(rest, stdout, stderr).unwrap_or(exit::USAGE),
         _ => {
             let _ = writeln!(stderr, "symbrain: unknown command {cmd:?}\n");
             let _ = write!(stderr, "{USAGE}");
-            Some(exit::USAGE)
+            exit::USAGE
         }
     }
 }
@@ -295,65 +244,6 @@ fn run_version(
         return exit::GENERIC;
     }
     exit::OK
-}
-
-#[cfg(unix)]
-fn exit_status_code(status: std::process::ExitStatus) -> u8 {
-    use std::os::unix::process::ExitStatusExt;
-    if let Some(code) = status.code() {
-        u8::try_from(code).unwrap_or(exit::GENERIC)
-    } else if let Some(sig) = status.signal() {
-        u8::try_from(128 + sig).unwrap_or(exit::GENERIC)
-    } else {
-        exit::GENERIC
-    }
-}
-
-#[cfg(not(unix))]
-fn exit_status_code(status: std::process::ExitStatus) -> u8 {
-    status
-        .code()
-        .and_then(|code| u8::try_from(code).ok())
-        .unwrap_or(exit::GENERIC)
-}
-
-fn run_go_fallback(args: &[OsString], stderr: &mut dyn Write) -> u8 {
-    let Some(binary) = go_fallback_binary() else {
-        let command = args
-            .first()
-            .map_or_else(|| "".into(), |arg| arg.to_string_lossy());
-        let _ = writeln!(
-            stderr,
-            "symbrain: command {command:?} is not ported yet and no Go fallback was found; set SYMBRAIN_GO_BINARY"
-        );
-        return exit::GENERIC;
-    };
-
-    let status = Command::new(&binary)
-        .args(args)
-        .stdin(Stdio::inherit())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .status();
-    match status {
-        Ok(status) => exit_status_code(status),
-        Err(error) => {
-            let _ = writeln!(
-                stderr,
-                "symbrain: start Go fallback {}: {error}",
-                binary.display()
-            );
-            exit::GENERIC
-        }
-    }
-}
-
-fn go_fallback_binary() -> Option<PathBuf> {
-    if let Some(path) = env::var_os("SYMBRAIN_GO_BINARY") {
-        return Some(PathBuf::from(path));
-    }
-    // Shared lookup: honours PATHEXT, so a packaged `symbrain-go.exe` is found on Windows.
-    passthrough::path_lookup(OsStr::new("symbrain-go"))
 }
 
 pub(crate) fn rustc_version() -> &'static str {

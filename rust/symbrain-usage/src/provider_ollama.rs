@@ -73,6 +73,7 @@ fn signed_request(key: &Ed25519KeyPair, public: &[u8], timestamp: i64) -> Reques
     let uri = format!("/api/balance?ts={timestamp}");
     let signature = key.sign(format!("GET,{uri}").as_bytes());
     Request {
+        header_bytes: std::collections::BTreeMap::new(),
         provider_id: "ollama".into(),
         method: "GET".into(),
         url: format!("https://ollama.com{uri}"),

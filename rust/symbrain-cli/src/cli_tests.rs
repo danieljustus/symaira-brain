@@ -219,138 +219,46 @@ fn config_path_normalizes_unexpected_flags() {
     assert!(stderr3.is_empty());
 }
 
-struct MockFallbackExecutor {
-    calls: std::sync::Mutex<Vec<Vec<OsString>>>,
-}
-
-impl FallbackExecutor for MockFallbackExecutor {
-    fn execute(&self, args: &[OsString], _stderr: &mut dyn Write) -> u8 {
-        self.calls.lock().unwrap().push(args.to_vec());
-        42
-    }
-}
-
 #[test]
-fn fallback_executor_receives_unmigrated_commands_only() {
-    let executor = MockFallbackExecutor {
-        calls: std::sync::Mutex::new(Vec::new()),
-    };
-    let mut stdout = Vec::new();
-    let mut stderr = Vec::new();
-
-    // Native command: should NOT call fallback
-    let native_code = run_with_executor(
-        &[OsString::from("help")],
-        &mut stdout,
-        &mut stderr,
-        &executor,
-    );
-    assert_eq!(native_code, exit::OK);
-    assert!(executor.calls.lock().unwrap().is_empty());
-
-    let doctor_code = run_with_executor(
-        &[OsString::from("doctor"), OsString::from("--help")],
-        &mut stdout,
-        &mut stderr,
-        &executor,
-    );
-    assert_eq!(doctor_code, exit::USAGE);
-    assert!(executor.calls.lock().unwrap().is_empty());
-
-    // `usage` is state-gated: a report that resolves no stored credential runs
-    // natively, one that resolves a credential fetches from a live endpoint and
-    // stays on Go until those fetch paths are pinned (issue #620). Which branch
-    // this process takes therefore depends on the machine's stored credentials,
-    // so that routing is pinned by the parity suite (and by the CLI's own
-    // predicate), not by an environment-dependent unit test. The fallback route
-    // is covered by `module_lifecycle_flags_are_forwarded_to_the_go_fallback`.
-    stdout.clear();
-    stderr.clear();
-
-    // Init is native and must not call the Go fallback.
-    stdout.clear();
-    stderr.clear();
-    let init_args = [OsString::from("init"), OsString::from("--help")];
-    let init_code = run_with_executor(&init_args, &mut stdout, &mut stderr, &executor);
-    assert_eq!(init_code, exit::NO_INPUT);
-    assert!(executor.calls.lock().unwrap().is_empty());
-    assert!(stdout.is_empty());
-    assert_eq!(stderr, b"Usage of init:\n");
-}
-
-#[test]
-fn unrelated_native_doctor_and_setup_invocations_do_not_fallback() {
-    let executor = MockFallbackExecutor {
-        calls: std::sync::Mutex::new(Vec::new()),
-    };
-    let mut stdout = Vec::new();
-    let mut stderr = Vec::new();
-    let cases = [
-        vec!["doctor", "--fix=false", "--help"],
-        vec!["doctor", "--help", "--", "--force-release"],
+fn every_top_level_command_is_handled_natively() {
+    let cases: &[(&[&str], u8)] = &[
+        (&["help"], exit::OK),
+        (&["doctor", "--help"], exit::USAGE),
+        (&["init", "--help"], exit::NO_INPUT),
+        (&["harness"], exit::USAGE),
+        (&["config", "set"], exit::USAGE),
+        (&["config"], exit::NO_INPUT),
+        (&["config", "frobnicate"], exit::NO_INPUT),
+        (&["doctor", "--fix=false", "--help"], exit::USAGE),
+        (&["doctor", "--help", "--", "--force-release"], exit::USAGE),
         // Go consumes `--force-release` as the `-vault-agent` value and stops
         // at `--help`, so this case never consults the machine's profiles.
-        vec!["doctor", "--vault-agent", "--force-release", "--help"],
-        vec!["doctor", "--unknown", "--force-release"],
-        vec!["setup", "--fix=false", "--help"],
-        vec!["setup", "--fix=TRUE", "--force-release", "--help"],
-        vec!["setup", "--help", "--", "--from-source", "/receiver"],
-        vec!["setup", "--help", "--from-source", "/receiver"],
-    ];
-
-    for case in cases {
-        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
-        assert_eq!(
-            run_with_executor(&args, &mut stdout, &mut stderr, &executor),
+        (
+            &["doctor", "--vault-agent", "--force-release", "--help"],
             exit::USAGE,
-            "{case:?} should stay native"
-        );
+        ),
+        (&["doctor", "--unknown", "--force-release"], exit::USAGE),
+        (&["setup", "--fix=false", "--help"], exit::USAGE),
+        (
+            &["setup", "--fix=TRUE", "--force-release", "--help"],
+            exit::USAGE,
+        ),
+        (
+            &["setup", "--help", "--", "--from-source", "/receiver"],
+            exit::USAGE,
+        ),
+        (
+            &["setup", "--help", "--from-source", "/receiver"],
+            exit::USAGE,
+        ),
+        (&["frobnicate"], exit::USAGE),
+    ];
+    for (case, want) in cases {
+        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        assert_eq!(run(&args, &mut stdout, &mut stderr), *want, "{case:?}");
     }
-
-    assert!(executor.calls.lock().unwrap().is_empty());
-}
-
-#[test]
-fn run_in_process_returns_none_for_unmigrated_commands() {
-    let mut stdout = Vec::new();
-    let mut stderr = Vec::new();
-
-    assert_eq!(
-        run_in_process(
-            &[OsString::from("init"), OsString::from("--help")],
-            &mut stdout,
-            &mut stderr
-        ),
-        Some(exit::NO_INPUT)
-    );
-    assert_eq!(
-        run_in_process(&[OsString::from("harness")], &mut stdout, &mut stderr),
-        Some(exit::USAGE)
-    );
-    assert_eq!(
-        run_in_process(
-            &[OsString::from("config"), OsString::from("set"),],
-            &mut stdout,
-            &mut stderr
-        ),
-        Some(exit::USAGE)
-    );
-    assert_eq!(
-        run_in_process(&[OsString::from("config")], &mut stdout, &mut stderr),
-        Some(exit::NO_INPUT)
-    );
-    assert_eq!(
-        run_in_process(
-            &[OsString::from("config"), OsString::from("frobnicate")],
-            &mut stdout,
-            &mut stderr
-        ),
-        Some(exit::NO_INPUT)
-    );
-    assert_eq!(
-        run_in_process(&[OsString::from("help")], &mut stdout, &mut stderr),
-        Some(exit::OK)
-    );
 }
 
 #[test]
@@ -358,12 +266,12 @@ fn config_get_executes_in_process() {
     let mut stdout = Vec::new();
     let mut stderr = Vec::new();
 
-    let res = run_in_process(
+    let res = run(
         &[OsString::from("config"), OsString::from("get")],
         &mut stdout,
         &mut stderr,
     );
-    assert_eq!(res, Some(exit::OK));
+    assert_eq!(res, exit::OK);
 }
 
 #[test]
@@ -401,7 +309,7 @@ fn config_set_executes_in_process() {
     let mut stdout = Vec::new();
     let mut stderr = Vec::new();
 
-    let res = run_in_process(
+    let res = run(
         &[
             OsString::from("config"),
             OsString::from("set"),
@@ -410,7 +318,7 @@ fn config_set_executes_in_process() {
         &mut stdout,
         &mut stderr,
     );
-    assert_eq!(res, Some(exit::USAGE));
+    assert_eq!(res, exit::USAGE);
     assert_eq!(stderr, b"symbrain config set: want exactly <key> <value>\n");
 }
 

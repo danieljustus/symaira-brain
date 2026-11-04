@@ -1,8 +1,6 @@
 // Source-bound owner selection and native-platform filepath comparisons.
-fn owner_matches_fresh_go() {
-    let fixture = std::env::var("USAGE_COPILOT_KIMI_OWNER").expect("fresh owned Go constructors");
-    let records: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(fixture).unwrap()).unwrap();
+fn owner_matches_frozen_go(evidence: &frozen::Frozen) {
+    let records: Vec<serde_json::Value> = evidence.documents("owner").as_array().unwrap().clone();
     assert_eq!(records.len(), 16, "all owner cases");
     assert_eq!(
         records
@@ -14,11 +12,6 @@ fn owner_matches_fresh_go() {
     );
     for record in &records {
         prepare(record);
-        assert!(
-            !super::needs_go_fallback(),
-            "{}: consistent owner eligibility",
-            record["id"]
-        );
         let before: BTreeMap<_, _> = record["file_sha256"]
             .as_object()
             .unwrap()
@@ -71,9 +64,7 @@ fn owner_matches_fresh_go() {
             "owner symlink read-only"
         );
     }
-    let output = std::env::var("USAGE_COPILOT_KIMI_OWNER_NATIVE").unwrap();
-    std::fs::write(output,serde_json::to_vec_pretty(&serde_json::json!({"cases":16,"passed":16,"failed":0,"full_reports":16,"read_only":16})).unwrap()).unwrap();
-    paths_match_fresh_go();
+    paths_match_frozen_go(evidence);
 }
 fn decode_hex(text: &str) -> Vec<u8> {
     assert_eq!(text.len() % 2, 0);
@@ -82,10 +73,8 @@ fn decode_hex(text: &str) -> Vec<u8> {
         .map(|index| u8::from_str_radix(&text[index..index + 2], 16).unwrap())
         .collect()
 }
-fn paths_match_fresh_go() {
-    let fixture = std::env::var("USAGE_COPILOT_KIMI_PATH").unwrap();
-    let records: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(fixture).unwrap()).unwrap();
+fn paths_match_frozen_go(evidence: &frozen::Frozen) {
+    let records: Vec<serde_json::Value> = evidence.documents("path").as_array().unwrap().clone();
     assert_eq!(records.len(), if cfg!(windows) { 21 } else { 22 });
     for record in &records {
         let bytes = decode_hex(record["base_hex"].as_str().unwrap());
@@ -118,6 +107,4 @@ fn paths_match_fresh_go() {
             "actual Go join: {path:?}"
         );
     }
-    let output = std::env::var("USAGE_COPILOT_KIMI_PATH_NATIVE").unwrap();
-    std::fs::write(output,serde_json::to_vec_pretty(&serde_json::json!({"cases":records.len(),"passed":records.len(),"failed":0,"non_utf8_unix":cfg!(unix)})).unwrap()).unwrap();
 }

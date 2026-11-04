@@ -1,0 +1,211 @@
+{
+ "db": {
+  "audit_log": [
+   [
+    "set",
+    "r-1",
+    "global",
+    null,
+    null,
+    null
+   ]
+  ],
+  "memories": [
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "local one",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "l-1",
+    "importance": "real:3fe0000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "local two",
+    "content_hash": "",
+    "created_at": "2026-10-15 09:30:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "l-2",
+    "importance": "real:3fe0000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-15 09:30:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "remote one",
+    "content_hash": "187effee8e64a68a375762ac76f7c6ca548a95a904564c293a1ba159e19f24b7",
+    "created_at": "2026-10-15 09:30:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "null",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "r-1",
+    "importance": "real:3fe0000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-15 09:30:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   }
+  ],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "l-1",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 2,
+    "memory_id": "l-2",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 3,
+    "memory_id": "gone-1",
+    "op": "delete",
+    "ts": "2026-10-18 17:45:10 +0000 UTC"
+   },
+   {
+    "event_id": 4,
+    "memory_id": "r-1",
+    "op": "upsert",
+    "ts": "<now>"
+   }
+  ],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-20 12:00:00.123456789 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "pull_table",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "Remote:            http://127.0.0.1:{PORT}\nMode:              pull\nEncrypted relay:   false\nCursor:            2026-10-20T12:00:00Z\nServer time:       2026-10-20T12:00:00Z\nPulled memories:   1\nPulled deletes:    0\nPushed memories:   0\nPushed deletes:    0\n"
+  }
+ ],
+ "seed": [
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-1', 'local one', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC')",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-2', 'local two', 'global', '{}', '[]', '2026-10-15 09:30:00 +0000 UTC', '2026-10-15 09:30:00 +0000 UTC')",
+  "INSERT INTO sync_oplog (op, memory_id, ts) VALUES ('delete', 'gone-1', '2026-10-18 17:45:10 +0000 UTC')"
+ ],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[{\"id\":\"r-1\",\"content\":\"remote one\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-15T09:30:00Z\",\"updated_at\":\"2026-10-15T09:30:00Z\",\"consolidation_status\":\"raw\",\"importance\":0.5,\"review_status\":\"approved\",\"tier\":\"long_term\",\"access_count\":1}],\"deleted\":[],\"server_time\":\"2026-10-20T12:00:00.123456789Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

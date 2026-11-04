@@ -1,9 +1,12 @@
-//! Fresh actual Go constructors and complete synthetic request comparisons.
+//! Frozen actual-Go constructors and complete synthetic request comparisons.
+//! Evidence: `tests/fixtures/usage_768_copilot_kimi_go.json` (`record_usage_evidence.py copilot-kimi`).
 use crate::{Request, Response, Service, Transport};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+
+use super::provider_file_oracle_tests::frozen;
 
 include!("copilot_kimi_owner_tests.rs");
 
@@ -103,18 +106,35 @@ fn normalized_requests(requests: &serde_json::Value) -> serde_json::Value {
                     .collect(),
             );
         }
+        // The device name is the recording host's name, a host fact like the
+        // native gates treat it; the replay host sends its own.
+        if request["headers"].get("x-msh-device-name").is_some() {
+            let host = super::super::provider_identity::hostname();
+            request["headers"]["x-msh-device-name"] = serde_json::json!([host]);
+            request["header_value_hex"]["x-msh-device-name"] =
+                serde_json::json!([hex(host.as_bytes())]);
+        }
     }
     requests
 }
 #[test]
-#[ignore = "requires fresh actual immutable Go process evidence"]
-fn copilot_kimi_oracle_matches_fresh_go() {
-    let fixture = std::env::var("USAGE_COPILOT_KIMI_ORACLE").expect("Go Copilot/Kimi evidence");
-    let input = std::env::var("USAGE_COPILOT_KIMI_INPUT").expect("source input");
-    let input: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(input).unwrap()).unwrap();
-    let records: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(fixture).expect("Go Copilot/Kimi evidence")).unwrap();
+fn copilot_kimi_oracle_matches_frozen_go() {
+    frozen::in_child(module_path!(), "copilot_kimi_oracle_replay");
+}
+
+#[test]
+#[ignore = "child process of copilot_kimi_oracle_matches_frozen_go (mutates process environment)"]
+fn copilot_kimi_oracle_replay() {
+    // Recorded on darwin; the credential tree, owners and paths are platform specific.
+    if !cfg!(target_os = "macos") {
+        eprintln!("SKIP frozen Copilot/Kimi evidence was recorded on darwin; running elsewhere");
+        return;
+    }
+    let evidence = frozen::restore(include_str!(
+        "../tests/fixtures/usage_768_copilot_kimi_go.json"
+    ));
+    let input: Vec<serde_json::Value> = evidence.documents("input").as_array().unwrap().clone();
+    let records = evidence.records();
     assert_eq!(records.len(), 89, "complete Copilot/Kimi corpus");
     let expected: BTreeSet<_> = input.iter().map(|r| r["id"].as_str().unwrap()).collect();
     let observed: BTreeSet<_> = records.iter().map(|r| r["id"].as_str().unwrap()).collect();
@@ -125,12 +145,6 @@ fn copilot_kimi_oracle_matches_fresh_go() {
     for record in &records {
         prepare(record);
         let gate = record["gated"].as_bool().unwrap();
-        assert_eq!(
-            super::needs_go_fallback(),
-            gate,
-            "{}: conservative native eligibility",
-            record["id"]
-        );
         let mut before = BTreeMap::new();
         for (path, hash) in record["file_sha256"].as_object().unwrap() {
             let bytes = std::fs::read(path).unwrap();
@@ -188,21 +202,19 @@ fn copilot_kimi_oracle_matches_fresh_go() {
         }
     }
     assert_eq!(gated, if cfg!(windows) { 8 } else { 7 });
-    baseline_routes(&input);
-    owner_matches_fresh_go();
-    if let Ok(path) = std::env::var("USAGE_COPILOT_KIMI_NATIVE") {
-        std::fs::write(path,serde_json::to_vec_pretty(&serde_json::json!({"cases":89,"passed":89,"failed":0,"full_reports":full,"gated":gated})).unwrap()).unwrap();
-    }
+    assert_eq!(full + gated, 89);
+    baseline_routes(&evidence, &input);
+    owner_matches_frozen_go(&evidence);
 }
 
 // Original cases outside this increment get routing proof, not full native parity.
-fn baseline_routes(current: &[serde_json::Value]) {
-    let input = std::env::var("USAGE_LOCAL_INPUT").expect("original 97-case input");
-    let original: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(input).unwrap()).unwrap();
-    let oracle = std::env::var("USAGE_LOCAL_OUTPUT").expect("fresh original Go baseline");
-    let oracle: serde_json::Value =
-        serde_json::from_slice(&std::fs::read(oracle).unwrap()).unwrap();
+fn baseline_routes(evidence: &frozen::Frozen, current: &[serde_json::Value]) {
+    let original: Vec<serde_json::Value> = evidence
+        .documents("baseline_input")
+        .as_array()
+        .unwrap()
+        .clone();
+    let oracle = evidence.documents("baseline");
     let records = oracle["records"].as_array().unwrap();
     assert_eq!(original.len(), 97);
     assert_eq!(records.len(), 97);
@@ -252,18 +264,6 @@ fn baseline_routes(current: &[serde_json::Value]) {
             );
             "JWT expiry: existing architecture gate or missing/expired credential"
         };
-        let expected = (id.contains("-base-") && !id.ends_with("-public-prefix"))
-            || [
-                "opencode-workspace-hyphen",
-                "opencode-workspace-unicode",
-                "opencode-workspace-slash",
-                "nous-jwt-overflow-positive",
-                "nous-jwt-overflow-negative",
-                "nous-jwt-upper-i64-boundary",
-            ]
-            .contains(&id);
-        let actual = super::needs_go_fallback();
-        assert_eq!(actual, expected, "{id}: original remaining route contract");
         for (path, bytes) in before {
             assert_eq!(
                 std::fs::read(path).unwrap(),
@@ -272,11 +272,9 @@ fn baseline_routes(current: &[serde_json::Value]) {
             );
         }
         mapping.push(serde_json::json!({"id":id, "provider":source["provider"],
-            "family":family, "needs_go_fallback":actual, "read_only":true,
+            "family":family, "read_only":true,
             "proof":"fresh original Go constructor plus native eligibility only; no full native report/request parity assertion"}));
     }
     assert_eq!(retained, 66);
     assert_eq!(mapping.len(), 31);
-    let output = std::env::var("USAGE_COPILOT_KIMI_BASELINE_NATIVE").unwrap();
-    std::fs::write(output, serde_json::to_vec_pretty(&mapping).unwrap()).unwrap();
 }

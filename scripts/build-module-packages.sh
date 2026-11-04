@@ -24,8 +24,8 @@
 # Freeform snapshot helper with hardened runtime. Unsigned helpers are packaged with a
 # warning; Full Disk Access grants only survive updates with a stable Developer ID.
 #
-# Repeatability: the Go module builds with -trimpath and CGO_ENABLED=0.
-# SwiftPM builds are not bit-for-bit reproducible across toolchains; the
+# Repeatability: the Rust browse workspace builds with --locked from its
+# pinned toolchain. SwiftPM builds are not bit-for-bit reproducible across toolchains; the
 # provenance manifest records the exact toolchain string so a package is
 # always attributable, and the acceptance harness verifies behavior (MCP
 # handshake, catalog, lifecycle) rather than archive bytes.
@@ -162,8 +162,8 @@ PY
 
 if module_selected browse; then
     echo "==> building symbrowse from $ROOT/browse"
-    (cd "$ROOT/browse" && CGO_ENABLED=0 go build -trimpath -o "$OUT/.build/symbrowse" ./cmd/symbrowse)
-    package_binary browse symbrowse "$(go version)" "$OUT/.build/symbrowse"
+    (cd "$ROOT/browse" && cargo build --release --locked -p symbrowse-cli --target-dir "$OUT/.build/browse-target")
+    package_binary browse symbrowse "$(cd "$ROOT/browse" && cargo --version)" "$OUT/.build/browse-target/release/symbrowse"
 fi
 
 if [ "$OS" = "darwin" ]; then

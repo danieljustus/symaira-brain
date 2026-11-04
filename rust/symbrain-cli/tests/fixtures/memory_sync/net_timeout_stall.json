@@ -1,0 +1,68 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "net_timeout_stall",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--timeout",
+    "1s"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: request http://127.0.0.1:{PORT}: Get \"http://127.0.0.1:{PORT}/api/sync/changes?limit=500\": context deadline exceeded\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--timeout",
+    "1s"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "action": "stall",
+     "body": "{\"memories\":[],\"deleted\":[],\"server_time\":\"2026-10-18T17:45:10Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "stall": 3,
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

@@ -428,6 +428,6 @@ final class OperateViewModel: ObservableObject, ModuleViewModelProtocol {
         }
     }
 
-    private static let sourceCheckoutGuidance = "Choose the Symaira Brain checkout root containing go.mod, browse/, operate/Package.swift, scope/Package.swift, and history/Package.swift."
+    private static let sourceCheckoutGuidance = "Choose the Symaira Brain checkout root containing Cargo.toml, browse/, operate/Package.swift, scope/Package.swift, and history/Package.swift."
 }
 #endif

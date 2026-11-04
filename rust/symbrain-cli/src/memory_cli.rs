@@ -26,15 +26,12 @@ use help::{
     MEMORY_SEARCH_USAGE, MEMORY_SEARCH_USAGE_ERROR, MEMORY_SET_USAGE, MEMORY_SET_USAGE_ERROR,
     MEMORY_USAGE, QUERY_LOG_USAGE,
 };
-mod routing;
-mod sync;
-mod sync_decode;
-mod sync_entry;
-mod sync_http;
-mod sync_native;
-mod sync_pull;
-pub(crate) use routing::requires_go_fallback;
 mod paths;
+mod sync;
+mod sync_duration;
+mod sync_net;
+mod sync_run;
+mod sync_url;
 use paths::{open_store, resolve_db_path};
 mod read;
 use read::{run_list, table_content};
@@ -46,6 +43,7 @@ use write::{run_delete, run_set};
 mod rules;
 use rules::run_rules;
 mod query_log;
+mod serve;
 use query_log::run_query_log;
 
 /// Runs `symbrain memory`.
@@ -63,14 +61,13 @@ pub(crate) fn is_sync(args: &[OsString]) -> bool {
     args.first().is_some_and(|verb| verb == "sync")
 }
 
-/// Runs `memory sync`; `None` leaves the invocation to the shipped
-/// implementation.
+/// Runs `memory sync`.
 pub(crate) fn run_sync(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> Option<u8> {
+) -> u8 {
     sync::run(&args[1..], stdout, stderr, format)
 }
 
@@ -99,11 +96,9 @@ pub(super) fn run_with_stdout(
         "set" => run_set(rest, stdout, stderr, format, process_stdout),
         "delete" => run_delete(rest, stdout, stderr, format),
         "rules" => run_rules(rest, stdout, stderr, format),
+        "serve" => serve::run(rest, stdout, stderr),
         "query-log" => run_query_log(rest, stdout, stderr, format),
-        // Reached only through direct calls: the CLI routes `sync` through
-        // `run_sync`, which can hand an invocation to the shipped
-        // implementation. Fail closed instead of synchronising here.
-        "sync" => sync::run(rest, stdout, stderr, format).unwrap_or(exit::GENERIC),
+        "sync" => sync::run(rest, stdout, stderr, format),
         _ => {
             let _ = writeln!(
                 stderr,
@@ -116,9 +111,5 @@ pub(super) fn run_with_stdout(
     }
 }
 
-#[cfg(test)]
-mod sync_pull_tests;
-#[cfg(test)]
-mod sync_tests;
 #[cfg(test)]
 mod tests;

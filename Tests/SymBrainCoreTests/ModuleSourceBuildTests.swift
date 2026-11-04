@@ -74,7 +74,7 @@ struct ModuleSourceBuildTests {
             at: root.appendingPathComponent("browse", isDirectory: true),
             withIntermediateDirectories: true
         )
-        for path in ["go.mod", "operate/Package.swift", "scope/Package.swift", "history/Package.swift"] {
+        for path in ["Cargo.toml", "operate/Package.swift", "scope/Package.swift", "history/Package.swift"] {
             let file = root.appendingPathComponent(path)
             try fileManager.createDirectory(
                 at: file.deletingLastPathComponent(),

@@ -12,6 +12,7 @@ name = "symguard"
 path = "src/main.rs"
 
 [dependencies]
+symaira-cutover.workspace = true
 chrono.workspace = true
 serde.workspace = true
 serde_json.workspace = true

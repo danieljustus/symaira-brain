@@ -21,15 +21,52 @@ fn kimi_cli_home() -> PathBuf {
 /// products it accepts remains unproven offline (#931).
 fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>, Option<f64>) {
     let (token, expiry) = kimi_file_credential(&credential_join(cli_home, "credentials/kimi-code.json"));
-    let device_id = read_limited(&credential_join(cli_home, "device_id"))
-        .and_then(|data| String::from_utf8(data).ok())
-        .map(|value| value.trim().to_owned())
-        .filter(|value| !value.is_empty());
+    let device_id = kimi_device_id_bytes(cli_home)
+        .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
     (token, device_id, expiry)
 }
 
-fn kimi_file_token_candidate(path: &Path) -> Option<String> {
-    kimi_file_credential(path).0
+/// The device id file trimmed the way Go's `strings.TrimSpace(string(data))`
+/// trims it: whole Unicode white-space runes at both ends, invalid UTF-8 bytes
+/// kept verbatim (they are not white space).
+fn kimi_device_id_bytes(cli_home: &Path) -> Option<Vec<u8>> {
+    let data = read_limited(&credential_join(cli_home, "device_id"))?;
+    let trimmed = go_trim_space(&data);
+    (!trimmed.is_empty()).then(|| trimmed.to_vec())
+}
+
+fn go_trim_space(mut bytes: &[u8]) -> &[u8] {
+    let space = |character: char| character.is_whitespace();
+    while let Some(first) = bytes.first() {
+        let length = match first {
+            0x00..=0x7f => 1,
+            0xc0..=0xdf => 2,
+            0xe0..=0xef => 3,
+            _ => 4,
+        };
+        match bytes.get(..length).and_then(|head| std::str::from_utf8(head).ok()) {
+            Some(head) if head.chars().next().is_some_and(space) => bytes = &bytes[length..],
+            _ => break,
+        }
+    }
+    while !bytes.is_empty() {
+        let start = (bytes.len().saturating_sub(4)..bytes.len())
+            .find(|start| {
+                std::str::from_utf8(&bytes[*start..]).is_ok_and(|tail| tail.chars().count() == 1)
+            });
+        match start {
+            Some(start)
+                if std::str::from_utf8(&bytes[start..])
+                    .ok()
+                    .and_then(|tail| tail.chars().next())
+                    .is_some_and(space) =>
+            {
+                bytes = &bytes[..start];
+            }
+            _ => break,
+        }
+    }
+    bytes
 }
 
 #[derive(Deserialize)]
@@ -58,77 +95,4 @@ fn kimi_expiry_seconds(value: &serde_json::Value) -> Option<f64> {
             .map(|time| time.timestamp_millis() as f64 / 1000.0);
     }
     value.as_f64().filter(|seconds| (-62_135_596_800.0..253_402_300_800.0).contains(seconds))
-}
-
-// Invalid regular JSON is native missing credentials. Unsafe file access is
-// native only where Go-derived evidence exists (#768, macOS). On Linux
-// cap-std's openat2(RESOLVE_BENEATH|O_NOFOLLOW) rejects an in-root relative
-// symlink that Go's os.Root follows, and Windows has no evidence yet, so those
-// targets keep the Go route for unsafe shapes.
-#[cfg(not(target_os = "macos"))]
-fn kimi_file_requires_go(path: &Path) -> bool {
-    read_optional_credential_file(path).is_err()
-}
-
-#[cfg(target_os = "macos")]
-fn kimi_file_requires_go(_path: &Path) -> bool {
-    false
-}
-
-/// Preserve Go's trimmed device bytes for the proven regular UTF-8 family.
-/// Invalid UTF-8, internal ASCII controls and unsafe file access retain Go;
-/// Unicode bytes require full request/report and actual wire evidence.
-fn kimi_device_id_is_native(path: &Path) -> bool {
-    match read_optional_credential_file(path) {
-        Ok(None) => true,
-        Ok(Some(bytes)) => std::str::from_utf8(&bytes).is_ok_and(|value| {
-            value
-                .trim()
-                .bytes()
-                .all(|byte| byte == b' ' || byte.is_ascii_graphic() || byte >= 0x80)
-        }),
-        Err(()) => false,
-    }
-}
-
-fn supported_custom_base(raw: &str) -> bool {
-    if !trusted_https_url(raw, false) || !raw.is_ascii() || raw.contains(['?', '#', '%', '@']) {
-        return false;
-    }
-    let Some(authority_and_path) = raw.strip_prefix("https://") else {
-        return false;
-    };
-    let (authority, path) = authority_and_path
-        .split_once('/')
-        .unwrap_or((authority_and_path, ""));
-    if !authority.contains('.')
-        || !authority.split('.').all(|label| {
-            !label.is_empty()
-                && label
-                    .as_bytes()
-                    .first()
-                    .is_some_and(u8::is_ascii_alphanumeric)
-                && label
-                    .as_bytes()
-                    .last()
-                    .is_some_and(u8::is_ascii_alphanumeric)
-                && label
-                    .bytes()
-                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
-        })
-    {
-        return false;
-    }
-    path.bytes()
-        .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'/' | b'-' | b'_' | b'.'))
-        && !path.contains("//")
-        && !path
-            .split('/')
-            .any(|segment| segment == "." || segment == "..")
-}
-
-fn supported_opencode_workspace(raw: &str) -> bool {
-    raw.strip_prefix("wrk_").is_some_and(|suffix| {
-        !suffix.is_empty() && suffix.bytes().all(|byte| byte.is_ascii_alphanumeric())
-    })
 }

@@ -1,4 +1,9 @@
 //! Exercise the requested reports through the actual native CLI with no Go.
+//!
+//! The Go reports are frozen in `fixtures/skills_status_go_oracle.json` (recorded from the
+//! immutable Go binary; the per-run temp root is tokenised as `<TEMP>`). Re-recording is
+//! historical tooling only: `SYMBRAIN_SKILLS_STATUS_RECORD_GO=<symbrain-go>` plus
+//! `SYMBRAIN_SKILLS_STATUS_RECORD_OUT=<path>`; it is never part of a gate.
 use std::fs;
 use std::process::Command;
 
@@ -7,13 +12,9 @@ use symbrain_skills::{RenderMetadata, load_bundle, render_target};
 
 #[test]
 fn explicit_target_reports_render_drift_without_a_go_fallback() {
-    let oracle = std::env::var_os("SYMBRAIN_SKILLS_STATUS_GO_ORACLE");
-    if std::env::var_os("SYMBRAIN_SKILLS_STATUS_REQUIRE_ORACLE").is_some() {
-        assert!(
-            oracle.is_some(),
-            "live evidence requires the immutable Go binary"
-        );
-    }
+    let recorder = std::env::var_os("SYMBRAIN_SKILLS_STATUS_RECORD_GO");
+    let frozen: serde_json::Value = serde_json::from_str(FROZEN).expect("frozen Go reports");
+    assert_eq!(frozen["total"], 12);
     let mut observations = Vec::new();
     for target in symbrain_skills::default_targets() {
         let Fixture {
@@ -39,9 +40,15 @@ fn explicit_target_reports_render_drift_without_a_go_fallback() {
             if mode == "symlink" { "linked" } else { "copy" },
             "{target}"
         );
-        if let Some(oracle) = &oracle {
-            observations.push(compare_go(oracle, &command, &target, "clean", &clean));
-        }
+        observations.push(compare_go(
+            recorder.as_deref(),
+            &frozen,
+            &command,
+            temp.path(),
+            &target,
+            "clean",
+            &clean,
+        ));
         fs::write(
             cache.join(&target).join("example/references/lesson.md"),
             "Edited render only\n",
@@ -60,15 +67,15 @@ fn explicit_target_reports_render_drift_without_a_go_fallback() {
             changed["installs"][0]["render_drift"][0]["path"], "references/lesson.md",
             "{target}"
         );
-        if let Some(oracle) = &oracle {
-            observations.push(compare_go(
-                oracle,
-                &command,
-                &target,
-                "render-edit",
-                &changed,
-            ));
-        }
+        observations.push(compare_go(
+            recorder.as_deref(),
+            &frozen,
+            &command,
+            temp.path(),
+            &target,
+            "render-edit",
+            &changed,
+        ));
         assert_eq!(
             fs::read(source.join("references/lesson.md")).unwrap(),
             b"Original lesson\n"
@@ -163,32 +170,78 @@ fn fixture_with_mode(target: &str, mode: &'static str) -> Fixture {
     }
 }
 
+const FROZEN: &str = include_str!("fixtures/skills_status_go_oracle.json");
+const TEMP_TOKEN: &str = "<TEMP>";
+
+fn tokenize(value: &serde_json::Value, temp: &std::path::Path) -> serde_json::Value {
+    let mut text = serde_json::to_string(value).unwrap();
+    let plain = temp.to_str().unwrap().to_owned();
+    let canonical = fs::canonicalize(temp).unwrap().to_str().unwrap().to_owned();
+    for path in [canonical, plain] {
+        let escaped = serde_json::to_string(&path).unwrap();
+        text = text.replace(&escaped[1..escaped.len() - 1], TEMP_TOKEN);
+    }
+    serde_json::from_str(&text).unwrap()
+}
+
+fn detokenize(value: &serde_json::Value, temp: &std::path::Path) -> serde_json::Value {
+    let text = serde_json::to_string(value).unwrap();
+    let path = serde_json::to_string(temp.to_str().unwrap()).unwrap();
+    serde_json::from_str(&text.replace(TEMP_TOKEN, &path[1..path.len() - 1])).unwrap()
+}
+
 fn compare_go(
-    oracle: &std::ffi::OsStr,
+    recorder: Option<&std::ffi::OsStr>,
+    frozen: &serde_json::Value,
     command: &Command,
+    temp: &std::path::Path,
     target: &str,
     state: &str,
     rust: &serde_json::Value,
 ) -> serde_json::Value {
-    let mut go = Command::new(oracle);
-    go.env_clear()
-        .envs(
-            command
-                .get_envs()
-                .filter_map(|(key, value)| value.map(|value| (key, value))),
-        )
-        .current_dir(command.get_current_dir().unwrap())
-        .args(command.get_args());
-    let output = go.output().unwrap();
-    assert!(
-        output.status.success(),
-        "Go {target}/{state}: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    assert!(output.stderr.is_empty(), "Go {target}/{state}");
-    let go: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    if recorder.is_none() && cfg!(windows) {
+        // The frozen Go reports were recorded on darwin (symlink installs); Windows reports use
+        // copy installs whose Go bytes were never recorded, so no frozen oracle exists there.
+        return serde_json::Value::Null;
+    }
+    let go = if let Some(oracle) = recorder {
+        // Historical re-recording against a live Go binary.
+        let mut go = Command::new(oracle);
+        go.env_clear()
+            .envs(
+                command
+                    .get_envs()
+                    .filter_map(|(key, value)| value.map(|value| (key, value))),
+            )
+            .current_dir(command.get_current_dir().unwrap())
+            .args(command.get_args());
+        let output = go.output().unwrap();
+        assert!(
+            output.status.success(),
+            "Go {target}/{state}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(output.stderr.is_empty(), "Go {target}/{state}");
+        serde_json::from_slice(&output.stdout).unwrap()
+    } else {
+        let case = frozen["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|case| case["target"] == target && case["state"] == state)
+            .unwrap_or_else(|| panic!("no frozen Go report for {target}/{state}"));
+        detokenize(&case["go"], temp)
+    };
+    // `installed_at` is the per-invocation wall clock and is an accepted difference.
+    let mut go = go;
+    for row in go["installs"].as_array_mut().unwrap() {
+        row["installed_at"] = serde_json::json!("<TS>");
+    }
     let mut baseline = rust.clone();
     for row in baseline["installs"].as_array_mut().unwrap() {
+        row.as_object_mut()
+            .unwrap()
+            .insert("installed_at".to_owned(), serde_json::json!("<TS>"));
         let row = row.as_object_mut().unwrap();
         // These are the explicit #621 product additions, never parity claims.
         for field in ["render_status", "render_drift", "render_error"] {
@@ -202,11 +255,11 @@ fn compare_go(
         baseline, go,
         "existing Go report changed for {target}/{state}"
     );
-    serde_json::json!({"target":target,"state":state,"go":go,"rust":rust,"existing_report_matches":true})
+    serde_json::json!({"target":target,"state":state,"go":tokenize(&go, temp),"rust":tokenize(rust, temp),"existing_report_matches":true})
 }
 
 fn write_observations(observations: &[serde_json::Value]) {
-    if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_STATUS_EVIDENCE") {
+    if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_STATUS_RECORD_OUT") {
         assert_eq!(
             observations.len(),
             12,
@@ -215,6 +268,7 @@ fn write_observations(observations: &[serde_json::Value]) {
         fs::write(
             path,
             serde_json::to_vec_pretty(&serde_json::json!({
+                "schema_version": 1,
                 "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
                 "total": observations.len(),
                 "cases": observations,

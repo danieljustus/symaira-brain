@@ -49,7 +49,7 @@ public enum ModuleSourceBuild {
         guard isDirectory(root.appendingPathComponent("browse", isDirectory: true)) else {
             throw ValidationError.missingDirectory("browse")
         }
-        for relativePath in ["go.mod", "operate/Package.swift", "scope/Package.swift", "history/Package.swift"] {
+        for relativePath in ["Cargo.toml", "operate/Package.swift", "scope/Package.swift", "history/Package.swift"] {
             guard isFile(root.appendingPathComponent(relativePath)) else {
                 throw ValidationError.missingFile(relativePath)
             }

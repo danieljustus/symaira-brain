@@ -7,9 +7,13 @@ fn current_copilot_selected_account() {
     }"#).as_deref(), Some("https://github.com:second"));
 }
 
-fn copilot_file_token_candidate_in(dir: &Path) -> Result<Option<String>, ()> {
+// Go's reader treats any unreadable, unsafe, oversized or malformed file as
+// absent and continues with the next file. For several distinct eligible
+// tokens Go's unordered map iteration picks any of them; the sorted map makes
+// the native choice deterministic.
+fn copilot_file_token_in(dir: &Path) -> Option<String> {
     for name in ["apps.json", "hosts.json"] {
-        let Some(contents) = read_optional_credential_file(&credential_join(dir, name))? else {
+        let Some(contents) = read_provider_credentials(&credential_join(dir, name)) else {
             continue;
         };
         let text = go_json_compatible_text(&contents);
@@ -24,26 +28,16 @@ fn copilot_file_token_candidate_in(dir: &Path) -> Result<Option<String>, ()> {
             entries.insert(key, value);
         }
         for prefix in ["github.com:", ""] {
-            let mut selected = None;
-            for (key, raw) in &entries {
-                if !prefix.is_empty() && !key.starts_with(prefix) {
-                    continue;
-                }
-                let Some(token) = decode_typed_credential(raw.get(), "oauth_token") else {
-                    continue;
-                };
-                if selected.as_ref().is_some_and(|previous| previous != &token) {
-                    // Different eligible tokens depend on Go map iteration.
-                    return Err(());
-                }
-                selected = Some(token);
-            }
+            let selected = entries
+                .iter()
+                .filter(|(key, _)| key.starts_with(prefix))
+                .find_map(|(_, raw)| decode_typed_credential(raw.get(), "oauth_token"));
             if selected.is_some() {
-                return Ok(selected);
+                return selected;
             }
         }
     }
-    Ok(None)
+    None
 }
 
 // Scalar null retains prior typed string values. A wrong known type invalidates
