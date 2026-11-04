@@ -85,8 +85,13 @@ jobs:
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
+      # cargo-auditable embeds the locked dependency list in the binary; the
+      # release job's Syft SBOM reads it (a plain Rust binary has no components).
+      - name: Install cargo-auditable
+        run: cargo install cargo-auditable --version 0.7.7 --locked
+
       - name: Build Rust CLI
-        run: SYMBRAIN_VERSION="$VERSION" cargo build --locked --release -p symbrain-cli
+        run: SYMBRAIN_VERSION="$VERSION" cargo auditable build --locked --release -p symbrain-cli
 
       - name: Package and smoke-test the archive
         run: |
