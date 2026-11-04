@@ -1,0 +1,68 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "relay_wrong_passphrase",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/relay?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: relay pull from http://127.0.0.1:{PORT}: decrypt relay blob r-1: decryption failed: invalid passphrase or corrupted payload\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"blobs\":[{\"id\":\"r-1\",\"updated_at\":\"2026-10-15T09:30:00Z\",\"blob\":\"AQABAgMEBQYHCAkKCwwNDg8FfxO2gj6CjNP3BzBOOLbYZDpOP4Fdlpis3SJxEDRVSEGLGNonEAAx7eUfLH5I1VAGH+z1AThOzfNLMgmdc4Tnhq+Qxrgj0d4NJdRhv5Py39rSH1W45cUb694JsEVRJfP2r6yY9M8m1H8AIsc/yLWnWAfgrUB/W3299v64rbQZAIjAZoA9aATrIdKoYlD0koihhtMkckFnkxL1/8f8QmTgjau1hkSBLaTjfz21P2Vug4sGtK79htHeheJS7YmRCF7RuNCOhD5GsndAaZT0zAMkEfZp4IP4altsCZ+nIitaw9pek992POfPgeq7GzXjaJixt7prH0zvhb5T+pzSIL6zt+5851th/DdyNJgdZqOqtOIy2fkY\"}],\"server_time\":\"2026-10-20T12:00:00Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

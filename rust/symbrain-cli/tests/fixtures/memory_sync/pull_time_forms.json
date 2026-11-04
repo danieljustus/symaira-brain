@@ -1,0 +1,225 @@
+{
+ "db": {
+  "audit_log": [
+   [
+    "set",
+    "t1",
+    null,
+    null,
+    null,
+    null
+   ],
+   [
+    "set",
+    "t2",
+    null,
+    null,
+    null,
+    null
+   ],
+   [
+    "set",
+    "t3",
+    null,
+    null,
+    null,
+    null
+   ]
+  ],
+  "memories": [
+   {
+    "access_count": 0,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "a",
+    "content_hash": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+    "created_at": "2026-10-10 08:00:00 +0545 +0545",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "null",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "t1",
+    "importance": "real:0000000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "null",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "",
+    "superseded_by": null,
+    "tier": "",
+    "updated_at": "2026-10-10 08:00:00.123456789 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": "2026-10-10 08:00:00.1 -0030 -0030"
+   },
+   {
+    "access_count": 0,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "zero",
+    "content_hash": "f9194e73f9e9459e3450ea10a179cdf77aafa695beecd3b9344a98d111622243",
+    "created_at": "0001-01-01 00:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "null",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "t2",
+    "importance": "real:0000000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "null",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "",
+    "superseded_by": null,
+    "tier": "",
+    "updated_at": "0001-01-01 00:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 0,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "far",
+    "content_hash": "512eea46ceb3921dff4363c7069d89d4964d1d9fccaa0f411851a7aa60a5c868",
+    "created_at": "0001-01-01 00:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "null",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "t3",
+    "importance": "real:0000000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "null",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "",
+    "superseded_by": null,
+    "tier": "",
+    "updated_at": "9999-12-31 23:59:59 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   }
+  ],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "t1",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 2,
+    "memory_id": "t2",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 3,
+    "memory_id": "t3",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 4,
+    "memory_id": "d1",
+    "op": "delete",
+    "ts": "2026-10-11 00:00:00.5 +0100 +0100"
+   }
+  ],
+  "sync_state": [
+   {
+    "last_sync": "9999-12-31 23:59:59 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "pull_time_forms",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"pull\",\"encrypted_relay\":false,\"cursor\":\"9999-12-31T23:59:59Z\",\"server_time\":\"9999-12-31T23:59:59Z\",\"pulled_memories_applied\":3,\"pulled_deletes_applied\":0,\"pushed_memories\":0,\"pushed_deletes\":0,\"relay_blobs_fetched\":0,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"memories\":[{\"id\":\"t1\",\"content\":\"a\",\"updated_at\":\"2026-10-10T08:00:00.123456789Z\",\"created_at\":\"2026-10-10T08:00:00+05:45\",\"valid_from\":null,\"valid_to\":\"2026-10-10T08:00:00.1-00:30\"},{\"id\":\"t2\",\"content\":\"zero\",\"updated_at\":\"0001-01-01T00:00:00Z\"},{\"id\":\"t3\",\"content\":\"far\",\"updated_at\":\"9999-12-31T23:59:59Z\"}],\"deleted\":[{\"id\":\"d1\",\"deleted_at\":\"2026-10-11T00:00:00.5+01:00\"}],\"server_time\":\"2026-10-20T12:00:00.987654321+02:00\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

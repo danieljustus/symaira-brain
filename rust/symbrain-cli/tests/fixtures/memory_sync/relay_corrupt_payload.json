@@ -1,0 +1,68 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "relay_corrupt_payload",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/relay?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: relay pull from http://127.0.0.1:{PORT}: decode relay blob r-1: json: cannot unmarshal string into Go value of type syncclient.relayPayload\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"blobs\":[{\"id\":\"r-1\",\"updated_at\":\"2026-10-15T09:30:00Z\",\"blob\":\"AQABAgMEBQYHCAkKCwwNDg/laej2pJzWu1bRCOTzpfJCjrmCcIU0EP6hDxurNUN1zeydTpGsxEWNCypM\"}],\"server_time\":\"2026-10-20T12:00:00Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

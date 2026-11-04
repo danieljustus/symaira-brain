@@ -1,0 +1,45 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "net_timeout_negative",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--timeout=-5s"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: request http://127.0.0.1:{PORT}: Get \"http://127.0.0.1:{PORT}/api/sync/changes?limit=500\": context deadline exceeded\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--timeout=-5s"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

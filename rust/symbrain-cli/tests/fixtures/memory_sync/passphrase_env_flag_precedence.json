@@ -1,0 +1,77 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-20 12:00:00 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "passphrase_env_flag_precedence",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull"
+   ],
+   "env": {
+    "SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE": "ignored"
+   },
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/relay?limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "Remote:            http://127.0.0.1:{PORT}\nMode:              pull\nEncrypted relay:   true\nCursor:            2026-10-20T12:00:00Z\nServer time:       2026-10-20T12:00:00Z\nPulled memories:   0\nPulled deletes:    0\nPushed memories:   0\nPushed deletes:    0\nRelay blobs fetched: 0\nRelay blobs stored: 0\n"
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull"
+   ],
+   "env": {
+    "SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE": "ignored"
+   },
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"blobs\":[],\"server_time\":\"2026-10-20T12:00:00Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

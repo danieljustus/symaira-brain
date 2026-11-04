@@ -12,6 +12,8 @@ repository.workspace = true
 base64 = "=0.22.1"
 hmac = "=0.12.1"
 zeroize = "=1.9.0"
+# AES-256-GCM and PBKDF2 of the encrypted-relay payloads; already locked via rustls.
+ring = "=0.17.14"
 hyper = { version = "=1.11.1", features = ["server", "http1"] }
 hyper-util = { version = "=0.1.21", features = ["tokio"] }
 http-body-util = "=0.1.5"

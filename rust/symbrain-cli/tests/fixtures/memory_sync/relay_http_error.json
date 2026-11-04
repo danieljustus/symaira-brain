@@ -1,0 +1,162 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "local one",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "l-1",
+    "importance": "real:3fe0000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "local two",
+    "content_hash": "",
+    "created_at": "2026-10-15 09:30:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "l-2",
+    "importance": "real:3fe0000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-15 09:30:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   }
+  ],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "l-1",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 2,
+    "memory_id": "l-2",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 3,
+    "memory_id": "gone-1",
+    "op": "delete",
+    "ts": "2026-10-18 17:45:10 +0000 UTC"
+   }
+  ],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "relay_http_error",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--push"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": "correct horse",
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/relay?limit=500"
+    }
+   ],
+   "stderr": "symbrain memory sync: relay pull from http://127.0.0.1:{PORT}: remote returned bad (400): nope\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-1', 'local one', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC')",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-2', 'local two', 'global', '{}', '[]', '2026-10-15 09:30:00 +0000 UTC', '2026-10-15 09:30:00 +0000 UTC')",
+  "INSERT INTO sync_oplog (op, memory_id, ts) VALUES ('delete', 'gone-1', '2026-10-18 17:45:10 +0000 UTC')"
+ ],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--push"
+   ],
+   "env": {},
+   "passphrase": "correct horse",
+   "responses": [
+    {
+     "body": "{\"error\": \"nope\", \"code\": \"bad\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 400
+    }
+   ]
+  }
+ ]
+}

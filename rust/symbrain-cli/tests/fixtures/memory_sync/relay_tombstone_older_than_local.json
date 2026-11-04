@@ -1,0 +1,169 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "local one",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "l-1",
+    "importance": "real:3fe0000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "local two",
+    "content_hash": "",
+    "created_at": "2026-10-15 09:30:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "l-2",
+    "importance": "real:3fe0000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-15 09:30:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   }
+  ],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "l-1",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 2,
+    "memory_id": "l-2",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 3,
+    "memory_id": "gone-1",
+    "op": "delete",
+    "ts": "2026-10-18 17:45:10 +0000 UTC"
+   }
+  ],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-20 12:00:00 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "relay_tombstone_older_than_local",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/relay?limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"pull\",\"encrypted_relay\":true,\"cursor\":\"2026-10-20T12:00:00Z\",\"server_time\":\"2026-10-20T12:00:00Z\",\"pulled_memories_applied\":0,\"pulled_deletes_applied\":0,\"pushed_memories\":0,\"pushed_deletes\":0,\"relay_blobs_fetched\":2,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-1', 'local one', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC')",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('l-2', 'local two', 'global', '{}', '[]', '2026-10-15 09:30:00 +0000 UTC', '2026-10-15 09:30:00 +0000 UTC')",
+  "INSERT INTO sync_oplog (op, memory_id, ts) VALUES ('delete', 'gone-1', '2026-10-18 17:45:10 +0000 UTC')"
+ ],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--relay-passphrase",
+    "correct horse",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"blobs\":[{\"id\":\"tombstone:l-2\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"blob\":\"AQABAgMEBQYHCAkKCwwNDg/+HfIS4cztcNmd0XtlM1sSRd/K7DXerGBkiIQ7LM3YwxLJVCTLzwjzZK302PdvIL3mQXwK4iSeTXHfl+tI/l/XNDz2Mn8PUHmR1qoo/GeeLuZ3dNOTXNWR\"},{\"id\":\"l-1\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"blob\":\"AQABAgMEBQYHCAkKCwwNDg/19NhndwqjMK/6Hs2yScughiVi7XCBMIt3nqElfULLGU6K4ei1HKzvDP4dqnaG0AYqYEEL/L0mtBRtCm0UTkpDXa2mVmeMF58RiOS8EiM4z5KUVu5oYaQqgzIPL0sHLZoanhkcY9yNVpmg/aT7fvHwWu4ANk42o/yV+u0VopzpZscsnaao22oM/eaazBf7DimXUhvKTll/cmtR0DjixkeZNLkNeDJZTu6nbnjQR1JcNlhiKBmf7fSoLhzkYyTWDShv2q/msG9xlDTmFCFJXE3ahg2EP35FwLrf14RdQNM8p1P2UK6BnbG0oAg5W+lwUFBEmHExTE++11A2ziS8kDu8fn5ZMgzsepuqoK3zZFftHPvVarBZvG7d\"}],\"server_time\":\"2026-10-20T12:00:00Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

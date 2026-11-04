@@ -1,0 +1,238 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "net_redirect_loop",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/api/sync/changes?limit=500",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    },
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "referer": "http://127.0.0.1:{PORT}/again",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/again"
+    }
+   ],
+   "stderr": "symbrain memory sync: pull from http://127.0.0.1:{PORT}: request http://127.0.0.1:{PORT}: Get \"/again\": stopped after 10 redirects\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    },
+    {
+     "body": "",
+     "headers": {
+      "Location": "/again"
+     },
+     "status": 302
+    }
+   ]
+  }
+ ]
+}

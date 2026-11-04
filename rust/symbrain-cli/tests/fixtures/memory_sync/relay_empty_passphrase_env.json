@@ -1,0 +1,49 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": []
+ },
+ "files": {},
+ "name": "relay_empty_passphrase_env",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--pull"
+   ],
+   "env": {
+    "SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE": ""
+   },
+   "exit": 2,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: --encrypted-relay requires --relay-passphrase (or $SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE)\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--encrypted-relay",
+    "--pull"
+   ],
+   "env": {
+    "SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE": ""
+   },
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

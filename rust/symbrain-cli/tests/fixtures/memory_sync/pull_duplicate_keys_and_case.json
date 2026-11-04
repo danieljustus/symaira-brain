@@ -1,0 +1,121 @@
+{
+ "db": {
+  "audit_log": [
+   [
+    "set",
+    "c1b",
+    null,
+    null,
+    null,
+    null
+   ]
+  ],
+  "memories": [
+   {
+    "access_count": 0,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "dup2",
+    "content_hash": "64dea6ce587eb07f28db0c871f67dae9778a4227418d67372c32e9c9403b17a3",
+    "created_at": "0001-01-01 00:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ff0000000000000",
+    "embedding": "null",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "c1b",
+    "importance": "real:0000000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "null",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "",
+    "superseded_by": null,
+    "tier": "",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   }
+  ],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "c1b",
+    "op": "upsert",
+    "ts": "<now>"
+   }
+  ],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-20 12:00:00 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "pull_duplicate_keys_and_case",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "",
+     "headers": {
+      "accept-encoding": "gzip",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "GET",
+     "target": "/api/sync/changes?limit=500"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"pull\",\"encrypted_relay\":false,\"cursor\":\"2026-10-20T12:00:00Z\",\"server_time\":\"2026-10-20T12:00:00Z\",\"pulled_memories_applied\":1,\"pulled_deletes_applied\":0,\"pushed_memories\":0,\"pushed_deletes\":0,\"relay_blobs_fetched\":0,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"MEMORIES\":[{\"ID\":\"c1\",\"Content\":\"case\",\"UPDATED_AT\":\"2026-10-10T08:00:00Z\",\"id\":\"c1b\",\"content\":\"dup1\",\"content\":\"dup2\"}],\"Deleted\":[],\"Server_Time\":\"2026-10-20T12:00:00Z\"}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,283 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "x",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:444b1ae4d6e2ef50",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "f0",
+    "importance": "real:3e7ad7f29abcaf48",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "x",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3fd3333333333334",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "f1",
+    "importance": "real:3fd3333333333334",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "x",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:4000000000000000",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "f2",
+    "importance": "real:419d6f34547e6b75",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "x",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ee4f8b588e368f1",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "f3",
+    "importance": "real:444b1ae4d6e2ef50",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   },
+   {
+    "access_count": 1,
+    "consolidated_into_id": null,
+    "consolidation_status": "raw",
+    "content": "x",
+    "content_hash": "",
+    "created_at": "2026-10-10 08:00:00 +0000 UTC",
+    "created_by": "",
+    "created_session": "",
+    "decay_factor": "real:3ee9e0fcaf9380fc",
+    "embedding": "[]",
+    "embedding_binary": null,
+    "embedding_dim": 0,
+    "embedding_model": "",
+    "embedding_quantization": "",
+    "embedding_source": "",
+    "expires_at": null,
+    "id": "f4",
+    "importance": "real:0000000000000000",
+    "kind": "",
+    "last_access": null,
+    "lsh_hash": 0,
+    "metadata": "{}",
+    "prev_access": null,
+    "retired_at": null,
+    "review_status": "approved",
+    "scope": "global",
+    "superseded_by": null,
+    "tier": "long_term",
+    "updated_at": "2026-10-10 08:00:00 +0000 UTC",
+    "updated_by": "",
+    "updated_session": "",
+    "valid_from": null,
+    "valid_to": null
+   }
+  ],
+  "sync_oplog": [
+   {
+    "event_id": 1,
+    "memory_id": "f0",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 2,
+    "memory_id": "f1",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 3,
+    "memory_id": "f2",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 4,
+    "memory_id": "f3",
+    "op": "upsert",
+    "ts": "<now>"
+   },
+   {
+    "event_id": 5,
+    "memory_id": "f4",
+    "op": "upsert",
+    "ts": "<now>"
+   }
+  ],
+  "sync_state": [
+   {
+    "last_sync": "2026-10-10 08:00:00 +0000 UTC",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "push_float_importance",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--push",
+    "--json"
+   ],
+   "env": {},
+   "exit": 0,
+   "passphrase": null,
+   "requests": [
+    {
+     "body": "{\"memories\":[{\"id\":\"f0\",\"content\":\"x\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-10T08:00:00Z\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"consolidation_status\":\"raw\",\"importance\":1e-7,\"review_status\":\"approved\",\"decay_factor\":1e+21,\"tier\":\"long_term\",\"access_count\":1},{\"id\":\"f1\",\"content\":\"x\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-10T08:00:00Z\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"consolidation_status\":\"raw\",\"importance\":0.30000000000000004,\"review_status\":\"approved\",\"decay_factor\":0.30000000000000004,\"tier\":\"long_term\",\"access_count\":1},{\"id\":\"f2\",\"content\":\"x\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-10T08:00:00Z\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"consolidation_status\":\"raw\",\"importance\":123456789.12345679,\"review_status\":\"approved\",\"decay_factor\":2,\"tier\":\"long_term\",\"access_count\":1},{\"id\":\"f3\",\"content\":\"x\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-10T08:00:00Z\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"consolidation_status\":\"raw\",\"importance\":1e+21,\"review_status\":\"approved\",\"decay_factor\":0.00001,\"tier\":\"long_term\",\"access_count\":1},{\"id\":\"f4\",\"content\":\"x\",\"scope\":\"global\",\"metadata\":{},\"created_at\":\"2026-10-10T08:00:00Z\",\"updated_at\":\"2026-10-10T08:00:00Z\",\"consolidation_status\":\"raw\",\"importance\":0,\"review_status\":\"approved\",\"decay_factor\":0.00001234,\"tier\":\"long_term\",\"access_count\":1}],\"deleted\":null}",
+     "headers": {
+      "accept-encoding": "gzip",
+      "content-type": "application/json",
+      "host": "127.0.0.1:{PORT}",
+      "user-agent": "Go-http-client/1.1"
+     },
+     "method": "POST",
+     "target": "/api/sync/apply"
+    }
+   ],
+   "stderr": "",
+   "stdout": "{\"remote\":\"http://127.0.0.1:{PORT}\",\"mode\":\"push\",\"encrypted_relay\":false,\"cursor\":\"2026-10-10T08:00:00Z\",\"server_time\":\"0001-01-01T00:00:00Z\",\"pulled_memories_applied\":0,\"pulled_deletes_applied\":0,\"pushed_memories\":5,\"pushed_deletes\":0,\"relay_blobs_fetched\":0,\"relay_blobs_stored\":0}\n"
+  }
+ ],
+ "seed": [
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at, importance, decay_factor) VALUES ('f0', 'x', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC', 1e-07, 1e+21)",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at, importance, decay_factor) VALUES ('f1', 'x', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC', 0.30000000000000004, 0.30000000000000004)",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at, importance, decay_factor) VALUES ('f2', 'x', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC', 123456789.12345679, 2.0)",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at, importance, decay_factor) VALUES ('f3', 'x', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC', 1e+21, 1e-05)",
+  "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at, importance, decay_factor) VALUES ('f4', 'x', 'global', '{}', '[]', '2026-10-10 08:00:00 +0000 UTC', '2026-10-10 08:00:00 +0000 UTC', 0.0, 1.234e-05)"
+ ],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--push",
+    "--json"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": [
+    {
+     "body": "{\"applied\": 5}",
+     "headers": {
+      "Content-Type": "application/json"
+     },
+     "status": 200
+    }
+   ]
+  }
+ ]
+}

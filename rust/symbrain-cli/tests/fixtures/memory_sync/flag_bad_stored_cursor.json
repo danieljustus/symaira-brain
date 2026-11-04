@@ -1,0 +1,50 @@
+{
+ "db": {
+  "audit_log": [],
+  "memories": [],
+  "sync_oplog": [],
+  "sync_state": [
+   {
+    "last_sync": "not a time",
+    "remote": "http://127.0.0.1:{PORT}"
+   }
+  ]
+ },
+ "files": {},
+ "name": "flag_bad_stored_cursor",
+ "note": "",
+ "observed": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "exit": 1,
+   "passphrase": null,
+   "requests": [],
+   "stderr": "symbrain memory sync: read sync cursor for http://127.0.0.1:{PORT}: sql: Scan error on column index 0, name \"last_sync\": unsupported Scan, storing driver.Value type string into type *time.Time\n",
+   "stdout": ""
+  }
+ ],
+ "seed": [
+  "INSERT INTO sync_state (remote, last_sync) VALUES ('{base}', 'not a time')"
+ ],
+ "steps": [
+  {
+   "argv": [
+    "memory",
+    "sync",
+    "--remote",
+    "{base}",
+    "--pull"
+   ],
+   "env": {},
+   "passphrase": null,
+   "responses": []
+  }
+ ]
+}

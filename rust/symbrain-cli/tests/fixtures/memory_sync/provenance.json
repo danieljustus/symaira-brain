@@ -1,0 +1,28 @@
+{
+  "description": "Frozen real-Go observations of `symbrain memory sync` (pull, push, plain and encrypted relay, auth, URL validation, redirects, gzip, timeouts, malformed pages, tombstone conflicts). One JSON file per scenario: scripted fake-server responses, the HTTP requests the Go CLI sent (relay blobs decrypted: nonces are random), stdout, stderr, exit status and the database after the run.",
+  "generator": "capture.py (this directory), `--go GO_BIN --out DIR`",
+  "oracle": "go-built symbrain from cmd/symbrain",
+  "go_version": "go version go1.27.3 darwin/arm64",
+  "go_build_command": "dev-external go -C <worktree> build -o <builds>/MEM-SYNC/bin/symbrain-go ./cmd/symbrain",
+  "worktree_commit_at_capture": "44d59150760769dc6d218eb736b93991cc65acef (+ uncommitted native Rust work; Go sources unchanged)",
+  "branch": "migration/w-memory-sync",
+  "platform": "darwin/arm64 (Apple M4 Pro)",
+  "capture_env": "env_clear + PATH=/usr/bin:/bin, HOME/XDG_*/TMPDIR under builds/symaira-brain/MEM-SYNC/work/go/<scenario>/, TZ=UTC, LC_ALL=C.UTF-8; scripted fake server on 127.0.0.1",
+  "replay": "rust/symbrain-cli/tests/memory_sync_replay.rs runs the native binary against a Rust fake server with the same scripts; no Go needed",
+  "platform_specific": [
+    "refuse/url scenarios that dial and fail print POSIX errno texts (darwin: `can't assign requested address`)",
+    "net_connection_refused_localhost depends on the host resolving localhost"
+  ],
+  "accepted_differences": [
+    "a bearer token with non-ASCII bytes: Go sends the bytes, the native HTTP stack refuses the header (error instead of a request)",
+    "https certificate-verification failures use the native TLS stack's wording, not Go's x509 texts; trust anchors are the bundled web PKI roots, not the system store",
+    "HTTP(S)_PROXY handling for non-loopback remotes follows the native HTTP stack's environment rules"
+  ],
+  "normalizations": [
+    "ports -> {PORT}/{CLOSED}, scratch root -> {root}, Go goroutine traces -> <trace>",
+    "database timestamps within a day of the run -> <now> (local-clock trigger stamps)",
+    "database REAL cells -> real:<IEEE-754 bits hex> (exact comparison; applied by capture.py, and once by script to the first 58 frozen files, whose floats were Python reprs of the sqlite values)",
+    "relay request bodies: each blob replaced by its decrypted payload (random salt/nonce)"
+  ],
+  "scenario_count": 201
+}
