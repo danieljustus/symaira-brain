@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import daemon_state_key as key
+import fixture_programs
 from raw_path_admission import probe_name, unavailable_name_is_proven
 
 
@@ -25,18 +26,13 @@ def queries(ledger: Path) -> list:
     return [json.loads(line) for line in ledger.read_text().splitlines()] if ledger.exists() else []
 
 
-def observe(probe: Path, binary: Path, fixture: Path, go: str) -> dict:
+def observe(probe: Path, binary: Path, fixture: Path) -> dict:
     with tempfile.TemporaryDirectory(prefix="bk-owner-path-", dir=key.registry.process.private_temporary_parent()) as directory:
         root = Path(directory); env = key.registry.environment(root)
         env.update(SYMBROWSE_KEY_PROBE_MODE="ab", SYMBROWSE_KEYCHAIN_PROBE_MODE="44",
                    SYMBROWSE_ENCRYPTION_KEY=key.KEY)
-        source = root / "path-control.go"
-        template = key.HERE / "startup_key_path_control.go.in"
-        shutil.copyfile(template, source)
-        control = root / ("path-control.exe" if os.name == "nt" else "path-control")
-        subprocess.run([go, "build", "-o", str(control), str(source)],
-                       env=dict(os.environ, CGO_ENABLED="0", GOTOOLCHAIN="local", GO111MODULE="off"),
-                       capture_output=True, check=True, timeout=120)
+        template = fixture_programs.source("path-control")
+        control = fixture_programs.install("path-control", root / "path-control")
         names = [("ascii", b"ascii"), ("unicode-ä", "unicode-ä".encode())]
         if os.name == "posix": names.append(("raw-byte", b"raw-\xff"))
         requested = [{"id": label, "name_bytes_hex": raw_name.hex(),

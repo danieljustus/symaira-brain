@@ -468,7 +468,6 @@ def main() -> int:
         type=Path,
         help="short encrypted-NVMe directory for the daemon runtime socket",
     )
-    parser.add_argument("--go", default="go")
     parser.add_argument("--native", choices=("macos",), default=None)
     parser.add_argument(
         "--native-targets",
@@ -485,7 +484,6 @@ def main() -> int:
         parser.error("--repeat must be between 1 and 1000")
     root = Path(__file__).resolve().parents[2]
     env = os.environ.copy()
-    env.update({"CGO_ENABLED": "0", "GOTOOLCHAIN": "go1.26.6"})
     external_environment(env)
     if args.suite == "all":
         run_all_suites(root, env, args)
@@ -500,17 +498,12 @@ def main() -> int:
         ]
     elif args.suite == "fetch-control":
         commands = [
-            ["go", "run", "./scripts/rust-port/fetch_fixture_gen.go", "--check"],
-            ["go", "run", "-tags", "rustport", "./scripts/rust-port/cmd/fetchcontrolgen", "--check"],
-            ["go", "test", "./internal/fetch/..."],
             ["cargo", "test", "-p", "symbrowse-fetch", "--all-targets", "--locked"],
         ]
     elif args.suite == "fetch-render":
         if args.comparison != "bytes":
             parser.error("fetch-render only supports --comparison bytes")
         commands = [
-            ["go", "run", "./scripts/rust-port/fetch_fixture_gen.go", "--check"],
-            ["go", "test", "./internal/fetch/dom/...", "./internal/fetch/render/...", "./internal/fetch/relevance/...", "./internal/fetch/semantic/..."],
             ["cargo", "test", "-p", "symbrowse-fetch", "--test", "render_corpus", "--test", "static_controls", "--test", "pipeline_controls", "--locked"],
         ]
     elif args.suite == "browser-transport":
@@ -528,7 +521,6 @@ def main() -> int:
         ]
     elif args.suite == "workflows":
         commands = [
-            ["go", "run", "./scripts/rust-port/cmd/workflowgen", "--check"],
             ["cargo", "test", "-p", "symbrowse-core", "--test", "workflows_contract", "--locked"],
         ]
     elif args.suite == "chrome-spike":

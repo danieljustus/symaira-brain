@@ -17,6 +17,7 @@ import time
 import daemon_state_key as key
 from registry_daemon_lifetime import WindowsJob
 import startup_key_paths
+import fixture_programs
 
 ROOT = key.ROOT
 INTERNAL = "--internal-startup-key-provider"
@@ -285,18 +286,13 @@ def refusals(binary: Path, provider: Path) -> list[dict]:
     return rows
 
 
-def source_boundaries(probe: Path, binary: Path, provider: Path, go: str) -> dict:
+def source_boundaries(probe: Path, binary: Path, provider: Path) -> dict:
     with tempfile.TemporaryDirectory(prefix="bk-owner-api-", dir=key.registry.process.private_temporary_parent()) as directory:
         root = Path(directory); env = key.registry.environment(root)
         executable = root / ("symvault.exe" if os.name == "nt" else "symvault")
         security = root / "security"
         for path in (executable, security): shutil.copyfile(provider, path); path.chmod(0o700)
-        control_source = root / "owner-control.go"
-        shutil.copyfile(key.HERE / "state_key_control.go.in", control_source)
-        control = root / ("owner-control.exe" if os.name == "nt" else "owner-control")
-        subprocess.run([go, "build", "-o", str(control), str(control_source)],
-                       env=dict(os.environ, CGO_ENABLED="0", GOTOOLCHAIN="local", GO111MODULE="off"),
-                       capture_output=True, check=True, timeout=120)
+        control = fixture_programs.install("owner-control", root / "owner-control")
         ledger = root / "queries.jsonl"
         env.update(PATH=str(root), SYMBROWSE_KEY_PROBE_MODE="4", SYMBROWSE_KEYCHAIN_PROBE_MODE="44",
                    SYMBROWSE_KEY_PROBE_LEDGER=str(ledger), SYMBROWSE_ENCRYPTION_KEY=key.KEY)
@@ -335,15 +331,14 @@ def main() -> int:
     parser.add_argument("--rust", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--rust-source-probe", type=Path, required=True)
-    parser.add_argument("--go-tool", default="go")
     args = parser.parse_args(); binary = args.rust.resolve()
     rows = []
     with tempfile.TemporaryDirectory(prefix="bk-own-tools-", dir=key.registry.process.private_temporary_parent()) as root:
-        provider = key.key_test_environment.build_provider(Path(root), args.go_tool)
+        provider = key.key_test_environment.build_provider(Path(root))
         provider_sha = key.registry.process.digest(provider)
         refusal_rows = refusals(binary, provider)
-        boundaries = source_boundaries(args.rust_source_probe.resolve(), binary, provider, args.go_tool)
-        paths = startup_key_paths.observe(args.rust_source_probe.resolve(), binary, provider, args.go_tool)
+        boundaries = source_boundaries(args.rust_source_probe.resolve(), binary, provider)
+        paths = startup_key_paths.observe(args.rust_source_probe.resolve(), binary, provider)
         for mode, trigger in (("ab", "normal"), ("4", "normal"), ("descendant", "closed-writer"),
                               ("pipe-holder", "closed-writer"), ("descendant", "helper-deadline"),
                               ("descendant", "daemon-signal"), ("descendant", "client-deadline"),
@@ -354,7 +349,7 @@ def main() -> int:
     report = {"candidate_head": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip(),
               "candidate_dirty": bool(subprocess.check_output(["git", "-C", str(ROOT), "status", "--porcelain"])),
               "platform": platform.platform(), "rust_binary_sha256": key.registry.process.digest(binary),
-              "provider_binary_sha256": provider_sha, "provider_source_sha256": key.registry.process.digest(key.HERE / "state_key_fixture.go.in"),
+              "provider_binary_sha256": provider_sha, "provider_source_sha256": key.registry.process.digest(fixture_programs.source("provider")),
               "candidate_source_sha256": {name: key.registry.process.digest(ROOT / name) for name in sources},
               "cases": rows, "source_boundaries": boundaries, "native_paths": paths, "refusals": refusal_rows, "unavailable": unavailable(binary), "matches": True,
               "scope": "explicit Browse CLI startup only; same-name sibling survives; no operator providers; native host evidence only"}
