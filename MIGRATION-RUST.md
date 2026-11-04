@@ -10,8 +10,10 @@ the Go CI jobs, the live Go-oracle differential workflows and the Rust CLI's
 `init-differential` and the browse workspace gate pass with no Go toolchain on
 `PATH` (evidence under the local NVMe evidence root
 `rust-only-local-20261104/`). The Go behavior stays pinned by the sealed
-fixture gate (`scripts/oracle-freeze`, 519 fixtures in 64 groups, including
-the memory-sync and memory-native observations registered at removal).
+fixture gate (`scripts/oracle-freeze`, 521 fixtures in 66 groups, including
+the memory-sync and memory-native observations registered at removal and the
+Linux parity/init transcripts recorded on the ubuntu runner from the
+pre-removal oracle source; see `migration/evidence/oracle-freeze-781/linux-recording`).
 
 Value gate (paired release binaries, macOS arm64, 60 alternating runs per
 workload, empty HOME/XDG per run, `/usr/bin/time -l` peak RSS):

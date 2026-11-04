@@ -17,7 +17,7 @@ the [Unreleased] section is moved into a dated version section.
   for a `symbrain-go` fallback (`SYMBRAIN_GO_BINARY` is ignored); every command
   is native. Release archives contain only `symbrain` and the documentation,
   and the Homebrew formula installs only `symbrain`. There is no rollback to
-  the Go releases. The Go behavior stays pinned by 519 sealed, replayed
+  the Go releases. The Go behavior stays pinned by 521 sealed, replayed
   fixtures (`scripts/oracle-freeze`). Paired release-binary measurements on
   macOS arm64 (60 alternating runs per workload): median RSS 40–65% lower,
   p95 latency at most 3.4% higher on one workload and lower on the others.
