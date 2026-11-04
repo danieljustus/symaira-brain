@@ -32,7 +32,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "scripts/oracle-freeze/registry.json"
 MANIFEST = ROOT / "migration/evidence/oracle-freeze-781/manifest.json"
-COVERAGE_GLOB = "rust/*/tests/fixtures/**"
+# "**/*", not "**": before Python 3.13 a trailing "**" yields directories only,
+# which silently emptied the unclaimed-fixture sweep on older runners.
+COVERAGE_GLOB = "rust/*/tests/fixtures/**/*"
 COVERAGE_EXCLUDE = ("rust/symbrain-memory/",)
 REQUIRED_PROVENANCE = ("sealed_at_commit", "go_toolchain", "origin", "go_inputs")
 
