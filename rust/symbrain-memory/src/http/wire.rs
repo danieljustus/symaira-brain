@@ -109,14 +109,6 @@ pub(super) fn protocol_error(reason: &'static str) -> Reply {
     reply
 }
 
-pub(super) fn unsupported() -> Reply {
-    error(
-        501,
-        "NOT_IMPLEMENTED",
-        "operation requires the unported memory pipeline",
-    )
-}
-
 pub(super) fn security_headers(reply: &mut Reply) {
     for (name, value) in [
         (

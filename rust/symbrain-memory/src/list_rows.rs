@@ -5,7 +5,7 @@
 //! columns and in the same field order. Times are parsed with [`gotime`] so a
 //! database written by either implementation reads the same.
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, FixedOffset};
 use rusqlite::{Connection, Row};
 
 use crate::gojson::Members;
@@ -35,9 +35,9 @@ pub struct MemoryListRow {
     /// The column held JSON `null` (a nil map), rendered as `null`.
     pub metadata_null: bool,
     /// Creation timestamp.
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: Option<DateTime<FixedOffset>>,
     /// Update timestamp.
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<FixedOffset>>,
     /// Actor that created the memory.
     pub created_by: String,
     /// Actor that last updated it.
@@ -53,21 +53,21 @@ pub struct MemoryListRow {
     /// Importance weight.
     pub importance: f64,
     /// Validity window start.
-    pub valid_from: Option<DateTime<Utc>>,
+    pub valid_from: Option<DateTime<FixedOffset>>,
     /// Validity window end.
-    pub valid_to: Option<DateTime<Utc>>,
+    pub valid_to: Option<DateTime<FixedOffset>>,
     /// Memory that superseded this one.
     pub superseded_by: String,
     /// Working or long-term tier.
     pub tier: String,
     /// Expiry for working-tier memories.
-    pub expires_at: Option<DateTime<Utc>>,
+    pub expires_at: Option<DateTime<FixedOffset>>,
     /// Retrieval count.
     pub access_count: i64,
     /// Last retrieval.
-    pub last_access: Option<DateTime<Utc>>,
+    pub last_access: Option<DateTime<FixedOffset>>,
     /// Retrieval before the most recent one.
-    pub prev_access: Option<DateTime<Utc>>,
+    pub prev_access: Option<DateTime<FixedOffset>>,
     /// Review status.
     pub review_status: String,
     /// Semantic kind.
@@ -75,7 +75,7 @@ pub struct MemoryListRow {
     /// Aging multiplier.
     pub decay_factor: f64,
     /// Retirement timestamp.
-    pub retired_at: Option<DateTime<Utc>>,
+    pub retired_at: Option<DateTime<FixedOffset>>,
 }
 
 impl MemoryListRow {
@@ -169,9 +169,9 @@ pub struct RuleRow {
     /// The column held JSON `null` (a nil map), rendered as `null`.
     pub metadata_null: bool,
     /// Creation timestamp.
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: Option<DateTime<FixedOffset>>,
     /// Update timestamp.
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<FixedOffset>>,
     /// Actor that created the rule.
     pub created_by: String,
     /// Actor that last updated it.
@@ -218,17 +218,26 @@ pub(crate) fn list_rules(conn: &Connection, scope: &str) -> rusqlite::Result<Vec
     };
     let mut result = Vec::new();
     while let Some(row) = rows.next()? {
-        let (metadata, metadata_null) = crate::rows::metadata(row, 3)?;
+        use crate::goscan::{decode_metadata, raw, text, time};
+        let id = text(row, 0, "id")?;
+        let content = text(row, 1, "content")?;
+        let scope = text(row, 2, "scope")?;
+        let metadata_bytes = raw(row, 3, "metadata")?;
+        let created_at = time(row, 4, "created_at")?;
+        let updated_at = time(row, 5, "updated_at")?;
+        let created_by = text(row, 6, "created_by")?;
+        let updated_by = text(row, 7, "updated_by")?;
+        let (metadata, metadata_null) = decode_metadata(&metadata_bytes)?;
         result.push(RuleRow {
-            id: row.get(0)?,
-            content: row.get(1)?,
-            scope: row.get(2)?,
+            id,
+            content,
+            scope,
             metadata,
             metadata_null,
-            created_at: time(row, 4)?,
-            updated_at: time(row, 5)?,
-            created_by: row.get::<_, Option<String>>(6)?.unwrap_or_default(),
-            updated_by: row.get::<_, Option<String>>(7)?.unwrap_or_default(),
+            created_at: Some(created_at),
+            updated_at: Some(updated_at),
+            created_by,
+            updated_by,
         });
     }
     Ok(result)
@@ -268,54 +277,59 @@ pub(crate) fn list_lite(
 }
 
 pub(crate) fn scan_lite(row: &Row<'_>) -> rusqlite::Result<MemoryListRow> {
-    let (metadata, metadata_null) = crate::rows::metadata(row, 3)?;
+    use crate::goscan::{decode_metadata, float, int, null_text, null_time, raw, text, time};
+    let id = text(row, 0, "id")?;
+    let content = text(row, 1, "content")?;
+    let scope = text(row, 2, "scope")?;
+    let metadata_bytes = raw(row, 3, "metadata")?;
+    let created_at = time(row, 4, "created_at")?;
+    let updated_at = time(row, 5, "updated_at")?;
+    let created_by = text(row, 6, "created_by")?;
+    let updated_by = text(row, 7, "updated_by")?;
+    let created_session = text(row, 8, "created_session")?;
+    let updated_session = text(row, 9, "updated_session")?;
+    let consolidation_status = text(row, 10, "consolidation_status")?;
+    let consolidated_into_id = null_text(row, 11, "consolidated_into_id")?;
+    let importance = float(row, 12, "importance")?;
+    let valid_from = null_time(row, 13, "valid_from")?;
+    let valid_to = null_time(row, 14, "valid_to")?;
+    let superseded_by = null_text(row, 15, "superseded_by")?;
+    let tier = text(row, 16, "tier")?;
+    let expires_at = null_time(row, 17, "expires_at")?;
+    let access_count = int(row, 18, "access_count")?;
+    let last_access = null_time(row, 19, "last_access")?;
+    let prev_access = null_time(row, 20, "prev_access")?;
+    let review_status = text(row, 21, "review_status")?;
+    let kind = text(row, 22, "kind")?;
+    let decay_factor = float(row, 23, "decay_factor")?;
+    let retired_at = null_time(row, 24, "retired_at")?;
+    let (metadata, metadata_null) = decode_metadata(&metadata_bytes)?;
     Ok(MemoryListRow {
-        id: row.get(0)?,
-        content: row.get(1)?,
-        scope: row.get(2)?,
+        id,
+        content,
+        scope,
         metadata,
         metadata_null,
-        created_at: time(row, 4)?,
-        updated_at: time(row, 5)?,
-        created_by: row.get(6)?,
-        updated_by: row.get(7)?,
-        created_session: row.get(8)?,
-        updated_session: row.get(9)?,
-        consolidation_status: row.get(10)?,
-        consolidated_into_id: row.get::<_, Option<String>>(11)?.unwrap_or_default(),
-        importance: row.get(12)?,
-        valid_from: time(row, 13)?,
-        valid_to: time(row, 14)?,
-        superseded_by: row.get::<_, Option<String>>(15)?.unwrap_or_default(),
-        tier: row.get(16)?,
-        expires_at: time(row, 17)?,
-        access_count: row.get(18)?,
-        last_access: time(row, 19)?,
-        prev_access: time(row, 20)?,
-        review_status: row.get(21)?,
-        kind: row.get(22)?,
-        decay_factor: row.get(23)?,
-        retired_at: time(row, 24)?,
+        created_at: Some(created_at),
+        updated_at: Some(updated_at),
+        created_by,
+        updated_by,
+        created_session,
+        updated_session,
+        consolidation_status,
+        consolidated_into_id,
+        importance,
+        valid_from,
+        valid_to,
+        superseded_by,
+        tier,
+        expires_at,
+        access_count,
+        last_access,
+        prev_access,
+        review_status,
+        kind,
+        decay_factor,
+        retired_at,
     })
-}
-
-fn time(row: &Row<'_>, index: usize) -> rusqlite::Result<Option<DateTime<Utc>>> {
-    let raw: Option<String> = row.get(index)?;
-    match raw {
-        None => Ok(None),
-        Some(value) if value.is_empty() => Ok(None),
-        Some(value) => crate::gotime::parse(&value).map_or_else(
-            || {
-                Err(rusqlite::Error::FromSqlConversionFailure(
-                    index,
-                    rusqlite::types::Type::Text,
-                    Box::new(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        format!("unrecognized timestamp: {value}"),
-                    )),
-                ))
-            },
-            |parsed| Ok(Some(parsed)),
-        ),
-    }
 }

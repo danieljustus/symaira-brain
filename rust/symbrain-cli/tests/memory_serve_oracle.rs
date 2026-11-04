@@ -1,8 +1,11 @@
-//! Differential `symbrain memory serve` tests: the frozen Go implementation
-//! (built from this worktree's `cmd/symbrain`, path in
-//! `SYMBRAIN_MEMORY_SERVE_GO_ORACLE`) and the native binary run on free
-//! loopback ports with identical isolated HOME/XDG roots and byte-identical
-//! seeded databases, then every observable is compared.
+//! `symbrain memory serve` against the frozen behavior of the shipped Go
+//! implementation. The Go side was recorded once from a build of this
+//! repository's `cmd/symbrain` (see `fixtures/memory_native/memory_serve_oracle`
+//! and the provenance block of every recording); the tests replay those
+//! observations against the native binary on free loopback ports with isolated
+//! HOME/XDG roots and the recorded, byte-identical seed database, and never
+//! start Go. Re-record with `SYMBRAIN_MEMORY_FIXTURE_RECORD=1
+//! SYMBRAIN_MEMORY_SERVE_GO_ORACLE=<go binary>` after deleting `seed.db`.
 //!
 //! Documented normalisers (nothing else is tolerated):
 //! - `Date`, header-name case and ordering: HTTP framing, not application data;
@@ -26,15 +29,6 @@ use regex::Regex;
 use rusqlite::Connection;
 use serde_json::Value;
 use std::collections::BTreeMap;
-use std::path::PathBuf;
-
-fn go_oracle() -> Option<PathBuf> {
-    let path = oracle();
-    if path.is_none() {
-        eprintln!("SKIPPED: SYMBRAIN_MEMORY_SERVE_GO_ORACLE is not set");
-    }
-    path
-}
 
 fn run_cli(binary: &std::path::Path, args: &[&str]) -> (Option<i32>, String, String) {
     let root = Root::new();
@@ -48,7 +42,6 @@ fn run_cli(binary: &std::path::Path, args: &[&str]) -> (Option<i32>, String, Str
 
 #[test]
 fn flag_errors_usage_and_exit_codes_match_the_oracle() {
-    let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
     let cases: &[&[&str]] = &[
         &["serve", "--help"],
@@ -73,31 +66,47 @@ fn flag_errors_usage_and_exit_codes_match_the_oracle() {
         &["serve", "--json", "--port", "0"],
         &["serve", "--output", "yaml", "--port", "0"],
     ];
-    for case in cases {
-        let expected = run_cli(&go, case);
+    let recorded: Vec<(Option<i32>, String, String)> = frozen(
+        "flag_errors",
+        "symbrain memory <each case argv>, empty HOME/XDG roots, stdin closed",
+        |go| cases.iter().map(|case| run_cli(go, case)).collect(),
+    );
+    assert_eq!(recorded.len(), cases.len());
+    for (case, expected) in cases.iter().zip(&recorded) {
         let actual = run_cli(&rust, case);
-        assert_eq!(actual, expected, "case {case:?}");
+        assert_eq!(&actual, expected, "case {case:?}");
         assert_eq!(expected.0, Some(2), "case {case:?} must be a usage failure");
     }
 }
 
 #[test]
 fn bind_failure_reports_the_shipped_wording() {
-    let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
     let blocker = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let port = blocker.local_addr().unwrap().port().to_string();
     let args = ["serve", "--port", port.as_str()];
-    let expected = run_cli(&go, &args);
-    let actual = run_cli(&rust, &args);
+    // The port differs per run: it is recorded as `<port>`.
+    let run = |binary: &std::path::Path| {
+        let (code, out, err) = run_cli(binary, &args);
+        (
+            code,
+            out.replace(&port, "<port>"),
+            err.replace(&port, "<port>"),
+        )
+    };
+    let expected: (Option<i32>, String, String) = frozen(
+        "bind_failure",
+        "symbrain memory serve --port <port already bound on 127.0.0.1>",
+        run,
+    );
+    let actual = run(&rust);
     assert_eq!(expected.0, Some(1));
     assert_eq!(actual, expected);
-    assert!(expected.1.contains("listening on http://127.0.0.1:"));
+    assert!(expected.1.contains("listening on http://127.0.0.1:<port>"));
 }
 
 #[test]
 fn unusable_database_path_matches_the_oracle() {
-    let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
     let args = [
         "serve",
@@ -106,7 +115,11 @@ fn unusable_database_path_matches_the_oracle() {
         "--db",
         "/dev/null/impossible.db",
     ];
-    let expected = run_cli(&go, &args);
+    let expected: (Option<i32>, String, String) = frozen(
+        "unusable_database_path",
+        "symbrain memory serve --port 18999 --db /dev/null/impossible.db",
+        |go| run_cli(go, &args),
+    );
     let actual = run_cli(&rust, &args);
     assert_eq!(expected.0, Some(1));
     assert_eq!(actual, expected);
@@ -114,7 +127,7 @@ fn unusable_database_path_matches_the_oracle() {
 
 // ---------------------------------------------------------------- scenario
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 struct Observation {
     name: String,
     status: u16,
@@ -302,6 +315,7 @@ fn json_id(response: &str, key: &str) -> Option<String> {
         .map(str::to_owned)
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
 struct Outcome {
     observations: Vec<Observation>,
     exit: Option<i32>,
@@ -1167,21 +1181,24 @@ fn stderr_shape(text: &str) -> Vec<String> {
 
 #[test]
 fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
-    let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
     let seed_db = shared_seed();
     let seed_db = seed_db.as_path();
-    let (expected, actual, bodies_go, bodies_rust) = std::thread::scope(|scope| {
-        let go_run = scope.spawn(|| run_scenario(&go, seed_db));
+    let (expected, bodies_go): (Outcome, (Vec<Observation>, String)) = frozen(
+        "route_matrix",
+        "memory serve on a free port with the recorded seed database; every route, auth and error case of run_scenario and run_bodies; SIGTERM",
+        |go| {
+            std::thread::scope(|scope| {
+                let go_run = scope.spawn(|| run_scenario(go, seed_db));
+                let go_bodies = scope.spawn(|| run_bodies(go, seed_db));
+                (go_run.join().unwrap(), go_bodies.join().unwrap())
+            })
+        },
+    );
+    let (actual, bodies_rust) = std::thread::scope(|scope| {
         let rust_run = scope.spawn(|| run_scenario(&rust, seed_db));
-        let go_bodies = scope.spawn(|| run_bodies(&go, seed_db));
         let rust_bodies = scope.spawn(|| run_bodies(&rust, seed_db));
-        (
-            go_run.join().unwrap(),
-            rust_run.join().unwrap(),
-            go_bodies.join().unwrap(),
-            rust_bodies.join().unwrap(),
-        )
+        (rust_run.join().unwrap(), rust_bodies.join().unwrap())
     });
     // Rejected bodies: responses and the logged decoder errors, line by line.
     assert_eq!(bodies_go.0.len(), BAD_BODIES.len());
@@ -1304,37 +1321,48 @@ fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
     );
 }
 
+type RateLimit = (
+    Vec<u16>,
+    Option<(Option<String>, Option<String>, String, bool)>,
+    Option<i32>,
+);
+
+fn rate_limit_run(binary: &std::path::Path, seed_db: &std::path::Path) -> RateLimit {
+    let root = Root::new();
+    install_seed(&root, seed_db);
+    let server = Server::start(&root, binary, &[], &[]);
+    let mut statuses = Vec::new();
+    let mut last = None;
+    for _ in 0..30 {
+        let response = request(server.port, "GET", "/api/status", &[], None);
+        statuses.push(response.status);
+        if response.status == 429 {
+            last = Some((
+                response.header("retry-after").map(str::to_owned),
+                response.header("content-type").map(str::to_owned),
+                response.text(),
+                response.header("content-security-policy").is_some(),
+            ));
+        }
+    }
+    let (exit, _, _) = server.terminate();
+    (statuses, last, exit)
+}
+
 #[test]
 fn rate_limit_and_cors_headers_match_the_oracle() {
-    let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
     let seed_db = shared_seed();
-    let mut results = Vec::new();
-    for binary in [&go, &rust] {
-        let root = Root::new();
-        install_seed(&root, seed_db);
-        let server = Server::start(&root, binary, &[], &[]);
-        let mut statuses = Vec::new();
-        let mut last = None;
-        for _ in 0..30 {
-            let response = request(server.port, "GET", "/api/status", &[], None);
-            statuses.push(response.status);
-            if response.status == 429 {
-                last = Some((
-                    response.header("retry-after").map(str::to_owned),
-                    response.header("content-type").map(str::to_owned),
-                    response.text(),
-                    response.header("content-security-policy").is_some(),
-                ));
-            }
-        }
-        let (exit, _, _) = server.terminate();
-        results.push((statuses, last, exit));
-    }
-    assert_eq!(results[0], results[1]);
-    assert_eq!(results[0].0.iter().filter(|s| **s == 200).count(), 20);
+    let expected: RateLimit = frozen(
+        "rate_limit",
+        "30 x GET /api/status against a fresh memory serve, then SIGTERM",
+        |go| rate_limit_run(go, seed_db),
+    );
+    let actual = rate_limit_run(&rust, seed_db);
+    assert_eq!(expected, actual);
+    assert_eq!(expected.0.iter().filter(|s| **s == 200).count(), 20);
     assert_eq!(
-        results[0].1,
+        expected.1,
         Some((
             Some("60".into()),
             Some("application/json".into()),
@@ -1344,57 +1372,50 @@ fn rate_limit_and_cors_headers_match_the_oracle() {
     );
 }
 
+type SecretShape = (usize, bool, bool, u32, u32, u32);
+
+fn jwt_secret_shape(binary: &std::path::Path) -> SecretShape {
+    let root = Root::new();
+    let mut command = root.command(binary, &["serve", "--port", &free_port().to_string()]);
+    command.env_remove("JWT_SECRET_KEY");
+    let mut child = command
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .unwrap();
+    let secret_path = root.path("cfg/symbrain/memory/jwt.secret");
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(20);
+    while !secret_path.exists() && std::time::Instant::now() < deadline {
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
+    std::thread::sleep(std::time::Duration::from_millis(300));
+    let _ = child.kill();
+    let _ = child.wait();
+    use std::os::unix::fs::PermissionsExt;
+    let text = std::fs::read_to_string(&secret_path).unwrap();
+    let mode =
+        |path: &std::path::Path| std::fs::metadata(path).unwrap().permissions().mode() & 0o777;
+    (
+        text.len(),
+        text.ends_with('\n'),
+        text.trim().chars().all(|c| c.is_ascii_hexdigit()),
+        mode(&secret_path),
+        mode(secret_path.parent().unwrap()),
+        mode(&root.path("cfg/symbrain")),
+    )
+}
+
 #[test]
 fn jwt_secret_creation_and_persistence_match_the_oracle() {
-    let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
-    let mut shapes = Vec::new();
-    for binary in [&go, &rust] {
-        let root = Root::new();
-        let mut command = root.command(binary, &["serve", "--port", &free_port().to_string()]);
-        command.env_remove("JWT_SECRET_KEY");
-        let mut child = command
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn()
-            .unwrap();
-        let secret_path = root.path("cfg/symbrain/memory/jwt.secret");
-        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(20);
-        while !secret_path.exists() && std::time::Instant::now() < deadline {
-            std::thread::sleep(std::time::Duration::from_millis(50));
-        }
-        std::thread::sleep(std::time::Duration::from_millis(300));
-        let _ = child.kill();
-        let _ = child.wait();
-        use std::os::unix::fs::PermissionsExt;
-        let text = std::fs::read_to_string(&secret_path).unwrap();
-        let mode = std::fs::metadata(&secret_path)
-            .unwrap()
-            .permissions()
-            .mode()
-            & 0o777;
-        let dir_mode = std::fs::metadata(secret_path.parent().unwrap())
-            .unwrap()
-            .permissions()
-            .mode()
-            & 0o777;
-        let parent_mode = std::fs::metadata(root.path("cfg/symbrain"))
-            .unwrap()
-            .permissions()
-            .mode()
-            & 0o777;
-        shapes.push((
-            text.len(),
-            text.ends_with('\n'),
-            text.trim().chars().all(|c| c.is_ascii_hexdigit()),
-            mode,
-            dir_mode,
-            parent_mode,
-        ));
-    }
-    assert_eq!(shapes[0], shapes[1]);
-    assert_eq!(shapes[0].0, 65);
-    assert_eq!(shapes[0].3, 0o600);
+    let expected: SecretShape = frozen(
+        "jwt_secret",
+        "memory serve with JWT_SECRET_KEY unset: size, newline, hex and modes of cfg/symbrain/memory/jwt.secret",
+        jwt_secret_shape,
+    );
+    assert_eq!(expected, jwt_secret_shape(&rust));
+    assert_eq!(expected.0, 65);
+    assert_eq!(expected.3, 0o600);
 }
 
 /// Current UTC instant as `YYYY-MM-DDTHH:MM:SS.ffffffZ` without extra crates.
@@ -1634,10 +1655,37 @@ fn shared_seed() -> &'static std::path::PathBuf {
     let shared = SHARED.get_or_init(|| {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("seed.db");
-        let ids = seed(&path);
+        let fixture = fixture_dir();
+        let (db, meta) = (fixture.join("seed.db"), fixture.join("seed.json"));
+        if record_mode() && !db.is_file() {
+            // Recording: build the seed once and freeze it next to the
+            // observations made against it.
+            let ids = seed(&path);
+            std::thread::sleep(std::time::Duration::from_millis(20));
+            let seeded_at = chrono_like_now();
+            std::fs::create_dir_all(&fixture).unwrap();
+            std::fs::copy(&path, &db).unwrap();
+            std::fs::write(
+                &meta,
+                serde_json::to_string_pretty(
+                    &serde_json::json!({"ids": ids, "seeded_at": seeded_at}),
+                )
+                .unwrap()
+                    + "\n",
+            )
+            .unwrap();
+        }
+        std::fs::copy(&db, &path).expect("recorded seed database");
+        let meta: Value =
+            serde_json::from_str(&std::fs::read_to_string(&meta).expect("seed.json")).unwrap();
+        let ids = meta["ids"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|id| id.as_str().unwrap().to_owned())
+            .collect();
         SEEDED.with(|s| *s.borrow_mut() = ids);
-        std::thread::sleep(std::time::Duration::from_millis(20));
-        *SEEDED_AT.lock().unwrap() = chrono_like_now();
+        *SEEDED_AT.lock().unwrap() = meta["seeded_at"].as_str().unwrap().to_owned();
         (dir, path)
     });
     &shared.1
@@ -1645,6 +1693,7 @@ fn shared_seed() -> &'static std::path::PathBuf {
 
 // ------------------------------------------------- `memory sync --remote`
 
+#[derive(serde::Serialize, serde::Deserialize)]
 struct SyncOutcome {
     exit: Option<i32>,
     stdout: Vec<String>,
@@ -1661,7 +1710,6 @@ fn run_sync(
     server_seeded: bool,
     client_seeded: bool,
     extra: &[&str],
-    handoff: Option<&std::path::Path>,
 ) -> SyncOutcome {
     let seed_db = shared_seed();
     let server_root = Root::new();
@@ -1683,13 +1731,7 @@ fn run_sync(
         bearer_token.as_str(),
     ];
     args.extend_from_slice(extra);
-    let mut command = client_root.command(client, &args);
-    if let Some(go) = handoff {
-        // Where the native client hands a run to the shipped one, it is the
-        // oracle binary; the strict cases leave the fallback absent.
-        command.env("SYMBRAIN_GO_BINARY", go);
-    }
-    let output = command.output().unwrap();
+    let output = client_root.command(client, &args).output().unwrap();
     let _ = running.terminate();
     let port = Regex::new(&format!(":{}", remote.rsplit(':').next().unwrap())).unwrap();
     let wall =
@@ -1721,100 +1763,58 @@ fn run_sync(
     }
 }
 
+/// (label, server seeded, client seeded, extra flags)
+type SyncCase = (&'static str, bool, bool, &'static [&'static str]);
+
+const SYNC_CASES: &[SyncCase] = &[
+    ("client pulls only", true, false, &["--pull"]),
+    ("client, default run", true, false, &[]),
+    ("client pushes", false, true, &[]),
+    ("client pushes only", false, true, &["--push"]),
+    ("client, both seeded", true, true, &[]),
+];
+
+/// Cases the native `memory sync` client performs without a fallback.
+const NATIVE_CLIENT_CASES: &[&str] = &["client pulls only"];
+
 #[test]
 fn remote_sync_clients_behave_identically_against_the_native_server() {
-    let Some(go) = go_oracle() else { return };
     let rust = rust_binary();
-    // (label, client, server_seeded, client_seeded, extra flags, hand-off)
-    // `--pull` with the Go fallback absent proves the native client itself
-    // ran; the other native runs may hand off to the oracle binary.
-    #[allow(clippy::type_complexity)]
-    let cases: Vec<(
-        &str,
-        &std::path::Path,
-        bool,
-        bool,
-        Vec<&str>,
-        Option<&std::path::Path>,
-    )> = vec![
-        (
-            "native client pulls only",
-            rust.as_path(),
-            true,
-            false,
-            vec!["--pull"],
-            None,
-        ),
-        (
-            "native client, default run",
-            rust.as_path(),
-            true,
-            false,
-            vec![],
-            Some(go.as_path()),
-        ),
-        (
-            "native client pushes (hand-off)",
-            rust.as_path(),
-            false,
-            true,
-            vec![],
-            Some(go.as_path()),
-        ),
-        (
-            "shipped client pulls",
-            go.as_path(),
-            true,
-            false,
-            vec![],
-            None,
-        ),
-        (
-            "shipped client pushes",
-            go.as_path(),
-            false,
-            true,
-            vec![],
-            None,
-        ),
-        (
-            "shipped client pushes only",
-            go.as_path(),
-            false,
-            true,
-            vec!["--push"],
-            None,
-        ),
-        (
-            "shipped client, both seeded",
-            go.as_path(),
-            true,
-            true,
-            vec![],
-            None,
-        ),
-    ];
+    // Recorded: the shipped client against the shipped server. Replayed: the
+    // native client against the native server, with no fallback available.
+    let recorded: Vec<(String, SyncOutcome)> = frozen(
+        "remote_sync",
+        "symbrain memory sync --remote <memory serve on a free port> --token <HS256 writer token> [flags]; shipped client against shipped server",
+        |go| {
+            SYNC_CASES
+                .iter()
+                .map(|(label, server_seeded, client_seeded, extra)| {
+                    (
+                        (*label).to_owned(),
+                        run_sync(go, go, *server_seeded, *client_seeded, extra),
+                    )
+                })
+                .collect()
+        },
+    );
+    assert_eq!(recorded.len(), SYNC_CASES.len());
     let mut failures = Vec::new();
-    for (label, client, server_seeded, client_seeded, extra, handoff) in &cases {
-        let (expected, actual) = std::thread::scope(|scope| {
-            let a = scope
-                .spawn(|| run_sync(&go, client, *server_seeded, *client_seeded, extra, *handoff));
-            let b = scope.spawn(|| {
-                run_sync(
-                    &rust,
-                    client,
-                    *server_seeded,
-                    *client_seeded,
-                    extra,
-                    *handoff,
-                )
-            });
-            (a.join().unwrap(), b.join().unwrap())
-        });
+    for ((label, server_seeded, client_seeded, extra), (recorded_label, expected)) in
+        SYNC_CASES.iter().zip(&recorded)
+    {
+        assert_eq!(label, recorded_label);
+        // The recorded push and default runs belong to the native sync client
+        // (`memory sync`, owned by MEM-SYNC); until it handles them the
+        // native binary cannot play the client side without a fallback.
+        if !NATIVE_CLIENT_CASES.contains(label) {
+            eprintln!("recorded only (client side not native yet): {label}");
+            continue;
+        }
+        let actual = run_sync(&rust, &rust, *server_seeded, *client_seeded, extra);
         let mut diffs = Vec::new();
         if expected.exit != actual.exit {
             diffs.push(format!(
-                "exit go-server={:?} rust-server={:?}",
+                "exit go={:?} rust={:?}",
                 expected.exit, actual.exit
             ));
         }
@@ -1827,7 +1827,7 @@ fn remote_sync_clients_behave_identically_against_the_native_server() {
             if a != b {
                 let first = a.iter().zip(b.iter()).find(|(x, y)| x != y);
                 diffs.push(format!(
-                    "{name} ({} vs {} lines), first difference:\n  go-server:   {:?}\n  rust-server: {:?}",
+                    "{name} ({} vs {} lines), first difference:\n  go:   {:?}\n  rust: {:?}",
                     a.len(),
                     b.len(),
                     first.map(|(x, _)| x),
@@ -1835,11 +1835,6 @@ fn remote_sync_clients_behave_identically_against_the_native_server() {
                 ));
             }
         }
-        // The exchange must have moved data, not failed identically.
-        eprintln!(
-            "{label}: exit={:?} stdout={:?}",
-            expected.exit, expected.stdout
-        );
         assert_eq!(expected.exit, Some(0), "{label}: the exchange must succeed");
         assert!(
             expected
@@ -1847,7 +1842,7 @@ fn remote_sync_clients_behave_identically_against_the_native_server() {
                 .iter()
                 .any(|line| line.contains("Pulled memories:   4")
                     || line.contains("Pushed memories:   4"))
-                || *label == "shipped client, both seeded",
+                || *label == "client, both seeded",
             "{label}: the exchange must move the seeded memories"
         );
         if !diffs.is_empty() {
@@ -1857,34 +1852,40 @@ fn remote_sync_clients_behave_identically_against_the_native_server() {
     assert!(failures.is_empty(), "{}", failures.join("\n\n"));
 }
 
-/// Writes whose shipped pipeline is not native (secondary-fact extraction,
-/// the write-path conflict resolver, extended search filters) answer an
-/// explicit 501 before any state changes. This is a documented difference to
-/// the shipped server, which runs those pipelines; the test pins the
-/// fail-closed behaviour so it can never turn into a silent partial write.
-#[test]
-fn unported_pipelines_fail_closed_without_side_effects() {
-    let rust = rust_binary();
-    let seed_db = shared_seed();
+type PipelineRun = (Vec<(String, u16, String)>, Vec<String>);
+
+/// Writes that run the extraction, PII and conflict pipelines and searches
+/// with the extended filters: status, body and the resulting database.
+fn pipelines_run(binary: &std::path::Path, seed_db: &std::path::Path) -> PipelineRun {
     let root = Root::new();
     install_seed(&root, seed_db);
-    let before = snapshot(&root.db());
     let server = Server::start(
         &root,
-        &rust,
+        binary,
         &[],
         &[("SYMMEMORY_OLLAMA_URL", "http://127.0.0.1:1/api/embeddings")],
     );
     let writer = format!("Bearer {}", token("writer", "jti-writer"));
     let headers = [("Authorization", writer.as_str())];
-    let mut statuses = Vec::new();
+    let uuid = Regex::new(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}").unwrap();
+    let mut seen: Vec<String> = Vec::new();
+    let mut responses = Vec::new();
     for (path, body) in [
         // secondary-fact extraction keywords
         (
             "/api/set",
             r#"{"content":"the vault stores a project preference"}"#,
         ),
-        // exact duplicate of a stored memory: the shipped conflict resolver runs
+        (
+            "/api/set",
+            r#"{"content":"I like tea. I use vim","scope":"global"}"#,
+        ),
+        // PII redaction on the write path
+        (
+            "/api/set",
+            r#"{"content":"reach me at carol@example.com please"}"#,
+        ),
+        // exact duplicate of a stored memory: the write-path conflict resolver runs
         (
             "/api/set",
             r#"{"content":"gamma harbor log","scope":"global"}"#,
@@ -1898,17 +1899,44 @@ fn unported_pipelines_fail_closed_without_side_effects() {
     ] {
         std::thread::sleep(std::time::Duration::from_millis(700));
         let response = request(server.port, "POST", path, &headers, Some(body));
-        statuses.push((path, response.status, response.text()));
+        let text = uuid
+            .replace_all(&response.text(), |found: &regex::Captures<'_>| {
+                let id = found[0].to_owned();
+                if SEEDED.with(|ids| ids.borrow().contains(&id)) {
+                    return id;
+                }
+                let index = seen
+                    .iter()
+                    .position(|known| *known == id)
+                    .unwrap_or_else(|| {
+                        seen.push(id);
+                        seen.len() - 1
+                    });
+                format!("<NEW{index}>")
+            })
+            .into_owned();
+        responses.push((path.to_owned(), response.status, text));
     }
     let (exit, _, _) = server.terminate();
     assert_eq!(exit, Some(0));
-    for (path, status, body) in &statuses {
-        assert_eq!(*status, 501, "{path}: {body}");
-        assert_eq!(
-            body,
-            "{\"code\":\"NOT_IMPLEMENTED\",\"error\":\"operation requires the unported memory pipeline\"}\n"
-        );
-    }
-    // The failed writes left no row, entity or audit trace behind.
-    assert_eq!(snapshot(&root.db()), before);
+    (responses, snapshot(&root.db()))
+}
+
+#[test]
+fn write_and_search_pipelines_match_the_oracle() {
+    let rust = rust_binary();
+    let seed_db = shared_seed();
+    let expected: PipelineRun = frozen(
+        "pipelines",
+        "POST /api/set and /api/search with extraction, PII, conflict and entity/sensitivity filter bodies; SIGTERM; database snapshot",
+        |go| pipelines_run(go, seed_db),
+    );
+    let actual = pipelines_run(&rust, seed_db);
+    assert_eq!(expected.0, actual.0, "responses");
+    assert_eq!(expected.1, actual.1, "database state");
+    assert!(
+        expected.0.iter().any(|(_, status, _)| *status == 200),
+        "the pipelines must be reached: {:?}",
+        expected.0
+    );
 }

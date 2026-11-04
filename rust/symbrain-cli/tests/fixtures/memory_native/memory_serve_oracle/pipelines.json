@@ -1,0 +1,86 @@
+{
+  "payload": [
+    [
+      [
+        "/api/set",
+        200,
+        "{\"id\":\"<NEW0>\",\"status\":\"success\"}\n"
+      ],
+      [
+        "/api/set",
+        200,
+        "{\"id\":\"<NEW1>\",\"status\":\"success\"}\n"
+      ],
+      [
+        "/api/set",
+        200,
+        "{\"id\":\"<NEW2>\",\"status\":\"success\"}\n"
+      ],
+      [
+        "/api/set",
+        200,
+        "{\"id\":\"95921f54-82f2-439c-b286-034d7a8f1206\",\"status\":\"success\"}\n"
+      ],
+      [
+        "/api/search",
+        200,
+        "null\n"
+      ],
+      [
+        "/api/search",
+        200,
+        "null\n"
+      ]
+    ],
+    [
+      "memories: I like tea. I use vim | global | {\"authority\":\"direct\",\"confidence\":\"high\",\"observed_at\":\"<T>\",\"sensitivity\":\"internal\",\"sharing_level\":\"private\",\"source_tool\":\"http\",\"source_type\":\"direct\",\"source_uri\":\"\",\"verification_status\":\"unverified\"} | vector(len=1582,fnv=6c9c8a96ec6d4db6) | 768 | hash-fallback |  |  | c40c8530a5334c80addb1115c3aafe8a4cad824f1a060fa86a626abe95d7eeae | 17750 | <T>",
+      "memories: User prefers tea | global | {\"authority\":\"inferred\",\"confidence\":\"high\",\"extraction_method\":\"pattern\",\"method\":\"regex_pattern\",\"raw_trigger\":\"I like tea\",\"sensitivity\":\"internal\",\"sharing_level\":\"private\",\"source_type\":\"extracted\",\"verification_status\":\"unverified\"} | vector(len=1564,fnv=e3fc038aa0ec7358) | 768 | hash-fallback |  |  | 28b14d0d9b665b70358b8493a226217fe9418f3cf6f46a41535b76cdd4e9d490 | 40203 | <T>",
+      "memories: User uses vim | global | {\"authority\":\"inferred\",\"confidence\":\"high\",\"extraction_method\":\"pattern\",\"method\":\"regex_pattern\",\"raw_trigger\":\"I use vim\",\"sensitivity\":\"internal\",\"sharing_level\":\"private\",\"source_type\":\"extracted\",\"verification_status\":\"unverified\"} | vector(len=1564,fnv=bad8901bf618e8f8) | 768 | hash-fallback |  |  | 4c4e05203afe10c4035c3dbbcba3760f8b7537e54a0db7efd8b4f00faaed5351 | 5015 | <T>",
+      "memories: beta garden journal | project | {} | vector(len=1564,fnv=1f3421a8968015b0) | 768 | hash-fallback |  |  | 1b8b497189fb9343f16b2eb682fd5b5d2a5fbaa945588dab71c8000ca46ae022 | 42183 | <T>",
+      "memories: contact alice@example.com about sk-abcdefghijklmnopqrstuv | global | {\"note\":\"call +49 170 1234567\",\"sensitivity\":\"confidential\",\"sharing_level\":\"team\"} | vector(len=1564,fnv=fa5ace2b2fbb4278) | 768 | hash-fallback |  |  | 6e9202339d14dd6d5218b69221071f7d82ef0a279f2672922bdf24d90723ba02 | 63504 | <T>",
+      "memories: delta mountain diary | agent | {} | vector(len=1564,fnv=ddaf31e4756d39d0) | 768 | hash-fallback |  |  | 144eeea17927092ef147f251b02ee784fe8cf6923236cfe30a43a60124eb7829 | 7976 | <T>",
+      "memories: gamma harbor log | global | {\"allowed_clients\":\"agent-one, agent-two\",\"denied_clients\":\"blocked\",\"sensitivity\":\"public\",\"sharing_level\":\"org\"} | vector(len=1564,fnv=1fe935b180463df8) | 768 | hash-fallback |  |  | db17bfb3d83f6bab45dfee4807efaba3c6ac8eec6178dc8d65e66bf2ecad2896 | 48049 | <T>",
+      "memories: reach me at [REDACTED_EMAIL] please | global | {\"authority\":\"direct\",\"confidence\":\"high\",\"observed_at\":\"<T>\",\"sensitivity\":\"internal\",\"sharing_level\":\"private\",\"source_tool\":\"http\",\"source_type\":\"direct\",\"source_uri\":\"\",\"verification_status\":\"unverified\"} | vector(len=1591,fnv=3ce5da52dfe59719) | 768 | hash-fallback |  |  | cddd00eae287d5d7946a16da0850e91e85e8835ac120ee4ea9b96686b4be02e1 | 36672 | <T>",
+      "memories: the vault stores a project preference | global | {\"authority\":\"direct\",\"confidence\":\"high\",\"observed_at\":\"<T>\",\"sensitivity\":\"internal\",\"sharing_level\":\"private\",\"source_tool\":\"http\",\"source_type\":\"direct\",\"source_uri\":\"\",\"verification_status\":\"unverified\"} | vector(len=1545,fnv=7ae18055b72c611d) | 768 | hash-fallback |  |  | 5afe4e6a9b36791e6a67d8df60cdd1863df0db586d0027159be0fb7b05efa2b3 | 11997 | <T>",
+      "entities: Alice | person | [\"Al\",\"A.\"] | desc <b>& | seed | ent-1",
+      "entities: Zeta Project | person | [] | desc <b>& |  | ent-2",
+      "audit_log: redaction | <NEW3> | NULL | NULL | global | NULL | writer | email",
+      "audit_log: set | <NEW4> | NULL | NULL | global | NULL | writer | NULL",
+      "audit_log: set | <NEW0> | NULL | NULL | global | NULL | writer | NULL",
+      "audit_log: set | <NEW1> | NULL | NULL | global | NULL | writer | NULL",
+      "audit_log: set | <NEW2> | NULL | NULL | global | NULL | writer | NULL",
+      "audit_log: set | <NEW3> | NULL | NULL | global | NULL | writer | NULL",
+      "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+      "sync_oplog: upsert | fe4cf573-d3af-4d8b-84bf-1d2cae745bae | <T>",
+      "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+      "sync_oplog: upsert | c6918517-639b-4341-8ebb-ab49fca460c3 | <T>",
+      "sync_oplog: upsert | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+      "sync_oplog: delete | 375d707d-ab1b-48fd-b8bb-0d97c1e35dac | <T>",
+      "sync_oplog: upsert | 078b450d-17a3-4770-9a1b-44a15be50039 | <T>",
+      "sync_oplog: upsert | 95921f54-82f2-439c-b286-034d7a8f1206 | <T>",
+      "sync_oplog: upsert | <NEW4> | <T>",
+      "sync_oplog: upsert | <NEW0> | <T>",
+      "sync_oplog: upsert | <NEW1> | <T>",
+      "sync_oplog: upsert | <NEW2> | <T>",
+      "sync_oplog: upsert | <NEW3> | <T>"
+    ]
+  ],
+  "provenance": {
+    "command": "POST /api/set and /api/search with extraction, PII, conflict and entity/sensitivity filter bodies; SIGTERM; database snapshot",
+    "fixture": "pipelines",
+    "go_source": {
+      "git_head": "1ce855074bb5394190a404f17c86c24320402f9c",
+      "go_mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+      "go_sum": "d527200e8f13fd16eb27b802bbe5b6ee19cd6a0c",
+      "tree_cmd": "6a47d5ab34dcd2f8e676684bd4a349da152765e9",
+      "tree_internal": "8ebcacdf27d3e1dc2e9d2a1d5b4e1d04ac57f5fe"
+    },
+    "go_version": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/MEM-NATIVE/oracle/symbrain: go1.27.3",
+    "kind": "go-oracle-recording",
+    "oracle_sha256": "6e81245f3c1ca3008f9e92ee175ca211c089c3a166be250d405e9123a18b47ff",
+    "payload_sha256": "f289f4a4ef556ef930b4dbf615f3cfdf4b8830e2e6d42e1a382c1dc4c65149ea",
+    "platform": "macos/aarch64",
+    "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1 SYMBRAIN_MEMORY_SERVE_GO_ORACLE=<go build of ./cmd/symbrain>",
+    "seed_sha256": "3cbc9860a9def8388b42388151407a76f0a3deb1dde8b4c045ade34b5b449d14"
+  }
+}

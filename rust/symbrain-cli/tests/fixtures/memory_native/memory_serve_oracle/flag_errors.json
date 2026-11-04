@@ -1,0 +1,127 @@
+{
+  "payload": [
+    [
+      2,
+      "",
+      "symbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: --port must be between 1 and 65535\n"
+    ],
+    [
+      2,
+      "",
+      "invalid value \"abc\" for flag -port: parse error\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: --port must be between 1 and 65535\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: --port must be between 1 and 65535\n"
+    ],
+    [
+      2,
+      "",
+      "invalid value \"\" for flag -port: parse error\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "invalid value \"99999999999999999999\" for flag -port: value out of range\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: --port must be between 1 and 65535\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: unexpected argument \"extra\"\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: unexpected argument \"--port\"\n"
+    ],
+    [
+      2,
+      "",
+      "flag provided but not defined: -bogus\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "flag provided but not defined: -bogus\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "flag provided but not defined: -x\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "bad flag syntax: -=1\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "flag needs an argument: -port\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "flag needs an argument: -db\nsymbrain memory serve — run the memory HTTP API as a sync peer\n\nUsage:\n  symbrain memory serve [flags]\n\nFlags:\n  --port <n>   TCP port to listen on (default 8787). Always bound to\n               127.0.0.1; never exposed on a non-loopback address.\n  --db <path>  Database path override (default: the standard memory\n               database under the XDG data directory).\n\nThis starts the same HTTP API 'symbrain memory sync --remote' talks to:\n/api/sync/changes, /api/sync/apply, /api/sync/relay, plus /api/search,\n/api/set, /api/list, /api/get, /api/delete, /api/rules, /api/stats and\n/api/status. All routes except /api/status require a bearer token; see\n'symbrain memory sync --help' for how tokens are supplied to the client\nside of a sync. The process runs until interrupted (Ctrl-C/SIGTERM), at\nwhich point it shuts down gracefully.\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: unexpected argument \"extra\"\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain memory serve: --port must be between 1 and 65535\n"
+    ],
+    [
+      2,
+      "",
+      "symbrain: unsupported output format \"yaml\" (want table or json)\n"
+    ]
+  ],
+  "provenance": {
+    "command": "symbrain memory <each case argv>, empty HOME/XDG roots, stdin closed",
+    "fixture": "flag_errors",
+    "go_source": {
+      "git_head": "1ce855074bb5394190a404f17c86c24320402f9c",
+      "go_mod": "a1a0b6e122c68f5276f65014510f02cb81829aa9",
+      "go_sum": "d527200e8f13fd16eb27b802bbe5b6ee19cd6a0c",
+      "tree_cmd": "6a47d5ab34dcd2f8e676684bd4a349da152765e9",
+      "tree_internal": "8ebcacdf27d3e1dc2e9d2a1d5b4e1d04ac57f5fe"
+    },
+    "go_version": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/MEM-NATIVE/oracle/symbrain: go1.27.3",
+    "kind": "go-oracle-recording",
+    "oracle_sha256": "6e81245f3c1ca3008f9e92ee175ca211c089c3a166be250d405e9123a18b47ff",
+    "payload_sha256": "441dd4ce3efc495888250eaffcef1fb065542da24c0840ffc37ff59b14a07b9c",
+    "platform": "macos/aarch64",
+    "record_mode": "SYMBRAIN_MEMORY_FIXTURE_RECORD=1 SYMBRAIN_MEMORY_SERVE_GO_ORACLE=<go build of ./cmd/symbrain>",
+    "seed_sha256": "3cbc9860a9def8388b42388151407a76f0a3deb1dde8b4c045ade34b5b449d14"
+  }
+}

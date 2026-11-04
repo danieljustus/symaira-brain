@@ -452,14 +452,20 @@ pub(super) fn revoke_args(body: &[u8]) -> Option<(String, String)> {
     Some((token, jti))
 }
 
-/// Arguments of `POST /api/search`; `extended` is set when a filter beyond
-/// query/scope/limit is in use.
+/// Arguments of `POST /api/search`.
 #[derive(Default)]
 pub(super) struct SearchArgs {
     pub query: String,
     pub scope: String,
     pub limit: i64,
-    pub extended: bool,
+    pub entity: String,
+    pub min_confidence: String,
+    pub verification: String,
+    pub exclude_superseded: bool,
+    pub max_age: String,
+    pub max_sensitivity: String,
+    pub min_sharing_level: String,
+    pub client_id: String,
 }
 
 pub(super) fn search_args(body: &[u8]) -> Option<SearchArgs> {
@@ -473,17 +479,14 @@ pub(super) fn search_args(body: &[u8]) -> Option<SearchArgs> {
                 Value::Number(number) => args.limit = number.as_i64()?,
                 _ => return None,
             },
-            "exclude_superseded" => {
-                let mut on = false;
-                flag(&value, &mut on)?;
-                args.extended |= on;
-            }
-            "entity" | "min_confidence" | "verification" | "max_age" | "max_sensitivity"
-            | "min_sharing_level" | "client_id" => {
-                let mut set = String::new();
-                text(&value, &mut set)?;
-                args.extended |= !set.is_empty();
-            }
+            "exclude_superseded" => flag(&value, &mut args.exclude_superseded)?,
+            "entity" => text(&value, &mut args.entity)?,
+            "min_confidence" => text(&value, &mut args.min_confidence)?,
+            "verification" => text(&value, &mut args.verification)?,
+            "max_age" => text(&value, &mut args.max_age)?,
+            "max_sensitivity" => text(&value, &mut args.max_sensitivity)?,
+            "min_sharing_level" => text(&value, &mut args.min_sharing_level)?,
+            "client_id" => text(&value, &mut args.client_id)?,
             _ => {}
         }
     }

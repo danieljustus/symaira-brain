@@ -27,8 +27,8 @@ pub(crate) enum SyncRow {
 impl SyncRow {
     pub(crate) fn updated_at(&self) -> Option<DateTime<Utc>> {
         match self {
-            Self::Lite(row) => row.updated_at,
-            Self::Full(row) => row.updated_at,
+            Self::Lite(row) => row.updated_at.map(|time| time.with_timezone(&Utc)),
+            Self::Full(row) => row.updated_at.map(|time| time.with_timezone(&Utc)),
         }
     }
 

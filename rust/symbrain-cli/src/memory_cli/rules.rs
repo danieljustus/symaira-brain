@@ -60,15 +60,20 @@ pub(super) fn run_rules(
                 for rule in &rules {
                     let created = rule
                         .created_at
-                        .map(|time| time.format("%Y-%m-%dT%H:%M:%SZ").to_string())
+                        .map(|time| {
+                            time.with_timezone(&chrono::Utc)
+                                .format("%Y-%m-%dT%H:%M:%SZ")
+                                .to_string()
+                        })
                         .unwrap_or_default();
-                    let _ = writeln!(
+                    super::read::write_row(
                         stdout,
-                        "{}\t{}\t{}\t{}",
-                        rule.id,
-                        rule.scope,
-                        created,
-                        table_content(&rule.content)
+                        &[
+                            &rule.id,
+                            &rule.scope,
+                            &created,
+                            &table_content(&rule.content),
+                        ],
                     );
                 }
             }

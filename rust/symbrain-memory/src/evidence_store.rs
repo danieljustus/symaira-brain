@@ -109,7 +109,7 @@ pub fn reparent_memory_evidence_tx(
     Ok(())
 }
 
-fn save_memory_evidence(
+pub(crate) fn save_memory_evidence(
     conn: &Connection,
     memory_id: &str,
     extractions: &[Extraction],

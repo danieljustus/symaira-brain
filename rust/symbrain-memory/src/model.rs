@@ -26,6 +26,11 @@ impl std::error::Error for StoreError {}
 
 impl From<rusqlite::Error> for StoreError {
     fn from(error: rusqlite::Error) -> Self {
+        if let rusqlite::Error::FromSqlConversionFailure(_, _, inner) = &error
+            && let Some(text) = inner.downcast_ref::<crate::goscan::GoText>()
+        {
+            return Self::Invalid(text.0.clone());
+        }
         Self::Sql(error)
     }
 }

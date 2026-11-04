@@ -2,17 +2,21 @@
 #![deny(unsafe_code)]
 
 mod activity;
-mod cli_delete_admission;
 mod cli_entity;
-mod cli_read_admission;
 mod cli_write;
-mod direct_admission;
+mod conflict;
+mod conflict_llm;
 mod embedding;
 mod entity;
 pub mod evidence;
 mod evidence_store;
+mod extract;
+mod goduration;
 mod gojson;
+pub mod gojson_decode;
 mod gorand;
+mod goscan;
+mod gotext;
 mod gotime;
 pub mod http;
 mod list_rows;
@@ -26,6 +30,8 @@ mod schema;
 mod schema_inspection;
 mod search_rows;
 mod serve_store;
+mod set_pipeline;
+mod slog;
 mod store;
 mod store_dir;
 mod sync_apply;
@@ -39,16 +45,17 @@ mod write;
 mod db_oracle_tests;
 
 pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, Provenance};
-pub use cli_delete_admission::direct_delete_supported;
-pub use cli_entity::direct_entities_supported;
-pub use cli_read_admission::direct_reads_supported;
-pub use cli_write::{DirectWrite, direct_project_supported};
-pub use direct_admission::{direct_content_supported, direct_text_supported};
+pub use conflict::ConflictConfig;
+pub use conflict_llm::LlmSettings;
 pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
+pub use goscan::raw_bytes;
 pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};
+pub use retrieval::{PolicyFilter, SearchFilters, ServiceSearch, TrustFilter};
 pub use schema_inspection::missing_required_columns;
 pub use search_rows::{SearchHit, SearchRow};
+pub use set_pipeline::{CliSet, Origin};
+pub use slog::LogSink;
 pub use sync_apply::{PullApplied, PulledDelete, PulledMemory, PulledPage};
 pub use sync_state::{StoredCursor, parse_cursor, render_cursor, zero_time};
 

@@ -8,6 +8,10 @@
 //! space as rows written by the shipped implementation, which is what makes
 //! their search scores comparable.
 
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
+
 use symaira_core_llm::{ClientBuilder, lookup};
 
 /// Dimension count of the shipped hash embedding.
@@ -41,13 +45,24 @@ pub struct GeneratedEmbedding {
 /// deterministic hash fallback when Ollama is unreachable or answers with a
 /// vector of the wrong dimension.
 ///
-/// The shipped generator also keeps a process-local vector cache and a 30s
-/// failure cooldown; neither can be observed through a one-shot CLI call, so
-/// they are deliberately not reproduced here.
+/// Like the shipped generator it keeps a process-local vector cache and a 30s
+/// failure cooldown. A write that embeds several texts observes both.
 pub struct EmbeddingGenerator {
     url: String,
     model: String,
+    state: Mutex<State>,
 }
+
+/// The shipped generator's process-local memory: a vector cache and the time
+/// of the last Ollama failure, which suppresses further calls for 30 seconds.
+#[derive(Default)]
+struct State {
+    last_failure: Option<Instant>,
+    cache: HashMap<Vec<u8>, Vec<f32>>,
+}
+
+/// How long one Ollama failure suppresses further Ollama calls.
+const FAILURE_COOLDOWN: Duration = Duration::from_secs(30);
 
 impl Default for EmbeddingGenerator {
     fn default() -> Self {
@@ -70,6 +85,7 @@ impl EmbeddingGenerator {
             } else {
                 model.to_owned()
             },
+            state: Mutex::new(State::default()),
         }
     }
 
@@ -89,19 +105,58 @@ impl EmbeddingGenerator {
     /// Produces the embedding for `text`.
     #[must_use]
     pub fn generate(&self, text: &str) -> GeneratedEmbedding {
-        match self.query_ollama(text) {
-            Some(vector)
-                if vector.len() == DIMENSIONS && vector.iter().all(|value| value.is_finite()) =>
-            {
-                GeneratedEmbedding {
-                    vector,
+        self.generate_bytes(text.as_bytes())
+    }
+
+    /// Produces the embedding for text that may hold invalid UTF-8. The
+    /// request and the hash fallback see the replacement-character form, as
+    /// `encoding/json` and `strings.ToLower` do in the shipped code; the
+    /// cache is keyed by the raw bytes.
+    #[must_use]
+    pub fn generate_bytes(&self, text: &[u8]) -> GeneratedEmbedding {
+        let lossy = String::from_utf8_lossy(text);
+        let skip = {
+            let state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if let Some(vector) = state.cache.get(text) {
+                return GeneratedEmbedding {
+                    vector: vector.clone(),
                     source: OLLAMA_SOURCE.to_owned(),
+                };
+            }
+            state
+                .last_failure
+                .is_some_and(|failed| failed.elapsed() < FAILURE_COOLDOWN)
+        };
+        if !skip {
+            match self.query_ollama(&lossy) {
+                Some(vector)
+                    if vector.len() == DIMENSIONS
+                        && vector.iter().all(|value| value.is_finite()) =>
+                {
+                    self.state
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner)
+                        .cache
+                        .insert(text.to_vec(), vector.clone());
+                    return GeneratedEmbedding {
+                        vector,
+                        source: OLLAMA_SOURCE.to_owned(),
+                    };
+                }
+                _ => {
+                    self.state
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner)
+                        .last_failure = Some(Instant::now());
                 }
             }
-            _ => GeneratedEmbedding {
-                vector: local_hash_vector(text),
-                source: HASH_FALLBACK_SOURCE.to_owned(),
-            },
+        }
+        GeneratedEmbedding {
+            vector: local_hash_vector(&lossy),
+            source: HASH_FALLBACK_SOURCE.to_owned(),
         }
     }
 

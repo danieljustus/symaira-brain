@@ -16,6 +16,12 @@ pub(super) struct Config {
     pub ollama_model: String,
     pub prefilter: bool,
     pub conflict_enabled: bool,
+    pub conflict_contradiction: f64,
+    pub conflict_near_dup: f64,
+    pub conflict_max_candidates: i64,
+    pub conflict_llm_provider: String,
+    pub conflict_llm_model: String,
+    pub conflict_llm_url: String,
     pub quantize_binary: bool,
     pub jwt_secret: String,
     pub jwt_secret_path: String,
@@ -23,8 +29,6 @@ pub(super) struct Config {
     pub trusted_proxies: Vec<String>,
     pub audit_log_enabled: bool,
     pub working_ttl: String,
-    pub conflict_threshold: f64,
-    pub conflict_max_candidates: i64,
 }
 
 impl Default for Config {
@@ -35,6 +39,12 @@ impl Default for Config {
             ollama_model: "nomic-embed-text".to_owned(),
             prefilter: false,
             conflict_enabled: true,
+            conflict_contradiction: 0.80,
+            conflict_near_dup: 0.95,
+            conflict_max_candidates: 10,
+            conflict_llm_provider: String::new(),
+            conflict_llm_model: String::new(),
+            conflict_llm_url: String::new(),
             quantize_binary: false,
             jwt_secret: String::new(),
             jwt_secret_path: String::new(),
@@ -42,8 +52,6 @@ impl Default for Config {
             trusted_proxies: Vec::new(),
             audit_log_enabled: true,
             working_ttl: "24h".to_owned(),
-            conflict_threshold: 0.0,
-            conflict_max_candidates: 0,
         }
     }
 }
@@ -109,7 +117,9 @@ fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
             };
             item = next;
         }
-        if item.is_none() || (!matches!(kind, Kind::PointerBool) && is_zero(item)) {
+        // configkit v0.18.2 applies present values, including false, zero and
+        // empty strings.
+        if item.is_none() {
             continue;
         }
         config_value::validate_item(kind, item)?;
@@ -133,13 +143,6 @@ fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
     Some(())
 }
 
-fn is_zero(item: &toml_edit::Item) -> bool {
-    item.as_str().is_some_and(str::is_empty)
-        || item.as_integer() == Some(0)
-        || item.as_float() == Some(0.0)
-        || item.as_bool() == Some(false)
-}
-
 fn apply(config: &mut Config, path: &str, value: &str) {
     match path {
         "database.path" => config.database = OsString::from(value),
@@ -157,18 +160,25 @@ fn apply(config: &mut Config, path: &str, value: &str) {
             config.audit_log_enabled = config_value::parse_bool(value).unwrap_or(true);
         }
         "working_memory.ttl" => value.clone_into(&mut config.working_ttl),
-        "conflict.contradiction_threshold" => {
-            config.conflict_threshold = value.parse().unwrap_or(0.0);
-        }
-        "conflict.max_candidates" => {
-            config.conflict_max_candidates = value.parse().unwrap_or(0);
-        }
         "conflict.enabled" => {
             config.conflict_enabled = config_value::parse_bool(value).unwrap_or(true);
         }
         "hybrid_search.quantize_to_binary" => {
             config.quantize_binary = config_value::parse_bool(value).unwrap_or(false);
         }
+        "conflict.contradiction_threshold" => {
+            config.conflict_contradiction = value.parse().unwrap_or(config.conflict_contradiction);
+        }
+        "conflict.near_dup_threshold" => {
+            config.conflict_near_dup = value.parse().unwrap_or(config.conflict_near_dup);
+        }
+        "conflict.max_candidates" => {
+            config.conflict_max_candidates =
+                value.parse().unwrap_or(config.conflict_max_candidates);
+        }
+        "conflict.llm_provider" => value.clone_into(&mut config.conflict_llm_provider),
+        "conflict.llm_model" => value.clone_into(&mut config.conflict_llm_model),
+        "conflict.llm_url" => value.clone_into(&mut config.conflict_llm_url),
         _ => {}
     }
 }
