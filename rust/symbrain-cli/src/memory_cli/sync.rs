@@ -109,7 +109,10 @@ pub(super) fn run(
         deadline,
         mode: ClientApplyMode {
             quantize_binary: config.quantize_binary,
-            audit_enabled: config.audit_log_enabled,
+            // Go's `memory sync` never mirrors retention.audit_log_enabled
+            // onto the store (only `memory serve`/MCP call
+            // SetAuditLogEnabled), so sync applies are always audited.
+            audit_enabled: true,
         },
     };
     match sync_run::run(&store, &options) {
