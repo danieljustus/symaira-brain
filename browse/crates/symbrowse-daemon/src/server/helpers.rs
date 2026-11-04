@@ -158,7 +158,7 @@ pub(super) fn builtin_handler(frame: Frame) -> HandlerResult {
         return Err(DaemonError {
             code: codes::OPERATION_FAILED.into(),
             message: "browser-backed state capture and restore are not implemented in Rust".into(),
-            hint: "use the Go fallback until the browser state runtime passes parity".into(),
+            hint: "run the command through a browser-backed symbrowse daemon".into(),
             ..Default::default()
         });
     }

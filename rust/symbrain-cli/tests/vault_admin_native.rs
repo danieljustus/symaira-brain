@@ -263,21 +263,14 @@ fn case_args(case: &Scenario) -> Vec<OsString> {
 }
 
 #[test]
-fn vault_validation_stays_native_with_a_fallback_executor() {
-    struct NoFallback;
-    impl symbrain_cli::FallbackExecutor for NoFallback {
-        fn execute(&self, _: &[OsString], _: &mut dyn Write) -> u8 {
-            panic!("vault reached Go fallback");
-        }
-    }
+fn vault_validation_stays_native() {
     let mut out = Vec::new();
     let mut err = Vec::new();
     assert_eq!(
-        symbrain_cli::run_with_executor(
+        symbrain_cli::run(
             &[OsString::from("vault"), OsString::from("create")],
             &mut out,
             &mut err,
-            &NoFallback
         ),
         2
     );

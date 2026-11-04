@@ -62,31 +62,30 @@ pub(crate) struct ServerShowReport {
     pub(crate) note: String,
 }
 
-/// Handles the migrated profile subcommands without invoking the Go fallback.
-#[allow(clippy::unnecessary_wraps)]
+/// Handles the profile subcommands.
 pub(crate) fn run(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> Option<u8> {
+) -> u8 {
     let Some(subcommand) = args.first().map(OsString::as_os_str) else {
         let _ = render::print_usage(stderr);
-        return Some(exit::USAGE);
+        return exit::USAGE;
     };
     match subcommand.to_string_lossy().as_ref() {
-        "list" => Some(run_list(&args[1..], stdout, stderr, format)),
-        "show" => Some(run_show(&args[1..], stdout, stderr, format)),
-        "add" => Some(profile_actions::run_add(&args[1..], stdout, stderr)),
-        "remove" => Some(profile_actions::run_remove(&args[1..], stdout, stderr)),
+        "list" => run_list(&args[1..], stdout, stderr, format),
+        "show" => run_show(&args[1..], stdout, stderr, format),
+        "add" => profile_actions::run_add(&args[1..], stdout, stderr),
+        "remove" => profile_actions::run_remove(&args[1..], stdout, stderr),
         "help" | "--help" | "-h" => {
             let result = render::print_usage(stdout);
-            Some(write_result(&result, stderr))
+            write_result(&result, stderr)
         }
         unknown => {
             let _ = writeln!(stderr, "symbrain profile: unknown subcommand {unknown:?}\n");
             let _ = render::print_usage(stderr);
-            Some(exit::USAGE)
+            exit::USAGE
         }
     }
 }
