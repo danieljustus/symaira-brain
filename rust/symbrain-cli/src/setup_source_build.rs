@@ -1,4 +1,4 @@
-//! The Go/Swift toolchain argv contract for optional source workers.
+//! The Cargo/Swift toolchain argv contract for optional source workers.
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -48,40 +48,50 @@ fn browse(
     dest: &Path,
     context: &process::Context,
 ) -> Result<(PathBuf, Vec<u8>), GoText> {
-    let tool = process::lookup("go")
-        .map_err(|error| format!("go toolchain not found on PATH: {error}"))?;
+    let tool = process::lookup("cargo")
+        .map_err(|error| format!("cargo toolchain not found on PATH: {error}"))?;
+    let workspace = root.join("browse");
+    let layout = layout::prepare(context)?;
+    // The browse workspace pins its own toolchain, so every call runs there.
     let version = output(
         &tool,
-        &[OsStr::new("version")],
-        None,
-        &[],
+        &[OsStr::new("--version")],
+        Some(&workspace),
+        &layout.environment,
         false,
         TOOL_BUDGET,
         context,
     )
-    .map_err(|error| error.with_prefix("go version: "))?;
+    .map_err(|error| error.with_prefix("cargo --version: "))?;
     let builder = trim_identity(&version);
-    let target = dest.join("symbrowse");
-    let mut environment = layout::prepare(context)?.environment;
-    environment.push(("CGO_ENABLED".into(), "0".into()));
+    let target_dir = layout
+        .environment
+        .iter()
+        .find(|(name, _)| name == "CARGO_TARGET_DIR")
+        .map_or_else(|| workspace.join("target"), |(_, path)| PathBuf::from(path));
     let args = [
         OsStr::new("build"),
-        OsStr::new("-trimpath"),
-        OsStr::new("-o"),
-        target.as_os_str(),
-        OsStr::new("./cmd/symbrowse"),
+        OsStr::new("--release"),
+        OsStr::new("--locked"),
+        OsStr::new("-p"),
+        OsStr::new("symbrowse-cli"),
+        OsStr::new("--target-dir"),
+        target_dir.as_os_str(),
     ];
     output(
         &tool,
         &args,
-        Some(&root.join("browse")),
-        &environment,
+        Some(&workspace),
+        &layout.environment,
         true,
         BUILD_BUDGET,
         context,
     )
-    .map_err(|error| error.with_prefix("go build ./cmd/symbrowse: "))?;
-    Ok((target, builder))
+    .map_err(|error| error.with_prefix("cargo build -p symbrowse-cli: "))?;
+    let built = target_dir
+        .join("release")
+        .join(format!("symbrowse{}", std::env::consts::EXE_SUFFIX));
+    Ok((stage(&built, dest, "symbrowse")?, builder))
 }
 
 fn swift(
@@ -164,13 +174,18 @@ fn swift(
     #[cfg(not(unix))]
     let built = PathBuf::from(String::from_utf8_lossy(super::text::trim_space(&out)).as_ref());
     let built = built.join(spec.binary);
-    std::fs::metadata(&built).map_err(|error| {
-        let mut message = GoText::path("expected built binary ", &built, ": stat ");
+    Ok((stage(&built, dest, spec.binary)?, builder))
+}
+
+/// Copies a built binary into the staging directory as an executable.
+fn stage(built: &Path, dest: &Path, binary: &str) -> Result<PathBuf, GoText> {
+    std::fs::metadata(built).map_err(|error| {
+        let mut message = GoText::path("expected built binary ", built, ": stat ");
         message.push(&symbrain_core::config::os_bytes(built.as_os_str()));
         message.with_suffix(format!(": {}", format_io_error(&error)).as_bytes())
     })?;
-    let bytes = read_built_binary(&built)?;
-    let target = dest.join(spec.binary);
+    let bytes = read_built_binary(built)?;
+    let target = dest.join(binary);
     std::fs::write(&target, bytes).map_err(|error| {
         GoText::path(
             "stage built binary: open ",
@@ -184,7 +199,7 @@ fn swift(
         std::fs::set_permissions(&target, std::fs::Permissions::from_mode(0o755))
             .map_err(|error| error.to_string())?;
     }
-    Ok((target, builder))
+    Ok(target)
 }
 
 fn read_built_binary(built: &Path) -> Result<Vec<u8>, GoText> {
