@@ -19,6 +19,7 @@ members = [
     "rust/symbrain-usage",
     "rust/symbrain-guard-core",
     "rust/symguard-cli",
+    "rust/symaira-cutover",
 ]
 resolver = "2"
 
@@ -52,6 +53,7 @@ symbrain-audit = { version = "0.12.1", path = "rust/symbrain-audit" }
 symbrain-broker = { version = "0.12.1", path = "rust/symbrain-broker" }
 symbrain-catalog = { version = "0.12.1", path = "rust/symbrain-catalog" }
 symbrain-core = { version = "0.12.1", path = "rust/symbrain-core" }
+symaira-cutover = { version = "0.12.1", path = "rust/symaira-cutover" }
 symbrain-gateway = { version = "0.12.1", path = "rust/symbrain-gateway" }
 symbrain-harness = { version = "0.12.1", path = "rust/symbrain-harness" }
 symbrain-instructions = { version = "0.12.1", path = "rust/symbrain-instructions" }

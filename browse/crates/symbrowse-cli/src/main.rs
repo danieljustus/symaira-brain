@@ -51,6 +51,20 @@ fn main() -> ExitCode {
         }
         return write_stdout(&output);
     }
+    if !symaira_cutover::run_for_binary("symbrowse", |homes| {
+        vec![
+            symaira_cutover::Root {
+                label: "config",
+                path: homes.config.join("symbrowse"),
+            },
+            symaira_cutover::Root {
+                label: "state",
+                path: homes.state.join("symbrowse"),
+            },
+        ]
+    }) {
+        return ExitCode::from(1);
+    }
     let mut stdin = std::io::stdin();
     let execution = app::run(&values, VERSION, &mut stdin);
     let _ = std::io::stdout().write_all(&execution.stdout);

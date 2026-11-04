@@ -12,6 +12,7 @@ name = "symbrain"
 path = "src/main.rs"
 
 [dependencies]
+symaira-cutover.workspace = true
 symguard-cli.workspace = true
 chrono.workspace = true
 serde.workspace = true
