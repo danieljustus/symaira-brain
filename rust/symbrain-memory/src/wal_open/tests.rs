@@ -77,7 +77,7 @@ fn only_observed_plain_busy_is_retryable() {
 fn genuine_wal_upgrade_busy_succeeds_after_reserved_writer_release() {
     let database = OwnedDatabase::new();
     let writer = retained_writer(&database);
-    let follower = Connection::open(&database.0).unwrap();
+    let mut follower = Connection::open(&database.0).unwrap();
     // The exact isolated pragma is the real failing phase, not Store::open's
     // outer error. Record its typed failure before exercising the helper.
     BUSY_CALLBACKS.with(|calls| calls.set(0));

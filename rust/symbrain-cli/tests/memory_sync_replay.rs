@@ -398,11 +398,7 @@ fn dump_db(path: &Path) -> Value {
         let mut statement = conn
             .prepare(&format!("SELECT * FROM {table} ORDER BY {order}"))
             .unwrap();
-        let names: Vec<String> = statement
-            .column_names()
-            .iter()
-            .map(|n| (*n).to_owned())
-            .collect();
+        let names: Vec<String> = statement.column_names().map(str::to_owned).collect();
         let mut rows = statement.query([]).unwrap();
         let mut list = Vec::new();
         while let Some(row) = rows.next().unwrap() {
