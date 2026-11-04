@@ -321,7 +321,7 @@ fn state_name(state: &ActionState) -> &'static str {
 
 fn exact_key(tool: &str, input: &str) -> String {
     let digest = Sha256::digest(input.as_bytes());
-    format!("exact:{tool}\0{digest:x}")
+    format!("exact:{tool}\0{}", crate::audit::hex_encode(&digest))
 }
 
 fn search_key(tool: &str, terms: &[String]) -> String {

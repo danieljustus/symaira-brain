@@ -45,7 +45,7 @@ fn zero_i64(value: &i64) -> bool {
     *value == 0
 }
 
-fn hex_encode(bytes: &[u8]) -> String {
+pub(crate) fn hex_encode(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len() * 2);
     for byte in bytes {
         let _ = write!(out, "{byte:02x}");

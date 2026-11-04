@@ -11,8 +11,8 @@ repository.workspace = true
 symbrain-core.workspace = true
 base64 = "=0.22.1"
 hkdf = "=0.13.0"
-hmac = "=0.12.1"
-sha2 = "=0.10.9"
+hmac = "=0.13.0"
+sha2 = "=0.11.1"
 getrandom = "=0.4.3"
 chrono.workspace = true
 serde.workspace = true

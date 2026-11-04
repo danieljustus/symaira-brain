@@ -1,6 +1,16 @@
 //! Replays observations captured from the immutable production Go binary.
 use serde_json::Value;
 use sha2::{Digest, Sha256};
+
+fn sha256_hex(bytes: impl AsRef<[u8]>) -> String {
+    use std::fmt::Write as _;
+    Sha256::digest(bytes)
+        .iter()
+        .fold(String::new(), |mut out, byte| {
+            let _ = write!(out, "{byte:02x}");
+            out
+        })
+}
 use symbrain_guard_core::external_decision::{ExternalDecisionAudit, evaluate_at};
 
 #[path = "fixtures/external_repair_trust_anchor.rs"]
@@ -10,10 +20,7 @@ const FIXTURE: &[u8] = include_bytes!("fixtures/external_repair_oracle.json");
 
 #[test]
 fn replay_f01_f05_production_go_observations() {
-    assert_eq!(
-        format!("{:x}", Sha256::digest(FIXTURE)),
-        trust_anchor::TRUSTED_FIXTURE_SHA256
-    );
+    assert_eq!(sha256_hex(FIXTURE), trust_anchor::TRUSTED_FIXTURE_SHA256);
     let fixture: Value = serde_json::from_slice(FIXTURE).unwrap();
     assert_eq!(
         fixture["oracle_commit"],
@@ -40,12 +47,12 @@ fn replay_f01_f05_production_go_observations() {
     );
     let generator = include_str!("../../../guard/scripts/guard-decide-oracle/repair_parity.py")
         .replace("\r\n", "\n");
-    let generator_sha256 = format!("{:x}", Sha256::digest(generator.as_bytes()));
+    let generator_sha256 = sha256_hex(generator.as_bytes());
     assert_eq!(generator_sha256, trust_anchor::TRUSTED_GENERATOR_SHA256);
     assert_eq!(fixture["generator_sha256"], generator_sha256);
     let validator = include_str!("../../../guard/scripts/guard-decide-oracle/native_repair.py")
         .replace("\r\n", "\n");
-    let validator_sha256 = format!("{:x}", Sha256::digest(validator.as_bytes()));
+    let validator_sha256 = sha256_hex(validator.as_bytes());
     assert_eq!(validator_sha256, trust_anchor::TRUSTED_VALIDATOR_SHA256);
     assert_eq!(fixture["validation_basis_sha256"], validator_sha256);
     let cases = fixture["cases"].as_array().unwrap();
