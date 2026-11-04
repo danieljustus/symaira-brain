@@ -35,7 +35,7 @@ fn opencode_database_key(dir: &Path, name: &str) -> Result<(Option<String>, bool
 fn with_opencode_database<T>(
     dir: &Path,
     name: &str,
-    consume: impl FnOnce(&rusqlite::Connection) -> Result<T, &'static str>,
+    consume: impl FnOnce(&mut rusqlite::Connection) -> Result<T, &'static str>,
 ) -> Result<T, &'static str> {
     use rustix::fs::{Mode, OFlags, openat};
     let root = opencode_directory(dir).map_err(|_| OPENCODE_DB_ERROR)?;
@@ -103,14 +103,14 @@ fn with_opencode_database<T>(
             file.write_all(data).map_err(|_| OPENCODE_DB_ERROR)?;
         }
     }
-    let db = rusqlite::Connection::open_with_flags(
+    let mut db = rusqlite::Connection::open_with_flags(
         tmp.path().join(name),
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
     )
     .map_err(|_| OPENCODE_DB_ERROR)?;
     // SQL-only budget: admission, regular-file copying and connection open are not timed.
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
-    let result = consume(&db);
+    let result = consume(&mut db);
     if std::time::Instant::now() >= deadline {
         return Err(OPENCODE_DB_ERROR);
     }
@@ -255,7 +255,7 @@ fn opencode_schema(
 
 #[cfg(unix)]
 fn opencode_sql_budget(
-    db: &rusqlite::Connection,
+    db: &mut rusqlite::Connection,
     cancelled: impl FnMut() -> bool + Send + 'static,
 ) -> rusqlite::Result<()> {
     db.progress_handler(1000, Some(cancelled))
@@ -277,10 +277,10 @@ mod opencode_sql_tests {
 
     #[test]
     fn opencode_sql_cancellation_interrupts_executing_vm() {
-        let db = rusqlite::Connection::open_in_memory().unwrap();
+        let mut db = rusqlite::Connection::open_in_memory().unwrap();
         let calls = Arc::new(AtomicUsize::new(0));
         let observed = calls.clone();
-        opencode_sql_budget(&db, move || observed.fetch_add(1, Ordering::SeqCst) >= 2).unwrap();
+        opencode_sql_budget(&mut db, move || observed.fetch_add(1, Ordering::SeqCst) >= 2).unwrap();
         let result = db.query_row("WITH RECURSIVE n(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM n WHERE x<100000) SELECT sum(x) FROM n", [], |r| r.get::<_,i64>(0));
         interrupted(&result.unwrap_err());
         assert_eq!(calls.load(Ordering::SeqCst), 3);
@@ -292,15 +292,15 @@ mod opencode_sql_tests {
             "../../tests/fixtures/opencode-v2-synthetic.json"
         ))
         .unwrap();
-        let db = rusqlite::Connection::open_in_memory().unwrap();
+        let mut db = rusqlite::Connection::open_in_memory().unwrap();
         db.execute_batch(fixture["schema"].as_str().unwrap())
             .unwrap();
         db.execute_batch("INSERT INTO migration VALUES('20260805200742_import_legacy_credentials',1); CREATE TABLE padding(value TEXT); WITH RECURSIVE n(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM n WHERE x<10000) INSERT INTO padding SELECT printf('%0100d',x) FROM n;").unwrap();
-        assert_eq!(opencode_database_sql(&db, || false), Ok((None, true)));
+        assert_eq!(opencode_database_sql(&mut db, || false), Ok((None, true)));
         let calls = Arc::new(AtomicUsize::new(0));
         let observed = calls.clone();
         assert_eq!(
-            opencode_database_sql(&db, move || {
+            opencode_database_sql(&mut db, move || {
                 observed.fetch_add(1, Ordering::SeqCst);
                 true
             }),
@@ -315,10 +315,10 @@ mod opencode_sql_tests {
             "PRAGMA quick_check(1)",
             "SELECT value FROM padding ORDER BY value DESC LIMIT 257",
         ] {
-            let db = rusqlite::Connection::open_in_memory().unwrap();
+            let mut db = rusqlite::Connection::open_in_memory().unwrap();
             db.execute_batch("CREATE TABLE padding(value TEXT); WITH RECURSIVE n(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM n WHERE x<10000) INSERT INTO padding SELECT printf('%0100d',x) FROM n").unwrap();
             let deadline = std::time::Instant::now();
-            opencode_sql_budget(&db, move || std::time::Instant::now() >= deadline).unwrap();
+            opencode_sql_budget(&mut db, move || std::time::Instant::now() >= deadline).unwrap();
             interrupted(
                 &db.query_row(query, [], |r| r.get::<_, String>(0))
                     .unwrap_err(),
@@ -329,7 +329,7 @@ mod opencode_sql_tests {
 
 #[cfg(unix)]
 fn opencode_database_sql(
-    db: &rusqlite::Connection,
+    db: &mut rusqlite::Connection,
     cancelled: impl FnMut() -> bool + Send + 'static,
 ) -> Result<(Option<String>, bool), &'static str> {
     opencode_sql_budget(db, cancelled).map_err(|_| OPENCODE_DB_ERROR)?;
