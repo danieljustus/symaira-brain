@@ -66,3 +66,7 @@ migration/evidence/memory-schema-649/final-independent-e4e/*.log binary
 # Preserve exact Windows schema-native failure bytes.
 migration/evidence/memory-schema-649/windows-lint-b2fdd/*.log binary
 migration/evidence/memory-schema-649/windows-lint-b2fdd/corrected-88a/*.log binary
+
+# Raw MCP stdio frames (Content-Length framing uses CRLF); keep exact bytes.
+browse/testdata/port/mcp/*.in binary
+browse/testdata/port/mcp/*.out binary

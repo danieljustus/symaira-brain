@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "kind": "frozen-go-stdout",
+  "go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "fixture_binary": "Go symbrowse built from go_ref with version v0.8.0 (daemon_mcp.py --go-fixture)",
+  "source_report": "migration/evidence/browse-daemon-772/linux-mcp-process-report.json",
+  "source_report_sha256": "fe964c183de16fe1668fad341f440f7a3dacf68a0f5aaa1cff8b2c528dcbe9e3",
+  "cross_checked_reports": [
+    "migration/evidence/browse-daemon-772/original-linux-mcp-process-report.json",
+    "migration/evidence/browse-registry-772/corrected-independent-cf959/symaira-registry-cf959-root-mcp.json",
+    "migration/evidence/browse-state-key-772/final-3db/symaira-state-key-3db-mcp.json",
+    "migration/evidence/browse-state-key-772/review-3db-root/symaira-state-key-3db-root-mcp.json",
+    "migration/evidence/browse-daemon-772/independent-gui-go-path-failure-a3c2bdb.json"
+  ],
+  "normalization": "the recorder used session mcp-parity-<pid>; every occurrence is replaced with the replay session name 'default'. All six recorded reports agree byte-for-byte after this normalization.",
+  "replayed_by": "browse/crates/symbrowse-cli/tests/mcp_frozen_go_frames.rs",
+  "outputs_sha256": {
+    "eof.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "framed_initialize.out": "85201c07d11ec520b2b5c75eff75ccd38b559c98cade8e69ba90b980006c73f9",
+    "initialize.out": "eaddc1e1aebf6e5fcc50320b4e476e6a155ee1e26239aac4967d026dc1b7ea25",
+    "initialized.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "malformed.out": "36bb7e848335c954ceb516bbdc00ffc65f4d1ae574a6942bf6d296df5dff339a",
+    "missing_argument.out": "393d3ab744b281064c52362639adf4d98f9bdba7f8a5c28e8eae459aa956a54d",
+    "notifications.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tool_error.out": "1b6fe2b89172e686535e7716e694aeb78654ded12d88f8d71a4c147e5de0e052",
+    "tools_all.out": "e78d34ceeb4d644d7eed5f54d46bf04ba4f08ac5005703672ee7692c81270c07",
+    "tools_core.out": "f55e44dff83df37a92a7f95c66ecb25d00a24e8cb46e39d95de7c5ce99181ec0",
+    "tools_nav.out": "4e5340c09bb4b4baf90be9e4f3a894742d803c371a41e59f79899daeebd9a7e5",
+    "unknown_method.out": "05d1a5483c3c63476ae77e71386f6b1997f61b52bcce6bb7685c584a7982e2a0",
+    "unknown_tool.out": "5dbeb6a9d28242924117a11521ad4eb3ab7bfa7a37e275e4e6faf3b656570552"
+  }
+}
