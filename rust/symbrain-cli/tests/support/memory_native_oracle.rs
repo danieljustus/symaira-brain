@@ -163,6 +163,9 @@ fn base_command(who: Who, sb: &Sandbox, rust_bin: &str) -> Command {
     if who == Who::Rust {
         // The native implementation must not need the shipped binary.
         command.env("SYMBRAIN_GO_BINARY", sb.root.join("absent-go-fallback"));
+        // Under coverage the instrumented child would otherwise write its
+        // .profraw into the work directory and break the created-files check.
+        command.envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)));
     }
     command
 }
