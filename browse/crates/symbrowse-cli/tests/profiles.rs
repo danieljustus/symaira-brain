@@ -1,3 +1,7 @@
+//! Browser profile discovery. Expectations are the frozen Go CLI behavior
+//! (see tests/fixtures/cli/cli_oracle.json for the recorded scenarios and
+//! cli_oracle.provenance.json for the Go capture); no Go binary runs here.
+
 use serde_json::{Value, json};
 use std::{
     collections::BTreeMap,
@@ -120,7 +124,7 @@ fn run(
 }
 
 #[test]
-fn browser_profiles_match_go_cli_without_touching_browser_state() {
+fn browser_profiles_match_frozen_go_observations_without_touching_browser_state() {
     let unique = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap()
@@ -132,13 +136,6 @@ fn browser_profiles_match_go_cli_without_touching_browser_state() {
     fs::create_dir(&capture).unwrap();
     println!("profiles raw evidence: {}", capture.display());
     let rust = Path::new(env!("CARGO_BIN_EXE_symbrowse"));
-    let go = std::env::var_os("SYMBROWSE_GO_ORACLE").map(PathBuf::from);
-    if let Some(go) = &go {
-        assert!(
-            fs::read(go).unwrap() != fs::read(rust).unwrap(),
-            "Go oracle must not be identical to the Rust CLI"
-        );
-    }
     for layout in ["missing", "empty", "populated", "root-file", "empty-home"] {
         let scenario = capture.join(layout);
         let root = scenario.join("fixture");
@@ -232,21 +229,6 @@ fn browser_profiles_match_go_cli_without_touching_browser_state() {
             ("yaml", &["profiles", "--output", "yaml"], false),
         ];
         for (case, args, structured) in cases {
-            let reference = go.as_ref().map(|go| {
-                run(
-                    go,
-                    &root,
-                    &logs,
-                    &format!("{case}-go"),
-                    args,
-                    layout == "empty-home",
-                )
-            });
-            assert_eq!(
-                snapshot(&root),
-                before,
-                "Go changed fixture: {layout}/{case}"
-            );
             let actual = run(
                 rust,
                 &root,
@@ -286,18 +268,6 @@ fn browser_profiles_match_go_cli_without_touching_browser_state() {
                 assert_eq!(actual.1, expected_text.as_bytes());
             } else {
                 assert!(actual.1.starts_with(b"success: true\n"));
-            }
-            if let Some(reference) = reference {
-                assert_eq!((actual.0, &actual.2), (reference.0, &reference.2));
-                if *structured {
-                    assert_eq!(
-                        serde_json::from_slice::<Value>(&actual.1).unwrap(),
-                        serde_json::from_slice::<Value>(&reference.1).unwrap()
-                    );
-                } else {
-                    assert_eq!(actual.1, reference.1, "{layout}/{case}");
-                }
-                println!("Go/Rust profiles case={layout}/{case} passed");
             }
         }
         if layout == "missing" {
@@ -352,9 +322,6 @@ fn browser_profiles_match_go_cli_without_touching_browser_state() {
                     "flag needs an argument: --output",
                 ),
             ] {
-                let reference = go
-                    .as_ref()
-                    .map(|go| run(go, &root, &logs, &format!("{case}-go"), &args, false));
                 let actual = run(rust, &root, &logs, &format!("{case}-rust"), &args, false);
                 assert_eq!(actual.0, code, "{case}: {actual:?}");
                 if structured {
@@ -364,16 +331,9 @@ fn browser_profiles_match_go_cli_without_touching_browser_state() {
                         json!({"success":false,"error":{"code":if code==2 {"invalid_args"} else {"internal"},"message":message}})
                     );
                     assert!(actual.2.is_empty());
-                    if let Some(reference) = &reference {
-                        assert_eq!(json, serde_json::from_slice::<Value>(&reference.1).unwrap());
-                    }
                 } else {
                     assert!(actual.1.is_empty());
                     assert_eq!(actual.2, format!("{message}\n").as_bytes());
-                }
-                if let Some(reference) = reference {
-                    assert_eq!((actual.0, actual.2), (reference.0, reference.2));
-                    println!("Go/Rust profiles case={case} passed");
                 }
                 assert_eq!(snapshot(&root), before, "argument errors changed fixture");
             }
@@ -381,10 +341,6 @@ fn browser_profiles_match_go_cli_without_touching_browser_state() {
             let actual = run(rust, &root, &logs, "mcp-rust", &args, false);
             assert_eq!(actual.0, 0);
             assert!(actual.1.starts_with(b"core     14 tools") && actual.2.is_empty());
-            if let Some(go) = &go {
-                assert_eq!(actual, run(go, &root, &logs, "mcp-go", &args, false));
-                println!("Go/Rust profiles case=separate-mcp-catalog passed");
-            }
             assert_eq!(snapshot(&root), before, "catalog changed fixture");
         }
     }

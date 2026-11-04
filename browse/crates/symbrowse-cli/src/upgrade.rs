@@ -83,13 +83,13 @@ struct CacheEntry {
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 struct StableVersion(u64, u64, u64);
 
-pub fn run(format: Format, binary_version: &str) -> ExitCode {
+pub fn run(format: Format, binary_version: &str, check_only: bool) -> ExitCode {
     let current = version_string(binary_version);
     let cache_path = default_cache_path(OWNER, REPOSITORY);
     let checked_at = OffsetDateTime::now_utc();
     let result = check_release(&current, LATEST_RELEASE_URL, &cache_path);
     match result {
-        Ok(Some(release)) => render_success(
+        Ok(Some(release)) if check_only => render_success(
             format,
             json!({
                 "up_to_date": false,
@@ -99,6 +99,7 @@ pub fn run(format: Format, binary_version: &str) -> ExitCode {
                 "hint": upgrade_hint(&current, &release.tag_name),
             }),
         ),
+        Ok(Some(release)) => apply_upgrade(format, &release),
         Ok(None) => render_success(
             format,
             json!({
@@ -111,6 +112,43 @@ pub fn run(format: Format, binary_version: &str) -> ExitCode {
     }
 }
 
+/// `applyUpgrade`: Homebrew installs get guidance, everything else is
+/// downloaded, verified and swapped in atomically.
+fn apply_upgrade(format: Format, release: &Release) -> ExitCode {
+    let fail = |message: String| render_error(format, message);
+    let executable = match env::current_exe() {
+        Ok(path) => path,
+        Err(error) => return fail(format!("locate running binary: {error}")),
+    };
+    let executable = fs::canonicalize(&executable).unwrap_or(executable);
+    let method = match apply::detect(&executable) {
+        Ok(method) => method,
+        Err(error) => return fail(format!("detect install method: {error}")),
+    };
+    if method == apply::InstallMethod::Homebrew {
+        return render_success(
+            format,
+            json!({
+                "applied": false,
+                "hint": method.guidance("symbrowse"),
+                "latest": release.tag_name,
+                "install_method": method.as_str(),
+            }),
+        );
+    }
+    match apply::apply(release, &executable) {
+        Ok(()) => render_success(
+            format,
+            json!({
+                "applied": true,
+                "latest": release.tag_name,
+                "hint": "restart symbrowse to use the new version",
+            }),
+        ),
+        Err(error) => fail(format!("update failed (rollback performed): {error}")),
+    }
+}
+
 fn render_success(format: Format, data: Value) -> ExitCode {
     match Envelope::ok(data, Vec::new()).render(format) {
         Ok(output) => super::write_stdout(&output),
@@ -119,10 +157,11 @@ fn render_success(format: Format, data: Value) -> ExitCode {
 }
 
 fn render_failure(format: Format, message: String) -> ExitCode {
-    let envelope = Envelope::failure(
-        ErrorCode::OperationFailed,
-        format!("update check failed: {message}"),
-    );
+    render_error(format, format!("update check failed: {message}"))
+}
+
+fn render_error(format: Format, message: String) -> ExitCode {
+    let envelope = Envelope::failure(ErrorCode::OperationFailed, message);
     match envelope.render(format) {
         Ok(output) => {
             if format == Format::Text {
@@ -149,7 +188,7 @@ fn version_string(binary_version: &str) -> String {
 
 fn upgrade_hint(current: &str, latest: &str) -> String {
     format!(
-        "symbrowse {latest} is available (current: {current}); this build can check for updates but cannot apply them"
+        "symbrowse {latest} is available (current: {current}); run `symbrowse upgrade` to apply it"
     )
 }
 
@@ -268,6 +307,7 @@ fn write_cache(path: &Path, entry: &CacheEntry) {
     let _ = fs::rename(temporary, path);
 }
 
+mod apply;
 mod cache_dir;
 use cache_dir::safe_cache_dir;
 

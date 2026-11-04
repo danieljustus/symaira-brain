@@ -1894,12 +1894,15 @@ dependencies = [
 name = "symbrowse-cli"
 version = "0.0.0"
 dependencies = [
+ "html5ever",
+ "markup5ever_rcdom",
  "reqwest",
  "serde",
  "serde_json",
  "sha2",
  "symbrowse-core",
  "symbrowse-daemon",
+ "symbrowse-engine",
  "symbrowse-mcp",
  "symbrowse-protocol",
  "tempfile",

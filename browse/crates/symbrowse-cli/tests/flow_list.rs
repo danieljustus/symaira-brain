@@ -37,13 +37,6 @@ fn flow_list_preserves_go_json_envelope_for_empty_and_populated_discovery() {
     ));
     fs::create_dir(&root).unwrap();
     let rust = Path::new(env!("CARGO_BIN_EXE_symbrowse"));
-    let go = std::env::var_os("SYMBROWSE_GO_ORACLE");
-    if let Some(binary) = &go {
-        assert!(
-            fs::read(rust).unwrap() != fs::read(binary).unwrap(),
-            "Go oracle must not be identical to the Rust CLI"
-        );
-    }
     let fixture: Value = serde_json::from_str(include_str!(
         "../../../testdata/port/workflows/workflows.json"
     ))
@@ -51,8 +44,9 @@ fn flow_list_preserves_go_json_envelope_for_empty_and_populated_discovery() {
     let contents = serde_json::to_vec(&fixture["flow"]).unwrap();
 
     // Observed from Go newFlowListCommand at a92385d2deecc08d1fd96869908b81b7abd355fe
-    // (Brain #662). An empty Go discovery is [], not null. CI also compares the
-    // same commands against a real Go binary, without rewriting either result.
+    // (Brain #662). An empty Go discovery is [], not null. The same commands are
+    // frozen against the Go binary in tests/fixtures/cli/cli_oracle.json
+    // (flow-list-* scenarios); no Go binary runs here.
     for origin in ["empty", "project", "global"] {
         let root = root.join(origin);
         fs::create_dir(&root).unwrap();
@@ -82,10 +76,6 @@ fn flow_list_preserves_go_json_envelope_for_empty_and_populated_discovery() {
         let expected = json!({"success": true, "data": {"flows": entries}});
         let actual = list(rust, &root);
         assert_eq!(actual, expected, "origin={origin}");
-        if let Some(binary) = &go {
-            assert_eq!(actual, list(Path::new(binary), &root), "Go/Rust parity");
-            println!("Go/Rust flow-list case={origin} passed");
-        }
         assert_eq!(
             fs::read_dir(root.join("home")).unwrap().count(),
             if origin == "global" { 1 } else { 0 }
