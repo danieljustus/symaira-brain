@@ -1,0 +1,954 @@
+{
+ "session": "oracle",
+ "daemon_args": [],
+ "steps": [
+  {
+   "name": "engine_info_planned",
+   "frame": {
+    "cmd": "engine.info"
+   }
+  },
+  {
+   "name": "console_list_nobrowser",
+   "frame": {
+    "cmd": "console.list"
+   }
+  },
+  {
+   "name": "console_clear_nobrowser",
+   "frame": {
+    "cmd": "console.clear"
+   }
+  },
+  {
+   "name": "errors_list_nobrowser",
+   "frame": {
+    "cmd": "errors.list"
+   }
+  },
+  {
+   "name": "errors_clear_nobrowser",
+   "frame": {
+    "cmd": "errors.clear"
+   }
+  },
+  {
+   "name": "network_requests_nobrowser",
+   "frame": {
+    "cmd": "network.requests"
+   }
+  },
+  {
+   "name": "flow_record_status_idle",
+   "frame": {
+    "cmd": "flow.record.status"
+   }
+  },
+  {
+   "name": "flow_record_start",
+   "frame": {
+    "cmd": "flow.record.start"
+   }
+  },
+  {
+   "name": "flow_record_status_active",
+   "frame": {
+    "cmd": "flow.record.status"
+   }
+  },
+  {
+   "name": "flow_record_stop_empty",
+   "frame": {
+    "cmd": "flow.record.stop"
+   }
+  },
+  {
+   "name": "policy_explain_open",
+   "frame": {
+    "cmd": "policy.explain",
+    "args": {
+     "command": "open",
+     "url": "{BASE}/index.html"
+    }
+   }
+  },
+  {
+   "name": "policy_explain_unknown",
+   "frame": {
+    "cmd": "policy.explain",
+    "args": {
+     "command": "nope"
+    }
+   }
+  },
+  {
+   "name": "policy_explain_mcp",
+   "frame": {
+    "cmd": "policy.explain",
+    "args": {
+     "command": "click",
+     "mode": "mcp"
+    }
+   }
+  },
+  {
+   "name": "policy_explain_noargs",
+   "frame": {
+    "cmd": "policy.explain"
+   }
+  },
+  {
+   "name": "oob_status_idle",
+   "frame": {
+    "cmd": "oob.status"
+   }
+  },
+  {
+   "name": "oob_complete_unknown",
+   "frame": {
+    "cmd": "oob.complete",
+    "args": {
+     "id": "missing"
+    }
+   }
+  },
+  {
+   "name": "oob_cancel_unknown",
+   "frame": {
+    "cmd": "oob.cancel",
+    "args": {
+     "id": "missing",
+     "reason": "x"
+    }
+   }
+  },
+  {
+   "name": "oob_complete_noargs",
+   "frame": {
+    "cmd": "oob.complete"
+   }
+  },
+  {
+   "name": "state_list_empty",
+   "frame": {
+    "cmd": "state.list"
+   }
+  },
+  {
+   "name": "session_list",
+   "frame": {
+    "cmd": "session.list"
+   }
+  },
+  {
+   "name": "session_info",
+   "frame": {
+    "cmd": "session.info"
+   }
+  },
+  {
+   "name": "session_info_missing",
+   "frame": {
+    "cmd": "session.info"
+   },
+   "session_override": "nosuch"
+  },
+  {
+   "name": "unknown_cmd",
+   "frame": {
+    "cmd": "bogus.cmd"
+   }
+  },
+  {
+   "name": "journal_tail_empty",
+   "frame": {
+    "cmd": "journal.tail"
+   }
+  },
+  {
+   "name": "trace_replay_empty",
+   "frame": {
+    "cmd": "trace.replay",
+    "args": {
+     "steps": []
+    }
+   }
+  },
+  {
+   "name": "auth_login_noentry",
+   "frame": {
+    "cmd": "auth.login",
+    "args": {}
+   }
+  },
+  {
+   "name": "journal_tail",
+   "frame": {
+    "cmd": "journal.tail",
+    "args": {
+     "lines": 5
+    }
+   }
+  },
+  {
+   "name": "open_index",
+   "frame": {
+    "cmd": "open",
+    "args": {
+     "url": "{BASE}/index.html"
+    }
+   }
+  },
+  {
+   "name": "engine_info_active",
+   "frame": {
+    "cmd": "engine.info"
+   }
+  },
+  {
+   "name": "eval_arith",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "1+1"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_title",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "document.title"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_object",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "({a:1,b:[1,2]})"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_undefined",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "undefined"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_throw",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "(function(){throw new Error('x')})()"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_syntax",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "1+"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_empty",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "  "
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_noargs",
+   "frame": {
+    "cmd": "eval"
+   },
+   "approve": true
+  },
+  {
+   "name": "cookies_list_before",
+   "frame": {
+    "cmd": "cookies.list"
+   }
+  },
+  {
+   "name": "cookies_set",
+   "frame": {
+    "cmd": "cookies.set",
+    "args": {
+     "cookie": {
+      "name": "k1",
+      "value": "v1",
+      "path": "/"
+     },
+     "url": "{BASE}/index.html"
+    }
+   }
+  },
+  {
+   "name": "cookies_list_after_set",
+   "frame": {
+    "cmd": "cookies.list"
+   }
+  },
+  {
+   "name": "cookies_list_urls",
+   "frame": {
+    "cmd": "cookies.list",
+    "args": {
+     "urls": [
+      "{BASE}/index.html"
+     ]
+    }
+   }
+  },
+  {
+   "name": "cookies_clear",
+   "frame": {
+    "cmd": "cookies.clear",
+    "args": {
+     "name": "k1",
+     "url": "{BASE}/index.html"
+    }
+   }
+  },
+  {
+   "name": "cookies_list_after_clear",
+   "frame": {
+    "cmd": "cookies.list"
+   }
+  },
+  {
+   "name": "cookies_clear_noargs",
+   "frame": {
+    "cmd": "cookies.clear"
+   }
+  },
+  {
+   "name": "storage_list_local",
+   "frame": {
+    "cmd": "storage.list",
+    "args": {
+     "kind": "local"
+    }
+   }
+  },
+  {
+   "name": "storage_list_session",
+   "frame": {
+    "cmd": "storage.list",
+    "args": {
+     "kind": "session"
+    }
+   }
+  },
+  {
+   "name": "storage_set_local",
+   "frame": {
+    "cmd": "storage.set",
+    "args": {
+     "kind": "local",
+     "key": "a",
+     "value": "b"
+    }
+   }
+  },
+  {
+   "name": "storage_list_local2",
+   "frame": {
+    "cmd": "storage.list",
+    "args": {
+     "kind": "local"
+    }
+   }
+  },
+  {
+   "name": "storage_clear_local",
+   "frame": {
+    "cmd": "storage.clear",
+    "args": {
+     "kind": "local"
+    }
+   }
+  },
+  {
+   "name": "storage_list_local3",
+   "frame": {
+    "cmd": "storage.list",
+    "args": {
+     "kind": "local"
+    }
+   }
+  },
+  {
+   "name": "storage_list_badkind",
+   "frame": {
+    "cmd": "storage.list",
+    "args": {
+     "kind": "nope"
+    }
+   }
+  },
+  {
+   "name": "storage_list_nokind",
+   "frame": {
+    "cmd": "storage.list"
+   }
+  },
+  {
+   "name": "set_viewport",
+   "frame": {
+    "cmd": "set.viewport",
+    "args": {
+     "width": 800,
+     "height": 600
+    }
+   }
+  },
+  {
+   "name": "eval_viewport",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "[innerWidth,innerHeight]"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "set_viewport_scale",
+   "frame": {
+    "cmd": "set.viewport",
+    "args": {
+     "width": 640,
+     "height": 480,
+     "scale": 2
+    }
+   }
+  },
+  {
+   "name": "set_viewport_zero",
+   "frame": {
+    "cmd": "set.viewport",
+    "args": {
+     "width": 0,
+     "height": 0
+    }
+   }
+  },
+  {
+   "name": "set_device",
+   "frame": {
+    "cmd": "set.device",
+    "args": {
+     "name": "iPhone 13"
+    }
+   }
+  },
+  {
+   "name": "set_device_unknown",
+   "frame": {
+    "cmd": "set.device",
+    "args": {
+     "name": "No Such Device"
+    }
+   }
+  },
+  {
+   "name": "set_geo",
+   "frame": {
+    "cmd": "set.geo",
+    "args": {
+     "latitude": 52.52,
+     "longitude": 13.405
+    }
+   }
+  },
+  {
+   "name": "set_offline_on",
+   "frame": {
+    "cmd": "set.offline",
+    "args": {
+     "offline": true
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "set_offline_off",
+   "frame": {
+    "cmd": "set.offline",
+    "args": {
+     "offline": false
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "set_headers",
+   "frame": {
+    "cmd": "set.headers",
+    "args": {
+     "headers": {
+      "X-Test": "1"
+     }
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "set_media_dark",
+   "frame": {
+    "cmd": "set.media",
+    "args": {
+     "dark": true
+    }
+   }
+  },
+  {
+   "name": "set_media_light",
+   "frame": {
+    "cmd": "set.media",
+    "args": {
+     "dark": false
+    }
+   }
+  },
+  {
+   "name": "set_user_agent",
+   "frame": {
+    "cmd": "set.user-agent",
+    "args": {
+     "user_agent": "OracleUA/1.0"
+    }
+   }
+  },
+  {
+   "name": "eval_ua",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "navigator.userAgent"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "open_boom",
+   "frame": {
+    "cmd": "open",
+    "args": {
+     "url": "{BASE}/boom.html"
+    }
+   }
+  },
+  {
+   "name": "errors_list",
+   "frame": {
+    "cmd": "errors.list"
+   },
+   "sleep_before": 0.5
+  },
+  {
+   "name": "console_list_boom",
+   "frame": {
+    "cmd": "console.list"
+   }
+  },
+  {
+   "name": "errors_clear",
+   "frame": {
+    "cmd": "errors.clear"
+   }
+  },
+  {
+   "name": "errors_list_after_clear",
+   "frame": {
+    "cmd": "errors.list"
+   }
+  },
+  {
+   "name": "open_index_again",
+   "frame": {
+    "cmd": "open",
+    "args": {
+     "url": "{BASE}/index.html"
+    }
+   }
+  },
+  {
+   "name": "trace_replay_steps",
+   "frame": {
+    "cmd": "trace.replay",
+    "args": {
+     "steps": [
+      {
+       "command": "open",
+       "url": "{BASE}/second.html",
+       "expected_url": "{BASE}/second.html"
+      },
+      {
+       "command": "open",
+       "url": "{BASE}/index.html",
+       "expected_url": "{BASE}/other.html"
+      },
+      {
+       "command": "click",
+       "selector": "#nosuch"
+      },
+      {
+       "command": "auth.login"
+      },
+      {
+       "command": "bogus"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "scroll_down",
+   "frame": {
+    "cmd": "scroll",
+    "args": {
+     "selector": "#name",
+     "amount": 300
+    }
+   }
+  },
+  {
+   "name": "scroll_noargs",
+   "frame": {
+    "cmd": "scroll"
+   }
+  },
+  {
+   "name": "flow_record_start2",
+   "frame": {
+    "cmd": "flow.record.start"
+   }
+  },
+  {
+   "name": "click_recorded",
+   "frame": {
+    "cmd": "click",
+    "args": {
+     "selector": "#b"
+    }
+   }
+  },
+  {
+   "name": "flow_record_stop2",
+   "frame": {
+    "cmd": "flow.record.stop"
+   }
+  },
+  {
+   "name": "console_list",
+   "frame": {
+    "cmd": "console.list"
+   },
+   "sleep_before": 0.3
+  },
+  {
+   "name": "console_clear",
+   "frame": {
+    "cmd": "console.clear"
+   }
+  },
+  {
+   "name": "console_list_after_clear",
+   "frame": {
+    "cmd": "console.list"
+   }
+  },
+  {
+   "name": "network_requests",
+   "frame": {
+    "cmd": "network.requests"
+   }
+  },
+  {
+   "name": "network_request_missing",
+   "frame": {
+    "cmd": "network.request",
+    "args": {
+     "id": "nope"
+    }
+   }
+  },
+  {
+   "name": "network_request_noargs",
+   "frame": {
+    "cmd": "network.request"
+   }
+  },
+  {
+   "name": "network_route_abort",
+   "frame": {
+    "cmd": "network.route",
+    "args": {
+     "pattern": "*/second.html",
+     "action": "abort"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "network_route_noargs",
+   "frame": {
+    "cmd": "network.route"
+   },
+   "approve": true
+  },
+  {
+   "name": "network_unroute",
+   "frame": {
+    "cmd": "network.unroute",
+    "args": {
+     "pattern": "*/second.html"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "network_unroute_all",
+   "frame": {
+    "cmd": "network.unroute"
+   },
+   "approve": true
+  },
+  {
+   "name": "network_route_mock",
+   "frame": {
+    "cmd": "network.route",
+    "args": {
+     "pattern": "{BASE}/api.json",
+     "action": "mock",
+     "status": 201,
+     "body": {
+      "mocked": true
+     },
+     "content_type": "application/json"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_fetch_mocked",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "fetch('{BASE}/api.json').then(r=>r.status)"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "network_unroute_mock",
+   "frame": {
+    "cmd": "network.unroute",
+    "args": {
+     "pattern": "{BASE}/api.json"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "eval_fetch_real",
+   "frame": {
+    "cmd": "eval",
+    "args": {
+     "expression": "fetch('{BASE}/api.json').then(r=>r.status)"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "network_har_badaction",
+   "frame": {
+    "cmd": "network.har",
+    "args": {
+     "action": "x"
+    }
+   }
+  },
+  {
+   "name": "network_har_start",
+   "frame": {
+    "cmd": "network.har",
+    "args": {
+     "action": "start"
+    }
+   }
+  },
+  {
+   "name": "open_second",
+   "frame": {
+    "cmd": "open",
+    "args": {
+     "url": "{BASE}/second.html"
+    }
+   }
+  },
+  {
+   "name": "network_har_stop",
+   "frame": {
+    "cmd": "network.har",
+    "args": {
+     "action": "stop"
+    }
+   }
+  },
+  {
+   "name": "downloads_list",
+   "frame": {
+    "cmd": "downloads.list"
+   }
+  },
+  {
+   "name": "download_setdir",
+   "frame": {
+    "cmd": "download.setdir",
+    "args": {
+     "dir": "{WORK}/downloads"
+    }
+   },
+   "approve": true
+  },
+  {
+   "name": "frame_main",
+   "frame": {
+    "cmd": "frame.main"
+   }
+  },
+  {
+   "name": "frame_select_bad",
+   "frame": {
+    "cmd": "frame.select",
+    "args": {
+     "frame": "nope"
+    }
+   }
+  },
+  {
+   "name": "frame_tree",
+   "frame": {
+    "cmd": "frame.tree"
+   }
+  },
+  {
+   "name": "open_frames",
+   "frame": {
+    "cmd": "open",
+    "args": {
+     "url": "{BASE}/frames.html"
+    }
+   }
+  },
+  {
+   "name": "frame_tree_frames",
+   "frame": {
+    "cmd": "frame.tree"
+   }
+  },
+  {
+   "name": "frame_select_f1",
+   "frame": {
+    "cmd": "frame.select",
+    "args": {
+     "frame": "f1"
+    }
+   }
+  },
+  {
+   "name": "frame_main2",
+   "frame": {
+    "cmd": "frame.main"
+   }
+  },
+  {
+   "name": "tab_list",
+   "frame": {
+    "cmd": "tab.list"
+   }
+  },
+  {
+   "name": "session_info_after",
+   "frame": {
+    "cmd": "session.info"
+   }
+  },
+  {
+   "name": "state_save",
+   "frame": {
+    "cmd": "state.save",
+    "args": {
+     "name": "oracle1"
+    }
+   }
+  },
+  {
+   "name": "state_list_one",
+   "frame": {
+    "cmd": "state.list"
+   }
+  },
+  {
+   "name": "state_show",
+   "frame": {
+    "cmd": "state.show",
+    "args": {
+     "name": "oracle1"
+    }
+   }
+  },
+  {
+   "name": "state_load",
+   "frame": {
+    "cmd": "state.load",
+    "args": {
+     "name": "oracle1"
+    }
+   }
+  },
+  {
+   "name": "state_load_missing",
+   "frame": {
+    "cmd": "state.load",
+    "args": {
+     "name": "nosuch"
+    }
+   }
+  },
+  {
+   "name": "state_clear",
+   "frame": {
+    "cmd": "state.clear",
+    "args": {
+     "name": "oracle1"
+    }
+   }
+  }
+ ],
+ "env": {
+  "SYMBROWSE_OPERATION_TIMEOUT": "20"
+ }
+}

@@ -1,0 +1,2859 @@
+{
+  "provenance": {
+    "generator": "browse/crates/symbrowse-daemon/tests/fixtures/daemon_oracle/capture.py",
+    "scenarios": "scenarios_chrome.json",
+    "go_version": "go version go1.27.3 darwin/arm64",
+    "platform": "darwin/arm64",
+    "argv": [
+      "daemon",
+      "--session",
+      "oracle",
+      "--headless",
+      "--allow-private"
+    ],
+    "chrome": "/Applications/Google Chrome.app (headless, temp profile)",
+    "binary_source_commit": "ff87f4cdbf9a13d5dc259e6883c6072b33690965"
+  },
+  "results": [
+    {
+      "name": "engine_info_planned",
+      "frame": {
+        "cmd": "engine.info"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "unknown_command",
+          "message": "command is not implemented by the daemon"
+        }
+      }
+    },
+    {
+      "name": "console_list_nobrowser",
+      "frame": {
+        "cmd": "console.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 0,
+          "entries": []
+        }
+      }
+    },
+    {
+      "name": "console_clear_nobrowser",
+      "frame": {
+        "cmd": "console.clear"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cleared": true
+        }
+      }
+    },
+    {
+      "name": "errors_list_nobrowser",
+      "frame": {
+        "cmd": "errors.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 0,
+          "entries": []
+        }
+      }
+    },
+    {
+      "name": "errors_clear_nobrowser",
+      "frame": {
+        "cmd": "errors.clear"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cleared": true
+        }
+      }
+    },
+    {
+      "name": "network_requests_nobrowser",
+      "frame": {
+        "cmd": "network.requests"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 0,
+          "requests": []
+        }
+      }
+    },
+    {
+      "name": "flow_record_status_idle",
+      "frame": {
+        "cmd": "flow.record.status"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "actions": 0,
+          "recording": false,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "flow_record_start",
+      "frame": {
+        "cmd": "flow.record.start"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "recording": true,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "flow_record_status_active",
+      "frame": {
+        "cmd": "flow.record.status"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "actions": 0,
+          "recording": true,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "flow_record_stop_empty",
+      "frame": {
+        "cmd": "flow.record.stop"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "actions": [],
+          "recording": false,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "policy_explain_open",
+      "frame": {
+        "cmd": "policy.explain",
+        "args": {
+          "command": "open",
+          "url": "{BASE}/index.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "decider": "policy",
+          "explanation": "command:  open\nclass:    navigate\nurl:      {BASE}/index.html\nhost:     127.0.0.1\nmode:     tty\ndecision: allow\norigin:   default\ndecider:   policy\nguard:     not configured\nreason:    default",
+          "guard_active": false,
+          "source": "{WORK}/xdg/state/symbrowse/policy.toml"
+        }
+      }
+    },
+    {
+      "name": "policy_explain_unknown",
+      "frame": {
+        "cmd": "policy.explain",
+        "args": {
+          "command": "nope"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command \"nope\" has no risk classification"
+        }
+      }
+    },
+    {
+      "name": "policy_explain_mcp",
+      "frame": {
+        "cmd": "policy.explain",
+        "args": {
+          "command": "click",
+          "mode": "mcp"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "decider": "policy",
+          "explanation": "command:  click\nclass:    interact\nurl:      \nhost:     \nmode:     mcp\ndecision: allow\norigin:   default\ndecider:   policy\nguard:     not configured\nreason:    default",
+          "guard_active": false,
+          "source": "{WORK}/xdg/state/symbrowse/policy.toml"
+        }
+      }
+    },
+    {
+      "name": "policy_explain_noargs",
+      "frame": {
+        "cmd": "policy.explain"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "oob_status_idle",
+      "frame": {
+        "cmd": "oob.status"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "active": false
+        }
+      }
+    },
+    {
+      "name": "oob_complete_unknown",
+      "frame": {
+        "cmd": "oob.complete",
+        "args": {
+          "id": "missing"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "oob prompt \"missing\" not found"
+        }
+      }
+    },
+    {
+      "name": "oob_cancel_unknown",
+      "frame": {
+        "cmd": "oob.cancel",
+        "args": {
+          "id": "missing",
+          "reason": "x"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "oob prompt \"missing\" not found"
+        }
+      }
+    },
+    {
+      "name": "oob_complete_noargs",
+      "frame": {
+        "cmd": "oob.complete"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "state_list_empty",
+      "frame": {
+        "cmd": "state.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "schema_version": 3,
+          "states": null
+        }
+      }
+    },
+    {
+      "name": "session_list",
+      "frame": {
+        "cmd": "session.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "schema_version": 1,
+          "sessions": [
+            {
+              "name": "oracle",
+              "pid": 93652,
+              "started_at": "2026-11-03T22:29:39.3119Z",
+              "active_tabs": 0,
+              "last_activity": "2026-11-03T22:29:39.582606Z",
+              "user_data_dir": "{WORK}/home/Library/Caches/symbrowse/sessions/oracle",
+              "browser_context_id": "context-oracle",
+              "ref_count": 0,
+              "scope": "worktree",
+              "origin_path": "{WORK}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "session_info",
+      "frame": {
+        "cmd": "session.info"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "name": "oracle",
+          "pid": 93652,
+          "started_at": "2026-11-03T22:29:39.3119Z",
+          "active_tabs": 0,
+          "last_activity": "2026-11-03T22:29:39.58287Z",
+          "user_data_dir": "{WORK}/home/Library/Caches/symbrowse/sessions/oracle",
+          "browser_context_id": "context-oracle",
+          "ref_count": 0,
+          "scope": "worktree",
+          "origin_path": "{WORK}"
+        }
+      }
+    },
+    {
+      "name": "session_info_missing",
+      "frame": {
+        "cmd": "session.info"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "session_not_found",
+          "message": "session not found: \"nosuch\""
+        }
+      }
+    },
+    {
+      "name": "unknown_cmd",
+      "frame": {
+        "cmd": "bogus.cmd"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "unknown_command",
+          "message": "command is not implemented by the daemon"
+        }
+      }
+    },
+    {
+      "name": "journal_tail_empty",
+      "frame": {
+        "cmd": "journal.tail"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "entries": [
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.523696Z",
+              "session": "oracle",
+              "command": "console.list",
+              "risk_class": "read",
+              "decider": "policy",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.5398Z",
+              "session": "oracle",
+              "command": "console.clear",
+              "risk_class": "read",
+              "decider": "policy",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.544355Z",
+              "session": "oracle",
+              "command": "errors.list",
+              "risk_class": "read",
+              "decider": "policy",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.555783Z",
+              "session": "oracle",
+              "command": "errors.clear",
+              "risk_class": "read",
+              "decider": "policy",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.560339Z",
+              "session": "oracle",
+              "command": "network.requests",
+              "risk_class": "read",
+              "decider": "policy",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.565754Z",
+              "session": "oracle",
+              "command": "oob.status",
+              "risk_class": "read",
+              "decider": "human",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.570268Z",
+              "session": "oracle",
+              "command": "oob.complete",
+              "args": {
+                "id": "missing"
+              },
+              "risk_class": "unknown",
+              "decider": "human",
+              "result": "error:failed"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.574298Z",
+              "session": "oracle",
+              "command": "oob.cancel",
+              "args": {
+                "id": "missing",
+                "reason": "x"
+              },
+              "risk_class": "unknown",
+              "decider": "human",
+              "result": "error:failed"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.578247Z",
+              "session": "oracle",
+              "command": "oob.complete",
+              "risk_class": "unknown",
+              "decider": "human",
+              "result": "error:failed"
+            }
+          ],
+          "schema_version": 1,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "trace_replay_empty",
+      "frame": {
+        "cmd": "trace.replay",
+        "args": {
+          "steps": []
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "trace contains no replayable steps"
+        }
+      }
+    },
+    {
+      "name": "auth_login_noentry",
+      "frame": {
+        "cmd": "auth.login",
+        "args": {}
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "vault entry is required"
+        }
+      }
+    },
+    {
+      "name": "journal_tail",
+      "frame": {
+        "cmd": "journal.tail",
+        "args": {
+          "lines": 5
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "entries": [
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.560339Z",
+              "session": "oracle",
+              "command": "network.requests",
+              "risk_class": "read",
+              "decider": "policy",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.565754Z",
+              "session": "oracle",
+              "command": "oob.status",
+              "risk_class": "read",
+              "decider": "human",
+              "result": "ok"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.570268Z",
+              "session": "oracle",
+              "command": "oob.complete",
+              "args": {
+                "id": "missing"
+              },
+              "risk_class": "unknown",
+              "decider": "human",
+              "result": "error:failed"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.574298Z",
+              "session": "oracle",
+              "command": "oob.cancel",
+              "args": {
+                "id": "missing",
+                "reason": "x"
+              },
+              "risk_class": "unknown",
+              "decider": "human",
+              "result": "error:failed"
+            },
+            {
+              "schema_version": 1,
+              "timestamp": "2026-11-03T22:29:39.578247Z",
+              "session": "oracle",
+              "command": "oob.complete",
+              "risk_class": "unknown",
+              "decider": "human",
+              "result": "error:failed"
+            }
+          ],
+          "schema_version": 1,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "open_index",
+      "frame": {
+        "cmd": "open",
+        "args": {
+          "url": "{BASE}/index.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "open",
+          "url": "{BASE}/index.html",
+          "http_status": 200
+        }
+      }
+    },
+    {
+      "name": "engine_info_active",
+      "frame": {
+        "cmd": "engine.info"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "unknown_command",
+          "message": "command is not implemented by the daemon"
+        }
+      }
+    },
+    {
+      "name": "eval_arith",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "1+1"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "2",
+          "exception_text": "",
+          "type": "number",
+          "value": 2
+        }
+      }
+    },
+    {
+      "name": "eval_title",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "document.title"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "",
+          "exception_text": "",
+          "type": "string",
+          "value": "Fixture Page"
+        }
+      }
+    },
+    {
+      "name": "eval_object",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "({a:1,b:[1,2]})"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "",
+          "exception_text": "",
+          "type": "object",
+          "value": {
+            "a": 1,
+            "b": [
+              1,
+              2
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "eval_undefined",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "undefined"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "",
+          "exception_text": "",
+          "type": "undefined",
+          "value": null
+        }
+      }
+    },
+    {
+      "name": "eval_throw",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "(function(){throw new Error('x')})()"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "Error: x\n    at <anonymous>:1:19\n    at <anonymous>:1:35",
+          "exception_text": "Uncaught",
+          "type": "object",
+          "value": null
+        }
+      }
+    },
+    {
+      "name": "eval_syntax",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "1+"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "SyntaxError: Unexpected end of input",
+          "exception_text": "Uncaught",
+          "type": "object",
+          "value": null
+        }
+      }
+    },
+    {
+      "name": "eval_empty",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "  "
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "eval requires a non-empty expression"
+        }
+      }
+    },
+    {
+      "name": "eval_noargs",
+      "frame": {
+        "cmd": "eval"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "cookies_list_before",
+      "frame": {
+        "cmd": "cookies.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cookies": [],
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "cookies_set",
+      "frame": {
+        "cmd": "cookies.set",
+        "args": {
+          "cookie": {
+            "name": "k1",
+            "value": "v1",
+            "path": "/"
+          },
+          "url": "{BASE}/index.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "set": "k1"
+        }
+      }
+    },
+    {
+      "name": "cookies_list_after_set",
+      "frame": {
+        "cmd": "cookies.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cookies": [
+            {
+              "name": "k1",
+              "value": "v1",
+              "domain": "127.0.0.1",
+              "path": "/",
+              "expires": -1,
+              "size": 4,
+              "http_only": false,
+              "secure": false,
+              "session": true
+            }
+          ],
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "cookies_list_urls",
+      "frame": {
+        "cmd": "cookies.list",
+        "args": {
+          "urls": [
+            "{BASE}/index.html"
+          ]
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cookies": [
+            {
+              "name": "k1",
+              "value": "v1",
+              "domain": "127.0.0.1",
+              "path": "/",
+              "expires": -1,
+              "size": 4,
+              "http_only": false,
+              "secure": false,
+              "session": true
+            }
+          ],
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "cookies_clear",
+      "frame": {
+        "cmd": "cookies.clear",
+        "args": {
+          "name": "k1",
+          "url": "{BASE}/index.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cleared": "k1"
+        }
+      }
+    },
+    {
+      "name": "cookies_list_after_clear",
+      "frame": {
+        "cmd": "cookies.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cookies": [],
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "cookies_clear_noargs",
+      "frame": {
+        "cmd": "cookies.clear"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "storage_list_local",
+      "frame": {
+        "cmd": "storage.list",
+        "args": {
+          "kind": "local"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "items": {
+            "seed": "1"
+          },
+          "kind": "local",
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "storage_list_session",
+      "frame": {
+        "cmd": "storage.list",
+        "args": {
+          "kind": "session"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "items": {
+            "sess": "2"
+          },
+          "kind": "session",
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "storage_set_local",
+      "frame": {
+        "cmd": "storage.set",
+        "args": {
+          "kind": "local",
+          "key": "a",
+          "value": "b"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "set": "a"
+        }
+      }
+    },
+    {
+      "name": "storage_list_local2",
+      "frame": {
+        "cmd": "storage.list",
+        "args": {
+          "kind": "local"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "items": {
+            "a": "b",
+            "seed": "1"
+          },
+          "kind": "local",
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "storage_clear_local",
+      "frame": {
+        "cmd": "storage.clear",
+        "args": {
+          "kind": "local"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cleared": "local"
+        }
+      }
+    },
+    {
+      "name": "storage_list_local3",
+      "frame": {
+        "cmd": "storage.list",
+        "args": {
+          "kind": "local"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "items": {},
+          "kind": "local",
+          "origin": "{BASE}"
+        }
+      }
+    },
+    {
+      "name": "storage_list_badkind",
+      "frame": {
+        "cmd": "storage.list",
+        "args": {
+          "kind": "nope"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "invalid storage kind \"nope\""
+        }
+      }
+    },
+    {
+      "name": "storage_list_nokind",
+      "frame": {
+        "cmd": "storage.list"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "set_viewport",
+      "frame": {
+        "cmd": "set.viewport",
+        "args": {
+          "width": 800,
+          "height": 600
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "viewport": [
+            800,
+            600
+          ]
+        }
+      }
+    },
+    {
+      "name": "eval_viewport",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "[innerWidth,innerHeight]"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "",
+          "exception_text": "",
+          "type": "object",
+          "value": [
+            800,
+            600
+          ]
+        }
+      }
+    },
+    {
+      "name": "set_viewport_scale",
+      "frame": {
+        "cmd": "set.viewport",
+        "args": {
+          "width": 640,
+          "height": 480,
+          "scale": 2
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "viewport": [
+            640,
+            480
+          ]
+        }
+      }
+    },
+    {
+      "name": "set_viewport_zero",
+      "frame": {
+        "cmd": "set.viewport",
+        "args": {
+          "width": 0,
+          "height": 0
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "viewport dimensions must be positive: 0x0"
+        }
+      }
+    },
+    {
+      "name": "set_device",
+      "frame": {
+        "cmd": "set.device",
+        "args": {
+          "name": "iPhone 13"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "device": "iPhone 13"
+        }
+      }
+    },
+    {
+      "name": "set_device_unknown",
+      "frame": {
+        "cmd": "set.device",
+        "args": {
+          "name": "No Such Device"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "unknown device \"No Such Device\""
+        }
+      }
+    },
+    {
+      "name": "set_geo",
+      "frame": {
+        "cmd": "set.geo",
+        "args": {
+          "latitude": 52.52,
+          "longitude": 13.405
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "geo": [
+            52.52,
+            13.405
+          ]
+        }
+      }
+    },
+    {
+      "name": "set_offline_on",
+      "frame": {
+        "cmd": "set.offline",
+        "args": {
+          "offline": true
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "offline": true
+        }
+      }
+    },
+    {
+      "name": "set_offline_off",
+      "frame": {
+        "cmd": "set.offline",
+        "args": {
+          "offline": false
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "offline": false
+        }
+      }
+    },
+    {
+      "name": "set_headers",
+      "frame": {
+        "cmd": "set.headers",
+        "args": {
+          "headers": {
+            "X-Test": "1"
+          }
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "headers_set": 1
+        }
+      }
+    },
+    {
+      "name": "set_media_dark",
+      "frame": {
+        "cmd": "set.media",
+        "args": {
+          "dark": true
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "media": "dark"
+        }
+      }
+    },
+    {
+      "name": "set_media_light",
+      "frame": {
+        "cmd": "set.media",
+        "args": {
+          "dark": false
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "media": "light"
+        }
+      }
+    },
+    {
+      "name": "set_user_agent",
+      "frame": {
+        "cmd": "set.user-agent",
+        "args": {
+          "user_agent": "OracleUA/1.0"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "user_agent_set": true
+        }
+      }
+    },
+    {
+      "name": "eval_ua",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "navigator.userAgent"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "",
+          "exception_text": "",
+          "type": "string",
+          "value": "OracleUA/1.0"
+        }
+      }
+    },
+    {
+      "name": "open_boom",
+      "frame": {
+        "cmd": "open",
+        "args": {
+          "url": "{BASE}/boom.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "open",
+          "url": "{BASE}/boom.html",
+          "http_status": 200
+        }
+      }
+    },
+    {
+      "name": "errors_list",
+      "frame": {
+        "cmd": "errors.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 1,
+          "entries": [
+            {
+              "text": "Uncaught",
+              "url": "{BASE}/boom.html",
+              "line": 1,
+              "stacktrace": [
+                "(anonymous) ({BASE}/boom.html:1:81)"
+              ],
+              "timestamp": "2026-11-03T23:29:49.397788+01:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "console_list_boom",
+      "frame": {
+        "cmd": "console.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 2,
+          "entries": [
+            {
+              "type": "log",
+              "text": "hello-log",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:41.326322+01:00"
+            },
+            {
+              "type": "warning",
+              "text": "hello-warn",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:41.326328+01:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "errors_clear",
+      "frame": {
+        "cmd": "errors.clear"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cleared": true
+        }
+      }
+    },
+    {
+      "name": "errors_list_after_clear",
+      "frame": {
+        "cmd": "errors.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 0,
+          "entries": null
+        }
+      }
+    },
+    {
+      "name": "open_index_again",
+      "frame": {
+        "cmd": "open",
+        "args": {
+          "url": "{BASE}/index.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "open",
+          "url": "{BASE}/index.html",
+          "http_status": 200
+        }
+      }
+    },
+    {
+      "name": "trace_replay_steps",
+      "frame": {
+        "cmd": "trace.replay",
+        "args": {
+          "steps": [
+            {
+              "command": "open",
+              "url": "{BASE}/second.html",
+              "expected_url": "{BASE}/second.html"
+            },
+            {
+              "command": "open",
+              "url": "{BASE}/index.html",
+              "expected_url": "{BASE}/other.html"
+            },
+            {
+              "command": "click",
+              "selector": "#nosuch"
+            },
+            {
+              "command": "auth.login"
+            },
+            {
+              "command": "bogus"
+            }
+          ]
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "total": 5,
+          "matched": 1,
+          "deviated": 1,
+          "failed": 3,
+          "outcomes": [
+            {
+              "index": 0,
+              "command": "open",
+              "matched": true,
+              "expected_url": "{BASE}/second.html",
+              "actual_url": "{BASE}/second.html"
+            },
+            {
+              "index": 1,
+              "command": "open",
+              "matched": false,
+              "expected_url": "{BASE}/other.html",
+              "actual_url": "{BASE}/index.html"
+            },
+            {
+              "index": 2,
+              "command": "click",
+              "matched": false,
+              "error": "selector \"#nosuch\" did not match an element"
+            },
+            {
+              "index": 3,
+              "command": "auth.login",
+              "matched": false,
+              "error": "credential step requires symvault re-resolution; replay it with auth login"
+            },
+            {
+              "index": 4,
+              "command": "bogus",
+              "matched": false,
+              "error": "step command \"bogus\" is not replayable"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "scroll_down",
+      "frame": {
+        "cmd": "scroll",
+        "args": {
+          "selector": "#name",
+          "amount": 300
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "scroll \"#name\": CDP Input.dispatchMouseEvent failed (-32602): 'deltaX' and 'deltaY' are expected for mouseWheel event"
+        }
+      }
+    },
+    {
+      "name": "scroll_noargs",
+      "frame": {
+        "cmd": "scroll"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "flow_record_start2",
+      "frame": {
+        "cmd": "flow.record.start"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "recording": true,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "click_recorded",
+      "frame": {
+        "cmd": "click",
+        "args": {
+          "selector": "#b"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "click",
+          "selector": "#b"
+        }
+      }
+    },
+    {
+      "name": "flow_record_stop2",
+      "frame": {
+        "cmd": "flow.record.stop"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "actions": [
+            {
+              "index": 0,
+              "command": "click",
+              "selector": "#b"
+            }
+          ],
+          "recording": false,
+          "session": "oracle"
+        }
+      }
+    },
+    {
+      "name": "console_list",
+      "frame": {
+        "cmd": "console.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 6,
+          "entries": [
+            {
+              "type": "log",
+              "text": "hello-log",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:41.326322+01:00"
+            },
+            {
+              "type": "warning",
+              "text": "hello-warn",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:41.326328+01:00"
+            },
+            {
+              "type": "log",
+              "text": "hello-log",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:50.100941+01:00"
+            },
+            {
+              "type": "warning",
+              "text": "hello-warn",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:50.100945+01:00"
+            },
+            {
+              "type": "log",
+              "text": "hello-log",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:50.173369+01:00"
+            },
+            {
+              "type": "warning",
+              "text": "hello-warn",
+              "line": 1,
+              "timestamp": "2026-11-03T23:29:50.173377+01:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "console_clear",
+      "frame": {
+        "cmd": "console.clear"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cleared": true
+        }
+      }
+    },
+    {
+      "name": "console_list_after_clear",
+      "frame": {
+        "cmd": "console.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 0,
+          "entries": null
+        }
+      }
+    },
+    {
+      "name": "network_requests",
+      "frame": {
+        "cmd": "network.requests"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 6,
+          "requests": [
+            {
+              "id": "91901642B1494B543081E729BB13EF75",
+              "url": "{BASE}/index.html",
+              "method": "GET",
+              "type": "Document",
+              "status": 200,
+              "status_text": "OK",
+              "mime_type": "text/html",
+              "started_at": "2026-11-03T22:29:41Z",
+              "finished": true,
+              "request_headers": {
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+                "sec-ch-ua": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\"",
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": "\"macOS\""
+              },
+              "response_headers": {
+                "Content-Length": "336",
+                "Content-Type": "text/html",
+                "Date": "Tue, 03 Nov 2026 22:29:41 GMT",
+                "Server": "BaseHTTP/0.6 Python/3.14.2"
+              },
+              "encoded_body_size": 138
+            },
+            {
+              "id": "94020.2",
+              "url": "{BASE}/favicon.ico",
+              "method": "GET",
+              "type": "Other",
+              "status": 404,
+              "status_text": "Not Found",
+              "mime_type": "text/plain",
+              "started_at": "2026-11-03T22:29:41Z",
+              "finished": true,
+              "request_headers": {
+                "Referer": "{BASE}/index.html",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+                "sec-ch-ua": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\"",
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": "\"macOS\""
+              },
+              "response_headers": {
+                "Date": "Tue, 03 Nov 2026 22:29:41 GMT",
+                "Server": "BaseHTTP/0.6 Python/3.14.2"
+              },
+              "encoded_body_size": 99
+            },
+            {
+              "id": "64F0E5B56A641C52B36EC66C886B60EA",
+              "url": "{BASE}/boom.html",
+              "method": "GET",
+              "type": "Document",
+              "status": 200,
+              "status_text": "OK",
+              "mime_type": "text/html",
+              "started_at": "2026-11-03T22:29:49Z",
+              "finished": true,
+              "request_headers": {
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "OracleUA/1.0",
+                "X-Test": "1"
+              },
+              "response_headers": {
+                "Content-Length": "130",
+                "Content-Type": "text/html",
+                "Date": "Tue, 03 Nov 2026 22:29:49 GMT",
+                "Server": "BaseHTTP/0.6 Python/3.14.2"
+              },
+              "encoded_body_size": 138
+            },
+            {
+              "id": "7B22A220C5B1327F096C8767286FAC3E",
+              "url": "{BASE}/index.html",
+              "method": "GET",
+              "type": "Document",
+              "status": 200,
+              "status_text": "OK",
+              "mime_type": "text/html",
+              "started_at": "2026-11-03T22:29:50Z",
+              "finished": true,
+              "request_headers": {
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "OracleUA/1.0",
+                "X-Test": "1"
+              },
+              "response_headers": {
+                "Content-Length": "336",
+                "Content-Type": "text/html",
+                "Date": "Tue, 03 Nov 2026 22:29:50 GMT",
+                "Server": "BaseHTTP/0.6 Python/3.14.2"
+              },
+              "encoded_body_size": 138
+            },
+            {
+              "id": "49634C4C7BBF65A819CA1E8E2B63753F",
+              "url": "{BASE}/second.html",
+              "method": "GET",
+              "type": "Document",
+              "status": 200,
+              "status_text": "OK",
+              "mime_type": "text/html",
+              "started_at": "2026-11-03T22:29:50Z",
+              "finished": true,
+              "request_headers": {
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "OracleUA/1.0",
+                "X-Test": "1"
+              },
+              "response_headers": {
+                "Content-Length": "70",
+                "Content-Type": "text/html",
+                "Date": "Tue, 03 Nov 2026 22:29:50 GMT",
+                "Server": "BaseHTTP/0.6 Python/3.14.2"
+              },
+              "encoded_body_size": 137
+            },
+            {
+              "id": "6C406938C89963456C1AB2E9A4D2C80D",
+              "url": "{BASE}/index.html",
+              "method": "GET",
+              "type": "Document",
+              "status": 200,
+              "status_text": "OK",
+              "mime_type": "text/html",
+              "started_at": "2026-11-03T22:29:50Z",
+              "finished": true,
+              "request_headers": {
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "OracleUA/1.0",
+                "X-Test": "1"
+              },
+              "response_headers": {
+                "Content-Length": "336",
+                "Content-Type": "text/html",
+                "Date": "Tue, 03 Nov 2026 22:29:50 GMT",
+                "Server": "BaseHTTP/0.6 Python/3.14.2"
+              },
+              "encoded_body_size": 138
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "network_request_missing",
+      "frame": {
+        "cmd": "network.request",
+        "args": {
+          "id": "nope"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "network_request_not_found",
+          "message": "no captured request with id \"nope\""
+        }
+      }
+    },
+    {
+      "name": "network_request_noargs",
+      "frame": {
+        "cmd": "network.request"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "network_route_abort",
+      "frame": {
+        "cmd": "network.route",
+        "args": {
+          "pattern": "*/second.html",
+          "action": "abort"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "abort",
+          "routed": "*/second.html"
+        }
+      }
+    },
+    {
+      "name": "network_route_noargs",
+      "frame": {
+        "cmd": "network.route"
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "command arguments are required"
+        }
+      }
+    },
+    {
+      "name": "network_unroute",
+      "frame": {
+        "cmd": "network.unroute",
+        "args": {
+          "pattern": "*/second.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "removed": true
+        }
+      }
+    },
+    {
+      "name": "network_unroute_all",
+      "frame": {
+        "cmd": "network.unroute"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "removed": false
+        }
+      }
+    },
+    {
+      "name": "network_route_mock",
+      "frame": {
+        "cmd": "network.route",
+        "args": {
+          "pattern": "{BASE}/api.json",
+          "action": "mock",
+          "status": 201,
+          "body": {
+            "mocked": true
+          },
+          "content_type": "application/json"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "mock",
+          "routed": "{BASE}/api.json"
+        }
+      }
+    },
+    {
+      "name": "eval_fetch_mocked",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "fetch('{BASE}/api.json').then(r=>r.status)"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "201",
+          "exception_text": "",
+          "type": "number",
+          "value": 201
+        }
+      }
+    },
+    {
+      "name": "network_unroute_mock",
+      "frame": {
+        "cmd": "network.unroute",
+        "args": {
+          "pattern": "{BASE}/api.json"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "removed": true
+        }
+      }
+    },
+    {
+      "name": "eval_fetch_real",
+      "frame": {
+        "cmd": "eval",
+        "args": {
+          "expression": "fetch('{BASE}/api.json').then(r=>r.status)"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "description": "200",
+          "exception_text": "",
+          "type": "number",
+          "value": 200
+        }
+      }
+    },
+    {
+      "name": "network_har_badaction",
+      "frame": {
+        "cmd": "network.har",
+        "args": {
+          "action": "x"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "invalid_har_action",
+          "message": "network har action must be \"start\" or \"stop\""
+        }
+      }
+    },
+    {
+      "name": "network_har_start",
+      "frame": {
+        "cmd": "network.har",
+        "args": {
+          "action": "start"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "started": true
+        }
+      }
+    },
+    {
+      "name": "open_second",
+      "frame": {
+        "cmd": "open",
+        "args": {
+          "url": "{BASE}/second.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "open",
+          "url": "{BASE}/second.html",
+          "http_status": 200
+        }
+      }
+    },
+    {
+      "name": "network_har_stop",
+      "frame": {
+        "cmd": "network.har",
+        "args": {
+          "action": "stop"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "entries": 9,
+          "har": {
+            "log": {
+              "creator": {
+                "name": "symbrowse",
+                "version": "0.1.0"
+              },
+              "entries": [
+                {
+                  "startedDateTime": "2026-11-03T22:29:41Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/index.html",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "User-Agent",
+                        "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"
+                      },
+                      {
+                        "name": "sec-ch-ua",
+                        "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+                      },
+                      {
+                        "name": "sec-ch-ua-mobile",
+                        "value": "?0"
+                      },
+                      {
+                        "name": "sec-ch-ua-platform",
+                        "value": "\"macOS\""
+                      },
+                      {
+                        "name": "Upgrade-Insecure-Requests",
+                        "value": "1"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 200,
+                    "statusText": "OK",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Content-Length",
+                        "value": "336"
+                      },
+                      {
+                        "name": "Content-Type",
+                        "value": "text/html"
+                      },
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:41 GMT"
+                      },
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 138,
+                      "mimeType": "text/html"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 138
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:41Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/favicon.ico",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Referer",
+                        "value": "{BASE}/index.html"
+                      },
+                      {
+                        "name": "User-Agent",
+                        "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"
+                      },
+                      {
+                        "name": "sec-ch-ua",
+                        "value": "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+                      },
+                      {
+                        "name": "sec-ch-ua-mobile",
+                        "value": "?0"
+                      },
+                      {
+                        "name": "sec-ch-ua-platform",
+                        "value": "\"macOS\""
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 404,
+                    "statusText": "Not Found",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:41 GMT"
+                      },
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 99,
+                      "mimeType": "text/plain"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 99
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:49Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/boom.html",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "X-Test",
+                        "value": "1"
+                      },
+                      {
+                        "name": "Upgrade-Insecure-Requests",
+                        "value": "1"
+                      },
+                      {
+                        "name": "User-Agent",
+                        "value": "OracleUA/1.0"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 200,
+                    "statusText": "OK",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Content-Length",
+                        "value": "130"
+                      },
+                      {
+                        "name": "Content-Type",
+                        "value": "text/html"
+                      },
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:49 GMT"
+                      },
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 138,
+                      "mimeType": "text/html"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 138
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:50Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/index.html",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "X-Test",
+                        "value": "1"
+                      },
+                      {
+                        "name": "Upgrade-Insecure-Requests",
+                        "value": "1"
+                      },
+                      {
+                        "name": "User-Agent",
+                        "value": "OracleUA/1.0"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 200,
+                    "statusText": "OK",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Content-Type",
+                        "value": "text/html"
+                      },
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:50 GMT"
+                      },
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      },
+                      {
+                        "name": "Content-Length",
+                        "value": "336"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 138,
+                      "mimeType": "text/html"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 138
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:50Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/second.html",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "X-Test",
+                        "value": "1"
+                      },
+                      {
+                        "name": "Upgrade-Insecure-Requests",
+                        "value": "1"
+                      },
+                      {
+                        "name": "User-Agent",
+                        "value": "OracleUA/1.0"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 200,
+                    "statusText": "OK",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Content-Length",
+                        "value": "70"
+                      },
+                      {
+                        "name": "Content-Type",
+                        "value": "text/html"
+                      },
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:50 GMT"
+                      },
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 137,
+                      "mimeType": "text/html"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 137
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:50Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/index.html",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Upgrade-Insecure-Requests",
+                        "value": "1"
+                      },
+                      {
+                        "name": "User-Agent",
+                        "value": "OracleUA/1.0"
+                      },
+                      {
+                        "name": "X-Test",
+                        "value": "1"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 200,
+                    "statusText": "OK",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      },
+                      {
+                        "name": "Content-Length",
+                        "value": "336"
+                      },
+                      {
+                        "name": "Content-Type",
+                        "value": "text/html"
+                      },
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:50 GMT"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 138,
+                      "mimeType": "text/html"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 138
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:54Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/api.json",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "X-Test",
+                        "value": "1"
+                      },
+                      {
+                        "name": "Referer",
+                        "value": "{BASE}/index.html"
+                      },
+                      {
+                        "name": "User-Agent",
+                        "value": "OracleUA/1.0"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 201,
+                    "statusText": "Created",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 52,
+                      "mimeType": "application/json"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 52
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:55Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/api.json",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "User-Agent",
+                        "value": "OracleUA/1.0"
+                      },
+                      {
+                        "name": "X-Test",
+                        "value": "1"
+                      },
+                      {
+                        "name": "Referer",
+                        "value": "{BASE}/index.html"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 200,
+                    "statusText": "OK",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Content-Length",
+                        "value": "11"
+                      },
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:55 GMT"
+                      },
+                      {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 144,
+                      "mimeType": "application/json"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 144
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                },
+                {
+                  "startedDateTime": "2026-11-03T22:29:55Z",
+                  "time": 0,
+                  "request": {
+                    "method": "GET",
+                    "url": "{BASE}/second.html",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Upgrade-Insecure-Requests",
+                        "value": "1"
+                      },
+                      {
+                        "name": "User-Agent",
+                        "value": "OracleUA/1.0"
+                      },
+                      {
+                        "name": "X-Test",
+                        "value": "1"
+                      }
+                    ],
+                    "queryString": null,
+                    "cookies": null,
+                    "headersSize": -1,
+                    "bodySize": -1
+                  },
+                  "response": {
+                    "status": 200,
+                    "statusText": "OK",
+                    "httpVersion": "HTTP/1.1",
+                    "headers": [
+                      {
+                        "name": "Content-Length",
+                        "value": "70"
+                      },
+                      {
+                        "name": "Content-Type",
+                        "value": "text/html"
+                      },
+                      {
+                        "name": "Date",
+                        "value": "Tue, 03 Nov 2026 22:29:55 GMT"
+                      },
+                      {
+                        "name": "Server",
+                        "value": "BaseHTTP/0.6 Python/3.14.2"
+                      }
+                    ],
+                    "cookies": null,
+                    "content": {
+                      "size": 137,
+                      "mimeType": "text/html"
+                    },
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": 137
+                  },
+                  "cache": {},
+                  "timings": {
+                    "receive": 0,
+                    "send": 0,
+                    "wait": 0
+                  }
+                }
+              ],
+              "pages": [
+                {
+                  "id": "page_1",
+                  "pageTimings": {},
+                  "startedDateTime": "2026-11-03T22:29:55.527013Z",
+                  "title": ""
+                }
+              ],
+              "version": "1.2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "downloads_list",
+      "frame": {
+        "cmd": "downloads.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "count": 0,
+          "downloads": []
+        }
+      }
+    },
+    {
+      "name": "download_setdir",
+      "frame": {
+        "cmd": "download.setdir",
+        "args": {
+          "dir": "{WORK}/downloads"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "download_dir": "{WORK}/downloads"
+        }
+      }
+    },
+    {
+      "name": "frame_main",
+      "frame": {
+        "cmd": "frame.main"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "frame": "main"
+        }
+      }
+    },
+    {
+      "name": "frame_select_bad",
+      "frame": {
+        "cmd": "frame.select",
+        "args": {
+          "frame": "nope"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "create isolated world for frame nope: CDP Page.createIsolatedWorld failed (-32602): No frame for given id found"
+        }
+      }
+    },
+    {
+      "name": "frame_tree",
+      "frame": {
+        "cmd": "frame.tree"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "frames": [
+            {
+              "id": "532778F4B4738E4C7E71EBEA3F773B71",
+              "url": "{BASE}/second.html"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "open_frames",
+      "frame": {
+        "cmd": "open",
+        "args": {
+          "url": "{BASE}/frames.html"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "action": "open",
+          "url": "{BASE}/frames.html",
+          "http_status": 200
+        }
+      }
+    },
+    {
+      "name": "frame_tree_frames",
+      "frame": {
+        "cmd": "frame.tree"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "frames": [
+            {
+              "id": "532778F4B4738E4C7E71EBEA3F773B71",
+              "url": "{BASE}/frames.html",
+              "children": [
+                {
+                  "id": "3F66F9D159290F0ACCA7F1268F77FBC7",
+                  "parent_id": "532778F4B4738E4C7E71EBEA3F773B71",
+                  "name": "f1",
+                  "url": "{BASE}/inner.html"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "frame_select_f1",
+      "frame": {
+        "cmd": "frame.select",
+        "args": {
+          "frame": "f1"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "create isolated world for frame f1: CDP Page.createIsolatedWorld failed (-32602): No frame for given id found"
+        }
+      }
+    },
+    {
+      "name": "frame_main2",
+      "frame": {
+        "cmd": "frame.main"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "frame": "main"
+        }
+      }
+    },
+    {
+      "name": "tab_list",
+      "frame": {
+        "cmd": "tab.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "active": "t1",
+          "tabs": [
+            {
+              "id": "t1",
+              "label": "t1",
+              "url": "{BASE}/frames.html",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "session_info_after",
+      "frame": {
+        "cmd": "session.info"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "name": "oracle",
+          "pid": 93652,
+          "started_at": "2026-11-03T22:29:39.3119Z",
+          "active_tabs": 1,
+          "last_activity": "2026-11-03T22:29:56.176388Z",
+          "user_data_dir": "{WORK}/home/Library/Caches/symbrowse/sessions/oracle",
+          "browser_context_id": "context-oracle",
+          "ref_count": 0,
+          "scope": "worktree",
+          "origin_path": "{WORK}"
+        }
+      }
+    },
+    {
+      "name": "state_save",
+      "frame": {
+        "cmd": "state.save",
+        "args": {
+          "name": "oracle1"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "metadata": {
+            "name": "oracle1",
+            "schema_version": 3,
+            "saved_at": "2026-11-03T22:29:56.180211Z",
+            "expires_at": "2026-12-03T22:29:56.180211Z",
+            "key_source": "none",
+            "origins": [
+              {
+                "origin": "{BASE}",
+                "cookie_count": 0,
+                "local_storage_keys": 1,
+                "session_storage_keys": 1
+              }
+            ]
+          },
+          "saved": "oracle1"
+        }
+      }
+    },
+    {
+      "name": "state_list_one",
+      "frame": {
+        "cmd": "state.list"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "schema_version": 3,
+          "states": [
+            "oracle1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "state_show",
+      "frame": {
+        "cmd": "state.show",
+        "args": {
+          "name": "oracle1"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "name": "oracle1",
+          "schema_version": 3,
+          "saved_at": "2026-11-03T22:29:56.180211Z",
+          "expires_at": "2026-12-03T22:29:56.180211Z",
+          "key_source": "none",
+          "origins": [
+            {
+              "origin": "{BASE}",
+              "cookie_count": 0,
+              "local_storage_keys": 1,
+              "session_storage_keys": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "state_load",
+      "frame": {
+        "cmd": "state.load",
+        "args": {
+          "name": "oracle1"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "loaded": "oracle1",
+          "metadata": {
+            "name": "oracle1",
+            "schema_version": 3,
+            "saved_at": "2026-11-03T22:29:56.180211Z",
+            "expires_at": "2026-12-03T22:29:56.180211Z",
+            "key_source": "none",
+            "origins": [
+              {
+                "origin": "{BASE}",
+                "cookie_count": 0,
+                "local_storage_keys": 1,
+                "session_storage_keys": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "state_load_missing",
+      "frame": {
+        "cmd": "state.load",
+        "args": {
+          "name": "nosuch"
+        }
+      },
+      "response": {
+        "success": false,
+        "error": {
+          "code": "operation_failed",
+          "message": "state \"nosuch\" not found"
+        }
+      }
+    },
+    {
+      "name": "state_clear",
+      "frame": {
+        "cmd": "state.clear",
+        "args": {
+          "name": "oracle1"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "cleared": "oracle1"
+        }
+      }
+    }
+  ]
+}

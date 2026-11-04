@@ -218,10 +218,11 @@ impl Server {
             }))
         });
         if options.handler.is_none() {
-            let handlers = match options.startup_provider_owner.clone() {
-                Some(owner) => crate::runtime::handlers_with_startup_owner(spec, Some(owner)),
-                None => crate::runtime::handlers(spec),
-            };
+            let handlers = crate::runtime::handlers_with_startup_owner(
+                spec,
+                options.startup_provider_owner.clone(),
+                Some(Arc::clone(&registry)),
+            );
             let (handler, shutdown_handler) =
                 handlers.map_err(|error| ServerError::Io(io::Error::other(error.message)))?;
             options.handler = Some(handler);

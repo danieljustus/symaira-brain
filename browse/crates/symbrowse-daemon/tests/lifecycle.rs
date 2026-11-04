@@ -15,7 +15,6 @@ mod unix {
         time::{Duration, Instant},
     };
 
-    use sha2::{Digest, Sha256};
     use symbrowse_daemon::{
         Client, ClientOptions, Frame, Response, Server, ServerError, ServerOptions, codes,
         connect_unix,
@@ -322,30 +321,12 @@ mod unix {
     #[test]
     #[allow(clippy::result_large_err)]
     fn operation_timeout_response_keeps_connection_usable_and_matches_go_oracle() {
-        const GO_SERVER_COMMIT: &str = "4180a1072245c542e22b5c294894009f1672fdf8";
-        const GO_SERVER_SHA256: &str =
-            "4dbf19e9c0e067a8e8bf93d5c020875ccda0af2a7e9eb9d00814e19394b38720";
-        const GO_TEST_SHA256: &str =
-            "32ae1c6e56bb77b00b4773e2694dde6290f40ceb62912984310628bd50faae37";
-        let go_server = include_bytes!("../../../internal/daemon/server.go");
-        let go_test = include_bytes!("../../../internal/daemon/server_test.go");
-        let server_hash: String = Sha256::digest(go_server)
-            .iter()
-            .map(|byte| format!("{byte:02x}"))
-            .collect();
-        let test_hash: String = Sha256::digest(go_test)
-            .iter()
-            .map(|byte| format!("{byte:02x}"))
-            .collect();
-        assert_eq!(
-            server_hash, GO_SERVER_SHA256,
-            "Go oracle server at {GO_SERVER_COMMIT}"
-        );
-        assert_eq!(
-            test_hash, GO_TEST_SHA256,
-            "Go timeout oracle test at {GO_SERVER_COMMIT}"
-        );
-
+        // Frozen Go daemon behavior (tests/fixtures/daemon_oracle/go_timeout.json,
+        // captured by capture.py from the real Go daemon); no Go at test time.
+        let oracle: serde_json::Value =
+            serde_json::from_str(include_str!("fixtures/daemon_oracle/go_timeout.json")).unwrap();
+        let recorded = &oracle["results"][0]["responses"];
+        assert!(oracle["provenance"]["go_version"].as_str().is_some());
         let root = root("timeout-live");
         let socket = root.join("default.sock");
         let cancellation_seen = Arc::new(AtomicBool::new(false));
@@ -408,13 +389,15 @@ mod unix {
         reader.read_line(&mut line).unwrap();
         let timeout: Response = serde_json::from_str(&line).unwrap();
         assert!(!timeout.success);
-        let error = timeout.error.unwrap();
+        let error = timeout.error.clone().unwrap();
         assert_eq!(error.code, codes::OPERATION_TIMEOUT);
         assert_eq!(error.message, "daemon operation exceeded its timeout");
+        assert_eq!(serde_json::to_value(&timeout).unwrap(), recorded[0]);
         line.clear();
         reader.read_line(&mut line).unwrap();
         let ping: Response = serde_json::from_str(&line).unwrap();
         assert!(ping.success, "connection unusable after timeout: {ping:?}");
+        assert_eq!(serde_json::to_value(&ping).unwrap(), recorded[1]);
         assert_eq!(ping.data.unwrap()["pong"], true);
         let deadline = Instant::now() + Duration::from_secs(1);
         while !cancellation_seen.load(Ordering::Acquire) && Instant::now() < deadline {

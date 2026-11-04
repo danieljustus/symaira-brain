@@ -1,3 +1,5 @@
+mod gate;
+mod go_cmds;
 mod state;
 mod state_key;
 
@@ -44,6 +46,8 @@ pub struct DispatchRuntime {
     output_cache: OutputCache,
     wayback_cdx_url: String,
     runtime: Runtime,
+    go: gate::GoRuntime,
+    registry: Mutex<Option<Arc<crate::SessionRegistry>>>,
     browser: Mutex<Option<BrowserState>>,
     firefox: AsyncMutex<Option<FirefoxSession>>,
     #[cfg(target_os = "macos")]
@@ -116,6 +120,22 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    /// Mirror the live tab count into the session registry (Go
+    /// `SetActiveTabs`), which `session.list/info` report as `active_tabs`.
+    fn report_active_tabs(&self) {
+        let count = self
+            .browser
+            .lock()
+            .ok()
+            .and_then(|browser| browser.as_ref().map(|state| state.tabs.len() as i64))
+            .unwrap_or(0);
+        if let Ok(slot) = self.registry.lock()
+            && let Some(registry) = slot.as_ref()
+        {
+            let _ = registry.set_active_tabs(&self.spec.session, count);
+        }
+    }
+
     fn shutdown_browser(&self) {
         eprintln!("symbrowse shutdown: begin");
         let browser = self
@@ -214,8 +234,11 @@ impl DispatchRuntime {
             spec.output_cache_dir(),
             Some(std::time::Duration::from_secs(24 * 60 * 60)),
         );
+        let go = gate::GoRuntime::new(&spec);
         Ok(Arc::new(Self {
             spec,
+            go,
+            registry: Mutex::new(None),
             state_store,
             fetch,
             allowlist,
@@ -264,7 +287,121 @@ impl DispatchRuntime {
         }
     }
 
+    /// Go handler parity: policy gate -> journal -> recorder around the
+    /// command, for the commands `cmd/symbrowse/daemon.go` routes that way.
     async fn dispatch(&self, frame: Frame, operation: OperationContext) -> HandlerResult {
+        if !gate::GoRuntime::is_gated(&frame.cmd) {
+            return self.dispatch_inner(frame, operation).await;
+        }
+        let url = gate::GoRuntime::frame_journal_url(&frame);
+        let (allowed, decision, decider) = self
+            .go
+            .decide_and_confirm(&frame.cmd, &url, &operation)
+            .await?;
+        if !allowed {
+            return Err(gate::GoRuntime::gate_denied(&frame.cmd, decision));
+        }
+        let started = std::time::Instant::now();
+        let mut url_before = self.current_origin().await;
+        if url_before.is_empty() {
+            url_before = url.clone();
+        }
+        let result = self.dispatch_inner(frame.clone(), operation).await;
+        let mut url_after = self.current_origin().await;
+        if url_after.is_empty() {
+            url_after = url;
+        }
+        let outcome = result.as_ref().map(|_| ()).map_err(Clone::clone);
+        let journal_warning = self.go.journal_append(
+            &frame,
+            &decider,
+            url_before,
+            url_after,
+            started.elapsed().as_millis() as u64,
+            &outcome,
+        );
+        if result.is_ok() && !frame.cmd.starts_with("fetch.") && frame.cmd != "wayback.snapshots" {
+            self.go.record_frame(&frame);
+        }
+        match (result, journal_warning) {
+            (Ok((data, mut warnings)), Some(message)) => {
+                warnings.push(Warning {
+                    kind: "journal".into(),
+                    severity: "warning".into(),
+                    message,
+                    ..Default::default()
+                });
+                Ok((data, warnings))
+            }
+            (result, _) => result,
+        }
+    }
+
+    /// Origin of the live Chrome page (Go journal `url_before/url_after`).
+    async fn current_origin(&self) -> String {
+        let Some(page) = self.live_page_for_journal() else {
+            return String::new();
+        };
+        tokio::time::timeout(Duration::from_secs(2), go_cmds_origin(&page))
+            .await
+            .unwrap_or_default()
+    }
+
+    fn live_page_for_journal(&self) -> Option<ChromePage> {
+        self.browser
+            .lock()
+            .ok()
+            .and_then(|browser| browser.as_ref().map(|state| state.page.clone()))
+    }
+
+    async fn dispatch_inner(&self, frame: Frame, operation: OperationContext) -> HandlerResult {
+        match frame.cmd.as_str() {
+            "policy.explain" => {
+                return Ok((Some(self.go.policy_explain(&frame)?), Vec::new()));
+            }
+            "journal.tail" | "journal.show" => {
+                return Ok((Some(self.go.journal_command(&frame)?), Vec::new()));
+            }
+            "oob.status" | "oob.complete" | "oob.cancel" | "handoff" => {
+                // Go journals OOB frames with decider "human" after the fact.
+                let started = std::time::Instant::now();
+                let result = if frame.cmd == "handoff" {
+                    self.go.handoff(&frame, &operation).await
+                } else {
+                    self.go.oob_command(&frame)
+                };
+                let outcome = result.as_ref().map(|_| ()).map_err(Clone::clone);
+                let warning = self.go.journal_append(
+                    &frame,
+                    "human",
+                    String::new(),
+                    String::new(),
+                    started.elapsed().as_millis() as u64,
+                    &outcome,
+                );
+                let warnings = warning
+                    .map(|message| {
+                        vec![Warning {
+                            kind: "journal".into(),
+                            severity: "warning".into(),
+                            message,
+                            ..Default::default()
+                        }]
+                    })
+                    .unwrap_or_default();
+                return result.map(|data| (Some(data), warnings));
+            }
+            "flow.record.start" | "flow.record.stop" | "flow.record.status" => {
+                return Ok((Some(self.go.record_command(&frame)?), Vec::new()));
+            }
+            command
+                if self.spec.engine == "chrome"
+                    && go_cmds::GO_CHROME_COMMANDS.contains(&command) =>
+            {
+                return self.go_chrome_command(&frame, &operation).await;
+            }
+            _ => {}
+        }
         #[cfg(target_os = "macos")]
         if self.spec.engine == "safari-bidi"
             && matches!(frame.cmd.as_str(), "click" | "fill" | "type" | "press")
@@ -1121,6 +1258,9 @@ impl DispatchRuntime {
                 });
             }
         };
+        if matches!(frame.cmd.as_str(), "tab.new" | "window.new" | "tab.close") {
+            self.report_active_tabs();
+        }
         Ok((Some(data), Vec::new()))
     }
 
@@ -1469,6 +1609,8 @@ impl DispatchRuntime {
             }],
             network_capture: None,
         });
+        drop(guard);
+        self.report_active_tabs();
         Ok(result)
     }
 
@@ -1568,9 +1710,7 @@ impl DispatchRuntime {
                         }
                     } else {
                         let page = self.ensure_browser(operation).await?;
-                        page.open_with_timeout(origin, operation.remaining())
-                            .await
-                            .map_err(navigation_error)?;
+                        Self::go_navigate(&page, "open", origin, operation).await?;
                         for cookie in &entry.cookies {
                             let cookie_value =
                                 serde_json::to_value(cookie).map_err(runtime_error)?;
@@ -1594,10 +1734,16 @@ impl DispatchRuntime {
                         let script = format!(
                             "(() => {{ for (const [k,v] of Object.entries({local})) localStorage.setItem(k,v); for (const [k,v] of Object.entries({session})) sessionStorage.setItem(k,v); return true; }})()"
                         );
-                        page.evaluate_script(&script)
-                            .await
-                            .map(|_| Vec::<String>::new())
-                            .map_err(|e| e.to_string())
+                        // Go (`RestoreCookiesAndStorage`) writes storage only when
+                        // the page origin is the saved origin; otherwise skips.
+                        if go_cmds_origin(&page).await == *origin {
+                            page.evaluate_script(&script)
+                                .await
+                                .map(|_| Vec::<String>::new())
+                                .map_err(|e| e.to_string())
+                        } else {
+                            Ok(Vec::<String>::new())
+                        }
                     };
                     if let Err(error) = result {
                         warnings.push(Warning {
@@ -1619,21 +1765,19 @@ impl DispatchRuntime {
     }
 }
 
-pub fn handlers(
-    spec: SessionSpec,
-) -> Result<(crate::DaemonHandler, crate::ShutdownHandler), DaemonError> {
-    handlers_with_startup_owner(spec, None)
-}
-
 pub(crate) fn handlers_with_startup_owner(
     spec: SessionSpec,
     owner: Option<std::path::PathBuf>,
+    registry: Option<Arc<crate::SessionRegistry>>,
 ) -> Result<(crate::DaemonHandler, crate::ShutdownHandler), DaemonError> {
     let runtime = DispatchRuntime::new_with_startup_owner(
         spec,
         "https://web.archive.org/cdx/search/cdx",
         owner,
     )?;
+    if let Ok(mut slot) = runtime.registry.lock() {
+        *slot = registry;
+    }
     let dispatch_runtime = runtime.clone();
     let shutdown_runtime = runtime;
     let handler = Arc::new(move |frame, operation| dispatch_runtime.handle(frame, operation));
@@ -1770,12 +1914,25 @@ fn origin_host(origin: &str) -> String {
     rest.split([':', '/']).next().unwrap_or_default().to_owned()
 }
 
+async fn go_cmds_origin(page: &ChromePage) -> String {
+    match page.evaluate_expression("location.origin").await {
+        Ok(result) if result["exception_text"] == json!("") => {
+            result["value"].as_str().unwrap_or_default().to_owned()
+        }
+        _ => String::new(),
+    }
+}
+
 fn object_args(frame: &Frame) -> Result<&serde_json::Map<String, Value>, DaemonError> {
-    frame
-        .args
-        .as_ref()
-        .and_then(Value::as_object)
-        .ok_or_else(|| malformed(format!("{} requires an object args payload", frame.cmd)))
+    // Absent/null args behave like an empty object (Go decodes optional args
+    // into a zero value); required fields still fail in `required_string`.
+    static EMPTY: std::sync::OnceLock<serde_json::Map<String, Value>> = std::sync::OnceLock::new();
+    match frame.args.as_ref() {
+        None | Some(Value::Null) => Ok(EMPTY.get_or_init(serde_json::Map::new)),
+        Some(value) => value
+            .as_object()
+            .ok_or_else(|| malformed(format!("{} requires an object args payload", frame.cmd))),
+    }
 }
 
 fn required_string<'a>(
