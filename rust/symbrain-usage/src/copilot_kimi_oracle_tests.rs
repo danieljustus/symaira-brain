@@ -106,6 +106,14 @@ fn normalized_requests(requests: &serde_json::Value) -> serde_json::Value {
                     .collect(),
             );
         }
+        // The device name is the recording host's name, a host fact like the
+        // native gates treat it; the replay host sends its own.
+        if request["headers"].get("x-msh-device-name").is_some() {
+            let host = super::super::provider_identity::hostname();
+            request["headers"]["x-msh-device-name"] = serde_json::json!([host]);
+            request["header_value_hex"]["x-msh-device-name"] =
+                serde_json::json!([hex(host.as_bytes())]);
+        }
     }
     requests
 }
