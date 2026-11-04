@@ -1,7 +1,13 @@
-//! Fresh Go constructor/credential/request replay with synthetic child providers.
+//! Frozen Go constructor/credential/request replay with synthetic child providers.
+//!
+//! The Go evidence (`fixtures/usage_768_credential_go.json`) was recorded from the immutable Go
+//! revision by `scripts/oracle-freeze/record_usage_evidence.py credential`; nothing here runs Go.
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex};
 use symbrain_usage::{Request, Response, Service, Transport};
+
+#[path = "support/frozen_go_evidence.rs"]
+mod frozen;
 
 struct UnauthorizedTransport(Mutex<Vec<BTreeMap<String, String>>>);
 impl Transport for UnauthorizedTransport {
@@ -33,11 +39,15 @@ fn set(name: &str, value: &str) {
 }
 
 #[test]
-#[ignore = "fresh immutable Go evidence supplied by the native credential gate"]
-fn usage_credential_768_matches_fresh_go_constructors_and_requests() {
-    let path = std::env::var("USAGE_768_ORACLE").expect("fresh Go credential evidence required");
-    let records: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(path).expect("Go evidence")).expect("oracle JSON");
+fn usage_credential_768_matches_frozen_go_constructors_and_requests() {
+    // Recorded on darwin (keychain:// references go through the macOS `security` helper).
+    if !cfg!(target_os = "macos") {
+        eprintln!("SKIP frozen credential evidence was recorded on darwin; running elsewhere");
+        return;
+    }
+    let evidence = frozen::restore(include_str!("fixtures/usage_768_credential_go.json"));
+    frozen::install_fake_symvault(&evidence.dir("<BIN>"));
+    let records = evidence.records();
     assert_eq!(
         records.len(),
         44,
@@ -110,16 +120,6 @@ fn usage_credential_768_matches_fresh_go_constructors_and_requests() {
         "credential oracle: {} cases; {known_divergences} known #930 divergences",
         records.len()
     );
-    if let Ok(path) = std::env::var("USAGE_768_NATIVE") {
-        std::fs::write(
-            path,
-            serde_json::to_vec_pretty(
-                &serde_json::json!({"cases":records.len(),"passed":records.len(),"failed":0}),
-            )
-            .expect("receipt"),
-        )
-        .expect("write receipt");
-    }
 }
 
 fn validate_corpus(records: &[serde_json::Value]) {

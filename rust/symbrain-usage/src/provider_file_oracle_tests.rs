@@ -1,9 +1,13 @@
-//! Fresh file-reader/constructor replay; automatic system Keychain is isolated.
+//! Frozen Go file-reader/constructor replay; automatic system Keychain is isolated.
+//! Evidence: `tests/fixtures/usage_768_provider_files_go.json` (`record_usage_evidence.py files`).
 use crate::{Request, Response, Service, Transport};
 use sha2::{Digest, Sha256};
 use std::cell::Cell;
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex};
+
+#[path = "../tests/support/frozen_go_evidence.rs"]
+pub(super) mod frozen;
 
 struct Unauthorized(Mutex<Vec<String>>);
 impl Transport for Unauthorized {
@@ -59,15 +63,27 @@ fn prepare(record: &serde_json::Value) {
     );
 }
 #[test]
-#[ignore = "fresh immutable Go file evidence supplied by provider-files gate"]
-fn provider_files_oracle_matches_fresh_go() {
-    let fixture = std::env::var("USAGE_FILES_ORACLE").expect("fresh Go fixture required");
-    let input = std::env::var("USAGE_FILES_INPUT").expect("source-bound cases required");
-    let input: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(input).expect("source cases")).expect("cases");
-    let records: Vec<serde_json::Value> =
-        serde_json::from_slice(&std::fs::read(fixture).expect("Go provider files evidence"))
-            .expect("oracle");
+fn provider_files_oracle_matches_frozen_go() {
+    frozen::in_child(module_path!(), "provider_files_oracle_replay");
+}
+
+#[test]
+#[ignore = "child process of provider_files_oracle_matches_frozen_go (mutates process environment)"]
+fn provider_files_oracle_replay() {
+    // Recorded on darwin; the credential tree and paths are platform specific.
+    if !cfg!(target_os = "macos") {
+        eprintln!("SKIP frozen provider-file evidence was recorded on darwin; running elsewhere");
+        return;
+    }
+    let evidence = frozen::restore(include_str!(
+        "../tests/fixtures/usage_768_provider_files_go.json"
+    ));
+    let input: Vec<serde_json::Value> = evidence
+        .documents("input")
+        .as_array()
+        .expect("source cases")
+        .clone();
+    let records = evidence.records();
     assert_eq!(records.len(), 86, "complete provider file corpus");
     let expected: BTreeSet<_> = input
         .iter()
@@ -89,16 +105,6 @@ fn provider_files_oracle_matches_fresh_go() {
         }
     }
     assert_eq!((compared, gated), (85, 1));
-    if let Ok(path) = std::env::var("USAGE_FILES_NATIVE") {
-        std::fs::write(
-            path,
-            serde_json::to_vec_pretty(
-                &serde_json::json!({"cases":86,"passed":86,"failed":0,"full_reports":85,"gated":1}),
-            )
-            .unwrap(),
-        )
-        .unwrap();
-    }
 }
 
 fn compare_record(record: &serde_json::Value) -> bool {
@@ -118,7 +124,15 @@ fn compare_record(record: &serde_json::Value) -> bool {
         );
     }
     if ambiguous {
-        assert!(super::claude_file_token_in(std::path::Path::new(path)).is_none());
+        // Go's map iteration is unordered, so any nonempty token is a Go-possible outcome; the
+        // native choice is the deterministic sorted one (see `claude_selected_token`).
+        let selected = super::claude_file_token_in(std::path::Path::new(path))
+            .unwrap_or_else(|| panic!("{}: a Go-possible token must be selected", record["id"]));
+        assert!(
+            ["spare-token", "work-token"].contains(&selected.as_str()),
+            "{}: {selected}",
+            record["id"]
+        );
         assert!(
             record["report"]["providers"][0]["configured"]
                 .as_bool()

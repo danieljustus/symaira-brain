@@ -1,0 +1,5085 @@
+{
+ "schema_version": 1,
+ "task_id": "ORACLE-FREEZE-781",
+ "issue": "https://github.com/danieljustus/symaira-brain/issues/781",
+ "base_commit": "ff87f4cdbf9a13d5dc259e6883c6072b33690965",
+ "stage": "initial",
+ "scope": "root workspace only; every place a test/check/script invokes Go or a Go binary, or reads a Go oracle env var",
+ "exclusions": [
+  "browse/**",
+  "rust/symbrain-memory/**",
+  "memory_* and memory_sync* tests",
+  "scripts/memory-*-oracle/**",
+  "CI workflows (.github/workflows)",
+  "MIGRATION-RUST.md / migration/contract-matrix.csv"
+ ],
+ "method": "rg over Makefile, scripts/**, guard/scripts/**, .github/tests/**, migration/evidence/**, rust/**, fuzz/** for go toolchain commands, run-go-oracle, GOTOOLCHAIN, SYMBRAIN_GO_BINARY, *_GO_ORACLE env vars, symbrain-go/--go-binary references; plus manual review of #[ignore]d tests and tests that read Go sources.",
+ "items": [
+  {
+   "id": "makefile:rust-go-printable-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "rust-go-printable-check",
+   "go_invocation": "go run scripts/generate-go-printable-table.go -check",
+   "fixtures": [
+    "rust/symbrain-core/src/go_printable.rs"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare against Go unicode tables",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:usage-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "usage-oracle-check",
+   "go_invocation": "go run ./scripts/usage-oracle -check",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/{provider_graph,provider_cases,*_authenticated_report,*_token_oracle,kimi_file_access_oracle,nous_*,...}.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:usage-opencode-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "usage-opencode-check",
+   "go_invocation": "GOTOOLCHAIN=go1.26.7 go run ./scripts/usage-request-oracle/opencode -check",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/opencode_discovery_go_dependency_update_20261008.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare, needs downloadable go1.26.7",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:usage-opencode-historical-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "usage-opencode-historical-check",
+   "go_invocation": "make -C $HISTORICAL_USAGE_ROOT usage-opencode-check",
+   "fixtures": [
+    "rust/symbrain-usage/tests/fixtures/opencode_discovery.json"
+   ],
+   "in_rust_check_before": false,
+   "note": "revalidates frozen generator in an immutable historical checkout; not in gate",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:usage-gateway-lifecycle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "usage-gateway-lifecycle-check",
+   "go_invocation": "go test ./internal/gateway -run TestUsageDiscoveryIsDeferredAndRepeatedPerCall",
+   "fixtures": [],
+   "in_rust_check_before": true,
+   "note": "runs a Go unit test of the production Go gateway; no fixture",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:activity-cli-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "activity-cli-oracle-check",
+   "go_invocation": "go build symbrain-go + go run ./scripts/activity-cli-oracle -check",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/activity_cli_oracle.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare through a built Go binary",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:policy-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "policy-oracle-check",
+   "go_invocation": "go run ./scripts/policy-oracle -check",
+   "fixtures": [
+    "rust/symbrain-policy/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:xdg-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "xdg-oracle-check",
+   "go_invocation": "go run ./scripts/xdg-oracle -check",
+   "fixtures": [
+    "rust/symbrain-core/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:cli-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "cli-oracle-check",
+   "go_invocation": "go build symbrain-go + go run ./scripts/cli-oracle -check",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare through a built Go binary",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:db-memory-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "db-memory-oracle-check",
+   "go_invocation": "go run ./scripts/db-memory-oracle -check",
+   "fixtures": [
+    "rust/symbrain-memory/tests/fixtures/db_memory_oracle.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "memory oracle; fixture owned by the memory workers",
+   "owner": "memory workers (fixture)",
+   "excluded": true,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:guard-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "guard-oracle-check",
+   "go_invocation": "go run ./guard/scripts/guard-oracle -check",
+   "fixtures": [
+    "rust/symbrain-guard-core/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:guard-doctor-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "guard-doctor-oracle-check",
+   "go_invocation": "go run ./guard/scripts/guard-doctor-oracle -check",
+   "fixtures": [
+    "rust/symbrain-guard-core/tests/fixtures/doctor_oracle.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:guard-scan-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "guard-scan-oracle-check",
+   "go_invocation": "guard/scripts/guard-scan-oracle/run.sh check (oracle.py builds pinned Go, go run helper)",
+   "fixtures": [
+    "guard/scripts/guard-scan-oracle/fixture.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare through pinned Go build",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:guard-scan-oracle-test",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "guard-scan-oracle-test",
+   "go_invocation": "python3 -m unittest guard/scripts/guard-scan-oracle",
+   "fixtures": [],
+   "in_rust_check_before": true,
+   "note": "python unit tests of the oracle; checked for Go use below",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:catalog-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "catalog-oracle-check",
+   "go_invocation": "go run ./scripts/catalog-oracle -check",
+   "fixtures": [
+    "rust/symbrain-catalog/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:audit-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "audit-oracle-check",
+   "go_invocation": "go run ./scripts/audit-oracle -check",
+   "fixtures": [
+    "rust/symbrain-audit/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:patterns-activity-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "patterns-activity-oracle-check",
+   "go_invocation": "go run ./scripts/patterns-activity-oracle -check",
+   "fixtures": [
+    "rust/symbrain-activity/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:mcp-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "mcp-oracle-check",
+   "go_invocation": "go run ./scripts/mcp-oracle -check",
+   "fixtures": [
+    "rust/symbrain-mcp/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:gateway-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "gateway-oracle-check",
+   "go_invocation": "go run ./scripts/gateway-oracle -check",
+   "fixtures": [
+    "rust/symbrain-gateway/tests/fixtures/gateway_cases.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:skills-runner-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "skills-runner-oracle-check",
+   "go_invocation": "go run ./scripts/skills-runner-oracle -check",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/runner_oracle.json"
+   ],
+   "in_rust_check_before": false,
+   "note": "regenerate-and-compare (was NOT in rust-check)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:broker-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "broker-oracle-check",
+   "go_invocation": "go run ./scripts/broker-oracle -check",
+   "fixtures": [
+    "rust/symbrain-broker/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:managed-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "managed-oracle-check",
+   "go_invocation": "go test ./internal/managed -run TestRustManagedOracleFixture",
+   "fixtures": [
+    "rust/symbrain-managed/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "Go test regenerates and compares",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:skills-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "skills-oracle-check",
+   "go_invocation": "go run ./scripts/skills-oracle -check",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:skills-config-toml-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "skills-config-toml-oracle-check",
+   "go_invocation": "go run ./scripts/skills-config-toml-oracle -check",
+   "fixtures": [
+    "rust/symbrain-skills/tests/fixtures/config_toml_oracle.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare against the real Go TOML decoders",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:skills-raw-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "skills-raw-oracle-check",
+   "go_invocation": "python3 scripts/skills-native-oracle/raw_layer_oracle.py check (needs full git history and Go 1.26.7)",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/skills_raw_go_oracle.json"
+   ],
+   "in_rust_check_before": false,
+   "note": "re-runs the pinned Go binary; was NOT in rust-check",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:instructions-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "instructions-oracle-check",
+   "go_invocation": "go run ./scripts/instructions-oracle -check",
+   "fixtures": [
+    "rust/symbrain-instructions/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare (needs git history)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:adapters-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "adapters-oracle-check",
+   "go_invocation": "go run ./scripts/adapters-oracle -check",
+   "fixtures": [
+    "rust/symbrain-adapter/tests/fixtures/oracle_expectations.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:install-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "install-oracle-check",
+   "go_invocation": "go run ./scripts/install-oracle -check",
+   "fixtures": [
+    "rust/symbrain-harness/tests/fixtures/install_oracle_{darwin,linux,windows}.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare; only the host-OS fixture is checkable",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:profile-remove-oracle-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "profile-remove-oracle-check",
+   "go_invocation": "go run ./scripts/profile-remove-oracle -check",
+   "fixtures": [
+    "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_{darwin,linux}.json"
+   ],
+   "in_rust_check_before": true,
+   "note": "regenerate-and-compare; only the host-OS fixture is checkable",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:init-differential",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "init-differential",
+   "go_invocation": "scripts/init-oracle/compare.py: go build symbrain-go from a HEAD worktree, run Go vs Rust",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "live Go-vs-Rust differential for `symbrain init`",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:parity-smoke",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "parity-smoke",
+   "go_invocation": "go build symbrain-go; guard-scan parity; python3 scripts/rust-differential.py GO RUST",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "live Go-vs-Rust differential, 700+ cases (CI runs `make rust-check parity-smoke`)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:build-rust",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "build-rust",
+   "go_invocation": "go build symbrain-go + cargo build",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "builds the Go fallback binary",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:rust-guard-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "rust-guard-check",
+   "go_invocation": "go run ./guard/scripts/guard-oracle -check; go test ./guard/internal/capability -run TestCapabilityOracle*",
+   "fixtures": [
+    "rust/symbrain-guard-core/tests/fixtures/capability_oracle.json"
+   ],
+   "in_rust_check_before": false,
+   "note": "Go oracle + Go capability test, then cargo fmt/check/clippy/test",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:build",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "build",
+   "go_invocation": "go build ./cmd/symbrain",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "Go build of the product",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:test",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "test",
+   "go_invocation": "go test ./...",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "Go unit tests",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:test-race",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "test-race",
+   "go_invocation": "go test -race ./...",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "Go race tests",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:test-memory-large",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "test-memory-large",
+   "go_invocation": "go test -tags memory_large ./internal/memory/db",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "memory Go storage measurement; memory-owned",
+   "owner": "memory workers (fixture)",
+   "excluded": true,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:vet",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "vet",
+   "go_invocation": "go vet ./...",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "Go static analysis",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:lint",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "lint",
+   "go_invocation": "vet + fmt-check (go vet, gofmt)",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "Go lint gate",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:fmt",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "fmt",
+   "go_invocation": "gofmt -w -s",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "Go formatting",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:fmt-check",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "fmt-check",
+   "go_invocation": "gofmt -l",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "Go format check",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:coverage",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "coverage",
+   "go_invocation": "go test ./... -coverprofile + scripts/rust-coverage/go_oracles.py (go run -cover)",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "default make target; Go coverage badge",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "makefile:clean",
+   "path": "Makefile",
+   "kind": "make-target",
+   "target": "clean",
+   "go_invocation": "go clean -testcache",
+   "fixtures": [],
+   "in_rust_check_before": false,
+   "note": "cleanup",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:guard/scripts/guard-decide-oracle/native_repair.py",
+   "path": "guard/scripts/guard-decide-oracle/native_repair.py",
+   "kind": "python-oracle",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:guard/scripts/guard-decide-oracle/oracle.py",
+   "path": "guard/scripts/guard-decide-oracle/oracle.py",
+   "kind": "python-oracle",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:guard/scripts/guard-decide-oracle/repair_parity.py",
+   "path": "guard/scripts/guard-decide-oracle/repair_parity.py",
+   "kind": "python-oracle",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:guard/scripts/guard-decide-oracle/test_repair_parity.py",
+   "path": "guard/scripts/guard-decide-oracle/test_repair_parity.py",
+   "kind": "python-oracle",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:guard/scripts/guard-grants-oracle/oracle.py",
+   "path": "guard/scripts/guard-grants-oracle/oracle.py",
+   "kind": "python-oracle",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:guard/scripts/guard-scan-oracle/oracle.py",
+   "path": "guard/scripts/guard-scan-oracle/oracle.py",
+   "kind": "python-oracle",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/src/lib.rs",
+   "path": "rust/symbrain-cli/src/lib.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/src/passthrough_tests.rs",
+   "path": "rust/symbrain-cli/src/passthrough_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/src/setup_source_build.rs",
+   "path": "rust/symbrain-cli/src/setup_source_build.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/activity_cli_oracle_tests.rs",
+   "path": "rust/symbrain-cli/tests/activity_cli_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/activity_validation_tests.rs",
+   "path": "rust/symbrain-cli/tests/activity_validation_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/cli_tree_tests.rs",
+   "path": "rust/symbrain-cli/tests/cli_tree_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/common/skills_restore_contract.rs",
+   "path": "rust/symbrain-cli/tests/common/skills_restore_contract.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/config_harness_native.rs",
+   "path": "rust/symbrain-cli/tests/config_harness_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/doctor_fix_native.rs",
+   "path": "rust/symbrain-cli/tests/doctor_fix_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/doctor_memory_schema.rs",
+   "path": "rust/symbrain-cli/tests/doctor_memory_schema.rs",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/doctor_native.rs",
+   "path": "rust/symbrain-cli/tests/doctor_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs",
+   "path": "rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/harness_health_tests.rs",
+   "path": "rust/symbrain-cli/tests/harness_health_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/harness_list_tests.rs",
+   "path": "rust/symbrain-cli/tests/harness_list_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/harness_nonutf8.rs",
+   "path": "rust/symbrain-cli/tests/harness_nonutf8.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/health_stdio_windows_diagnostic.rs",
+   "path": "rust/symbrain-cli/tests/health_stdio_windows_diagnostic.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/init_cli_tests.rs",
+   "path": "rust/symbrain-cli/tests/init_cli_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/memory_serve_oracle.rs",
+   "path": "rust/symbrain-cli/tests/memory_serve_oracle.rs",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_oracle_env"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/memory_serve_support/mod.rs",
+   "path": "rust/symbrain-cli/tests/memory_serve_support/mod.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/memory_set_sigpipe.rs",
+   "path": "rust/symbrain-cli/tests/memory_set_sigpipe.rs",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/memory_store_creation.rs",
+   "path": "rust/symbrain-cli/tests/memory_store_creation.rs",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/profile_cli_tests.rs",
+   "path": "rust/symbrain-cli/tests/profile_cli_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/project_path_native.rs",
+   "path": "rust/symbrain-cli/tests/project_path_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/setup_config_pwd.rs",
+   "path": "rust/symbrain-cli/tests/setup_config_pwd.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/setup_fix_native.rs",
+   "path": "rust/symbrain-cli/tests/setup_fix_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/setup_repair_native.rs",
+   "path": "rust/symbrain-cli/tests/setup_repair_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/skills_doctor_native.rs",
+   "path": "rust/symbrain-cli/tests/skills_doctor_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/skills_log_native.rs",
+   "path": "rust/symbrain-cli/tests/skills_log_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/skills_raw_oracle.rs",
+   "path": "rust/symbrain-cli/tests/skills_raw_oracle.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/skills_render_drift.rs",
+   "path": "rust/symbrain-cli/tests/skills_render_drift.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/skills_sync_legacy_roots.rs",
+   "path": "rust/symbrain-cli/tests/skills_sync_legacy_roots.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/skills_tools_oracle.rs",
+   "path": "rust/symbrain-cli/tests/skills_tools_oracle.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/sync_native.rs",
+   "path": "rust/symbrain-cli/tests/sync_native.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/usage_native_gates_cli.rs",
+   "path": "rust/symbrain-cli/tests/usage_native_gates_cli.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/usage_optin_tests.rs",
+   "path": "rust/symbrain-cli/tests/usage_optin_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-cli/tests/usage_selection_tests.rs",
+   "path": "rust/symbrain-cli/tests/usage_selection_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-gateway/tests/gateway_tests.rs",
+   "path": "rust/symbrain-gateway/tests/gateway_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-harness/tests/go_parse_errors.rs",
+   "path": "rust/symbrain-harness/tests/go_parse_errors.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-memory/src/lsh.rs",
+   "path": "rust/symbrain-memory/src/lsh.rs",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "rust/symbrain-memory/** is owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-skills/tests/config_toml_oracle.rs",
+   "path": "rust/symbrain-skills/tests/config_toml_oracle.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/src/copilot_kimi_oracle_tests.rs",
+   "path": "rust/symbrain-usage/src/copilot_kimi_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/src/device_oracle_tests.rs",
+   "path": "rust/symbrain-usage/src/device_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/src/device_oracle_wire_tests.rs",
+   "path": "rust/symbrain-usage/src/device_oracle_wire_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/src/provider_file_oracle_tests.rs",
+   "path": "rust/symbrain-usage/src/provider_file_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/src/retry_after_oracle_tests.rs",
+   "path": "rust/symbrain-usage/src/retry_after_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/src/status_oracle_tests.rs",
+   "path": "rust/symbrain-usage/src/status_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/tests/credential_reference_tests.rs",
+   "path": "rust/symbrain-usage/tests/credential_reference_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symbrain-usage/tests/hermes_credential_tests.rs",
+   "path": "rust/symbrain-usage/tests/hermes_credential_tests.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:rust/symguard-cli/tests/standalone.rs",
+   "path": "rust/symguard-cli/tests/standalone.rs",
+   "kind": "rust-test",
+   "role": "rust-test",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/activity-validation-oracle/replay.py",
+   "path": "scripts/activity-validation-oracle/replay.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/activity-validation-oracle/run.sh",
+   "path": "scripts/activity-validation-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/build-module-packages.sh",
+   "path": "scripts/build-module-packages.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/ci-go-test-shards.sh",
+   "path": "scripts/ci-go-test-shards.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/ci-go-test-weights.tsv",
+   "path": "scripts/ci-go-test-weights.tsv",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/config-harness-oracle/replay.py",
+   "path": "scripts/config-harness-oracle/replay.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/config-harness-oracle/run.sh",
+   "path": "scripts/config-harness-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/dist-oracle/smoke-hybrid-fallback.sh",
+   "path": "scripts/dist-oracle/smoke-hybrid-fallback.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/doctor-repair-oracle/replay.py",
+   "path": "scripts/doctor-repair-oracle/replay.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/doctor-repair-oracle/run.sh",
+   "path": "scripts/doctor-repair-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/doctor-stdout-oracle/embedded.py",
+   "path": "scripts/doctor-stdout-oracle/embedded.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/doctor-stdout-oracle/fix.py",
+   "path": "scripts/doctor-stdout-oracle/fix.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/doctor-stdout-oracle/identity.py",
+   "path": "scripts/doctor-stdout-oracle/identity.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/doctor-stdout-oracle/process.py",
+   "path": "scripts/doctor-stdout-oracle/process.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/doctor-stdout-oracle/run.sh",
+   "path": "scripts/doctor-stdout-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/gen-gorand.py",
+   "path": "scripts/gen-gorand.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/guard-standalone-oracle/command_tree.py",
+   "path": "scripts/guard-standalone-oracle/command_tree.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/guard-standalone-oracle/raw_paths.py",
+   "path": "scripts/guard-standalone-oracle/raw_paths.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/guard-standalone-oracle/run.sh",
+   "path": "scripts/guard-standalone-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/guard-standalone-oracle/windows_path_reference.py",
+   "path": "scripts/guard-standalone-oracle/windows_path_reference.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/init-oracle/compare.py",
+   "path": "scripts/init-oracle/compare.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/init-oracle/test_compare.py",
+   "path": "scripts/init-oracle/test_compare.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/mcp-differential.py",
+   "path": "scripts/mcp-differential.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/controls.py",
+   "path": "scripts/memory-cli-oracle/controls.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/corrupt_reads.py",
+   "path": "scripts/memory-cli-oracle/corrupt_reads.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/creation_controls.py",
+   "path": "scripts/memory-cli-oracle/creation_controls.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/deletes.py",
+   "path": "scripts/memory-cli-oracle/deletes.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/replay.py",
+   "path": "scripts/memory-cli-oracle/replay.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/sync_controls.py",
+   "path": "scripts/memory-cli-oracle/sync_controls.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/sync_pull_controls.py",
+   "path": "scripts/memory-cli-oracle/sync_pull_controls.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/sync_relay_controls.py",
+   "path": "scripts/memory-cli-oracle/sync_relay_controls.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/sync_time_fixture.py",
+   "path": "scripts/memory-cli-oracle/sync_time_fixture.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/test_revision_binding.py",
+   "path": "scripts/memory-cli-oracle/test_revision_binding.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/write_boundaries.py",
+   "path": "scripts/memory-cli-oracle/write_boundaries.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/write_failures.py",
+   "path": "scripts/memory-cli-oracle/write_failures.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/write_gate.py",
+   "path": "scripts/memory-cli-oracle/write_gate.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-cli-oracle/writes.py",
+   "path": "scripts/memory-cli-oracle/writes.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-evidence-oracle/replay.py",
+   "path": "scripts/memory-evidence-oracle/replay.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-historical-oracle/controls.py",
+   "path": "scripts/memory-historical-oracle/controls.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-historical-oracle/replay.py",
+   "path": "scripts/memory-historical-oracle/replay.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-historical-oracle/run.sh",
+   "path": "scripts/memory-historical-oracle/run.sh",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-historical-oracle/validate.py",
+   "path": "scripts/memory-historical-oracle/validate.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-http-oracle/run.py",
+   "path": "scripts/memory-http-oracle/run.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-http-oracle/support.py",
+   "path": "scripts/memory-http-oracle/support.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-mcp-oracle/catalog.py",
+   "path": "scripts/memory-mcp-oracle/catalog.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-schema-oracle/replay.py",
+   "path": "scripts/memory-schema-oracle/replay.py",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/memory-schema-oracle/run.sh",
+   "path": "scripts/memory-schema-oracle/run.sh",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "memory_* oracle/tests are owned by the memory workers",
+   "excluded": true,
+   "owner": "memory workers",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/run-go-oracle.sh",
+   "path": "scripts/run-go-oracle.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/rust-coverage/go_oracles.py",
+   "path": "scripts/rust-coverage/go_oracles.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/rust-differential.py",
+   "path": "scripts/rust-differential.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/rust-release/manifests.py",
+   "path": "scripts/rust-release/manifests.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/rust-release/package.py",
+   "path": "scripts/rust-release/package.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/rust-release/smoke.py",
+   "path": "scripts/rust-release/smoke.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/rust-release/test_manifests.py",
+   "path": "scripts/rust-release/test_manifests.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/rust-release/test_package.py",
+   "path": "scripts/rust-release/test_package.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-output-oracle/embedded.py",
+   "path": "scripts/setup-output-oracle/embedded.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-output-oracle/human-pipe-probes.py",
+   "path": "scripts/setup-output-oracle/human-pipe-probes.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-output-oracle/output-probes.py",
+   "path": "scripts/setup-output-oracle/output-probes.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-output-oracle/pipe-probes.py",
+   "path": "scripts/setup-output-oracle/pipe-probes.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-output-oracle/run.sh",
+   "path": "scripts/setup-output-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-repair-oracle/replay.py",
+   "path": "scripts/setup-repair-oracle/replay.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-repair-oracle/run.sh",
+   "path": "scripts/setup-repair-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-source-oracle/replay.py",
+   "path": "scripts/setup-source-oracle/replay.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-source-oracle/run.sh",
+   "path": "scripts/setup-source-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/setup-source-oracle/tool_fixture.go.txt",
+   "path": "scripts/setup-source-oracle/tool_fixture.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-argv-oracle/build_go.py",
+   "path": "scripts/skills-argv-oracle/build_go.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-argv-oracle/compare.py",
+   "path": "scripts/skills-argv-oracle/compare.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-argv-oracle/novel.py",
+   "path": "scripts/skills-argv-oracle/novel.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-argv-oracle/verify_control.py",
+   "path": "scripts/skills-argv-oracle/verify_control.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-argv-oracle/verify_novel_control.py",
+   "path": "scripts/skills-argv-oracle/verify_novel_control.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-native-oracle/raw_layer_oracle.py",
+   "path": "scripts/skills-native-oracle/raw_layer_oracle.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-native-oracle/tools_oracle.py",
+   "path": "scripts/skills-native-oracle/tools_oracle.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-render-drift/run.sh",
+   "path": "scripts/skills-render-drift/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_oracle_env",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/skills-status-config-oracle/run.py",
+   "path": "scripts/skills-status-config-oracle/run.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-copilot-kimi-oracle/argv.py",
+   "path": "scripts/usage-copilot-kimi-oracle/argv.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-copilot-kimi-oracle/argv_controls.py",
+   "path": "scripts/usage-copilot-kimi-oracle/argv_controls.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-copilot-kimi-oracle/cli.py",
+   "path": "scripts/usage-copilot-kimi-oracle/cli.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-copilot-kimi-oracle/provider_test.go.txt",
+   "path": "scripts/usage-copilot-kimi-oracle/provider_test.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-copilot-kimi-oracle/run.sh",
+   "path": "scripts/usage-copilot-kimi-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_oracle_env",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-credential-oracle/cli.py",
+   "path": "scripts/usage-credential-oracle/cli.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-credential-oracle/current_cli_parity.py",
+   "path": "scripts/usage-credential-oracle/current_cli_parity.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-credential-oracle/provider_test.go.txt",
+   "path": "scripts/usage-credential-oracle/provider_test.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-credential-oracle/receipt.py",
+   "path": "scripts/usage-credential-oracle/receipt.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-credential-oracle/run.sh",
+   "path": "scripts/usage-credential-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-fetch-oracle/run.sh",
+   "path": "scripts/usage-fetch-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-hermes-oracle/cli.py",
+   "path": "scripts/usage-hermes-oracle/cli.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-hermes-oracle/filesystem.py",
+   "path": "scripts/usage-hermes-oracle/filesystem.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-hermes-oracle/provider_test.go.txt",
+   "path": "scripts/usage-hermes-oracle/provider_test.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-hermes-oracle/receipt.py",
+   "path": "scripts/usage-hermes-oracle/receipt.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-hermes-oracle/run.sh",
+   "path": "scripts/usage-hermes-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-local-files-baseline/run.sh",
+   "path": "scripts/usage-local-files-baseline/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-native-gates-oracle/cli.py",
+   "path": "scripts/usage-native-gates-oracle/cli.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-native-gates-oracle/run.sh",
+   "path": "scripts/usage-native-gates-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-next-oracle/argv.py",
+   "path": "scripts/usage-next-oracle/argv.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref",
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-next-oracle/argv_controls.py",
+   "path": "scripts/usage-next-oracle/argv_controls.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-next-oracle/device.py",
+   "path": "scripts/usage-next-oracle/device.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_oracle_env",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-next-oracle/sentinel.go.txt",
+   "path": "scripts/usage-next-oracle/sentinel.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-next-oracle/status_test.go.txt",
+   "path": "scripts/usage-next-oracle/status_test.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-next-oracle/test_metadata.py",
+   "path": "scripts/usage-next-oracle/test_metadata.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-provider-files-oracle/cli.py",
+   "path": "scripts/usage-provider-files-oracle/cli.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-provider-files-oracle/filesystem.py",
+   "path": "scripts/usage-provider-files-oracle/filesystem.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_env",
+    "go_binary_ref"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-provider-files-oracle/provider_test.go.txt",
+   "path": "scripts/usage-provider-files-oracle/provider_test.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-provider-files-oracle/run.sh",
+   "path": "scripts/usage-provider-files-oracle/run.sh",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_oracle_env",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-retry-after-oracle/oracle.py",
+   "path": "scripts/usage-retry-after-oracle/oracle.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_oracle_env",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-retry-after-oracle/scalar_test.go.txt",
+   "path": "scripts/usage-retry-after-oracle/scalar_test.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/usage-retry-after-oracle/status_test.go.txt",
+   "path": "scripts/usage-retry-after-oracle/status_test.go.txt",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_oracle_env"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "file:scripts/vault-admin-oracle/replay.py",
+   "path": "scripts/vault-admin-oracle/replay.py",
+   "kind": "script",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go_binary_ref",
+    "go_toolchain_cmd"
+   ],
+   "note": "",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:.github/tests/rust_release_workflow_test.go",
+   "path": ".github/tests/rust_release_workflow_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:.github/tests/rust_workflow_test.go",
+   "path": ".github/tests/rust_workflow_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:.github/tests/supported_platforms_test.go",
+   "path": ".github/tests/supported_platforms_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-decide-oracle/json_parity_fixture.go",
+   "path": "guard/scripts/guard-decide-oracle/json_parity_fixture.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-doctor-oracle/main.go",
+   "path": "guard/scripts/guard-doctor-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-oracle/cases.go",
+   "path": "guard/scripts/guard-oracle/cases.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-oracle/main.go",
+   "path": "guard/scripts/guard-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-oracle/sec002.go",
+   "path": "guard/scripts/guard-oracle/sec002.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-oracle/sec002_chain.go",
+   "path": "guard/scripts/guard-oracle/sec002_chain.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-oracle/sec002_grants.go",
+   "path": "guard/scripts/guard-oracle/sec002_grants.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:guard/scripts/guard-oracle/sec002_grants_test.go",
+   "path": "guard/scripts/guard-oracle/sec002_grants_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/activity-cli-oracle/main.go",
+   "path": "scripts/activity-cli-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/adapters-oracle/main.go",
+   "path": "scripts/adapters-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/audit-oracle/main.go",
+   "path": "scripts/audit-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/broker-oracle/main.go",
+   "path": "scripts/broker-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/catalog-oracle/main.go",
+   "path": "scripts/catalog-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/cli-oracle/main.go",
+   "path": "scripts/cli-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/cli-oracle/main_test.go",
+   "path": "scripts/cli-oracle/main_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/db-memory-oracle/main.go",
+   "path": "scripts/db-memory-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/dist-oracle/candidate.go",
+   "path": "scripts/dist-oracle/candidate.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/dist-oracle/candidate_test.go",
+   "path": "scripts/dist-oracle/candidate_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/dist-oracle/main.go",
+   "path": "scripts/dist-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/doctor-repair-oracle/probe_fixture.go.txt",
+   "path": "scripts/doctor-repair-oracle/probe_fixture.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/doctor-stdout-oracle/embedded.go.txt",
+   "path": "scripts/doctor-stdout-oracle/embedded.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/fmt_check_test.go",
+   "path": "scripts/fmt_check_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/gateway-oracle/main.go",
+   "path": "scripts/gateway-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/generate-go-printable-table.go",
+   "path": "scripts/generate-go-printable-table.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/gorand-dump/main.go",
+   "path": "scripts/gorand-dump/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/guard-standalone-oracle/main.go.txt",
+   "path": "scripts/guard-standalone-oracle/main.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/install-oracle/main.go",
+   "path": "scripts/install-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/install-oracle/main_test.go",
+   "path": "scripts/install-oracle/main_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/instructions-oracle/main.go",
+   "path": "scripts/instructions-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/mcp-oracle/main.go",
+   "path": "scripts/mcp-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/memory-activity-oracle/main.go",
+   "path": "scripts/memory-activity-oracle/main.go",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go-source"
+   ],
+   "excluded": true,
+   "owner": "memory workers",
+   "note": "memory oracle Go source",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/memory-cli-oracle/control.go.txt",
+   "path": "scripts/memory-cli-oracle/control.go.txt",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go-source"
+   ],
+   "excluded": true,
+   "owner": "memory workers",
+   "note": "memory oracle Go source",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/memory-cli-oracle/schema.go.txt",
+   "path": "scripts/memory-cli-oracle/schema.go.txt",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go-source"
+   ],
+   "excluded": true,
+   "owner": "memory workers",
+   "note": "memory oracle Go source",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/memory-cli-oracle/write_control.go.txt",
+   "path": "scripts/memory-cli-oracle/write_control.go.txt",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go-source"
+   ],
+   "excluded": true,
+   "owner": "memory workers",
+   "note": "memory oracle Go source",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/memory-cli-oracle/write_fallback.go.txt",
+   "path": "scripts/memory-cli-oracle/write_fallback.go.txt",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go-source"
+   ],
+   "excluded": true,
+   "owner": "memory workers",
+   "note": "memory oracle Go source",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/memory-evidence-oracle/main.go.txt",
+   "path": "scripts/memory-evidence-oracle/main.go.txt",
+   "kind": "memory-owned",
+   "role": "excluded",
+   "go_dependency": [
+    "go-source"
+   ],
+   "excluded": true,
+   "owner": "memory workers",
+   "note": "memory oracle Go source",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/patterns-activity-oracle/main.go",
+   "path": "scripts/patterns-activity-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/policy-oracle/cases.go",
+   "path": "scripts/policy-oracle/cases.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/policy-oracle/decode_cases.go",
+   "path": "scripts/policy-oracle/decode_cases.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/policy-oracle/main.go",
+   "path": "scripts/policy-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/policy-oracle/policy_cases.go",
+   "path": "scripts/policy-oracle/policy_cases.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/policy-oracle/types.go",
+   "path": "scripts/policy-oracle/types.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/profile-remove-oracle/main.go",
+   "path": "scripts/profile-remove-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/profile-remove-oracle/main_test.go",
+   "path": "scripts/profile-remove-oracle/main_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/release_fmt_check_test.go",
+   "path": "scripts/release_fmt_check_test.go",
+   "kind": "go-test",
+   "role": "go-test",
+   "go_dependency": [
+    "go-test"
+   ],
+   "note": "Go test; runs only under the Go toolchain",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/secret-oracle/main.go",
+   "path": "scripts/secret-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/setup-output-oracle/embedded.go.txt",
+   "path": "scripts/setup-output-oracle/embedded.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/setup-source-oracle/tool_fixture.go.txt",
+   "path": "scripts/setup-source-oracle/tool_fixture.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/skills-config-toml-oracle/main.go",
+   "path": "scripts/skills-config-toml-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/skills-install-oracle/main.go",
+   "path": "scripts/skills-install-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/skills-oracle/main.go",
+   "path": "scripts/skills-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/skills-runner-oracle/main.go",
+   "path": "scripts/skills-runner-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-copilot-kimi-oracle/owner_test.go.txt",
+   "path": "scripts/usage-copilot-kimi-oracle/owner_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-copilot-kimi-oracle/provider_test.go.txt",
+   "path": "scripts/usage-copilot-kimi-oracle/provider_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-credential-oracle/provider_test.go.txt",
+   "path": "scripts/usage-credential-oracle/provider_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-fetch-oracle/cli_test.go.txt",
+   "path": "scripts/usage-fetch-oracle/cli_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-fetch-oracle/usage_test.go.txt",
+   "path": "scripts/usage-fetch-oracle/usage_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-hermes-oracle/provider_test.go.txt",
+   "path": "scripts/usage-hermes-oracle/provider_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-local-files-baseline/provider_test.go.txt",
+   "path": "scripts/usage-local-files-baseline/provider_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-native-gates-oracle/gates_test.go.txt",
+   "path": "scripts/usage-native-gates-oracle/gates_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-next-oracle/certificate.go.txt",
+   "path": "scripts/usage-next-oracle/certificate.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-next-oracle/device_test.go.txt",
+   "path": "scripts/usage-next-oracle/device_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-next-oracle/sentinel.go.txt",
+   "path": "scripts/usage-next-oracle/sentinel.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-next-oracle/status_test.go.txt",
+   "path": "scripts/usage-next-oracle/status_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-oracle/main.go",
+   "path": "scripts/usage-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-provider-files-oracle/provider_test.go.txt",
+   "path": "scripts/usage-provider-files-oracle/provider_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-remaining-baseline/provider_test.go.txt",
+   "path": "scripts/usage-remaining-baseline/provider_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-request-oracle/main.go",
+   "path": "scripts/usage-request-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-request-oracle/opencode/cases.go",
+   "path": "scripts/usage-request-oracle/opencode/cases.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-request-oracle/opencode/main.go",
+   "path": "scripts/usage-request-oracle/opencode/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-request-oracle/opencode/provenance.go",
+   "path": "scripts/usage-request-oracle/opencode/provenance.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-request-oracle/opencode/review_cases.go",
+   "path": "scripts/usage-request-oracle/opencode/review_cases.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-retry-after-oracle/scalar_test.go.txt",
+   "path": "scripts/usage-retry-after-oracle/scalar_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-retry-after-oracle/sdk_decimal_probe.go.txt",
+   "path": "scripts/usage-retry-after-oracle/sdk_decimal_probe.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/usage-retry-after-oracle/status_test.go.txt",
+   "path": "scripts/usage-retry-after-oracle/status_test.go.txt",
+   "kind": "go-template",
+   "role": "oracle-tooling",
+   "go_dependency": [
+    "go-source-template"
+   ],
+   "note": "Go source copied into a pinned Go checkout by a live differential harness; inert text in this tree",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc:scripts/xdg-oracle/main.go",
+   "path": "scripts/xdg-oracle/main.go",
+   "kind": "go-generator",
+   "role": "record-helper",
+   "go_dependency": [
+    "go-source"
+   ],
+   "note": "Go program that regenerates committed fixtures",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/activity-validation-767",
+   "path": "migration/evidence/activity-validation-767",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 6,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/browse-daemon-772",
+   "path": "migration/evidence/browse-daemon-772",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 4,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/browse-registry-772",
+   "path": "migration/evidence/browse-registry-772",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 9,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/browse-state-key-772",
+   "path": "migration/evidence/browse-state-key-772",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 42,
+   "go_source_files": [
+    "migration/evidence/browse-state-key-772/original-b363/symaira-key-bridge-go-downgrade.go.txt",
+    "migration/evidence/browse-state-key-772/original-b363/symaira-key-bridge-provider.go.txt",
+    "migration/evidence/browse-state-key-772/static-sdk/path.go.txt",
+    "migration/evidence/browse-state-key-772/static-sdk/zerrors_windows.go.txt"
+   ],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/config-harness-769",
+   "path": "migration/evidence/config-harness-769",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 17,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/daemon-registry-autostart-lifetime-801",
+   "path": "migration/evidence/daemon-registry-autostart-lifetime-801",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 2,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/daemon-registry-progress-observer-801",
+   "path": "migration/evidence/daemon-registry-progress-observer-801",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 1,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/doctor-output-765",
+   "path": "migration/evidence/doctor-output-765",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 24,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/doctor-owned-paths-806",
+   "path": "migration/evidence/doctor-owned-paths-806",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 7,
+   "go_source_files": [
+    "migration/evidence/doctor-owned-paths-806/original-f944/original-embedded.go.txt"
+   ],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/doctor-repair-765",
+   "path": "migration/evidence/doctor-repair-765",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 12,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/doctor-source-progress-806",
+   "path": "migration/evidence/doctor-source-progress-806",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 3,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/doctor-windows-765",
+   "path": "migration/evidence/doctor-windows-765",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 148,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/guard-diagnostics-770",
+   "path": "migration/evidence/guard-diagnostics-770",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 1,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/guard-doctor-warnings-770",
+   "path": "migration/evidence/guard-doctor-warnings-770",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 2,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/guard-standalone-770",
+   "path": "migration/evidence/guard-standalone-770",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 1,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/memory-cli-758",
+   "path": "migration/evidence/memory-cli-758",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 47,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/memory-evidence-758",
+   "path": "migration/evidence/memory-evidence-758",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 1,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/memory-historical-649",
+   "path": "migration/evidence/memory-historical-649",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 25,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/memory-mcp-759",
+   "path": "migration/evidence/memory-mcp-759",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 4,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/memory-open-race-803",
+   "path": "migration/evidence/memory-open-race-803",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 13,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/memory-schema-649",
+   "path": "migration/evidence/memory-schema-649",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 8,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/memory-ui-763",
+   "path": "migration/evidence/memory-ui-763",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 13,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": true,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/profile-create-race",
+   "path": "migration/evidence/profile-create-race",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 4,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/setup-repair-765",
+   "path": "migration/evidence/setup-repair-765",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 3,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/setup-source-765",
+   "path": "migration/evidence/setup-source-765",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 73,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/skills-output-owner-806",
+   "path": "migration/evidence/skills-output-owner-806",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 4,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/skills-preflight-793",
+   "path": "migration/evidence/skills-preflight-793",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 6,
+   "go_source_files": [
+    "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/os/exec_windows.go",
+    "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/syscall/wtf8_windows.go"
+   ],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/skills-render-drift-621",
+   "path": "migration/evidence/skills-render-drift-621",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 4,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-argv-768",
+   "path": "migration/evidence/usage-argv-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 34,
+   "go_source_files": [
+    "migration/evidence/usage-argv-768/original-abf-review/proof/symaira-usage768-abf-root-doctor-path/path.go"
+   ],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-copilot-kimi-768",
+   "path": "migration/evidence/usage-copilot-kimi-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 21,
+   "go_source_files": [
+    "migration/evidence/usage-copilot-kimi-768/original-root-review-7e0b/symaira-usage768-f759-root-owner-go.go"
+   ],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-credential-768",
+   "path": "migration/evidence/usage-credential-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 2,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-files-windows-runner",
+   "path": "migration/evidence/usage-files-windows-runner",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 4,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-hermes-768",
+   "path": "migration/evidence/usage-hermes-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 6,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-hermes-depth-768",
+   "path": "migration/evidence/usage-hermes-depth-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 11,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-next-768",
+   "path": "migration/evidence/usage-next-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 1,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-provider-files-768",
+   "path": "migration/evidence/usage-provider-files-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 3,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "evidence:migration/evidence/usage-remaining-baseline-768",
+   "path": "migration/evidence/usage-remaining-baseline-768",
+   "kind": "evidence",
+   "role": "historical-evidence",
+   "go_dependency": [
+    "go-mentions"
+   ],
+   "files_mentioning_go": 3,
+   "go_source_files": [],
+   "note": "immutable archived evidence (logs, receipts, retained Go snippets); not executed by any gate or test",
+   "excluded": false,
+   "owner": "ORACLE-FREEZE-781",
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-usage/tests/history_source_contract_tests.rs",
+   "path": "rust/symbrain-usage/tests/history_source_contract_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads internal/usage/schema.go Go source (not toolchain) (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-usage/src/opencode_provenance_tests.rs",
+   "path": "rust/symbrain-usage/src/opencode_provenance_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "hashes Go sources + scripts/usage-request-oracle/opencode/*.go and runs `git show` on pinned commits (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-usage/src/opencode_historical_source.rs",
+   "path": "rust/symbrain-usage/src/opencode_historical_source.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "runs `git show` on pinned historical Go revision (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-usage/src/request_oracle_tests.rs",
+   "path": "rust/symbrain-usage/src/request_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "include_bytes! internal/usage/testdata/*.json (Go test data) (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-guard-core/tests/capability_oracle_tests.rs",
+   "path": "rust/symbrain-guard-core/tests/capability_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "hashes guard/internal/capability/*.go sources (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-guard-core/tests/external_decision.rs",
+   "path": "rust/symbrain-guard-core/tests/external_decision.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "hashes Go sources + guard/scripts/guard-decide-oracle/*.py via git show (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-guard-core/tests/external_decision_review.rs",
+   "path": "rust/symbrain-guard-core/tests/external_decision_review.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "git show of pinned Go revision (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-guard-core/tests/external_repair.rs",
+   "path": "rust/symbrain-guard-core/tests/external_repair.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "include_str! of guard-decide-oracle python generators; go_toolchain pin (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-cli/tests/guard_decide_raw_bytes.rs",
+   "path": "rust/symbrain-cli/tests/guard_decide_raw_bytes.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "include_str! of guard-decide-oracle python generators; go_toolchain pin (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-skills/tests/install_oracle_tests.rs",
+   "path": "rust/symbrain-skills/tests/install_oracle_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "hashes scripts/skills-install-oracle/main.go and internal/skills/** Go sources (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-skills/tests/render_materialize_tests.rs",
+   "path": "rust/symbrain-skills/tests/render_materialize_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads internal/skills/render/testdata (Go test data) (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-skills/tests/render_tests.rs",
+   "path": "rust/symbrain-skills/tests/render_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads internal/skills/render/testdata (Go test data) (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-skills/tests/model_tests.rs",
+   "path": "rust/symbrain-skills/tests/model_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads internal/skills/render/testdata (Go test data) (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-skills/tests/model_security_tests.rs",
+   "path": "rust/symbrain-skills/tests/model_security_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads internal/skills/render/testdata (Go test data) (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-skills/tests/variant_tests.rs",
+   "path": "rust/symbrain-skills/tests/variant_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads internal/skills/render/testdata (Go test data) (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-skills/tests/relative_root_tests.rs",
+   "path": "rust/symbrain-skills/tests/relative_root_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads scripts/skills-oracle/fixtures/relative-root (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-adapter/tests/adapter_tests.rs",
+   "path": "rust/symbrain-adapter/tests/adapter_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "hashes scripts/adapters-oracle/main.go and pins go_toolchain=go1.26.7 (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-instructions/tests/instruction_tests.rs",
+   "path": "rust/symbrain-instructions/tests/instruction_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "pins go_toolchain=go1.26.7 (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-cli/tests/profile_cli_tests.rs",
+   "path": "rust/symbrain-cli/tests/profile_cli_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "hashes cmd/symbrain/cmd_profile*.go and internal/** Go sources (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symbrain-mcp/src/raw_skills_eof_tests.rs",
+   "path": "rust/symbrain-mcp/src/raw_skills_eof_tests.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads scripts/skills-native-oracle/eof-review-inputs (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  },
+  {
+   "id": "gosrc-read:rust/symguard-cli/tests/command_tree.rs",
+   "path": "rust/symguard-cli/tests/command_tree.rs",
+   "kind": "rust-test",
+   "role": "go-source-read",
+   "go_dependency": [
+    "go-source-read"
+   ],
+   "note": "reads migration/evidence/guard-command-tree-770/inventory.json (needs the Go SOURCE tree, not a Go toolchain/binary)",
+   "owner": "ORACLE-FREEZE-781",
+   "excluded": false,
+   "resolution": "pending classification",
+   "status": "open"
+  }
+ ],
+ "summary": {
+  "total_items": 342,
+  "by_kind_status": {
+   "evidence|open": 37,
+   "go-generator|open": 41,
+   "go-template|open": 22,
+   "go-test|open": 10,
+   "make-target|open": 43,
+   "memory-owned|open": 35,
+   "python-oracle|open": 6,
+   "rust-test|open": 65,
+   "script|open": 83
+  }
+ }
+}
