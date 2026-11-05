@@ -384,6 +384,20 @@ fn strip_retired(text: &str) -> String {
         .collect()
 }
 
+/// The oracle was recorded on macOS, so untagged scenarios that report the
+/// daemon socket carry the macOS default. Elsewhere the CLI uses
+/// `$XDG_RUNTIME_DIR/symbrowse`, which `run_scenario` points at `$ROOT/h/run`
+/// (see `socket_path`).
+fn localize_socket_dir(text: &str) -> String {
+    if cfg!(target_os = "macos") {
+        return text.to_owned();
+    }
+    text.replace(
+        "$ROOT/h/Library/Caches/symbrowse/run/",
+        "$ROOT/h/run/symbrowse/",
+    )
+}
+
 fn platform_mismatch(scenario: &Value) -> bool {
     scenario
         .get("platform")
@@ -413,7 +427,9 @@ fn rust_cli_matches_frozen_go_cli_observations() {
         compared += 1;
         let got = run_scenario(scenario);
         let want = &scenario["expected"];
-        let want_stdout = strip_retired(want["stdout"].as_str().unwrap_or_default());
+        let want_stdout =
+            localize_socket_dir(&strip_retired(want["stdout"].as_str().unwrap_or_default()));
+        let want_stderr = want["stderr"].as_str().map(localize_socket_dir);
         let mut diffs = Vec::new();
         if want["exit"].as_i64() != Some(got.exit) {
             diffs.push(format!("exit: want {} got {}", want["exit"], got.exit));
@@ -424,10 +440,10 @@ fn rust_cli_matches_frozen_go_cli_observations() {
                 got.stdout
             ));
         }
-        if want["stderr"].as_str() != Some(got.stderr.as_str()) {
+        if want_stderr.as_deref() != Some(got.stderr.as_str()) {
             diffs.push(format!(
-                "stderr:\n  want {:?}\n  got  {:?}",
-                want["stderr"], got.stderr
+                "stderr:\n  want {want_stderr:?}\n  got  {:?}",
+                got.stderr
             ));
         }
         let want_frames = canonical_numbers(&want["frames"])
