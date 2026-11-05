@@ -398,11 +398,21 @@ fn localize_socket_dir(text: &str) -> String {
     )
 }
 
+/// Untagged scenarios whose recorded outcome depends on a macOS-only facility.
+/// `state-key-init-env` expects the Keychain lookup through `security` to
+/// fail; other platforms have no Keychain step and report the environment key.
+const UNTAGGED_DARWIN_ONLY: &[&str] = &["state-key-init-env"];
+
 fn platform_mismatch(scenario: &Value) -> bool {
-    scenario
+    let darwin_only = scenario
         .get("platform")
         .and_then(Value::as_str)
-        .is_some_and(|p| p == "darwin" && !cfg!(target_os = "macos"))
+        .is_some_and(|p| p == "darwin")
+        || scenario
+            .get("id")
+            .and_then(Value::as_str)
+            .is_some_and(|id| UNTAGGED_DARWIN_ONLY.contains(&id));
+    darwin_only && !cfg!(target_os = "macos")
 }
 
 #[test]
