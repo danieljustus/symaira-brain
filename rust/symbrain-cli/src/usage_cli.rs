@@ -6,6 +6,8 @@ use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{ProviderSelection, Report, Service, UsageMeter};
 
+mod details;
+
 const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage [--providers ID,ID]\n\n--providers selects only those providers before credential discovery.\nDefault IDs: claude,codex,copilot,cursor,kimi,moonshot,nous,opencode,openrouter,antigravity.\nOpt-in IDs: zai (ZAI_API_KEY), devin (DEVIN_API_KEY, Codeium-compatible),\ngrok (GROK_ACCESS_TOKEN or GROK_HOME/auth.json), ollama (local signing key only).\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
 /// A Usage invocation classified before any credential admission or reads.
@@ -154,6 +156,7 @@ fn render_report_table(writer: &mut dyn Write, report: &Report) -> std::io::Resu
             writeln!(writer, "error\t{error}")?;
         } else if let Some(snapshot) = &provider.snapshot {
             writeln!(writer, "ok\tsource={}", snapshot.source)?;
+            details::write_details(writer, snapshot)?;
             for meter in &snapshot.meters {
                 writeln!(
                     writer,
@@ -242,6 +245,7 @@ mod tests {
                     currency: None,
                     fetched_at: chrono::DateTime::UNIX_EPOCH,
                     source: "api".into(),
+                    ..symbrain_usage::UsageSnapshot::default()
                 }),
                 history: None,
                 error: None,

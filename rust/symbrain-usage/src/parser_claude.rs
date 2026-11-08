@@ -2,7 +2,14 @@ use super::{fmt_num, meter, number, obj, parse_time};
 use crate::UsageSnapshot;
 use serde_json::Value;
 
+#[path = "parser_claude_grants.rs"]
+mod grants;
+#[cfg(test)]
+#[path = "parser_claude_grants_tests.rs"]
+mod grants_tests;
+
 pub(super) fn parse_claude(v: &Value, s: &mut UsageSnapshot) {
+    s.reset_grants = grants::parse_reset_grants(v.get("cedar_ember"));
     if let Some(v) = number(obj(v, "total_cost_usd")) {
         s.meters
             .push(meter("Spend (7d)", Some(fmt_num(v)), None, "USD", None));

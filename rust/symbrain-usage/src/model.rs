@@ -75,6 +75,14 @@ pub struct UsageSnapshot {
     #[serde(serialize_with = "serialize_go_timestamp")]
     pub fetched_at: DateTime<Utc>,
     pub source: String,
+    /// Subscription plan label (for example `Max 5x`), taken from the already
+    /// resolved login rather than from an extra request.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plan: Option<String>,
+    /// Read-only reset-grant status; absent unless the response carried a
+    /// complete, well-formed block.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reset_grants: Option<crate::ResetGrantStatus>,
 }
 
 /// One normalized quota or balance meter.
@@ -119,7 +127,7 @@ where
 }
 
 #[allow(clippy::ref_option)] // serde's serialize_with contract passes the field by reference.
-fn serialize_optional_go_timestamp<S>(
+pub(crate) fn serialize_optional_go_timestamp<S>(
     value: &Option<DateTime<chrono::FixedOffset>>,
     serializer: S,
 ) -> Result<S::Ok, S::Error>

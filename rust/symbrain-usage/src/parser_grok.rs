@@ -60,6 +60,7 @@ pub(super) fn parse(body: &[u8], now: DateTime<Utc>) -> Result<UsageSnapshot, Us
         currency: None,
         fetched_at: now,
         source: "api".into(),
+        ..UsageSnapshot::default()
     })
 }
 

@@ -48,6 +48,7 @@ include!("provider_config/credential_json.rs");
 include!("provider_config/credential_path.rs");
 include!("provider_config/files.rs");
 include!("provider_config/claude_file.rs");
+include!("provider_config/claude_plan.rs");
 include!("provider_config/codex_file.rs");
 include!("provider_config/copilot_file.rs");
 include!("provider_config/copilot_cli.rs");
@@ -66,6 +67,10 @@ include!("provider_grok.rs");
 #[cfg(test)]
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
+
+#[cfg(test)]
+#[path = "provider_config/claude_plan_tests.rs"]
+mod claude_plan_tests;
 
 #[cfg(test)]
 #[path = "kimi_expiry_tests.rs"]

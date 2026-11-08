@@ -27,13 +27,20 @@ fn claude_with_keychain(
         oauth_value = Some(("keychain".into(), token));
         oauth_expires_at = expires_at;
     }
-    claude_from_resolved(
+    let plan_source = oauth_value.as_ref().map(|(source, _)| source.clone());
+    let mut provider = claude_from_resolved(
         admin_value,
         admin_error,
         oauth_value,
         oauth_error,
         oauth_expires_at,
-    )
+    );
+    provider.plan = match plan_source.as_deref() {
+        Some("file") => claude_file_plan(&home().join(".claude/.credentials.json")),
+        Some("keychain") => take_claude_keychain_plan(),
+        _ => None,
+    };
+    provider
 }
 
 pub(crate) fn claude_from_resolved(

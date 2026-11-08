@@ -60,6 +60,7 @@ pub(crate) fn parse_snapshot(
         currency: None,
         fetched_at: now,
         source: source.to_string(),
+        ..UsageSnapshot::default()
     };
     match id {
         "claude" => {

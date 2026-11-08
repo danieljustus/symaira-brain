@@ -35,7 +35,9 @@ fn claude_keychain_service_credential(service: &str) -> Option<(String, Option<S
         CLAUDE_KEYCHAIN_TIMEOUT,
         MAX_CREDENTIAL_FILE_BYTES,
     )?;
-    parse_claude_keychain_blob(&blob)
+    let parsed = parse_claude_keychain_blob(&blob)?;
+    remember_claude_keychain_plan(&blob);
+    Some(parsed)
 }
 
 #[derive(Default)]

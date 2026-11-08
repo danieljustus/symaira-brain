@@ -22,6 +22,7 @@ mod model;
 mod parser;
 mod providers;
 mod retry_after;
+mod snapshot_extra;
 mod transport;
 
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
@@ -31,6 +32,7 @@ pub use providers::{
     selected_providers, set_secretref_timeout,
 };
 pub use retry_after::parse_retry_after;
+pub use snapshot_extra::{ResetGrant, ResetGrantStatus};
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
 
 use std::collections::BTreeSet;

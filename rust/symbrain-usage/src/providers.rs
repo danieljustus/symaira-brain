@@ -20,6 +20,8 @@ mod provider_antigravity;
 mod provider_fetch;
 #[path = "provider_identity.rs"]
 mod provider_identity;
+#[path = "provider_kimi.rs"]
+mod provider_kimi;
 #[path = "provider_ollama.rs"]
 pub(crate) mod provider_ollama;
 #[path = "provider_quota.rs"]
@@ -78,6 +80,8 @@ pub struct Provider {
     device_id_bytes: Option<Vec<u8>>,
     enterprise_host: Option<String>,
     kimi_cli_expires_at: Option<f64>,
+    /// Claude plan label read with the login; reported on OAuth snapshots only.
+    plan: Option<String>,
 }
 
 impl std::fmt::Debug for Provider {
@@ -123,6 +127,7 @@ impl Provider {
             device_id_bytes: None,
             enterprise_host: None,
             kimi_cli_expires_at: None,
+            plan: None,
         }
     }
 
@@ -245,41 +250,11 @@ impl Provider {
         for (source, credential) in &self.credentials {
             let req = request_for(self, source, credential, None);
             match fetch_one(self, transport, cancel, source, req) {
-                Ok(v) => return Ok(v),
-                Err(e) => errors.push(e),
-            }
-        }
-        Err(UsageError::chain(&self.id, errors))
-    }
-    fn fetch_kimi(
-        &self,
-        transport: &Arc<dyn Transport>,
-        cancel: &Cancellation,
-    ) -> Result<UsageSnapshot, UsageError> {
-        let mut errors = Vec::new();
-        for (source, credential) in &self.credentials {
-            let cli_expired = || {
-                source == "cli"
-                    && self.kimi_cli_expires_at.is_some_and(|expiry| {
-                        std::time::SystemTime::now()
-                            .duration_since(std::time::UNIX_EPOCH)
-                            .is_ok_and(|now| now.as_secs_f64() >= expiry)
-                    })
-            };
-            let expired_error = || {
-                UsageError::exact(
-                    "Kimi Code CLI login expired — run the Kimi CLI once to refresh it",
-                )
-            };
-            if cli_expired() {
-                errors.push(expired_error());
-                continue;
-            }
-            let req = request_for(self, source, credential, None);
-            match fetch_one(self, transport, cancel, source, req) {
-                Ok(v) => return Ok(v),
-                Err(e) if matches!(&e, UsageError::Status { status: 401, .. }) && cli_expired() => {
-                    errors.push(expired_error());
+                Ok(mut v) => {
+                    if source == "oauth" {
+                        v.plan.clone_from(&self.plan);
+                    }
+                    return Ok(v);
                 }
                 Err(e) => errors.push(e),
             }
@@ -384,6 +359,10 @@ mod opencode_discovery_tests;
 #[cfg(test)]
 #[path = "antigravity_tests.rs"]
 mod antigravity_tests;
+
+#[cfg(test)]
+#[path = "kimi_credential_tests.rs"]
+mod kimi_credential_tests;
 
 #[cfg(test)]
 #[path = "debug_redaction_tests.rs"]
