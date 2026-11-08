@@ -29,7 +29,7 @@ struct SyncView: View {
                 controlsSection
 
                 if vm.isLoading {
-                    SymairaLoadingState("Syncing harnesses...")
+                    SymairaLoadingState("Syncing harnesses…")
                 } else if let error = vm.errorMessage {
                     SymairaNotice(title: "Error", message: error, tone: .critical)
                     if let detail = vm.errorDetail {
@@ -72,7 +72,7 @@ struct SyncView: View {
                 .font(.title.bold())
                 .foregroundStyle(SymairaTheme.textPrimary)
             Text("Push instructions and skills to installed harnesses")
-                .font(.subheadline)
+                .font(SymairaTypography.callout)
                 .foregroundStyle(SymairaTheme.textSecondary)
         }
     }
@@ -108,6 +108,7 @@ struct SyncView: View {
                     HStack(spacing: SymairaSpacing.medium) {
                         if vm.isLoading {
                             ProgressView()
+                                .accessibilityLabel("Syncing")
                                 .scaleEffect(0.7)
                                 .frame(width: 14, height: 14)
                         } else {
@@ -140,17 +141,17 @@ struct SyncView: View {
     private func targetsSection(_ summary: SyncSummary) -> some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Text("Targets")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
 
             if summary.targets.isEmpty {
                 Text("No harness targets found.")
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
             } else {
                 // #147: relative targets are resolved against this directory.
                 Text("Paths resolve against \(vm.syncWorkingDirectory)")
-                    .font(.caption2)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
                 VStack(spacing: SymairaSpacing.xSmall) {
                     ForEach(summary.targets) { target in
@@ -173,12 +174,12 @@ struct SyncView: View {
                     SymairaBadge(target.status, tone: statusTone(target.status))
                 }
                 Text(vm.displayPath(for: target))
-                    .font(.caption2)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
                     .lineLimit(1)
                 if let message = target.message, !message.isEmpty {
                     Text(message)
-                        .font(.caption2)
+                        .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.textSecondary)
                         .lineLimit(2)
                 }
@@ -195,7 +196,7 @@ struct SyncView: View {
             if !summary.skills.isEmpty {
                 VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                     Text("Skills")
-                        .font(.headline)
+                        .font(SymairaTypography.subheading)
                         .foregroundStyle(SymairaTheme.goldPrimary)
 
                     VStack(spacing: SymairaSpacing.xSmall) {
@@ -221,7 +222,7 @@ struct SyncView: View {
                 }
                 if let message = skill.message, !message.isEmpty {
                     Text(message)
-                        .font(.caption2)
+                        .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.textSecondary)
                         .lineLimit(2)
                 }

@@ -96,7 +96,7 @@ struct SkillsView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Text("Portable skill library and harness installs — built into SymBrain")
-                    .font(.subheadline)
+                    .font(SymairaTypography.callout)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
@@ -187,7 +187,7 @@ struct SkillsView: View {
                             .foregroundStyle(SymairaTheme.textPrimary)
                         if let description = skill.description, !description.isEmpty {
                             Text(description)
-                                .font(.caption)
+                                .font(SymairaTypography.caption)
                                 .foregroundStyle(SymairaTheme.textSecondary)
                                 .lineLimit(2)
                         }
@@ -229,7 +229,7 @@ struct SkillsView: View {
 
                     if let description = skill.description, !description.isEmpty {
                         Text(description)
-                            .font(.callout)
+                            .font(SymairaTypography.callout)
                             .foregroundStyle(SymairaTheme.textSecondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .textSelection(.enabled)
@@ -249,7 +249,7 @@ struct SkillsView: View {
 
                     if let installs = skill.installs, !installs.isEmpty {
                         Text("Installs")
-                            .font(.headline)
+                            .font(SymairaTypography.subheading)
                             .foregroundStyle(SymairaTheme.textPrimary)
                             .padding(.top, SymairaSpacing.small)
                         ForEach(installs, id: \.target) { install in
@@ -369,7 +369,7 @@ struct SkillsView: View {
 
             TableColumn("Mode") { row in
                 Text(row.mode ?? "—")
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
             }
             .width(min: 60, ideal: 80)
@@ -393,7 +393,7 @@ struct SkillsView: View {
             HStack {
                 SymairaBadge("\(report.rows.count) \(countLabel)", tone: tone)
                 Text(title)
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textSecondary)
                 Spacer()
                 Button("Dismiss") { vm.clearSyncPlan() }
@@ -406,7 +406,7 @@ struct SkillsView: View {
             }
             if report.rows.count > 6 {
                 Text("… and \(report.rows.count - 6) more")
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
             }
         }
@@ -514,7 +514,7 @@ struct SkillsView: View {
 
                     TableColumn("Harness") { entry in
                         Text(entry.target ?? "—")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                     }
                     .width(min: 80, ideal: 100)
@@ -529,7 +529,7 @@ struct SkillsView: View {
 
                     TableColumn("Actor") { entry in
                         Text(entry.actor ?? "—")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                     }
                     .width(min: 70, ideal: 90)
@@ -565,7 +565,7 @@ struct SkillsView: View {
 
                         if let targets = report.targets, !targets.isEmpty {
                             Text("Target Roots")
-                                .font(.headline)
+                                .font(SymairaTypography.subheading)
                                 .foregroundStyle(SymairaTheme.textPrimary)
                                 .padding(.top, SymairaSpacing.small)
                             ForEach(targets) { target in

@@ -17,7 +17,7 @@ struct AuditView: View {
             headerSection
 
             if vm.isLoading {
-                SymairaLoadingState("Loading audit log...")
+                SymairaLoadingState("Loading audit log…")
             } else if vm.entries.isEmpty {
                 SymairaEmptyState(
                     systemImage: "doc.text.magnifyingglass",
@@ -44,7 +44,7 @@ struct AuditView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Text("Tool call history from the JSONL audit log")
-                    .font(.subheadline)
+                    .font(SymairaTypography.callout)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()

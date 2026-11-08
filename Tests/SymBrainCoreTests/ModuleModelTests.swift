@@ -308,7 +308,8 @@ struct ClipboardLifetimeTests {
         #expect(fake.concealed)
 
         await clock.resumeNext()
-        await Task.yield()
+        let cleared = await waitUntil { fake.value == nil }
+        #expect(cleared)
         #expect(fake.value == nil)
         #expect(fake.clearCount == 2)
     }

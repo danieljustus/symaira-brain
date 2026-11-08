@@ -42,11 +42,11 @@ struct SettingsView: View {
     private var binarySection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Text("Binary Path Override")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
 
             Text("Leave empty to auto-detect symbrain from PATH and Homebrew prefixes.")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textSecondary)
 
             TextField("/opt/homebrew/bin/symbrain", text: $binaryPathOverride)
@@ -84,7 +84,7 @@ struct SettingsView: View {
     private var versionSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Text("Version")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
 
             if let error = vm.errorMessage {
@@ -130,7 +130,7 @@ struct SettingsView: View {
                 }
                 .font(.caption.monospaced())
             } else {
-                SymairaLoadingState("Loading version...")
+                SymairaLoadingState("Loading version…")
             }
         }
         .padding(SymairaSpacing.xLarge)
@@ -142,7 +142,7 @@ struct SettingsView: View {
     private var updateSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Text("Update")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
 
             // Auto-check toggle
@@ -150,7 +150,7 @@ struct SettingsView: View {
                 get: { vm.autoPrefs.autoCheckEnabled },
                 set: { vm.autoPrefs.autoCheckEnabled = $0 }
             ))
-            .font(.caption)
+            .font(SymairaTypography.caption)
             .foregroundStyle(SymairaTheme.textSecondary)
 
             // Status display
@@ -160,7 +160,7 @@ struct SettingsView: View {
 
             // Check for Updates button
             if vm.isLoading {
-                SymairaLoadingState("Checking for updates...")
+                SymairaLoadingState("Checking for updates…")
             } else {
                 Button(action: { Task { await vm.checkForUpdate() } }) {
                     Label("Check for Updates", systemImage: "arrow.up.circle")
@@ -223,15 +223,15 @@ struct SettingsView: View {
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Text("About")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
 
             Text("SymBrain is the portable agent-context layer for the Symaira ecosystem. It multiplexes state cores behind one MCP gateway.")
-                .font(.body)
+                .font(SymairaTypography.body)
                 .foregroundStyle(SymairaTheme.textSecondary)
 
             Text("Daemon supervision (symbrain mcp) is coming in a future release.")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textMuted)
                 .italic()
         }

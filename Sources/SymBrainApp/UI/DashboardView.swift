@@ -20,7 +20,7 @@ struct DashboardView: View {
                 headerSection
 
                 if vm.isLoading {
-                    SymairaLoadingState("Running doctor...")
+                    SymairaLoadingState("Running doctor…")
                 } else if vm.isBinaryNotFound {
                     binaryNotFoundSection
                 } else if let error = vm.errorMessage {
@@ -44,7 +44,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
             HStack {
                 Image(systemName: "brain")
-                    .font(.system(size: 28))
+                    .font(SymairaTypography.display)
                     .foregroundStyle(SymairaTheme.goldPrimary)
                 Text("SymBrain")
                     .font(.title.bold())
@@ -59,7 +59,7 @@ struct DashboardView: View {
                 }
             }
             Text("Agent-context layer for the Symaira ecosystem")
-                .font(.subheadline)
+                .font(SymairaTypography.callout)
                 .foregroundStyle(SymairaTheme.textSecondary)
         }
     }
@@ -76,7 +76,7 @@ struct DashboardView: View {
 
             VStack(alignment: .leading, spacing: SymairaSpacing.small) {
                 Text("Install via Homebrew")
-                    .font(.headline)
+                    .font(SymairaTypography.subheading)
                     .foregroundStyle(SymairaTheme.goldPrimary)
 
                 HStack(spacing: SymairaSpacing.small) {
@@ -85,7 +85,7 @@ struct DashboardView: View {
                         .foregroundStyle(SymairaTheme.textPrimary)
                         .padding(SymairaSpacing.small)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+                        .background(SymairaTheme.borderGlass, in: RoundedRectangle(cornerRadius: 6))
 
                     Button(action: {
                         #if os(macOS)
@@ -102,7 +102,7 @@ struct DashboardView: View {
 
                 VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
                     Text("Quick Start")
-                        .font(.headline)
+                        .font(SymairaTypography.subheading)
                         .foregroundStyle(SymairaTheme.goldPrimary)
 
                     installStep(1, "Install the CLI", "brew install danieljustus/tap/symbrain")
@@ -123,7 +123,7 @@ struct DashboardView: View {
             }
 
             Text("To configure a custom binary path, select Settings in the sidebar.")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textSecondary)
 
             if let detail = vm.errorDetail {
@@ -140,7 +140,7 @@ struct DashboardView: View {
         HStack(spacing: SymairaSpacing.small) {
             Text("\(number)")
                 .font(.caption.weight(.bold))
-                .foregroundStyle(.black)
+                .foregroundStyle(SymairaTheme.bgDarker)
                 .frame(width: 22, height: 22)
                 .background(SymairaTheme.goldPrimary, in: Circle())
             Text(title)
@@ -158,7 +158,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: SymairaSpacing.large) {
             // Directories
             Text("Directories")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
             HStack(spacing: SymairaSpacing.medium) {
                 dirCard("Config", status: report.configDir, purpose: "Stores profile configuration and settings")
@@ -168,13 +168,13 @@ struct DashboardView: View {
 
             // Config
             Text("Configuration")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
             configCard(report.config)
 
             // Servers
             Text("State-Core Servers")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 260))], spacing: SymairaSpacing.medium) {
                 ForEach(report.servers, id: \.name) { server in
@@ -184,7 +184,7 @@ struct DashboardView: View {
 
             // Harnesses
             Text("Harnesses")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 260))], spacing: SymairaSpacing.medium) {
                 ForEach(report.harnesses, id: \.name) { harness in
@@ -194,7 +194,7 @@ struct DashboardView: View {
 
             // Profiles
             Text("Profiles (\(report.profiles.count))")
-                .font(.headline)
+                .font(SymairaTypography.subheading)
                 .foregroundStyle(SymairaTheme.goldPrimary)
             HStack {
                 ForEach(report.profiles, id: \.self) { name in
@@ -213,19 +213,19 @@ struct DashboardView: View {
                 .foregroundStyle(SymairaTheme.textSecondary)
             SymairaBadge(status.exists ? "Exists" : "Missing", tone: status.exists ? .positive : .warning)
             Text(status.path)
-                .font(.caption2)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textMuted)
                 .lineLimit(1)
 
             if !status.exists {
                 Text(purpose)
-                    .font(.caption2)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
                     .padding(.top, SymairaSpacing.xSmall)
 
                 Button(action: { createDirectory(status.path) }) {
                     Label("Create Directory", systemImage: "folder.badge.plus")
-                        .font(.caption)
+                        .font(SymairaTypography.caption)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Create \(title) directory")
@@ -260,32 +260,32 @@ struct DashboardView: View {
             Spacer()
             VStack(alignment: .trailing, spacing: SymairaSpacing.xSmall) {
                 Text(config.path)
-                    .font(.caption2)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
                     .lineLimit(1)
                 if !config.exists {
                     Text("File does not exist yet. Initialize SymBrain to create it.")
-                        .font(.caption2)
+                        .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.textMuted)
                     Button(action: { Task { await initializeConfig() } }) {
                         Label(
-                            isInitializing ? "Initializing..." : "Run symbrain init",
+                            isInitializing ? "Initializing…" : "Run symbrain init",
                             systemImage: isInitializing ? "hourglass" : "play.fill"
                         )
-                        .font(.caption)
+                        .font(SymairaTypography.caption)
                     }
                     .symairaButtonStyle(.primary)
                     .accessibilityLabel(isInitializing ? "Initializing" : "Run symbrain init")
                     .disabled(isInitializing)
                     if let initializeError {
                         Text(initializeError)
-                            .font(.caption2)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.critical)
                             .lineLimit(3)
                     }
                 } else if let error = config.error {
                     Text(error)
-                        .font(.caption2)
+                        .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.critical)
                         .lineLimit(2)
                 }
@@ -324,13 +324,13 @@ struct DashboardView: View {
             }
             if let path = server.path {
                 Text(path)
-                    .font(.caption2)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
                     .lineLimit(1)
             }
             if let hint = server.installHint {
                 Text(hint)
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.warning)
             }
         }
@@ -362,7 +362,7 @@ struct DashboardView: View {
             }
             if let profile = harness.profile {
                 Text("Profile: \(profile)")
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
         }

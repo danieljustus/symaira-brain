@@ -21,7 +21,7 @@ struct ProfilesView: View {
                 headerSection
 
                 if vm.isLoading && vm.profiles.isEmpty {
-                    SymairaLoadingState("Loading profiles...")
+                    SymairaLoadingState("Loading profiles…")
                 } else if let error = vm.errorMessage {
                     VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                         SymairaNotice(title: "Error", message: error, tone: .critical)
@@ -73,7 +73,7 @@ struct ProfilesView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Text("Manage MCP exposure profiles for harness connections")
-                    .font(.subheadline)
+                    .font(SymairaTypography.callout)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
@@ -120,7 +120,7 @@ struct ProfilesView: View {
             }) {
                 HStack {
                     Image(systemName: vm.selectedProfile?.name == profile.name ? "chevron.down" : "chevron.right")
-                        .font(.caption)
+                        .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.textSecondary)
                     VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
                         Text(profile.name)
@@ -128,11 +128,11 @@ struct ProfilesView: View {
                             .foregroundStyle(SymairaTheme.textPrimary)
                         if let error = profile.error {
                             Text(error)
-                                .font(.caption)
+                                .font(SymairaTypography.caption)
                                 .foregroundStyle(SymairaTheme.critical)
                         } else {
                             Text(profile.description)
-                                .font(.caption)
+                                .font(SymairaTypography.caption)
                                 .foregroundStyle(SymairaTheme.textSecondary)
                         }
                     }
@@ -210,7 +210,7 @@ struct ProfilesView: View {
 
                     if let note = server.note {
                         Text(note)
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                             .italic()
                     }
@@ -244,17 +244,17 @@ struct NewProfileSheet: View {
 
             VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                 Text("Name")
-                    .font(.headline)
+                    .font(SymairaTypography.subheading)
                     .foregroundStyle(SymairaTheme.textSecondary)
                 TextField("my-profile", text: $name)
                     .textFieldStyle(.roundedBorder)
 
                 Text("Use lowercase letters (a-z), digits (0-9), hyphens (-), and underscores (_). Names must start with a letter.")
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
 
                 Text("Base template")
-                    .font(.headline)
+                    .font(SymairaTypography.subheading)
                     .foregroundStyle(SymairaTheme.textSecondary)
                 Picker("Template", selection: $template) {
                     ForEach(templates, id: \.self) { t in

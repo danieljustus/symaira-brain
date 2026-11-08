@@ -83,7 +83,7 @@ struct VaultView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Text("Symaira Vault — credentials, secrets and their broker trail")
-                    .font(.subheadline)
+                    .font(SymairaTypography.callout)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
@@ -217,7 +217,7 @@ struct VaultView: View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             VStack(alignment: .leading, spacing: SymairaSpacing.small) {
                 Text("Create secret")
-                    .font(.headline)
+                    .font(SymairaTypography.subheading)
                 HStack(spacing: SymairaSpacing.medium) {
                     TextField("Entry path", text: $vm.createPath)
                         .textFieldStyle(.roundedBorder)
@@ -264,7 +264,7 @@ struct VaultView: View {
                 }
                 if let confirmation = vm.createConfirmation {
                     Text("Submitted: \(confirmation.submittedPath) · Confirmed: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
-                        .font(.caption)
+                        .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.textSecondary)
                 }
                 if let path = vm.selectedPath {
@@ -286,7 +286,7 @@ struct VaultView: View {
                     }
                     if let confirmation = vm.editConfirmation {
                         Text("Updated \(confirmation.confirmedPath).\(confirmation.submittedField) · readback matches: \(confirmation.confirmedValueMatches ? "yes" : "no")")
-                            .font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                            .font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textSecondary)
                     }
                 }
             }
@@ -374,7 +374,7 @@ struct VaultView: View {
 
                     if let modified = detail.formattedModified {
                         Text("Modified \(modified)")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                     }
 
@@ -447,7 +447,7 @@ struct VaultView: View {
                 .foregroundStyle(SymairaTheme.textSecondary)
                 .frame(width: 120, alignment: .leading)
             Text(value)
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textPrimary)
                 .textSelection(.enabled)
         }
@@ -501,7 +501,7 @@ struct VaultView: View {
 
     private var intakeSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-            Text("Import for review").font(.headline)
+            Text("Import for review").font(SymairaTypography.subheading)
             HStack {
                 TextField("File path", text: $intakePath).textFieldStyle(.roundedBorder)
                 Button("Add") {
@@ -512,14 +512,14 @@ struct VaultView: View {
                 Button("Stage") { Task { await vm.stageIntake() } }.disabled(vm.intakeFiles.isEmpty || vm.isLoading)
             }
             if !vm.intakeFiles.isEmpty {
-                Text(vm.intakeFiles.map(\.path).joined(separator: ", ")).font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                Text(vm.intakeFiles.map(\.path).joined(separator: ", ")).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
             }
             if !vm.intakeDrafts.isEmpty {
                 ForEach(vm.intakeDrafts) { draft in
                     HStack {
                         Text(draft.sourceName)
                         Text("→ \(draft.targetPath)").foregroundStyle(SymairaTheme.textSecondary)
-                        Text(draft.fields.keys.sorted().joined(separator: ", ")).font(.caption)
+                        Text(draft.fields.keys.sorted().joined(separator: ", ")).font(SymairaTypography.caption)
                     }
                 }
                 Button(vm.intakeReviewComplete ? "Reviewed" : "Mark reviewed") { vm.markIntakeReviewed() }
@@ -536,7 +536,7 @@ struct VaultView: View {
     private var approvalsSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             HStack {
-                Text("Pending approval requests").font(.headline)
+                Text("Pending approval requests").font(SymairaTypography.subheading)
                 Spacer()
                 Button { Task { await vm.loadApprovals() } } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
@@ -553,18 +553,18 @@ struct VaultView: View {
                     VStack(alignment: .leading, spacing: SymairaSpacing.small) {
                         HStack {
                             Text(verbatim: request.id).font(.caption.monospaced()).textSelection(.enabled)
-                            Text(verbatim: request.status).font(.caption)
+                            Text(verbatim: request.status).font(SymairaTypography.caption)
                             Spacer()
                             Button("Review") { vm.reviewApproval(request) }
                                 .disabled(!request.isPending || request.isExpired)
                         }
-                        Text(verbatim: "Agent: \(request.agentName) · Path: \(request.path)").font(.callout)
+                        Text(verbatim: "Agent: \(request.agentName) · Path: \(request.path)").font(SymairaTypography.callout)
                         HStack(spacing: 4) {
-                            Text("Access:").font(.caption)
-                            Text(request.write ? "write" : "read").font(.caption).bold()
+                            Text("Access:").font(SymairaTypography.caption)
+                            Text(request.write ? "write" : "read").font(SymairaTypography.caption).bold()
                         }
-                        Text(verbatim: request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
-                        Text(verbatim: "Expires: \(request.expiresAt)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                        Text(verbatim: request.reason).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textSecondary)
+                        Text(verbatim: "Expires: \(request.expiresAt)").font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
                     }
                     .padding(SymairaSpacing.small)
                     .background(SymairaTheme.bgCardHover)
@@ -572,13 +572,13 @@ struct VaultView: View {
             }
             if let snapshot = vm.approvalSnapshot {
                 VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-                    Text("Explicit review").font(.headline)
-                    Text(verbatim: "Request \(snapshot.request.id) for \(snapshot.request.path)").font(.callout)
+                    Text("Explicit review").font(SymairaTypography.subheading)
+                    Text(verbatim: "Request \(snapshot.request.id) for \(snapshot.request.path)").font(SymairaTypography.callout)
                     HStack(spacing: 4) {
-                        Text("Access:").font(.caption)
-                        Text(snapshot.request.write ? "write" : "read").font(.caption).bold()
+                        Text("Access:").font(SymairaTypography.caption)
+                        Text(snapshot.request.write ? "write" : "read").font(SymairaTypography.caption).bold()
                     }
-                    Text(verbatim: snapshot.request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    Text(verbatim: snapshot.request.reason).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textSecondary)
                     HStack {
                         Button("Approve") { Task { await vm.decideReviewedApproval(approve: true) } }
                             .symairaButtonStyle(.primary)
@@ -592,7 +592,7 @@ struct VaultView: View {
                 .padding(SymairaSpacing.medium)
             }
             if let outcome = vm.approvalOutcome {
-                Text(verbatim: "Confirmed \(outcome.id): \(outcome.status)").font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                Text(verbatim: "Confirmed \(outcome.id): \(outcome.status)").font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textSecondary)
             }
         }
         .task { await vm.loadApprovals() }

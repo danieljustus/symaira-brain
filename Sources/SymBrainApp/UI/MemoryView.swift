@@ -110,7 +110,7 @@ struct MemoryView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Text("Persistent facts, rules and retrieval log — built into SymBrain")
-                    .font(.subheadline)
+                    .font(SymairaTypography.callout)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
@@ -207,7 +207,7 @@ struct MemoryView: View {
 
                 if let note = vm.listTruncationNote {
                     Text(note)
-                        .font(.caption)
+                        .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.textMuted)
                 }
             }
@@ -234,7 +234,7 @@ struct MemoryView: View {
                 } label: {
                     VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
                         Text(memory.content)
-                            .font(.callout)
+                            .font(SymairaTypography.callout)
                             .foregroundStyle(SymairaTheme.textPrimary)
                             .lineLimit(3)
                         HStack(spacing: SymairaSpacing.small) {
@@ -278,7 +278,7 @@ struct MemoryView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                     Text(memory.content)
-                        .font(.body)
+                        .font(SymairaTypography.body)
                         .foregroundStyle(SymairaTheme.textPrimary)
                         .textSelection(.enabled)
                         .fixedSize(horizontal: false, vertical: true)
@@ -301,7 +301,7 @@ struct MemoryView: View {
 
                     if !memory.metadataPairs.isEmpty {
                         Text("Metadata")
-                            .font(.headline)
+                            .font(SymairaTypography.subheading)
                             .foregroundStyle(SymairaTheme.textPrimary)
                             .padding(.top, SymairaSpacing.small)
                         ForEach(memory.metadataPairs, id: \.key) { pair in
@@ -356,7 +356,7 @@ struct MemoryView: View {
 
                     TableColumn("Rule") { rule in
                         Text(rule.content)
-                            .font(.callout)
+                            .font(SymairaTypography.callout)
                             .foregroundStyle(SymairaTheme.textPrimary)
                     }
 
@@ -409,7 +409,7 @@ struct MemoryView: View {
 
                         TableColumn("Query") { entry in
                             Text(entry.queryText ?? "—")
-                                .font(.caption)
+                                .font(SymairaTypography.caption)
                                 .foregroundStyle(SymairaTheme.textPrimary)
                         }
 
@@ -525,7 +525,7 @@ private struct AddMemorySheet: View {
                 .foregroundStyle(SymairaTheme.textPrimary)
 
             TextEditor(text: $content)
-                .font(.body)
+                .font(SymairaTypography.body)
                 .frame(minHeight: 140)
                 .scrollContentBackground(.hidden)
                 .padding(SymairaSpacing.small)
@@ -576,7 +576,7 @@ struct ModuleActivityTable: View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             HStack {
                 Text("\(entries.count) recorded calls")
-                    .font(.caption)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textSecondary)
                 Spacer()
                 Button(action: onRefresh) {
@@ -603,7 +603,7 @@ struct ModuleActivityTable: View {
 
                     TableColumn("Profile") { entry in
                         Text(entry.profile)
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                     }
                     .width(min: 80, ideal: 100)

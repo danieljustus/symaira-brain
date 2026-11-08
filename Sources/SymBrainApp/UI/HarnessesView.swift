@@ -41,7 +41,7 @@ struct HarnessesView: View {
                 headerSection
 
                 if vm.isLoading {
-                    SymairaLoadingState("Loading harnesses...")
+                    SymairaLoadingState("Loading harnesses…")
                 } else if let error = vm.errorMessage {
                     VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                         SymairaNotice(title: "Error", message: error, tone: .critical)
@@ -130,7 +130,7 @@ struct HarnessesView: View {
                 .font(.title.bold())
                 .foregroundStyle(SymairaTheme.textPrimary)
             Text("Install or uninstall symbrain as an MCP server in each harness")
-                .font(.subheadline)
+                .font(SymairaTypography.callout)
                 .foregroundStyle(SymairaTheme.textSecondary)
         }
     }
@@ -199,7 +199,7 @@ struct HarnessesView: View {
                     }
                 }
                 Text(status.configPath)
-                    .font(.caption2)
+                    .font(SymairaTypography.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
                     .lineLimit(1)
             }
@@ -223,7 +223,7 @@ struct HarnessesView: View {
                     }
                 } label: {
                     Label("Install", systemImage: "arrow.down.to.line")
-                        .font(.caption)
+                        .font(SymairaTypography.caption)
                 }
                 // #151: bordered style with intrinsic width so the hit area is
                 // compact and visible (was an oversized invisible target with
@@ -241,7 +241,7 @@ struct HarnessesView: View {
                     dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: true)
                 }) {
                     Label("Dry Run", systemImage: "doc.text.magnifyingglass")
-                        .font(.caption)
+                        .font(SymairaTypography.caption)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Preview install for \(name)")
@@ -254,7 +254,7 @@ struct HarnessesView: View {
                         dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: false)
                     }) {
                         Label("Dry Run", systemImage: "doc.text.magnifyingglass")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Preview uninstall for \(name)")
@@ -266,7 +266,7 @@ struct HarnessesView: View {
                         pendingUninstall = UninstallConfirmation(harness: name)
                     }) {
                         Label("Uninstall", systemImage: "arrow.up.from.line")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Uninstall \(name)")
@@ -342,19 +342,19 @@ struct DryRunSheet: View {
                 .foregroundStyle(SymairaTheme.textPrimary)
 
             Text("Harness: \(harness)")
-                .font(.subheadline)
+                .font(SymairaTypography.callout)
                 .foregroundStyle(SymairaTheme.textSecondary)
 
             if isInstall && !hasRun && !isLoading {
                 // #73: Profile picker for install dry run
                 VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                     Text("Profile")
-                        .font(.headline)
+                        .font(SymairaTypography.subheading)
                         .foregroundStyle(SymairaTheme.textSecondary)
 
                     if profiles.isEmpty {
                         Text("No profiles available. Create one in the Profiles tab.")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                     } else {
                         Picker("Profile", selection: $selectedProfile) {
@@ -389,7 +389,7 @@ struct DryRunSheet: View {
                     .disabled(profiles.isEmpty || selectedProfile.isEmpty)
                 }
             } else if isLoading {
-                SymairaLoadingState("Running dry run...")
+                SymairaLoadingState("Running dry run…")
             } else if hasRun {
                 ScrollView {
                     Text(output)

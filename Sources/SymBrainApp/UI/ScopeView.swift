@@ -62,7 +62,7 @@ struct ScopeView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Text("Symaira Scope — local system inventory")
-                    .font(.subheadline)
+                    .font(SymairaTypography.callout)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
@@ -130,7 +130,7 @@ struct ScopeView: View {
                         selectedSourceRoot(sourceRoot)
                     } else {
                         Text("Choose a local Symaira Brain checkout before building. The selection is not saved.")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                     }
 
@@ -164,7 +164,7 @@ struct ScopeView: View {
     private func selectedSourceRoot(_ sourceRoot: URL) -> some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
             Text("Selected Brain checkout (not saved)")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textSecondary)
             Text(sourceRoot.path)
                 .font(.caption.monospaced())
@@ -218,7 +218,7 @@ struct ScopeView: View {
 
     private var binarySection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-            Text("Managed binary").font(.headline)
+            Text("Managed binary").font(SymairaTypography.subheading)
             Grid(alignment: .leading, horizontalSpacing: SymairaSpacing.large, verticalSpacing: SymairaSpacing.xSmall) {
                 GridRow {
                     Text("Path").foregroundStyle(SymairaTheme.textSecondary)
@@ -238,13 +238,13 @@ struct ScopeView: View {
                     if let builder = provenance.builder {
                         GridRow {
                             Text("Builder").foregroundStyle(SymairaTheme.textSecondary)
-                            Text(builder).font(.caption).textSelection(.enabled)
+                            Text(builder).font(SymairaTypography.caption).textSelection(.enabled)
                         }
                     }
                     if let builtAt = provenance.formattedBuiltAt {
                         GridRow {
                             Text("Built").foregroundStyle(SymairaTheme.textSecondary)
-                            Text(builtAt).font(.caption)
+                            Text(builtAt).font(SymairaTypography.caption)
                         }
                     }
                     GridRow {
@@ -254,11 +254,11 @@ struct ScopeView: View {
                 } else {
                     GridRow {
                         Text("Provenance").foregroundStyle(SymairaTheme.textSecondary)
-                        Text("Unknown (no provenance sidecar next to this binary)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                        Text("Unknown (no provenance sidecar next to this binary)").font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
                     }
                 }
             }
-            .font(.caption)
+            .font(SymairaTypography.caption)
         }
         .padding(SymairaSpacing.large)
         .glassCard()
@@ -266,16 +266,16 @@ struct ScopeView: View {
 
     private var profileSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-            Text("Profile exposure").font(.headline)
+            Text("Profile exposure").font(SymairaTypography.subheading)
             if vm.profileExposure.isEmpty {
-                Text("No profiles found.").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                Text("No profiles found.").font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
             } else {
                 ForEach(vm.profileExposure) { exposure in
                     HStack {
                         Text(exposure.profile).font(.caption.monospaced())
                         SymairaBadge(exposure.enabled ? "exposed" : "not exposed", tone: exposure.enabled ? .positive : .neutral)
                         if let mode = exposure.mode, !mode.isEmpty {
-                            Text(mode).font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                            Text(mode).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
                         }
                     }
                 }
@@ -288,7 +288,7 @@ struct ScopeView: View {
     private var versionSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
             HStack {
-                Text("Version").font(.headline)
+                Text("Version").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.checkVersion() } }) {
                     Label("Check Version", systemImage: "info.circle")
@@ -309,7 +309,7 @@ struct ScopeView: View {
                         Text("\(version.schemaVersion)")
                     }
                 }
-                .font(.caption)
+                .font(SymairaTypography.caption)
             }
         }
         .padding(SymairaSpacing.large)
@@ -319,7 +319,7 @@ struct ScopeView: View {
     private var scanSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
             HStack {
-                Text("Health").font(.headline)
+                Text("Health").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.runScan() } }) {
                     Label("Scan Now", systemImage: "magnifyingglass")
@@ -328,7 +328,7 @@ struct ScopeView: View {
                 .disabled(vm.isScanning)
             }
             Text("Walks listening ports, launchd/Homebrew daemons and Docker containers on this Mac — a real inventory pass, not a cheap check.")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textMuted)
 
             if vm.isScanning {
@@ -341,7 +341,7 @@ struct ScopeView: View {
                     countStat("Daemons", snapshot.daemonCount)
                 }
                 ForEach(snapshot.notes, id: \.self) { note in
-                    Text(note).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    Text(note).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textSecondary)
                 }
             }
         }
@@ -352,7 +352,7 @@ struct ScopeView: View {
     private func countStat(_ label: String, _ value: Int) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text("\(value)").font(.title3.monospacedDigit()).foregroundStyle(SymairaTheme.textPrimary)
-            Text(label).font(.caption).foregroundStyle(SymairaTheme.textMuted)
+            Text(label).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
         }
     }
 

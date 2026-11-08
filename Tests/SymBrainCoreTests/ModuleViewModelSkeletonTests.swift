@@ -207,17 +207,42 @@ private final class ControlledVaultClient: VaultClientProtocol {
 
 private actor ManualSleeper {
     private var waiters: [CheckedContinuation<Void, Never>] = []
+    private var arrivals: [CheckedContinuation<Void, Never>] = []
 
     func sleep(_ duration: Duration) async throws {
         await withCheckedContinuation { continuation in
             waiters.append(continuation)
+            let pending = arrivals
+            arrivals = []
+            pending.forEach { $0.resume() }
         }
     }
 
-    func resumeNext() {
-        guard !waiters.isEmpty else { return }
+    /// Suspends until a sleeper is registered. Without this a test can call
+    /// `resumeNext()` before the production task reached `sleep`, which then
+    /// silently resumes nothing.
+    func waitForSleeper() async {
+        guard waiters.isEmpty else { return }
+        await withCheckedContinuation { arrivals.append($0) }
+    }
+
+    func resumeNext() async {
+        await waitForSleeper()
         waiters.removeFirst().resume()
     }
+}
+
+/// Yields to the main actor until `condition` holds or `timeout` elapses. The
+/// condition, not a fixed number of scheduler turns, decides when a resumed
+/// task has finished, so slow CI machines cannot make the outcome flaky.
+@MainActor
+func waitUntil(timeout: Duration = .seconds(10), _ condition: @MainActor () -> Bool) async -> Bool {
+    let deadline = ContinuousClock.now + timeout
+    while !condition() {
+        if ContinuousClock.now >= deadline { return false }
+        await Task.yield()
+    }
+    return true
 }
 
 @MainActor
@@ -313,11 +338,12 @@ extension ModuleViewModelSkeletonTests {
         vm.availability = .ready
         await vm.select(path: detail.path)
         await vm.revealSelectedEntry()
-        await Task.yield()
+        await sleeper.waitForSleeper()
         #expect(vm.detail == detail)
 
         await sleeper.resumeNext()
-        await Task.yield()
+        let expired = await waitUntil { vm.detail == nil }
+        #expect(expired)
         #expect(vm.detail == nil)
         #expect(vm.revealedFields.isEmpty)
     }
@@ -832,9 +858,12 @@ private final class DelayedApprovalClient: VaultClientProtocol {
     let vm = VaultViewModel(client: StubVaultClient(result: detail), sleep: { duration in try await sleeper.sleep(duration) })
     vm.availability = .ready
     await vm.select(path: detail.path); await vm.revealSelectedEntry()
+    await sleeper.waitForSleeper()
     vm.approvalRequests = [request]; vm.reviewApproval(request); vm.cancelApprovalReview()
     #expect(vm.detail == detail)
-    await sleeper.resumeNext(); await Task.yield()
+    await sleeper.resumeNext()
+    let expired = await waitUntil { vm.detail == nil }
+    #expect(expired)
     #expect(vm.detail == nil)
 }
 

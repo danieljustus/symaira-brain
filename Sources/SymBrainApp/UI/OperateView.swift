@@ -62,7 +62,7 @@ struct OperateView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Text("Symaira Operate — screen automation and permission status")
-                    .font(.subheadline)
+                    .font(SymairaTypography.callout)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
@@ -130,7 +130,7 @@ struct OperateView: View {
                         selectedSourceRoot(sourceRoot)
                     } else {
                         Text("Choose a local Symaira Brain checkout before building. The selection is not saved.")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textMuted)
                     }
 
@@ -164,7 +164,7 @@ struct OperateView: View {
     private func selectedSourceRoot(_ sourceRoot: URL) -> some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
             Text("Selected Brain checkout (not saved)")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textSecondary)
             Text(sourceRoot.path)
                 .font(.caption.monospaced())
@@ -218,7 +218,7 @@ struct OperateView: View {
 
     private var binarySection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-            Text("Managed binary").font(.headline)
+            Text("Managed binary").font(SymairaTypography.subheading)
             Grid(alignment: .leading, horizontalSpacing: SymairaSpacing.large, verticalSpacing: SymairaSpacing.xSmall) {
                 GridRow {
                     Text("Path").foregroundStyle(SymairaTheme.textSecondary)
@@ -238,13 +238,13 @@ struct OperateView: View {
                     if let builder = provenance.builder {
                         GridRow {
                             Text("Builder").foregroundStyle(SymairaTheme.textSecondary)
-                            Text(builder).font(.caption).textSelection(.enabled)
+                            Text(builder).font(SymairaTypography.caption).textSelection(.enabled)
                         }
                     }
                     if let builtAt = provenance.formattedBuiltAt {
                         GridRow {
                             Text("Built").foregroundStyle(SymairaTheme.textSecondary)
-                            Text(builtAt).font(.caption)
+                            Text(builtAt).font(SymairaTypography.caption)
                         }
                     }
                     GridRow {
@@ -254,11 +254,11 @@ struct OperateView: View {
                 } else {
                     GridRow {
                         Text("Provenance").foregroundStyle(SymairaTheme.textSecondary)
-                        Text("Unknown (no provenance sidecar next to this binary)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                        Text("Unknown (no provenance sidecar next to this binary)").font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
                     }
                 }
             }
-            .font(.caption)
+            .font(SymairaTypography.caption)
         }
         .padding(SymairaSpacing.large)
         .glassCard()
@@ -266,16 +266,16 @@ struct OperateView: View {
 
     private var profileSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-            Text("Profile exposure").font(.headline)
+            Text("Profile exposure").font(SymairaTypography.subheading)
             if vm.profileExposure.isEmpty {
-                Text("No profiles found.").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                Text("No profiles found.").font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
             } else {
                 ForEach(vm.profileExposure) { exposure in
                     HStack {
                         Text(exposure.profile).font(.caption.monospaced())
                         SymairaBadge(exposure.enabled ? "exposed" : "not exposed", tone: exposure.enabled ? .positive : .neutral)
                         if let mode = exposure.mode, !mode.isEmpty {
-                            Text(mode).font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                            Text(mode).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textMuted)
                         }
                     }
                 }
@@ -288,7 +288,7 @@ struct OperateView: View {
     private var versionSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
             HStack {
-                Text("Version").font(.headline)
+                Text("Version").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.checkVersion() } }) {
                     Label("Check for Updates", systemImage: "network")
@@ -297,7 +297,7 @@ struct OperateView: View {
                 .disabled(vm.isCheckingVersion)
             }
             Text("Contacts GitHub to check for a newer symoperate release.")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textMuted)
 
             if vm.isCheckingVersion {
@@ -315,7 +315,7 @@ struct OperateView: View {
                         }
                     }
                 }
-                .font(.caption)
+                .font(SymairaTypography.caption)
             }
         }
         .padding(SymairaSpacing.large)
@@ -325,7 +325,7 @@ struct OperateView: View {
     private var doctorSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
             HStack {
-                Text("Health").font(.headline)
+                Text("Health").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.runDoctor() } }) {
                     Label("Run Doctor", systemImage: "stethoscope")
@@ -334,7 +334,7 @@ struct OperateView: View {
                 .disabled(vm.isRunningDoctor)
             }
             Text("Takes a real screenshot and reads the frontmost app's UI tree to prove those permissions actually work.")
-                .font(.caption)
+                .font(SymairaTypography.caption)
                 .foregroundStyle(SymairaTheme.textMuted)
 
             if vm.isRunningDoctor {
@@ -344,7 +344,7 @@ struct OperateView: View {
                     HStack {
                         SymairaBadge(doctor.ok ? "ok" : "attention needed", tone: doctor.ok ? .positive : .warning)
                         Text("\(doctor.environment.appsCount) apps · \(doctor.environment.displaysCount) displays · macOS \(doctor.environment.macOSVersion)")
-                            .font(.caption)
+                            .font(SymairaTypography.caption)
                             .foregroundStyle(SymairaTheme.textSecondary)
                     }
                     HStack {
@@ -352,7 +352,7 @@ struct OperateView: View {
                         permissionBadge("Screen Recording", granted: doctor.permissions.screenRecordingGranted)
                     }
                     ForEach(doctor.recommendations, id: \.self) { note in
-                        Text(note).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                        Text(note).font(SymairaTypography.caption).foregroundStyle(SymairaTheme.textSecondary)
                     }
                 }
             }
@@ -363,7 +363,7 @@ struct OperateView: View {
 
     private func permissionBadge(_ name: String, granted: Bool) -> some View {
         HStack(spacing: 4) {
-            Text(name).font(.caption)
+            Text(name).font(SymairaTypography.caption)
             SymairaBadge(granted ? "granted" : "missing", tone: granted ? .positive : .critical)
         }
     }
