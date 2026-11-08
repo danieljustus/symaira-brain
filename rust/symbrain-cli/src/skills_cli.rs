@@ -17,11 +17,20 @@ use symbrain_skills::gotext::clean;
 mod doctor;
 mod env;
 mod flags;
+mod history;
+mod import;
+mod install;
 mod list;
 mod log;
+mod opargs;
+mod ops;
+mod pull;
+mod render;
+mod restore;
 mod status;
 mod sync;
 mod targets;
+mod validate;
 
 /// The shipped `symbrain skills` help, verbatim from the shipped source.
 const SKILLS_USAGE: &str = r"symbrain skills — embedded skill library operations
@@ -122,6 +131,13 @@ pub fn run(
         Some("log") => log::run(rest, stdout, stderr, format),
         Some("sync") => sync::run(rest, stdout, stderr, format),
         Some("doctor") => doctor::run(rest, stdout, stderr, format),
+        Some("import") => import::run(rest, stdout, stderr, format),
+        Some("pull") => pull::run(rest, stdout, stderr, format),
+        Some("install") => install::run(rest, stdout, stderr, format),
+        Some("render") => render::run(rest, stdout, stderr, format),
+        Some("validate") => validate::run(rest, stdout, stderr, format),
+        Some("history") => history::run(rest, stdout, stderr, format),
+        Some("restore") => restore::run(rest, stdout, stderr, format),
         _ => {
             let _ = writeln!(
                 stderr,

@@ -144,6 +144,45 @@ pub fn is_repo(dir: &Path) -> bool {
     crate::gotext::join(dir, ".git").exists() && run(dir, &["rev-parse", "--git-dir"]).is_ok()
 }
 
+/// Whether the `git` binary is missing; callers degrade without versioning.
+#[must_use]
+pub fn is_unavailable(error: &SkillError) -> bool {
+    error.0 == GIT_UNAVAILABLE
+}
+
+/// Creates a repository at `dir` with an initial commit of the current tree.
+/// Reports `false` when `dir` already is a repository; an empty tree leaves a
+/// valid repository without commits.
+///
+/// # Errors
+/// Returns git failures, or the unavailable-binary error ([`is_unavailable`]).
+pub fn init(dir: &Path) -> Result<bool, SkillError> {
+    if is_repo(dir) {
+        return Ok(false);
+    }
+    run(dir, &["init"])?;
+    run(dir, &["add", "-A"])?;
+    let committed = run(
+        dir,
+        &[
+            "-c",
+            "user.name=symskills",
+            "-c",
+            "user.email=symskills@localhost",
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "-m",
+            "import: initial library import",
+        ],
+    );
+    match committed {
+        Ok(_) => Ok(true),
+        Err(error) if error.0.contains("nothing to commit") => Ok(true),
+        Err(error) => Err(error),
+    }
+}
+
 /// Resolves a revision to a full commit hash.
 ///
 /// # Errors

@@ -31,6 +31,7 @@ pub use core::ModeChange;
 pub use core::{
     InstallOptions, InstallResult, install_copy, install_path, install_path_for, install_rendered,
 };
+pub(crate) use drift::file_hashes;
 pub use drift::{DriftKind, DriftSummary, FileDrift, classify_drift, classify_file, summarize};
 pub use event::{
     EVENT_MAX_BYTES, EventReadFailure, OperationEvent, read_events, read_events_go_exact,

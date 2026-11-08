@@ -359,7 +359,7 @@ fn compose_body(
     Ok(format!("{}\n", parts.join("\n\n")))
 }
 
-fn overlay_text(
+pub(crate) fn overlay_text(
     bundle: &Bundle,
     target_name: &str,
     default_name: &str,

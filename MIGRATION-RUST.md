@@ -560,6 +560,59 @@ unqualified multi-target CLI fallback remain part of #764.
 > `$HOME` is the error `scan installs: $HOME is not defined` (exit 1) for
 > `status` and `sync`.
 
+### Skills: native state of every library shape and the MCP tools (#764, 2026-11-08)
+
+With Go gone (#1003) there is no routing predicate left: `skills_cli::requires_go_fallback`
+and `run_go_fallback` do not exist, and every "Still on Go" list in the skills slices below is
+historical. The intended Rust behavior of the formerly Go-routed shapes is pinned by Rust
+regression tests (`rust/symbrain-cli/tests/skills_config_shapes_native.rs`, plus the sealed
+replays `skills_native_no_fallback.rs`, `skills_status_opencode_tests.rs`,
+`skills_list_native.rs`, `skills_targets_native.rs`, `skills_doctor_native.rs`):
+
+- Configuration: defaults, then the global `config.toml`, then `./.symskills.toml`, then
+  `SYMSKILLS_*`; any load failure resets the whole config to the defaults. A configured
+  `library_dir`/`base_dir` drives `list`, `status`, `sync`, `install` and `pull` for every target,
+  not only OpenCode. `disabled_targets` is honoured by every verb that selects targets.
+- `SYMSKILLS_CACHE_DIR` and any config file switch the #621 render-drift extension off; `status`
+  never creates the cache directory.
+- `status`/`sync`/`targets` reject an unknown `--scope` or `--target` with exit 2; an undefined
+  `$HOME` is `scan installs: $HOME is not defined` (exit 1).
+- `list` of a populated library reports category counts, created/modified times, per-target
+  installs and last use.
+- MCP: all eleven skills tools are served in process by `symbrain mcp` (`skills_list`,
+  `skills_inspect`, `skills_validate`, `skills_profile_list`, `skills_profile_resolve`,
+  `skills_render_plan`, `skills_install`, `skills_discover_sources`, `skills_history`,
+  `skills_restore`, `skills_targets_status`). Names, schemas and order are unchanged;
+  `skills_mcp_tools_native.rs` calls each against a real library and requires JSON-RPC-only
+  stdout and an empty stderr. The profile/versioning tools additionally replay
+  `skills_tools_go_oracle.json`.
+- The defects named by the issue are covered by `render_drift_status.rs` (#621),
+  `confined_symlink_render_tests.rs` (#490), `input_bounds.rs` (#476) and `concurrent_installs.rs`
+  (#457) in `rust/symbrain-skills/tests`.
+
+### Skills library operations replace `symskills` 0.5.0 (#905, 2026-11-08)
+
+`symbrain skills` now carries the SSOT workflow that required the frozen `symskills` binary. All
+verbs use the same library, base-snapshot and event-log locations as the existing verbs
+(`symbrain skills doctor`), take the global `--json`/`--output`, and use exit codes 0/1/2
+(success/failure/usage). Each has `--help`.
+
+| Verb | Behavior |
+|---|---|
+| `import <dir> [--batch] [--update] [--library DIR]` | Copy into the library (symlinks must stay inside the source; `.git` skipped), refuse a skill that fails validation or already exists (`--update` replaces the tree in place), version it in its own git repository (`import:`/`update:` commit). Versioning failures are warnings. `--batch` imports every subdirectory with a `SKILL.md`. |
+| `pull <skill> [--target all\|a,b] [--scope] [--dry-run] [--apply]` | Compare each installed copy with a fresh render of the library source against the install-time base snapshot; stage only harness-side edits (body, frontmatter, resource add/modify/remove) into `<library parent>/pending/<target>/<skill>`. Conflicts, edited overlay body regions and overlay-owned frontmatter keys are refused. `allowed-tools` edits are flagged as permission-relevant. A stale install (library changed) is never pulled back. `--apply` validates the pending tree, replaces the library skill (keeping `.git`), commits `pull: apply pending changes for <skill>` and removes the pending tree. Symlink-mode installs are refused. |
+| `install [skill\|dir] [--profile P] [--target] [--scope] [--mode symlink\|copy] [--force] [--dry-run] [--allow-executable] [--ignore-capabilities] [-o DIR]` | Render and install into the selected, enabled targets; `install` events go to the operation log. One target and skill prints one JSON object, otherwise an array. |
+| `render [skill\|dir] [--profile P] [--target] [--explain] [-o DIR]` | Write the rendered tree to the render directory without installing. |
+| `validate [skill\|dir] [--strict]` | Print findings; exit 1 on errors (and on warnings with `--strict`), also with `--json`. |
+| `history <skill> [--limit N]`, `restore <skill> --to <rev> [--dry-run] [--allow-dirty] [--sync]` | The CLI face of `skills_history`/`skills_restore`: forward commits only, restored state validated first, uncommitted changes never discarded, `--sync` re-installs stale targets. |
+
+Deliberate differences from `symskills` 0.5.0: `validate --json` exits 1 for an invalid skill;
+`pull` rewrites the staged frontmatter with insertion order preserved (0.5.0 sorted keys) and only
+when a frontmatter key changed; an unchanged skill reports `current` instead of staging an empty
+tree; keys the renderer never emits (for example `tags`) are neither dropped nor reported. Tests:
+`skills_ops_cli.rs`, `skills_pull_install_cli.rs`. Not ported (not needed by the SSOT flow):
+`diff`, `discover`, `inspect`, `init`, `profile`, `show`, `uninstall`, `serve`.
+
 ### Skills status environment-only config (#764 slice c)
 
 `symbrain skills status --target opencode [--scope user|project]` is native when
