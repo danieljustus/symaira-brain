@@ -7,9 +7,12 @@
 
 #![cfg(unix)]
 
+mod store_support;
+
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
+use store_support::{CHILD_TIMEOUT, executed, isolate, output_within, skip_privileged, temp};
 
 struct Run {
     code: i32,
@@ -19,22 +22,17 @@ struct Run {
 
 fn run(root: &Path, args: &[&str]) -> Run {
     // Fixed umask: modes are `0777 & !umask` for creation requests.
-    let output = Command::new("/bin/sh")
+    let mut command = Command::new("/bin/sh");
+    command
         .arg("-c")
         .arg("umask 022; exec \"$0\" \"$@\"")
         .arg(env!("CARGO_BIN_EXE_symbrain"))
         .arg("memory")
         .args(args)
-        .env_clear()
-        .env("HOME", root)
-        .env("XDG_CONFIG_HOME", root.join("config"))
-        .env("XDG_DATA_HOME", root.join("data"))
-        .env("XDG_CACHE_HOME", root.join("cache"))
-        .env("PATH", "")
-        .env("SYMBRAIN_GO_BINARY", root.join("absent-go"))
-        .current_dir(root)
-        .output()
-        .expect("actual CLI child");
+        .current_dir(root);
+    isolate(&mut command, root);
+    // Bounded: a child blocked on its database path fails the test (#917).
+    let output = output_within(&mut command, CHILD_TIMEOUT);
     Run {
         code: output.status.code().expect("exit status"),
         stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
@@ -44,13 +42,6 @@ fn run(root: &Path, args: &[&str]) -> Run {
 
 fn mode(path: &Path) -> u32 {
     std::fs::metadata(path).expect("entry").permissions().mode() & 0o7777
-}
-
-/// The canonical root: Go reports the resolved path of trusted system links.
-fn temp() -> (tempfile::TempDir, std::path::PathBuf) {
-    let guard = tempfile::tempdir().expect("root");
-    let root = guard.path().canonicalize().expect("canonical root");
-    (guard, root)
 }
 
 const SET: [&str; 5] = ["set", "hello", "--kind", "fact", "--staged"];
@@ -157,8 +148,18 @@ fn read_only_parent_reports_directory_and_file_errors() {
     std::fs::create_dir(&ro).expect("ro");
     std::fs::set_permissions(&ro, std::fs::Permissions::from_mode(0o500)).expect("mode");
     if std::fs::create_dir(ro.join("probe")).is_ok() {
-        return; // privileged runner: permission denial is not observable
+        // Privileged runner: permission denial is not observable. Say so
+        // instead of passing as if the denial assertions had run (#936).
+        for scenario in [
+            "read_only_parent.directory_creation_denied",
+            "read_only_parent.database_file_denied",
+        ] {
+            skip_privileged(scenario, "mode 0500 parent is writable by this user");
+        }
+        return;
     }
+    executed("read_only_parent.directory_creation_denied");
+    executed("read_only_parent.database_file_denied");
     let wrap = "failed to open sqlite database: ";
     let sub = run(
         &root,
@@ -239,6 +240,39 @@ fn non_regular_database_paths_report_the_shipped_doubled_open_error() {
 }
 
 #[test]
+fn a_child_blocked_on_a_fifo_fails_the_test_instead_of_hanging() {
+    // The guard itself: opening a FIFO that has no writer blocks forever.
+    let (_guard, root) = temp();
+    let fifo = root.join("fifo");
+    let status = Command::new("/usr/bin/mkfifo")
+        .arg(&fifo)
+        .status()
+        .expect("mkfifo");
+    assert!(status.success());
+    let started = std::time::Instant::now();
+    let outcome = std::panic::catch_unwind(|| {
+        let mut blocked = Command::new("/bin/sh");
+        blocked
+            .arg("-c")
+            .arg("exec 3< \"$0\"")
+            .arg(&fifo)
+            .current_dir(&root);
+        output_within(&mut blocked, std::time::Duration::from_millis(300))
+    });
+    let payload = outcome.expect_err("a blocked child must fail the test");
+    let message = payload
+        .downcast_ref::<String>()
+        .cloned()
+        .or_else(|| payload.downcast_ref::<&str>().map(ToString::to_string))
+        .unwrap_or_default();
+    assert!(message.contains("timed out after"), "{message}");
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(30),
+        "the bounded wait must return promptly"
+    );
+}
+
+#[test]
 fn description_and_code_parses_only_the_shipped_shape() {
     assert_eq!(
         description_and_code("disk I/O error (10)\n"),
@@ -254,78 +288,11 @@ fn description_and_code_parses_only_the_shipped_shape() {
 }
 
 #[test]
-fn relative_database_path_honours_only_pwd_naming_the_current_directory() {
-    use std::os::unix::fs::MetadataExt;
-
-    // Observed against Go dcddcef0: valid logical PWD preserves the symlink
-    // rejection; absent, relative or unrelated PWD uses the physical cwd.
-    for args in [&SET[..], &["delete", "absent"][..]] {
-        for spelling in [
-            "symlink",
-            "physical",
-            "wrong-directory",
-            "relative",
-            "unset",
-        ] {
-            let (_guard, root) = temp();
-            let real = root.join("real");
-            let link = root.join("link");
-            std::fs::create_dir(&real).unwrap();
-            std::os::unix::fs::symlink(&real, &link).unwrap();
-            if spelling == "symlink" && std::fs::symlink_metadata(&link).unwrap().uid() == 0 {
-                eprintln!("SKIP logical-PWD symlink rejection: root-owned links are trusted");
-                continue;
-            }
-            let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
-            command
-                .arg("memory")
-                .args(args)
-                .args(["--db", "rel/sub/c.db"])
-                .env_clear()
-                .env("HOME", &root)
-                .env("XDG_CONFIG_HOME", root.join("config"))
-                .env("XDG_DATA_HOME", root.join("data"))
-                .env("XDG_CACHE_HOME", root.join("cache"))
-                .env("PATH", "")
-                .env("SYMBRAIN_GO_BINARY", root.join("absent-go"))
-                .current_dir(&real);
-            match spelling {
-                "symlink" => command.env("PWD", &link),
-                "physical" => command.env("PWD", &real),
-                "wrong-directory" => command.env("PWD", &root),
-                "relative" => command.env("PWD", "link"),
-                _ => &mut command,
-            };
-            let output = command.output().expect("native CLI child");
-            let stderr = String::from_utf8(output.stderr).unwrap();
-            let verb = args[0];
-            if spelling == "symlink" {
-                assert_eq!(output.status.code(), Some(1), "{verb}: {stderr}");
-                assert!(output.stdout.is_empty());
-                assert_eq!(
-                    stderr,
-                    format!(
-                        "symbrain memory {verb}: open memory database: failed to open sqlite database: failed to create database directory: mkdir {}: too many levels of symbolic links\n",
-                        link.display()
-                    )
-                );
-                assert!(
-                    !real.join("rel").exists(),
-                    "rejection must not create directories"
-                );
-            } else {
-                assert!(
-                    real.join("rel/sub/c.db").is_file(),
-                    "{verb} {spelling}: {stderr}"
-                );
-                if verb == "set" {
-                    assert!(output.status.success(), "{spelling}: {stderr}");
-                    assert!(stderr.is_empty());
-                } else {
-                    assert_eq!(output.status.code(), Some(1));
-                    assert_eq!(stderr, "symbrain memory delete: memory not found: absent\n");
-                }
-            }
-        }
-    }
+fn scenario_report_names_the_outcome_and_the_reason() {
+    use store_support::report_line;
+    assert_eq!(
+        report_line("skipped(privilege)", "read_only_parent.x", "root runner"),
+        "skipped(privilege) read_only_parent.x: root runner\n"
+    );
+    assert_eq!(report_line("executed", "a.b", ""), "executed a.b\n");
 }

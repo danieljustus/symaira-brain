@@ -7,6 +7,11 @@
 
 use std::path::Path;
 
+#[cfg(unix)]
+mod absolute;
+#[cfg(unix)]
+use absolute::absolute_directory;
+
 /// Go `filepath.Dir`: everything up to the last separator, cleaned.
 #[cfg(unix)]
 pub(crate) fn go_dir(path: &Path) -> Vec<u8> {
@@ -87,30 +92,7 @@ pub(crate) fn safe_mkdir_all(directory: &[u8]) -> Result<(), String> {
     use std::os::unix::ffi::{OsStrExt, OsStringExt};
     use std::os::unix::fs::{DirBuilderExt, MetadataExt};
 
-    let absolute = if directory.first() == Some(&b'/') {
-        go_clean(directory)
-    } else {
-        // Go os.Getwd keeps a valid logical PWD, including symlinks that the
-        // directory walk below must still reject (#928).
-        let pwd = std::env::var_os("PWD").filter(|pwd| {
-            Path::new(pwd).is_absolute()
-                && matches!(
-                    (std::fs::metadata("."), std::fs::metadata(pwd)),
-                    (Ok(dot), Ok(named)) if dot.dev() == named.dev() && dot.ino() == named.ino()
-                )
-        });
-        let mut joined = pwd
-            .or_else(|| {
-                std::env::current_dir()
-                    .ok()
-                    .map(std::path::PathBuf::into_os_string)
-            })
-            .map(OsStringExt::into_vec)
-            .unwrap_or_default();
-        joined.push(b'/');
-        joined.extend_from_slice(directory);
-        go_clean(&joined)
-    };
+    let absolute = absolute_directory(directory)?;
     let mut current: Vec<u8> = vec![b'/'];
     let components = absolute
         .split(|&byte| byte == b'/')

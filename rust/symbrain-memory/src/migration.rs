@@ -16,11 +16,15 @@ pub(crate) use permissions::secure_files;
 #[cfg(test)]
 mod backfill_tests;
 #[cfg(test)]
+mod concurrency_tests;
+#[cfg(test)]
 mod defaults_tests;
 #[cfg(test)]
 mod fts_tests;
 #[cfg(test)]
 mod historical_tests;
+#[cfg(test)]
+mod legacy_store_tests;
 #[cfg(test)]
 mod rollback_tests;
 #[cfg(test)]
