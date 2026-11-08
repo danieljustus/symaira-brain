@@ -109,8 +109,44 @@ fn vault_administration_matches_real_go_process_contracts() {
         if case.case.unix_only && !cfg!(unix) {
             continue;
         }
-        run_case(&child, case, &temp.path().join(format!("case-{index}")));
+        let case_root = temp.path().join(format!("case-{index}"));
+        if case.case.extra_env.values().any(String::is_empty) {
+            empty_environment_is_rejected(&child, case, &case_root);
+            continue;
+        }
+        run_case(&child, case, &case_root);
     }
+}
+
+/// `CoreKit` v0.18.2 reads the environment like `os.LookupEnv` (#898): a present
+/// but empty bool/int variable is converted and rejected, so the config layer
+/// fails and no override applies. The sealed Go `dcddcef0` recording predates
+/// that and expected the empty value to be ignored (exit 0); the recorded cases
+/// stay untouched and this assertion supersedes them.
+fn empty_environment_is_rejected(child: &Path, case: &Case, root: &Path) {
+    let mut process = case_command(child, case, root)
+        .arg("vault")
+        .args(case_args(&case.case))
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let mut stdin = process.stdin.take().unwrap();
+    stdin
+        .write_all(&unhex(&case.case.input_hex))
+        .unwrap_or_else(|error| assert_eq!(error.kind(), std::io::ErrorKind::BrokenPipe));
+    drop(stdin);
+    let output = process.wait_with_output().unwrap();
+    assert_eq!(output.status.code(), Some(1), "{}", case.case.name);
+    assert!(output.stdout.is_empty(), "{} stdout", case.case.name);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("not found"), "{}: {stderr}", case.case.name);
+    assert!(
+        !root.join("calls").exists(),
+        "{}: the vault child must not run",
+        case.case.name
+    );
 }
 
 fn case_command(child: &Path, case: &Case, root: &Path) -> Command {

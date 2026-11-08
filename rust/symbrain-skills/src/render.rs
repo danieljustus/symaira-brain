@@ -29,6 +29,9 @@ pub struct RenderMetadata {
     pub capabilities: BTreeMap<String, bool>,
     /// Force rendering despite explicitly unsupported capabilities.
     pub ignore_capabilities: bool,
+    /// Globally disabled targets: never rendered, and not counted as sibling
+    /// targets by validator hints.
+    pub disabled_targets: Vec<String>,
 }
 
 /// One unmet capability requirement.
@@ -98,7 +101,12 @@ pub fn render_target(
     // Match Go's render contract: bundle validation runs before any target
     // overlay or variant is resolved, and only render-blocking findings stop
     // output. Preserve the validator's issue order and first diagnostic.
-    let known_targets = target::target_names();
+    if crate::disabled_targets::contains(&metadata.disabled_targets, target_name) {
+        return Err(SkillError(format!(
+            "target {target_name} is disabled in the skills config"
+        )));
+    }
+    let known_targets = target::enabled_target_names(&metadata.disabled_targets);
     for issue in validate_with_targets(bundle, &known_targets) {
         if issue.severity == "error" && is_render_blocking(&issue.code) {
             return Err(SkillError(format!("validation error: {}", issue.message)));

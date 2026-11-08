@@ -79,6 +79,8 @@ pub struct StatusOptions {
     pub project_dir: Option<PathBuf>,
     /// `user` (default) or `project`.
     pub scope: String,
+    /// Globally disabled targets; listed as `disabled` and never scanned.
+    pub disabled_targets: Vec<String>,
 }
 
 /// Returns one status row per registered target, in registry order.
@@ -87,8 +89,38 @@ pub fn list_status(options: &StatusOptions) -> Vec<TargetStatus> {
     target::target_names()
         .iter()
         .filter_map(|name| lookup(name))
-        .map(|spec| inspect(spec, options))
+        .map(|spec| {
+            if crate::disabled_targets::contains(&options.disabled_targets, spec.name) {
+                disabled_row(spec)
+            } else {
+                inspect(spec, options)
+            }
+        })
         .collect()
+}
+
+/// Row for a globally disabled target: nothing on disk is read.
+fn disabled_row(spec: TargetSpec) -> TargetStatus {
+    TargetStatus {
+        target: spec.name.to_owned(),
+        display_name: spec.display_name.to_owned(),
+        installed: false,
+        evidence: String::new(),
+        effective_skill_root: String::new(),
+        skill_root_exists: false,
+        skill_root_readable: false,
+        managed_skills_count: 0,
+        unmanaged_skills_count: 0,
+        install_state: "disabled".to_owned(),
+        capabilities: Vec::new(),
+        runtime_capabilities: BTreeMap::new(),
+        setup_hint: format!(
+            "Target disabled: remove {:?} from {} to enable it again.",
+            spec.name,
+            crate::disabled_targets::KEY
+        ),
+        verification_status: "not_verified".to_owned(),
+    }
 }
 
 fn inspect(spec: TargetSpec, options: &StatusOptions) -> TargetStatus {

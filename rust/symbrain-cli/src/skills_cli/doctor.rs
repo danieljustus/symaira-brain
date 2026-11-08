@@ -81,7 +81,7 @@ pub(super) fn run(
         return code;
     }
     let env = Env::load();
-    let targets = symbrain_skills::default_targets()
+    let targets = symbrain_skills::enabled_target_names(&env.disabled_targets)
         .into_iter()
         .filter_map(|target| {
             let (user, project) = roots(&target)?;

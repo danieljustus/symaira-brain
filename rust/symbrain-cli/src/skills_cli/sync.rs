@@ -48,7 +48,7 @@ pub(super) fn run(
         home_dir: env.home_dir.clone(),
         project_dir: Some(env.project_dir.clone()),
         scope,
-        targets: target.into_iter().collect(),
+        targets: env.target_selection(target),
         skills: Vec::new(),
         base_dir: Some(cleaned(&env.cfg.base_dir)),
         render_dir: Some(cleaned(&env.cfg.render_dir)),

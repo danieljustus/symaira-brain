@@ -534,6 +534,7 @@ fn native_skill_results(harnesses: &[String], dry_run: bool) -> Vec<SkillResult>
         library_dir: library_dir.to_string_lossy().into_owned(),
         base_dir: base_dir.to_string_lossy().into_owned(),
         home_dir: home_dir.to_string_lossy().into_owned(),
+        disabled_targets: crate::skills_cli::resolve_disabled_targets(),
         ..symbrain_skills::runner::Options::default()
     };
     // A render root is deliberately not set here: `DefaultOptions().RenderDir`

@@ -14,7 +14,7 @@ use cap_fs_ext::DirExt;
 use serde::Serialize;
 
 use super::base::base_path_for_scope;
-use super::destination::entry_metadata;
+use super::destination::root_metadata;
 use super::lock;
 use super::replace::open_trusted_dir;
 use super::status_compare::{
@@ -183,7 +183,7 @@ fn status_target(
     // An absent install root is a no-op and status must not create it merely
     // to acquire a read lock. If it exists, lock both shared directory roots
     // before reading entries or their per-skill base manifests.
-    if entry_metadata(&root)
+    if root_metadata(&root)
         .map_err(|error| scan_root_error(&root, error))?
         .is_none()
     {
@@ -217,7 +217,7 @@ fn status_target(
         lock_roots.push(legacy_root);
     }
     let _locks = lock::acquire_existing_shared(&lock_roots)?;
-    let Some(metadata) = entry_metadata(&root).map_err(|error| scan_root_error(&root, error))?
+    let Some(metadata) = root_metadata(&root).map_err(|error| scan_root_error(&root, error))?
     else {
         return Ok(Vec::new());
     };

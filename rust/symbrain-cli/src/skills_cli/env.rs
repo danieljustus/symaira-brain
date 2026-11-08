@@ -41,6 +41,9 @@ pub(super) struct Env {
     pub(super) config_path: PathBuf,
     /// A config file was merged, or any `SYMSKILLS_*` variable is set.
     pub(super) customised: bool,
+    /// Targets switched off by `disabled_targets` in the global or project
+    /// config file (see [`symbrain_skills::disabled_targets`]).
+    pub(super) disabled_targets: Vec<String>,
 }
 
 /// `os.UserHomeDir()` on Unix: a non-empty `$HOME`.
@@ -152,8 +155,11 @@ fn from_skills(before: &Config, loaded: SkillsConfig) -> Config {
     }
 }
 
-/// `configkit.mergeFile` for one source: absent files are skipped, any other
-/// stat, read, parse or apply failure is a `Load` error.
+/// `configkit.mergeFile` for one source: a file `os.IsNotExist` accepts is
+/// skipped, any other stat, read, parse or apply failure is a `Load` error.
+///
+/// Absence is POSIX `ENOENT` (raw error 2) on the supported macOS and Linux
+/// platforms; `ENOTDIR` (a file used as a directory) is not absence.
 ///
 /// A document the decoder hands back (`NeedsGo`) is a document `BurntSushi`
 /// either rejects or decodes through a grammar quirk `toml_edit` lacks; the
@@ -214,7 +220,8 @@ fn load_config(defaults: &Config, project_dir: Option<&Path>) -> Config {
 }
 
 /// Whether a `SYMSKILLS_*` variable is set or a config source is anything but
-/// verifiably absent. Go's bytes carry no #621 render extension then.
+/// verifiably absent (`os.IsNotExist`, POSIX `ENOENT`). The report then keeps
+/// the plain layout without the #621 render extension.
 fn has_custom_sources(project_dir: Option<&Path>) -> bool {
     let absent =
         |path: &Path| matches!(fs::metadata(path), Err(error) if error.raw_os_error() == Some(2));
@@ -238,11 +245,28 @@ fn is_symskills_variable(name: &OsString) -> bool {
 }
 
 impl Env {
+    /// Targets a verb works on: an explicit `--target` wins, otherwise every
+    /// target that is not globally disabled. Empty means "all", which keeps
+    /// the verbs' default when nothing is disabled.
+    pub(super) fn target_selection(&self, explicit: Option<String>) -> Vec<String> {
+        match explicit {
+            Some(target) => vec![target],
+            None if self.disabled_targets.is_empty() => Vec::new(),
+            None => symbrain_skills::enabled_target_names(&self.disabled_targets),
+        }
+    }
+
     /// Go `loadSkillsEnv()`.
     pub(super) fn load() -> Self {
         let project = go_getwd();
         let cfg = load_config(&defaults(), project.as_deref());
+        let global_config = config_path();
+        let project_config = project.as_deref().map(|dir| join(dir, ".symskills.toml"));
+        let mut config_files: Vec<&Path> = vec![global_config.as_path()];
+        config_files.extend(project_config.as_deref());
+        let disabled_targets = symbrain_skills::disabled_targets::load(&config_files);
         Self {
+            disabled_targets,
             cfg,
             customised: has_custom_sources(project.as_deref()),
             // Go's `filepath.Join` cleans every derived path lexically, so the

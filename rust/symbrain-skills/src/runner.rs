@@ -26,6 +26,8 @@ pub struct Options {
     pub project_dir: String,
     /// Per-target timeout.
     pub timeout: Duration,
+    /// Globally disabled targets, skipped without rendering or installing.
+    pub disabled_targets: Vec<String>,
 }
 
 impl Options {
@@ -106,6 +108,15 @@ pub fn run(
             });
             continue;
         };
+
+        if crate::disabled_targets::contains(&opts.disabled_targets, &target_name) {
+            results.push(TargetResult {
+                target: target_name,
+                status: "skipped".to_string(),
+                message: Some("target disabled in the skills config".to_string()),
+            });
+            continue;
+        }
 
         // Process target (timeout handled per-target inside sync_target, matching Go's WithTimeout)
         let result = sync_target(ctx, &target_name, &opts, dry_run, &loader);
@@ -295,13 +306,20 @@ fn timeout_result(
     })
 }
 
+/// Render metadata carrying the runner's global target switches.
+fn render_metadata(opts: &Options) -> render::RenderMetadata {
+    render::RenderMetadata {
+        disabled_targets: opts.disabled_targets.clone(),
+        ..render::RenderMetadata::default()
+    }
+}
+
 /// Dry-run: renders a skill in memory and resolves its install destination.
 ///\n\n/// # Errors\n///\n/// Returns an error if rendering fails or the install path cannot be resolved.
 fn plan_skill(bundle: &Bundle, target_name: &str, opts: &Options) -> Result<(), SkillError> {
     // Render the skill for the target
-    let rendered =
-        render::render_target(bundle, target_name, &render::RenderMetadata::default())
-            .map_err(|err| SkillError(format!("{}: render: {err}", bundle.manifest.skill.name)))?;
+    let rendered = render::render_target(bundle, target_name, &render_metadata(opts))
+        .map_err(|err| SkillError(format!("{}: render: {err}", bundle.manifest.skill.name)))?;
 
     // Resolve install path (validates the path can be computed)
     install::install_path_for(
@@ -342,13 +360,13 @@ fn install_skill(bundle: &Bundle, target_name: &str, opts: &Options) -> Result<(
     // handed the render root to keep the resulting layout identical; the
     // frozen on-disk layout is asserted by
     // tests/runner_env_tests.rs::installed_symlinks_match_the_frozen_go_layout.
-    let rendered = render::render_target(bundle, target_name, &render::RenderMetadata::default())
-        .map_err(|err| {
-        SkillError(format!(
-            "{}: render: target {target_name}: {err}",
-            bundle.manifest.skill.name
-        ))
-    })?;
+    let rendered =
+        render::render_target(bundle, target_name, &render_metadata(opts)).map_err(|err| {
+            SkillError(format!(
+                "{}: render: target {target_name}: {err}",
+                bundle.manifest.skill.name
+            ))
+        })?;
 
     let install_opts = install::InstallOptions {
         home_dir: Path::new(&opts.home_dir).to_path_buf(),

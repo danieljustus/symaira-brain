@@ -31,6 +31,7 @@ mod profile_cli;
 mod profile_render;
 mod setup_cli;
 mod skills_cli;
+mod skills_stdout;
 mod sync_cli;
 mod usage_cli;
 mod vault_admin;
@@ -108,6 +109,7 @@ fn run_native(
             memory_cli::run_with_stdout(rest, stdout, stderr, format, true)
         }
         "memory" => memory_cli::run(rest, stdout, stderr, format),
+        "skills" if process_stdout => skills_cli::run_process(rest, stderr, format),
         "skills" => skills_cli::run(rest, stdout, stderr, format),
         "activity" => activity_cli::run(rest, stdout, stderr, format),
         "vault" => vault_admin::run(args, stdout, stderr),

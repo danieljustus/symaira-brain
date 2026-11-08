@@ -546,6 +546,20 @@ existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
 three-OS CI at the final candidate head remains required. Dynamic config and
 unqualified multi-target CLI fallback remain part of #764.
 
+> **Superseding note for the skills slices below (2026-11-08, #937, #924).**
+> The Go binary and its fallback route no longer exist (#1003), so every
+> "stays on Go", "routed to Go" and "Go fallback" statement in the skills
+> slices describes historical routing, not current behavior. Today `symbrain
+> skills` answers every case natively. Absence is classified like Go's
+> `os.IsNotExist`: `ENOENT` is the POSIX case (macOS and Linux, the supported
+> platforms); the Windows codes 2, 3 and 53 (`ERROR_FILE_NOT_FOUND`,
+> `ERROR_PATH_NOT_FOUND`, `_ERROR_BAD_NETPATH`) apply only to the retired
+> Windows path. On POSIX a path below a non-directory fails with `ENOTDIR`,
+> which `os.IsNotExist` does not accept. Install roots below a search-only
+> ancestor read as "No installed skills found." (exit 0), and an undefined
+> `$HOME` is the error `scan installs: $HOME is not defined` (exit 1) for
+> `status` and `sync`.
+
 ### Skills status environment-only config (#764 slice c)
 
 `symbrain skills status --target opencode [--scope user|project]` is native when
@@ -571,15 +585,15 @@ whole config, env overrides included, with the defaults. Native therefore
 requires both `$XDG_CONFIG_HOME|$HOME/.config/symskills/config.toml` and
 `./.symskills.toml` to be verified absent with those platform-specific codes
 through `fs::metadata` (symlinks followed, so dangling links are absent as in Go).
-A file used as a config directory is absent on Windows but returns `ENOTDIR` on
-POSIX. Any other probe outcome, a `.`/`..` element in the config root (Go cleans
+A file used as a config directory is absent on Windows (code 3, historical) but
+returns `ENOTDIR` on POSIX, which `os.IsNotExist` rejects. Any other probe outcome, a `.`/`..` element in the config root (Go cleans
 those lexically, the kernel does not), an unresolvable home or an unreadable
 working directory stays on Go. This
 also hardens the default-config probe shared by `list`, `targets`, `doctor` and
 `sync`. A `SYMSKILLS_LIBRARY_DIR`/`BASE_DIR` override is native only if it is absolute,
 lexically clean (no `.`/`..`/empty element, no trailing separator), every existing
 ancestor is a real directory (no symlinked or non-directory ancestor, no stat
-failure other than `ENOENT`), and an existing leaf can be listed and traversed
+failure other than the POSIX `ENOENT` of `os.IsNotExist`), and an existing leaf can be listed and traversed
 (the Rust install layer opens roots capability-style and fails where Go succeeds
 for a symlinked ancestor such as macOS `/tmp`, for `..` through a symlink and for a
 mode-000 directory). An undefined or empty `$HOME` (`%USERPROFILE%` on Windows)
@@ -696,13 +710,13 @@ the shapes are replayed from Go's `config.Load()` (`configkit.Loader.loadOnce`):
 `SYMSKILLS_*`; `loadSkillsEnv` replaces the **whole** result with `Defaults()` when
 `Load` returns any error (`cmd/symbrain/cmd_skills.go:66`). Native code reproduces:
 
-- both files absent (`os.Stat` reports `ENOENT`): `SYMSKILLS_{LIBRARY,RENDER,CACHE,
+- both files absent (`os.IsNotExist` accepts the `os.Stat` error: POSIX `ENOENT`): `SYMSKILLS_{LIBRARY,RENDER,CACHE,
   PROFILES,BASE}_DIR` replace their field verbatim (empty and relative values
   included, no path cleaning); `SYMSKILLS_VCS_ENABLED` goes through
   `strconv.ParseBool`, and an invalid or empty value makes `Load` fail and the whole
   config, overrides included, reset to the defaults; `SYMBRAIN_SKILLS_*` is not Go
   config and changes nothing;
-- a config path whose stat fails with anything but `ENOENT` (`ENOTDIR`, `EACCES`,
+- a config path whose stat fails with anything but the POSIX `ENOENT` (`ENOTDIR`, `EACCES`,
   `ELOOP`) or that is a directory (`toml.DecodeFile` fails with `EISDIR`): the same
   reset to defaults. The global file is merged first, so its failure ends the load;
   a failing project path resets whatever the global file contains (a decode error
@@ -767,7 +781,7 @@ real-directory ancestors that can be listed); the whole shape is also gated on a
 variable (Go ignores those, native code would honour them).
 
 Stays on Go: any `config.toml`/`.symskills.toml` and any config probe that is not a plain
-`ENOENT` (the TOML decode is Go's), `SYMBRAIN_SKILLS_LIBRARY_DIR`/`SYMBRAIN_SKILLS_BASE_DIR`,
+POSIX `ENOENT` absence (the TOML decode is Go's), `SYMBRAIN_SKILLS_LIBRARY_DIR`/`SYMBRAIN_SKILLS_BASE_DIR`,
 an invalid `SYMSKILLS_VCS_ENABLED` bool (Go then discards the whole config for the defaults),
 relative, empty, symlinked, non-clean, non-directory or unlistable library overrides, an
 undefined or empty `HOME`, libraries with entries Go reports through cap-std diagnostics, and

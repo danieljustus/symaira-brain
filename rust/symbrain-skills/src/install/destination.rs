@@ -135,12 +135,32 @@ pub(crate) fn entry_exists(path: &Path) -> Result<bool, SkillError> {
 }
 
 pub(crate) fn entry_metadata(path: &Path) -> Result<Option<cap_std::fs::Metadata>, SkillError> {
+    entry_metadata_inner(path, false)
+}
+
+/// Like [`entry_metadata`] for a status scan root: an ancestor that is
+/// search-only (mode `--x`) cannot be opened by the confined walk, which reads
+/// as "no installed skills" rather than a scan failure.
+pub(crate) fn root_metadata(path: &Path) -> Result<Option<cap_std::fs::Metadata>, SkillError> {
+    entry_metadata_inner(path, true)
+}
+
+fn entry_metadata_inner(
+    path: &Path,
+    unreadable_ancestor_is_absent: bool,
+) -> Result<Option<cap_std::fs::Metadata>, SkillError> {
     let parent = path
         .parent()
         .ok_or_else(|| SkillError("path has no parent".to_owned()))?;
     let root = match open_existing_dir(parent) {
         Ok(root) => root,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error)
+            if unreadable_ancestor_is_absent
+                && error.kind() == std::io::ErrorKind::PermissionDenied =>
+        {
+            return Ok(None);
+        }
         Err(error) => return Err(SkillError(format!("open existing root: {error}"))),
     };
     let name = safe_name(path.file_name())?;

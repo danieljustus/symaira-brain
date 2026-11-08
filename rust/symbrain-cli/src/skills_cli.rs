@@ -63,6 +63,16 @@ fn skills_data_root() -> PathBuf {
     }
 }
 
+/// Targets switched off by `disabled_targets` in the symskills config files
+/// that `symbrain sync` shares with `symbrain skills`.
+pub(crate) fn resolve_disabled_targets() -> Vec<String> {
+    let global = env::config_path();
+    let project = env::go_getwd().map(|dir| symbrain_skills::gotext::join(dir, ".symskills.toml"));
+    let mut files: Vec<&std::path::Path> = vec![global.as_path()];
+    files.extend(project.as_deref());
+    symbrain_skills::disabled_targets::load(&files)
+}
+
 /// Library, base and home directories for `symbrain sync`'s skill push.
 pub(crate) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
@@ -78,6 +88,15 @@ pub(crate) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
         data_root.join("base")
     };
     (library_dir, base_dir, home)
+}
+
+/// Runs `symbrain skills` against the actual process stdout descriptor, so a
+/// readonly or closed descriptor fails like Go's `os.Stdout` instead of being
+/// swallowed by `std::io::Stdout`.
+pub(crate) fn run_process(args: &[OsString], stderr: &mut dyn Write, format: OutputFormat) -> u8 {
+    let mut raw = crate::skills_stdout::ProcessStdout;
+    let mut stdout = crate::stdio_output::Output::new(&mut raw, true);
+    run(args, &mut stdout, stderr, format)
 }
 
 /// Runs `symbrain skills` and returns the process exit code.

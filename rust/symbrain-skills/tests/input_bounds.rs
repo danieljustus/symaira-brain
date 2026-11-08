@@ -234,6 +234,9 @@ fn runner_shares_input_budget_across_library_bundles() {
             render_dir: temp.path().join("rendered").display().to_string(),
             base_dir: temp.path().join("base").display().to_string(),
             home_dir: temp.path().display().to_string(),
+            // The test checks the shared input budget, not the 30 s production
+            // default, which a loaded host can exhaust before the budget error.
+            timeout: std::time::Duration::from_secs(600),
             ..Default::default()
         },
         true,

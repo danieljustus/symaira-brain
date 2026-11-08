@@ -138,6 +138,15 @@ pub fn target_names() -> Vec<String> {
         .collect()
 }
 
+/// Registered target names minus the globally disabled ones, in registry order.
+#[must_use]
+pub fn enabled_target_names(disabled: &[String]) -> Vec<String> {
+    target_names()
+        .into_iter()
+        .filter(|name| !crate::disabled_targets::contains(disabled, name))
+        .collect()
+}
+
 /// Looks up a registered target without maintaining a second target list.
 #[must_use]
 pub fn lookup(name: &str) -> Option<TargetSpec> {

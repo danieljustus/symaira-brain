@@ -46,6 +46,7 @@ pub(super) fn run(
             home_dir: env.home_dir,
             project_dir: Some(env.project_dir),
             scope: scope.to_owned(),
+            disabled_targets: env.disabled_targets,
         }),
     };
     let output = match format {

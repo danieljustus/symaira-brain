@@ -1,4 +1,5 @@
 //! Preserve Go's config-load failure boundary before binary overrides.
+use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
 use toml_edit::{DocumentMut, Item};
@@ -9,13 +10,30 @@ pub(super) fn configured_override(path: &Path, variable: &str) -> Option<PathBuf
         Ok(directory) => read_document(&directory.join(".symbrain.toml"))?,
         Err(_) => DocumentMut::new(),
     };
-    if !valid_file_types(&global) || !valid_file_types(&project) || !valid_environment_types() {
+    resolve(&global, &project, variable, |name| std::env::var_os(name))
+}
+
+/// Applies `CoreKit` v0.18.2 `configkit` semantics: every present value is
+/// converted (zero values are not skipped), a layer that sets `binary_path`
+/// replaces the earlier one even when empty, and the environment is read like
+/// `os.LookupEnv`, so a present-but-empty variable counts as set.
+fn resolve(
+    global: &DocumentMut,
+    project: &DocumentMut,
+    variable: &str,
+    env: impl Fn(&str) -> Option<OsString>,
+) -> Option<PathBuf> {
+    if !valid_file_types(global) || !valid_file_types(project) || !valid_environment_types(&env) {
         return None;
     }
-    std::env::var_os(variable)
-        .filter(|value| !value.is_empty())
-        .map(PathBuf::from)
-        .or_else(|| binary_path(&project).or_else(|| binary_path(&global)))
+    let value = match env(variable) {
+        Some(value) => value,
+        None => [project, global]
+            .into_iter()
+            .find_map(binary_path)
+            .map(OsString::from)?,
+    };
+    (!value.is_empty()).then(|| PathBuf::from(value))
 }
 
 fn read_document(path: &Path) -> Option<DocumentMut> {
@@ -26,9 +44,8 @@ fn read_document(path: &Path) -> Option<DocumentMut> {
     }
 }
 
-fn binary_path(document: &DocumentMut) -> Option<PathBuf> {
-    let value = lookup(document, "servers.vault.binary_path")?.as_str()?;
-    (!value.is_empty()).then(|| PathBuf::from(value))
+fn binary_path(document: &DocumentMut) -> Option<&str> {
+    lookup(document, "servers.vault.binary_path")?.as_str()
 }
 
 fn lookup<'a>(document: &'a DocumentMut, path: &str) -> Option<&'a Item> {
@@ -45,20 +62,6 @@ fn lookup<'a>(document: &'a DocumentMut, path: &str) -> Option<&'a Item> {
     None
 }
 
-fn zero(item: &Item) -> bool {
-    item.as_str() == Some("")
-        || item.as_integer() == Some(0)
-        || item.as_float() == Some(0.0)
-        || item.as_bool() == Some(false)
-}
-
-fn valid_bool(value: &str) -> bool {
-    matches!(
-        value,
-        "1" | "t" | "T" | "true" | "TRUE" | "True" | "0" | "f" | "F" | "false" | "FALSE" | "False"
-    )
-}
-
 fn valid_integer(value: &str) -> bool {
     // Go ParseInt with base 10 accepts one optional sign and decimal digits;
     // separators, surrounding whitespace, and values outside int64 fail.
@@ -68,71 +71,62 @@ fn valid_integer(value: &str) -> bool {
         && value.parse::<i64>().is_ok()
 }
 
-fn valid_file_types(document: &DocumentMut) -> bool {
-    // CoreKit applies nonzero values to plain fields and every present value
-    // to pointer fields. Bool/int strings use the same conversion as env.
-    for path in [
-        "default_profile",
-        "servers.vault.binary_path",
-        "servers.operate.binary_path",
-        "servers.scope.binary_path",
-    ] {
-        if let Some(item) = lookup(document, path)
-            && !zero(item)
-            && item.as_str().is_none()
-        {
-            return false;
-        }
-    }
-    for (path, pointer) in [
-        ("audit.enabled", true),
-        ("audit.verbose", false),
-        ("gateway.identity_injection", true),
-        ("updatecheck.enabled", true),
-        ("patterns.enabled", true),
-        ("modules.browse", false),
-        ("modules.operate", false),
-        ("modules.scope", false),
-    ] {
-        if let Some(item) = lookup(document, path)
-            && (pointer || !zero(item))
-            && item.as_bool().is_none()
-            && !item.as_str().is_some_and(valid_bool)
-        {
-            return false;
-        }
-    }
-    lookup(document, "patterns.promotion_threshold").is_none_or(|item| {
-        zero(item)
-            || item.as_integer().is_some()
-            || item.as_float().is_some()
-            || item.as_str().is_some_and(valid_integer)
-    })
+const TEXT_LEAVES: [&str; 4] = [
+    "default_profile",
+    "servers.vault.binary_path",
+    "servers.operate.binary_path",
+    "servers.scope.binary_path",
+];
+
+const BOOL_LEAVES: [&str; 8] = [
+    "audit.enabled",
+    "audit.verbose",
+    "gateway.identity_injection",
+    "updatecheck.enabled",
+    "patterns.enabled",
+    "modules.browse",
+    "modules.operate",
+    "modules.scope",
+];
+
+const INT_LEAF: &str = "patterns.promotion_threshold";
+
+fn valid_bool(value: &str) -> bool {
+    crate::setup_cli::parse_go_bool(value).is_ok()
 }
 
-fn valid_environment_types() -> bool {
-    for variable in [
-        "SYMBRAIN_AUDIT_ENABLED",
-        "SYMBRAIN_AUDIT_VERBOSE",
-        "SYMBRAIN_GATEWAY_IDENTITY_INJECTION",
-        "SYMBRAIN_UPDATECHECK_ENABLED",
-        "SYMBRAIN_PATTERNS_ENABLED",
-        "SYMBRAIN_MODULES_BROWSE",
-        "SYMBRAIN_MODULES_OPERATE",
-        "SYMBRAIN_MODULES_SCOPE",
-    ] {
-        if let Some(value) = std::env::var_os(variable)
-            && !value.is_empty()
-            && !value.to_str().is_some_and(valid_bool)
-        {
-            return false;
-        }
-    }
-    let Some(value) = std::env::var_os("SYMBRAIN_PATTERNS_PROMOTION_THRESHOLD") else {
-        return true;
-    };
-    if value.is_empty() {
-        return true;
-    }
-    value.to_str().is_some_and(valid_integer)
+fn valid_file_types(document: &DocumentMut) -> bool {
+    // configkit converts every present value; no zero value is skipped.
+    TEXT_LEAVES
+        .iter()
+        .all(|path| lookup(document, path).is_none_or(|item| item.as_str().is_some()))
+        && BOOL_LEAVES.iter().all(|path| {
+            lookup(document, path).is_none_or(|item| {
+                item.as_bool().is_some() || item.as_str().is_some_and(valid_bool)
+            })
+        })
+        && lookup(document, INT_LEAF).is_none_or(|item| {
+            item.as_integer().is_some()
+                || item.as_float().is_some()
+                || item.as_str().is_some_and(valid_integer)
+        })
 }
+
+fn valid_environment_types(env: &impl Fn(&str) -> Option<OsString>) -> bool {
+    // `os.LookupEnv`: a present but empty value is converted and rejected for
+    // bool and int fields instead of being ignored.
+    let bools = BOOL_LEAVES.iter().all(|path| {
+        env(&environment_name(path)).is_none_or(|value| value.to_str().is_some_and(valid_bool))
+    });
+    bools
+        && env(&environment_name(INT_LEAF))
+            .is_none_or(|value| value.to_str().is_some_and(valid_integer))
+}
+
+fn environment_name(path: &str) -> String {
+    format!("SYMBRAIN_{}", path.replace('.', "_").to_uppercase())
+}
+
+#[cfg(test)]
+#[path = "vault_config_tests.rs"]
+mod tests;

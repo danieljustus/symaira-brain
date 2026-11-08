@@ -6,6 +6,7 @@
 mod cap_root;
 pub mod config_toml;
 pub mod context_profile;
+pub mod disabled_targets;
 pub mod discover;
 mod encode;
 pub mod gotext;
@@ -37,5 +38,5 @@ pub use model::{
 pub use render::{
     CapabilityGap, RenderMetadata, Rendered, VariantReport, default_targets, render_target,
 };
-pub use target::{config_dir, lookup, skill_root, target_names};
+pub use target::{config_dir, enabled_target_names, lookup, skill_root, target_names};
 pub use validation::{DEFAULT_TARGETS, is_render_blocking, validate, validate_with_targets};

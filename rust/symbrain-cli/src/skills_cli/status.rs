@@ -92,7 +92,7 @@ pub(super) fn status_options(env: &Env, scope: String, target: Option<String>) -
         home_dir: env.home_dir.clone(),
         project_dir: Some(env.project_dir.clone()),
         render_dir: render_extension(env, target.as_deref()),
-        targets: target.into_iter().collect(),
+        targets: env.target_selection(target),
         scope,
         library_dir: cleaned(&env.cfg.library_dir),
         base_dir: Some(cleaned(&env.cfg.base_dir)),
