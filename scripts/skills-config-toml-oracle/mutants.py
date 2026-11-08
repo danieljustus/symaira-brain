@@ -9,7 +9,7 @@ failure or interrupt.
 Usage: mutants.py [--only NAME[,NAME...]]
 
 Set SYMBRAIN_MUTANT_CARGO (default `cargo`) to wrap the build, for example
-`/Users/daniel/.local/bin/dev-external cargo`. Exit 0 only when every mutant is
+`~/.local/bin/dev-external cargo`. Exit 0 only when every mutant is
 KILLED; a mutant that builds and passes is SURVIVED, one that does not build
 or time out is INCONCLUSIVE (never counted as killed).
 """

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# HISTORICAL RECORD MODE (#1004): live Go-vs-Rust MCP comparison against a Go binary.
+# Needs a checkout of 57c26c76e238e458d9027d5ee4362df24d30b47e (the parent of the Go removal, #1003) and a
+# Go toolchain. No gate runs it; sealed fixtures (scripts/oracle-freeze) and the
+# replay tooling are the supported surface. See docs/adr/historical-go-record-paths-1004.md.
 """Compare the Go and Rust MCP executables with isolated embedded memory."""
 from __future__ import annotations
 
@@ -222,10 +226,10 @@ def assert_foreign_child(go: subprocess.CompletedProcess[bytes], rust: subproces
     assert [frame[1].get("id") for frame in go_frames] == [1, 2, 3]
     assert [frame[1].get("id") for frame in rust_frames] == [1, 2, 3]
     assert go_frames[0][0] == rust_frames[0][0], "foreign child changed the initialize frame"
-    go_tools = {tool["name"]: tool for tool in go_frames[1][1]["result"]["tools"]}
+    go_catalog = {tool["name"]: tool for tool in go_frames[1][1]["result"]["tools"]}
     rust_tools = {tool["name"]: tool for tool in rust_frames[1][1]["result"]["tools"]}
-    assert "echo" in go_tools and "echo" in rust_tools
-    assert go_tools["echo"] == rust_tools["echo"], (go_tools["echo"], rust_tools["echo"])
+    assert "echo" in go_catalog and "echo" in rust_tools
+    assert go_catalog["echo"] == rust_tools["echo"], (go_catalog["echo"], rust_tools["echo"])
     assert go_frames[2][0] == rust_frames[2][0], "foreign stdio child call frame differs"
     assert go_frames[2][1]["result"]["isError"] is False
     assert go_frames[2][1]["result"]["content"][0]["text"] == '{"value":"child-roundtrip"}'
@@ -241,10 +245,10 @@ def assert_session(go: subprocess.CompletedProcess[bytes], rust: subprocess.Comp
         assert len(ids) == 4 and ids[:2] == [1, 2] and set(ids[2:]) == {3, 4}, ids
     assert all(frame[1].get("jsonrpc") == "2.0" for frame in go_frames + rust_frames)
     assert go_frames[0][0] == rust_frames[0][0], (go_frames[0], rust_frames[0])
-    go_tools = {tool["name"] for tool in go_frames[1][1]["result"]["tools"]}
+    go_catalog = {tool["name"] for tool in go_frames[1][1]["result"]["tools"]}
     rust_tools = {tool["name"] for tool in rust_frames[1][1]["result"]["tools"]}
-    assert go_tools == rust_tools, (sorted(go_tools), sorted(rust_tools))
-    assert {"bootstrap", "patterns", "memory_get", "memory_search"} <= go_tools
+    assert go_catalog == rust_tools, (sorted(go_catalog), sorted(rust_tools))
+    assert {"bootstrap", "patterns", "memory_get", "memory_search"} <= go_catalog
     go_calls = {frame[1]["id"]: frame for frame in go_frames[2:]}
     rust_calls = {frame[1]["id"]: frame for frame in rust_frames[2:]}
     for request_id in (3, 4):

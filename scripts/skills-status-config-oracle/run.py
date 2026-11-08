@@ -32,7 +32,7 @@ differential journal (distinct root per replay, with per-case timeout events and
 raw child streams) and, unless KILLED, the mutant executable itself.
 
 Set SYMBRAIN_MUTANT_CARGO (default `cargo`) to wrap the build, for example
-`/Users/daniel/.local/bin/dev-external cargo`.
+`~/.local/bin/dev-external cargo`.
 """
 from __future__ import annotations
 

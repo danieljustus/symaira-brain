@@ -15,7 +15,7 @@ No historic proof is relabeled as evidence for this combined source.
 
 Choose one already archived, exclusively transferred target for the complete
 author gates, rather than duplicating Cargo artifacts. The proposed path is
-/workspace/symaira-skills794-wide-runtime/target. It is not created or accessed
+an already archived, exclusively transferred Cargo target directory. It is not created or accessed
 before Root's explicit archive receipt and ownership release. Preserve all
 initial attempts and actual executable bytes before source fixes or reuse;
 debug/test-debug0, incremental0, jobs2, subreaper and the700MiB free-space floor
@@ -57,7 +57,7 @@ The clean final production source is51e42aa. Its fresh complete run passes447
 primary Audit/CLI/Skills tests and104 Core tests over58 Cargo parents, with
 2 intentional child-entry ignores and14 separately counted nested child tests.
 Strict all-target/all-feature Clippy, workspace formatting and actionlint pass.
-The existing actionlint binary needs /workspace/toolchains/bin in PATH; preserve
+The existing actionlint binary needs its toolchain directory in PATH; preserve
 the preceding missing-PATH attempt rather than replacing its failure log.
 
 The frozen Go build from the original linked-worktree helper was correctly

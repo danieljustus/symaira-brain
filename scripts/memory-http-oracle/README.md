@@ -11,11 +11,11 @@ introduced.
 On the owned Linux workspace, build with the explicitly assigned target:
 
 ```sh
-CARGO_TARGET_DIR=/workspace/symaira-memory763-ui/target \
+CARGO_TARGET_DIR=$OWNED_TARGET \
 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 \
 CARGO_BUILD_JOBS=2 cargo build --offline --locked -p symbrain-memory --example http_probe
 python3 scripts/memory-http-oracle/replay.py \
-  --native /workspace/symaira-memory763-ui/target/debug/examples/http_probe \
+  --native $OWNED_TARGET/debug/examples/http_probe \
   --report /tmp/memory-http-proof.json
 ```
 

@@ -37,7 +37,7 @@ attribution is retained in `migration/licenses/go-filepath-bsd.txt`.
 
 Before target reuse, all seven actually executed candidate test/CLI binaries
 were byte/SHA archived in
-`/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/`, including CLI
+the private oracle-binary archive of the usage768-local-files-7e0b run (not published), including CLI
 4d0417cf0c33f6c664e5988402493c835a8fd1520b78bb76e4aa5e00d3a2b60c.
 The original owner Go/native probes, exact linked production rlib and archived
 parent CLI are also retained there. The archive receipt is tracked with the

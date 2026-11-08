@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# HISTORICAL RECORD MODE (#1004): compiles copied Go SDK sources with `go build`.
+# Needs a checkout of 57c26c76e238e458d9027d5ee4362df24d30b47e (the parent of the Go removal, #1003) and a
+# Go toolchain. No gate runs it; sealed fixtures (scripts/oracle-freeze) and the
+# replay tooling are the supported surface. See docs/adr/historical-go-record-paths-1004.md.
 """Actual copied Go SDK Windows algorithms vs production Rust helper; NOT native Windows proof."""
 import gzip
 import hashlib

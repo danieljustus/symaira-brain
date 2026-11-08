@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# HISTORICAL RECORD MODE (#1004): drives the frozen Go binary and the retired memory web-console assets (console removed in #763).
+# Needs a checkout of 57c26c76e238e458d9027d5ee4362df24d30b47e (the parent of the Go removal, #1003) and a
+# Go toolchain. No gate runs it; sealed fixtures (scripts/oracle-freeze) and the
+# replay tooling are the supported surface. See docs/adr/historical-go-record-paths-1004.md.
 """Frozen Go CLI versus the actual bounded native owner, not full serve admission."""
 import argparse
 import json
@@ -9,6 +13,10 @@ import time
 import uuid
 from datetime import datetime
 from support import GO,GO_SHA,FROZEN,ORACLE,Peer,Embeddings,digest,token,owned_env,seed,snapshot
+
+ASSETS = Path(__file__).resolve().parents[2] / "rust/symbrain-memory/assets/web"
+if not ASSETS.is_dir():
+    raise SystemExit("retired: the memory web console (and %s) was removed in #763; see docs/adr/historical-go-record-paths-1004.md" % ASSETS)
 
 HEADERS=['content-type','x-content-type-options','x-frame-options','content-security-policy','access-control-allow-origin','access-control-allow-methods','access-control-allow-headers','vary','allow']
 

@@ -111,16 +111,21 @@ symaira-brain/
 │   └── SymBrainMobile/    # iOS companion (read-only overview)
 ├── Tests/                 # Swift unit tests
 │   └── SymBrainCoreTests/ # Decoding tests for CLI JSON shapes
+├── history/               # Swift package symcockpit-history (SymCockpitHistory library)
 ├── guard/                 # Guard module docs, assets and recorded oracle inputs
 │                          #   (absorbed 2026-08-21, relicensed MIT → Apache-2.0)
 ├── fuzz/                  # cargo-fuzz targets for MCP framing
 ├── migration/             # Contract matrix and immutable migration evidence
-├── scripts/               # Release, coverage and fixture-gate tooling
-├── docs/                  # Tracked ADRs/handoffs; other private planning is ignored
+├── evidence/              # Retained release and rollback artifact evidence
+├── assets/                # App icon, branding, DMG resources, screenshots
+├── scripts/               # Release, coverage, fixture-gate and replay tooling
+├── docs/                  # Tracked: docs/adr/ and docs/handoffs/end-work-cloud.md;
+│                          #   all other docs/ content is ignored private planning
 ├── project.yml            # Xcode project generation (xcodegen)
 ├── Makefile
-├── README.md
+├── README.md, CHANGELOG.md, MIGRATION-RUST.md, MEMORY-SYNC-MIGRATION.md
 ├── LICENSE                # Apache-2.0
+├── CLAUDE.md, GEMINI.md   # Managed agent-instruction files that point here
 └── AGENTS.md              # This file
 ```
 
@@ -307,7 +312,11 @@ stable (guard pins schemas and the frozen fixtures pin the bytes).
 ### Code Belongs in the Public Core
 
 - No tenant, billing, or hosted-sync code in this repository. There is no Pro
-  edition; multi-device sync is out of scope, not deferred elsewhere.
+  edition and no hosted or multi-tenant sync service. Peer-to-peer
+  `symbrain memory sync` between the user's own stores (including a
+  self-hosted `symbrain memory serve` peer and the encrypted relay) is shipped
+  and in scope (maintainer decision 2026-11-04, #844); a hosted or tenant sync
+  offering stays out of scope, not deferred elsewhere.
 
 ### Native UI
 
@@ -346,8 +355,11 @@ workspace is macOS only (GUIDELINES.md section 12).
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain with a harness |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain from a harness |
 | `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push instructions/skills to installed harnesses |
-| `symbrain memory` | Operate the embedded memory store |
-| `symbrain skills` | Operate the embedded skill library (list, status, targets, log, sync, doctor) |
+| `symbrain memory` | Operate the embedded memory store (list, search, set, delete, rules, query-log) |
+| `symbrain memory sync --remote <url> [--pull\|--push]` | Peer-to-peer sync between the user's own stores (self-hosted peer, optional encrypted relay) |
+| `symbrain memory serve [--port <n>]` | Run the memory HTTP API on loopback as the sync peer for `memory sync --remote` |
+| `symbrain skills list \| status \| targets \| log \| sync \| doctor` | Inspect and repair the embedded skill library and its installs |
+| `symbrain skills import \| pull \| install \| render \| validate \| history \| restore` | Manage skill content: import and pull into the library, install, render per target, validate, and read or restore history |
 | `symbrain activity` | Read bounded activity summaries with explicit profile access |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log |
 | `symbrain vault` | Human credential create/set/delete commands and symvault passthrough |

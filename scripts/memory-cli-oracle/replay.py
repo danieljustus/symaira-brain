@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# HISTORICAL RECORD MODE (#1004): `--go` unset builds the Go reference with `go build`; replay of sealed data stays supported via the Makefile/CI gates.
+# Needs a checkout of 57c26c76e238e458d9027d5ee4362df24d30b47e (the parent of the Go removal, #1003) and a
+# Go toolchain. No gate runs it; sealed fixtures (scripts/oracle-freeze) and the
+# replay tooling are the supported surface. See docs/adr/historical-go-record-paths-1004.md.
 """Execute scoped native memory CLI contracts against an immutable Go process."""
 import argparse
 import base64

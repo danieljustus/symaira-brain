@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# HISTORICAL RECORD MODE (#1004): compiles the Go CLI (the former scripts/run-go-oracle.sh helper no longer exists).
+# Needs a checkout of 57c26c76e238e458d9027d5ee4362df24d30b47e (the parent of the Go removal, #1003) and a
+# Go toolchain. No gate runs it; sealed fixtures (scripts/oracle-freeze) and the
+# replay tooling are the supported surface. See docs/adr/historical-go-record-paths-1004.md.
 set -euo pipefail
 # The candidate base (CoreKit v0.18.2), as for the setup-repair, setup-source
 # and doctor-repair oracles.

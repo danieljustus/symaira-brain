@@ -153,9 +153,9 @@ Write `~/Library/LaunchAgents/com.daniel.symbrain-memory-sync.plist`:
     <key>RunAtLoad</key>
     <true/>
     <key>StandardErrorPath</key>
-    <string>/Users/daniel/Library/Logs/symbrain-memory-sync.err.log</string>
+    <string>/Users/YOUR_USER/Library/Logs/symbrain-memory-sync.err.log</string>
     <key>StandardOutPath</key>
-    <string>/Users/daniel/Library/Logs/symbrain-memory-sync.out.log</string>
+    <string>/Users/YOUR_USER/Library/Logs/symbrain-memory-sync.out.log</string>
 </dict>
 </plist>
 ```

@@ -39,7 +39,7 @@ Do not change unrelated global output formatting or normalize away mismatches.
 
 Before target reuse, all38 actual reviewed a66 ELF binaries were SHA-checked,
 losslessly gzip archived and decoded/roundtrip verified under
-`/workspace/oracles/symaira-doctor765-a66-binaries/`. All66 original third-review
+the private oracle-binary archive of the doctor765-a66 run (not published). All66 original third-review
 artifacts plus report/receipt remain exact under
 `migration/evidence/doctor-windows-765/independent-review-a66/`; raw logs use
 base64 with original byte count/SHA. They include all23 extra consumer pairs and

@@ -19,11 +19,11 @@ the pinned Go1.26.7/Rust SDK PATH, and run under the lifecycle subreaper:
 
 ```sh
 python3 /tmp/symaira-subreaper.py python3 scripts/memory-historical-oracle/validate.py \
-  --go /workspace/oracles/symbrain-go-dcddcef0 \
+  --go $ORACLES/symbrain-go-dcddcef0 \
   --go-sha256 a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41 \
-  --go-source /workspace/oracles/daemon772-go-source \
+  --go-source $ORACLES/daemon772-go-source \
   --target ALLOCATED_EXISTING_TARGET \
-  --actionlint /workspace/toolchains/bin/actionlint \
+  --actionlint $(command -v actionlint) \
   --output /tmp/NEW_SOURCE_BOUND_REPORT_ROOT
 ```
 
@@ -37,8 +37,8 @@ driver has not run at this source checkpoint.
 
 ```sh
 python3 scripts/memory-historical-oracle/replay.py \
-  --go /workspace/oracles/symbrain-go-dcddcef0 \
-  --go-source /workspace/oracles/daemon772-go-source \
+  --go $ORACLES/symbrain-go-dcddcef0 \
+  --go-source $ORACLES/daemon772-go-source \
   --native "$CARGO_TARGET_DIR/debug/symbrain" \
   --output /tmp/memory-historical-649-clean-head
 ```

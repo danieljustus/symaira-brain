@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# HISTORICAL RECORD MODE (#1004): `record`/`check` rebuild the Go CLI from the working tree.
+# Needs a checkout of 57c26c76e238e458d9027d5ee4362df24d30b47e (the parent of the Go removal, #1003) and a
+# Go toolchain. No gate runs it; sealed fixtures (scripts/oracle-freeze) and the
+# replay tooling are the supported surface. See docs/adr/historical-go-record-paths-1004.md.
 """Record or verify the Go oracle for the five versioning/profile Skills tools (#764 slice b).
 
 Covers `skills_profile_list`, `skills_profile_resolve`, `skills_discover_sources`,
@@ -680,6 +684,8 @@ def git_tree(ref, source):
 
 
 def build(ref):
+    if not (ROOT / "go.mod").is_file():
+        raise SystemExit("historical record mode: the Go tree was removed in #1003; check out 57c26c76e238e458d9027d5ee4362df24d30b47e to run this")
     out = Path(tempfile.mkdtemp(prefix="toolsoracle-go-")) / "symbrain"
     subprocess.run(["go", "build", "-o", str(out), "./cmd/symbrain"], cwd=ROOT, check=True)
     return out

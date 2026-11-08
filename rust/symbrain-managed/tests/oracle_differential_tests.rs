@@ -58,12 +58,63 @@ fn decode_hex(value: &str) -> Vec<u8> {
         .collect()
 }
 
+/// Version without a leading `v`, as it appears inside release asset names.
+fn bare(version: &str) -> &str {
+    version.strip_prefix('v').unwrap_or(version)
+}
+
+/// Compares the shipped manifest with the sealed Go-era oracle manifest by
+/// structure and policy, deliberately NOT by pin values (#997).
+///
+/// The sealed fixture cannot change without a re-seal, while the shipped
+/// `assets/manifest.json` is refreshed whenever a core releases. Everything that
+/// is policy must still match exactly (core set, repo, binary and asset prefix,
+/// cosign, platform and arch rules, optional flag, one checksum per archive and
+/// the archive naming scheme); only the version and the sha256 digests may move.
+fn assert_embedded_manifest_matches_sealed_structure(shipped: &Manifest, sealed: &Manifest) {
+    assert_eq!(shipped.schema_version, sealed.schema_version);
+    assert_eq!(
+        shipped.cores.keys().collect::<Vec<_>>(),
+        sealed.cores.keys().collect::<Vec<_>>(),
+        "core set"
+    );
+    for (name, new) in &shipped.cores {
+        let old = &sealed.cores[name];
+        let policy = |core: &Core| Core {
+            version: String::new(),
+            sha256: std::collections::BTreeMap::default(),
+            ..core.clone()
+        };
+        assert_eq!(policy(new), policy(old), "{name} policy");
+        assert_eq!(
+            bare(&new.version).split('.').count(),
+            bare(&old.version).split('.').count(),
+            "{name} version shape"
+        );
+        // Same archives, only re-versioned: map each sealed asset name onto the
+        // shipped version and require exactly the shipped asset set.
+        let repinned: std::collections::BTreeSet<String> = old
+            .sha256
+            .keys()
+            .map(|asset| asset.replace(bare(&old.version), bare(&new.version)))
+            .collect();
+        let pinned: std::collections::BTreeSet<String> = new.sha256.keys().cloned().collect();
+        assert_eq!(pinned, repinned, "{name} pinned archives");
+        for (asset, digest) in &new.sha256 {
+            assert!(
+                digest.len() == 64 && digest.bytes().all(|b| b.is_ascii_hexdigit()),
+                "{name} {asset}: malformed sha256 {digest:?}"
+            );
+        }
+    }
+}
+
 #[test]
 fn embedded_manifest_and_core_naming_match_go() {
     let oracle = oracle();
-    assert_eq!(
-        Manifest::load_embedded().expect("manifest"),
-        oracle.manifest
+    assert_embedded_manifest_matches_sealed_structure(
+        &Manifest::load_embedded().expect("manifest"),
+        &oracle.manifest,
     );
     for case in oracle.core_cases {
         let core = case.core;

@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -17,6 +18,108 @@ assert SPEC is not None and SPEC.loader is not None
 DIFFERENTIAL = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = DIFFERENTIAL
 SPEC.loader.exec_module(DIFFERENTIAL)
+import differential_process as DIFFERENTIAL_PROCESS  # noqa: E402
+
+
+class SealedPinMappingTests(unittest.TestCase):
+    """#997: sealed transcripts keep the old managed pins; replay maps them to the shipped ones."""
+
+    def setUp(self):
+        self.sealed = DIFFERENTIAL._load_cores(DIFFERENTIAL._SEALED_MANIFEST)
+        self.shipped = DIFFERENTIAL._load_cores(DIFFERENTIAL._SHIPPED_MANIFEST)
+        self.rules = DIFFERENTIAL.sealed_pin_substitutions()
+
+    def map(self, text):
+        return DIFFERENTIAL.map_sealed_pins(text.encode(), self.rules).decode()
+
+    def test_maps_version_asset_and_digest_of_changed_cores(self):
+        for name in ("symvault", "symcockpit"):
+            old, new = self.sealed[name], self.shipped[name]
+            if old["version"] == new["version"]:
+                continue
+            self.assertEqual(self.map(f'"version":"{old["version"]}"'), f'"version":"{new["version"]}"')
+            for (old_asset, old_sha), (new_asset, new_sha) in zip(
+                sorted(old["sha256"].items()), sorted(new["sha256"].items())
+            ):
+                self.assertEqual(self.map(old_asset), new_asset)
+                self.assertEqual(self.map(old_sha), new_sha)
+
+    def test_leaves_unrelated_numbers_and_unchanged_pins_alone(self):
+        for text in ("10.6.2", "0.6.2.1", "x0.22.1", "version 1.0.0", self.shipped["symdesk"]["version"]):
+            with self.subTest(text=text):
+                self.assertEqual(self.map(text), text)
+
+    def test_stub_executable_hash_follows_the_version(self):
+        old, new = self.sealed["symcockpit"]["version"], self.shipped["symcockpit"]["version"]
+        digest = DIFFERENTIAL.hashlib.sha256
+        self.assertEqual(
+            self.map(digest(DIFFERENTIAL._stub_executable(old)).hexdigest()),
+            digest(DIFFERENTIAL._stub_executable(new)).hexdigest(),
+        )
+
+
+@unittest.skipUnless(os.name == "posix", "process groups and PTYs are POSIX-only")
+class ChildDeadlineTests(unittest.TestCase):
+    """#946: PTY and pipe children get a real deadline and die with their whole process group."""
+
+    # The leader backgrounds a SIGTERM-ignoring grandchild that inherits stdio,
+    # records its pid, then (hang mode) blocks. Readiness is the pid file.
+    SCRIPT = (
+        "#!/bin/sh\n"
+        "(trap '' TERM; echo $$ > \"$PIDFILE\"; exec sleep 300) &\n"
+        "while [ ! -s \"$PIDFILE\" ]; do sleep 0.05; done\n"
+        "if [ \"$MODE\" = hang ]; then sleep 300; fi\n"
+    )
+
+    def run_case(self, mode, use_pty, timeout=1.0):
+        with tempfile.TemporaryDirectory() as temp:
+            binary = Path(temp) / "child"
+            binary.write_text(self.SCRIPT)
+            binary.chmod(0o755)
+            pidfile = Path(temp) / "grandchild.pid"
+            env = {"PATH": os.environ["PATH"], "PIDFILE": str(pidfile), "MODE": mode}
+            started = time.monotonic()
+            outcome = None
+            try:
+                outcome = DIFFERENTIAL_PROCESS.run_child(binary, (), env, None, use_pty, timeout=timeout)
+            except subprocess.TimeoutExpired as error:
+                outcome = error
+            elapsed = time.monotonic() - started
+            pid = int(pidfile.read_text())
+            return outcome, elapsed, pid
+
+    def assert_dead(self, pid):
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                return
+            time.sleep(0.05)
+        os.kill(pid, 9)
+        self.fail(f"grandchild {pid} outlived its case")
+
+    def test_hung_children_time_out_and_their_group_is_killed(self):
+        for use_pty in (True, False):
+            with self.subTest(pty=use_pty):
+                outcome, elapsed, pid = self.run_case("hang", use_pty)
+                self.assertIsInstance(outcome, subprocess.TimeoutExpired)
+                self.assertLess(elapsed, 5)
+                self.assert_dead(pid)
+
+    def test_grandchild_holding_the_terminal_cannot_stall_a_finished_leader(self):
+        for use_pty in (True, False):
+            with self.subTest(pty=use_pty):
+                outcome, elapsed, pid = self.run_case("exit", use_pty, timeout=5.0)
+                self.assertIsInstance(outcome, subprocess.CompletedProcess)
+                self.assertEqual(outcome.returncode, 0)
+                self.assertLess(elapsed, 4)
+                self.assert_dead(pid)
+
+    def test_run_routes_through_the_deadline_runner(self):
+        with mock.patch.object(DIFFERENTIAL, "run_child", return_value="sentinel") as run_child:
+            self.assertEqual(DIFFERENTIAL.run(Path("bin"), ("a",), {}, b"in", True), "sentinel")
+        run_child.assert_called_once_with(Path("bin"), ("a",), {}, b"in", True)
 
 
 class InstallAtimePlatformTests(unittest.TestCase):

@@ -51,7 +51,7 @@ Die vollständige unabhängige Prüfung von `86ea7bfb` hat drei weitere P2-Grupp
 bestätigt. Ihr Bericht, alle originalen Prozessbeobachtungen und Runner sind in
 `migration/evidence/setup-source-765/independent-review-86ea/` unverändert erhalten.
 Vor dem Neubau wurden zusätzlich 40 tatsächlich ausgeführte ursprüngliche CLI-
-und Testdateien unter `/workspace/oracles/source765-86ea-binaries/` samt SHA-Beleg
+und Testdateien unter dem privaten Oracle-Binary-Archiv des Laufs source765-86ea (nicht veröffentlicht) samt SHA-Beleg
 gesichert. Erst nach expliziter Freigabe des unabhängigen Prüfers wird dessen
 bisheriger Target-Cache exklusiv von der neuen Lane wiederverwendet.
 

@@ -12,7 +12,7 @@ und Logs bleiben unverändert in
 `migration/evidence/doctor-windows-765/independent-review-a301/`. `retention.json`
 bindet alle 46 Originaldateien. Die 38 tatsächlich geprüften CLI-/Testdateien
 wurden vor Target-Wiederverwendung unter
-`/workspace/oracles/symaira-doctor765-a301-binaries/` verlustfrei archiviert und
+dem privaten Oracle-Binary-Archiv des Laufs doctor765-a301 (nicht veröffentlicht) verlustfrei archiviert und
 dekomprimiert SHA-verifiziert. Frühere Kandidaten und Fehlbelege bleiben erhalten.
 Main `e3dbda6c` mit dem separat angenommenen Profile-Fix wurde regulär integriert.
 

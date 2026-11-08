@@ -62,6 +62,21 @@ fn compile_version_probe(temp: &Path, name: &str, source: &str) -> std::path::Pa
     binary_path
 }
 
+/// Serializes every test that writes an executable fixture and then execs it
+/// (#927). `fork` copies the whole fd table, so while another test thread is
+/// between `fork` and `exec` it holds a duplicate of any fixture's write
+/// descriptor that is still open on a sibling thread; on Linux the sibling's
+/// `exec` of that fixture then fails with ETXTBSY ("text file busy") before the
+/// intended probe ever starts. Holding this lock across write + probe means no
+/// other probe can fork inside that window. Nothing is retried and no assertion
+/// is relaxed: a genuine ETXTBSY would still fail the test.
+#[cfg(unix)]
+fn exec_fixture_lock() -> std::sync::MutexGuard<'static, ()> {
+    static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    LOCK.lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
 fn fixture_core() -> Core {
     Core {
         version: "v1.2.3".to_string(),
@@ -250,6 +265,7 @@ fn checksum_failure_leaves_existing_binary_untouched() {
 fn installed_version_probes_json_and_normalizes_v_prefix() {
     use std::os::unix::fs::PermissionsExt;
 
+    let _exec_fixture = exec_fixture_lock();
     let temp = tempfile::tempdir().unwrap();
     let binary = temp.path().join("tool");
     std::fs::write(&binary, b"#!/bin/sh\nprintf '{\"version\":\"1.2.3\"}\\n'\n").unwrap();
@@ -327,6 +343,7 @@ fn installed_version_timeout_is_bounded_and_reaps_descendants() {
     use std::process::{Command, Stdio};
     use std::time::{Duration, Instant};
 
+    let _exec_fixture = exec_fixture_lock();
     let temp = tempfile::tempdir().unwrap();
     let binary = temp.path().join("tool");
     let marker = temp.path().join("child.pid");
@@ -372,4 +389,46 @@ fn installed_version_timeout_is_bounded_and_reaps_descendants() {
         "version-probe descendant survived timeout: pid={pid:?}; probe={error}; elapsed={:?}; fixture={binary:?}",
         started.elapsed(),
     );
+}
+
+/// Root cause of #927, reproduced deterministically: Linux refuses to exec a
+/// file while any process still holds it open for writing, which is what a
+/// concurrently forking sibling thread's inherited descriptor copy amounts to.
+/// A holder process keeps such a write descriptor open on purpose.
+#[test]
+#[cfg(target_os = "linux")]
+fn exec_of_fixture_fails_with_etxtbsy_while_a_writer_descriptor_is_inherited() {
+    use std::io::{BufRead, BufReader};
+    use std::os::unix::fs::PermissionsExt;
+    use std::process::{Command, Stdio};
+
+    const ETXTBSY: i32 = 26;
+    let _exec_fixture = exec_fixture_lock();
+    let temp = tempfile::tempdir().unwrap();
+    let script = temp.path().join("tool");
+    std::fs::write(&script, b"#!/bin/sh\nexit 0\n").unwrap();
+    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+
+    let mut holder = Command::new("/bin/sh")
+        .args([
+            "-c",
+            "exec 9>>\"$0\"; echo ready; read _",
+            script.to_str().unwrap(),
+        ])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let mut ready = String::new();
+    BufReader::new(holder.stdout.take().unwrap())
+        .read_line(&mut ready)
+        .unwrap();
+    assert_eq!(ready.trim(), "ready");
+
+    let busy = Command::new(&script).spawn().unwrap_err();
+    assert_eq!(busy.raw_os_error(), Some(ETXTBSY), "{busy}");
+
+    drop(holder.stdin.take());
+    assert!(holder.wait().unwrap().success());
+    assert!(Command::new(&script).status().unwrap().success());
 }

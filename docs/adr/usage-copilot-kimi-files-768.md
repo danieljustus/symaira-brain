@@ -6,10 +6,10 @@ Integrate independently approved provider-files parentfdfea204 normally and keep
 its frozen-Go, original failures and native source receipts historical. Preserve
 the original97-case Go-only baseline exactly. Before reusing its released target,
 archive every actual native ELF executable:112 paths/74 unique binaries, byte and
-SHA256 verified under `/workspace/oracles/symaira-usage768-files-f241-binaries/`.
+SHA256 verified under the private oracle-binary archive of the usage768-files-f241 run (not published).
 The archive receipt binds sourcef241/7bd and the original three process manifests,
 including CLI9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38.
-Only `/workspace/symaira-usage768-local-files/target` is now used for this lane.
+Only a dedicated, lane-owned Cargo target directory is now used for this lane.
 Parent source and evidence are unchanged. This avoids a duplicate build target
 while preserving actual prior binaries for review.
 

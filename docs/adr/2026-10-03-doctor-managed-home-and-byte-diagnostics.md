@@ -10,7 +10,7 @@ Prozessbeobachtungen und Logs bleiben unverändert in
 `migration/evidence/doctor-windows-765/independent-review-0b56/`; `retention.json`
 bindet alle 35 Dateien an SHA und Kandidaten. Vor der exklusiven Target-
 Wiederverwendung wurden 41 tatsächlich geprüfte CLI-/Test-Executables unter
-`/workspace/oracles/symaira-doctor765-0b56-binaries/` verlustfrei gzip-archiviert;
+dem privaten Oracle-Binary-Archiv des Laufs doctor765-0b56 (nicht veröffentlicht) verlustfrei gzip-archiviert;
 `receipt.json` prüft Original- und Dekompressionshashes. Frühere Kandidaten und
 der ursprüngliche Windows-Fehllauf bleiben eigenständige historische Belege.
 

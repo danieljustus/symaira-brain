@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# HISTORICAL RECORD MODE (#1004): exercises the retired memory web-console assets (console removed in #763).
+# Needs a checkout of 57c26c76e238e458d9027d5ee4362df24d30b47e (the parent of the Go removal, #1003) and a
+# Go toolchain. No gate runs it; sealed fixtures (scripts/oracle-freeze) and the
+# replay tooling are the supported surface. See docs/adr/historical-go-record-paths-1004.md.
 """Owned jsdom runtime exercises actual native assets and retains original defects."""
 import argparse
 import json
@@ -7,6 +11,10 @@ from pathlib import Path
 import sqlite3
 import subprocess
 from support import FROZEN,Embeddings,Peer,owned_env,seed,token,digest
+
+ASSETS = Path(__file__).resolve().parents[2] / "rust/symbrain-memory/assets/web"
+if not ASSETS.is_dir():
+    raise SystemExit("retired: the memory web console (and %s) was removed in #763; see docs/adr/historical-go-record-paths-1004.md" % ASSETS)
 parser=argparse.ArgumentParser();parser.add_argument('--native',type=Path,required=True);parser.add_argument('--node',type=Path,required=True);parser.add_argument('--jsdom',type=Path,required=True);parser.add_argument('--report',type=Path,required=True);args=parser.parse_args()
 repo=Path(__file__).resolve().parents[2];root=args.report.with_suffix('.evidence');root.mkdir(exist_ok=False)
 embedding=Embeddings();peers=[];runs=[]

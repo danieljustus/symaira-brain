@@ -17,11 +17,14 @@ fn setup_fix_uses_native_noop_when_all_managed_versions_match() {
     let bin_dir = home.join(".symaira/bin");
     fs::create_dir_all(&bin_dir).unwrap();
 
-    for (name, version) in [
-        ("symcockpit", "0.6.2"),
-        ("symdesk", "0.12.2"),
-        ("symvault", "0.22.1"),
-    ] {
+    // Versions come from the shipped manifest, so a pin refresh needs no test edit.
+    let manifest: serde_json::Value =
+        serde_json::from_str(include_str!("../../symbrain-managed/assets/manifest.json")).unwrap();
+    for name in ["symcockpit", "symdesk", "symvault"] {
+        let version = manifest["cores"][name]["version"]
+            .as_str()
+            .unwrap()
+            .trim_start_matches('v');
         let path = bin_dir.join(name);
         fs::write(
             &path,

@@ -43,7 +43,7 @@ Preserve all 46 independent report/proof/input/log artifacts under
 `migration/evidence/memory-cli-758/sigpipe-review-55e3038/`. Before reusing the
 released target, archive and decompression/SHA-verify the actual reviewed CLI
 `b1314acb` and five executed test binaries under
-`/workspace/oracles/symaira-memory758-647-binaries/receipt.json`. The original55
+the private `receipt.json` of the memory758-647 oracle-binary archive (not published). The original55
 source, previous14d archives and all rejected observations remain unchanged.
 
 Clean combined source `458e8fa5` passes 165 affected Rust tests (119 CLI, 44

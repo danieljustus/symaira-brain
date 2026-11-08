@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Black-box Go↔Rust parity smoke tests for the migration."""
+"""Black-box Go↔Rust parity smoke tests for the migration.
+
+`replay FIXTURE RUST_BINARY` (what `make parity-smoke` runs) compares the Rust
+binary against the sealed Go transcripts and needs no Go. `record` and the live
+`GO_BINARY RUST_BINARY` mode are HISTORICAL RECORD MODE (#1004): they need a Go
+binary built from the pre-removal checkout 57c26c76e238e458d9027d5ee4362df24d30b47e
+(the parent of #1003) and are not run by any gate.
+"""
 from __future__ import annotations
 import json
 import calendar
@@ -26,6 +33,7 @@ from typing import Callable
 
 from external_env import ensure_external_environment
 from differential_journal import Journal
+from differential_process import run_child
 from harness_health_contract import (
     HEALTH_DEVIATIONS,
     SEEDED_HEALTH_PREFIX,
@@ -33,8 +41,6 @@ from harness_health_contract import (
     legacy_health_view,
 )
 from skills_render_contract import RENDER_DEVIATIONS, legacy_render_view
-if os.name == "posix":
-    import pty
 RELEASE_BASE_URL = ""
 # Some setups seed state by running the reference binary in BOTH fixture roots.
 # In replay mode there is no Go binary, so the Rust binary seeds them instead
@@ -414,7 +420,7 @@ import os
 import sys
 import time
 if sys.argv[1] == "version":
-    print(json.dumps({"version": "0.22.1"}))
+    print(json.dumps({"version": "@VAULT_VERSION@"}))
     sys.exit(0)
 if sys.argv[1:] != json.loads(os.environ["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"]):
     print("wrong vault arguments", file=sys.stderr)
@@ -430,7 +436,7 @@ for line in sys.stdin:
         continue
     time.sleep(float(os.environ.get("SYMBRAIN_TEST_VAULT_DELAY", "0")))
     print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": result}), flush=True)
-''')
+'''.replace("@VAULT_VERSION@", _version_without_tag(str(_managed_cores()["symvault"]["version"]))))
     binary.chmod(0o755)
     env["PATH"] = str(binary_dir)
     env["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"] = json.dumps(["serve", "--stdio", "--agent", "other", "--allow-locked"])
@@ -612,13 +618,73 @@ def _install_windows_stub(path: Path) -> None:
     shutil.copyfile(WINDOWS_STUB_BINARY, path)
 
 
-def _managed_cores() -> dict[str, dict[str, object]]:
-    manifest_path = Path(__file__).resolve().parent.parent / "rust/symbrain-cli/tests/fixtures/managed_manifest.json"
+# Managed-core pins (#997). The Rust binary embeds `assets/manifest.json`, so the
+# release fixture server, the pre-installed stub binaries and the install check
+# are all built from that shipped manifest. The sealed Go transcripts (and the
+# sealed `managed_manifest.json` fixture) still encode the pins of the Go-era
+# manifest; they must stay byte-identical, so replay maps ONLY those managed-core
+# pin values (versions, archive/asset names, sha256) onto the shipped ones before
+# comparing. No runtime manifest override exists in production code.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_SHIPPED_MANIFEST = _REPO_ROOT / "rust/symbrain-managed/assets/manifest.json"
+_SEALED_MANIFEST = _REPO_ROOT / "rust/symbrain-cli/tests/fixtures/managed_manifest.json"
+
+
+def _load_cores(manifest_path: Path) -> dict[str, dict[str, object]]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     cores = manifest.get("cores")
     if not isinstance(cores, dict):
         raise RuntimeError(f"managed manifest has no core map: {manifest_path}")
     return cores
+
+
+def _managed_cores() -> dict[str, dict[str, object]]:
+    return _load_cores(_SHIPPED_MANIFEST)
+
+
+def _stub_executable(version: str) -> bytes:
+    """POSIX stub binary that reports `version` (what the fixtures install)."""
+    return f"#!/bin/sh\nprintf '{{\"version\":\"{_version_without_tag(version)}\"}}\\n'\n".encode()
+
+
+def sealed_pin_substitutions() -> list[tuple["re.Pattern[bytes]", bytes]]:
+    """(sealed pin value -> shipped pin value) rules for managed-core pin fields only.
+
+    Covers each core's version (`v1.2.3` and bare `1.2.3`), its pinned archive
+    names and their sha256 digests. A value is rewritten only as a whole token (not
+    inside a longer version/identifier), pairs whose sealed and shipped value are
+    equal are dropped, and longer values are applied first so an asset name is
+    never half-rewritten by the version embedded in it.
+    """
+    sealed, shipped = _load_cores(_SEALED_MANIFEST), _load_cores(_SHIPPED_MANIFEST)
+    pairs: dict[str, str] = {}
+    for name, old in sealed.items():
+        new = shipped.get(name)
+        if new is None:
+            continue
+        old_assets, new_assets = old.get("sha256", {}), new.get("sha256", {})
+        if isinstance(old_assets, dict) and isinstance(new_assets, dict):
+            for old_asset, new_asset in zip(sorted(old_assets), sorted(new_assets)):
+                pairs[old_asset] = new_asset
+                pairs[str(old_assets[old_asset])] = str(new_assets[new_asset])
+        old_v, new_v = str(old["version"]), str(new["version"])
+        pairs[old_v] = new_v
+        pairs[_version_without_tag(old_v)] = _version_without_tag(new_v)
+        # Provenance sidecars record the sha256 of the installed stub executable,
+        # whose bytes embed the version (see `_stub_executable`).
+        pairs[hashlib.sha256(_stub_executable(old_v)).hexdigest()] = hashlib.sha256(_stub_executable(new_v)).hexdigest()
+    return [
+        # Not glued to a preceding alphanumeric or `N.`; not followed by an alphanumeric or `.N`.
+        (re.compile(rb"(?<![0-9A-Za-z])(?<!\d\.)" + re.escape(old.encode()) + rb"(?![0-9A-Za-z]|\.\d)"), new.encode())
+        for old, new in sorted(pairs.items(), key=lambda kv: -len(kv[0]))
+        if old != new
+    ]
+
+
+def map_sealed_pins(data: bytes, substitutions: list[tuple["re.Pattern[bytes]", bytes]]) -> bytes:
+    for pattern, new in substitutions:
+        data = pattern.sub(lambda _match, new=new: new, data)
+    return data
 
 
 def _version_without_tag(version: str) -> str:
@@ -679,84 +745,11 @@ def _assert_current_managed_install(root: Path, env: dict[str, str], runtime: st
 
 
 def _build_windows_stub() -> None:
-    global WINDOWS_STUB_TEMP, WINDOWS_STUB_BINARY
-    if os.name != "nt":
-        return
-    go = shutil.which("go")
-    if go is None:
-        raise RuntimeError("native Windows parity fixtures require the Go toolchain")
-    WINDOWS_STUB_TEMP = tempfile.TemporaryDirectory(prefix="symbrain-parity-stubs-")
-    root = Path(WINDOWS_STUB_TEMP.name)
-    source = root / "main.go"
-    WINDOWS_STUB_BINARY = root / "symbrain-parity-stub.exe"
-    version_entries = "\n".join(
-        f"\t\t{json.dumps(str(core['binary_name']))}: "
-        f"{json.dumps(_version_without_tag(str(core['version'])))},"
-        for core in _managed_cores().values()
-    )
-    go_source = r'''package main
-
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-)
-
-func main() {
-	name := strings.TrimSuffix(strings.ToLower(filepath.Base(os.Args[0])), ".exe")
-	if name == "cosign" {
-		fmt.Println("cosign stdout")
-		fmt.Fprintln(os.Stderr, "cosign stderr")
-		os.Exit(9)
-	}
-	if name == "symvault" && os.Getenv("SYMBRAIN_TEST_FAKE_SYMVAULT_MODE") == "doctor_failed_version" {
-		if len(os.Args) > 1 && os.Args[1] == "version" {
-			fmt.Print(`{"version":"9.9.9"}`)
-			os.Exit(42)
-		}
-		if len(os.Args) > 1 && os.Args[1] == "serve" {
-			scanner := bufio.NewScanner(os.Stdin)
-			scanner.Scan()
-			os.Stdout.Close()
-			for scanner.Scan() {}
-		}
-		fmt.Fprintln(os.Stderr, "not found")
-		os.Exit(1)
-	}
-	version := map[string]string{
-__VERSION_ENTRIES__
-	}[name]
-	if name == "symdesk" {
-		if override := os.Getenv("SYMBRAIN_TEST_MANAGED_SYMDESK_VERSION"); override != "" {
-			version = override
-		}
-	}
-	if version == "" || len(os.Args) < 2 || os.Args[1] != "version" {
-		fmt.Fprintln(os.Stderr, "unsupported fixture invocation")
-		os.Exit(2)
-	}
-	fmt.Printf("{\"version\":%q}\n", version)
-}
-'''.replace("__VERSION_ENTRIES__", version_entries)
-    _write_text(
-        source,
-        go_source,
-    )
-    result = subprocess.run(
-        [go, "build", "-trimpath", "-o", str(WINDOWS_STUB_BINARY), str(source)],
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=root,
-        env={**os.environ, "CGO_ENABLED": "0", "GO111MODULE": "off"},
-    )
-    if result.returncode != 0:
-        raise RuntimeError(
-            "build native Windows parity fixture executable failed: "
-            + result.stderr.decode("utf-8", errors="replace")
-        )
+    # Native Windows is not a parity target (#990, #992). The Go-compiled stub
+    # executable this once built is gone with the Go toolchain; Windows-only
+    # fixture paths below are inert history.
+    if os.name == "nt":
+        raise RuntimeError("native Windows parity is unsupported (#990): the Go stub builder was removed (#1004)")
 class ReleaseFixtureServer:
     def __init__(self) -> None:
         self.routes = self._build_routes()
@@ -5888,42 +5881,9 @@ def run(
     stdin: bytes | None = None,
     use_pty: bool = False,
 ) -> subprocess.CompletedProcess[bytes]:
-    if use_pty:
-        master, slave = pty.openpty()
-        try:
-            process = subprocess.Popen(
-                [str(binary), *argv],
-                env=env,
-                cwd=env.get("PROJECT"),
-                stdin=slave,
-                stdout=slave,
-                stderr=slave,
-            )
-        finally:
-            os.close(slave)
-        chunks: list[bytes] = []
-        while True:
-            try:
-                chunk = os.read(master, 4096)
-            except OSError:
-                break
-            if not chunk:
-                break
-            chunks.append(chunk)
-        os.close(master)
-        return subprocess.CompletedProcess(
-            [str(binary), *argv], process.wait(timeout=10), b"".join(chunks), b""
-        )
-    return subprocess.run(
-        [str(binary), *argv],
-        env=env,
-        cwd=env.get("PROJECT"),
-        input=stdin if stdin is not None else b"",
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        timeout=10,
-        check=False,
-    )
+    # One deadline for pipe and PTY children alike, enforced on the whole
+    # process group (#946); see differential_process.py.
+    return run_child(binary, argv, env, stdin, use_pty)
 def format_access_time_ns(atime_ns: int) -> str:
     """Format an atime the way Go's `time.RFC3339Nano` does."""
     seconds, nanos = divmod(atime_ns, 1_000_000_000)
@@ -6206,6 +6166,7 @@ def main() -> int:
     else:
         print("usage: rust-differential.py record FIXTURE GO_BINARY | replay FIXTURE RUST_BINARY | GO_BINARY RUST_BINARY", file=sys.stderr)
         return 2
+    pin_substitutions = sealed_pin_substitutions() if mode == "replay" else []
     journal = Journal()
     if mode != "replay":
         journal.bind("Go", go_binary)
@@ -6291,7 +6252,9 @@ def main() -> int:
                 if mode == "replay":
                     entry = recorded[case.name]
                     go_result = subprocess.CompletedProcess(
-                        list(go_argv), entry["returncode"], _unb64(entry["stdout"]), _unb64(entry["stderr"])
+                        list(go_argv), entry["returncode"],
+                        map_sealed_pins(_unb64(entry["stdout"]), pin_substitutions),
+                        map_sealed_pins(_unb64(entry["stderr"]), pin_substitutions),
                     )
                 else:
                     go_result = journal.run(case.name, "Go", run, go_binary, go_argv, go_env, case.stdin, case.pty)
@@ -6483,6 +6446,11 @@ def main() -> int:
                     )
                 elif case.mutating:
                     go_manifest = _manifest_from_json(recorded[case.name]["manifest"]) if mode == "replay" else get_fs_manifest(go_root)
+                    if mode == "replay":
+                        go_manifest = {
+                            path: (kind, perm, map_sealed_pins(content, pin_substitutions))
+                            for path, (kind, perm, content) in go_manifest.items()
+                        }
                     rust_manifest = get_fs_manifest(rust_root)
                     if go_manifest != rust_manifest:
                         failures.append(

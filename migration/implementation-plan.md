@@ -1532,7 +1532,7 @@ the coordinator owns this integration worktree and no Brain writer is active.
 This update supersedes the earlier decoder checkpoint's pending-CLI statements.
 
 Exact five-file delta, source-before/after hashes and reversible patch:
-`/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/rust-resume-evidence/brain-cli-integration-20260914T074809.707828Z/integration.json`.
+the private `integration.json` receipt of the `brain-cli-integration` run (not published).
 The sibling `integrated-parity.json` records the rebuilt integration binary's
 23/23 actual Go comparisons (response, exit, stderr, audit). Build, strict CLI
 Clippy and workspace formatting passed after integration. Earlier worker tests
@@ -1560,12 +1560,12 @@ existing WIP, historical Go source and failed evidence. No PR or release.
   claim that CLI integration is already underway. The integration worktree,
   lockfile, decoder and this register remain coordinator-owned. Worker lifetime
   is session-local, not durable after termination. Integration worktree:
-  `/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/rust-integration-20260913`,
+  the local `rust-integration-20260913` worktree,
   branch `migration/rust-integration-20260913`; integration/Go oracle
   `0b585d52915a824664e1377d0a995dff3f5405cd` plus preserved WIP.
 - Recovery manifest (main/origin SHAs, full owned file list, byte-verified overlay,
   staged/unstaged binary patches):
-  `/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/rust-resume-evidence/20260914T072304.925477Z/brain/snapshot.json`.
+  the private `brain/snapshot.json` recovery manifest (not published).
   This retains the earlier Go audit/test changes, Raw-JSONL implementation,
   test-only adapter, fixture generators and this run's decoder changes. Do not
   reset, overwrite or reimplement that WIP.
@@ -1576,7 +1576,7 @@ existing WIP, historical Go source and failed evidence. No PR or release.
   corrected against actual pinned-command output. Quoting reuses the existing
   `symbrain-core` implementation rather than a second formatter.
 - Verified evidence:
-  `/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/rust-resume-evidence/brain-review-gate-20260914T072140.355630Z/report.json`.
+  the private `report.json` of the `brain-review-gate` run (not published).
   It binds source-before/after hashes, Rust/Cargo 1.98.0, native host, argv,
   cwd, individual exit codes and logs. Guard-core tests, strict Clippy and
   formatting passed. The new corpus compares 18 actual Go responses and audit
@@ -1587,7 +1587,7 @@ existing WIP, historical Go source and failed evidence. No PR or release.
   The generator verifies the historical binary hash and full Git-source identity;
   its retained build lives in `target/migration-run/guard-decide-provenancefix`.
 - Next executable gate:
-  `python3 /Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/brain-review-gate.py`.
+  the private `brain-review-gate.py` script (not published).
   Then promote the existing test-only adapter into the local Rust CLI candidate
   and compare the actual binary against the pinned Go command. `guard` dispatch
   still returns `None` (Go fallback); installed applications are unchanged.

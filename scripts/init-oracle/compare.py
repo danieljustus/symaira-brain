@@ -428,7 +428,13 @@ def build_go_reference_binary(
     output_binary_path: Path,
     build_cache_dir: Path,
 ) -> dict[str, str]:
-    """Builds the Go reference binary from extracted sources."""
+    """Builds the Go reference binary from extracted sources.
+
+    HISTORICAL RECORD MODE (#1004): used only by `record` and the live compare.
+    The sources come from the pinned commit via `git archive`, so this needs a
+    Go toolchain and full git history but no Go in the working tree. The gate
+    (`make init-differential`) replays the sealed fixture and never calls this.
+    """
     output_binary_path.parent.mkdir(parents=True, exist_ok=True)
     build_cache_dir.mkdir(parents=True, exist_ok=True)
 
