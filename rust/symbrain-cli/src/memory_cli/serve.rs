@@ -16,7 +16,9 @@ use symbrain_core::exit;
 use symbrain_memory::http::{Options, Server};
 use symbrain_memory::{EmbeddingGenerator, Store};
 
-const DEFAULT_PORT: i64 = 8787;
+/// Not the Go-era 8787, which Readarr (the *arr stack) owns; 48787 sits below
+/// the OS ephemeral range and has no well-known self-hosted user (#996).
+const DEFAULT_PORT: i64 = 48787;
 
 const SERVE_USAGE: &str = "symbrain memory serve — run the memory HTTP API as a sync peer
 
@@ -24,8 +26,10 @@ Usage:
   symbrain memory serve [flags]
 
 Flags:
-  --port <n>   TCP port to listen on (default 8787). Always bound to
-               127.0.0.1; never exposed on a non-loopback address.
+  --port <n>   TCP port to listen on (default 48787). Always bound to
+               127.0.0.1; never exposed on a non-loopback address. Startup
+               is refused when another process already serves the same port
+               on [::1] or the wildcard address.
   --db <path>  Database path override (default: the standard memory
                database under the XDG data directory).
 

@@ -29,6 +29,8 @@ fn fold(key: &str) -> String {
 pub(super) struct Apply {
     pub memories: Vec<PulledMemory>,
     pub deleted: Vec<(String, DateTime<Utc>)>,
+    /// The `entity_graph` envelope of a full-fidelity peer (#855).
+    pub graph: crate::GraphDelta,
 }
 
 /// Decodes a top-level object (or `null`) into its members; duplicate keys
@@ -112,6 +114,7 @@ pub(super) fn apply(body: &[u8]) -> Option<Apply> {
                 }
             }
             ("memories" | "deleted", _) => return None,
+            ("entity_graph", value) => out.graph = crate::GraphDelta::from_value(Some(value)),
             _ => {}
         }
     }
@@ -275,6 +278,7 @@ fn memory(value: &Value) -> Option<PulledMemory> {
             _ => {}
         }
     }
+    memory.extras = crate::MemoryExtras::from_object(map);
     Some(memory)
 }
 

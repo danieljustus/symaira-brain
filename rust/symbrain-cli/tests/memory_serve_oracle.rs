@@ -18,6 +18,10 @@
 //! - the label order of a `redaction` audit detail: the shipped service joins
 //!   the labels in Go map iteration order (random per run), so the label set
 //!   is compared sorted;
+//! - the `--port` paragraph of the usage text: #996 deliberately moved the
+//!   default from the Go-era 8787 (Readarr's port) and documents the
+//!   cross-family bind refusal, so the new paragraph is mapped back to the
+//!   frozen one before comparing (the sealed fixtures are not edited);
 //! - timestamps in the databases: wall clock, except the fixed `2030-…`
 //!   instants sent by the tests themselves.
 #![allow(clippy::pedantic)]
@@ -29,6 +33,27 @@ use regex::Regex;
 use rusqlite::Connection;
 use serde_json::Value;
 use std::collections::BTreeMap;
+
+const FROZEN_PORT_HELP: &str =
+    "  --port <n>   TCP port to listen on (default 8787). Always bound to
+               127.0.0.1; never exposed on a non-loopback address.
+";
+const NATIVE_PORT_HELP: &str =
+    "  --port <n>   TCP port to listen on (default 48787). Always bound to
+               127.0.0.1; never exposed on a non-loopback address. Startup
+               is refused when another process already serves the same port
+               on [::1] or the wildcard address.
+";
+
+/// Maps the native `--port` help paragraph back to the frozen Go wording.
+fn frozen_port_help(output: (Option<i32>, String, String)) -> (Option<i32>, String, String) {
+    let (code, out, err) = output;
+    (
+        code,
+        out.replace(NATIVE_PORT_HELP, FROZEN_PORT_HELP),
+        err.replace(NATIVE_PORT_HELP, FROZEN_PORT_HELP),
+    )
+}
 
 fn run_cli(binary: &std::path::Path, args: &[&str]) -> (Option<i32>, String, String) {
     let root = Root::new();
@@ -73,7 +98,7 @@ fn flag_errors_usage_and_exit_codes_match_the_oracle() {
     );
     assert_eq!(recorded.len(), cases.len());
     for (case, expected) in cases.iter().zip(&recorded) {
-        let actual = run_cli(&rust, case);
+        let actual = frozen_port_help(run_cli(&rust, case));
         assert_eq!(&actual, expected, "case {case:?}");
         assert_eq!(expected.0, Some(2), "case {case:?} must be a usage failure");
     }
@@ -127,7 +152,7 @@ fn unusable_database_path_matches_the_oracle() {
 
 // ---------------------------------------------------------------- scenario
 
-#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 struct Observation {
     name: String,
     status: u16,
@@ -1179,12 +1204,38 @@ fn stderr_shape(text: &str) -> Vec<String> {
         .collect()
 }
 
+/// #763: the Web Console is retired, so `GET /` is the generic not-found page
+/// instead of the recorded Go console. The recorded `root-html` observation
+/// (and its access-log status) is mapped to the recorded `unknown-path` shape;
+/// the sealed fixture is not edited.
+fn retire_console(expected: &mut Outcome) {
+    let unknown = expected
+        .observations
+        .iter()
+        .find(|observation| observation.name == "unknown-path")
+        .cloned()
+        .expect("recorded unknown-path observation");
+    let root = expected
+        .observations
+        .iter_mut()
+        .find(|observation| observation.name == "root-html")
+        .expect("recorded root-html observation");
+    *root = Observation {
+        name: "root-html".to_owned(),
+        ..unknown
+    };
+    expected.stderr = expected.stderr.replace(
+        "method=GET path=/ status=200 ",
+        "method=GET path=/ status=404 ",
+    );
+}
+
 #[test]
 fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
     let rust = rust_binary();
     let seed_db = shared_seed();
     let seed_db = seed_db.as_path();
-    let (expected, bodies_go): (Outcome, (Vec<Observation>, String)) = frozen(
+    let (mut expected, bodies_go): (Outcome, (Vec<Observation>, String)) = frozen(
         "route_matrix",
         "memory serve on a free port with the recorded seed database; every route, auth and error case of run_scenario and run_bodies; SIGTERM",
         |go| {
@@ -1195,6 +1246,7 @@ fn full_route_matrix_side_effects_and_shutdown_match_the_oracle() {
             })
         },
     );
+    retire_console(&mut expected);
     let (actual, bodies_rust) = std::thread::scope(|scope| {
         let rust_run = scope.spawn(|| run_scenario(&rust, seed_db));
         let rust_bodies = scope.spawn(|| run_bodies(&rust, seed_db));
@@ -1702,6 +1754,37 @@ struct SyncOutcome {
     server_db: Vec<String>,
 }
 
+/// #855: the native client pulls stored vectors (`include_embeddings`), where
+/// the frozen lite Go pull stored `null | 0 | '' | '' | '' | <hash> | 0`. The
+/// vector, its dimension, source and LSH bucket are mapped back to the
+/// frozen columns (and the pulled graph tables are skipped) on the client side
+/// before comparing; every other column is still pinned. The
+/// full-fidelity behavior itself is covered by `memory_sync_fidelity.rs`.
+fn drop_synced_vectors(mut outcome: SyncOutcome) -> SyncOutcome {
+    let vector = Regex::new(
+        r"\| vector\(len=\d+,fnv=[0-9a-f]+\) \| \d+ \| [^|]* \| [^|]* \| [^|]* \| ([0-9a-f]*) \| \d+ \|",
+    )
+    .unwrap();
+    for line in &mut outcome.client_db {
+        *line = vector
+            .replace_all(line, "| null | 0 |  |  |  | $1 | 0 |")
+            .into_owned();
+    }
+    // The pulled entity graph (entities, relations, links, evidence) is new
+    // data the frozen Go client never fetched.
+    outcome.client_db.retain(|line| {
+        ![
+            "entities:",
+            "entity_relations:",
+            "memory_entities:",
+            "memory_evidence:",
+        ]
+        .iter()
+        .any(|table| line.starts_with(table))
+    });
+    outcome
+}
+
 /// Runs `symbrain memory sync --remote <this server>` with `client` against a
 /// `server` binary; both sides start from identical seeded or empty roots.
 fn run_sync(
@@ -1810,7 +1893,13 @@ fn remote_sync_clients_behave_identically_against_the_native_server() {
             eprintln!("recorded only (client side not native yet): {label}");
             continue;
         }
-        let actual = run_sync(&rust, &rust, *server_seeded, *client_seeded, extra);
+        let actual = drop_synced_vectors(run_sync(
+            &rust,
+            &rust,
+            *server_seeded,
+            *client_seeded,
+            extra,
+        ));
         let mut diffs = Vec::new();
         if expected.exit != actual.exit {
             diffs.push(format!(

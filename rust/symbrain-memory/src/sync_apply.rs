@@ -58,6 +58,8 @@ pub struct PulledMemory {
     pub access_count: i64,
     pub last_access: Option<DateTime<Utc>>,
     pub prev_access: Option<DateTime<Utc>>,
+    /// Linked entity names and evidence spans of a full-fidelity peer (#855).
+    pub extras: crate::sync_graph::MemoryExtras,
 }
 
 impl PulledMemory {
@@ -95,6 +97,7 @@ impl PulledMemory {
             access_count: 0,
             last_access: None,
             prev_access: None,
+            extras: crate::sync_graph::MemoryExtras::default(),
         }
     }
 }

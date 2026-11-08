@@ -8,6 +8,7 @@
 
 use crate::sync_client_scan::{Fail, check_valid, first_value, go_lossy, unquote};
 use crate::sync_client_time::{GoTime, unmarshal_json as time_from_json};
+use crate::sync_graph::{EntityRecord, GraphDelta, MemoryExtras, RelationRecord};
 use std::collections::BTreeMap;
 
 // ------------------------------------------------------------------ nodes
@@ -702,6 +703,8 @@ pub struct ClientMemory {
     pub access_count: i64,
     pub last_access: Option<GoTime>,
     pub prev_access: Option<GoTime>,
+    /// Linked entity names and evidence spans (#855); empty from Go-era peers.
+    pub extras: MemoryExtras,
 }
 
 /// A decoded `db.DeletedMemory`.
@@ -719,6 +722,8 @@ pub struct Changes {
     pub deleted: Vec<ClientDelete>,
     pub server_time: GoTime,
     pub next_cursor: String,
+    /// The `entity_graph` envelope of a full-fidelity server (#855).
+    pub graph: GraphDelta,
 }
 
 /// A decoded `db.RelayBlob`.
@@ -748,6 +753,10 @@ pub struct ApplyCounts {
 pub struct RelayPayload {
     pub memory: Option<ClientMemory>,
     pub deleted: Option<ClientDelete>,
+    /// A graph entity blob (#855).
+    pub entity: Option<EntityRecord>,
+    /// A graph relation blob (#855).
+    pub relation: Option<RelationRecord>,
 }
 
 fn field<'a>(shape: &StructTy, values: &'a [Val], name: &str) -> &'a Val {
@@ -840,6 +849,7 @@ fn memory_from(values: &[Val]) -> ClientMemory {
         },
         last_access: time_ptr_of(shape, values, "last_access"),
         prev_access: time_ptr_of(shape, values, "prev_access"),
+        extras: MemoryExtras::default(),
     }
 }
 
@@ -955,11 +965,23 @@ pub fn decode_changes(body: &[u8], stop: Option<&str>) -> Result<Changes, String
                 .collect(),
             _ => Vec::new(),
         };
+        let (extras, graph) = crate::sync_client_extras::changes(body);
+        let memories = memories
+            .into_iter()
+            .enumerate()
+            .map(|(index, memory)| {
+                memory.map(|mut memory| {
+                    memory.extras = extras.get(index).cloned().unwrap_or_default();
+                    memory
+                })
+            })
+            .collect();
         Ok(Changes {
             memories,
             deleted,
             server_time: time_of(&CHANGES, &values, "server_time"),
             next_cursor: string_of(&CHANGES, &values, "next_cursor"),
+            graph,
         })
     })
 }
@@ -1092,7 +1114,17 @@ pub fn decode_relay_payload(payload: &[u8]) -> Result<RelayPayload, String> {
             },
             _ => None,
         };
-        Ok(RelayPayload { memory, deleted })
+        let extras = crate::sync_client_extras::payload(payload);
+        let memory = memory.map(|mut memory| {
+            memory.extras = extras.memory.clone();
+            memory
+        });
+        Ok(RelayPayload {
+            memory,
+            deleted,
+            entity: extras.entity,
+            relation: extras.relation,
+        })
     })
 }
 
@@ -1198,6 +1230,13 @@ pub struct LocalMemory {
     pub access_count: i64,
     pub last_access: Option<GoTime>,
     pub prev_access: Option<GoTime>,
+    /// The stored vector and its labels (#855); empty when never embedded.
+    pub embedding: Vec<f32>,
+    pub embedding_source: String,
+    pub embedding_model: String,
+    pub embedding_quantization: String,
+    /// Linked entity names and evidence spans (#855).
+    pub extras: MemoryExtras,
 }
 
 fn string_member(out: &mut Vec<String>, name: &str, value: &str, omit_empty: bool) {
@@ -1242,6 +1281,26 @@ impl LocalMemory {
                 }
             )
         ));
+        if !self.embedding.is_empty() {
+            members.push(format!(
+                "{}:{}",
+                quote("embedding"),
+                crate::cli_write::embedding_json(&self.embedding)
+            ));
+            string_member(
+                &mut members,
+                "embedding_source",
+                &self.embedding_source,
+                true,
+            );
+            string_member(&mut members, "embedding_model", &self.embedding_model, true);
+            string_member(
+                &mut members,
+                "embedding_quantization",
+                &self.embedding_quantization,
+                true,
+            );
+        }
         time_member(&mut members, "created_at", &self.created_at);
         time_member(&mut members, "updated_at", &self.updated_at);
         string_member(&mut members, "created_by", &self.created_by, true);
@@ -1283,6 +1342,7 @@ impl LocalMemory {
         members.push(format!("{}:{}", quote("access_count"), self.access_count));
         time_ptr_member(&mut members, "last_access", self.last_access.as_ref());
         time_ptr_member(&mut members, "prev_access", self.prev_access.as_ref());
+        members.extend(self.extras.members());
         format!("{{{}}}", members.join(","))
     }
 }
@@ -1303,6 +1363,16 @@ pub fn delete_json(id: &str, deleted_at: &GoTime) -> String {
 /// entries of one kind marshals that slice as `null`.
 #[must_use]
 pub fn apply_body(memories: &[LocalMemory], deleted: &[(String, GoTime)]) -> String {
+    apply_body_with_graph(memories, deleted, &GraphDelta::default())
+}
+
+/// [`apply_body`] plus the `entity_graph` envelope when it is not empty (#855).
+#[must_use]
+pub fn apply_body_with_graph(
+    memories: &[LocalMemory],
+    deleted: &[(String, GoTime)],
+    graph: &GraphDelta,
+) -> String {
     let memory_list = if memories.is_empty() {
         "null".to_owned()
     } else {
@@ -1327,7 +1397,13 @@ pub fn apply_body(memories: &[LocalMemory], deleted: &[(String, GoTime)]) -> Str
                 .join(",")
         )
     };
-    format!("{{\"memories\":{memory_list},\"deleted\":{delete_list}}}")
+    if graph.is_empty() {
+        return format!("{{\"memories\":{memory_list},\"deleted\":{delete_list}}}");
+    }
+    format!(
+        "{{\"memories\":{memory_list},\"deleted\":{delete_list},\"entity_graph\":{}}}",
+        graph.to_json()
+    )
 }
 
 /// `json.Marshal` of the plaintext carried inside one relay blob.

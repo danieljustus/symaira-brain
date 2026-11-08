@@ -94,6 +94,14 @@ impl Server {
         let full = params
             .get("include_embeddings")
             .is_some_and(|value| value == "true");
+        let with_graph = params
+            .get("include_graph")
+            .is_some_and(|value| value == "true");
+        // Policy-filtered reads are scoped views: the store-wide graph is not
+        // part of them, so the envelope is withheld (fail closed).
+        let scoped = ["max_sensitivity", "min_sharing_level", "client_id"]
+            .iter()
+            .any(|name| params.get(*name).is_some_and(|value| !value.is_empty()));
         let Ok(rows) = self.store.sync_changes(since, limit + 1, full) else {
             return wire::error(500, "INTERNAL_ERROR", "Failed to fetch changes");
         };
@@ -121,6 +129,18 @@ impl Server {
         let Ok(deleted) = self.store.deleted_since(since) else {
             return wire::error(500, "INTERNAL_ERROR", "Failed to fetch tombstones");
         };
+        let mut extras = if with_graph {
+            let ids: Vec<String> = rows.iter().map(|row| row.id().to_owned()).collect();
+            match self.store.serve_extras(&ids) {
+                Ok(extras) => extras,
+                Err(_) => return wire::error(500, "INTERNAL_ERROR", "Failed to fetch changes"),
+            }
+        } else {
+            BTreeMap::new()
+        };
+        extras
+            .values_mut()
+            .for_each(crate::MemoryExtras::redact_pii);
         let mut members = Members::default();
         members.raw(
             "deleted",
@@ -138,8 +158,25 @@ impl Server {
         );
         members.raw(
             "memories",
-            &array(&rows.iter().map(SyncRow::to_json).collect::<Vec<_>>()),
+            &array(
+                &rows
+                    .iter()
+                    .map(|row| match extras.get(row.id()) {
+                        Some(extra) => extra.splice(row.to_json()),
+                        None => row.to_json(),
+                    })
+                    .collect::<Vec<_>>(),
+            ),
         );
+        if with_graph && !scoped && !params.contains_key("cursor") {
+            let Ok(mut graph) = self.store.serve_graph_since(since) else {
+                return wire::error(500, "INTERNAL_ERROR", "Failed to fetch graph");
+            };
+            graph.redact_pii();
+            if !graph.is_empty() {
+                members.raw("entity_graph", &graph.to_json());
+            }
+        }
         if let Some(cursor) = next_cursor {
             members.string("next_cursor", &cursor);
         }
@@ -168,6 +205,11 @@ impl Server {
         };
         let (mut applied, mut skipped, mut invalid_scope, mut invalid_id, mut deleted) =
             (0_i64, 0_i64, 0_i64, 0_i64, 0_i64);
+        let mut graph = request.graph;
+        graph.redact_pii();
+        if self.store.serve_apply_graph(&graph).is_err() {
+            return wire::error(500, "INTERNAL_ERROR", "Failed to apply graph");
+        }
         for mut memory in request.memories {
             if memory.id.is_empty() {
                 skipped += 1;
@@ -191,6 +233,14 @@ impl Server {
                 Ok(true) => applied += 1,
                 Ok(false) => skipped += 1,
                 Err(_) => return wire::error(500, "INTERNAL_ERROR", "Failed to apply memory"),
+            }
+            memory.extras.redact_pii();
+            if self
+                .store
+                .serve_apply_extras(&memory.id, &memory.extras)
+                .is_err()
+            {
+                return wire::error(500, "INTERNAL_ERROR", "Failed to apply memory extras");
             }
         }
         for (id, at) in request.deleted {

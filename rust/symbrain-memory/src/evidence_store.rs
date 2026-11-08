@@ -12,11 +12,11 @@ use crate::{Store, StoreError};
 pub struct EvidenceSpan {
     pub id: String,
     pub memory_id: String,
-    #[serde(skip_serializing_if = "String::is_empty")]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub source_id: String,
-    #[serde(skip_serializing_if = "String::is_empty")]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub source_kind: String,
-    #[serde(skip_serializing_if = "String::is_empty")]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub text: String,
     pub evidence_text: String,
     pub char_start: i64,

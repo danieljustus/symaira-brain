@@ -34,7 +34,7 @@ binary.
 | `--relay` | `--encrypted-relay` | ✅ in-process |
 | `--passphrase-file <file>` | `--relay-passphrase <p>` or `$SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE` | ✅ (read the file yourself: `--relay-passphrase "$(cat <file>)"`, or export the env var) |
 | `-o json` | `--output json` / `--json` | ✅ |
-| `--remote` pointing at a tunneled `http://localhost:8787` | identical URL works | ✅ |
+| `--remote` pointing at a tunneled `http://localhost:48787` | identical URL works | ✅ |
 
 All four legacy modes (pull-only, push-only, token auth, encrypted relay)
 are implemented in-process, so **no legacy mode needs a documented
@@ -50,13 +50,70 @@ Security notes (placeholders, not secrets):
   share the same passphrase.
 - The token/passphrase values are never logged or echoed by the command.
 
+## Port note (#996)
+
+`symbrain memory serve` now defaults to port **48787**. The old default 8787
+is Readarr's port; on a host that runs both, macOS lets `127.0.0.1:8787` and
+Readarr's `*:8787` coexist and `localhost` (via `::1`) then reaches the wrong
+server. `memory serve` also refuses to start when another process already
+serves its port on `[::1]` or the wildcard address. Hosts that still run the
+old runtime on 8787 (or a workaround port) keep it by passing `--port`;
+adjust the tunnel and `--remote` URLs below to whichever port the remote
+actually listens on.
+
+## Sync fidelity (#855)
+
+`symbrain memory sync` is a **full-fidelity replica** of the physical store,
+in plain and in `--encrypted-relay` mode. Both peers must run a build with
+this support; a Go-era peer keeps working but only sees the memory-row subset
+(the extra members below are ignored by it).
+
+| Datum | Carried | Notes |
+|---|---|---|
+| Content, scope, metadata, provenance (`created_by/at`, sessions) | yes | unchanged |
+| Lifecycle: `retired_at`, `superseded_by`, `consolidated_into_id`, `valid_from`, `valid_to`, tier, review status, decay | yes | existing-row updates now include `valid_from`/`valid_to`/`superseded_by` |
+| Embedding vector, source, model, quantization | yes | the client asks `include_embeddings=true` and pushes stored vectors |
+| Entities (name, type, aliases, description), memory-entity links | yes | entities merge by name (case-insensitive); the local id wins |
+| Entity relations incl. provenance and validity window | yes | endpoints travel by entity name |
+| Evidence spans | yes | union by span id |
+
+Rules a partner can rely on:
+
+- **A payload without a vector never replaces a valid stored vector.** If the
+  content is unchanged the stored vector, binary form and LSH bucket stay; if
+  the content changed and no new vector arrives, the stale vector is cleared
+  (it describes other text) so it can be recomputed.
+- **Last writer wins on `updated_at`.** At an *equal* `updated_at` with
+  different lifecycle state, both peers rank the two states by the same
+  canonical key (retirement, supersession, consolidation, validity) and keep
+  the greater one, so they converge. Each such decision is recorded in the
+  audit log as `sync_lifecycle` with the kept and replaced key.
+- **Graph merges are additive.** Unlinking an entity or deleting a single
+  relation is not replicated; deleting a memory is (links and evidence go
+  with it).
+- **Scope is the whole physical store.** The `read`/`readwrite` roles do not
+  isolate projects on a shared-store sync endpoint. A changes request that
+  carries `max_sensitivity`, `min_sharing_level` or `client_id` is a scoped
+  view and is served without the entity graph (fail closed).
+- Memories with `metadata.sync_exclude = "true"` stay local, including their
+  links and evidence.
+- Compare replicas by their data, not by counts: the dump comparison in
+  `rust/symbrain-cli/tests/memory_sync_fidelity.rs` is the reference.
+
+Wire (additive, snake_case): memory objects may carry `embedding`,
+`embedding_source/model/quantization`, `entities` (linked names) and
+`evidence`; `/api/sync/changes` accepts `include_graph=true`, and both it and
+`/api/sync/apply` carry an `entity_graph` object `{entities, relations}`.
+Relay payloads add `{"entity": …}` and `{"relation": …}` blobs
+(`entity:<id>`, `relation:<id>`).
+
 ## Current state of the old setup (this machine, 2026-08-25)
 
 - Homebrew formula `danieljustus/tap/symmemory` **0.17.0 installed**
   (formula is disabled/deprecated upstream).
 - LaunchAgent `~/Library/LaunchAgents/com.daniel.symmemory-tunnel.plist`
   **loaded** (label `com.daniel.symmemory-tunnel`): `ssh -N -L
-  8787:localhost:8787 macmini`, RunAtLoad + KeepAlive, log to
+  48787:localhost:48787 macmini`, RunAtLoad + KeepAlive, log to
   `~/Library/Logs/symmemory-tunnel.err.log`.
 - The six-hour sync cadence was provided by the old runtime's scheduler
   (it ran `symmemory sync` against the tunneled remote every 6 h). No
@@ -82,7 +139,7 @@ Write `~/Library/LaunchAgents/com.daniel.symbrain-memory-sync.plist`:
         <string>memory</string>
         <string>sync</string>
         <string>--remote</string>
-        <string>http://127.0.0.1:8787</string>
+        <string>http://127.0.0.1:48787</string>
         <string>--output</string>
         <string>json</string>
     </array>
@@ -114,7 +171,7 @@ launchctl kickstart -k gui/$(id -u)/com.daniel.symbrain-memory-sync   # run once
 Verify one run by hand first:
 
 ```sh
-symbrain memory sync --remote http://127.0.0.1:8787 \
+symbrain memory sync --remote http://127.0.0.1:48787 \
   --token "$SYMBRAIN_MEMORY_SYNC_TOKEN" --output json
 ```
 
@@ -126,10 +183,10 @@ the old scheduler.
 
 ### 2. The SSH tunnel stays as-is during migration
 
-`com.daniel.symmemory-tunnel` (ssh `-N -L 8787:localhost:8787 macmini`) is
+`com.daniel.symmemory-tunnel` (ssh `-N -L 48787:localhost:48787 macmini`) is
 **not** part of the retired runtime — it is the transport to the remote
 Mac mini and must keep running. The sync job above targets the tunneled
-`http://127.0.0.1:8787` exactly like the old job did.
+`http://127.0.0.1:48787` exactly like the old job did.
 
 ### 3. When the old formula may be removed
 
@@ -148,7 +205,7 @@ brew uninstall symmemory
 Keep the tunnel agent (`com.daniel.symmemory-tunnel`) — nothing else
 depends on the formula, but the tunnel is still the transport. If the
 tunnel ever needs to be owned by the new stack instead, fold the ssh
-forward into the sync job: add `/usr/bin/ssh -N -L 8787:localhost:8787
+forward into the sync job: add `/usr/bin/ssh -N -L 48787:localhost:48787
 macmini` as a second ProgramArgument set, or wrap both in a small script.
 That is optional; keeping the existing tunnel agent is the supported path.
 
@@ -167,7 +224,7 @@ rm ~/Library/LaunchAgents/com.daniel.symbrain-memory-sync.plist
 # launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.daniel.symmemory-sync.plist
 
 # 3. Verify with the old binary (formula must still be installed):
-# symmemory sync --remote http://127.0.0.1:8787 --token <t>
+# symmemory sync --remote http://127.0.0.1:48787 --token <t>
 ```
 
 Rollback is safe at any time: the new command never changes the sync

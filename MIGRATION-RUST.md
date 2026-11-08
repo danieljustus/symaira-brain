@@ -1730,3 +1730,44 @@ remaining Windows failure is diagnosable from the CI log. Still routed to Go (#7
 `memory serve`, `memory sync <args>`, `set` with unsupported write shapes,
 `search` with `prefilter`, reads/deletes on a database outside the native
 decoder domain, and the usage/skills/setup/doctor routes.
+
+## Memory port inventory (#760, #761) — 2026-11-08
+
+Reference: Go tag `v0.12.0` (`git show v0.12.0:internal/memory/<pkg>`). Parity
+evidence is Rust behavior tests with an injected clock; there is no live Go
+oracle. "Done" means the Rust test in the last column passes.
+
+### #760 extraction, consolidation, aging, summarization, context assembly
+
+| Go package (lines) | Rust | Status |
+|---|---|---|
+| `extractor/pattern.go` (213) | `symbrain-memory/src/extract.rs` | covered earlier |
+| `extractor/embeddings.go` (331) | `embedding.rs` (hash fallback; backend via `symaira-core-llm`) | covered earlier |
+| `conflict/conflict.go` (386), `conflict/llm.go` (153) | `conflict.rs`, `conflict_llm.rs` | covered earlier |
+| `aging/aging.go` (188) | `aging.rs`: `decay_factor`, `Store::run_aging`, `unretire_memory` | **ported** (`aging_tests.rs`) |
+| `working/evictor.go` (76) | `working.rs`: expired/evict/`compact_working_memories` (consolidation hook supplied by the caller) | **ported** (`aging_tests.rs`) |
+| `entity/resolve.go` (129) | graph CRUD only in `entity.rs`; `Normalize`/`BestMatch`/`IsPII` missing | open — needs Unicode NFD (a new dependency; not added here) |
+| `temporal/temporal.go` (324) | schema only (migrations 014, 025) | open |
+| `summarizer/summary.go` (200) | — | open (LLM client reuse as in `conflict_llm.rs`) |
+| `consolidation/{engine,journal,prompts}.go` (918) | schema only (009, 027_consolidation_runs) | open |
+| `contextassembler/{assembler,budget}.go` (1210) | schema only (021 context profiles) | open |
+| `discovery/discovery.go` (119) | — | open (depends on the importer `SessionRef`) |
+
+### #761 importers and the DB-backed activity store
+
+| Go package (lines) | Rust | Status |
+|---|---|---|
+| `activity` read side: search/get/status (`api.go`) | `activity.rs`, `activity/search.rs`, `symbrain-activity` | covered earlier |
+| `activity/{store,types}.go` save/list/rollup/stage | `activity_store.rs`, `activity_episode.rs`, `activity_stage.rs` | **ported** (`activity_store_tests.rs`) |
+| `activity/retention.go` expire/delete/clear + disk-clean check | `activity_retention.rs` | **ported** (`activity_store_tests.rs`) |
+| `importer/{importer,state,registry}.go` (564) | `import_state` table only (migration 010) | open |
+| `importer/codexmemory` (558), `curatedmemory` (346) | — | open |
+| `importer/{claudecode,codex,hermes,aider,opencode,shellhistory,git,github,email,calendar,obsidian,paperless}` | — | open |
+| `importer/memorytool/{chatgpt,mem0,openmemory,smartimport,adapter}` | — | open |
+
+The activity store has no CLI/MCP write entry points yet (Go wired capture
+through the providers, which are separate products); the library API is
+`Store::{save_activity_segment, save_activity_episode, rollup_activity_6h,
+list_activity_*, expire_activity, delete_activity_episode,
+clear_activity_range, clear_all_activity, clear_last_activity_session,
+stage_activity_episode}`.

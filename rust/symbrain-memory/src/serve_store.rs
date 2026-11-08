@@ -25,6 +25,13 @@ pub(crate) enum SyncRow {
 }
 
 impl SyncRow {
+    pub(crate) fn id(&self) -> &str {
+        match self {
+            Self::Lite(row) => &row.id,
+            Self::Full(row) => &row.id,
+        }
+    }
+
     pub(crate) fn updated_at(&self) -> Option<DateTime<Utc>> {
         match self {
             Self::Lite(row) => row.updated_at.map(|time| time.with_timezone(&Utc)),
@@ -209,6 +216,7 @@ impl Store {
     }
 }
 
+#[allow(clippy::too_many_lines)] // One linear pass mirroring the shipped upsert.
 fn upsert(conn: &Connection, memory: &PulledMemory, mode: ApplyMode) -> Result<bool, StoreError> {
     let vector = memory.embedding.clone().unwrap_or_default();
     let embedding = match &memory.embedding {
@@ -273,16 +281,38 @@ fn upsert(conn: &Connection, memory: &PulledMemory, mode: ApplyMode) -> Result<b
     let existing = stored_time(&existing)
         .ok_or_else(|| StoreError::Invalid("unrecognized memory timestamp".to_owned()))?;
     if memory.updated_at <= existing {
-        return Ok(false);
+        if memory.updated_at < existing {
+            return Ok(false);
+        }
+        return reconcile_equal(conn, memory, mode).map_err(Into::into);
     }
+    let columns = if vector.is_empty() {
+        crate::sync_embedding::preserved(conn, &memory.id, &memory.content)?
+    } else {
+        None
+    }
+    .unwrap_or_else(|| {
+        crate::sync_embedding::EmbeddingColumns::incoming(
+            embedding.clone(),
+            binary.clone(),
+            dimension,
+            [
+                &memory.embedding_source,
+                &memory.embedding_model,
+                &memory.embedding_quantization,
+            ],
+            lsh,
+        )
+    });
     conn.execute(
-        "UPDATE memories SET content=?, scope=?, metadata=?, embedding=?, embedding_binary=?, embedding_dim=?, embedding_source=?, embedding_model=?, embedding_quantization=?, content_hash=?, lsh_hash=?, updated_at=?, updated_by=?, updated_session=?, consolidation_status=?, consolidated_into_id=?, importance=?, tier=?, expires_at=?, access_count=?, last_access=?, prev_access=?, review_status=?, kind=?, decay_factor=?, retired_at=? WHERE id=?",
+        "UPDATE memories SET content=?, scope=?, metadata=?, embedding=?, embedding_binary=?, embedding_dim=?, embedding_source=?, embedding_model=?, embedding_quantization=?, content_hash=?, lsh_hash=?, updated_at=?, updated_by=?, updated_session=?, consolidation_status=?, consolidated_into_id=?, valid_from=?, valid_to=?, superseded_by=?, importance=?, tier=?, expires_at=?, access_count=?, last_access=?, prev_access=?, review_status=?, kind=?, decay_factor=?, retired_at=? WHERE id=?",
         params![
-            memory.content, memory.scope, metadata, embedding, binary, dimension,
-            memory.embedding_source, memory.embedding_model, memory.embedding_quantization,
-            content_hash, lsh, render_cursor(memory.updated_at), memory.updated_by,
+            memory.content, memory.scope, metadata, columns.embedding, columns.binary,
+            columns.dimension, columns.source, columns.model, columns.quantization,
+            content_hash, columns.lsh, render_cursor(memory.updated_at), memory.updated_by,
             memory.updated_session, status, non_null(&memory.consolidated_into_id),
-            memory.importance, memory.tier, optional_time(memory.expires_at), memory.access_count,
+            optional_time(memory.valid_from), optional_time(memory.valid_to),
+            non_null(&memory.superseded_by), memory.importance, memory.tier, optional_time(memory.expires_at), memory.access_count,
             optional_time(memory.last_access), optional_time(memory.prev_access), review,
             memory.kind, decay, optional_time(memory.retired_at), memory.id,
         ],
@@ -299,4 +329,26 @@ fn upsert(conn: &Connection, memory: &PulledMemory, mode: ApplyMode) -> Result<b
         );
     }
     Ok(true)
+}
+
+/// Equal `updated_at` on both peers: keep the greater lifecycle (#855).
+fn reconcile_equal(
+    conn: &Connection,
+    memory: &PulledMemory,
+    mode: ApplyMode,
+) -> rusqlite::Result<bool> {
+    let incoming = crate::sync_lifecycle::Lifecycle {
+        retired_at: optional_time(memory.retired_at),
+        superseded_by: memory.superseded_by.clone(),
+        consolidated_into_id: memory.consolidated_into_id.clone(),
+        valid_from: optional_time(memory.valid_from),
+        valid_to: optional_time(memory.valid_to),
+    };
+    let audited = crate::sync_lifecycle::Audited {
+        enabled: mode.audit_enabled,
+        scope: &memory.scope,
+        session: &memory.updated_session,
+        actor: &memory.updated_by,
+    };
+    crate::sync_lifecycle::reconcile_equal(conn, &memory.id, &incoming, &audited)
 }

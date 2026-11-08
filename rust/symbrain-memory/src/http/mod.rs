@@ -12,6 +12,7 @@ mod authority;
 mod go_json;
 mod log;
 mod middleware;
+mod port_guard;
 mod read;
 mod rfc3339;
 mod routes;

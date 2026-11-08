@@ -1,5 +1,7 @@
 # Keep the portable Memory Console and retire the unreachable TUI plan
 
+> **Superseding decision (2026-11-06, #763):** the Memory Web Console and the legacy Memory TUI are both retired, not ported. `symbrain memory serve` serves only the JSON API (`/api/*`); `/`, `/style.css` and `/app.js` answer `404`. Memory browsing is covered by the native macOS app. The text below is historical context and no longer describes the shipped product.
+
 Status: accepted product decision, 2026-10-04; native implementation and runtime
 cutover gates pending. Refs #763 and #731. The user delegated long-term product
 decisions to the coordinating maintainer, who explicitly approved this decision.

@@ -102,12 +102,18 @@ impl Server {
     /// available, or the runtime/accept error.
     pub fn run_loopback(self: Arc<Self>, port: u16) -> Result<(), String> {
         let address = format!("127.0.0.1:{port}");
+        // Probe before binding so a same-family clash keeps the shipped
+        // `failed to bind` error and only a cross-family listener is refused.
+        let foreign = super::port_guard::existing_listener(port);
         let listener = TcpListener::bind(&address).map_err(|error| {
             format!(
                 "failed to bind to {address}: listen tcp {address}: bind: {}",
                 go_listen_reason(&error)
             )
         })?;
+        if let Some(found) = foreign {
+            return Err(super::port_guard::conflict_message(port, found));
+        }
         log::info(
             "Symaira Memory API listening",
             &[

@@ -274,6 +274,9 @@ impl Drop for Server {
 }
 
 fn sanitize(text: &str, port: u16, closed_port: u16, root: &str) -> String {
+    // #855: see `normalize_request`; the additive parameters also show up in
+    // transport error texts that quote the request URL.
+    let text = text.replace("include_embeddings=true&include_graph=true&", "");
     let text = text.replace(root, "{root}");
     let trace = Regex::new(r"goroutine \d+ \[running\]:[\s\S]*").unwrap();
     let text = trace.replace_all(&text, "goroutine N [running]:\n<trace>\n");
@@ -283,12 +286,25 @@ fn sanitize(text: &str, port: u16, closed_port: u16, root: &str) -> String {
         .replace(&format!(":{port}"), ":{PORT}")
 }
 
+/// #855: pushed memories now carry their stored vector (and its labels), which
+/// the frozen lite Go push never did; the additive members are dropped before
+/// comparing so every other byte is still pinned.
+fn without_vector(text: &str) -> String {
+    let vector = Regex::new(
+        r#""embedding":\[[^\]]*\],(?:"embedding_source":"[^"]*",)?(?:"embedding_model":"[^"]*",)?(?:"embedding_quantization":"[^"]*",)?"#,
+    )
+    .unwrap();
+    vector.replace_all(text, "").into_owned()
+}
+
 fn normalize_request(request: &Recorded, port: u16, passphrase: Option<&str>) -> Value {
     let mut headers = Map::new();
     for (name, value) in &request.headers {
         if HEADERS.contains(&name.as_str()) {
             let value = if name == "referer" {
-                value.replace(&port.to_string(), "{PORT}")
+                value
+                    .replace("include_embeddings=true&include_graph=true&", "")
+                    .replace(&port.to_string(), "{PORT}")
             } else {
                 value.clone()
             };
@@ -306,7 +322,13 @@ fn normalize_request(request: &Recorded, port: u16, passphrase: Option<&str>) ->
     );
     let mut out = Map::new();
     out.insert("method".into(), Value::String(request.method.clone()));
-    out.insert("target".into(), Value::String(request.target.clone()));
+    // #855: the native client now also asks for stored vectors and the entity
+    // graph; the frozen Go requests never did, so the two additive query
+    // parameters are removed before comparing (sealed fixtures stay as is).
+    let target = request
+        .target
+        .replace("include_embeddings=true&include_graph=true&", "");
+    out.insert("target".into(), Value::String(target));
     out.insert("headers".into(), Value::Object(headers));
     let body = String::from_utf8_lossy(&request.body).into_owned();
     if let Some(passphrase) = passphrase
@@ -322,14 +344,14 @@ fn normalize_request(request: &Recorded, port: u16, passphrase: Option<&str>) ->
             .map(|blob| {
                 let raw = base64_decode(blob["blob"].as_str().unwrap());
                 let plain = cipher.decrypt(&raw, passphrase.as_bytes()).unwrap();
-                json!({"id": blob["id"], "updated_at": blob["updated_at"], "payload": String::from_utf8(plain).unwrap()})
+                json!({"id": blob["id"], "updated_at": blob["updated_at"], "payload": without_vector(&String::from_utf8(plain).unwrap())})
             })
             .collect();
         out.insert("relay_blobs".into(), Value::Array(blobs));
     } else {
         out.insert(
             "body".into(),
-            Value::String(body.replace(&port.to_string(), "{PORT}")),
+            Value::String(without_vector(&body).replace(&port.to_string(), "{PORT}")),
         );
     }
     Value::Object(out)

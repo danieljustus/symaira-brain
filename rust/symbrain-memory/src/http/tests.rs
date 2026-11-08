@@ -147,7 +147,7 @@ fn bearer(token: &str) -> String {
 }
 
 #[test]
-fn public_status_assets_and_security_headers() {
+fn public_status_security_headers_and_retired_console() {
     let owner = owner(Options {
         version: "1.2.3".into(),
         ..Options::default()
@@ -158,33 +158,13 @@ fn public_status_assets_and_security_headers() {
     assert!(status.head.contains("x-frame-options: deny"));
     assert!(status.head.contains("x-content-type-options: nosniff"));
 
-    let index = send(owner.port, "GET", "/", &[], "");
-    assert_eq!(index.status, 200);
-    assert!(index.head.contains("text/html"));
-    assert!(!index.head.contains("accept-ranges"));
-    let css = send(owner.port, "GET", "/style.css", &[], "");
-    assert!(css.head.contains("accept-ranges: bytes"));
-    assert_eq!(
-        css.body.as_bytes(),
-        include_bytes!("../../assets/web/style.css")
-    );
-
-    let head = send(owner.port, "HEAD", "/app.js", &[], "");
-    assert_eq!(head.status, 200);
-    assert!(head.body.is_empty());
-    let length = include_bytes!("../../assets/web/app.js").len();
-    assert!(head.head.contains(&format!("content-length: {length}")));
-
-    assert_eq!(send(owner.port, "GET", "/missing", &[], "").status, 404);
-    let post = send(
-        owner.port,
-        "POST",
-        "/style.css",
-        &[("X-Requested-With", "XMLHttpRequest")],
-        "",
-    );
-    assert_eq!(post.status, 405);
-    assert!(post.head.contains("allow: get, head"));
+    // The Web Console is retired (#763): no UI route is served any more.
+    for path in ["/", "/style.css", "/app.js", "/missing", "/index.html"] {
+        let reply = send(owner.port, "GET", path, &[], "");
+        assert_eq!(reply.status, 404, "{path}");
+        assert_eq!(reply.body, "404 page not found\n", "{path}");
+        assert!(!reply.body.contains("Memory Console"), "{path}");
+    }
 }
 
 #[test]

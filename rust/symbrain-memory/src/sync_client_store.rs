@@ -216,6 +216,11 @@ fn scan_lite(row: &Row<'_>) -> Result<LocalMemory, String> {
         kind: text_col(row, 22, "kind")?,
         decay_factor: float_col(row, 23, "decay_factor")?,
         retired_at: opt_time_col(row, 24, "retired_at")?,
+        embedding: serde_json::from_str(&opt_text_col(row, 25)?).unwrap_or_default(),
+        embedding_source: opt_text_col(row, 26)?,
+        embedding_model: opt_text_col(row, 27)?,
+        embedding_quantization: opt_text_col(row, 28)?,
+        extras: crate::sync_graph::MemoryExtras::default(),
     })
 }
 
@@ -279,7 +284,7 @@ impl Store {
             "(symbrain_sync_time(updated_at) > symbrain_sync_time(?) OR (symbrain_sync_time(updated_at) = symbrain_sync_time(?) AND id > ?))"
         };
         let query = format!(
-            "SELECT {LITE} FROM memories WHERE ({predicate}) AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true' ORDER BY symbrain_sync_time(updated_at) ASC, id ASC LIMIT ?"
+            "SELECT {LITE}, embedding, embedding_source, embedding_model, embedding_quantization FROM memories WHERE ({predicate}) AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true' ORDER BY symbrain_sync_time(updated_at) ASC, id ASC LIMIT ?"
         );
         let mut statement = conn.prepare(&query).map_err(|error| sql(&error))?;
         let since_text = bound(since);
@@ -292,6 +297,13 @@ impl Store {
         let mut memories = Vec::new();
         while let Some(row) = rows.next().map_err(|error| sql(&error))? {
             memories.push(scan_lite(row)?);
+        }
+        drop(rows);
+        drop(statement);
+        let ids: Vec<String> = memories.iter().map(|memory| memory.id.clone()).collect();
+        let mut extras = crate::sync_graph::extras_for(&conn, &ids).map_err(|error| sql(&error))?;
+        for memory in &mut memories {
+            memory.extras = extras.remove(&memory.id).unwrap_or_default();
         }
         Ok(memories)
     }
@@ -429,6 +441,7 @@ fn latest_operation(conn: &Connection, id: &str) -> Result<Option<(String, GoTim
 }
 
 /// `UpsertMemoryIfNewer`.
+#[allow(clippy::too_many_lines)] // One linear pass mirroring the shipped upsert.
 fn upsert(conn: &Connection, memory: &ClientMemory, mode: ClientApplyMode) -> Result<bool, String> {
     let vector = memory.embedding.clone().unwrap_or_default();
     let embedding = match &memory.embedding {
@@ -495,16 +508,39 @@ fn upsert(conn: &Connection, memory: &ClientMemory, mode: ClientApplyMode) -> Re
     };
     let existing = time_value(ValueRef::from(&existing), 0, "updated_at")?;
     if !memory.updated_at.after(&existing) {
-        return Ok(false);
+        if existing.after(&memory.updated_at) {
+            return Ok(false);
+        }
+        return reconcile_equal(conn, memory, mode);
     }
+    let columns = if vector.is_empty() {
+        crate::sync_embedding::preserved(conn, &memory.id, &memory.content)
+            .map_err(|error| sql(&error))?
+    } else {
+        None
+    }
+    .unwrap_or_else(|| {
+        crate::sync_embedding::EmbeddingColumns::incoming(
+            embedding.clone(),
+            binary.clone(),
+            dimension,
+            [
+                &memory.embedding_source,
+                &memory.embedding_model,
+                &memory.embedding_quantization,
+            ],
+            lsh,
+        )
+    });
     conn.execute(
-        "UPDATE memories SET content=?, scope=?, metadata=?, embedding=?, embedding_binary=?, embedding_dim=?, embedding_source=?, embedding_model=?, embedding_quantization=?, content_hash=?, lsh_hash=?, updated_at=?, updated_by=?, updated_session=?, consolidation_status=?, consolidated_into_id=?, importance=?, tier=?, expires_at=?, access_count=?, last_access=?, prev_access=?, review_status=?, kind=?, decay_factor=?, retired_at=? WHERE id=?",
+        "UPDATE memories SET content=?, scope=?, metadata=?, embedding=?, embedding_binary=?, embedding_dim=?, embedding_source=?, embedding_model=?, embedding_quantization=?, content_hash=?, lsh_hash=?, updated_at=?, updated_by=?, updated_session=?, consolidation_status=?, consolidated_into_id=?, valid_from=?, valid_to=?, superseded_by=?, importance=?, tier=?, expires_at=?, access_count=?, last_access=?, prev_access=?, review_status=?, kind=?, decay_factor=?, retired_at=? WHERE id=?",
         params![
-            memory.content, memory.scope, metadata, embedding, binary, dimension,
-            memory.embedding_source, memory.embedding_model, memory.embedding_quantization,
-            content_hash, lsh, bound(&memory.updated_at), memory.updated_by,
+            memory.content, memory.scope, metadata, columns.embedding, columns.binary,
+            columns.dimension, columns.source, columns.model, columns.quantization,
+            content_hash, columns.lsh, bound(&memory.updated_at), memory.updated_by,
             memory.updated_session, status, non_null(&memory.consolidated_into_id),
-            memory.importance, memory.tier, optional_bound(memory.expires_at.as_ref()),
+            optional_bound(memory.valid_from.as_ref()), optional_bound(memory.valid_to.as_ref()),
+            non_null(&memory.superseded_by), memory.importance, memory.tier, optional_bound(memory.expires_at.as_ref()),
             memory.access_count, optional_bound(memory.last_access.as_ref()),
             optional_bound(memory.prev_access.as_ref()), review, memory.kind, decay,
             optional_bound(memory.retired_at.as_ref()), memory.id,
@@ -523,4 +559,27 @@ fn upsert(conn: &Connection, memory: &ClientMemory, mode: ClientApplyMode) -> Re
         );
     }
     Ok(true)
+}
+
+/// Equal `updated_at` on both peers: keep the greater lifecycle (#855).
+fn reconcile_equal(
+    conn: &Connection,
+    memory: &ClientMemory,
+    mode: ClientApplyMode,
+) -> Result<bool, String> {
+    let incoming = crate::sync_lifecycle::Lifecycle {
+        retired_at: optional_bound(memory.retired_at.as_ref()),
+        superseded_by: memory.superseded_by.clone(),
+        consolidated_into_id: memory.consolidated_into_id.clone(),
+        valid_from: optional_bound(memory.valid_from.as_ref()),
+        valid_to: optional_bound(memory.valid_to.as_ref()),
+    };
+    let audited = crate::sync_lifecycle::Audited {
+        enabled: mode.audit_enabled,
+        scope: &memory.scope,
+        session: &memory.updated_session,
+        actor: &memory.updated_by,
+    };
+    crate::sync_lifecycle::reconcile_equal(conn, &memory.id, &incoming, &audited)
+        .map_err(|error| sql(&error))
 }

@@ -1993,6 +1993,7 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 - Preserve JWT/secret resolution (`symvault://`, deprecated `vault://`, env fallback), loopback binding, request limits, and encrypted relay compatibility.
 
 ### Task 10.8: Preserve the reachable portable Memory Console
+- **Superseded 2026-11-06 (#763):** the Web Console and the TUI are retired, not ported; `memory serve` serves the JSON API only and the native macOS app covers memory browsing. The bullets below are historical.
 - Accepted #763 decision: port the Web Console reachable through `memory serve` with the shared native HTTP/store owner (#759/#762/#763); verify assets, authentication, nested search results, read/write safety and lifecycle using actual isolated Go/native processes and an owned frontend runtime.
 - Retire the mandatory Ratatui port plan for the unconnected legacy TUI under ADR0003/E010 and `docs/adr/memory-ui-and-unreachable-tui-763.md`. Main's12 actual Go/native command probes and the original13 Go-only CLI probes remain separate source-bound evidence; both dependency inventories exclude the production TUI. Keep domain operations and frozen Go intact; no shipped command or new terminal client is introduced by this decision.
 - The scoped Host/absolute-request authority correction preserves original source824 failure proofs and early Go rejection precedence; fresh Linux gates, independent review and native three-OS acceptance remain required (`docs/adr/memory-http-request-authority-763.md`).

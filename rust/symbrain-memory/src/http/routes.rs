@@ -142,7 +142,7 @@ impl Server {
         path: &str,
     ) -> wire::Reply {
         if !API_ROUTES.contains(&path) {
-            return static_asset(path, request.method());
+            return not_found();
         }
         if path == "/api/status" {
             return wire::raw_json(
@@ -246,51 +246,13 @@ impl Server {
     }
 }
 
-fn static_asset(path: &str, method: &Method) -> wire::Reply {
-    if path != "/" && method != Method::GET && method != Method::HEAD {
-        let mut reply = wire::bytes(
-            405,
-            "text/plain; charset=utf-8",
-            "Method Not Allowed\n",
-            true,
-        );
-        reply.headers_mut().insert(
-            "allow",
-            hyper::header::HeaderValue::from_static("GET, HEAD"),
-        );
-        return reply;
-    }
-    let (bytes, mime, exact) = match path {
-        "/" => (
-            include_bytes!("../../assets/web/index.html").as_slice(),
-            "text/html; charset=utf-8",
-            false,
-        ),
-        "/style.css" => (
-            include_bytes!("../../assets/web/style.css").as_slice(),
-            "text/css; charset=utf-8",
-            true,
-        ),
-        "/app.js" => (
-            include_bytes!("../../assets/web/app.js").as_slice(),
-            "text/javascript; charset=utf-8",
-            true,
-        ),
-        _ => {
-            return wire::bytes(
-                404,
-                "text/plain; charset=utf-8",
-                "404 page not found\n",
-                true,
-            );
-        }
-    };
-    let mut reply = wire::bytes(200, mime, bytes, exact);
-    if path != "/" {
-        reply.headers_mut().insert(
-            "accept-ranges",
-            hyper::header::HeaderValue::from_static("bytes"),
-        );
-    }
-    reply
+/// Anything outside the API: the embedded Web Console is retired (#763), so
+/// every non-API path is the generic not-found page.
+fn not_found() -> wire::Reply {
+    wire::bytes(
+        404,
+        "text/plain; charset=utf-8",
+        "404 page not found\n",
+        true,
+    )
 }

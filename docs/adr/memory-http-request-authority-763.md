@@ -1,5 +1,7 @@
 # Resolve one validated Memory HTTP request authority
 
+> **Superseding decision (2026-11-06, #763):** the Memory Web Console and the legacy Memory TUI are both retired, not ported. `symbrain memory serve` serves only the JSON API (`/api/*`); `/`, `/style.css` and `/app.js` answer `404`. Memory browsing is covered by the native macOS app. The text below is historical context and no longer describes the shipped product.
+
 Status: accepted implementation decision; complete bounded Linux validation and
 different-author review passed on source b7fb40f/publication2c7d1c2. Current-head
 protected CI and native-three-OS acceptance remain required. Refs #763, #759 and #762.

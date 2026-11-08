@@ -1,13 +1,14 @@
 //! `syncclient.Run`: pull, push and the encrypted relay against one remote,
 //! with the shipped counters, cursor rules and error wording.
 
+use super::sync_graph as graph;
 use super::sync_net::{Client, Exchange};
 use serde::Serialize;
 use std::time::Instant;
 use symbrain_memory::Store;
 use symbrain_memory::sync_client::{
-    ClientApplyMode, ClientMemory, GoTime, LocalMemory, RelayCipher, apply_body, decode_api_error,
-    decode_apply_counts, decode_changes, decode_relay_page, decode_relay_payload,
+    ClientApplyMode, ClientMemory, GoTime, LocalMemory, RelayCipher, apply_body_with_graph,
+    decode_api_error, decode_apply_counts, decode_changes, decode_relay_page, decode_relay_payload,
     decode_relay_stored, go_quote, relay_body, relay_payload_json,
 };
 
@@ -59,7 +60,7 @@ impl From<String> for Failure {
     }
 }
 
-type Outcome<T> = Result<T, Failure>;
+pub(super) type Outcome<T> = Result<T, Failure>;
 
 /// `url.Values.Encode` of one value.
 fn query_escape(value: &str) -> String {
@@ -175,6 +176,10 @@ fn changes_target(base: &str, since: &GoTime, cursor: &str) -> String {
     if !cursor.is_empty() {
         query.push(format!("cursor={}", query_escape(cursor)));
     }
+    // Full-fidelity replica (#855): ask for stored vectors and the entity
+    // graph; a Go-era server ignores both and answers with the lite form.
+    query.push("include_embeddings=true".to_owned());
+    query.push("include_graph=true".to_owned());
     query.push(format!("limit={PAGE_LIMIT}"));
     if cursor.is_empty() && !since.is_zero() {
         query.push(format!("since={}", query_escape(&since.to_rfc3339_utc())));
@@ -197,6 +202,7 @@ fn plain_pull(
         let exchange = checked(client.get(&target)?)?;
         let changes = decode_changes(&exchange.body, exchange.stop.as_deref())
             .map_err(|error| decode_text(&error))?;
+        graph::apply(store, &changes.graph)?;
         for memory in &changes.memories {
             let Some(memory) = memory else {
                 return Err(Failure::NilPanic);
@@ -207,6 +213,7 @@ fn plain_pull(
             if applied {
                 report.pulled_memories_applied += 1;
             }
+            graph::apply_extras(store, memory)?;
             max_seen = memory_max(&max_seen, &memory.updated_at);
         }
         for deleted in &changes.deleted {
@@ -302,11 +309,18 @@ fn plain_push(
 ) -> Outcome<GoTime> {
     let mut local_max = GoTime::zero();
     let mut position = start(since);
+    let mut pending = graph::pending(store, since)?;
     loop {
-        let Some(batch) = next_batch(store, &position)? else {
-            return Ok(local_max);
+        let batch = match next_batch(store, &position)? {
+            Some(batch) => batch,
+            None if !pending.is_empty() => Batch {
+                memories: Vec::new(),
+                deleted: Vec::new(),
+            },
+            None => return Ok(local_max),
         };
-        let body = apply_body(&batch.memories, &batch.deleted);
+        let envelope = std::mem::take(&mut pending);
+        let body = apply_body_with_graph(&batch.memories, &batch.deleted, &envelope);
         let exchange = checked(client.post(
             &format!("{}/api/sync/apply", client.base),
             body.into_bytes(),
@@ -353,7 +367,9 @@ fn relay_pull(
                 .map_err(|error| format!("decrypt relay blob {}: {error}", blob.id))?;
             let decoded = decode_relay_payload(&payload)
                 .map_err(|error| format!("decode relay blob {}: {error}", blob.id))?;
-            let recognised = if let Some(deleted) = &decoded.deleted {
+            let recognised = if decoded.entity.is_some() || decoded.relation.is_some() {
+                graph::apply_relay_row(store, decoded.entity.as_ref(), decoded.relation.as_ref())?
+            } else if let Some(deleted) = &decoded.deleted {
                 let removed = store
                     .client_apply_remote_delete(
                         &deleted.id,
@@ -393,9 +409,11 @@ fn apply_relay_memory(
     memory: &ClientMemory,
     options: &Options<'_>,
 ) -> Outcome<bool> {
-    store
+    let applied = store
         .client_upsert_if_newer(memory, options.mode)
-        .map_err(|error| Failure::Message(format!("apply relay memory {}: {error}", memory.id)))
+        .map_err(|error| Failure::Message(format!("apply relay memory {}: {error}", memory.id)))?;
+    graph::apply_extras(store, memory)?;
+    Ok(applied)
 }
 
 fn relay_push(
@@ -408,11 +426,20 @@ fn relay_push(
     let mut local_max = GoTime::zero();
     let mut position = start(since);
     let mut cipher = RelayCipher::new();
+    let mut pending = graph::pending(store, since)?;
     loop {
-        let Some(batch) = next_batch(store, &position)? else {
-            return Ok(local_max);
+        let batch = match next_batch(store, &position)? {
+            Some(batch) => batch,
+            None if !pending.is_empty() => Batch {
+                memories: Vec::new(),
+                deleted: Vec::new(),
+            },
+            None => return Ok(local_max),
         };
         let mut blobs: Vec<(String, GoTime, Vec<u8>)> = Vec::new();
+        for (id, at, payload) in graph::relay_payloads(&std::mem::take(&mut pending)) {
+            blobs.push((id, at, encrypt(&mut cipher, &payload, options)?));
+        }
         for memory in &batch.memories {
             let payload = relay_payload_json(Some(memory), None);
             let sealed = encrypt(&mut cipher, &payload, options)?;
@@ -461,11 +488,11 @@ mod tests {
         let since = symbrain_memory::sync_client::parse_rfc3339("2026-10-26T01:02:03.5Z").unwrap();
         assert_eq!(
             changes_target("http://h", &since, ""),
-            "http://h/api/sync/changes?limit=500&since=2026-10-26T01%3A02%3A03Z"
+            "http://h/api/sync/changes?include_embeddings=true&include_graph=true&limit=500&since=2026-10-26T01%3A02%3A03Z"
         );
         assert_eq!(
             changes_target("http://h", &since, "c 1"),
-            "http://h/api/sync/changes?cursor=c+1&limit=500"
+            "http://h/api/sync/changes?cursor=c+1&include_embeddings=true&include_graph=true&limit=500"
         );
         assert_eq!(
             relay_target("http://h", &since),

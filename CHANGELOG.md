@@ -10,6 +10,13 @@ the [Unreleased] section is moved into a dated version section.
 ## [Unreleased]
 
 ### Removed
+- **Memory Web Console and Memory TUI retired (#763).** `symbrain memory serve`
+  no longer serves the embedded browser console: `/`, `/style.css` and `/app.js`
+  answer `404`, and the JSON API (`/api/*`, including `/api/sync/*`) is
+  unchanged. The legacy Memory TUI was never reachable from the `symbrain`
+  command tree; `memory tui`, `ui`, `web` and `dashboard` stay unknown-command
+  usage errors (exit 2). Browse and manage memories in the native macOS app or
+  with `symbrain memory list|search|get`.
 - **Go implementation removed; symbrain is Rust-only.** The Go sources
   (`cmd/`, `internal/`, `guard/cmd`, `guard/internal`, `browse/cmd`,
   `browse/internal`), `go.mod`/`go.sum`, GoReleaser, the Go CI jobs and the
@@ -39,10 +46,19 @@ the [Unreleased] section is moved into a dated version section.
   or `browser`. The Go sidecar sources remain until the Go removal.
 
 ### Changed
-- The Rust migration plan preserves the reachable Memory web interface and
-  retires the unused legacy TUI target, which the shipped Brain command tree
-  does not expose (ADR0003/E010, #763). HTTP UI implementation remains tracked
-  separately; this decision does not remove a currently reachable command.
+- `symbrain memory sync` is now a full-fidelity replica (#855): embeddings,
+  `valid_from`/`valid_to`/`superseded_by`, entities, relations, memory-entity
+  links and evidence spans travel in plain and encrypted-relay mode. A partial
+  payload without a vector no longer replaces a valid stored embedding, and
+  equal-timestamp lifecycle edits converge deterministically with an audit
+  entry. The additive wire members are described in `MEMORY-SYNC-MIGRATION.md`;
+  Go-era peers keep working on the memory-row subset.
+- `symbrain memory serve` now defaults to port 48787 instead of 8787, which
+  Readarr (the *arr stack) uses; on macOS both could bind 8787 at once and
+  silently split `127.0.0.1` and `localhost` traffic. The server also refuses
+  to start when another process already serves the port on `[::1]` or the
+  wildcard address. Pass `--port 8787` to keep the old port and update tunnel
+  and `--remote` URLs accordingly (#996).
 
 ### Security
 - Confine versioned skill archive extraction to its destination root, including

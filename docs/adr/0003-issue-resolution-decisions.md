@@ -154,6 +154,8 @@ open; Doctor must inspect actual schema, not only quick_check/bookkeeping.
 
 ### E010 — Keep the reachable Memory web interface; retire the unreachable TUI target
 
+> **Superseding decision (2026-11-06, #763):** the Memory Web Console and the legacy Memory TUI are both retired, not ported. `symbrain memory serve` serves only the JSON API (`/api/*`); `/`, `/style.css` and `/app.js` answer `404`. Memory browsing is covered by the native macOS app. The text below is historical context and no longer describes the shipped product.
+
 Actual frozen Go1.26.7 dependency inspection finds the embedded web package
 reachable through memory serve/Brain HTTPHandler, and no TUI dependency in the
 shipped Brain command tree. Twelve actual Go/native CLI pairs also reject

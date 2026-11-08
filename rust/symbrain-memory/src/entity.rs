@@ -266,7 +266,7 @@ impl Store {
     }
 }
 
-fn stable_id(parts: &[&str]) -> String {
+pub(crate) fn stable_id(parts: &[&str]) -> String {
     use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
     for part in parts {

@@ -29,6 +29,7 @@ use help::{
 mod paths;
 mod sync;
 mod sync_duration;
+mod sync_graph;
 mod sync_net;
 mod sync_run;
 mod sync_url;

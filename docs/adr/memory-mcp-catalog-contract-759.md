@@ -1,5 +1,7 @@
 # Memory MCP metadata stays with its embedded owner
 
+> **Superseding decision (2026-11-06, #763):** the Memory Web Console and the legacy Memory TUI are both retired, not ported. `symbrain memory serve` serves only the JSON API (`/api/*`); `/`, `/style.css` and `/app.js` answer `404`. Memory browsing is covered by the native macOS app. The text below is historical context and no longer describes the shipped product.
+
 > **Superseding platform scope (2026-10-29, #990):** Native Windows and macOS Intel (including `x86_64-apple-darwin`) are no longer required targets. These statements remain historical evidence and are not current acceptance gates. Keep Linux as a CI/server platform and CLI target; product targets are macOS Apple Silicon, iOS, and Web.
 
 

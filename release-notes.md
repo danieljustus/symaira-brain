@@ -1,8 +1,8 @@
 ## What's changed
 
-### Memory UI migration decision (#763)
-- Keep the portable local Memory Web Console reachable through `symbrain memory serve` and port it alongside the native memory HTTP owner. Existing commands and data remain supported during the tested cutover; this decision alone does not replace the Go server.
-- Retire the mandatory port of the legacy Memory TUI, which has no reachable Brain command. No terminal command or memory-domain operation is removed. The accepted Brain GUI/CLI target remains in effect; the bounded native HTTP owner corrects protected-read authentication, nested search rendering and exact local Origin writes, with owned Linux HTTP/DOM evidence. Full `memory serve` admission and native three-platform runtime gates remain pending.
+### Memory Web Console and TUI retired (#763)
+- The Memory Web Console is removed: `symbrain memory serve` serves only the JSON API (`/api/*`, including `/api/sync/*`); `/`, `/style.css` and `/app.js` answer `404`. Use the native macOS app to browse memories, or `symbrain memory list|search|get` from a terminal.
+- The legacy Memory TUI was never reachable from the `symbrain` command tree and is retired. `memory tui|ui|web|dashboard` remain usage errors. No memory-domain operation or stored data is removed.
 
 ### Features
 - #302 In-process skill sync and remote memory sync — closes #300 #301. `symbrain sync` now runs skill rendering/installation in-process (no archived `symskills` binary needed), and `symbrain memory sync --remote` replaces the archived `symmemory` runtime workflow with pull/push/token/encrypted-relay modes.
