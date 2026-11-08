@@ -11,8 +11,18 @@ mod cli_entity;
 mod cli_write;
 mod conflict;
 mod conflict_llm;
+pub mod consolidation;
+mod consolidation_apply;
+pub mod consolidation_journal;
+pub mod consolidation_llm;
+pub mod consolidation_parse;
+pub mod consolidation_prompts;
+pub mod context;
+pub mod discovery;
 mod embedding;
 mod entity;
+pub mod entity_candidates;
+pub mod entity_resolve;
 pub mod evidence;
 mod evidence_store;
 mod extract;
@@ -24,6 +34,7 @@ mod goscan;
 mod gotext;
 mod gotime;
 pub mod http;
+pub mod importer;
 mod list_rows;
 mod lsh;
 mod migration;
@@ -40,6 +51,7 @@ mod set_pipeline;
 mod slog;
 mod store;
 mod store_dir;
+pub mod summarizer;
 mod sync_apply;
 pub mod sync_client;
 mod sync_client_extras;
@@ -54,6 +66,7 @@ mod sync_graph_store;
 mod sync_lifecycle;
 mod sync_state;
 mod sync_time;
+pub mod temporal;
 mod wal_open;
 mod working;
 mod write;
@@ -63,6 +76,9 @@ mod activity_store_tests;
 
 #[cfg(test)]
 mod aging_tests;
+
+#[cfg(test)]
+mod consolidation_tests;
 
 #[cfg(test)]
 mod sync_fidelity_tests;

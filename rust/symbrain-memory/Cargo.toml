@@ -29,6 +29,9 @@ sha2.workspace = true
 # Same pinned crate the guard workspace already uses; needed to generate
 # UUID-shaped memory ids like the shipped store.
 getrandom = "=0.4.3"
+# Unicode NFD/NFC for entity-name matching (Go: golang.org/x/text/unicode/norm).
+# Pure Rust, MIT/Apache-2.0, only dep tinyvec (already locked).
+unicode-normalization = "=0.1.25"
 symaira-core-llm.workspace = true
 symbrain-activity.workspace = true
 

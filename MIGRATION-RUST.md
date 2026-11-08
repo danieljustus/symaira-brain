@@ -1799,12 +1799,12 @@ oracle. "Done" means the Rust test in the last column passes.
 | `conflict/conflict.go` (386), `conflict/llm.go` (153) | `conflict.rs`, `conflict_llm.rs` | covered earlier |
 | `aging/aging.go` (188) | `aging.rs`: `decay_factor`, `Store::run_aging`, `unretire_memory` | **ported** (`aging_tests.rs`) |
 | `working/evictor.go` (76) | `working.rs`: expired/evict/`compact_working_memories` (consolidation hook supplied by the caller) | **ported** (`aging_tests.rs`) |
-| `entity/resolve.go` (129) | graph CRUD only in `entity.rs`; `Normalize`/`BestMatch`/`IsPII` missing | open — needs Unicode NFD (a new dependency; not added here) |
-| `temporal/temporal.go` (324) | schema only (migrations 014, 025) | open |
-| `summarizer/summary.go` (200) | — | open (LLM client reuse as in `conflict_llm.rs`) |
-| `consolidation/{engine,journal,prompts}.go` (918) | schema only (009, 027_consolidation_runs) | open |
-| `contextassembler/{assembler,budget}.go` (1210) | schema only (021 context profiles) | open |
-| `discovery/discovery.go` (119) | — | open (depends on the importer `SessionRef`) |
+| `entity/resolve.go` (129) + `db.ResolveEntityCandidates` | `entity_resolve.rs` (`normalize`/`best_match`/`is_pii`, `unicode-normalization =0.1.25`), `entity_candidates.rs` (`Store::resolve_entity_candidates`) | **ported** (unit tests); deviation: marks are stripped by category `M`, not `Mn` only |
+| `temporal/temporal.go` (324) | `temporal.rs` (`extract`, injected `now`) | **ported** (`temporal_tests.rs`); not yet called by a Rust search entry point |
+| `summarizer/summary.go` (200) | `summarizer.rs` (`summarize_session`, extractive) | **ported** |
+| `consolidation/{engine,journal,prompts}.go` (918) | `consolidation*.rs` (engine, apply, parse, prompts, journal, LLM client via `symaira-core-llm`; injected clock/ids/embedder) | **ported** (`consolidation_tests.rs`); no CLI entry point yet |
+| `contextassembler/{assembler,budget}.go` (1210) + `memory.Receipt` | `context/` (layers, degradation ladder, hard budget + drop report, delta packs, profile/session layers, recall receipts; `ContextSource` trait + `StoreSource`) | **ported** (`context/tests.rs`, `store_tests.rs`); config structs are local to the module, not yet read from `config.toml` |
+| `discovery/discovery.go` (119) | `discovery.rs` (metadata-only `scan`, provider list injected) | **ported** |
 
 ### #761 importers and the DB-backed activity store
 
@@ -1813,10 +1813,10 @@ oracle. "Done" means the Rust test in the last column passes.
 | `activity` read side: search/get/status (`api.go`) | `activity.rs`, `activity/search.rs`, `symbrain-activity` | covered earlier |
 | `activity/{store,types}.go` save/list/rollup/stage | `activity_store.rs`, `activity_episode.rs`, `activity_stage.rs` | **ported** (`activity_store_tests.rs`) |
 | `activity/retention.go` expire/delete/clear + disk-clean check | `activity_retention.rs` | **ported** (`activity_store_tests.rs`) |
-| `importer/{importer,state,registry}.go` (564) | `import_state` table only (migration 010) | open |
-| `importer/codexmemory` (558), `curatedmemory` (346) | — | open |
-| `importer/{claudecode,codex,hermes,aider,opencode,shellhistory,git,github,email,calendar,obsidian,paperless}` | — | open |
-| `importer/memorytool/{chatgpt,mem0,openmemory,smartimport,adapter}` | — | open |
+| `importer/{importer,state,registry}.go` (564) | `importer/{mod,state,registry,store_row}.rs` (incremental run, 30-day first look-back, per-importer cursor, dry run, staging/untrusted fencing, transcript distillation) | **ported** (`registry_tests.rs`) |
+| `importer/codexmemory` (558), `curatedmemory` (346) | `importer/codexmemory.rs`, `curatedmemory.rs` (+ `markdown.rs`) | **ported** (`codexmemory_tests.rs`, unit tests) |
+| `importer/{claudecode,codex,hermes,aider,opencode,shellhistory,git,github,email,calendar,obsidian,paperless}` | `importer/{transcripts,hermes,opencode,shellhistory,git,github,email,calendar,obsidian,paperless}.rs`; claudecode/codex/aider live in `transcripts.rs`; `runner.rs`/`http.rs` inject command and HTTP access | **ported** on synthetic temp-dir fixtures; every importer takes its root/home as an argument, tests never read real user data and never use the network |
+| `importer/memorytool/{chatgpt,mem0,openmemory,smartimport,adapter}` | `importer/memorytool/` | **ported** (`chatgpt_tests.rs`, `tool_tests.rs`); the ChatGPT reader rejects symlinks/FIFOs/devices via component `lstat` + inode check because `std` has no `openat` |
 
 The activity store has no CLI/MCP write entry points yet (Go wired capture
 through the providers, which are separate products); the library API is

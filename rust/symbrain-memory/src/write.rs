@@ -213,7 +213,7 @@ pub(crate) fn content_hash(content: &str) -> String {
 /// The shipped encoder renders a `float32` with its shortest round-trip form
 /// and without a forced fraction (`0`, not `0.0`), which `serde_json` would
 /// not produce, so the array is rendered by hand.
-fn embedding_text(vector: &[f32]) -> String {
+pub(crate) fn embedding_text(vector: &[f32]) -> String {
     let values = vector
         .iter()
         .map(|value| format!("{value}"))
