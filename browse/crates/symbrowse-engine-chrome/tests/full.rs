@@ -324,7 +324,9 @@ impl Drop for TestServer {
 
 fn serve(mut stream: TcpStream, requests: Arc<AtomicUsize>, redirect_location: Option<&str>) {
     stream
-        .set_read_timeout(Some(Duration::from_secs(2)))
+        // Chrome opens speculative preconnect sockets and may reuse one late; a
+        // short idle timeout closes it under the browser (net::ERR_SOCKET_NOT_CONNECTED).
+        .set_read_timeout(Some(Duration::from_secs(30)))
         .expect("set read timeout");
     let mut request = Vec::new();
     let mut chunk = [0_u8; 1024];
