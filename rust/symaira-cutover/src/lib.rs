@@ -11,21 +11,36 @@
 //! manifest records (`cp -Rp <backup>/<label>/. <original>`), after which
 //! [`verify_restore`] proves the restored bytes match the backup.
 //!
+//! The backup never holds a command hostage: [`start_for_binary`] runs it on a
+//! worker thread, the entrypoint waits at most [`START_GRACE`] (a quick backup
+//! still finishes before the command touches state), and [`Backup::finish`]
+//! waits at most [`EXIT_GRACE`] before cancelling. Files are not fsynced one by
+//! one (that is minutes of `F_FULLFSYNC` on macOS); the manifest and the
+//! directories are, once, before the marker is written. A per-app advisory
+//! lock keeps concurrent runs apart and tells a live copy from an orphan:
+//! `.partial` trees of dead runs are removed by the next run.
+//!
 //! `SYMAIRA_CUTOVER_BACKUP=off` disables the mechanism for users who manage
 //! their own backups; debug builds need `=on` (see [`disabled`]). Caches are
 //! never copied.
 
-use std::ffi::OsString;
 use std::fmt::Write as _;
 use std::fs;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::atomic::AtomicBool;
 
 use sha2::{Digest, Sha256};
 
+mod clock;
 #[cfg(unix)]
 mod copy;
+mod launch;
+mod lock;
+mod verify;
+
+pub use launch::{Backup, EXIT_GRACE, START_GRACE, run_for_binary, start_for_binary};
+pub use verify::{verify_restore, verify_tree};
 
 /// Environment variable that switches the backup `on` or `off` (see [`disabled`]).
 pub const DISABLE_ENV: &str = "SYMAIRA_CUTOVER_BACKUP";
@@ -50,6 +65,8 @@ pub enum Outcome {
     AlreadyDone,
     /// No state root existed; a marker was written so no later backup runs.
     NoState,
+    /// Another live process holds the backup slot; this run did not wait.
+    InProgress,
     /// A verified backup was created.
     Created {
         /// Final backup directory.
@@ -124,8 +141,22 @@ pub fn disabled() -> bool {
 /// Returns an error when an existing root cannot be copied or verified; the
 /// partial backup is removed and no marker is written, so the next run retries.
 pub fn ensure(app: &str, roots: &[Root], store: &Path) -> io::Result<Outcome> {
+    ensure_cancellable(app, roots, store, &AtomicBool::new(false))
+}
+
+fn marker_exists(marker: &Path) -> bool {
+    fs::symlink_metadata(marker).is_ok()
+}
+
+/// [`ensure`] that stops with `ErrorKind::Interrupted` once `cancel` is set.
+pub(crate) fn ensure_cancellable(
+    app: &str,
+    roots: &[Root],
+    store: &Path,
+    cancel: &AtomicBool,
+) -> io::Result<Outcome> {
     let marker = store.join(format!("{app}.json"));
-    if fs::symlink_metadata(&marker).is_ok() {
+    if marker_exists(&marker) {
         return Ok(Outcome::AlreadyDone);
     }
     let present: Vec<&Root> = roots.iter().filter(|root| root.path.is_dir()).collect();
@@ -133,15 +164,24 @@ pub fn ensure(app: &str, roots: &[Root], store: &Path) -> io::Result<Outcome> {
         create_private_dir(store)?;
         write_atomic(
             &marker,
-            &serde_json::json!({"schema": 1, "app": app, "created_at": utc_now(), "state": "none"}),
+            &serde_json::json!({"schema": 1, "app": app, "created_at": clock::utc_now(), "state": "none"}),
         )?;
         return Ok(Outcome::NoState);
     }
     create_private_dir(store)?;
-    let stamp = utc_stamp();
+    let Some(_slot) = lock::try_acquire(store, app)? else {
+        return Ok(Outcome::InProgress);
+    };
+    if marker_exists(&marker) {
+        return Ok(Outcome::AlreadyDone);
+    }
+    // Holding the slot proves no live run owns a partial tree: whatever is
+    // left belongs to a run that was killed mid-copy.
+    lock::remove_orphans(store, app);
+    let stamp = clock::utc_stamp();
     let final_dir = store.join(format!("{app}-{stamp}-{}", std::process::id()));
     let partial = store.join(format!(".{app}-{stamp}-{}.partial", std::process::id()));
-    let result = backup_into(app, &present, &partial).and_then(|(files, bytes)| {
+    let result = backup_into(app, &present, &partial, cancel).and_then(|(files, bytes)| {
         verify_tree(&partial)?;
         fs::rename(&partial, &final_dir)?;
         write_atomic(
@@ -149,7 +189,7 @@ pub fn ensure(app: &str, roots: &[Root], store: &Path) -> io::Result<Outcome> {
             &serde_json::json!({
                 "schema": 1,
                 "app": app,
-                "created_at": utc_now(),
+                "created_at": clock::utc_now(),
                 "state": "backed-up",
                 "backup": final_dir.to_string_lossy(),
                 "files": files,
@@ -171,138 +211,18 @@ pub fn ensure(app: &str, roots: &[Root], store: &Path) -> io::Result<Outcome> {
     }
 }
 
-/// Runs [`ensure`] for a binary entrypoint and reports on stderr.
-///
-/// Returns `false` when the backup failed; the caller must then stop before
-/// touching state. Success, skip and disabled states return `true`.
-pub fn run_for_binary(app: &str, roots: impl FnOnce(&Homes) -> Vec<Root>) -> bool {
-    if disabled() {
-        return true;
-    }
-    let Some(homes) = Homes::from_env() else {
-        return true;
-    };
-    let roots = roots(&homes);
-    match ensure(app, &roots, &homes.store()) {
-        Ok(Outcome::Created { dir, files, .. }) => {
-            let _ = writeln!(
-                io::stderr(),
-                "{app}: backed up existing state ({files} files) to {} before the first Rust run",
-                dir.display()
-            );
-            true
-        }
-        Ok(_) => true,
-        Err(error) => {
-            let _ = writeln!(
-                io::stderr(),
-                "{app}: automatic state backup before the first Rust run failed: {error}\n\
-                 {app}: nothing was changed; free space or fix permissions and retry, or set {DISABLE_ENV}=off to skip the backup"
-            );
-            false
-        }
-    }
-}
-
-/// Verifies a backup directory: every manifest entry under `dir/<label>/`
-/// must match the recorded type, mode and SHA-256.
-///
-/// # Errors
-/// Returns `InvalidData` naming the first mismatch.
-pub fn verify_tree(dir: &Path) -> io::Result<()> {
-    let manifest = read_manifest(dir)?;
-    verify_entries(&manifest, |label| Ok(dir.join(label)))
-}
-
-/// Verifies that the original locations recorded in the manifest of
-/// `backup` hold exactly the backed-up bytes again, i.e. that a restore
-/// (`cp -Rp <backup>/<label>/. <path>`) succeeded.
-///
-/// # Errors
-/// Returns `InvalidData` naming the first mismatch or an unknown label.
-pub fn verify_restore(backup: &Path) -> io::Result<()> {
-    let manifest = read_manifest(backup)?;
-    let roots = manifest
-        .get("roots")
-        .and_then(serde_json::Value::as_array)
-        .ok_or_else(|| invalid("manifest: missing roots".into()))?;
-    verify_entries(&manifest, |label| {
-        roots
-            .iter()
-            .find(|root| root.get("label").and_then(serde_json::Value::as_str) == Some(label))
-            .and_then(|root| root.get("path_hex").and_then(serde_json::Value::as_str))
-            .ok_or_else(|| invalid(format!("manifest: unknown label {label}")))
-            .and_then(decode_path)
-    })
-}
-
-fn read_manifest(dir: &Path) -> io::Result<serde_json::Value> {
-    serde_json::from_slice(&fs::read(dir.join(MANIFEST))?)
-        .map_err(|error| invalid(format!("manifest: {error}")))
-}
-
-fn verify_entries(
-    manifest: &serde_json::Value,
-    base: impl Fn(&str) -> io::Result<PathBuf>,
-) -> io::Result<()> {
-    let entries = manifest
-        .get("entries")
-        .and_then(serde_json::Value::as_array)
-        .ok_or_else(|| invalid("manifest: missing entries".into()))?;
-    for entry in entries {
-        let field = |name: &str| {
-            entry
-                .get(name)
-                .and_then(serde_json::Value::as_str)
-                .ok_or_else(|| invalid(format!("manifest entry without {name}")))
-        };
-        let rel = decode_path(field("path_hex")?)?;
-        let path = if rel.as_os_str().is_empty() {
-            base(field("label")?)?
-        } else {
-            base(field("label")?)?.join(rel)
-        };
-        let meta = fs::symlink_metadata(&path)?;
-        match field("kind")? {
-            "dir" if meta.is_dir() => {}
-            "symlink" if meta.file_type().is_symlink() => {
-                let target = hex(fs::read_link(&path)?.as_os_str());
-                if target != field("target_hex")? {
-                    return Err(invalid(format!(
-                        "symlink target changed: {}",
-                        path.display()
-                    )));
-                }
-            }
-            "file" if meta.is_file() => {
-                if sha256_file(&path)?.0 != field("sha256")? {
-                    return Err(invalid(format!("content changed: {}", path.display())));
-                }
-            }
-            kind => {
-                return Err(invalid(format!("{} is not a {kind}", path.display())));
-            }
-        }
-        #[cfg(unix)]
-        if field("kind")? != "symlink" {
-            use std::os::unix::fs::PermissionsExt;
-            let mode = entry.get("mode").and_then(serde_json::Value::as_u64);
-            if mode != Some(u64::from(meta.permissions().mode() & 0o7777)) {
-                return Err(invalid(format!("mode changed: {}", path.display())));
-            }
-        }
-    }
-    Ok(())
-}
-
 #[cfg(unix)]
-fn backup_into(app: &str, roots: &[&Root], partial: &Path) -> io::Result<(u64, u64)> {
+fn backup_into(
+    app: &str,
+    roots: &[&Root],
+    partial: &Path,
+    cancel: &AtomicBool,
+) -> io::Result<(u64, u64)> {
     create_private_dir(partial)?;
-    let mut entries = Vec::new();
-    let mut totals = (0_u64, 0_u64);
+    let mut walk = copy::Walk::new(cancel);
     for root in roots {
         let dest = partial.join(root.label);
-        copy::copy_root(&root.path, &dest, root.label, &mut entries, &mut totals)?;
+        copy::copy_root(&root.path, &dest, root.label, &mut walk)?;
     }
     let roots_json: Vec<_> = roots
         .iter()
@@ -317,17 +237,25 @@ fn backup_into(app: &str, roots: &[&Root], partial: &Path) -> io::Result<(u64, u
     let manifest = serde_json::json!({
         "schema": 1,
         "app": app,
-        "created_at": utc_now(),
+        "created_at": clock::utc_now(),
         "restore": "cp -Rp <backup>/<label>/. <path>; the manifest records <path> per label",
         "roots": roots_json,
-        "entries": entries,
+        "entries": walk.entries,
     });
     write_atomic(&partial.join(MANIFEST), &manifest)?;
-    Ok(totals)
+    // The single durability point: files are verified by content below, the
+    // directory entries that make them reachable are flushed here.
+    copy::sync_dirs(partial)?;
+    Ok(walk.totals)
 }
 
 #[cfg(not(unix))]
-fn backup_into(_app: &str, _roots: &[&Root], _partial: &Path) -> io::Result<(u64, u64)> {
+fn backup_into(
+    _app: &str,
+    _roots: &[&Root],
+    _partial: &Path,
+    _cancel: &AtomicBool,
+) -> io::Result<(u64, u64)> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,
         "automatic state backup is implemented for macOS and Linux only",
@@ -369,36 +297,11 @@ pub(crate) fn hex_bytes(bytes: &[u8]) -> String {
     })
 }
 
-fn decode_path(value: &str) -> io::Result<PathBuf> {
-    if value.is_empty() {
-        return Ok(PathBuf::new());
-    }
-    if !value.len().is_multiple_of(2) {
-        return Err(invalid("manifest: odd path_hex".into()));
-    }
-    let bytes = (0..value.len())
-        .step_by(2)
-        .map(|index| u8::from_str_radix(&value[index..index + 2], 16))
-        .collect::<Result<Vec<u8>, _>>()
-        .map_err(|error| invalid(format!("manifest: path_hex: {error}")))?;
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::OsStringExt;
-        Ok(PathBuf::from(OsString::from_vec(bytes)))
-    }
-    #[cfg(not(unix))]
-    {
-        Ok(PathBuf::from(OsString::from(
-            String::from_utf8_lossy(&bytes).into_owned(),
-        )))
-    }
-}
-
-fn invalid(message: String) -> io::Error {
+pub(crate) fn invalid(message: String) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
 
-fn create_private_dir(path: &Path) -> io::Result<()> {
+pub(crate) fn create_private_dir(path: &Path) -> io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
     #[cfg(unix)]
@@ -417,46 +320,19 @@ fn write_atomic(path: &Path, value: &serde_json::Value) -> io::Result<()> {
     file.write_all(&bytes)?;
     file.sync_all()?;
     drop(file);
-    fs::rename(&tmp, path)
+    fs::rename(&tmp, path)?;
+    sync_dir(path.parent())
 }
 
-fn utc_parts() -> (i64, u32, u32, u64) {
-    let secs = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_or(0, |elapsed| elapsed.as_secs());
-    let days = i64::try_from(secs / 86_400).unwrap_or(0);
-    // Howard Hinnant's days-to-civil conversion.
-    let z = days + 719_468;
-    let era = z.div_euclid(146_097);
-    let doe = z.rem_euclid(146_097);
-    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
-    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
-    let mp = (5 * doy + 2) / 153;
-    let day = u32::try_from(doy - (153 * mp + 2) / 5 + 1).unwrap_or(1);
-    let month = u32::try_from(if mp < 10 { mp + 3 } else { mp - 9 }).unwrap_or(1);
-    let year = yoe + era * 400 + i64::from(month <= 2);
-    (year, month, day, secs % 86_400)
-}
-
-fn utc_stamp() -> String {
-    let (year, month, day, secs) = utc_parts();
-    format!(
-        "{year:04}{month:02}{day:02}T{:02}{:02}{:02}Z",
-        secs / 3600,
-        secs / 60 % 60,
-        secs % 60
-    )
-}
-
-fn utc_now() -> String {
-    let (year, month, day, secs) = utc_parts();
-    format!(
-        "{year:04}-{month:02}-{day:02}T{:02}:{:02}:{:02}Z",
-        secs / 3600,
-        secs / 60 % 60,
-        secs % 60
-    )
+/// Flushes a directory entry (best effort where directories cannot be opened).
+pub(crate) fn sync_dir(dir: Option<&Path>) -> io::Result<()> {
+    match dir {
+        Some(dir) => fs::File::open(dir).and_then(|handle| handle.sync_all()),
+        None => Ok(()),
+    }
 }
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod tests_background;

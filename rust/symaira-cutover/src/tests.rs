@@ -183,11 +183,11 @@ fn unreadable_state_fails_closed_without_marker_or_partial_backup() {
     fs::set_permissions(&secret, fs::Permissions::from_mode(0o600)).unwrap();
     assert!(result.is_err());
     assert!(!store.join("symbrain.json").exists());
-    assert_eq!(
-        fs::read_dir(&store).unwrap().count(),
-        0,
-        "partial backup removed"
-    );
+    let left: Vec<_> = fs::read_dir(&store)
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect();
+    assert_eq!(left, [".symbrain.lock"], "partial backup removed");
     let (dir, ..) = created(ensure("symbrain", &roots(temp.path()), &store).unwrap());
     verify_tree(&dir).unwrap();
 }
