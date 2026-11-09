@@ -5,9 +5,9 @@ import SymairaTheme
 struct SymBrainMobileApp: App {
     var body: some Scene {
         WindowGroup {
+            // Follows the system appearance; the app was dark-only before.
             MobileRootView()
-                .preferredColorScheme(.dark)
-                .tint(SymairaTheme.goldPrimary)
+                .tint(SymairaTokens.selected)
         }
     }
 }

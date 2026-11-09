@@ -202,6 +202,8 @@ public final class AuditViewModel: ObservableObject {
     @Published public var entries: [AuditEntry] = []
     @Published public var profiles: [ProfileSummary] = []
     @Published public var selectedProfile: String?
+    /// Restricts the log to one state-core server (`memory`, `vault`, …).
+    @Published public var selectedServer: String?
     @Published public var isLoading = false
 
     private let client: SymBrainClient
@@ -215,7 +217,7 @@ public final class AuditViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        entries = await auditReader.read(profile: selectedProfile)
+        entries = await auditReader.read(profile: selectedProfile, server: selectedServer, limit: 500)
     }
 
     public func loadProfiles() async {

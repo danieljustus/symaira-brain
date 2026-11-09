@@ -1,202 +1,173 @@
 import SwiftUI
 import SymairaTheme
 import SymairaToolKit
+import UIKit
 
+/// The read-only iOS companion: what Symaira Brain is, which Symaira tools
+/// exist, and how to set Brain up on a Mac. Native `TabView` (IOS-1).
 struct MobileRootView: View {
-    @State private var selectedTab = 0
+    enum Tab: String, CaseIterable, Identifiable, Hashable {
+        case overview, tools, guide
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .overview: "Overview"
+            case .tools: "Tools"
+            case .guide: "Setup"
+            }
+        }
+
+        var icon: SymairaIcon {
+            switch self {
+            case .overview: .productBrain
+            case .tools: .tools
+            case .guide: .checklist
+            }
+        }
+    }
+
+    @State private var tab: Tab = .overview
+    @State private var topography = SymairaTopoModel()
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            OverviewTab()
-                .tabItem {
-                    Label("Overview", systemImage: "brain")
+        TabView(selection: $tab) {
+            ForEach(Tab.allCases) { item in
+                NavigationStack {
+                    page(item)
+                        // Topography behind the main overview only (MOTION-1, IOS-5).
+                        .symairaTopography(item == .overview ? topography : nil)
+                        .toolbar(.hidden, for: .navigationBar)
                 }
-                .tag(0)
+                // The tab bar renders only Image, so the icon is a still (IOS-6).
+                .tabItem { Label { Text(item.title) } icon: { Image(symairaIcon: item.icon) } }
+                .tag(item)
+            }
+        }
+    }
 
-            ToolsTab()
-                .tabItem {
-                    Label("Tools", systemImage: "wrench.and.screwdriver")
-                }
-                .tag(1)
-
-            GuideTab()
-                .tabItem {
-                    Label("Guide", systemImage: "book")
-                }
-                .tag(2)
+    @ViewBuilder
+    private func page(_ item: Tab) -> some View {
+        switch item {
+        case .overview: OverviewTab()
+        case .tools: ToolsTab()
+        case .guide: GuideTab()
         }
     }
 }
 
-// MARK: - Overview Tab
+// MARK: - Overview
 
 struct OverviewTab: View {
     var body: some View {
-        NavigationStack {
-            ZStack {
-                SymairaBackdrop(gridStyle: .dots)
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: SymairaSpacing.xLarge) {
-                        // Header
-                        VStack(spacing: SymairaSpacing.medium) {
-                            Image(systemName: "brain")
-                                .font(.system(size: 48))
-                                .foregroundStyle(SymairaTheme.goldPrimary)
-                            Text("SymBrain")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(SymairaTheme.textPrimary)
-                            Text("The portable agent-context layer")
-                                .font(.subheadline)
-                                .foregroundStyle(SymairaTheme.textSecondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, SymairaSpacing.xLarge)
-
-                        // State cores
-                        Text("State Cores")
-                            .font(.headline)
-                            .foregroundStyle(SymairaTheme.goldPrimary)
-                            .padding(.horizontal)
-
-                        coreCard(
-                            icon: "lock.shield",
-                            name: "Symaira Vault",
-                            description: "Credentials and secrets management"
-                        )
-                        coreCard(
-                            icon: "brain.head.profile",
-                            name: "Symaira Memory",
-                            description: "Persistent semantic memory and entities"
-                        )
-                        coreCard(
-                            icon: "hammer",
-                            name: "Symaira Skills",
-                            description: "Skill catalog and SSOT"
-                        )
-
-                        // What it does
-                        Text("How It Works")
-                            .font(.headline)
-                            .foregroundStyle(SymairaTheme.goldPrimary)
-                            .padding(.horizontal)
-
-                        Text("SymBrain multiplexes the three state cores behind one MCP gateway. Each harness connection gets its own profile, controlling exactly what tools that harness can see.")
-                            .font(.body)
-                            .foregroundStyle(SymairaTheme.textSecondary)
-                            .padding(.horizontal)
-                            .padding(SymairaSpacing.medium)
-                            .glassCard()
-                    }
-                    .padding(.bottom, SymairaSpacing.xLarge)
+        SymairaPage(title: "Symaira Brain", subtitle: "The portable agent-context layer") {
+            VStack(alignment: .leading, spacing: SymairaSpacing.large) {
+                SymairaNotice(
+                    message: "This companion is read-only. Manage profiles, harnesses and credentials in Symaira Brain on your Mac.",
+                    tone: .informative
+                )
+                SymairaFormSection("State Cores") {
+                    SymairaFormRow("Vault", description: "Credentials and secrets, in their own process")
+                    SymairaFormDivider()
+                    SymairaFormRow("Memory", description: "Facts, rules and entities your agents keep")
+                    SymairaFormDivider()
+                    SymairaFormRow("Skills", description: "One skill library for every harness")
+                }
+                SymairaFormSection(
+                    "How It Works",
+                    footer: "A harness such as Claude Code or Codex connects to one MCP gateway instead of each tool separately."
+                ) {
+                    Text("Symaira Brain puts the state cores behind one MCP gateway. Every harness connection gets its own profile, which decides exactly which tools that harness can see.")
+                        .symairaText(.body)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, SymairaSpacing.small)
                 }
             }
-            .navigationTitle("SymBrain")
         }
-    }
-
-    private func coreCard(icon: String, name: String, description: String) -> some View {
-        HStack(spacing: SymairaSpacing.medium) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(SymairaTheme.goldPrimary)
-                .frame(width: 36)
-            VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
-                Text(name)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(SymairaTheme.textPrimary)
-                Text(description)
-                    .font(.caption)
-                    .foregroundStyle(SymairaTheme.textSecondary)
-            }
-            Spacer()
-        }
-        .padding(SymairaSpacing.medium)
-        .padding(.horizontal)
-        .glassCard()
     }
 }
 
-// MARK: - Tools Tab
+// MARK: - Tools
 
-/// Active Symaira tools from the shared appkit registry.
-
+/// Active Symaira tools from the shared registry.
 struct ToolsTab: View {
     var body: some View {
-        NavigationStack {
-            ZStack {
-                SymairaBackdrop(gridStyle: .dots)
-
-                List {
-                    ForEach(SymairaToolRegistry.active) { tool in
-                        HStack {
-                            VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
-                                Text(tool.displayName)
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(SymairaTheme.textPrimary)
-                                Text(tool.binaryName)
-                                    .font(.caption.monospaced())
-                                    .foregroundStyle(SymairaTheme.textMuted)
-                            }
-                            Spacer()
-                            if tool.supportsMCP {
-                                SymairaBadge("MCP", tone: .informative)
-                            }
+        SymairaPage(title: "Tools", subtitle: "Active tools in the Symaira family") {
+            SymairaFormSection(footer: "MCP marks tools that an agent harness can call through a profile.") {
+                ForEach(Array(SymairaToolRegistry.active.enumerated()), id: \.element.id) { index, tool in
+                    if index > 0 { SymairaFormDivider() }
+                    SymairaFormRow(tool.displayName, description: tool.binaryName) {
+                        if tool.supportsMCP {
+                            SymairaBadge("MCP", tone: .informative)
                         }
-                        .padding(.vertical, SymairaSpacing.xSmall)
                     }
+                    .accessibilityElement(children: .combine)
                 }
-                .scrollContentBackground(.hidden)
-                .navigationTitle("Tools")
             }
         }
     }
 }
 
-// MARK: - Guide Tab
+// MARK: - Setup guide
 
 struct GuideTab: View {
-    var body: some View {
-        NavigationStack {
-            ZStack {
-                SymairaBackdrop(gridStyle: .dots)
+    private struct Step: Identifiable {
+        let id: Int
+        let title: String
+        let command: String?
+        let note: String?
+    }
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: SymairaSpacing.xLarge) {
-                        stepRow(1, "Install the CLI", "brew install danieljustus/tap/symbrain")
-                        stepRow(2, "Initialize", "symbrain init")
-                        stepRow(3, "Check Health", "symbrain doctor")
-                        stepRow(4, "Install per Harness", "symbrain install --harness claude --profile personal")
-                        stepRow(5, "Verify", "symbrain doctor (confirms installed)")
-                        stepRow(6, "Restart Harness", "Reload MCP connections in your harness")
-                    }
-                    .padding()
+    private let steps = [
+        Step(id: 1, title: "Install the CLI", command: "brew install danieljustus/tap/symbrain", note: nil),
+        Step(id: 2, title: "Initialize", command: "symbrain init", note: nil),
+        Step(id: 3, title: "Check Health", command: "symbrain doctor", note: nil),
+        Step(id: 4, title: "Connect a Harness", command: "symbrain install --harness claude --profile personal", note: nil),
+        Step(id: 5, title: "Verify", command: "symbrain doctor", note: "The harness now shows as installed."),
+        Step(id: 6, title: "Restart the Harness", command: nil, note: "Reload the MCP connections in your harness."),
+    ]
+
+    var body: some View {
+        SymairaPage(title: "Setup", subtitle: "Six steps on your Mac") {
+            SymairaFormSection(footer: "Run the commands in Terminal on the Mac where your agents work.") {
+                ForEach(steps) { step in
+                    if step.id > 1 { SymairaFormDivider() }
+                    stepRow(step)
                 }
             }
-            .navigationTitle("Setup Guide")
         }
     }
 
-    private func stepRow(_ number: Int, _ title: String, _ command: String) -> some View {
-        VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-            HStack(spacing: SymairaSpacing.small) {
-                Text("\(number)")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.black)
-                    .frame(width: 24, height: 24)
-                    .background(SymairaTheme.goldPrimary, in: Circle())
-                Text(title)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(SymairaTheme.textPrimary)
+    private func stepRow(_ step: Step) -> some View {
+        HStack(alignment: .top, spacing: SymairaSpacing.medium) {
+            Text("\(step.id)")
+                .font(SymairaTypography.readout)
+                .foregroundStyle(SymairaTokens.ink3)
+                .frame(minWidth: 24, alignment: .leading)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
+                Text(step.title).symairaText(.bodyEmphasized)
+                if let command = step.command {
+                    Text(verbatim: command)
+                        .symairaText(.monoSmall)
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let note = step.note {
+                    Text(note).symairaText(.caption)
+                }
             }
-            Text(command)
-                .font(.caption.monospaced())
-                .foregroundStyle(SymairaTheme.textSecondary)
-                .padding(SymairaSpacing.small)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+            Spacer(minLength: 0)
+            if let command = step.command {
+                SymairaIconButton("Copy \(step.title) Command", icon: .copy, size: 18) {
+                    UIPasteboard.general.string = command
+                }
+                .frame(minWidth: 44, minHeight: 44)
+            }
         }
-        .padding(SymairaSpacing.medium)
-        .glassCard()
+        .padding(.vertical, SymairaSpacing.small)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Step \(step.id), \(step.title)")
     }
 }

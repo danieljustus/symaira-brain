@@ -744,13 +744,17 @@ xcodegen generate
 open SymBrain.xcodeproj
 ```
 
-**SymBrain** (macOS) is a full dashboard: doctor, profiles, harnesses, audit
-log, and settings, plus a **Modules** sidebar for the three brokered state
-cores — **Memory** (browse, search, rules, and query log), **Vault** (session
-unlock with masked secrets, folder browsing, and TOTP), and **Skills** (library
-with per-harness install state and dry-run sync), each with the broker audit
-trail filtered to its own server. **SymBrainMobile** (iOS) is a read-only
-companion showing the state-core overview, tool registry, and setup guide.
+**Symaira Brain** (macOS) uses the shared Symaira workspace with seven
+destinations: **Overview** (doctor health, the optional Operate and Scope
+modules, recent activity), **Harnesses** (install, change profile, dry-run
+sync), **Profiles**, **Memory** (memories, rules, query log, health),
+**Skills** (library, installs and sync, operation log, health),
+**Credentials** (vault unlock, masked secrets with TOTP, approval requests,
+file import) and **Activity** (every routed tool call, filterable by server
+and profile). Settings (⌘,) holds appearance, the CLI path and updates; ⌘1 to
+⌘7 switch destinations, ⌘R refreshes and ⌘N runs the page's primary action.
+**SymBrainMobile** (iOS) is a read-only companion showing the state-core
+overview, tool registry, and setup guide.
 
 ## License
 

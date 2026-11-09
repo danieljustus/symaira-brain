@@ -9,6 +9,18 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Changed
+- macOS app rebuilt on the symaira-appkit 0.18.1 workspace: `SymairaWorkspace`
+  shell with seven destinations (Overview, Harnesses, Profiles, Memory, Skills,
+  Credentials, Activity), shared page, state and sheet scaffolds, a persistent
+  CLI status in the sidebar, light and dark appearance with a picker in
+  Settings, and ⌘R/⌘N page commands. Sync moved onto Harnesses, the per-core
+  broker activity tabs became one filterable Activity page, and Operate and
+  Scope open as detail sheets from the Overview. A changed CLI path now reloads
+  the pages instead of requiring a relaunch.
+- iOS companion restyled with the shared page and form components, Symaira tab
+  icons and system appearance.
+
 ## [v0.13.0] - 2026-11-09
 
 Breaking: the Go implementation is removed and `symbrain` is Rust-only (see

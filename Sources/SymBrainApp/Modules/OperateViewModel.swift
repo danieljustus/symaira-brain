@@ -117,9 +117,8 @@ struct SetupSourceReport: Decodable, Sendable, Equatable {
 
 /// Shared plumbing for optional modules that ship as their own managed
 /// binary and are gated by `[modules]` in symbrain's global config
-/// (Operate, Scope). Kept file-scoped here and reused by ScopeViewModel —
-/// the same cross-file sharing MemoryView.swift already uses for
-/// `ModuleActivityTable`/`ModuleTabStrip`.
+/// (Operate, Scope). Kept here and reused by ScopeViewModel and the
+/// Overview's module rows.
 enum ManagedModuleSupport {
     /// Reads `symbrain config get modules.<module>`. A non-zero exit means
     /// the key is unset, which resolves to `false` — `ModulesConfig`'s
