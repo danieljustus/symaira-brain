@@ -9,6 +9,22 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.13.0] - 2026-11-09
+
+Breaking: the Go implementation is removed and `symbrain` is Rust-only (see
+Removed). Release archives and the Homebrew formula contain only the Rust
+`symbrain` binary.
+
+### Added
+- macOS app: Settings scene (⌘,) and window navigation commands through the
+  shared Symaira helpers; the app now builds on symaira-appkit 0.18.1 with its
+  typography roles and shared icons (#985).
+- Browse: Go-free replay of the sealed Go state-key recording against the Rust
+  daemon, run on Linux and macOS in the native daemon workflow (#772).
+- Browse: the Chrome and Safari fixture checks verify the sealed Go recordings
+  instead of the removed Go sources (#776), and a native Firefox BiDi gate runs
+  on Linux and macOS (#777).
+
 ### Removed
 - **Memory Web Console and Memory TUI retired (#763).** `symbrain memory serve`
   no longer serves the embedded browser console: `/`, `/style.css` and `/app.js`
@@ -65,6 +81,8 @@ the [Unreleased] section is moved into a dated version section.
   writes through pre-existing symlinks (#686).
 
 ### Fixed
+- Browse: the Firefox adapter drives its own tab; Firefox 159 rejected script
+  evaluation in the first browsing context of a new profile (#777).
 - Build the macOS GUI release with Xcode 26 so Icon Composer assets compile
   (#683).
 - Allow an existing release tag to resume GUI and Homebrew publication without
