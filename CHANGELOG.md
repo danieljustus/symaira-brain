@@ -19,6 +19,12 @@ the [Unreleased] section is moved into a dated version section.
   divergence from the frozen Go doctor output: `scripts/doctor_harness_contract.py`.
   Not yet: `symbrain harness list` still omits Hermes, and
   `~/.hermes/profiles/*/config.yaml` is not read (#1021).
+- The first-run state backup now converges across short CLI commands. A copy
+  cancelled at command exit keeps its single `.<app>-resume.partial` tree, and
+  the next run reuses every file whose size and mtime still match the source
+  (re-hashing it) and copies only the rest, so `symbrain version`, `doctor` and
+  `memory ...` no longer restart a 300 MB copy each time. The manifest is still
+  verified before the marker is written (#1020).
 
 ## [v0.13.1] - 2026-11-09
 

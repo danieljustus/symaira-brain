@@ -22,15 +22,15 @@ use crate::{DISABLE_ENV, Homes, Outcome, Root, disabled, ensure_cancellable};
 /// starts after a finished backup and a failed one still stops it.
 pub const START_GRACE: Duration = Duration::from_secs(3);
 /// How long [`Backup::finish`] lets a running backup continue after the
-/// command returned before the copy is cancelled and retried on the next run.
+/// command returned before the copy is cancelled and resumed on the next run.
 pub const EXIT_GRACE: Duration = Duration::from_secs(5);
-/// Time a cancelled worker gets to remove its partial copy.
+/// Time a cancelled worker gets to stop.
 const CANCEL_GRACE: Duration = Duration::from_secs(2);
 
 /// Handle of a backup running on a worker thread.
 ///
-/// Dropping it cancels a still-running copy, so no orphaned partial tree is
-/// left behind by a normal exit.
+/// Dropping it cancels a still-running copy; its partial tree is kept and
+/// resumed by the next run.
 pub struct Backup {
     app: String,
     done: Option<Receiver<bool>>,
@@ -117,7 +117,7 @@ impl Backup {
     }
 
     /// Lets a running backup continue for at most `budget`, then cancels it
-    /// (its partial copy is removed; the next run starts over).
+    /// (its partial copy is kept; the next run resumes it).
     pub fn finish(mut self, budget: Duration) {
         let _ = self.wait(budget);
     }
@@ -147,7 +147,7 @@ impl Drop for Backup {
             let _ = done.recv_timeout(CANCEL_GRACE);
         }
         // A worker still verifying a huge tree is abandoned: it dies with the
-        // process and the next run removes its partial copy.
+        // process and the next run resumes its partial copy.
         if worker.is_finished() {
             let _ = worker.join();
         }
@@ -185,7 +185,7 @@ fn report(app: &str, result: io::Result<Outcome>) -> bool {
         Ok(_) => true,
         Err(error) if error.kind() == io::ErrorKind::Interrupted => {
             notice(&format!(
-                "{app}: state backup paused before it finished; it restarts on the next run"
+                "{app}: state backup paused before it finished; it resumes on the next run"
             ));
             true
         }

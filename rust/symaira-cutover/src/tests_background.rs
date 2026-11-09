@@ -4,6 +4,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 use super::{Backup, Outcome, Root, ensure, lock, verify_tree};
@@ -13,7 +14,16 @@ use super::{Backup, Outcome, Root, ensure, lock, verify_tree};
 const SLOW_FILE: Duration = Duration::from_millis(100);
 const CHILD_ENV: &str = "SYMAIRA_CUTOVER_TEST_CHILD_BASE";
 
+/// Source files whose copy started, across all tests (filter by temp dir).
+static COPIES: Mutex<Vec<PathBuf>> = Mutex::new(Vec::new());
+
+fn copies_under(base: &Path) -> usize {
+    let copies = COPIES.lock().unwrap();
+    copies.iter().filter(|path| path.starts_with(base)).count()
+}
+
 pub(crate) fn slow_down(path: &Path) {
+    COPIES.lock().unwrap().push(path.to_path_buf());
     if path
         .file_name()
         .is_some_and(|name| name.to_string_lossy().starts_with("slow-"))
@@ -107,19 +117,36 @@ fn failed_backup_is_reported_by_settle() {
 }
 
 #[test]
-fn unfinished_backup_is_cancelled_without_orphans() {
+fn cancelled_backup_is_resumed_without_recopying_finished_files() {
     let temp = tempfile::tempdir().unwrap();
     let store = seed_slow(temp.path(), 100);
     let mut backup = Backup::spawn("symbrain", roots(temp.path()), store.clone());
-    assert!(backup.settle(Duration::from_millis(250)));
+    assert!(backup.settle(Duration::from_millis(450)));
     let started = Instant::now();
     backup.finish(Duration::from_millis(50));
     assert!(started.elapsed() < Duration::from_secs(5));
-    assert!(partials(&store).is_empty(), "{:?}", entries(&store));
     assert!(!store.join("symbrain.json").exists());
-    // The next run starts over and converges.
+    assert_eq!(partials(&store).len(), 1, "{:?}", entries(&store));
+    let first = copies_under(temp.path());
+    assert!((2..100).contains(&first), "first run copied {first}");
+
+    // A source file removed meanwhile must not survive in the backup.
+    let gone = temp.path().join("data/symbrain/memory/slow-0000.db");
+    fs::remove_file(&gone).unwrap();
     let outcome = ensure("symbrain", &roots(temp.path()), &store).unwrap();
-    assert!(matches!(outcome, Outcome::Created { files: 100, .. }));
+    let Outcome::Created { dir, files, .. } = outcome else {
+        panic!("expected a backup, got {outcome:?}");
+    };
+    assert_eq!(files, 99);
+    // At most the file the cancelled run was writing is copied twice.
+    let second = copies_under(temp.path()) - first;
+    assert!(
+        second <= 99 - (first - 1) + 1,
+        "{first} then {second} copies"
+    );
+    assert!(!dir.join("data/memory/slow-0000.db").exists());
+    verify_tree(&dir).unwrap();
+    assert!(partials(&store).is_empty(), "{:?}", entries(&store));
 }
 
 /// Body of the child process of [`killed_backup_leaves_no_orphan_for_the_next_run`].
