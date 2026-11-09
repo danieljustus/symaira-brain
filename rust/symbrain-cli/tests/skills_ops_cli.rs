@@ -242,3 +242,132 @@ fn restore_reports_stale_installs_and_sync_reinstalls_them() {
         );
     }
 }
+
+fn import_alpha(sandbox: &Sandbox) {
+    let source = sandbox.source("alpha", "# Alpha");
+    let run = sandbox.skills(&["import", source.to_str().unwrap()]);
+    assert_eq!(run.code, 0, "{}", run.err);
+}
+
+#[test]
+fn uninstall_all_targets_removes_every_install_and_render_dir() {
+    let sandbox = Sandbox::new();
+    import_alpha(&sandbox);
+    let install = sandbox.skills(&["install", "--target", "claude,hermes,opencode", "alpha"]);
+    assert_eq!(install.code, 0, "{}", install.err);
+    let render = sandbox.path("data/symbrain/skills/rendered");
+    assert!(render.join("hermes/alpha").exists());
+
+    let dry = sandbox.skills(&[
+        "uninstall",
+        "--dry-run",
+        "--json",
+        "--target",
+        "all",
+        "alpha",
+    ]);
+    assert_eq!(dry.code, 0, "{}", dry.err);
+    assert!(sandbox.path("home/.claude/skills/alpha").exists());
+    assert!(render.join("hermes/alpha").exists());
+
+    let run = sandbox.skills(&["uninstall", "--json", "--target", "all", "alpha"]);
+    assert_eq!(run.code, 0, "{}", run.err);
+    let rows = run.json();
+    let rows = rows.as_array().expect("one result per target");
+    let mut removed: Vec<&str> = rows
+        .iter()
+        .filter(|row| row["removed"] == true)
+        .map(|row| row["target"].as_str().unwrap())
+        .collect();
+    removed.sort_unstable();
+    assert_eq!(removed, ["claude", "hermes", "opencode"], "{}", run.out);
+    assert!(rows.len() > removed.len(), "other targets are reported too");
+    assert!(!sandbox.path("home/.claude/skills/alpha").exists());
+    assert!(!render.join("hermes/alpha").exists());
+    assert!(!render.join("opencode/alpha").exists());
+    let hermes = rows.iter().find(|row| row["target"] == "hermes").unwrap();
+    assert_eq!(hermes["render_removed"], true);
+
+    let again = sandbox.skills(&["uninstall", "--target", "claude", "alpha"]);
+    assert_eq!(again.code, 0, "{}", again.err);
+    assert!(
+        again.out.starts_with("not installed alpha"),
+        "{}",
+        again.out
+    );
+    assert_eq!(sandbox.skills(&["uninstall"]).code, 2);
+}
+
+#[test]
+fn uninstall_continues_past_a_refused_target() {
+    let sandbox = Sandbox::new();
+    import_alpha(&sandbox);
+    let install = sandbox.skills(&["install", "--target", "claude,hermes", "alpha"]);
+    assert_eq!(install.code, 0, "{}", install.err);
+    // A foreign directory without the install marker is refused, not removed.
+    let claude = sandbox.path("home/.claude/skills/alpha");
+    fs::remove_file(&claude).unwrap();
+    fs::create_dir_all(&claude).unwrap();
+    fs::write(claude.join("foreign.txt"), "x").unwrap();
+
+    let run = sandbox.skills(&["uninstall", "--json", "--target", "claude,hermes", "alpha"]);
+    assert_eq!(run.code, 1);
+    assert!(run.err.contains("unmanaged"), "{}", run.err);
+    let rows = run.json();
+    assert!(!rows[0]["error"].as_str().unwrap().is_empty());
+    assert_eq!(rows[1]["removed"], true);
+    assert!(claude.join("foreign.txt").exists());
+}
+
+#[test]
+fn dirty_library_source_is_flagged_on_install_status_and_sync() {
+    if !git_available() {
+        return;
+    }
+    let sandbox = Sandbox::new();
+    import_alpha(&sandbox);
+    let base = ["--target", "claude", "--mode", "copy"];
+    let clean = sandbox.skills(&[&["install", "--json"], &base[..], &["alpha"]].concat());
+    assert_eq!(clean.code, 0, "{}", clean.err);
+    assert!(clean.json().get("warnings").is_none(), "{}", clean.out);
+    let status = sandbox.skills(&["status", "--json"]);
+    assert!(!status.out.contains("source-dirty"), "{}", status.out);
+
+    let skill_md = sandbox.library("alpha/SKILL.md");
+    let text = fs::read_to_string(&skill_md).unwrap();
+    fs::write(&skill_md, format!("{text}edited\n")).unwrap();
+
+    let install = sandbox.skills(&[&["install", "--json"], &base[..], &["alpha"]].concat());
+    assert_eq!(install.code, 0, "{}", install.err);
+    assert_eq!(install.json()["warnings"][0], "source-dirty");
+    let text_run = sandbox.skills(&[&["install"], &base[..], &["alpha"]].concat());
+    assert!(
+        text_run.err.contains("warning: source-dirty"),
+        "{}",
+        text_run.err
+    );
+    let refused =
+        sandbox.skills(&[&["install", "--require-clean"], &base[..], &["alpha"]].concat());
+    assert_eq!(refused.code, 1);
+    assert!(refused.err.contains("source-dirty"), "{}", refused.err);
+
+    let status = sandbox.skills(&["status", "--json"]);
+    assert_eq!(
+        status.json()["installs"][0]["warnings"][0],
+        "source-dirty",
+        "{}",
+        status.out
+    );
+    assert!(sandbox.skills(&["status"]).err.contains("source-dirty"));
+    // A further uncommitted edit makes the install stale, so sync has a row.
+    fs::write(&skill_md, format!("{text}edited again\n")).unwrap();
+    let sync = sandbox.skills(&["sync", "--json"]);
+    assert_eq!(
+        sync.json()["results"][0]["warnings"][0],
+        "source-dirty",
+        "{}",
+        sync.out
+    );
+    fs::write(&skill_md, format!("{text}edited thrice\n")).unwrap();
+    assert!(sandbox.skills(&["sync"]).err.contains("source-dirty"));
+}

@@ -28,6 +28,15 @@ the [Unreleased] section is moved into a dated version section.
 - `browse/docs/engines.md` and `browse/docs/output-schema.md` no longer link to
   removed Go sources; every claim now points to the Rust crates, tests and
   `cargo test` commands under `browse/` (#1016).
+### Added
+- `symbrain skills uninstall <skill> [--target all|a,b] [--scope] [--dry-run]`
+  removes the managed install on every selected target, reports one result per
+  target and removes the generated `rendered/<target>/<skill>` copy, so the
+  retired `symskills uninstall` is no longer needed (#1015).
+- `symbrain skills install|status|sync` report `source-dirty` (a `warnings`
+  field in `--json`, a stderr line in text) when the library skill's own git
+  repository has uncommitted changes; `install --require-clean` refuses such a
+  source. Clean sources produce the same output as before (#1013).
 
 ## [v0.13.1] - 2026-11-09
 
