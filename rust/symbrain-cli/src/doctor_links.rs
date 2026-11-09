@@ -87,13 +87,14 @@ fn probe_handshake(
         unknown: 0,
         error: String::new(),
     };
-    // Probe exactly the argv the gateway spawns (#1018).
-    let agent = if vault_agent.is_empty() {
-        crate::mcp_cli::DEFAULT_VAULT_AGENT
+    // A named agent (default `claude-code`, like the gateway) probes exactly
+    // the argv the gateway spawns (#1018). An explicit empty agent keeps the
+    // recorded plain-`serve` probe (sealed fixture doctor_empty_vault_agent).
+    let args = if vault_agent.is_empty() {
+        vec!["serve".to_string()]
     } else {
-        vault_agent
+        crate::mcp_cli::vault_child_args(vault_agent)
     };
-    let args = crate::mcp_cli::vault_child_args(agent);
     let deadline = Instant::now() + HANDSHAKE_TIMEOUT;
     let client = match Client::spawn(
         path,
