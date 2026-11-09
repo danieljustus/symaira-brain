@@ -40,6 +40,9 @@ the [Unreleased] section is moved into a dated version section.
 - Usage: documented the Kimi credential walk (accepted `symvault://` key
   references, expired CLI login handled without refresh or writes) and why an
   unresolved key reference stays hidden next to a CLI token (sealed oracle) (#931).
+- Usage: documented why Antigravity has no read-only quota source while the app
+  is closed (stale undocumented protobuf cache, OAuth token out of scope) and
+  pinned the "not running" behaviour with a no-HTTP fixture test (#934).
 
 ## [v0.13.1] - 2026-11-09
 

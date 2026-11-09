@@ -59,3 +59,24 @@ fn pid_above_go_lsof_limit_does_not_invoke_probe_or_send_http() {
     assert!(!lsof_called);
     assert!(fixture.requests().is_empty());
 }
+
+#[test]
+fn closed_app_has_no_cached_quota_fallback_and_sends_no_http() {
+    // #934: no read-only source exists, so a closed app stays "not running".
+    let provider = crate::providers::provider_config::antigravity_from_process_list(Some(""));
+    let fixture = FixtureTransport::default();
+    let transport: Arc<dyn Transport> = Arc::new(fixture.clone());
+    let error = fetch_antigravity_from_observations(
+        &provider,
+        &transport,
+        &Cancellation::new(),
+        " 7 /usr/bin/unrelated\n",
+        |_| panic!("no candidate may be probed"),
+    )
+    .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "Antigravity is not running — no local quota server found."
+    );
+    assert!(fixture.requests().is_empty());
+}

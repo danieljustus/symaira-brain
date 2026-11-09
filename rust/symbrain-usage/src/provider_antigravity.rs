@@ -1,4 +1,19 @@
 //! Bounded local Antigravity observations and request walk.
+//!
+//! Quota comes only from the running app's local language-server (#934). With
+//! the app closed there is deliberately no read-only fallback, so the provider
+//! keeps reporting "not running" (text pinned by sealed report fixtures):
+//!
+//! - The only on-disk copy is the `antigravityUnifiedStateSync.userStatus`
+//!   entry in `~/Library/Application Support/Antigravity/User/globalStorage/
+//!   state.vscdb`: an undocumented, nested base64 protobuf inside a SQLite
+//!   file the app owns. It holds no per-model usage and its single
+//!   remaining-fraction/reset pair was last written months earlier (the
+//!   inspected file dates from 2026-05-19, reset 2026-05-19) — showing it
+//!   with an age would still present an invented number as quota.
+//! - The live alternative is the Google Cloud Code quota API with the app's
+//!   OAuth token (`antigravityUnifiedStateSync.oauthToken`); reading or using
+//!   that token is a new Google OAuth integration, which is out of scope.
 use super::{Provider, Request, UsageError, request_for, status_error};
 use crate::{
     UsageSnapshot,
