@@ -9,6 +9,17 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Fixed
+- `symbrain doctor` detects Hermes read-only through `~/.hermes/config.yaml`
+  (`mcp_servers.symbrain`, including the single-dash `-profile` form), so the
+  Hermes profile counts as bound. Harnesses without an MCP config path print
+  `unsupported (no MCP config path)` instead of `config not found: ` with an
+  empty path. Managed cores whose installed version differs from the pin show
+  `!` with a `symbrain setup --fix` hint (`mismatch` in `--json`). Accepted
+  divergence from the frozen Go doctor output: `scripts/doctor_harness_contract.py`.
+  Not yet: `symbrain harness list` still omits Hermes, and
+  `~/.hermes/profiles/*/config.yaml` is not read (#1021).
+
 ## [v0.13.1] - 2026-11-09
 
 ### Changed

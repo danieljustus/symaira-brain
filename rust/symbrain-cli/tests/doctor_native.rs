@@ -97,6 +97,89 @@ fn doctor_json_reports_static_config_and_registered_harness_natively() {
 }
 
 #[test]
+fn doctor_detects_hermes_yaml_config_and_never_prints_an_empty_path() {
+    let root = TempDir::new().unwrap();
+    let profiles_dir = root.path().join("config/symbrain/profiles");
+    fs::create_dir_all(&profiles_dir).unwrap();
+    fs::create_dir_all(root.path().join("home/.hermes")).unwrap();
+    fs::write(
+        profiles_dir.join("personal.toml"),
+        "[profile]\nname = \"personal\"\n\n[servers.vault]\nenabled = false\n",
+    )
+    .unwrap();
+    fs::write(
+        root.path().join("home/.hermes/config.yaml"),
+        "mcp_servers:\n  symbrain:\n    command: /opt/bin/symbrain\n    args: [mcp, -profile, personal, --vault-agent, hermes]\n",
+    )
+    .unwrap();
+
+    let json = command(&root, &["doctor", "--json"]).output().unwrap();
+    let report: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    let hermes = report["harnesses"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|harness| harness["name"] == "hermes")
+        .unwrap();
+    assert_eq!(hermes["installed"], json!(true));
+    assert_eq!(hermes["profile"], json!("personal"));
+    assert!(
+        hermes["config_path"]
+            .as_str()
+            .unwrap()
+            .ends_with("home/.hermes/config.yaml")
+    );
+    let registered = report["links"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|link| link["name"] == "profile \"personal\": registered")
+        .unwrap();
+    assert_eq!(registered["status"], json!("pass"));
+
+    let human = command(&root, &["doctor"]).output().unwrap();
+    let text = String::from_utf8(human.stdout).unwrap();
+    assert!(
+        text.contains("hermes         installed, profile \"personal\""),
+        "{text}"
+    );
+    assert!(
+        text.contains("agents         unsupported (no MCP config path)"),
+        "{text}"
+    );
+    assert!(!text.contains("config not found: \n"), "{text}");
+}
+
+#[test]
+fn doctor_flags_managed_core_version_mismatch_with_setup_fix_hint() {
+    let root = TempDir::new().unwrap();
+    let managed = root.path().join("home/.symaira/bin");
+    fs::create_dir_all(&managed).unwrap();
+    let binary = managed.join("symvault");
+    fs::write(&binary, "#!/bin/sh\nprintf '{\"version\":\"0.0.1\"}\\n'\n").unwrap();
+    fs::set_permissions(&binary, fs::Permissions::from_mode(0o755)).unwrap();
+
+    let json = command(&root, &["doctor", "--json"]).output().unwrap();
+    let report: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    let core = report["managed_cores"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|core| core["name"] == "symvault")
+        .unwrap();
+    assert_eq!(core["version"], json!("0.0.1"));
+    assert_eq!(core["mismatch"], json!(true));
+
+    let human = command(&root, &["doctor"]).output().unwrap();
+    let text = String::from_utf8(human.stdout).unwrap();
+    assert!(
+        text.lines().any(|line| line.starts_with("    !  symvault")
+            && line.contains("run `symbrain setup --fix`")),
+        "{text}"
+    );
+}
+
+#[test]
 fn doctor_json_true_uses_json_output() {
     let root = TempDir::new().unwrap();
     let output = command(&root, &["doctor", "--json=true"])

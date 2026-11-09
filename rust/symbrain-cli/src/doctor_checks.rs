@@ -4,7 +4,7 @@ use std::path::Path;
 
 use symbrain_audit::Degradation;
 use symbrain_core::xdg;
-use symbrain_managed::{Manifest, Platform, installed_version};
+use symbrain_managed::{Manifest, Platform, installed_version, versions_match};
 use toml_edit::DocumentMut;
 
 use super::doctor_core::{check_harnesses, check_memory_db, check_skills_library, probe_version};
@@ -132,10 +132,14 @@ fn check_managed_cores(managed_dir: &Path) -> Vec<ManagedCoreCheck> {
         .cores
         .iter()
         .filter(|(_, core)| core.supports_platform(platform.os))
-        .map(|(name, core)| ManagedCoreCheck {
-            name: name.clone(),
-            pinned: core.version.clone(),
-            version: installed_version(managed_dir, &core.binary_name).unwrap_or_default(),
+        .map(|(name, core)| {
+            let version = installed_version(managed_dir, &core.binary_name).unwrap_or_default();
+            ManagedCoreCheck {
+                name: name.clone(),
+                pinned: core.version.clone(),
+                mismatch: !version.is_empty() && !versions_match(&version, &core.version),
+                version,
+            }
         })
         .collect::<Vec<_>>();
     checks.sort_by(|a, b| a.name.cmp(&b.name));

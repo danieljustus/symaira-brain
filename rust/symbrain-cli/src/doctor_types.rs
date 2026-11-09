@@ -48,6 +48,9 @@ pub(crate) struct ManagedCoreCheck {
     pub(crate) pinned: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub(crate) version: String,
+    /// Installed binary reports a version other than the pinned one.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub(crate) mismatch: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -233,8 +236,9 @@ pub(crate) const HARNESSES: [HarnessSpec; 9] = [
     },
     HarnessSpec {
         name: "hermes",
-        format: "unsupported",
-        servers_key: "",
+        // Read-only detection: install/uninstall stay unsupported.
+        format: "yaml",
+        servers_key: "mcp_servers",
         supports_mcp_install: false,
     },
     HarnessSpec {

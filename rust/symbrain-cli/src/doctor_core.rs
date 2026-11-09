@@ -126,6 +126,7 @@ pub(super) fn check_harnesses(profiles_dir: &Path) -> Vec<HarnessCheck> {
 
 pub(super) fn check_harness(spec: HarnessSpec, profiles_dir: &Path) -> HarnessCheck {
     let path = harness_path(spec).unwrap_or_default();
+    let read_only = spec.format == "yaml";
     let mut check = HarnessCheck {
         name: spec.name.to_string(),
         config_path: path.display().to_string(),
@@ -139,7 +140,7 @@ pub(super) fn check_harness(spec: HarnessSpec, profiles_dir: &Path) -> HarnessCh
         profile_missing: false,
         superseded: Vec::new(),
     };
-    if !spec.supports_mcp_install {
+    if !spec.supports_mcp_install && !read_only {
         check.config_path.clear();
         check.config_error = "harness does not support MCP installation".to_string();
         return check;
@@ -211,6 +212,11 @@ pub(super) fn check_harness(spec: HarnessSpec, profiles_dir: &Path) -> HarnessCh
 }
 
 pub(super) fn harness_path(spec: HarnessSpec) -> Option<PathBuf> {
+    if spec.name == "hermes" {
+        // shortcut: only ~/.hermes/config.yaml, not profiles/*/config.yaml; extend when a profile-scoped Hermes needs checking.
+        let home = std::env::var_os("HOME").filter(|home| !home.is_empty())?;
+        return Some(Path::new(&home).join(".hermes").join("config.yaml"));
+    }
     symbrain_harness::lookup(spec.name).ok()?.config_path().ok()
 }
 
@@ -221,6 +227,15 @@ pub(super) fn parse_server_map(
     if spec.format == "json" {
         let root: serde_json::Value =
             serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
+        let map = root
+            .get(spec.servers_key)
+            .and_then(|v| v.as_object())
+            .cloned()
+            .unwrap_or_default();
+        Ok(map.into_iter().collect())
+    } else if spec.format == "yaml" {
+        let root: serde_json::Value =
+            serde_yaml_ng::from_slice(bytes).map_err(|error| error.to_string())?;
         let map = root
             .get(spec.servers_key)
             .and_then(|v| v.as_object())
@@ -265,10 +280,14 @@ pub(super) fn sorted_server_names(map: &BTreeMap<String, serde_json::Value>) -> 
 pub(super) fn profile_arg(args: &[serde_json::Value]) -> Option<String> {
     args.iter().enumerate().find_map(|(i, arg)| {
         let value = arg.as_str()?;
-        if value == "--profile" {
+        // Go's flag package accepts one or two dashes (Hermes writes `-profile`).
+        let flag = value
+            .strip_prefix("--")
+            .or_else(|| value.strip_prefix('-'))?;
+        if flag == "profile" {
             args.get(i + 1).and_then(|v| v.as_str()).map(str::to_owned)
         } else {
-            value.strip_prefix("--profile=").map(str::to_owned)
+            flag.strip_prefix("profile=").map(str::to_owned)
         }
     })
 }
