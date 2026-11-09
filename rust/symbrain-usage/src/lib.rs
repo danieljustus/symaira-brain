@@ -34,7 +34,7 @@ pub use providers::{
     selected_providers, set_secretref_timeout,
 };
 pub use retry_after::parse_retry_after;
-pub use snapshot_extra::{ResetGrant, ResetGrantStatus};
+pub use snapshot_extra::{OrgBilling, ResetGrant, ResetGrantStatus};
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
 
 use std::collections::BTreeSet;

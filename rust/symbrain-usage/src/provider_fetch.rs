@@ -1,7 +1,7 @@
 use super::{Provider, UsageError, status_error};
 use crate::UsageSnapshot;
 use crate::parser::parse_snapshot;
-use crate::transport::{Cancellation, Request, Transport};
+use crate::transport::{Cancellation, Request, Response, Transport};
 use chrono::Utc;
 use std::sync::Arc;
 
@@ -12,6 +12,25 @@ pub(super) fn fetch_one(
     source: &str,
     request: Request,
 ) -> Result<UsageSnapshot, UsageError> {
+    let response = fetch_one_response(provider, transport, cancel, request)?;
+    let mut snapshot = parse_snapshot(&provider.id, source, &response.body, Utc::now())?;
+    if provider.id == "moonshot" && provider.region == "cn" {
+        snapshot.currency = Some("CNY".into());
+        for meter in &mut snapshot.meters {
+            meter.unit = "CNY".into();
+        }
+    }
+    Ok(snapshot)
+}
+
+/// Sends the request and returns the 2xx response, mapping
+/// transport and status failures to the provider's report errors.
+pub(super) fn fetch_one_response(
+    provider: &Provider,
+    transport: &Arc<dyn Transport>,
+    cancel: &Cancellation,
+    request: Request,
+) -> Result<Response, UsageError> {
     let response = transport
         .request_with_cancel(request, cancel)
         .map_err(|e| {
@@ -60,12 +79,5 @@ pub(super) fn fetch_one(
             &response.headers,
         ));
     }
-    let mut snapshot = parse_snapshot(&provider.id, source, &response.body, Utc::now())?;
-    if provider.id == "moonshot" && provider.region == "cn" {
-        snapshot.currency = Some("CNY".into());
-        for meter in &mut snapshot.meters {
-            meter.unit = "CNY".into();
-        }
-    }
-    Ok(snapshot)
+    Ok(response)
 }

@@ -88,6 +88,10 @@ pub struct UsageSnapshot {
     /// complete, well-formed block.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reset_grants: Option<crate::ResetGrantStatus>,
+    /// Copilot seats billed to an organization: what the organization billing
+    /// lookup returned (#1001). Absent for personal seats.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_billing: Option<crate::OrgBilling>,
 }
 
 /// One normalized quota or balance meter.

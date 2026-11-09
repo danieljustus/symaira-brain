@@ -49,6 +49,11 @@ the [Unreleased] section is moved into a dated version section.
   `candidate` / `unattributed` state). Discovery is read-only (Claude Code CLI
   and Desktop account ids, Codex `auth.json`), accounts are never merged, and
   single-login reports are unchanged (#1000).
+- Copilot seats billed to an organization show the organization's month-to-date
+  Copilot credits from `GET /user/orgs` and
+  `GET /orgs/{org}/settings/billing/usage/summary`. A 403 (not owner or billing
+  manager), no organization or an outage is reported in `org_billing` and does
+  not fail the report; no cost is computed (#1001).
 
 ## [v0.13.1] - 2026-11-09
 
