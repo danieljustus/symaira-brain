@@ -28,6 +28,13 @@ the [Unreleased] section is moved into a dated version section.
 - `browse/docs/engines.md` and `browse/docs/output-schema.md` no longer link to
   removed Go sources; every claim now points to the Rust crates, tests and
   `cargo test` commands under `browse/` (#1016).
+- Usage: documented the Kimi credential walk (accepted `symvault://` key
+  references, expired CLI login handled without refresh or writes) and why an
+  unresolved key reference stays hidden next to a CLI token (sealed oracle). Refs #931.
+- Usage: documented why Antigravity has no read-only quota source while the app
+  is closed (stale undocumented protobuf cache, OAuth token out of scope) and
+  pinned the "not running" behaviour with a no-HTTP fixture test (#934).
+
 ### Added
 - `symbrain skills uninstall <skill> [--target all|a,b] [--scope] [--dry-run]`
   removes the managed install on every selected target, reports one result per
@@ -37,12 +44,6 @@ the [Unreleased] section is moved into a dated version section.
   field in `--json`, a stderr line in text) when the library skill's own git
   repository has uncommitted changes; `install --require-clean` refuses such a
   source. Clean sources produce the same output as before (#1013).
-- Usage: documented the Kimi credential walk (accepted `symvault://` key
-  references, expired CLI login handled without refresh or writes) and why an
-  unresolved key reference stays hidden next to a CLI token (sealed oracle) (#931).
-- Usage: documented why Antigravity has no read-only quota source while the app
-  is closed (stale undocumented protobuf cache, OAuth token out of scope) and
-  pinned the "not running" behaviour with a no-HTTP fixture test (#934).
 - `symbrain usage` names the local account behind a Claude or Codex row when
   more than one login exists or the credential's owner is ambiguous
   (`accounts` with a stable non-secret label and `used` / `not_read` /
