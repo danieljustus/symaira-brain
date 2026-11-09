@@ -9,6 +9,14 @@
 //!    expired; the file is never written and the refresh token never read.
 //! 3. `web` — `KIMI_AUTH_TOKEN` against the kimi.com billing service.
 //!
+//! `KIMI_CODE_API_KEY` / `KIMI_AUTH_TOKEN` accept `symvault://`, `vault://`,
+//! `env://` and `keychain://` references (`resolve_env`). A reference that
+//! fails to resolve is only reported when it leaves the provider unconfigured;
+//! next to a present CLI token the sealed Go oracle
+//! (`kimi-error-api-retains-cli`) pins the failure as dropped, so it cannot be
+//! added to the chain without re-sealing. Expired CLI token: handled below
+//! (#975), never written or refreshed.
+//!
 //! A Moonshot Open Platform key is a different product with its own provider
 //! (`moonshot`); this endpoint is not documented to accept it. Which API-key
 //! products the live endpoint accepts can only be confirmed against the real

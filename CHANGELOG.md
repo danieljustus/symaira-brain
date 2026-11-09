@@ -37,6 +37,9 @@ the [Unreleased] section is moved into a dated version section.
   field in `--json`, a stderr line in text) when the library skill's own git
   repository has uncommitted changes; `install --require-clean` refuses such a
   source. Clean sources produce the same output as before (#1013).
+- Usage: documented the Kimi credential walk (accepted `symvault://` key
+  references, expired CLI login handled without refresh or writes) and why an
+  unresolved key reference stays hidden next to a CLI token (sealed oracle) (#931).
 
 ## [v0.13.1] - 2026-11-09
 
