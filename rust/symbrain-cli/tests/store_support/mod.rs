@@ -24,6 +24,7 @@ pub fn temp() -> (tempfile::TempDir, PathBuf) {
 pub fn isolate<'a>(command: &'a mut Command, root: &Path) -> &'a mut Command {
     command
         .env_clear()
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .env("HOME", root)
         .env("XDG_CONFIG_HOME", root.join("config"))
         .env("XDG_DATA_HOME", root.join("data"))

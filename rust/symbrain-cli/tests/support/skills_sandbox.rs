@@ -47,6 +47,7 @@ impl Sandbox {
     pub fn skills_with(&self, env: &[(&str, &str)], args: &[&str]) -> Run {
         let output = Command::new(env!("CARGO_BIN_EXE_symbrain"))
             .env_clear()
+            .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
             .envs(coverage::profile_environment())
             .env("HOME", self.root.join("home"))
             .env("XDG_CONFIG_HOME", self.root.join("config"))

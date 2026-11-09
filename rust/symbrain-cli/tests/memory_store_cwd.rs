@@ -85,6 +85,7 @@ fn resolvable_cwd_without_pwd_still_creates_nested_and_bare_stores() {
         let output = Command::new(env!("CARGO_BIN_EXE_symbrain"))
             .args(["memory", "list", "--db", database])
             .env_clear()
+            .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
             .env("HOME", &root)
             .env("XDG_CONFIG_HOME", root.join("config"))
             .env("XDG_DATA_HOME", root.join("data"))

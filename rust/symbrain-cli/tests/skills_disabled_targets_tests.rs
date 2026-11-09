@@ -36,6 +36,7 @@ impl Fixture {
         let root: &Path = self.root.path();
         let output = Command::new(env!("CARGO_BIN_EXE_symbrain"))
             .env_clear()
+            .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
             .envs(coverage::profile_environment())
             .env("HOME", root.join("home"))
             .env("XDG_CONFIG_HOME", root.join("config"))

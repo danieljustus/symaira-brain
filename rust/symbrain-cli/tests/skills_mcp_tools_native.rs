@@ -49,6 +49,7 @@ fn serve(sandbox: &Sandbox, calls: &[(&str, Value)]) -> (BTreeMap<u64, Value>, S
         + "\n";
     let mut child = Command::new(env!("CARGO_BIN_EXE_symbrain"))
         .env_clear()
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .envs(skills_sandbox::coverage::profile_environment())
         .env("HOME", sandbox.path("home"))
         .env("XDG_CONFIG_HOME", sandbox.path("config"))

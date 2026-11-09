@@ -181,6 +181,7 @@ fn run_push(extra: &[&str]) -> (Remote, std::process::Output) {
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .env_clear()
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .env("HOME", home.path())
         .env("XDG_CONFIG_HOME", home.path().join("cfg"))
         .env("XDG_DATA_HOME", home.path().join("xdg"))

@@ -29,6 +29,7 @@ fn command(root: &TempDir, report: &[&str], format: &str) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .env_clear()
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .envs(coverage::profile_environment())
         .env("HOME", &home)
         .env("XDG_CONFIG_HOME", root.path().join("config"))

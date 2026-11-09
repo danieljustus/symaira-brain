@@ -172,15 +172,44 @@ mod tests {
     use super::*;
     use std::net::TcpListener;
 
+    /// Reads one complete HTTP request: a single `read` can return only the
+    /// headers when the body arrives in a later TCP segment.
+    fn read_request(stream: &mut std::net::TcpStream) -> String {
+        use std::io::Read;
+        let mut data = Vec::new();
+        let mut chunk = [0_u8; 4096];
+        loop {
+            let n = stream.read(&mut chunk).unwrap();
+            data.extend_from_slice(&chunk[..n]);
+            let text = String::from_utf8_lossy(&data).into_owned();
+            if let Some(end) = text.find("\r\n\r\n") {
+                let length = text[..end]
+                    .lines()
+                    .find_map(|line| {
+                        let (name, value) = line.split_once(':')?;
+                        name.eq_ignore_ascii_case("content-length")
+                            .then(|| value.trim().parse::<usize>().ok())
+                            .flatten()
+                    })
+                    .unwrap_or(0);
+                if data.len() >= end + 4 + length {
+                    return text;
+                }
+            }
+            if n == 0 {
+                return text;
+            }
+        }
+    }
+
     fn serve(reply: &'static str) -> (String, std::thread::JoinHandle<String>) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let port = listener.local_addr().unwrap().port();
         let handle = std::thread::spawn(move || {
             let (mut stream, _) = listener.accept().unwrap();
-            let mut buffer = [0_u8; 4096];
-            let n = stream.read(&mut buffer).unwrap();
+            let request = read_request(&mut stream);
             stream.write_all(reply.as_bytes()).unwrap();
-            String::from_utf8_lossy(&buffer[..n]).into_owned()
+            request
         });
         (format!("http://127.0.0.1:{port}"), handle)
     }
