@@ -62,6 +62,20 @@ fn seed(base: &Path) -> PathBuf {
     base.join("store")
 }
 
+/// Retries while another process briefly holds a duplicate of the slot's
+/// descriptor: a sibling test's fork keeps the inherited `flock` until its
+/// exec closes it, which on a loaded runner outlasts a single attempt.
+fn ensure_when_free(roots: &[Root], store: &Path) -> Outcome {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    loop {
+        let outcome = ensure("symbrain", roots, store).unwrap();
+        if outcome != Outcome::InProgress || std::time::Instant::now() >= deadline {
+            return outcome;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
+}
+
 fn created(outcome: Outcome) -> (PathBuf, u64, u64) {
     match outcome {
         Outcome::Created { dir, files, bytes } => (dir, files, bytes),
@@ -188,6 +202,6 @@ fn unreadable_state_fails_closed_without_marker_or_partial_backup() {
         .map(|entry| entry.unwrap().file_name())
         .collect();
     assert_eq!(left, [".symbrain.lock"], "partial backup removed");
-    let (dir, ..) = created(ensure("symbrain", &roots(temp.path()), &store).unwrap());
+    let (dir, ..) = created(ensure_when_free(&roots(temp.path()), &store));
     verify_tree(&dir).unwrap();
 }

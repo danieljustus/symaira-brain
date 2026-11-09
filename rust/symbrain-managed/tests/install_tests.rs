@@ -330,7 +330,7 @@ fn exec_of_fixture_fails_with_etxtbsy_while_a_writer_descriptor_is_inherited() {
     let mut holder = Command::new("/bin/sh")
         .args([
             "-c",
-            "exec 9>>\"$0\"; echo ready; read _",
+            "exec 9>>\"$0\"; echo ready; read _ || true",
             script.to_str().unwrap(),
         ])
         .stdin(Stdio::piped())

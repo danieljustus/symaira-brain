@@ -18,6 +18,9 @@ fn run_from_deleted_cwd(root: &Path, verb: &[&str], database: &str) -> (i32, Str
         .args(verb)
         .args(["--db", database])
         .env_clear()
+        // Coverage builds write profiles relative to the (deleted) cwd unless
+        // the absolute profile path set by the coverage runner survives.
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .env("HOME", root)
         .env("XDG_CONFIG_HOME", root.join("config"))
         .env("XDG_DATA_HOME", root.join("data"))
