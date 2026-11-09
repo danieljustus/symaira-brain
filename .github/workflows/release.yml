@@ -393,6 +393,9 @@ jobs:
           echo "CODESIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
           echo "TEAM_ID=$TEAM_ID" >> "$GITHUB_ENV"
 
+      - name: Install Metal Toolchain
+        run: xcodebuild -downloadComponent MetalToolchain
+
       - name: Install XcodeGen
         run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
 
