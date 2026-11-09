@@ -45,6 +45,7 @@ jobs:
           set -euo pipefail
           python3 -B port/harness/test_daemon_state_key_ownership.py
           python3 -B port/harness/test_startup_key_paths.py
+          python3 -B port/harness/test_daemon_state_key_replay.py
 
       - name: Build the Rust CLI
         run: |
@@ -88,6 +89,15 @@ jobs:
             --out "$RUNNER_TEMP/browse-daemon-state-key-ownership.json" \
             2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key-ownership.log"
 
+      - name: Replay sealed Go state-key recording
+        run: |
+          set -euo pipefail
+          python3 port/harness/daemon_state_key_replay.py \
+            --rust "$GITHUB_WORKSPACE/browse/target/release/symbrowse" \
+            --rust-store-probe "$GITHUB_WORKSPACE/browse/target/release/examples/state_key_store_probe" \
+            --out "$RUNNER_TEMP/browse-daemon-state-key-replay.json" \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key-replay.log"
+
       - name: Retain exact-head daemon receipt
         if: always()
         env:
@@ -119,5 +129,7 @@ jobs:
             ${{ runner.temp }}/browse-daemon-races.log
             ${{ runner.temp }}/browse-daemon-state-key-ownership.json
             ${{ runner.temp }}/browse-daemon-state-key-ownership.log
+            ${{ runner.temp }}/browse-daemon-state-key-replay.json
+            ${{ runner.temp }}/browse-daemon-state-key-replay.log
           if-no-files-found: error
           retention-days: 14

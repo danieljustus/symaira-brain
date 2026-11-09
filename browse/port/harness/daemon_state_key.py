@@ -75,11 +75,13 @@ def oracle_api(source: Path, go: str) -> dict:
                 "probe_sha256": registry.process.digest(HERE / "state_key_oracle_test.go.in")}
 
 
-def observe(binary: Path, case: dict, provider: Path, api: dict, control: tuple[Path, str] | None = None) -> dict:
+def observe(binary: Path, case: dict, provider: Path, api: dict, control: tuple[Path, str] | None = None,
+            extra_env: dict | None = None) -> dict:
     with tempfile.TemporaryDirectory(prefix="bk-", dir=registry.process.private_temporary_parent()) as directory:
         root = Path(directory)
         env = registry.environment(root)
         env["SYMBROWSE_NO_AUTOSTART"] = "1"
+        env.update(extra_env or {})
         session = "key" + str(os.getpid())
         ledger = root / "queries.jsonl"
         owned_bin = root / "bin"; owned_bin.mkdir(mode=0o700)
@@ -202,7 +204,8 @@ HISTORICAL_RECORD_BANNER = (
     "HISTORICAL RECORD MODE (#1004): daemon_state_key.py drives a Go binary and the Go "
     "oracle probes that were removed in #1003. It only works from a checkout of the "
     "pre-removal revision 57c26c76e (full: 57c26c76e238e458d9027d5ee4362df24d30b47e). Replay of "
-    "sealed fixtures (make parity-smoke init-differential) needs no Go. See "
+    "sealed fixtures (make parity-smoke init-differential) needs no Go; the state-key "
+    "gate replays its sealed recording with daemon_state_key_replay.py. See "
     "docs/adr/historical-go-record-paths-1004.md."
 )
 
