@@ -41,6 +41,10 @@ pub struct ProviderUsage {
     pub snapshot: Option<UsageSnapshot>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// Local accounts behind this row; emitted only when more than one login
+    /// exists or the credential in use cannot be tied to one (#1000).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub accounts: Vec<crate::AccountRef>,
 }
 
 impl ProviderUsage {
@@ -59,6 +63,7 @@ impl ProviderUsage {
             history: None,
             snapshot: None,
             error: resolution_failed.then(|| provider.auth_status.detail.clone()),
+            accounts: provider.accounts.clone(),
         }
     }
 }

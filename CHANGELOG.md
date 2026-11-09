@@ -43,6 +43,12 @@ the [Unreleased] section is moved into a dated version section.
 - Usage: documented why Antigravity has no read-only quota source while the app
   is closed (stale undocumented protobuf cache, OAuth token out of scope) and
   pinned the "not running" behaviour with a no-HTTP fixture test (#934).
+- `symbrain usage` names the local account behind a Claude or Codex row when
+  more than one login exists or the credential's owner is ambiguous
+  (`accounts` with a stable non-secret label and `used` / `not_read` /
+  `candidate` / `unattributed` state). Discovery is read-only (Claude Code CLI
+  and Desktop account ids, Codex `auth.json`), accounts are never merged, and
+  single-login reports are unchanged (#1000).
 
 ## [v0.13.1] - 2026-11-09
 

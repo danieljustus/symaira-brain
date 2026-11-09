@@ -169,6 +169,13 @@ fn render_report_table(writer: &mut dyn Write, report: &Report) -> std::io::Resu
         } else {
             writeln!(writer, "unknown")?;
         }
+        for account in &provider.accounts {
+            writeln!(
+                writer,
+                "  account\t{}\t{}\t{}",
+                account.label, account.state, account.source
+            )?;
+        }
         if let Some(h) = &provider.history {
             writeln!(
                 writer,
@@ -248,6 +255,7 @@ mod tests {
                     ..symbrain_usage::UsageSnapshot::default()
                 }),
                 history: None,
+                accounts: Vec::new(),
                 error: None,
             }],
         };

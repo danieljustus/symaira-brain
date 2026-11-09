@@ -1,6 +1,7 @@
 //! Schema-versioned, read-only AI provider usage reporting.
 #![deny(unsafe_code)]
 
+mod accounts;
 mod claude_history;
 mod codex_history;
 mod go_decimal;
@@ -25,6 +26,7 @@ mod retry_after;
 mod snapshot_extra;
 mod transport;
 
+pub use accounts::AccountRef;
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
 pub use providers::{
     Provider, ProviderSelection, ProviderSpec, UsageError, all_providers, is_secret_reference,

@@ -84,6 +84,8 @@ pub struct Provider {
     plan: Option<String>,
 }
 
+    /// Claude/Codex accounts, set only when attribution is ambiguous (#1000).
+    pub(crate) accounts: Vec<crate::AccountRef>,
 impl std::fmt::Debug for Provider {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Provider")
@@ -130,6 +132,7 @@ impl Provider {
             plan: None,
         }
     }
+            accounts: Vec::new(),
 
     /// A configured provider that performs no process, home, keychain, or network reads.
     #[must_use]

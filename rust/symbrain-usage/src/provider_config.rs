@@ -57,6 +57,7 @@ include!("provider_config/hermes.rs");
 include!("provider_config/jwt.rs");
 include!("provider_config/keychain.rs");
 include!("provider_config/registry.rs");
+include!("provider_config/account_scan.rs");
 include!("provider_config/accounts.rs");
 include!("provider_config/other_accounts.rs");
 include!("provider_config/opencode_api.rs");
@@ -71,6 +72,10 @@ mod coverage;
 #[cfg(test)]
 #[path = "provider_config/claude_plan_tests.rs"]
 mod claude_plan_tests;
+
+#[cfg(test)]
+#[path = "provider_config/account_scan_tests.rs"]
+mod account_scan_tests;
 
 #[cfg(test)]
 #[path = "kimi_expiry_tests.rs"]
