@@ -250,9 +250,6 @@ fn verify_cosign(
 ) -> Result<(), ManagedError> {
     let cosign = find_on_path("cosign");
     let reason = if cosign.is_none() {
-        #[cfg(windows)]
-        let lookup_error = "executable file not found in %PATH%";
-        #[cfg(not(windows))]
         let lookup_error = "executable file not found in $PATH";
         Some(format!(
             "cosign is not installed on PATH (exec: \"cosign\": {lookup_error})"
@@ -338,23 +335,7 @@ fn find_on_path(binary: &str) -> Option<PathBuf> {
 }
 
 fn executable_names(binary: &str) -> Vec<OsString> {
-    #[cfg(windows)]
-    {
-        let extensions = env::var_os("PATHEXT").unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into());
-        let mut names = vec![OsString::from(binary)];
-        names.extend(
-            extensions
-                .to_string_lossy()
-                .split(';')
-                .filter(|extension| !extension.is_empty())
-                .map(|extension| OsString::from(format!("{binary}{extension}"))),
-        );
-        names
-    }
-    #[cfg(not(windows))]
-    {
-        vec![OsString::from(binary)]
-    }
+    vec![OsString::from(binary)]
 }
 
 #[must_use]

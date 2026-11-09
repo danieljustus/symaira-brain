@@ -363,7 +363,6 @@ fn is_expired(meta: &CacheMeta, now: SystemTime) -> Result<bool, CacheError> {
     Ok(parse_time(&meta.expires_at)?.is_some_and(|expires| now > expires))
 }
 
-#[cfg(unix)]
 fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
     use std::{fs::OpenOptions, io::Write, os::unix::fs::OpenOptionsExt};
     let mut file = OpenOptions::new()
@@ -375,20 +374,9 @@ fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
     file.write_all(data)
 }
 
-#[cfg(not(unix))]
-fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
-    fs::write(path, data)
-}
-
-#[cfg(unix)]
 fn secure_directory(path: &Path) -> std::io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(0o700))
-}
-
-#[cfg(not(unix))]
-fn secure_directory(_path: &Path) -> std::io::Result<()> {
-    Ok(())
 }
 
 #[cfg(test)]
@@ -425,7 +413,6 @@ mod tests {
         assert_eq!(entries.len(), 1);
         assert_eq!(entries[0].id, id);
         assert_eq!(entries[0].bytes, 12);
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             assert_eq!(

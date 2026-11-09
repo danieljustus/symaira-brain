@@ -108,7 +108,6 @@ fn relative_root_is_stored_as_an_absolute_logical_path() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn internal_symlink_directories_are_enumerated_through_capability() {
     use std::os::unix::fs::symlink;
@@ -131,7 +130,6 @@ fn internal_symlink_directories_are_enumerated_through_capability() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn overlay_directory_symlink_is_not_enumerated_ambiently() {
     use std::os::unix::fs::symlink;
@@ -151,7 +149,6 @@ fn overlay_directory_symlink_is_not_enumerated_ambiently() {
     assert!(error.to_string().contains("overlays") || error.to_string().contains("escapes"));
 }
 
-#[cfg(unix)]
 #[test]
 fn in_root_overlay_block_symlink_is_checked_through_capability() {
     use std::os::unix::fs::symlink;
@@ -170,7 +167,6 @@ fn in_root_overlay_block_symlink_is_checked_through_capability() {
     assert!(error.to_string().contains("escapes") || error.to_string().contains("path"));
 }
 
-#[cfg(unix)]
 #[test]
 fn binary_markdown_resources_preserve_bytes() {
     let temp = tempfile::tempdir().expect("tempdir");
@@ -186,7 +182,6 @@ fn binary_markdown_resources_preserve_bytes() {
     assert_eq!(bundle.markdown["references/data.md"], [0xff, 0x00, b'x']);
 }
 
-#[cfg(unix)]
 #[test]
 fn manifest_symlink_is_rejected_as_control_input() {
     use std::os::unix::fs::symlink;
@@ -205,7 +200,6 @@ fn manifest_symlink_is_rejected_as_control_input() {
     assert!(error.to_string().contains("escapes skill root"));
 }
 
-#[cfg(unix)]
 #[test]
 fn control_file_symlinks_are_rejected() {
     use std::os::unix::fs::symlink;

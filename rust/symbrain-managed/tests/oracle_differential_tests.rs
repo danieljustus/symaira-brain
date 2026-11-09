@@ -218,7 +218,6 @@ fn atomic_install_replaces_bytes_and_sets_executable_mode() {
     atomic_install(dir.path(), "symtool", b"new").expect("replace install");
     let path = dir.path().join("symtool");
     assert_eq!(fs::read(&path).expect("read"), b"new");
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(

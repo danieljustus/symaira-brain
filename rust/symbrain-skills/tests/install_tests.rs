@@ -1,5 +1,4 @@
 use std::fs;
-#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 
@@ -23,7 +22,6 @@ fn write_source(root: &Path, body: &str) {
 fn install_copy_writes_marker_base_and_strips_executable_bits() {
     let source = tempfile::tempdir().expect("source");
     write_source(source.path(), "body\n");
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(
@@ -45,10 +43,7 @@ fn install_copy_writes_marker_base_and_strips_executable_bits() {
     .expect("install");
     assert_eq!(result.action, "installed");
     assert_eq!(result.mode, "copy");
-    #[cfg(unix)]
     assert_eq!(result.mode_changes.len(), 1);
-    #[cfg(not(unix))]
-    assert!(result.mode_changes.is_empty());
     let destination = home.path().join(".config/opencode/skills/demo");
     assert_eq!(
         fs::read(destination.join("SKILL.md")).expect("installed skill"),
@@ -64,7 +59,6 @@ fn install_copy_writes_marker_base_and_strips_executable_bits() {
             .join(".local/share/symskills/base/opencode/demo/manifest.json")
             .is_file()
     );
-    #[cfg(unix)]
     assert_eq!(
         fs::metadata(destination.join("reference.txt"))
             .expect("installed resource")

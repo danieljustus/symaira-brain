@@ -67,13 +67,11 @@ exact Brain adapter tests additionally require both streams empty before Go
 fallback. One actual process mutant canonicalizes a generated base and reads
 the wrong physical owner, and must be rejected.
 
-The `-windows-path-reference.json` process gate copies exact SHA-pinned Go
-1.26.7 Windows Clean/Join functions and compares the exact production Rust
-helper in an owned portable probe, retaining both executable bytes and drivers.
-It checks drives/UNC/verbatim/device/postClean and raw UTF16/WTF8 inputs.
-The copy/namespace adaptations are declared in the receipt; it is source-
-reference evidence and never substitutes for native Windows CLI/file tests.
-SDK BSD source licensing is retained in `windows-sdk-LICENSE.txt`.
+The Windows path-reference process gate (`windows_path_reference.py`) was removed
+with the Windows-only Guard path code (#992; native Windows is outside the
+supported platform scope, see AGENTS.md). Its pinned SDK provenance
+(`windows-sdk-source.json`, `windows-sdk-LICENSE.txt`) is retained as historical
+evidence only.
 See [the ownership decision](../../docs/adr/guard-generated-config-path-ownership.md).
 
 The repaired Linux source5bb receipt retains 25 path cases (21 full reports and

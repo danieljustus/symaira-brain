@@ -46,20 +46,7 @@ pub(super) fn initialize_with_sources(
 }
 
 fn not_directory_message() -> String {
-    #[cfg(windows)]
-    {
-        // Go os.MkdirAll uses syscall.ENOTDIR = ERROR_PATH_NOT_FOUND (3).
-        // Use the real Windows message, stripping Rust's display-only suffix.
-        let message = std::io::Error::from_raw_os_error(3).to_string();
-        message
-            .strip_suffix(" (os error 3)")
-            .unwrap_or(&message)
-            .to_owned()
-    }
-    #[cfg(not(windows))]
-    {
-        "not a directory".to_owned()
-    }
+    "not a directory".to_owned()
 }
 
 fn source_error(error: ResolveError) -> String {

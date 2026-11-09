@@ -1,7 +1,6 @@
 //! Replays the 13 frozen Go `symbrowse mcp` stdout fixtures (MCP-001..008)
 //! against the production Rust MCP server proxying to the production Rust
 //! daemon, without Go. Provenance: `testdata/port/mcp/frozen-go-provenance.json`.
-#![cfg(unix)]
 
 use std::fs;
 use std::io::Cursor;

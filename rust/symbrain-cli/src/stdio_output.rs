@@ -4,15 +4,12 @@ use std::fmt;
 use std::io::{self, Write};
 
 pub(crate) fn pipe_boundary(error: &io::Error, process_stdout: bool) {
-    #[cfg(unix)]
     if process_stdout && error.raw_os_error().is_some() && error.kind() == io::ErrorKind::BrokenPipe
     {
         // Go os.File invokes epipecheck at the failing write, rather than at
         // startup or command completion. Already committed work remains owned.
         let _ = signal_hook::low_level::emulate_default_handler(signal_hook::consts::SIGPIPE);
     }
-    #[cfg(not(unix))]
-    let _ = (error, process_stdout);
 }
 
 pub(crate) fn io_cause(error: &io::Error) -> String {
@@ -22,14 +19,7 @@ pub(crate) fn io_cause(error: &io::Error) -> String {
     let literal = error.to_string();
     let suffix = format!(" (os error {code})");
     let message = literal.strip_suffix(&suffix).unwrap_or(&literal);
-    #[cfg(unix)]
-    {
-        message.to_lowercase()
-    }
-    #[cfg(not(unix))]
-    {
-        message.to_owned()
-    }
+    message.to_lowercase()
 }
 
 pub(crate) fn write_json(report: &impl serde::Serialize, stdout: &mut dyn Write) -> io::Result<()> {

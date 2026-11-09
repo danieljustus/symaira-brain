@@ -99,7 +99,6 @@ fn standalone_decide_keeps_private_guard_audit_state() {
     assert_eq!(record["command"], "fixture");
     assert_eq!(record["decision"], "allow");
     assert!(!root.path().join("data/symbrain").exists());
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(
@@ -195,7 +194,6 @@ fn several_invalid_defaults_report_the_first_key_deterministically() {
     assert_eq!(detail(&doctor_with_config(text).1), detail(&first));
 }
 
-#[cfg(unix)]
 #[test]
 fn unreadable_audit_log_is_a_native_stat_error() {
     let root = TempDir::new().unwrap();
@@ -216,7 +214,6 @@ fn unreadable_audit_log_is_a_native_stat_error() {
 }
 
 // Windows reports missing parent directories of other sources first.
-#[cfg(unix)]
 #[test]
 fn server_without_command_or_url_is_a_native_discovery_error() {
     let root = TempDir::new().unwrap();

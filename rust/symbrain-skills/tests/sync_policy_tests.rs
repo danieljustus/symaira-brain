@@ -1,4 +1,3 @@
-#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
 #[test]
@@ -162,7 +161,6 @@ fn sync_harness_changed_uses_go_pull_diagnostic() {
     assert_eq!(results[0].error, "harness changed; use symskills pull");
 }
 
-#[cfg(any(unix, windows))]
 #[test]
 fn sync_empty_mode_preserves_symlink_marker() {
     let library = tempfile::tempdir().expect("library");
@@ -187,7 +185,6 @@ fn sync_empty_mode_preserves_symlink_marker() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn sync_manifest_allow_executable_is_or_with_marker_policy() {
     let library = tempfile::tempdir().expect("library");

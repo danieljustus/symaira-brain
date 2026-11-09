@@ -1,6 +1,5 @@
 //! Native `symbrain skills` empty-log and Go byte contracts.
 
-#![cfg(unix)]
 #![deny(unsafe_code)]
 
 #[path = "../../test-support/coverage.rs"]

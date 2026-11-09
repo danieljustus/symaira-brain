@@ -44,14 +44,9 @@ impl Parsed {
 pub(crate) struct ParseFailed;
 
 fn bytes_to_os(bytes: &[u8]) -> OsString {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStringExt;
         OsString::from_vec(bytes.to_vec())
-    }
-    #[cfg(not(unix))]
-    {
-        OsString::from(String::from_utf8_lossy(bytes).into_owned())
     }
 }
 

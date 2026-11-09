@@ -231,7 +231,6 @@ fn v3_retention_authenticates_encrypted_header() {
     fs::remove_dir_all(root).unwrap();
 }
 
-#[cfg(unix)]
 #[test]
 fn refuses_symlink_state_files() {
     use std::os::unix::fs::symlink;
@@ -249,7 +248,6 @@ fn refuses_symlink_state_files() {
     fs::remove_dir_all(root).unwrap();
 }
 
-#[cfg(unix)]
 fn store(root: &PathBuf) -> Store {
     Store::new(root, Duration::days(30), None).unwrap()
 }
@@ -307,7 +305,6 @@ fn assert_no_temporary_files(root: &PathBuf) {
     }
 }
 
-#[cfg(unix)]
 fn assert_private_modes(directory: &PathBuf, file: &PathBuf) {
     use std::os::unix::fs::PermissionsExt;
     assert_eq!(
@@ -319,6 +316,3 @@ fn assert_private_modes(directory: &PathBuf, file: &PathBuf) {
         0o600
     );
 }
-
-#[cfg(not(unix))]
-fn assert_private_modes(_directory: &PathBuf, _file: &PathBuf) {}

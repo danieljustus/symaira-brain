@@ -1,7 +1,6 @@
 #![allow(missing_docs)]
 
 use serde::Deserialize;
-#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use symbrain_adapter::{
@@ -252,7 +251,6 @@ fn atomic_write_preserves_mode_and_rejects_symlink_parents() {
     let temp = tempfile::tempdir().expect("temporary project");
     let target = temp.path().join("AGENTS.md");
     std::fs::write(&target, b"old").expect("existing target");
-    #[cfg(unix)]
     {
         std::fs::set_permissions(&target, std::fs::Permissions::from_mode(0o640))
             .expect("existing mode");
@@ -260,7 +258,6 @@ fn atomic_write_preserves_mode_and_rejects_symlink_parents() {
     symbrain_adapter::write_atomic(temp.path(), Path::new("AGENTS.md"), b"new")
         .expect("atomic replacement");
     assert_eq!(std::fs::read(&target).expect("target bytes"), b"new");
-    #[cfg(unix)]
     assert_eq!(
         std::fs::metadata(&target)
             .expect("target metadata")
@@ -270,11 +267,9 @@ fn atomic_write_preserves_mode_and_rejects_symlink_parents() {
         0o640
     );
 
-    #[cfg(unix)]
     let fresh = temp.path().join("fresh.md");
     symbrain_adapter::write_atomic(temp.path(), Path::new("fresh.md"), b"fresh")
         .expect("atomic creation");
-    #[cfg(unix)]
     assert_eq!(
         std::fs::metadata(&fresh)
             .expect("fresh metadata")
@@ -295,7 +290,6 @@ fn atomic_write_preserves_mode_and_rejects_symlink_parents() {
         std::fs::read(&nested_rendered.path).expect("nested target bytes"),
         nested_rendered.output
     );
-    #[cfg(unix)]
     {
         let cursor_dir = nested_project.join(".cursor");
         let rules_dir = cursor_dir.join("rules");
@@ -315,7 +309,6 @@ fn atomic_write_preserves_mode_and_rejects_symlink_parents() {
         }
     }
 
-    #[cfg(unix)]
     {
         let outside = tempfile::tempdir().expect("outside directory");
         let link = temp.path().join("rules");
@@ -329,7 +322,6 @@ fn atomic_write_preserves_mode_and_rejects_symlink_parents() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn atomic_write_retains_parent_capability_after_replacement() {
     let temp = tempfile::tempdir().expect("temporary project");
@@ -358,7 +350,6 @@ fn unknown_harness_is_not_silently_skipped() {
     assert!(render_for_harness("toolbox", b"", b"content", Path::new("/project")).is_err());
 }
 
-#[cfg(unix)]
 #[test]
 fn atomic_write_preserves_special_mode_and_extended_attribute() {
     use rustix::fs::{self, XattrFlags};

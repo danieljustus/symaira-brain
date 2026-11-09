@@ -42,7 +42,7 @@ pub(super) fn run(format: Format) -> ExitCode {
 }
 
 fn browser_root() -> Option<PathBuf> {
-    let home = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" })?;
+    let home = std::env::var_os("HOME")?;
     if home.is_empty() {
         return None;
     }
@@ -52,11 +52,6 @@ fn browser_root() -> Option<PathBuf> {
             .join("Application Support")
             .join("Google")
             .join("Chrome")
-    } else if cfg!(windows) {
-        PathBuf::from(std::env::var_os("LOCALAPPDATA").unwrap_or_default())
-            .join("Google")
-            .join("Chrome")
-            .join("User Data")
     } else {
         PathBuf::from(home).join(".config").join("google-chrome")
     })

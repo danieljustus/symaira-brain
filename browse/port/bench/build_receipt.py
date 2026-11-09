@@ -7,6 +7,14 @@ from pathlib import Path
 import subprocess
 
 
+HISTORICAL_RECORD_BANNER = (
+    "HISTORICAL RECORD MODE (#1004): bench/build_receipt.py `--kind go` records a Go build and needs a Go toolchain. "
+    "The Go implementation was removed in #1003; this mode only works from a checkout of the "
+    "pre-removal revision 57c26c76e (full: 57c26c76e238e458d9027d5ee4362df24d30b47e). It is not run by any gate; sealed fixtures "
+    "replay without Go. See docs/adr/historical-go-record-paths-1004.md."
+)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", type=Path, required=True)
@@ -14,6 +22,8 @@ def main():
     parser.add_argument("--kind", choices=("go", "rust"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.kind == "go":
+        raise SystemExit(HISTORICAL_RECORD_BANNER)
     source = args.source.resolve(strict=True)
     repo = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], cwd=source, text=True).strip())
     assert not subprocess.check_output(["git", "status", "--porcelain"], cwd=repo), "build source must be clean"

@@ -5,9 +5,6 @@ use std::path::{Path, PathBuf};
 use symbrain_core::exit;
 use symbrain_core::xdg;
 
-#[cfg(windows)]
-const MISSING_HOME_ERR: &str = "%userprofile% is not defined";
-#[cfg(not(windows))]
 const MISSING_HOME_ERR: &str = "$HOME is not defined";
 
 const DEFAULT_CONFIG_TOML: &str = include_str!("init_templates/default_config.toml");
@@ -106,14 +103,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
 // PathBuf::join retains separators inside an XDG value, unlike Go's
 // filepath.Join. Rebuild Windows components without resolving symlinks.
 fn native_path(path: &Path) -> PathBuf {
-    #[cfg(windows)]
-    {
-        path.components().collect()
-    }
-    #[cfg(not(windows))]
-    {
-        path.to_path_buf()
-    }
+    path.to_path_buf()
 }
 
 /// Atomically writes `contents` to `path` unless a file/directory/symlink-target already
@@ -126,12 +116,7 @@ fn write_if_missing(path: &Path, contents: &[u8]) -> Result<bool, String> {
             Ok(true)
         }
         Err(err) => {
-            // Go's Windows stat fallback opens reparse points with CreateFile.
-            let operation = if cfg!(windows) && err.raw_os_error() == Some(1921) {
-                "CreateFile"
-            } else {
-                "stat"
-            };
+            let operation = "stat";
             Err(format!(
                 "{operation} {}: {}",
                 path.display(),
@@ -148,11 +133,7 @@ fn mkdir_all(path: &Path) -> Result<(), String> {
         return if metadata.is_dir() {
             Ok(())
         } else {
-            let reason = if cfg!(windows) {
-                go_io_error(&io::Error::from_raw_os_error(3))
-            } else {
-                "not a directory".to_owned()
-            };
+            let reason = "not a directory".to_owned();
             Err(format!("mkdir {}: {reason}", path.display()))
         };
     }
@@ -160,7 +141,6 @@ fn mkdir_all(path: &Path) -> Result<(), String> {
         mkdir_all(parent)?;
     }
     let builder = fs::DirBuilder::new();
-    #[cfg(unix)]
     let builder = {
         use std::os::unix::fs::DirBuilderExt;
         let mut builder = builder;
@@ -187,14 +167,7 @@ fn go_io_error(error: &io::Error) -> String {
     let message = rendered
         .rsplit_once(" (os error ")
         .map_or(rendered.as_str(), |(text, _)| text);
-    #[cfg(windows)]
-    {
-        message.to_owned()
-    }
-    #[cfg(not(windows))]
-    {
-        message.to_ascii_lowercase()
-    }
+    message.to_ascii_lowercase()
 }
 
 #[cfg(test)]
@@ -223,11 +196,7 @@ mod tests {
         let root = tempfile::tempdir().unwrap();
         let collision = root.path().join("file");
         fs::write(&collision, b"preserve").unwrap();
-        let reason = if cfg!(windows) {
-            "The system cannot find the path specified."
-        } else {
-            "not a directory"
-        };
+        let reason = "not a directory";
         assert_eq!(
             mkdir_all(&collision.join("nested/leaf")),
             Err(format!("mkdir {}: {reason}", collision.display()))
@@ -235,7 +204,6 @@ mod tests {
         assert_eq!(fs::read(collision).unwrap(), b"preserve");
     }
 
-    #[cfg(unix)]
     #[test]
     fn symlink_loop_preserves_stat_context() {
         let root = tempfile::tempdir().unwrap();

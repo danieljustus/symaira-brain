@@ -101,9 +101,6 @@ pub fn discover(binary_name: &str, override_path: &str) -> Result<String, Broker
     }
 
     which(binary_name).ok_or_else(|| {
-        #[cfg(windows)]
-        let path_var = "%PATH%";
-        #[cfg(not(windows))]
         let path_var = "$PATH";
         BrokerError::Io(io::Error::new(
             io::ErrorKind::NotFound,
@@ -119,14 +116,9 @@ fn is_usable_executable(path: &std::path::Path) -> bool {
     if !metadata.is_file() {
         return false;
     }
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         metadata.permissions().mode() & 0o111 != 0
-    }
-    #[cfg(not(unix))]
-    {
-        true
     }
 }
 
@@ -138,24 +130,7 @@ fn find_in_dir(directory: &std::path::Path, binary: &str) -> Option<std::path::P
 }
 
 fn executable_names(binary: &str) -> Vec<OsString> {
-    #[cfg(windows)]
-    {
-        let extensions =
-            std::env::var_os("PATHEXT").unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into());
-        let mut names = vec![OsString::from(binary)];
-        names.extend(
-            extensions
-                .to_string_lossy()
-                .split(';')
-                .filter(|ext| !ext.is_empty())
-                .map(|ext| OsString::from(format!("{binary}{ext}"))),
-        );
-        names
-    }
-    #[cfg(not(windows))]
-    {
-        vec![OsString::from(binary)]
-    }
+    vec![OsString::from(binary)]
 }
 
 fn which(binary: &str) -> Option<String> {
@@ -238,7 +213,6 @@ pub struct Options {
 struct Inner {
     next_id: AtomicI64,
     pending: Mutex<HashMap<i64, Sender<Result<serde_json::Value, BrokerError>>>>,
-    #[cfg(unix)]
     pid: u32,
     done: Mutex<Option<String>>,
 }
@@ -278,7 +252,6 @@ impl Client {
         } else {
             Stdio::inherit()
         });
-        #[cfg(unix)]
         {
             use std::os::unix::process::CommandExt;
             cmd.process_group(0);
@@ -292,7 +265,6 @@ impl Client {
         let inner = Arc::new(Inner {
             next_id: AtomicI64::new(0),
             pending: Mutex::new(HashMap::new()),
-            #[cfg(unix)]
             pid,
             done: Mutex::new(None),
         });
@@ -597,10 +569,7 @@ impl Client {
     pub fn kill(&self) -> Result<(), BrokerError> {
         let mut child_guard = self.child.lock().expect("child lock");
         if let Some(child) = child_guard.as_mut() {
-            #[cfg(unix)]
             signal_process_group(self.pid, "-KILL").map_err(BrokerError::Io)?;
-            #[cfg(not(unix))]
-            child.kill().map_err(BrokerError::Io)?;
             let status = child.wait().map_err(BrokerError::Io)?;
             *self.exited.lock().expect("exited lock") = Some(status);
         }
@@ -613,7 +582,6 @@ impl Client {
     /// # Errors
     /// Returns an error when SIGTERM delivery fails.
     pub fn terminate(&self) -> Result<(), BrokerError> {
-        #[cfg(unix)]
         {
             signal_process_group(self.pid, "-TERM").map_err(BrokerError::Io)?;
         }
@@ -640,7 +608,6 @@ impl Drop for Client {
         let _ = self.close();
         let mut child_guard = self.child.lock().expect("child lock");
         if let Some(mut child) = child_guard.take() {
-            #[cfg(unix)]
             let _ = signal_process_group(self.pid, "-KILL");
             let _ = child.kill();
             let _ = child.wait();
@@ -659,7 +626,6 @@ impl Drop for Client {
     }
 }
 
-#[cfg(unix)]
 fn signal_process_group(pid: u32, signal: &str) -> io::Result<()> {
     let status = Command::new("/bin/kill")
         .arg(signal)
@@ -750,7 +716,6 @@ fn read_loop(stdout: ChildStdout, inner: Arc<Inner>) {
             }
             Err(err) => {
                 terminal_detail = err.to_string();
-                #[cfg(unix)]
                 let _ = signal_process_group(inner.pid, "-KILL");
                 break;
             }
@@ -876,7 +841,7 @@ mod tests {
     fn missing_binary_error_uses_go_platform_path_placeholder() {
         let error = discover("symbrain-definitely-missing-fixture-binary", "")
             .expect_err("fixture binary must not exist");
-        let expected = if cfg!(windows) { "%PATH%" } else { "$PATH" };
+        let expected = "$PATH";
         assert!(error.to_string().contains(expected), "{error}");
     }
 
@@ -890,7 +855,6 @@ mod tests {
         let fixture = directory.path().join("fixture");
         std::fs::copy(std::env::current_exe().expect("test executable"), &fixture)
             .expect("copy executable");
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             let mut permissions = std::fs::metadata(&fixture)

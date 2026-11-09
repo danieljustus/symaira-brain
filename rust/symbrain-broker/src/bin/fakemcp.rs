@@ -242,7 +242,6 @@ fn sleep_env(name: &str, fallback_ms: u64) {
 fn record_pid(path: &str) {
     let mut options = OpenOptions::new();
     options.create(true).append(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
@@ -255,7 +254,6 @@ fn record_pid(path: &str) {
 fn record_call(path: &str, name: &str) {
     let mut options = OpenOptions::new();
     options.create(true).append(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);

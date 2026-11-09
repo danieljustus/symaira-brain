@@ -1,22 +1,14 @@
-#![cfg(any(unix, windows))]
-
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use symbrain_skills::{RenderMetadata, load_bundle, materialize, render_target};
 
 fn link_directory(target: &Path, link: &Path) {
-    #[cfg(unix)]
     std::os::unix::fs::symlink(target, link).unwrap();
-    #[cfg(windows)]
-    std::os::windows::fs::symlink_dir(target, link).unwrap();
 }
 
 fn remove_directory_link(link: &Path) {
-    #[cfg(unix)]
     fs::remove_file(link).unwrap();
-    #[cfg(windows)]
-    fs::remove_dir(link).unwrap();
 }
 
 fn source_at(parent: &Path) -> PathBuf {
@@ -29,7 +21,6 @@ fn source_at(parent: &Path) -> PathBuf {
     .unwrap();
     fs::write(source.join("real/nested/data.bin"), b"SAFE").unwrap();
     fs::write(source.join("real/note.md"), b"Resource markdown\n").unwrap();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(
@@ -78,7 +69,6 @@ fn relative_and_absolute_in_root_directory_links_materialize_regular_files() {
                 .file_type()
                 .is_symlink()
         );
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             assert_eq!(
@@ -165,20 +155,6 @@ fn renamed_source_root_keeps_hashing_and_copying_the_retained_directory() {
     let render = rendered(&bundle);
     let initial = materialize(&bundle, &render, &temp.path().join("before")).unwrap();
     let rename = fs::rename(&source, temp.path().join("retained-source"));
-    #[cfg(windows)]
-    {
-        // Cap-std deliberately denies FILE_SHARE_DELETE on directory handles:
-        // do not weaken that protection to mimic Unix root replacement.
-        let error = rename.unwrap_err();
-        assert_eq!(error.raw_os_error(), Some(32));
-        let result = materialize(&bundle, &render, &temp.path().join("after")).unwrap();
-        assert_eq!(result.source_hash, initial.source_hash);
-        assert_eq!(
-            fs::read(result.root.join("linked/nested/data.bin")).unwrap(),
-            b"SAFE"
-        );
-    }
-    #[cfg(unix)]
     {
         rename.unwrap();
         fs::create_dir_all(source.join("real/nested")).unwrap();

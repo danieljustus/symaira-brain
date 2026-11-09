@@ -1,4 +1,3 @@
-#[cfg(unix)]
 use cap_fs_ext::OpenOptionsExt;
 use cap_std::fs::{Dir, OpenOptions};
 use std::fs;
@@ -10,7 +9,6 @@ use super::core::AtomicFile;
 pub(super) fn reserve_name(parent: &Dir, name: &Path) -> io::Result<bool> {
     let mut options = OpenOptions::new();
     options.write(true).create_new(true);
-    #[cfg(unix)]
     options.mode(0o600);
     match parent.open_with(name, &options) {
         Ok(file) => {
@@ -67,7 +65,6 @@ pub fn atomic_write(path: &Path, data: &[u8], mode: u32) -> io::Result<()> {
 pub fn create_private_dir_all(path: &Path) -> io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::DirBuilderExt;
         builder.mode(0o700);

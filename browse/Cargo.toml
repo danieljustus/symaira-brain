@@ -15,9 +15,6 @@ aes-gcm = { version = "=0.11.1", features = ["zeroize"] }
 async-tungstenite = { version = "=0.32.1", default-features = false, features = ["tokio-runtime"] }
 chromiumoxide = { version = "=0.9.1", default-features = false }
 fs2 = "=0.4.3"
-interprocess = { version = "=2.4.7", features = ["tokio"] }
-widestring = "=1.2.1"
-windows-sys = { version = "=0.61.2", features = ["Win32_Foundation"] }
 futures = "=0.3.34"
 futures-util = { version = "=0.3.34", features = ["sink"] }
 getrandom = "=0.4.3"

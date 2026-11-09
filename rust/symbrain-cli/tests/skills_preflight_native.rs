@@ -1,9 +1,7 @@
 //! Native preflight regressions; every child has a bounded deadline.
 
-#[cfg(unix)]
 use std::ffi::OsString;
 use std::fs;
-#[cfg(unix)]
 use std::process::Command;
 
 use tempfile::TempDir;
@@ -11,7 +9,6 @@ use tempfile::TempDir;
 #[path = "support/skills_preflight_process.rs"]
 mod process;
 use process::run;
-#[cfg(unix)]
 use process::run_os;
 
 #[test]
@@ -20,11 +17,8 @@ fn native_skills_preflight_contracts() {
     check_sync_boolean_flags();
     check_rejected_markers_override_fallback();
     check_marker_probe_does_not_create_directories();
-    #[cfg(unix)]
     check_special_markers();
-    #[cfg(unix)]
     check_raw_argument_values();
-    #[cfg(unix)]
     check_raw_target_whitespace();
 }
 
@@ -186,7 +180,6 @@ fn check_marker_probe_does_not_create_directories() {
     assert!(moved.is_dir());
 }
 
-#[cfg(unix)]
 fn check_raw_argument_values() {
     use std::os::unix::ffi::OsStringExt;
     for (bytes, separated, expected) in [
@@ -261,7 +254,6 @@ fn check_raw_argument_values() {
     }
 }
 
-#[cfg(unix)]
 fn check_raw_target_whitespace() {
     use std::os::unix::ffi::OsStringExt;
     // All Go Unicode White_Space runes, with invalid bytes kept at the edge
@@ -305,7 +297,6 @@ fn check_raw_target_whitespace() {
     }
 }
 
-#[cfg(unix)]
 fn check_special_markers() {
     for kind in ["fifo", "symlink"] {
         let root = TempDir::new().unwrap();

@@ -20,10 +20,7 @@ fn mkdir_all(path: &Path) -> Result<(), (PathBuf, std::io::Error)> {
         } else {
             // Go's Stat fast path intentionally returns syscall.ENOTDIR.
             // The pinned Windows SDK maps ENOTDIR to ERROR_PATH_NOT_FOUND.
-            #[cfg(unix)]
             let code = 20;
-            #[cfg(windows)]
-            let code = 3;
             Err((path.to_owned(), std::io::Error::from_raw_os_error(code)))
         };
     }
@@ -33,11 +30,7 @@ fn mkdir_all(path: &Path) -> Result<(), (PathBuf, std::io::Error)> {
     {
         mkdir_all(parent)?;
     }
-    #[cfg(unix)]
     let mut builder = std::fs::DirBuilder::new();
-    #[cfg(not(unix))]
-    let builder = std::fs::DirBuilder::new();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::DirBuilderExt;
         builder.mode(0o755);
@@ -67,10 +60,7 @@ mod tests {
         std::fs::write(&blocked, b"owned obstruction").unwrap();
         let target = blocked.join("bin");
         let error = create_bin_dir(&target).unwrap_err().into_go_text();
-        #[cfg(unix)]
         let code = 20;
-        #[cfg(windows)]
-        let code = 3;
         let detail = crate::format_io_error(&std::io::Error::from_raw_os_error(code));
         assert_eq!(
             error.as_ref(),

@@ -92,7 +92,6 @@ fn signed_request(key: &Ed25519KeyPair, public: &[u8], timestamp: i64) -> Reques
     }
 }
 
-#[cfg(unix)]
 fn read_key(path: &Path) -> Result<Vec<u8>, UsageError> {
     use rustix::fs::{Mode, OFlags, open};
     use std::io::Read;
@@ -122,10 +121,6 @@ fn read_key(path: &Path) -> Result<Vec<u8>, UsageError> {
         return Err(key_error());
     }
     Ok(bytes)
-}
-#[cfg(not(unix))]
-fn read_key(_: &Path) -> Result<Vec<u8>, UsageError> {
-    Err(key_error())
 }
 
 // Only the bounded, unencrypted single-key OpenSSH container is accepted.

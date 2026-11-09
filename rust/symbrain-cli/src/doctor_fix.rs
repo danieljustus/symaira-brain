@@ -15,11 +15,7 @@ pub(super) fn managed_bin_dir() -> Option<std::path::PathBuf> {
 
 pub(super) fn run_fix(force_release: bool, stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     let Some(bin_dir) = managed_bin_dir() else {
-        let home_label = if cfg!(windows) {
-            "%userprofile%"
-        } else {
-            "$HOME"
-        };
+        let home_label = "$HOME";
         let _ = writeln!(
             stderr,
             "symbrain doctor --fix: managed: cannot determine home directory: {home_label} is not defined"

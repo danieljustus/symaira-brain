@@ -1,4 +1,3 @@
-#[cfg(unix)]
 use super::go_write_error;
 use super::{Output, io_cause};
 use std::io::{self, Write};
@@ -7,10 +6,7 @@ struct Broken(bool);
 impl Write for Broken {
     fn write(&mut self, _: &[u8]) -> io::Result<usize> {
         if self.0 {
-            #[cfg(unix)]
             let code = 32;
-            #[cfg(not(unix))]
-            let code = 109;
             Err(io::Error::from_raw_os_error(code))
         } else {
             Err(io::Error::new(io::ErrorKind::BrokenPipe, "owned callback"))
@@ -30,7 +26,6 @@ fn embedded_raw_and_kind_only_pipe_errors_are_ordinary_errors() {
         assert_eq!(error.kind(), io::ErrorKind::BrokenPipe);
         if raw {
             assert!(error.raw_os_error().is_some());
-            #[cfg(unix)]
             assert_eq!(io_cause(&error), "broken pipe");
         } else {
             assert_eq!(io_cause(&error), "owned callback");
@@ -44,7 +39,6 @@ fn embedded_raw_and_kind_only_pipe_errors_are_ordinary_errors() {
     assert_eq!(error.to_string(), "owned callback");
 }
 
-#[cfg(unix)]
 #[test]
 fn real_stdout_io_error_retains_operation_path_cause_and_source() {
     struct Full;

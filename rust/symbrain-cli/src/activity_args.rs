@@ -88,25 +88,13 @@ fn parse_integer(raw: &[u8]) -> Result<i64, &'static str> {
         value.cast_signed()
     })
 }
-#[cfg(unix)]
 fn bytes(arg: &std::ffi::OsStr) -> Vec<u8> {
     use std::os::unix::ffi::OsStrExt;
     arg.as_bytes().to_vec()
 }
-#[cfg(not(unix))]
-fn bytes(arg: &std::ffi::OsStr) -> Vec<u8> {
-    arg.to_string_lossy().as_bytes().to_vec()
-}
-#[cfg(unix)]
 fn os(bytes: Vec<u8>) -> OsString {
     use std::os::unix::ffi::OsStringExt;
     OsString::from_vec(bytes)
-}
-#[cfg(not(unix))]
-fn os(bytes: Vec<u8>) -> OsString {
-    String::from_utf8(bytes)
-        .unwrap_or_else(|error| String::from_utf8_lossy(error.as_bytes()).into_owned())
-        .into()
 }
 // Go decodes each malformed UTF-8 byte as an individual RuneError.
 fn go_string(mut bytes: &[u8]) -> String {

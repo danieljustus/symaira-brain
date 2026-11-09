@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import os
 import signal
@@ -153,13 +152,6 @@ def request(socket_path: Path, frame: dict[str, object], *, timeout: float = 3.0
     payload = json.dumps(frame, separators=(",", ":")).encode() + b"\n"
     if len(payload) >= MAX_FRAME_BYTES:
         raise ValueError("harness request must stay below the daemon frame limit")
-    if os.name == "nt":
-        specification = importlib.util.spec_from_file_location(
-            "browse_windows_pipe", Path(__file__).with_name("windows_pipe.py"))
-        assert specification and specification.loader
-        transport = importlib.util.module_from_spec(specification)
-        specification.loader.exec_module(transport)
-        return transport.request(str(socket_path), payload, MAX_FRAME_BYTES, timeout)
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
         connection.settimeout(timeout)
         connection.connect(str(socket_path))

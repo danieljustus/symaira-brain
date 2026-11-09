@@ -80,8 +80,6 @@ fn table_matches_go_layout_for_populated_and_missing_configs() {
     let config = root.join("config");
     let claude_desktop_config = if cfg!(target_os = "macos") {
         home.join("Library/Application Support/Claude/claude_desktop_config.json")
-    } else if cfg!(target_os = "windows") {
-        home.join("AppData/Roaming/Claude/claude_desktop_config.json")
     } else {
         config.join("Claude/claude_desktop_config.json")
     };
@@ -254,7 +252,6 @@ fn successful_health_probe_is_native_without_go_fallback() {
 
 /// Every `config.error` family is reported natively: a fallback script that
 /// would run on any Go routing exits 17 and prints markers that must not appear.
-#[cfg(unix)]
 #[test]
 fn toml_and_io_inventory_errors_are_native_without_go_fallback() {
     use std::os::unix::fs::PermissionsExt;

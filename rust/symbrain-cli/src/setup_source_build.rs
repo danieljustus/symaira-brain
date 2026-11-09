@@ -164,15 +164,12 @@ fn swift(
     .map_err(|error| {
         error.with_prefix(&format!("swift build --show-bin-path ({}): ", spec.module))
     })?;
-    #[cfg(unix)]
     let built = {
         use std::os::unix::ffi::OsStringExt;
         PathBuf::from(std::ffi::OsString::from_vec(
             super::text::trim_space(&out).to_vec(),
         ))
     };
-    #[cfg(not(unix))]
-    let built = PathBuf::from(String::from_utf8_lossy(super::text::trim_space(&out)).as_ref());
     let built = built.join(spec.binary);
     Ok((stage(&built, dest, spec.binary)?, builder))
 }
@@ -193,7 +190,6 @@ fn stage(built: &Path, dest: &Path, binary: &str) -> Result<PathBuf, GoText> {
             &format!(": {}", format_io_error(&error)),
         )
     })?;
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         std::fs::set_permissions(&target, std::fs::Permissions::from_mode(0o755))
@@ -207,13 +203,7 @@ fn read_built_binary(built: &Path) -> Result<Vec<u8>, GoText> {
         let is_directory = error.kind() == std::io::ErrorKind::IsADirectory
             || std::fs::metadata(built).is_ok_and(|metadata| metadata.is_dir());
         let operation = if is_directory { "read" } else { "open" };
-        // Windows reports AccessDenied for Rust's directory read, while Go's
-        // os.ReadFile surfaces ERROR_INVALID_FUNCTION for the same payload.
-        let detail = if cfg!(windows) && is_directory {
-            format_io_error(&std::io::Error::from_raw_os_error(1))
-        } else {
-            format_io_error(&error)
-        };
+        let detail = format_io_error(&error);
         let mut message = GoText::path("read built binary ", built, &format!(": {operation} "));
         message.push(&symbrain_core::config::os_bytes(built.as_os_str()));
         message.with_suffix(format!(": {detail}").as_bytes())

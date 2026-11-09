@@ -1,15 +1,12 @@
 //! Lexical credential joins and bounded credential JSON admission.
-#[cfg(unix)]
 use super::credential_join;
 use super::{
     CredentialFields, MAX_CREDENTIAL_FILE_BYTES, go_json_credential_limits,
     read_provider_credentials,
 };
 use std::path::Path;
-#[cfg(unix)]
 use std::path::PathBuf;
 
-#[cfg(unix)]
 #[test]
 fn credential_join_cleans_like_go_filepath_join() {
     for (base, child, expected) in [
@@ -39,7 +36,6 @@ fn credential_join_cleans_like_go_filepath_join() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn credential_join_preserves_non_utf8_unix_bytes() {
     use std::ffi::OsStr;
@@ -114,7 +110,6 @@ fn credential_reads_are_bounded_regular_files() {
         None
     );
     assert_eq!(read_provider_credentials(Path::new("/")), None);
-    #[cfg(unix)]
     {
         let link = dir.path().join("link.json");
         std::os::unix::fs::symlink(&file, &link).unwrap();

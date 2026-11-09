@@ -21,15 +21,6 @@ pub(super) fn serve_connection_parts<S>(
             return;
         }
         let mut line = Vec::new();
-        #[cfg(windows)]
-        let read_result = read_limited_line_windows(
-            &mut reader,
-            &mut line,
-            MAX_FRAME_BYTES,
-            options.read_timeout,
-            &stopping,
-        );
-        #[cfg(not(windows))]
         let read_result = read_limited_line(&mut reader, &mut line, MAX_FRAME_BYTES);
         match read_result {
             Ok(0) | Err(_) => return,
@@ -157,8 +148,6 @@ pub(super) fn serve_connection_parts<S>(
                 return;
             }
             stopping.store(true, Ordering::Release);
-            #[cfg(windows)]
-            wake_windows_listener(&options.socket_path);
             return;
         }
         if cmd == "daemon.ping" {
@@ -239,7 +228,6 @@ pub(super) fn write_response<W: Write>(stream: &mut W, response: Response) -> io
     stream.flush()
 }
 
-#[cfg(not(windows))]
 pub(super) fn read_limited_line<R: BufRead>(
     reader: &mut R,
     output: &mut Vec<u8>,

@@ -12,9 +12,6 @@ fn missing_managed_home_fails_before_config_probes_or_publication() {
     fs::create_dir_all(&config).unwrap();
     fs::write(config.join("config.toml"), b"[bad config").unwrap();
     let before = snapshot(root.path());
-    #[cfg(windows)]
-    let (home_key, label) = ("USERPROFILE", "%userprofile%");
-    #[cfg(not(windows))]
     let (home_key, label) = ("HOME", "$HOME");
     for empty in [false, true] {
         let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
@@ -31,18 +28,6 @@ fn missing_managed_home_fails_before_config_probes_or_publication() {
         // Keep instrumentation outside the product-owned filesystem snapshot.
         if let Some(profile) = std::env::var_os("LLVM_PROFILE_FILE") {
             command.env("LLVM_PROFILE_FILE", profile);
-        }
-        #[cfg(windows)]
-        {
-            let owner = fallback.to_str().unwrap();
-            let (drive, path) = owner.split_at(2);
-            assert!(drive.ends_with(':') && path.starts_with('\\'));
-            command.env("HOMEDRIVE", drive).env("HOMEPATH", path);
-            for key in ["SystemRoot", "windir", "ComSpec"] {
-                if let Some(value) = std::env::var_os(key) {
-                    command.env(key, value);
-                }
-            }
         }
         let output = command.output().unwrap();
         assert_eq!(output.status.code(), Some(1));
@@ -154,8 +139,6 @@ fn prepare(case: &Path, child: &Path, provenance: &[u8]) -> PathBuf {
     {
         let path = bin.join(&core.binary_name);
         fs::copy(child, &path).unwrap();
-        #[cfg(windows)]
-        fs::copy(child, path.with_extension("exe")).unwrap();
         fs::write(
             bin.join(format!("{}.provenance.json", core.binary_name)),
             provenance,

@@ -1,7 +1,6 @@
 //! Opt-in backends remain native and never inspect excluded credentials.
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
-#[cfg(unix)]
 #[test]
 fn opt_in_backends_validate_before_discovery() {
     use std::os::unix::fs::PermissionsExt;

@@ -6,7 +6,6 @@ use std::sync::{Arc, Mutex};
 
 use ambient_authority::ambient_authority;
 use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
-#[cfg(unix)]
 use cap_std::fs::OpenOptionsExt;
 use cap_std::fs::{Dir, OpenOptions};
 
@@ -319,20 +318,7 @@ fn load_resources(root: &Dir, anchors: &[PathBuf]) -> Result<Vec<Resource>, Skil
 }
 
 fn resource_mode(metadata: &cap_std::fs::Metadata) -> u32 {
-    #[cfg(unix)]
-    {
-        cap_std::fs::PermissionsExt::mode(&metadata.permissions()) & 0o777
-    }
-    #[cfg(windows)]
-    {
-        let _ = metadata;
-        0o666
-    }
-    #[cfg(not(any(unix, windows)))]
-    {
-        let _ = metadata;
-        0o644
-    }
+    cap_std::fs::PermissionsExt::mode(&metadata.permissions()) & 0o777
 }
 
 fn append_resource(

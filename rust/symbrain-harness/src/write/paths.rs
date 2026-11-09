@@ -1,7 +1,6 @@
 use cap_fs_ext::DirExt;
 use cap_std::ambient_authority;
 use cap_std::fs::Dir;
-#[cfg(unix)]
 use cap_std::fs::{Permissions, PermissionsExt};
 use std::io;
 use std::path::{Component, Path, PathBuf};
@@ -30,7 +29,6 @@ pub(super) fn open_trusted_root(path: &Path, create: bool) -> io::Result<Dir> {
         };
         let next = current.open_dir_nofollow(name)?;
         if created {
-            #[cfg(unix)]
             next.set_permissions(".", Permissions::from_mode(0o700))?;
         }
         current = next;
@@ -38,7 +36,6 @@ pub(super) fn open_trusted_root(path: &Path, create: bool) -> io::Result<Dir> {
     Ok(current)
 }
 
-#[cfg(unix)]
 fn open_filesystem_anchor(path: &Path) -> io::Result<Dir> {
     let anchor = if path.is_absolute() {
         Path::new("/")
@@ -46,26 +43,6 @@ fn open_filesystem_anchor(path: &Path) -> io::Result<Dir> {
         Path::new(".")
     };
     Dir::open_ambient_dir(anchor, ambient_authority())
-}
-
-#[cfg(windows)]
-fn open_filesystem_anchor(path: &Path) -> io::Result<Dir> {
-    let mut components = path.components();
-    match components.next() {
-        Some(Component::Prefix(prefix)) => {
-            if !matches!(components.next(), Some(Component::RootDir)) {
-                return Err(io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    "trusted root must be an absolute Windows path",
-                ));
-            }
-            let mut anchor = prefix.as_os_str().to_os_string();
-            anchor.push("\\");
-            Dir::open_ambient_dir(PathBuf::from(anchor), ambient_authority())
-        }
-        Some(Component::RootDir) => Dir::open_ambient_dir(Path::new("\\"), ambient_authority()),
-        _ => Dir::open_ambient_dir(Path::new("."), ambient_authority()),
-    }
 }
 
 pub(super) fn open_parent_capability(root: &Dir, parent: &Path, create: bool) -> io::Result<Dir> {
@@ -91,7 +68,6 @@ pub(super) fn open_parent_capability(root: &Dir, parent: &Path, create: bool) ->
         }
         let next = current.open_dir_nofollow(name)?;
         if created {
-            #[cfg(unix)]
             next.set_permissions(".", Permissions::from_mode(0o700))?;
         }
         current = next;

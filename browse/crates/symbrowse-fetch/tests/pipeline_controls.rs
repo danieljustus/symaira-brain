@@ -235,7 +235,6 @@ fn response_cache_expires_and_removes_stale_entries() {
     let cache = ResponseCache::new(&root).with_ttl(Duration::from_nanos(1));
     let key = ResponseCache::key("https://example.test", "honest", "text", "default", "");
     cache.put(&key, b"body", &serde_json::json!({})).unwrap();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         let dir = root.join(&key[..2]);

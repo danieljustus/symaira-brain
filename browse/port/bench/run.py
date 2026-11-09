@@ -571,6 +571,14 @@ def run_binary(
     return result
 
 
+HISTORICAL_RECORD_BANNER = (
+    "HISTORICAL RECORD MODE (#1004): bench/run.py measures a paired Go binary (`--go`, `--go-build-receipt`). "
+    "The Go implementation was removed in #1003; this mode only works from a checkout of the "
+    "pre-removal revision 57c26c76e (full: 57c26c76e238e458d9027d5ee4362df24d30b47e). It is not run by any gate; sealed fixtures "
+    "replay without Go. See docs/adr/historical-go-record-paths-1004.md."
+)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     ensure_external_environment(__file__)
     parser = argparse.ArgumentParser(description=__doc__)
@@ -585,6 +593,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--workload", action="append", choices=WORKLOADS)
     parser.add_argument("--strict", action="store_true", help="fail if either binary lacks a selected workload")
     args = parser.parse_args(argv)
+    if args.go is not None or args.go_build_receipt is not None:
+        raise SystemExit(HISTORICAL_RECORD_BANNER)
     if args.runs < 1 or args.runs > 100:
         parser.error("--runs must be between 1 and 100")
     selected = set(args.workload or WORKLOADS)

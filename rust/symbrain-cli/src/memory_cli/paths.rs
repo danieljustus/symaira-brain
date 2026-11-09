@@ -21,7 +21,7 @@ pub(super) fn resolve_db_path(override_path: Option<&std::ffi::OsStr>) -> PathBu
         return PathBuf::from(path);
     }
     let xdg = std::env::var_os("XDG_DATA_HOME").map(PathBuf::from);
-    let home = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" })
+    let home = std::env::var_os("HOME")
         .filter(|value| !value.is_empty())
         .map(PathBuf::from);
     let directory =

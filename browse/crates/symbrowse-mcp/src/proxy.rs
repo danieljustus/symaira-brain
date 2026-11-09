@@ -10,7 +10,6 @@ use std::{
     time::{Duration, Instant},
 };
 
-#[cfg(unix)]
 use std::io::{BufRead, BufReader, Write};
 
 use serde_json::{Map, Value, json};
@@ -248,7 +247,6 @@ impl DaemonProxy {
         })
     }
 
-    #[cfg(unix)]
     #[allow(clippy::result_large_err)]
     fn request(&self, endpoint: &str, frame: &DaemonFrame) -> Result<DaemonResponse, ToolError> {
         let payload = serde_json::to_vec(frame).map_err(|error| {
@@ -340,101 +338,6 @@ impl DaemonProxy {
             result
         })?;
         Ok(response)
-    }
-
-    #[cfg(windows)]
-    #[allow(clippy::result_large_err)]
-    fn request(&self, endpoint: &str, frame: &DaemonFrame) -> Result<DaemonResponse, ToolError> {
-        use interprocess::{
-            ConnectWaitMode,
-            os::windows::named_pipe::{pipe_mode, tokio::PipeStream},
-        };
-        use tokio::io::AsyncWriteExt;
-
-        let payload = serde_json::to_vec(frame).map_err(|error| {
-            ToolError::transport(
-                "operation_failed",
-                format!("encode daemon frame: {error}"),
-                &frame.session,
-                endpoint,
-            )
-        })?;
-        if payload.len().saturating_add(1) > MAX_DAEMON_FRAME_BYTES {
-            return Err(ToolError::transport(
-                "malformed_request",
-                "daemon frame exceeds size limit",
-                &frame.session,
-                endpoint,
-            ));
-        }
-        let timeout = self.options.read_timeout;
-        let runtime = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .map_err(|error| {
-                ToolError::transport(
-                    "daemon_unavailable",
-                    format!("create daemon runtime: {error}"),
-                    &frame.session,
-                    endpoint,
-                )
-            })?;
-        let result: io::Result<DaemonResponse> = runtime.block_on(async {
-            let mut transport = tokio::time::timeout(
-                timeout,
-                PipeStream::<pipe_mode::Bytes, pipe_mode::Bytes>::connect_by_path_with_wait_mode(
-                    endpoint,
-                    ConnectWaitMode::Timeout(timeout),
-                ),
-            )
-            .await
-            .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "daemon connect timed out"))??;
-            tokio::time::timeout(timeout, transport.write_all(&payload))
-                .await
-                .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "daemon write timed out"))??;
-            tokio::time::timeout(timeout, transport.write_all(b"\n"))
-                .await
-                .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "daemon write timed out"))??;
-            tokio::time::timeout(timeout, transport.flush())
-                .await
-                .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "daemon flush timed out"))??;
-            tokio::time::timeout(timeout, read_response_windows(&mut transport))
-                .await
-                .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "daemon read timed out"))?
-        });
-        result.map_err(|error| {
-            let timeout = error.kind() == io::ErrorKind::TimedOut;
-            let code = if timeout {
-                "operation_timeout"
-            } else {
-                "daemon_unavailable"
-            };
-            let mut result = ToolError::transport(
-                code,
-                if timeout {
-                    format!("daemon response timed out after {:?}", self.options.read_timeout)
-                } else {
-                    format!("failed to communicate with daemon for session {:?}", frame.session)
-                },
-                &frame.session,
-                endpoint,
-            );
-            result.hint = Some(if timeout {
-                format!(
-                    "increase timeout with SYMBROWSE_READ_TIMEOUT or inspect daemon logs for session {:?}",
-                    frame.session
-                )
-            } else {
-                self.daemon_hint(&frame.session)
-            });
-            result.details = Some(json!({
-                "session": redact_str(&frame.session),
-                "socket_path": redact_str(endpoint),
-                "timeout_seconds": self.options.read_timeout.as_secs_f64(),
-                "transport_error": redact_str(&error.to_string()),
-            }));
-            result
-        })
     }
 
     #[allow(clippy::result_large_err)]
@@ -542,7 +445,6 @@ impl DaemonProxy {
         }
         let mut log_options = OpenOptions::new();
         log_options.create(true).append(true);
-        #[cfg(unix)]
         {
             use std::os::unix::fs::OpenOptionsExt;
             log_options.mode(0o600);
@@ -916,7 +818,6 @@ fn valid_session(value: &str) -> bool {
 const CHILD_REAP_TIMEOUT: Duration = Duration::from_secs(1);
 
 fn terminate_child(child: &mut Child) {
-    #[cfg(unix)]
     {
         if let Ok(pid) = i32::try_from(child.id()) {
             let _ = nix::sys::signal::killpg(
@@ -953,54 +854,13 @@ fn default_endpoint(session: &str) -> Result<String, String> {
         .map_err(|_| "daemon endpoint is not valid UTF-8".to_owned())
 }
 
-#[cfg(windows)]
-async fn read_response_windows(
-    transport: &mut (impl tokio::io::AsyncRead + Unpin),
-) -> io::Result<DaemonResponse> {
-    use tokio::io::AsyncReadExt;
-
-    let mut line = Vec::new();
-    let mut byte = [0_u8; 1];
-    loop {
-        let read = transport.read(&mut byte).await?;
-        if read == 0 {
-            if line.is_empty() {
-                return Err(io::Error::new(
-                    io::ErrorKind::UnexpectedEof,
-                    "daemon closed connection without a response",
-                ));
-            }
-            break;
-        }
-        if line.len().saturating_add(read) > MAX_DAEMON_FRAME_BYTES {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "daemon response exceeds size limit",
-            ));
-        }
-        line.push(byte[0]);
-        if byte[0] == b'\n' {
-            break;
-        }
-    }
-    serde_json::from_slice(line.trim_ascii_end()).map_err(|error| {
-        io::Error::new(
-            io::ErrorKind::InvalidData,
-            format!("decode daemon response: {error}"),
-        )
-    })
-}
-
-#[cfg(unix)]
 type DaemonTransport = std::os::unix::net::UnixStream;
 
-#[cfg(unix)]
 fn write_frame(
     transport: &mut DaemonTransport,
     payload: &[u8],
     timeout: Duration,
 ) -> io::Result<()> {
-    #[cfg(unix)]
     {
         transport.set_write_timeout(Some(timeout))?;
     }
@@ -1009,9 +869,7 @@ fn write_frame(
     transport.flush()
 }
 
-#[cfg(unix)]
 fn read_response(transport: &mut DaemonTransport, timeout: Duration) -> io::Result<DaemonResponse> {
-    #[cfg(unix)]
     {
         transport.set_read_timeout(Some(timeout))?;
     }
@@ -1032,7 +890,6 @@ fn read_response(transport: &mut DaemonTransport, timeout: Duration) -> io::Resu
     })
 }
 
-#[cfg(unix)]
 fn read_limited_line<R: BufRead>(
     reader: &mut R,
     output: &mut Vec<u8>,
@@ -1066,7 +923,6 @@ fn read_limited_line<R: BufRead>(
 mod tests {
     use super::*;
 
-    #[cfg(unix)]
     #[test]
     fn runtime_proxy_sends_daemon_frame_and_preserves_warnings() {
         use std::{
@@ -1149,7 +1005,6 @@ mod tests {
         let _ = std::fs::remove_file(path);
     }
 
-    #[cfg(unix)]
     #[test]
     fn failed_status_preserves_error_without_stop_or_autostart() {
         use std::{
@@ -1284,7 +1139,6 @@ mod tests {
         );
     }
 
-    #[cfg(unix)]
     #[test]
     fn daemon_frame_limit_applies_while_reading() {
         let mut reader = BufReader::with_capacity(4, io::Cursor::new(b"123456789\n"));
@@ -1315,7 +1169,6 @@ mod tests {
         assert!(rendered.contains("[REDACTED]"));
     }
 
-    #[cfg(unix)]
     fn proxy_status_fixture(
         status_data: Value,
         stop_response: Value,
@@ -1394,7 +1247,6 @@ mod tests {
         (commands, result)
     }
 
-    #[cfg(unix)]
     #[test]
     fn status_identity_must_be_present_and_match_without_stop_dispatch_or_autostart() {
         for status in [
@@ -1411,7 +1263,6 @@ mod tests {
         }
     }
 
-    #[cfg(unix)]
     #[test]
     fn incompatible_owner_requires_stop_ack_but_same_owner_remains_restartable() {
         let (commands, result) = proxy_status_fixture(
@@ -1432,7 +1283,6 @@ mod tests {
         assert_eq!(commands, ["daemon.status", "daemon.stop"]);
     }
 
-    #[cfg(unix)]
     #[test]
     fn terminate_child_reaps_within_bounded_cleanup_window() {
         let mut child = Command::new("/bin/sh")

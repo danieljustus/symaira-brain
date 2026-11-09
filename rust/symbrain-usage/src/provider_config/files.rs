@@ -49,18 +49,3 @@ fn copilot_file_token() -> Option<String> {
 
 // Preserve the existing gate for unsafe/unreadable sources; regular malformed
 // JSON supplies no token and falls through to the next file, as Go does.
-#[cfg(not(unix))]
-fn read_optional_credential_file(path: &Path) -> Result<Option<Vec<u8>>, ()> {
-    let metadata = match fs::symlink_metadata(path) {
-        Ok(metadata) => metadata,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
-        Err(_) => return Err(()),
-    };
-    if !metadata.file_type().is_file() {
-        return Err(());
-    }
-    if metadata.len() > MAX_CREDENTIAL_FILE_BYTES {
-        return Ok(None);
-    }
-    read_provider_credentials(path).map(Some).ok_or(())
-}

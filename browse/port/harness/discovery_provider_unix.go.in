@@ -1,3 +1,0 @@
-package main
-
-func commandLine() []uint16 { return nil }

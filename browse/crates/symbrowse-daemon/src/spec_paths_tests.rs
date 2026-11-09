@@ -58,19 +58,11 @@ fn cache_environment_uses_go_platform_fallbacks_in_isolated_children() {
                 } else {
                     command.env("TMPDIR", "");
                 }
-                if cfg!(unix) {
-                    PathBuf::from("/tmp/symbrowse/sessions")
-                } else {
-                    fallback.clone()
-                }
+                PathBuf::from("/tmp/symbrowse/sessions")
             }
             "home" => {
                 command.env("HOME", &home).env("LOCALAPPDATA", &home);
-                if cfg!(windows) {
-                    home.join("symbrowse").join("sessions")
-                } else {
-                    home_cache.clone()
-                }
+                home_cache.clone()
             }
             "absolute-cache" => {
                 command
@@ -88,9 +80,7 @@ fn cache_environment_uses_go_platform_fallbacks_in_isolated_children() {
                     .env("HOME", &home)
                     .env("LOCALAPPDATA", &home)
                     .env("XDG_CACHE_HOME", "relative-cache");
-                if cfg!(windows) {
-                    home.join("symbrowse").join("sessions")
-                } else if cfg!(target_os = "macos") {
+                if cfg!(target_os = "macos") {
                     home_cache.clone()
                 } else {
                     fallback.clone()

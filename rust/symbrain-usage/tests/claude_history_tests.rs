@@ -1,4 +1,3 @@
-#![cfg(unix)]
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
 use std::sync::Arc;

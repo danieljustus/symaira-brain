@@ -9,17 +9,11 @@ impl Write for Broken {
     fn write(&mut self, _: &[u8]) -> io::Result<usize> {
         match self.0.as_str() {
             "raw-pipe" => {
-                #[cfg(unix)]
                 let code = 32;
-                #[cfg(not(unix))]
-                let code = 109;
                 Err(io::Error::from_raw_os_error(code))
             }
             "raw-full" => {
-                #[cfg(unix)]
                 let code = 28;
-                #[cfg(not(unix))]
-                let code = 112;
                 Err(io::Error::from_raw_os_error(code))
             }
             "kind-pipe" => Err(io::Error::new(io::ErrorKind::BrokenPipe, "owned callback")),

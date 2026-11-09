@@ -639,7 +639,16 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
     return report
 
 
+HISTORICAL_RECORD_BANNER = (
+    "HISTORICAL RECORD MODE (#1004): bench/chrome_pair.py measures a paired Go/Rust Chrome flow and needs a Go binary (`--go`). "
+    "The Go implementation was removed in #1003; this mode only works from a checkout of the "
+    "pre-removal revision 57c26c76e (full: 57c26c76e238e458d9027d5ee4362df24d30b47e). It is not run by any gate; sealed fixtures "
+    "replay without Go. See docs/adr/historical-go-record-paths-1004.md."
+)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    raise SystemExit(HISTORICAL_RECORD_BANNER)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", required=True, choices=sorted(TARGETS))
     parser.add_argument("--go", type=Path, required=True)

@@ -115,7 +115,6 @@ fn authenticated_header_cleanup_does_not_require_payload_json() {
     );
     fs::remove_dir_all(root).unwrap();
 }
-#[cfg(unix)]
 #[test]
 fn overwrite_warning_probe_rejects_links_and_never_blocks_on_fifo() {
     use std::os::unix::fs::{FileTypeExt, PermissionsExt, symlink};

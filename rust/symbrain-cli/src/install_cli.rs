@@ -174,14 +174,9 @@ impl FlagValues for UninstallArgs {
 
 /// The raw bytes of `arg` after its first `skip` bytes.
 fn os_suffix(arg: &OsString, skip: usize) -> OsString {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::{OsStrExt, OsStringExt};
         OsString::from_vec(arg.as_os_str().as_bytes()[skip..].to_vec())
-    }
-    #[cfg(not(unix))]
-    {
-        OsString::from(arg.to_string_lossy()[skip..].to_owned())
     }
 }
 
@@ -414,14 +409,9 @@ impl<T: std::fmt::Display> Part for Shown<T> {
 }
 
 fn path_bytes(path: &Path) -> Vec<u8> {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         path.as_os_str().as_bytes().to_vec()
-    }
-    #[cfg(not(unix))]
-    {
-        path.to_string_lossy().into_owned().into_bytes()
     }
 }
 
@@ -488,11 +478,9 @@ fn diff_bytes(path: &Path, old: &[u8], new: &[u8]) -> Vec<u8> {
 }
 
 /// `ENOTDIR` is 20 on every Unix this CLI supports (Linux, macOS, the BSDs).
-#[cfg(unix)]
 const ENOTDIR: i32 = 20;
 
 /// Go's `os.MkdirAll(path, 0o700)`, including which component an error names.
-#[cfg(unix)]
 fn go_mkdir_all(path: &Path) -> Result<(), (PathBuf, io::Error)> {
     use std::os::unix::fs::DirBuilderExt;
 
@@ -518,23 +506,11 @@ fn go_mkdir_all(path: &Path) -> Result<(), (PathBuf, io::Error)> {
     }
 }
 
-#[cfg(not(unix))]
-fn go_mkdir_all(path: &Path) -> Result<(), (PathBuf, io::Error)> {
-    fs::create_dir_all(path).map_err(|error| (path.to_path_buf(), error))
-}
-
 /// The directory the operating system resolves a cleaned project root to,
 /// following symlinks like Go's plain `os` calls. Windows keeps the cleaned
 /// path (a verbatim `\\?\` prefix would change the capability anchor).
-#[cfg(unix)]
 fn physical_root(root: &Path) -> io::Result<PathBuf> {
     fs::canonicalize(root)
-}
-
-#[cfg(not(unix))]
-#[allow(clippy::unnecessary_wraps)] // same signature as the fallible Unix variant
-fn physical_root(root: &Path) -> io::Result<PathBuf> {
-    Ok(root.to_path_buf())
 }
 
 /// Opens the existing config through the retained capability. A project root

@@ -68,10 +68,7 @@ mod tests {
     impl Write for BrokenPipeWriter {
         fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
             if self.os_error {
-                #[cfg(unix)]
                 let code = 32;
-                #[cfg(not(unix))]
-                let code = 109;
                 Err(std::io::Error::from_raw_os_error(code))
             } else {
                 Err(std::io::Error::new(
@@ -107,7 +104,6 @@ mod tests {
                     exit::GENERIC
                 );
                 assert!(stderr.starts_with(b"symbrain memory set: format output: "));
-                #[cfg(unix)]
                 if os_error {
                     assert_eq!(
                         stderr,

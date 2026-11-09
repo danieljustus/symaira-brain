@@ -5,14 +5,6 @@ use std::{path::PathBuf, time::Duration};
 // The Go registry owns browser profiles under the OS cache, independently of
 // output/state cache settings and the legacy fixture seam.
 pub(crate) fn default_session_cache_root() -> PathBuf {
-    if cfg!(windows) {
-        return std::env::var_os("LOCALAPPDATA")
-            .filter(|p| !p.is_empty())
-            .map_or_else(
-                || go_temp_dir().join("symbrowse").join("sessions"),
-                |path| PathBuf::from(path).join("symbrowse").join("sessions"),
-            );
-    }
     if cfg!(target_os = "macos") {
         return std::env::var_os("HOME")
             .filter(|p| !p.is_empty())
@@ -40,15 +32,10 @@ pub(crate) fn default_session_cache_root() -> PathBuf {
 }
 // Go os.TempDir uses /tmp for a missing or empty Unix TMPDIR, including macOS.
 fn go_temp_dir() -> PathBuf {
-    #[cfg(unix)]
     {
         std::env::var_os("TMPDIR")
             .filter(|path| !path.is_empty())
             .map_or_else(|| PathBuf::from("/tmp"), PathBuf::from)
-    }
-    #[cfg(not(unix))]
-    {
-        std::env::temp_dir()
     }
 }
 
@@ -91,14 +78,9 @@ pub(crate) fn worktree_origin() -> String {
 }
 
 pub(crate) fn json_path(path: &std::path::Path) -> String {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         go_json_text(path.as_os_str().as_bytes())
-    }
-    #[cfg(not(unix))]
-    {
-        path.to_string_lossy().into_owned()
     }
 }
 

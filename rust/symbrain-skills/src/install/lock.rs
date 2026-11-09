@@ -7,7 +7,6 @@ use std::time::{Duration, Instant};
 
 use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
 use cap_std::fs::OpenOptions;
-#[cfg(unix)]
 use cap_std::fs::OpenOptionsExt;
 use fs2::FileExt;
 use sha2::{Digest, Sha256};
@@ -89,7 +88,6 @@ fn open_lock_file(
             .create(!existing_only)
             .follow(FollowSymlinks::No);
         // Read-only opening of a FIFO would bypass the contention deadline.
-        #[cfg(unix)]
         options.custom_flags(rustix::fs::OFlags::NONBLOCK.bits().cast_signed());
         match root.open_with(Path::new(lock_name), &options) {
             Ok(file) => {
@@ -173,7 +171,6 @@ mod tests {
 
     use super::{acquire_existing_shared, acquire_with_timeout, lock_name};
 
-    #[cfg(unix)]
     #[test]
     fn special_lock_files_are_rejected_without_blocking() {
         let temp = tempdir().expect("temporary root");

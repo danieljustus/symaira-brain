@@ -311,7 +311,6 @@ fn go_exact_reader_reports_the_failing_operation() {
     let path = dir.path().join("events.jsonl");
     fs::create_dir(&path).expect("directory as log");
     match read_events_go_exact(&path, None, None) {
-        #[cfg(unix)]
         Err(EventReadFailure {
             op, path: failed, ..
         }) => {
@@ -319,9 +318,6 @@ fn go_exact_reader_reports_the_failing_operation() {
             assert_eq!(failed, path);
         }
         other => {
-            #[cfg(not(unix))]
-            let _ = other;
-            #[cfg(unix)]
             panic!("unexpected {other:?}");
         }
     }

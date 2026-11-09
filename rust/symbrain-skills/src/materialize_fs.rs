@@ -43,7 +43,6 @@ fn collect_files(
 }
 
 use fs2::FileExt;
-#[cfg(unix)]
 use std::os::fd::AsFd;
 
 fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result<std::fs::File> {
@@ -235,8 +234,6 @@ fn write_file(
     fault_operation: Option<&str>,
 ) -> io::Result<()> {
     fault(fault_operation, "write")?;
-    #[cfg(not(unix))]
-    let _ = mode;
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
     ensure_dir(root, parent)?;
     let mut options = OpenOptions::new();
@@ -245,7 +242,6 @@ fn write_file(
         .create(true)
         .truncate(true)
         .follow(FollowSymlinks::No);
-    #[cfg(unix)]
     options.mode(mode);
     let mut file = root.open_with(path, &options)?;
     file.write_all(bytes)?;
@@ -268,7 +264,6 @@ fn sync_tree(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Resu
 
 fn sync_dir(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Result<()> {
     fault(fault_operation, "sync-dir")?;
-    #[cfg(unix)]
     {
         // cap-std directories are O_PATH capabilities on Linux. Reopen the
         // same directory through the retained capability so fsync receives a
@@ -285,14 +280,6 @@ fn sync_dir(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Resul
         .map_err(io::Error::from)?;
         rustix::fs::fsync(&fd).map_err(io::Error::from)
     }
-    #[cfg(windows)]
-    {
-        sync_windows_dir(root, path)
-    }
-    #[cfg(not(any(unix, windows)))]
-    {
-        open_child_nofollow(root, path)?.into_std_file().sync_all()
-    }
 }
 
 fn parse_mode(value: &str) -> u32 {
@@ -300,17 +287,8 @@ fn parse_mode(value: &str) -> u32 {
 }
 
 fn file_mode(metadata: &cap_std::fs::Metadata) -> u32 {
-    #[cfg(unix)]
     {
         metadata.permissions().mode() & 0o777
-    }
-    #[cfg(windows)]
-    {
-        if metadata.is_dir() { 0o777 } else { 0o666 }
-    }
-    #[cfg(not(any(unix, windows)))]
-    {
-        if metadata.is_dir() { 0o755 } else { 0o644 }
     }
 }
 
@@ -318,7 +296,7 @@ fn io_error(error: &io::Error) -> SkillError {
     SkillError(format!("materialize: {error}"))
 }
 
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use cap_std::ambient_authority;

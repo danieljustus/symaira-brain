@@ -46,7 +46,6 @@ pub(crate) fn acquire_pull_lock(
         .ok_or_else(|| SkillError("pull lock path has no parent".to_owned()))?;
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
-    #[cfg(unix)]
     std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o755);
     builder
         .create(parent)
@@ -60,7 +59,6 @@ pub(crate) fn acquire_pull_lock(
     for attempt in 0..2 {
         let mut options = OpenOptions::new();
         options.write(true).create_new(true);
-        #[cfg(unix)]
         std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o644);
         match options.open(&path) {
             Ok(mut file) => {

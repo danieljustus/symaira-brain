@@ -171,7 +171,6 @@ fn validation_rejects_parent_traversal_overlay_reference() {
     }));
 }
 
-#[cfg(unix)]
 #[test]
 fn escaping_symlink_resource_is_rejected() {
     use std::os::unix::fs::symlink;

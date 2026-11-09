@@ -1,5 +1,4 @@
 // Recorded hosted rows only. No credential lookup or source SQLite connection.
-#[cfg(unix)]
 fn opencode_history_rows(
     dir: &Path,
     cancel: &crate::Cancellation,
@@ -92,14 +91,6 @@ fn opencode_history_rows(
         }
     }
     Ok((events, excluded))
-}
-
-#[cfg(not(unix))]
-fn opencode_history_rows(
-    _: &Path,
-    _: &crate::Cancellation,
-) -> Result<(Vec<crate::history::Event>, usize), ()> {
-    Err(())
 }
 
 fn parse_opencode_history_row(

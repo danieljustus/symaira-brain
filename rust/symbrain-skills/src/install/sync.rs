@@ -3,17 +3,13 @@
 #![allow(clippy::collapsible_if)]
 use std::path::{Path, PathBuf};
 
-#[cfg(not(windows))]
 use cap_fs_ext::DirExt;
 use cap_std::fs::Dir;
 use serde::Serialize;
-#[cfg(unix)]
 use std::os::fd::AsFd;
 
 use super::replace::FaultPoint;
 use super::sync_lock::acquire_pull_lock;
-#[cfg(windows)]
-use crate::cap_root::sync_windows_dir;
 use crate::model::{MAX_RESOURCE_ENTRIES, SkillError};
 use crate::{BundleLoader, RenderMetadata, render_target};
 
@@ -61,7 +57,6 @@ pub(crate) fn sync_dir(
     fault: Option<FaultPoint>,
 ) -> Result<(), SkillError> {
     fail(fault, FaultPoint::Sync)?;
-    #[cfg(unix)]
     {
         // cap-std directories are O_PATH capabilities on Linux. Reopen the
         // same directory through the retained capability so fsync receives a
@@ -79,19 +74,6 @@ pub(crate) fn sync_dir(
         )
         .map_err(|error| SkillError(format!("open directory for sync: {error}")))?;
         rustix::fs::fsync(&fd)
-            .map_err(|error| SkillError(format!("sync staged directory: {error}")))
-    }
-    #[cfg(windows)]
-    {
-        sync_windows_dir(root, path)
-            .map_err(|error| SkillError(format!("open directory for sync: {error}")))
-    }
-    #[cfg(not(any(unix, windows)))]
-    {
-        root.open_dir_nofollow(path)
-            .map_err(|error| SkillError(format!("open directory for sync: {error}")))?
-            .into_std_file()
-            .sync_all()
             .map_err(|error| SkillError(format!("sync staged directory: {error}")))
     }
 }
@@ -338,7 +320,7 @@ fn failed(status: &super::InstallStatus, error: String) -> SyncResult {
     }
 }
 
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::install::{InstallStatus, StatusKind};

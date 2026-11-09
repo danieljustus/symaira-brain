@@ -1,7 +1,6 @@
 //! CLI flag validation and provider selection are credential-free and native.
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
-#[cfg(unix)]
 #[test]
 fn usage_provider_selection_is_native_and_credential_free() {
     use std::os::unix::fs::PermissionsExt;

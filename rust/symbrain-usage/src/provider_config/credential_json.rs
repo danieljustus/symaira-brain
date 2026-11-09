@@ -5,7 +5,6 @@
 // exactly that rule unless `O_NOFOLLOW` is also passed (it would reject the
 // in-root relative symlink Go follows); the macOS resolver already matches Go
 // with the flag. `O_NONBLOCK` keeps a FIFO from blocking the report.
-#[cfg(unix)]
 const CREDENTIAL_OPEN_FLAGS: i32 = if cfg!(target_os = "linux") {
     libc::O_NONBLOCK
 } else {
@@ -17,7 +16,6 @@ fn read_provider_credentials(path: &Path) -> Option<Vec<u8>> {
         cap_std::fs::Dir::open_ambient_dir(path.parent()?, cap_std::ambient_authority()).ok()?;
     let mut options = cap_std::fs::OpenOptions::new();
     options.read(true);
-    #[cfg(unix)]
     cap_std::fs::OpenOptionsExt::custom_flags(&mut options, CREDENTIAL_OPEN_FLAGS);
     let file = parent.open_with(path.file_name()?, &options).ok()?;
     let metadata = file.metadata().ok()?;

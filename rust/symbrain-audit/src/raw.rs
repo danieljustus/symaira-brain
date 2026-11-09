@@ -1,12 +1,7 @@
 //! Safe append-only writer for the legacy raw JSONL audit format.
 
-#[cfg(unix)]
 #[path = "raw_unix.rs"]
 mod raw_unix;
-
-#[cfg(windows)]
-#[path = "raw_windows.rs"]
-mod raw_windows;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -31,7 +26,6 @@ impl RawJsonlAppender {
     }
 }
 
-#[cfg(unix)]
 impl RawJsonlAppender {
     /// Appends one raw JSONL record, preserving every input byte.
     ///
@@ -57,47 +51,6 @@ impl RawJsonlAppender {
     }
 }
 
-#[cfg(windows)]
-impl RawJsonlAppender {
-    /// Appends one raw JSONL record on Windows, preserving every input byte.
-    ///
-    /// The parent is opened component-by-component with handle-relative
-    /// nofollow traversal and retained as a directory capability. The target
-    /// is opened relative to that retained directory with symlink following
-    /// disabled. Device namespaces, alternate data streams (ADS), reserved DOS
-    /// device names, and reparse points are rejected fail-closed.
-    ///
-    /// # Errors
-    /// Returns an error when the record contains a line ending, a path
-    /// component is unsafe, a parent cannot be created, the target is not
-    /// a regular file, or the write is short.
-    pub fn append(&self, record: &[u8]) -> io::Result<()> {
-        if record.contains(&b'\n') || record.contains(&b'\r') {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "audit: raw record must be a single line",
-            ));
-        }
-        let (parent_path, name) = raw_windows::split_target(&self.path)?;
-        let parent = raw_windows::open_parent(&parent_path, true)?;
-        raw_windows::append_to_parent(&parent, &name, record)
-    }
-}
-
-#[cfg(not(any(unix, windows)))]
-impl RawJsonlAppender {
-    /// Fails closed on platforms without safe directory capability append support.
-    ///
-    /// # Errors
-    /// Always returns [`io::ErrorKind::Unsupported`].
-    pub fn append(&self, _record: &[u8]) -> io::Result<()> {
-        Err(io::Error::new(
-            io::ErrorKind::Unsupported,
-            "audit: raw JSONL append is unsupported on this platform",
-        ))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -106,7 +59,6 @@ mod tests {
     use std::thread;
     use tempfile::tempdir;
 
-    #[cfg(any(unix, windows))]
     #[test]
     fn appends_exact_bytes_without_rewriting_fields() {
         let dir = tempdir().expect("tempdir");
@@ -124,7 +76,6 @@ mod tests {
         assert_eq!(fs::read(&path).expect("read"), expected);
     }
 
-    #[cfg(unix)]
     #[test]
     fn creates_all_new_directories_private_and_preserves_existing_modes() {
         use std::os::unix::fs::PermissionsExt;
@@ -159,7 +110,6 @@ mod tests {
         );
     }
 
-    #[cfg(unix)]
     #[test]
     fn rejects_synchronized_ancestor_swap() {
         use std::sync::Barrier;
@@ -188,7 +138,6 @@ mod tests {
         assert!(!outside.path().join("audit.log").exists());
     }
 
-    #[cfg(any(unix, windows))]
     #[test]
     fn bare_relative_path_uses_process_working_directory() {
         if std::env::var_os("SYMBRAIN_RAW_RELATIVE_CHILD").is_some() {
@@ -214,7 +163,6 @@ mod tests {
         );
     }
 
-    #[cfg(any(unix, windows))]
     #[test]
     fn rejects_line_breaks_and_unsafe_paths() {
         let dir = tempdir().expect("tempdir");
@@ -235,7 +183,6 @@ mod tests {
         );
     }
 
-    #[cfg(unix)]
     #[test]
     fn rejects_non_regular_targets_without_blocking() {
         use std::os::unix::net::UnixListener;
@@ -295,7 +242,6 @@ mod tests {
         assert!(socket_result.is_err());
     }
 
-    #[cfg(any(unix, windows))]
     #[test]
     fn concurrent_appends_are_complete_jsonl_records() {
         let dir = tempdir().expect("tempdir");

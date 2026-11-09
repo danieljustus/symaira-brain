@@ -4,7 +4,6 @@ include!("opencode_wal.rs");
 const OPENCODE_DB_ERROR: &str =
     "OpenCode database unreadable or ambiguous; set OPENCODE_GO_API_KEY explicitly";
 
-#[cfg(unix)]
 fn opencode_directory(dir: &Path) -> std::io::Result<std::fs::File> {
     use rustix::fs::{Mode, OFlags, open, openat};
     let flags =
@@ -23,7 +22,6 @@ fn opencode_directory(dir: &Path) -> std::io::Result<std::fs::File> {
     Ok(root.into())
 }
 
-#[cfg(unix)]
 fn opencode_database_key(dir: &Path, name: &str) -> Result<(Option<String>, bool), &'static str> {
     with_opencode_database(dir, name, |db| {
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
@@ -31,7 +29,6 @@ fn opencode_database_key(dir: &Path, name: &str) -> Result<(Option<String>, bool
     })
 }
 
-#[cfg(unix)]
 fn with_opencode_database<T>(
     dir: &Path,
     name: &str,
@@ -117,12 +114,6 @@ fn with_opencode_database<T>(
     result
 }
 
-#[cfg(not(unix))]
-fn opencode_database_key(_: &Path, _: &str) -> Result<(Option<String>, bool), &'static str> {
-    Err(OPENCODE_DB_ERROR)
-}
-
-#[cfg(unix)]
 fn opencode_credential_row(db: &rusqlite::Connection) -> Result<(Option<String>, bool), ()> {
     if !opencode_table(db, "migration")? {
         return Err(());
@@ -217,7 +208,6 @@ fn opencode_credential_row(db: &rusqlite::Connection) -> Result<(Option<String>,
     Ok((Some(key.into()), true))
 }
 
-#[cfg(unix)]
 fn opencode_table(db: &rusqlite::Connection, name: &str) -> Result<bool, ()> {
     let (count, valid): (i64, i64) = db
         .query_row(
@@ -232,7 +222,6 @@ fn opencode_table(db: &rusqlite::Connection, name: &str) -> Result<bool, ()> {
     Ok(count == 1)
 }
 
-#[cfg(unix)]
 fn opencode_schema(
     db: &rusqlite::Connection,
     name: &str,
@@ -253,7 +242,6 @@ fn opencode_schema(
     Ok(())
 }
 
-#[cfg(unix)]
 fn opencode_sql_budget(
     db: &mut rusqlite::Connection,
     cancelled: impl FnMut() -> bool + Send + 'static,
@@ -261,7 +249,7 @@ fn opencode_sql_budget(
     db.progress_handler(1000, Some(cancelled))
 }
 
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod opencode_sql_tests {
     use super::*;
     use std::sync::{
@@ -327,7 +315,6 @@ mod opencode_sql_tests {
     }
 }
 
-#[cfg(unix)]
 fn opencode_database_sql(
     db: &mut rusqlite::Connection,
     cancelled: impl FnMut() -> bool + Send + 'static,

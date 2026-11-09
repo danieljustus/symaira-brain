@@ -146,7 +146,7 @@ pub fn run_at_path<R: Read, W: Write>(
 pub(crate) fn audit_path() -> PathBuf {
     let data_home = env::var_os("XDG_DATA_HOME").filter(|value| !value.is_empty());
     // Match Go os.UserHomeDir, not the Unix shell's HOME on Windows.
-    let home_key = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
+    let home_key = "HOME";
     let home = env::var_os(home_key).filter(|value| !value.is_empty());
     audit_path_from(data_home, home, &env::temp_dir())
 }

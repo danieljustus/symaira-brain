@@ -1,7 +1,6 @@
 use ambient_authority::ambient_authority;
 use cap_fs_ext::DirExt;
 use cap_std::fs::Dir;
-#[cfg(unix)]
 use cap_std::fs::{Permissions, PermissionsExt};
 use std::io;
 use std::path::{Path, PathBuf};
@@ -53,7 +52,6 @@ pub fn clean_path(path: &Path) -> PathBuf {
 
 /// Go's `os.Getwd`: `$PWD` when it names the current directory, otherwise the
 /// kernel's answer.
-#[cfg(unix)]
 fn go_getwd() -> io::Result<PathBuf> {
     use std::os::unix::fs::MetadataExt;
     if let Some(pwd) = std::env::var_os("PWD").map(PathBuf::from)
@@ -69,7 +67,6 @@ fn go_getwd() -> io::Result<PathBuf> {
 
 /// Go's `filepath.Abs(filepath.Clean(path))`, which `openDirectoryNoFollow`
 /// applies before it walks the trusted root from `/`.
-#[cfg(unix)]
 fn go_abs_clean(path: &Path) -> io::Result<PathBuf> {
     let cleaned = clean_path(path);
     if cleaned.is_absolute() {
@@ -83,7 +80,6 @@ fn go_abs_clean(path: &Path) -> io::Result<PathBuf> {
 ///
 /// Like Go, the path is first made absolute and lexically cleaned, so `..`
 /// and `.` components never reach the component walk.
-#[cfg(unix)]
 fn open_path_no_follow(path: &Path, create: bool) -> io::Result<Dir> {
     let path = physical_path(&go_abs_clean(path)?);
     let mut current = Dir::open_ambient_dir(Path::new("/"), ambient_authority())?;
@@ -111,73 +107,6 @@ fn open_path_no_follow(path: &Path, create: bool) -> io::Result<Dir> {
             next.set_permissions(".", Permissions::from_mode(0o700))?;
         }
         current = next;
-    }
-    Ok(current)
-}
-
-/// Opens a Windows path component-by-component from a filesystem anchor.
-///
-/// The only ambient opens here are the drive/UNC root or the already-selected
-/// process working directory. Every caller-controlled component is then opened
-/// relative to the retained directory capability with reparse-point following
-/// disabled. In particular, this must not be replaced by opening `path.parent()`
-/// ambiently: an intermediate junction could otherwise redirect the walk.
-#[cfg(not(unix))]
-fn open_path_no_follow(path: &Path, create: bool) -> io::Result<Dir> {
-    let mut components = path.components();
-    let mut pending = Vec::new();
-    let current = match components.next() {
-        Some(std::path::Component::Prefix(prefix)) => {
-            if !matches!(components.next(), Some(std::path::Component::RootDir)) {
-                return Err(io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    "drive-relative paths are not safe",
-                ));
-            }
-            let anchor = PathBuf::from(format!("{}\\", prefix.as_os_str().to_string_lossy()));
-            Dir::open_ambient_dir(&anchor, ambient_authority())?
-        }
-        Some(std::path::Component::RootDir) => {
-            Dir::open_ambient_dir(Path::new("\\"), ambient_authority())?
-        }
-        Some(std::path::Component::CurDir) => {
-            Dir::open_ambient_dir(Path::new("."), ambient_authority())?
-        }
-        Some(std::path::Component::Normal(name)) => {
-            pending.push(PathBuf::from(name));
-            Dir::open_ambient_dir(Path::new("."), ambient_authority())?
-        }
-        Some(std::path::Component::ParentDir) => {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "path contains an unsafe component",
-            ));
-        }
-        None => Dir::open_ambient_dir(Path::new("."), ambient_authority())?,
-    };
-    pending.extend(components.filter_map(|component| match component {
-        std::path::Component::Normal(name) => Some(PathBuf::from(name)),
-        std::path::Component::CurDir
-        | std::path::Component::RootDir
-        | std::path::Component::Prefix(_) => None,
-        std::path::Component::ParentDir => Some(PathBuf::new()),
-    }));
-    if pending.iter().any(|name| name.as_os_str().is_empty()) {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "path contains an unsafe component",
-        ));
-    }
-    let mut current = current;
-    for name in pending {
-        if create {
-            match current.create_dir(&name) {
-                Ok(()) => {}
-                Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {}
-                Err(error) => return Err(error),
-            }
-        }
-        current = current.open_dir_nofollow(&name)?;
     }
     Ok(current)
 }

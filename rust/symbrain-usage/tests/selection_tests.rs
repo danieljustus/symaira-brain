@@ -1,7 +1,6 @@
 //! Selection is tested in a clean subprocess so no real credentials are visible.
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
-#[cfg(unix)]
 #[test]
 fn provider_selection_excludes_credential_discovery() {
     use std::os::unix::fs::PermissionsExt;

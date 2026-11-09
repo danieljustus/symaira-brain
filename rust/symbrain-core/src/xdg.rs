@@ -23,11 +23,7 @@ impl Platform {
     /// Returns the runtime platform target.
     #[must_use]
     pub const fn current() -> Self {
-        if cfg!(windows) {
-            Self::Windows
-        } else {
-            Self::Unix
-        }
+        Self::Unix
     }
 }
 
@@ -229,14 +225,7 @@ mod tests {
     use super::*;
 
     fn test_abs(p: &str) -> PathBuf {
-        #[cfg(windows)]
-        {
-            PathBuf::from(format!("C:{}", p.replace('/', "\\")))
-        }
-        #[cfg(not(windows))]
-        {
-            PathBuf::from(p)
-        }
+        PathBuf::from(p)
     }
 
     #[test]

@@ -1,5 +1,4 @@
 use chrono::{TimeZone, Utc};
-#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use symbrain_harness::{
@@ -85,13 +84,12 @@ fn entry_semantics_match_go_and_are_cross_platform() {
     let entry = Entry::new("personal");
     assert!(entry.is_symbrain());
     assert_eq!(entry.profile(), Some("personal"));
-    assert_eq!(
-        Entry {
+    assert!(
+        !Entry {
             command: r"C:\bin\symbrain".into(),
             args: vec![],
         }
         .is_symbrain(),
-        cfg!(windows),
         "filepath.Base follows the host platform separator"
     );
     assert!(
@@ -107,11 +105,7 @@ fn entry_semantics_match_go_and_are_cross_platform() {
             args: vec![],
         }
         .superseded_core(),
-        if cfg!(windows) {
-            Some("symmemory")
-        } else {
-            None
-        },
+        None,
         "filepath.Base follows the host platform separator"
     );
     assert_eq!(
@@ -243,7 +237,6 @@ fn backup_clock_and_mode_are_deterministic_on_unix() {
     let root = temp.path().canonicalize().unwrap();
     let path = root.join("config.json");
     std::fs::write(&path, b"{}\n").unwrap();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o640)).unwrap();
@@ -255,7 +248,6 @@ fn backup_clock_and_mode_are_deterministic_on_unix() {
         "config.json.bak.20260906T200000Z"
     );
     assert_eq!(std::fs::read(&backup).unwrap(), b"{}\n");
-    #[cfg(unix)]
     assert_eq!(
         std::fs::metadata(backup).unwrap().permissions().mode() & 0o777,
         0o640
@@ -298,7 +290,6 @@ fn backups_with_same_timestamp_keep_both_snapshots() {
     assert_eq!(std::fs::read(second).unwrap(), b"second\n");
 }
 
-#[cfg(unix)]
 #[test]
 fn backup_rejects_symlink_targets() {
     let temp = tempfile::tempdir().unwrap();
@@ -310,7 +301,6 @@ fn backup_rejects_symlink_targets() {
     assert!(backup_at(&link, timestamp).is_err());
     assert_eq!(std::fs::read(&target).unwrap(), b"{\"ok\":true}\n");
 }
-#[cfg(unix)]
 #[test]
 fn backup_rejects_symlink_parents() {
     let temp = tempfile::tempdir().unwrap();

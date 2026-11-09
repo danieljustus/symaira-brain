@@ -106,7 +106,6 @@ fn status_unmanaged_identity_preserves_marker_metadata() {
     assert!(rows[0].source_hash.is_some());
 }
 
-#[cfg(unix)]
 #[test]
 fn status_reports_link_onto_non_directory_as_unmanaged() {
     use std::os::unix::fs::symlink;
@@ -135,7 +134,6 @@ fn status_reports_link_onto_non_directory_as_unmanaged() {
     assert_eq!(rows[0].path, skills.join("linkedfile"));
 }
 
-#[cfg(unix)]
 #[test]
 fn status_reports_dangling_and_directory_links_like_go() {
     use std::os::unix::fs::symlink;

@@ -185,14 +185,7 @@ mod tests {
     use std::collections::HashSet;
 
     fn test_abs(p: &str) -> PathBuf {
-        #[cfg(windows)]
-        {
-            PathBuf::from(format!("C:{}", p.replace('/', "\\")))
-        }
-        #[cfg(not(windows))]
-        {
-            PathBuf::from(p)
-        }
+        PathBuf::from(p)
     }
 
     #[test]

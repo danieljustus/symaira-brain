@@ -37,21 +37,7 @@ fn fixture() -> serde_json::Value {
 }
 
 fn native_command() -> String {
-    #[cfg(windows)]
-    {
-        let system_root = std::env::var_os("SystemRoot")
-            .or_else(|| std::env::var_os("windir"))
-            .unwrap_or_else(|| r"C:\Windows".into());
-        std::path::PathBuf::from(system_root)
-            .join("System32")
-            .join("where.exe")
-            .to_string_lossy()
-            .into_owned()
-    }
-    #[cfg(not(windows))]
-    {
-        "/usr/bin/true".to_owned()
-    }
+    "/usr/bin/true".to_owned()
 }
 
 fn normalize_root_paths(value: &str) -> String {
@@ -126,12 +112,6 @@ fn run(case_root: &Path) -> Output {
     let config_home = home.join(".config");
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     cmd.env_clear().envs(coverage::profile_environment());
-    #[cfg(windows)]
-    for key in ["SystemRoot", "windir", "PATHEXT", "ComSpec", "SystemDrive"] {
-        if let Some(val) = std::env::var_os(key) {
-            cmd.env(key, val);
-        }
-    }
     // Deliberately no SYMBRAIN_GO_BINARY, and an empty PATH: there is no Go
     // binary this run could possibly have used.
     cmd.current_dir(case_root)
@@ -159,9 +139,6 @@ fn every_oracle_case_matches_native_go_bytes() {
     let temp = TempDir::new().unwrap();
     // The oracle rewrites its own mktemp root to <root>; macOS hands out
     // /var/... symlinks to /private/var/..., so canonicalize like it does.
-    #[cfg(windows)]
-    let root = temp.path().to_path_buf();
-    #[cfg(not(windows))]
     let root = fs::canonicalize(temp.path()).unwrap();
 
     let mut native = Vec::new();

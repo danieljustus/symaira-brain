@@ -331,11 +331,7 @@ fn is_managed_skill(path: &Path) -> bool {
 /// suffixes on Windows.
 fn lookup_path(name: &str) -> Option<PathBuf> {
     let path = env::var_os("PATH")?;
-    let suffixes: &[&str] = if cfg!(windows) {
-        &["", ".exe", ".cmd", ".bat"]
-    } else {
-        &[""]
-    };
+    let suffixes: &[&str] = &[""];
     for directory in env::split_paths(&path) {
         for suffix in suffixes {
             let candidate = if suffix.is_empty() {
@@ -356,7 +352,6 @@ fn lookup_path(name: &str) -> Option<PathBuf> {
     None
 }
 
-#[cfg(unix)]
 fn is_executable_file(path: &Path) -> bool {
     use std::os::unix::fs::PermissionsExt;
 
@@ -364,11 +359,4 @@ fn is_executable_file(path: &Path) -> bool {
         return false;
     };
     metadata.is_file() && metadata.permissions().mode() & 0o111 != 0
-}
-
-/// Windows has no executable bit in the POSIX sense; `PATHEXT` suffixes and an
-/// existing regular file are the whole contract there.
-#[cfg(not(unix))]
-fn is_executable_file(path: &Path) -> bool {
-    fs::metadata(path).is_ok_and(|metadata| metadata.is_file())
 }

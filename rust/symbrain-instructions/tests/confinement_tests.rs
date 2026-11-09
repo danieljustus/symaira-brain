@@ -2,10 +2,8 @@
 #![cfg_attr(unix, allow(unsafe_code))]
 
 use std::path::Path;
-#[cfg(unix)]
 use symbrain_instructions::Source;
 
-#[cfg(unix)]
 #[test]
 fn trusted_root_and_source_parent_symlinks_are_rejected() {
     let temp = tempfile::tempdir().expect("temporary root");
@@ -44,7 +42,6 @@ fn trusted_root_and_source_parent_symlinks_are_rejected() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn missing_source_parent_is_not_reopened_after_a_late_symlink() {
     let temp = tempfile::tempdir().expect("temporary root");
@@ -56,7 +53,6 @@ fn missing_source_parent_is_not_reopened_after_a_late_symlink() {
     assert!(source.content().expect("missing source").is_empty());
 }
 
-#[cfg(unix)]
 #[test]
 fn fifo_source_is_rejected_without_blocking() {
     let temp = tempfile::tempdir().expect("temporary root");

@@ -1,4 +1,3 @@
-#![cfg(unix)]
 use symbrain_usage::{Cancellation, scan_codex_history};
 #[test]
 fn codex_history_complete_json_corpus() {

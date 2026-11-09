@@ -1,5 +1,4 @@
 // SQLite can silently ignore corrupt WAL frames and expose a previous login.
-#[cfg(unix)]
 fn opencode_valid_wal(database: &[u8], data: &[u8]) -> bool {
     if database.len() < 100 || &database[..16] != b"SQLite format 3\0" {
         return false;

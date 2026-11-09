@@ -43,25 +43,11 @@ fn run_profile_with_stdin(root: &TempDir, args: &[&str], input: &[u8]) -> std::p
 }
 
 fn create_file_symlink(target: &std::path::Path, link: &std::path::Path) -> std::io::Result<()> {
-    #[cfg(unix)]
-    {
-        std::os::unix::fs::symlink(target, link)
-    }
-    #[cfg(windows)]
-    {
-        std::os::windows::fs::symlink_file(target, link)
-    }
+    std::os::unix::fs::symlink(target, link)
 }
 
 fn create_dir_symlink(target: &std::path::Path, link: &std::path::Path) -> std::io::Result<()> {
-    #[cfg(unix)]
-    {
-        std::os::unix::fs::symlink(target, link)
-    }
-    #[cfg(windows)]
-    {
-        std::os::windows::fs::symlink_dir(target, link)
-    }
+    std::os::unix::fs::symlink(target, link)
 }
 
 #[test]
@@ -75,7 +61,6 @@ fn add_uses_restricted_template_by_default_and_secure_modes() {
     let contents = std::fs::read_to_string(&path).unwrap();
     assert!(contents.contains("name        = \"new_profile\""));
     assert!(contents.contains("request_only"));
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(
@@ -242,7 +227,6 @@ fn remove_deletes_file_symlink_without_following() {
     assert_eq!(std::fs::read(&outside).unwrap(), b"outside\n");
 }
 
-#[cfg(unix)]
 #[test]
 fn remove_deletes_fifo_without_following() {
     let root = TempDir::new().unwrap();
@@ -261,8 +245,6 @@ fn remove_deletes_fifo_without_following() {
 fn remove_oracle_fixture_records_source_provenance() {
     let path = if let Some(path) = std::env::var_os("SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE") {
         std::path::PathBuf::from(path)
-    } else if cfg!(windows) {
-        panic!("native Windows requires SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE from the Go oracle")
     } else {
         let fixture_name = if cfg!(target_os = "macos") {
             "profile_remove_oracle_darwin.json"
@@ -317,30 +299,7 @@ fn remove_oracle_fixture_records_source_provenance() {
         .iter()
         .filter_map(|case| case["id"].as_str())
         .collect::<std::collections::BTreeSet<_>>();
-    if cfg!(windows) {
-        assert_eq!(case_ids.len(), 19);
-        for id in [
-            "bound_project_symlink_refuses",
-            "symlink",
-            "symlink_profiles_root",
-        ] {
-            assert!(
-                case_ids.contains(id),
-                "Windows oracle omitted native case {id}"
-            );
-        }
-        let skipped = fixture["skipped_cases"].as_array().unwrap();
-        assert_eq!(skipped.len(), 1);
-        assert_eq!(skipped[0]["id"], "special_file");
-        assert_eq!(
-            skipped[0]["reason"],
-            "POSIX FIFO created with mkfifo has no ordinary Win32 filesystem entry equivalent"
-        );
-        assert_eq!(
-            skipped[0]["native_alternative"],
-            "symlink and symlink_profiles_root exercise Windows reparse-point deletion and ancestor refusal; neither is claimed equivalent to a FIFO"
-        );
-    } else {
+    {
         assert_eq!(case_ids.len(), 20);
         assert!(fixture["skipped_cases"].is_null());
     }
@@ -359,13 +318,6 @@ fn remove_rejects_symlinked_profiles_root_without_touching_target() {
 
     let output = run_profile(&root, &["profile", "remove", "existing", "--force"]);
     assert!(!output.status.success(), "stderr: {:?}", output.stderr);
-    if cfg!(windows) {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        assert!(
-            stderr.contains("open configuration directory component \"profiles\": reparse point"),
-            "unexpected Windows reparse-point diagnostic: {stderr}"
-        );
-    }
     assert_eq!(std::fs::read(&victim).unwrap(), b"outside\n");
 }
 
@@ -391,7 +343,6 @@ fn remove_fails_closed_for_symlink_harness_config() {
     ));
 }
 
-#[cfg(unix)]
 #[test]
 fn remove_fails_closed_for_fifo_harness_config() {
     let root = TempDir::new().unwrap();

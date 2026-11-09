@@ -7,7 +7,6 @@ use std::time::{Duration, Instant};
 use serde::Deserialize;
 use serde_json::value::RawValue;
 use symbrain_broker::{BrokerError, Config, ManagedServer, State};
-#[cfg(unix)]
 use symbrain_broker::{Client, Options};
 
 #[derive(Deserialize)]
@@ -145,7 +144,6 @@ fn in_flight_child_call_observes_connection_cancellation() {
     server.shutdown();
 }
 
-#[cfg(unix)]
 #[test]
 fn client_drop_kills_process_group_descendants() {
     use std::fs;
@@ -274,7 +272,6 @@ fn concurrent_lazy_start_spawns_exactly_one_child() {
     server.shutdown();
 }
 
-#[cfg(unix)]
 #[test]
 fn shutdown_kills_descendant_process_group() {
     let marker_dir = tempfile::tempdir().expect("tempdir");
@@ -305,7 +302,6 @@ fn shutdown_kills_descendant_process_group() {
     assert_eq!(server.state(), State::Stopped);
 }
 
-#[cfg(unix)]
 fn process_alive(pid: u32) -> bool {
     std::process::Command::new("/bin/kill")
         .arg("-0")
@@ -314,11 +310,6 @@ fn process_alive(pid: u32) -> bool {
         .stderr(std::process::Stdio::null())
         .status()
         .is_ok_and(|status| status.success())
-}
-
-#[cfg(not(unix))]
-fn process_alive(_pid: u32) -> bool {
-    false
 }
 
 fn read_pids(path: &std::path::Path) -> Vec<u32> {

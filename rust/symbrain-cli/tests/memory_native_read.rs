@@ -1,8 +1,6 @@
 //! Read commands (`search`, `list`, `rules`, `delete`) against the Go oracle
 //! for the configurations and database states that used to stay on Go (#758).
 
-#![cfg(unix)]
-
 #[path = "support/memory_native_oracle.rs"]
 mod oracle;
 

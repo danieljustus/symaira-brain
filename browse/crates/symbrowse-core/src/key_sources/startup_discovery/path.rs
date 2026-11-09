@@ -34,29 +34,8 @@ use std::path::{Path, PathBuf};
 pub(super) fn join(directory: &Path, program: &Path) -> PathBuf {
     let mut path = units(directory);
     let next = units(program);
-    #[cfg(windows)]
-    let mut next = next;
     if !path.is_empty() && !next.is_empty() {
-        #[cfg(unix)]
         path.push(47);
-        #[cfg(windows)]
-        match path.last().copied() {
-            Some(last) if separator(last) => {
-                let start = next
-                    .iter()
-                    .position(|unit| !separator(*unit))
-                    .unwrap_or(next.len());
-                drop(next.drain(..start));
-                if path.len() == 1
-                    && next.starts_with(&[63, 63])
-                    && (next.len() == 2 || separator(next[2]))
-                {
-                    path.extend_from_slice(&[46, 92]);
-                }
-            }
-            Some(58) => {}
-            _ => path.push(92),
-        }
     }
     path.extend(next);
     native(clean(&path))
@@ -64,18 +43,9 @@ pub(super) fn join(directory: &Path, program: &Path) -> PathBuf {
 
 pub(super) fn is_absolute(path: &Path) -> bool {
     let input = units(path);
-    #[cfg(unix)]
-    return input.first() == Some(&47);
-    #[cfg(windows)]
-    {
-        let volume = volume_len(&input);
-        volume > 0
-            && (input.len() > 1 && separator(input[0]) && separator(input[1])
-                || input.get(volume).is_some_and(|unit| separator(*unit)))
-    }
+    input.first() == Some(&47)
 }
 
-#[cfg(unix)]
 fn units(path: &Path) -> Vec<u16> {
     use std::os::unix::ffi::OsStrExt;
     path.as_os_str()
@@ -84,32 +54,15 @@ fn units(path: &Path) -> Vec<u16> {
         .map(|byte| u16::from(*byte))
         .collect()
 }
-#[cfg(windows)]
-fn units(path: &Path) -> Vec<u16> {
-    use std::os::windows::ffi::OsStrExt;
-    path.as_os_str().encode_wide().collect()
-}
-#[cfg(unix)]
 fn native(input: Vec<u16>) -> PathBuf {
     use std::os::unix::ffi::OsStringExt;
     std::ffi::OsString::from_vec(input.into_iter().map(|unit| unit as u8).collect()).into()
 }
-#[cfg(windows)]
-fn native(input: Vec<u16>) -> PathBuf {
-    use std::os::windows::ffi::OsStringExt;
-    std::ffi::OsString::from_wide(&input).into()
-}
 fn separator(unit: u16) -> bool {
-    #[cfg(unix)]
-    return unit == 47;
-    #[cfg(windows)]
-    return matches!(unit, 47 | 92);
+    unit == 47
 }
 fn clean(input: &[u16]) -> Vec<u16> {
-    #[cfg(unix)]
     let volume = 0;
-    #[cfg(windows)]
-    let volume = volume_len(input);
     let path = &input[volume..];
     if path.is_empty() {
         let mut result = input.to_owned();
@@ -134,10 +87,7 @@ fn clean(input: &[u16]) -> Vec<u16> {
             parts.push(part);
         }
     }
-    #[cfg(unix)]
     let slash = 47;
-    #[cfg(windows)]
-    let slash = 92;
     let mut result = input[..volume].to_owned();
     if rooted {
         result.push(slash);
@@ -151,89 +101,15 @@ fn clean(input: &[u16]) -> Vec<u16> {
     if result.len() == volume {
         result.push(46);
     }
-    #[cfg(windows)]
-    if volume == 0 {
-        // Same postClean protection against new drive/device-root meanings.
-        let first = result
-            .split(|unit| separator(*unit))
-            .next()
-            .unwrap_or_default();
-        if first.contains(&58) {
-            drop(result.splice(..0, [46, 92]));
-        } else if result.starts_with(&[92, 63, 63]) {
-            drop(result.splice(..0, [92, 46]));
-        }
-    }
     from_slash(result)
 }
 fn from_slash(input: Vec<u16>) -> Vec<u16> {
-    #[cfg(windows)]
-    let mut input = input;
-    #[cfg(windows)]
-    for unit in &mut input {
-        if *unit == 47 {
-            *unit = 92;
-        }
-    }
     input
-}
-
-#[cfg(windows)]
-fn volume_len(input: &[u16]) -> usize {
-    // Go detects a drive at byte1 of WTF-8. A multi-byte first unit is not
-    // a drive letter, although the native units themselves remain untouched.
-    if input.len() >= 2 && input[0] < 128 && input[1] == 58 {
-        return 2;
-    }
-    if input.is_empty() || !separator(input[0]) {
-        return 0;
-    }
-    if prefix(input, b"\\\\.\\UNC") {
-        return unc_len(input, 8);
-    }
-    if prefix(input, b"\\\\.") || prefix(input, b"\\\\?") || prefix(input, b"\\??") {
-        if input.len() == 3 {
-            return 3;
-        }
-        return input
-            .iter()
-            .enumerate()
-            .skip(4)
-            .find(|(_, unit)| separator(**unit))
-            .map_or(input.len(), |(index, _)| index);
-    }
-    if input.len() >= 2 && separator(input[1]) {
-        return unc_len(input, 2);
-    }
-    0
-}
-#[cfg(windows)]
-fn prefix(input: &[u16], prefix: &[u8]) -> bool {
-    input.len() >= prefix.len()
-        && input.iter().zip(prefix).all(|(unit, byte)| {
-            if separator(u16::from(*byte)) {
-                separator(*unit)
-            } else {
-                *unit <= 127 && (*unit as u8).eq_ignore_ascii_case(byte)
-            }
-        })
-        && (input.len() == prefix.len() || separator(input[prefix.len()]))
-}
-#[cfg(windows)]
-fn unc_len(input: &[u16], start: usize) -> usize {
-    input
-        .iter()
-        .enumerate()
-        .skip(start)
-        .filter(|(_, unit)| separator(**unit))
-        .nth(1)
-        .map_or(input.len(), |(index, _)| index)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[cfg(unix)]
     #[test]
     fn unix_candidates_clean_lexically_without_losing_bytes() {
         use std::os::unix::ffi::OsStrExt;
@@ -255,43 +131,5 @@ mod tests {
             );
             assert_eq!(path.as_os_str().as_bytes(), expected);
         }
-    }
-    #[cfg(windows)]
-    #[test]
-    fn windows_candidates_keep_drive_unc_device_and_dotdot_rules() {
-        for (directory, expected) in [
-            (r"C:\owned\missing\..\bin", r"C:\owned\bin\symvault"),
-            (r"C:\owned\link\..\bin", r"C:\owned\bin\symvault"),
-            (r"C:", r"C:symvault"),
-            (r"C:bin\..", r"C:symvault"),
-            (r"\bin\..", r"\symvault"),
-            (r"..\..\bin\..", r"..\..\symvault"),
-            (r"\\host\share\bin\..", r"\\host\share\symvault"),
-            (r"\\?\C:\bin\..", r"\\?\C:\symvault"),
-            (
-                r"\\.\UNC\host\share\..\bin",
-                r"\\.\UNC\host\share\bin\symvault",
-            ),
-            // Go Join never cleans elements first: `a\..\c:` ends in ':' so no
-            // separator is added, Clean gives `c:symvault`, and postClean
-            // prefixes `.\` because ':' precedes the first separator.
-            (r"a\..\c:", r".\c:symvault"),
-            (r"\a\..\??\x", r"\.\??\x\symvault"),
-            ("C:/owned//./bin/", r"C:\owned\bin\symvault"),
-        ] {
-            assert_eq!(
-                join(Path::new(directory), Path::new("symvault")),
-                PathBuf::from(expected),
-                "{directory}"
-            );
-        }
-        use std::os::windows::ffi::OsStringExt;
-        let raw = std::ffi::OsString::from_wide(&[67, 58, 92, 0xd800, 92, 46, 46, 92, 0xd801]);
-        assert_eq!(
-            units(&join(Path::new(&raw), Path::new("symvault"))),
-            [
-                67, 58, 92, 0xd801, 92, 115, 121, 109, 118, 97, 117, 108, 116
-            ]
-        );
     }
 }

@@ -1,8 +1,6 @@
 //! A failing working-directory lookup stops store creation before any directory
 //! or database exists (#935): relative input must never be resolved from `/`.
 
-#![cfg(unix)]
-
 use std::path::Path;
 use std::process::Command;
 

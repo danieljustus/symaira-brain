@@ -4,14 +4,11 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
-#[cfg(windows)]
-use tempfile::Builder as TempFileBuilder;
-#[cfg(not(windows))]
 use tempfile::NamedTempFile;
 
 /// Retries an operation up to 10 attempts with a 10ms backoff on error.
 /// Parameterized with `rename_op` and `sleep_op` for testability without real sleeps.
-#[cfg_attr(not(windows), allow(dead_code))]
+#[allow(dead_code)]
 pub fn rename_with_retry_impl<R, S>(mut rename_op: R, mut sleep_op: S) -> std::io::Result<()>
 where
     R: FnMut(usize) -> std::io::Result<()>,
@@ -32,19 +29,6 @@ where
     Err(last_err.unwrap_or_else(|| std::io::Error::other("rename retry attempts exhausted")))
 }
 
-#[cfg(windows)]
-fn atomic_rename(temp_path: &Path, dest_path: &Path) -> std::io::Result<()> {
-    rename_with_retry_impl(
-        |_| fs::rename(temp_path, dest_path),
-        |_, dur| std::thread::sleep(dur),
-    )
-}
-
-#[cfg(all(not(windows), not(unix)))]
-fn atomic_rename(temp_path: &Path, dest_path: &Path) -> std::io::Result<()> {
-    fs::rename(temp_path, dest_path)
-}
-
 /// Recursively creates parent directories with 0700 permissions on Unix.
 ///
 /// # Errors
@@ -52,7 +36,6 @@ fn atomic_rename(temp_path: &Path, dest_path: &Path) -> std::io::Result<()> {
 pub fn create_dir_all(parent: &Path) -> std::io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::DirBuilderExt;
         builder.mode(0o700);
@@ -71,17 +54,8 @@ pub fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or_else(|| Path::new("."));
-    #[cfg(windows)]
-    let temp = TempFileBuilder::new()
-        .prefix(&format!(
-            "{}.tmp-",
-            path.file_name().unwrap_or_default().to_string_lossy()
-        ))
-        .tempfile_in(parent)?;
-    #[cfg(not(windows))]
     let temp = NamedTempFile::new_in(parent)?;
     let temp_file = temp.as_file();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         temp_file.set_permissions(fs::Permissions::from_mode(0o600))?;
@@ -90,61 +64,13 @@ pub fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
     writer.write_all(data)?;
     writer.sync_all()?;
 
-    #[cfg(unix)]
-    {
-        temp.persist(path).map(|_| ()).map_err(|e| e.error)
-    }
-
-    #[cfg(not(unix))]
-    {
-        // On Windows and other non-Unix systems, close the temp file handle
-        // before renaming so it doesn't hold a sharing lock.
-        let temp_path = temp.into_temp_path();
-        if let Err(error) = atomic_rename(&temp_path, path) {
-            #[cfg(windows)]
-            return Err(std::io::Error::new(
-                error.kind(),
-                format!(
-                    "rename {} {}: {}",
-                    temp_path.display(),
-                    path.display(),
-                    go_windows_io_error(&error)
-                ),
-            ));
-            #[cfg(not(windows))]
-            return Err(error);
-        }
-        // Keep the temp file from being deleted on drop after successful rename.
-        std::mem::forget(temp_path);
-        Ok(())
-    }
-}
-
-#[cfg(windows)]
-fn go_windows_io_error(error: &std::io::Error) -> String {
-    match error.raw_os_error() {
-        Some(5) => "Access is denied.".to_owned(),
-        Some(3) => "The system cannot find the path specified.".to_owned(),
-        _ => error.to_string(),
-    }
+    temp.persist(path).map(|_| ()).map_err(|e| e.error)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[cfg(windows)]
-    #[test]
-    fn windows_errors_match_go_path_error_text() {
-        assert_eq!(
-            go_windows_io_error(&std::io::Error::from_raw_os_error(5)),
-            "Access is denied."
-        );
-        assert_eq!(
-            go_windows_io_error(&std::io::Error::from_raw_os_error(3)),
-            "The system cannot find the path specified."
-        );
-    }
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     #[test]

@@ -35,7 +35,6 @@ fn run(root: &Path, home: Option<&Path>, args: &[&str]) -> Output {
     command.output().unwrap()
 }
 
-#[cfg(unix)]
 #[test]
 fn status_below_search_only_ancestor_reports_no_installed_skills() {
     use std::os::unix::fs::PermissionsExt;

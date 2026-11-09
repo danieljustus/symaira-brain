@@ -1,13 +1,10 @@
-#[cfg(unix)]
 mod connect;
 mod errors;
 mod process;
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod tests;
 mod transport;
-#[cfg(unix)]
 use connect::connect_error;
-#[cfg(unix)]
 pub use connect::connect_unix;
 use errors::{lifecycle_error, map_io_error, should_autostart, unavailable};
 pub use process::detach_command;
@@ -18,17 +15,10 @@ use crate::{
     redact_json, redact_str,
 };
 use serde_json::Value;
-#[cfg(unix)]
 use std::io::{BufRead, BufReader, Write};
-#[cfg(unix)]
 use std::os::fd::{AsFd, AsRawFd};
-#[cfg(unix)]
 use std::os::unix::net::UnixStream;
-#[cfg(unix)]
 use std::os::unix::process::CommandExt;
-#[cfg(windows)]
-use std::os::windows::process::CommandExt;
-#[cfg(unix)]
 use std::path::Path;
 use std::{
     io,

@@ -35,24 +35,11 @@ pub(super) fn kimi_headers(device: Option<&str>) -> BTreeMap<String, String> {
     headers
 }
 
-#[cfg(unix)]
 pub(super) fn hostname() -> String {
     rustix::system::uname()
         .nodename()
         .to_string_lossy()
         .into_owned()
-}
-
-#[cfg(windows)]
-pub(super) fn hostname() -> String {
-    hostname::get()
-        .map(|name| name.to_string_lossy().into_owned())
-        .unwrap_or_default()
-}
-
-#[cfg(not(any(unix, windows)))]
-pub(super) fn hostname() -> String {
-    String::new()
 }
 
 pub(super) fn copilot_url(host: Option<&str>) -> String {

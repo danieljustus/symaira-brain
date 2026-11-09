@@ -264,7 +264,6 @@ fn create_or_set(
 }
 
 fn field_path(query: &OsStr) -> OsString {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::{OsStrExt, OsStringExt};
         let bytes = query.as_bytes();
@@ -273,16 +272,6 @@ fn field_path(query: &OsStr) -> OsString {
             .rposition(|byte| *byte == b'.')
             .expect("validated field target");
         OsString::from_vec(bytes[..dot].to_vec())
-    }
-    #[cfg(not(unix))]
-    {
-        OsString::from(
-            query
-                .to_string_lossy()
-                .rsplit_once('.')
-                .expect("validated field target")
-                .0,
-        )
     }
 }
 

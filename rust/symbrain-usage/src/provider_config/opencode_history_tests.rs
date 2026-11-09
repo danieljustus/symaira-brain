@@ -1,4 +1,4 @@
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod opencode_history_tests {
     use super::*;
     #[test]

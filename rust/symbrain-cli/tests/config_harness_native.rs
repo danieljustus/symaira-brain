@@ -25,14 +25,9 @@ fn from_hex(text: &str) -> Vec<u8> {
 }
 
 fn os_arg(bytes: Vec<u8>) -> OsString {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStringExt;
         OsString::from_vec(bytes)
-    }
-    #[cfg(not(unix))]
-    {
-        OsString::from(String::from_utf8(bytes).expect("non-raw fixture argv is UTF-8"))
     }
 }
 
@@ -56,10 +51,6 @@ fn go_recorded_shapes_are_native_without_a_go_fallback() {
     let mut executed = 0;
     for case in cases {
         let name = case["name"].as_str().unwrap();
-        if cfg!(not(unix)) && case["raw_bytes"].as_bool().unwrap() {
-            eprintln!("SKIP {name}: raw-byte argv is not representable on this platform");
-            continue;
-        }
         let root = TempDir::new().unwrap();
         let root_path = root.path().canonicalize().unwrap();
         for dir in ["home", "config", "data", "cache", "project"] {
@@ -101,16 +92,11 @@ fn go_recorded_shapes_are_native_without_a_go_fallback() {
         );
         executed += 1;
     }
-    let raw = cases
+    let _raw = cases
         .iter()
         .filter(|case| case["raw_bytes"].as_bool().unwrap())
         .count();
-    let expected_executed = if cfg!(unix) {
-        cases.len()
-    } else {
-        cases.len() - raw
-    };
-    assert_eq!(executed, expected_executed);
+    assert_eq!(executed, cases.len());
 }
 
 /// Runs the native CLI in a disposable root seeded like the oracle's

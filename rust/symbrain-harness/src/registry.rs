@@ -435,11 +435,7 @@ mod tests {
             ("/proj", "/proj/.mcp.json"),
             ("/", "/.mcp.json"),
         ] {
-            let want = if cfg!(windows) {
-                want.replace('/', "\\")
-            } else {
-                want.to_owned()
-            };
+            let want = want.to_owned();
             assert_eq!(display(project), want, "{project:?}");
         }
     }

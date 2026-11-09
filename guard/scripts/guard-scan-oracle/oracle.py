@@ -312,7 +312,16 @@ def fixture_differences(expected: dict[str, object], actual: dict[str, object]) 
     return differences
 
 
+HISTORICAL_RECORD_BANNER = (
+    "HISTORICAL RECORD MODE (#1004): guard-scan-oracle/oracle.py builds the pinned Go revision with `go build`. "
+    "The Go implementation was removed in #1003; this mode only works from a checkout of the "
+    "pre-removal revision 57c26c76e (full: 57c26c76e238e458d9027d5ee4362df24d30b47e). It is not run by any gate; sealed fixtures "
+    "replay without Go. See docs/adr/historical-go-record-paths-1004.md."
+)
+
+
 def build_and_run() -> dict[str, object]:
+    raise SystemExit(HISTORICAL_RECORD_BANNER)
     expected = require_pin()
     runtime_parent = Path(os.environ.get("SYMAIRA_EXTERNAL_RUNTIME_ROOT", tempfile.gettempdir()))
     runtime = runtime_parent / "guard-scan-oracle-runtime"

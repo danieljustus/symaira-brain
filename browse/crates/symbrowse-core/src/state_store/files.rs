@@ -7,7 +7,6 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 static NEXT_TEMP: AtomicU64 = AtomicU64::new(1);
-#[cfg(unix)]
 pub(super) fn read_regular(path: &Path) -> std::io::Result<Vec<u8>> {
     use std::io::Read;
 
@@ -25,15 +24,6 @@ pub(super) fn read_regular(path: &Path) -> std::io::Result<Vec<u8>> {
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
     Ok(data)
-}
-
-#[cfg(not(unix))]
-pub(super) fn read_regular(path: &Path) -> std::io::Result<Vec<u8>> {
-    let metadata = fs::symlink_metadata(path)?;
-    if !metadata.is_file() || metadata.file_type().is_symlink() {
-        return Err(std::io::Error::other("state path is not a regular file"));
-    }
-    fs::read(path)
 }
 
 pub(super) fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
@@ -78,39 +68,22 @@ pub(super) fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
     result
 }
 
-#[cfg(unix)]
 fn secure_file_options(options: &mut OpenOptions) {
     use std::os::unix::fs::OpenOptionsExt;
     options.mode(0o600);
 }
 
-#[cfg(not(unix))]
-fn secure_file_options(_options: &mut OpenOptions) {}
-
-#[cfg(unix)]
 pub(super) fn secure_directory(path: &Path) -> std::io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(0o700))
 }
 
-#[cfg(not(unix))]
-pub(super) fn secure_directory(_path: &Path) -> std::io::Result<()> {
-    Ok(())
-}
-
-#[cfg(unix)]
 fn sync_directory(path: &Path) -> std::io::Result<()> {
     fs::File::open(path)?.sync_all()
 }
 
-#[cfg(not(unix))]
-fn sync_directory(_path: &Path) -> std::io::Result<()> {
-    Ok(())
-}
-
 pub(super) fn read_prefix(path: &Path, limit: u64) -> std::io::Result<Vec<u8>> {
     use std::io::Read;
-    #[cfg(unix)]
     let file = {
         use rustix::fs::{Mode, OFlags, open};
         fs::File::from(open(
@@ -118,14 +91,6 @@ pub(super) fn read_prefix(path: &Path, limit: u64) -> std::io::Result<Vec<u8>> {
             OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NONBLOCK,
             Mode::empty(),
         )?)
-    };
-    #[cfg(not(unix))]
-    let file = {
-        let metadata = fs::symlink_metadata(path)?;
-        if !metadata.is_file() || metadata.file_type().is_symlink() {
-            return Err(std::io::Error::other("state path is not a regular file"));
-        }
-        fs::File::open(path)?
     };
     if !file.metadata()?.is_file() {
         return Err(std::io::Error::other("state path is not a regular file"));

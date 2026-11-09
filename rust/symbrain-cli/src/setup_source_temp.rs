@@ -55,11 +55,7 @@ pub(super) fn stage(parent: &Path) -> Result<Stage, GoText> {
             } else {
                 parent.join(absolute.file_name().expect("generated stage filename"))
             };
-            #[cfg(unix)]
             let mut builder = std::fs::DirBuilder::new();
-            #[cfg(not(unix))]
-            let builder = std::fs::DirBuilder::new();
-            #[cfg(unix)]
             {
                 use std::os::unix::fs::DirBuilderExt;
                 builder.mode(0o700);
@@ -73,17 +69,8 @@ pub(super) fn stage(parent: &Path) -> Result<Stage, GoText> {
                     detail = Some(if error.kind() == std::io::ErrorKind::NotFound {
                         match std::fs::metadata(parent) {
                             Err(stat) if stat.kind() == std::io::ErrorKind::NotFound => {
-                                let display_parent = if cfg!(windows) {
-                                    super::absolute(parent.as_os_str())
-                                        .unwrap_or_else(|_| parent.to_path_buf())
-                                } else {
-                                    parent.to_path_buf()
-                                };
-                                let operation = if cfg!(windows) {
-                                    "GetFileAttributesEx "
-                                } else {
-                                    "stat "
-                                };
+                                let display_parent = parent.to_path_buf();
+                                let operation = "stat ";
                                 GoText::path(
                                     operation,
                                     &display_parent,

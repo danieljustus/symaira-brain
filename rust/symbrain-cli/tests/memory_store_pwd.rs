@@ -8,8 +8,6 @@
 //! exercise are reported through `store_support::skip_privileged`, never passed
 //! silently.
 
-#![cfg(unix)]
-
 mod store_support;
 
 use std::os::unix::fs::MetadataExt;

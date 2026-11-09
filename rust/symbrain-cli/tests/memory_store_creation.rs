@@ -5,8 +5,6 @@
 //! Linux/ext4-overlay. The live Go-vs-native comparison runs in that harness;
 //! this process test keeps the contract enforced by plain `cargo test`.
 
-#![cfg(unix)]
-
 mod store_support;
 
 use std::os::unix::fs::PermissionsExt;

@@ -289,7 +289,6 @@ fn useful_access_time(path: &Path, installed_at: Option<i64>) -> Option<(i64, u3
 /// Access timestamp with nanosecond precision where the platform records one.
 /// Platforms without a useful access time report `None`, like the Go build tag
 /// split does.
-#[cfg(unix)]
 fn access_time(metadata: &fs::Metadata) -> Option<(i64, u32)> {
     use std::os::unix::fs::MetadataExt;
 
@@ -299,11 +298,6 @@ fn access_time(metadata: &fs::Metadata) -> Option<(i64, u32)> {
         return None;
     }
     Some((seconds, nanos))
-}
-
-#[cfg(not(unix))]
-fn access_time(_metadata: &fs::Metadata) -> Option<(i64, u32)> {
-    None
 }
 
 fn modified_time(metadata: &fs::Metadata) -> Option<(i64, u32)> {

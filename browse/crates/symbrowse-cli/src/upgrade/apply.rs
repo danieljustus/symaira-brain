@@ -140,25 +140,15 @@ pub(super) fn detect(binary: &Path) -> Result<InstallMethod, String> {
         return Ok(InstallMethod::GoInstall);
     }
 
-    if cfg!(windows) {
-        return Ok(InstallMethod::BuildFromSource);
-    }
     let Some(dir) = Path::new(&abs).parent() else {
         return Ok(InstallMethod::Unknown);
     };
     let Ok(meta) = fs::metadata(dir) else {
         return Ok(InstallMethod::Unknown);
     };
-    #[cfg(unix)]
     let mode = {
         use std::os::unix::fs::PermissionsExt;
         meta.permissions().mode()
-    };
-    #[cfg(not(unix))]
-    let mode = if meta.permissions().readonly() {
-        0o444
-    } else {
-        0o644
     };
     if mode & 0o200 != 0 || mode & 0o022 != 0 {
         Ok(InstallMethod::DirectDownload)
@@ -263,7 +253,6 @@ fn check_writable(target: &Path) -> Result<(), String> {
             )
         })?;
     let _ = fs::remove_file(&probe);
-    #[cfg(unix)]
     if let Ok(meta) = fs::metadata(target) {
         use std::os::unix::fs::PermissionsExt;
         if meta.permissions().mode() & 0o200 == 0 {
@@ -407,7 +396,6 @@ pub(super) fn apply(release: &Release, target: &Path) -> Result<(), String> {
             asset.name
         ));
     }
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(&staged, fs::Permissions::from_mode(0o755))

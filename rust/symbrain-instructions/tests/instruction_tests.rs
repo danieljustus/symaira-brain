@@ -56,8 +56,6 @@ struct Case {
     verdict: String,
     #[serde(default)]
     error: String,
-    #[serde(default)]
-    platform_evidence: String,
 }
 
 fn oracle() -> Oracle {
@@ -188,22 +186,14 @@ fn oracle_source_verdict_cases_match_go() {
         .filter(|item| item.operation == "source_verdict")
     {
         assert_eq!(item.verdict, "error", "case {}", item.id);
-        if item.platform_evidence == "unix_runtime" && !cfg!(unix) {
-            // The fixture deliberately carries static Unix evidence when the
-            // current runner cannot create a no-follow symlink case.
-            continue;
-        }
         let temp = tempfile::tempdir().expect("temporary verdict root");
         let global = temp.path().join("global");
         let project = temp.path().join("project");
         match item.id.as_str() {
             "source_symlink_rejected" => {
-                #[cfg(unix)]
-                {
-                    let outside = temp.path().join("outside");
-                    std::fs::write(&outside, b"outside").expect("outside source");
-                    std::os::unix::fs::symlink(&outside, &global).expect("source symlink");
-                }
+                let outside = temp.path().join("outside");
+                std::fs::write(&outside, b"outside").expect("outside source");
+                std::os::unix::fs::symlink(&outside, &global).expect("source symlink");
             }
             "source_directory_rejected" => {
                 std::fs::create_dir(&global).expect("source directory");
@@ -340,13 +330,6 @@ fn preserves_non_utf8_bytes_like_go_strings() {
 
 #[test]
 fn source_paths_follow_xdg_and_project_layout() {
-    #[cfg(windows)]
-    let home = std::env::temp_dir()
-        .ancestors()
-        .last()
-        .expect("temp drive root")
-        .join("oracle-home");
-    #[cfg(not(windows))]
     let home = PathBuf::from("/oracle-home");
     let project = Path::new("/oracle-project");
     let source = Source::with_environment(Some(project), None, Some(&home));
@@ -358,9 +341,6 @@ fn source_paths_follow_xdg_and_project_layout() {
         source.project_path,
         Some(PathBuf::from("/oracle-project/.symbrain/instructions.md"))
     );
-    #[cfg(windows)]
-    let xdg = Path::new("C:\\custom\\config");
-    #[cfg(not(windows))]
     let xdg = Path::new("/custom/config");
     assert_eq!(
         resolve_global_path(Some(xdg), Some(&home)),
@@ -506,7 +486,6 @@ fn source_rejects_oversized_merged_content() {
     assert!(source.content().is_err());
 }
 
-#[cfg(unix)]
 #[test]
 fn source_rejects_symlink_without_following_it() {
     let temp = tempfile::tempdir().expect("temporary source root");

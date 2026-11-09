@@ -110,7 +110,6 @@ impl Store {
     pub(super) fn open(dir: &Path) -> Result<Self, String> {
         let mut builder = fs::DirBuilder::new();
         builder.recursive(true);
-        #[cfg(unix)]
         {
             use std::os::unix::fs::DirBuilderExt;
             builder.mode(0o700);
@@ -246,7 +245,6 @@ impl Store {
             .join(format!(".grants-{}-{nonce}.tmp", std::process::id()));
         let mut options = OpenOptions::new();
         options.write(true).create_new(true);
-        #[cfg(unix)]
         {
             use std::os::unix::fs::OpenOptionsExt;
             options.mode(0o600);
@@ -258,7 +256,6 @@ impl Store {
             let _ = fs::remove_file(&temp_path);
             return Err(format!("grant: write temp file: {error}"));
         }
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             fs::set_permissions(&temp_path, fs::Permissions::from_mode(0o600))

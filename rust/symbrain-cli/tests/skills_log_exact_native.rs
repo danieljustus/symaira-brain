@@ -261,7 +261,6 @@ fn missing_log_reports_nothing_recorded() {
     assert_eq!(json.stdout, b"[]\n");
 }
 
-#[cfg(unix)]
 mod posix {
     use super::*;
     use std::os::unix::fs::symlink;

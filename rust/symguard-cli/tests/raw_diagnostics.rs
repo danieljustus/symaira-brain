@@ -1,5 +1,4 @@
 //! Exercise the shared Brain/standalone decision boundary, not a formatter copy.
-#![cfg(unix)]
 
 use std::ffi::OsString;
 use std::os::unix::ffi::OsStringExt;

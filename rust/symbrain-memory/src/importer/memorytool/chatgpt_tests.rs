@@ -139,7 +139,6 @@ fn empty_path_uses_downloads_below_the_given_home() {
     assert_eq!(refs[0].path, export.to_string_lossy());
 }
 
-#[cfg(unix)]
 #[test]
 fn symlinks_and_special_files_are_never_followed() {
     use std::os::unix::fs::symlink;

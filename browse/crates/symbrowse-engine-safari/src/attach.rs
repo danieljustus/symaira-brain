@@ -157,7 +157,6 @@ impl ScriptRunner for OsascriptRunner {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null());
-        #[cfg(unix)]
         {
             use std::os::unix::process::CommandExt;
             // The child becomes the process-group leader. This is a safe
@@ -280,16 +279,11 @@ impl ScriptRunner for OsascriptRunner {
 }
 
 fn terminate_process_group(child: &mut Child) {
-    #[cfg(unix)]
     {
         use rustix::process::{Pid, Signal, kill_process_group};
         if let Some(pid) = Pid::from_raw(child.id() as i32) {
             let _ = kill_process_group(pid, Signal::KILL);
         }
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = child.kill();
     }
     let _ = child.wait();
 }

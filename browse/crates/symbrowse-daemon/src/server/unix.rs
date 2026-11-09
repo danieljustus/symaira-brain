@@ -1,14 +1,12 @@
 use super::*;
 const STALE_SOCKET_PROBE_TIMEOUT: Duration = Duration::from_millis(100);
 
-#[cfg(unix)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct SocketIdentity {
     device: u64,
     inode: u64,
 }
 
-#[cfg(unix)]
 pub(super) fn socket_identity(metadata: &fs::Metadata) -> SocketIdentity {
     SocketIdentity {
         device: metadata.dev(),
@@ -16,12 +14,10 @@ pub(super) fn socket_identity(metadata: &fs::Metadata) -> SocketIdentity {
     }
 }
 
-#[cfg(unix)]
 pub(super) fn socket_identity_at_path(path: &Path) -> io::Result<SocketIdentity> {
     fs::symlink_metadata(path).map(|metadata| socket_identity(&metadata))
 }
 
-#[cfg(unix)]
 pub(super) fn remove_owned_socket(path: &Path, owner: SocketIdentity) -> io::Result<()> {
     match fs::symlink_metadata(path) {
         Ok(metadata) if metadata.file_type().is_socket() && socket_identity(&metadata) == owner => {
@@ -34,7 +30,6 @@ pub(super) fn remove_owned_socket(path: &Path, owner: SocketIdentity) -> io::Res
 }
 
 impl Server {
-    #[cfg(unix)]
     pub(super) fn listen_unix(&self) -> Result<(), ServerError> {
         use std::os::unix::net::UnixListener;
         let parent = self
@@ -78,7 +73,6 @@ impl Server {
         result.and(cleanup.map_err(ServerError::Io))
     }
 
-    #[cfg(unix)]
     fn accept_loop(
         &self,
         listener: std::os::unix::net::UnixListener,
@@ -149,7 +143,6 @@ impl Server {
         Ok(())
     }
 }
-#[cfg(unix)]
 pub(super) fn wait_for_unix_listener(
     listener: &std::os::unix::net::UnixListener,
     timeout: Duration,
@@ -205,7 +198,6 @@ pub(super) fn peer_is_current_user(_stream: &std::os::unix::net::UnixStream) -> 
     Ok(false)
 }
 
-#[cfg(unix)]
 #[allow(clippy::too_many_arguments)]
 pub(super) fn serve_connection(
     stream: std::os::unix::net::UnixStream,
@@ -229,10 +221,8 @@ pub(super) fn serve_connection(
     );
 }
 
-#[cfg(unix)]
 pub(super) fn acquire_lock(path: &Path) -> Result<File, ServerError> {
     let file = {
-        #[cfg(unix)]
         {
             use std::os::unix::fs::OpenOptionsExt;
             OpenOptions::new()
@@ -241,15 +231,6 @@ pub(super) fn acquire_lock(path: &Path) -> Result<File, ServerError> {
                 .read(true)
                 .write(true)
                 .mode(0o600)
-                .open(path)?
-        }
-        #[cfg(windows)]
-        {
-            OpenOptions::new()
-                .create(true)
-                .truncate(false)
-                .read(true)
-                .write(true)
                 .open(path)?
         }
     };
@@ -263,7 +244,6 @@ pub(super) fn acquire_lock(path: &Path) -> Result<File, ServerError> {
     Ok(file)
 }
 
-#[cfg(unix)]
 pub(super) fn prepare_socket(path: &Path) -> Result<(), ServerError> {
     match fs::symlink_metadata(path) {
         Ok(metadata) if !metadata.file_type().is_socket() => {
@@ -293,7 +273,6 @@ pub(super) fn prepare_socket(path: &Path) -> Result<(), ServerError> {
     Ok(())
 }
 
-#[cfg(unix)]
 pub(super) fn set_mode(path: &Path, mode: u32) -> io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(mode))

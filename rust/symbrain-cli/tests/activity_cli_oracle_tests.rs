@@ -29,11 +29,6 @@ fn fixture() -> Suite {
         },
         PathBuf::from,
     );
-    #[cfg(windows)]
-    assert!(
-        std::env::var_os("SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE").is_some(),
-        "Windows requires a fresh native Go fixture"
-    );
     serde_json::from_slice(&fs::read(path).expect("read Go activity CLI oracle"))
         .expect("parse Go activity CLI oracle")
 }
@@ -106,12 +101,6 @@ fn run_case(oracle: &Oracle) {
         .env("XDG_DATA_HOME", &data)
         .env("XDG_CACHE_HOME", root.join("cache"))
         .env("XDG_STATE_HOME", root.join("state"));
-    #[cfg(windows)]
-    for key in ["SystemRoot", "windir", "ComSpec", "PATHEXT"] {
-        if let Some(value) = std::env::var_os(key) {
-            command.env(key, value);
-        }
-    }
     let output = command.output().expect("run native activity CLI case");
     // Every mismatch prints both streams and the exit status, so a failure
     // seen only on a CI runner (Windows) is diagnosable from its log.

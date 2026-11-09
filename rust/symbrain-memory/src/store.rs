@@ -67,7 +67,6 @@ impl Store {
         let connection =
             Connection::open(path).map_err(|error| go_open_failure(error, OpenPhase::Open))?;
         let store = Self::configure(connection)?;
-        #[cfg(unix)]
         crate::migration::secure_files(path)?;
         Ok(store)
     }

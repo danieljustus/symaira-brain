@@ -36,7 +36,6 @@ fn trusted_urls_reject_private_and_ambiguous_authorities() {
 }
 
 #[test]
-#[cfg(unix)]
 fn cancelled_probe_kills_process_group_and_returns_within_bound() {
     use std::time::{Duration, Instant};
 
@@ -49,7 +48,6 @@ fn cancelled_probe_kills_process_group_and_returns_within_bound() {
 }
 
 #[test]
-#[cfg(unix)]
 fn timed_out_probe_kills_process_group_and_returns_within_bound() {
     use std::time::{Duration, Instant};
 
@@ -73,7 +71,6 @@ fn invalid_provider_base_urls_fail_closed_to_defaults() {
 }
 
 #[test]
-#[cfg(unix)]
 fn probe_tool_resolution_fails_closed_for_executable_relative_path_entries() {
     use std::os::unix::fs::PermissionsExt;
     use std::path::PathBuf;
@@ -113,7 +110,6 @@ fn probe_tool_resolution_fails_closed_for_executable_relative_path_entries() {
 }
 
 #[test]
-#[cfg(unix)]
 fn oversized_probe_output_terminates_the_child_while_it_is_running() {
     use std::time::{Duration, Instant};
 

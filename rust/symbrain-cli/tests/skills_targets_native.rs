@@ -140,7 +140,6 @@ fn managed_and_unmanaged_skill_roots_are_classified_natively() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn symlinked_skill_root_is_inventoried_natively() {
     use std::os::unix::fs::symlink;
@@ -170,7 +169,6 @@ fn target_binary_is_reported_as_evidence_natively() {
     std::fs::create_dir_all(&bin_dir).unwrap();
     let binary = bin_dir.join("opencode");
     std::fs::write(&binary, b"placeholder").unwrap();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o755)).unwrap();
@@ -204,9 +202,6 @@ fn scope_flag_is_native_and_symskills_config_is_ignored() {
     );
     assert!(project.status.success(), "stderr: {:?}", project.stderr);
     let row = opencode_row(&project);
-    #[cfg(windows)]
-    let project_root = root.path().to_path_buf();
-    #[cfg(not(windows))]
     let project_root = root.path().canonicalize().unwrap();
     assert_eq!(
         row["effective_skill_root"],
@@ -260,7 +255,6 @@ fn unknown_flag_or_scope_and_missing_home_are_native() {
         let mut targets = command(&root, args);
         expect(&root, &format!("targets/{}", args.join(" ")), &mut targets);
     }
-    #[cfg(unix)]
     {
         let mut missing_home = command(&root, &["skills", "targets"]);
         missing_home.env_remove("HOME");

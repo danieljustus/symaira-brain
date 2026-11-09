@@ -128,22 +128,15 @@ fn create_dirs_secure(dir: &Path) -> io::Result<()> {
     }
     fs::create_dir_all(dir)?;
     for path in missing {
-        #[cfg(unix)]
         set_dir_mode(path, 0o700)?;
-        #[cfg(not(unix))]
-        set_dir_mode(path, 0o700);
     }
     Ok(())
 }
 
-#[cfg(unix)]
 fn set_dir_mode(path: &Path, mode: u32) -> io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(mode))
 }
-
-#[cfg(not(unix))]
-fn set_dir_mode(_path: &Path, _mode: u32) {}
 
 fn atomic_write_new(path: &Path, contents: &[u8]) -> io::Result<()> {
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
@@ -153,10 +146,7 @@ fn atomic_write_new(path: &Path, contents: &[u8]) -> io::Result<()> {
         .prefix(".profile-")
         .suffix(".tmp")
         .tempfile_in(parent)?;
-    #[cfg(unix)]
     set_mode(file.as_file(), 0o600)?;
-    #[cfg(not(unix))]
-    set_mode(file.as_file(), 0o600);
     file.write_all(contents)?;
     file.as_file().sync_all()?;
     // Platform no-replace publication preserves the winner's complete bytes.
@@ -166,14 +156,10 @@ fn atomic_write_new(path: &Path, contents: &[u8]) -> io::Result<()> {
         .map_err(|error| error.error)
 }
 
-#[cfg(unix)]
 fn set_mode(file: &std::fs::File, mode: u32) -> io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     file.set_permissions(fs::Permissions::from_mode(mode))
 }
-
-#[cfg(not(unix))]
-fn set_mode(_file: &std::fs::File, _mode: u32) {}
 
 #[cfg(test)]
 mod tests {
@@ -221,7 +207,6 @@ mod tests {
                     "remaining_profile_files": leftovers
                 })
             );
-            #[cfg(unix)]
             {
                 use std::os::unix::fs::PermissionsExt;
                 let mode = fs::metadata(dir.join("race.toml"))
@@ -252,7 +237,6 @@ mod tests {
         assert_eq!(fs::read_dir(root.path()).unwrap().count(), 2);
     }
 
-    #[cfg(unix)]
     #[test]
     fn unix_set_dir_mode_sets_0700() {
         use std::os::unix::fs::PermissionsExt;
@@ -266,7 +250,6 @@ mod tests {
         assert_eq!(metadata.permissions().mode() & 0o777, 0o700);
     }
 
-    #[cfg(unix)]
     #[test]
     fn unix_set_mode_sets_0600() {
         use std::os::unix::fs::PermissionsExt;
@@ -284,7 +267,6 @@ mod tests {
         assert_eq!(metadata.permissions().mode() & 0o777, 0o600);
     }
 
-    #[cfg(unix)]
     #[test]
     fn unix_set_dir_mode_propagates_error() {
         let temp_dir = tempfile::tempdir().expect("tempdir");
@@ -292,22 +274,5 @@ mod tests {
 
         let err = set_dir_mode(&non_existent, 0o700).unwrap_err();
         assert_eq!(err.kind(), io::ErrorKind::NotFound);
-    }
-
-    #[cfg(not(unix))]
-    #[test]
-    fn non_unix_mode_helpers_are_noops() {
-        let temp_dir = tempfile::tempdir().expect("tempdir");
-        let dir_path = temp_dir.path().join("subdir");
-        fs::create_dir(&dir_path).expect("create_dir");
-        let file_path = temp_dir.path().join("file.txt");
-        let file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&file_path)
-            .expect("open");
-
-        set_dir_mode(&dir_path, 0o700);
-        set_mode(&file, 0o600);
     }
 }

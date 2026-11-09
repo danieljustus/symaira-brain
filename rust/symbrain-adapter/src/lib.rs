@@ -3,10 +3,7 @@
 #![deny(unsafe_code)]
 
 mod atomic;
-#[cfg(unix)]
 mod metadata_unix;
-#[cfg(windows)]
-mod metadata_windows;
 mod path;
 mod target;
 

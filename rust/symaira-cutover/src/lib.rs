@@ -33,7 +33,6 @@ use std::sync::atomic::AtomicBool;
 use sha2::{Digest, Sha256};
 
 mod clock;
-#[cfg(unix)]
 mod copy;
 mod launch;
 mod lock;
@@ -211,7 +210,6 @@ pub(crate) fn ensure_cancellable(
     }
 }
 
-#[cfg(unix)]
 fn backup_into(
     app: &str,
     roots: &[&Root],
@@ -249,19 +247,6 @@ fn backup_into(
     Ok(walk.totals)
 }
 
-#[cfg(not(unix))]
-fn backup_into(
-    _app: &str,
-    _roots: &[&Root],
-    _partial: &Path,
-    _cancel: &AtomicBool,
-) -> io::Result<(u64, u64)> {
-    Err(io::Error::new(
-        io::ErrorKind::Unsupported,
-        "automatic state backup is implemented for macOS and Linux only",
-    ))
-}
-
 pub(crate) fn sha256_file(path: &Path) -> io::Result<(String, u64)> {
     let mut file = fs::File::open(path)?;
     let mut hasher = Sha256::new();
@@ -279,14 +264,9 @@ pub(crate) fn sha256_file(path: &Path) -> io::Result<(String, u64)> {
 }
 
 pub(crate) fn hex(value: &std::ffi::OsStr) -> String {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         hex_bytes(value.as_bytes())
-    }
-    #[cfg(not(unix))]
-    {
-        hex_bytes(value.to_string_lossy().as_bytes())
     }
 }
 
@@ -304,7 +284,6 @@ pub(crate) fn invalid(message: String) -> io::Error {
 pub(crate) fn create_private_dir(path: &Path) -> io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::DirBuilderExt;
         builder.mode(0o700);

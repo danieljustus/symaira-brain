@@ -64,7 +64,6 @@ fn bounded_credential_file_read_rejects_oversized_files() {
     assert!(read_limited(&path).is_none());
 }
 
-#[cfg(unix)]
 #[test]
 fn bounded_credential_file_read_does_not_follow_symlinks() {
     let directory = tempfile::tempdir().expect("temporary directory");

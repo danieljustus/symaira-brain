@@ -483,7 +483,6 @@ fn configured_module_path_from(document: &DocumentMut, alias: &str) -> Option<St
 fn install_signal_flag() -> io::Result<Arc<AtomicBool>> {
     let cancelled = Arc::new(AtomicBool::new(false));
     signal_hook::flag::register(signal_hook::consts::SIGINT, Arc::clone(&cancelled))?;
-    #[cfg(unix)]
     signal_hook::flag::register(signal_hook::consts::SIGTERM, Arc::clone(&cancelled))?;
     Ok(cancelled)
 }

@@ -249,7 +249,6 @@ fn broken_skill_names_the_target_in_the_install_path() {
 }
 
 // Runner defaults to managed symlink installs on both Unix and Windows.
-#[cfg(any(unix, windows))]
 #[test]
 fn populated_library_processes_every_target_without_a_legacy_binary() {
     // Go's TestRun_NoLegacyBinaryProcessesTargets: no symskills binary is

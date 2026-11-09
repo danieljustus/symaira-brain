@@ -68,7 +68,6 @@ fn opencode_api_credentials() {
         }
         let bin = root.path().join("bin");
         std::fs::create_dir(&bin).unwrap();
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             let fake = bin.join("symvault");
@@ -96,10 +95,6 @@ fn opencode_api_credentials() {
                     .env("OPENCODE_WORKSPACE_ID", "unsupported spelling");
             }
             "vault" => {
-                #[cfg(not(unix))]
-                {
-                    continue;
-                }
                 cmd.env("OPENCODE_GO_API_KEY", "symvault://test/opencode");
             }
             "failed" => {

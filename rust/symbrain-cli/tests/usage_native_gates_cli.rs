@@ -3,7 +3,6 @@
 //! natively, byte for byte as the recorded Go binary answered it
 //! (`scripts/usage-native-gates-oracle/cli.py --record`). The fallback binary
 //! is a sentinel that fails loudly, and every scenario is network-free.
-#![cfg(unix)]
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
 

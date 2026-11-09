@@ -162,13 +162,10 @@ fn render_config_table(
     };
     write!(stdout, "{label}\t")?;
     // Go writes filesystem strings verbatim to the table; JSON stays lossy UTF-8.
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         stdout.write_all(config.raw_path.as_os_str().as_bytes())?;
     }
-    #[cfg(not(unix))]
-    write!(stdout, "{}", config.path)?;
     writeln!(stdout, "\t{state}\tservers={servers}")?;
     if let Some(error) = &config.error {
         writeln!(stdout, "    error: {error}")?;

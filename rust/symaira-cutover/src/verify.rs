@@ -86,7 +86,6 @@ fn verify_entries(
                 return Err(invalid(format!("{} is not a {kind}", path.display())));
             }
         }
-        #[cfg(unix)]
         if field("kind")? != "symlink" {
             use std::os::unix::fs::PermissionsExt;
             let mode = entry.get("mode").and_then(serde_json::Value::as_u64);
@@ -110,15 +109,8 @@ fn decode_path(value: &str) -> io::Result<PathBuf> {
         .map(|index| u8::from_str_radix(&value[index..index + 2], 16))
         .collect::<Result<Vec<u8>, _>>()
         .map_err(|error| invalid(format!("manifest: path_hex: {error}")))?;
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStringExt;
         Ok(PathBuf::from(OsString::from_vec(bytes)))
-    }
-    #[cfg(not(unix))]
-    {
-        Ok(PathBuf::from(OsString::from(
-            String::from_utf8_lossy(&bytes).into_owned(),
-        )))
     }
 }

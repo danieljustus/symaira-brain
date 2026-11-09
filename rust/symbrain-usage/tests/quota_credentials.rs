@@ -98,7 +98,6 @@ fn quota_credentials() {
     std::fs::create_dir_all(path.parent().unwrap()).unwrap();
     let bin = root.path().join("bin");
     std::fs::create_dir(&bin).unwrap();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         let fake = bin.join("symvault");
@@ -129,10 +128,6 @@ fn quota_credentials() {
                 .env("QUOTA_TOKEN", "hermetic-secret");
         }
         if case == "vault" {
-            #[cfg(not(unix))]
-            {
-                continue;
-            }
             cmd.env("ZAI_API_KEY", "symvault://test/zai")
                 .env("DEVIN_API_KEY", "symvault://test/devin");
         }

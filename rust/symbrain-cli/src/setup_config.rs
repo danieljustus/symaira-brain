@@ -129,7 +129,6 @@ pub(super) fn lexical_clean(path: &Path) -> PathBuf {
 
 /// Go `os.Getwd`: a valid `$PWD` wins over the kernel's physical path.
 fn go_getwd() -> Option<PathBuf> {
-    #[cfg(unix)]
     {
         use std::os::unix::fs::MetadataExt;
         if let Some(pwd) =
@@ -193,21 +192,7 @@ fn merge_file(modules: &mut [bool; 3], path: &Path, shown: &[u8]) -> Result<(), 
 /// denied file) reported as `open`, exactly as Go does. Unix opens directories
 /// read-only already and fails the read with `is a directory`.
 fn open_read_only(path: &Path) -> std::io::Result<std::fs::File> {
-    #[cfg(windows)]
-    {
-        use std::os::windows::fs::OpenOptionsExt;
-        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
-        const FILE_SHARE_READ_WRITE: u32 = 3;
-        std::fs::OpenOptions::new()
-            .read(true)
-            .share_mode(FILE_SHARE_READ_WRITE)
-            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
-            .open(path)
-    }
-    #[cfg(not(windows))]
-    {
-        std::fs::File::open(path)
-    }
+    std::fs::File::open(path)
 }
 
 fn apply_document(modules: &mut [bool; 3], document: &DocumentMut) -> Result<(), String> {

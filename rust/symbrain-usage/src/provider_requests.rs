@@ -222,7 +222,6 @@ pub(super) fn command_output_with_cancel(
         .args(args)
         .stdout(Stdio::from(child_stdout))
         .stderr(Stdio::null());
-    #[cfg(unix)]
     {
         use std::os::unix::process::CommandExt;
         command_line.process_group(0);
@@ -293,7 +292,6 @@ fn resolve_probe_tool_from(
             if !metadata.is_file() {
                 continue;
             }
-            #[cfg(unix)]
             {
                 use std::os::unix::fs::PermissionsExt;
                 if metadata.permissions().mode() & 0o111 == 0 {
@@ -312,7 +310,6 @@ fn resolve_probe_tool_from(
         if !metadata.is_file() {
             continue;
         }
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             if metadata.permissions().mode() & 0o111 == 0 {
@@ -325,7 +322,6 @@ fn resolve_probe_tool_from(
 }
 
 fn terminate_probe(child: &mut std::process::Child) {
-    #[cfg(unix)]
     if let Ok(raw_pid) = i32::try_from(child.id())
         && let Some(pid) = rustix::process::Pid::from_raw(raw_pid)
     {

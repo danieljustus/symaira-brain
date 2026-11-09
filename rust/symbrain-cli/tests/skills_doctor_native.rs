@@ -1,6 +1,5 @@
 //! Native `symbrain skills doctor` default contract and fallback boundary.
 
-#![cfg(unix)]
 #![deny(unsafe_code)]
 
 #[path = "../../test-support/coverage.rs"]

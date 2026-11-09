@@ -23,7 +23,6 @@ fn literal_unicode_flag_name_is_preserved() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn raw_flag_names_and_bad_syntax_remain_byte_exact() {
     use std::ffi::OsString;

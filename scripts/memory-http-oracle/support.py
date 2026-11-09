@@ -14,9 +14,10 @@ import subprocess
 import threading
 import time
 
-GO = Path(os.environ.get('MEMORY_HTTP_ORACLE_GO','/workspace/oracles/symbrain-go-dcddcef0'))
+ORACLE_ROOT = Path(os.environ.get('SYMAIRA_ORACLE_ROOT','oracles'))
+GO = Path(os.environ.get('MEMORY_HTTP_ORACLE_GO',str(ORACLE_ROOT/'symbrain-go-dcddcef0')))
 GO_SHA = os.environ.get('MEMORY_HTTP_ORACLE_SHA','a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41')
-FROZEN = Path(os.environ.get('MEMORY_HTTP_ORACLE_SOURCE','/workspace/oracles/daemon772-go-source'))
+FROZEN = Path(os.environ.get('MEMORY_HTTP_ORACLE_SOURCE',str(ORACLE_ROOT/'daemon772-go-source')))
 ORACLE = 'dcddcef0df5789123c7c9a7ebe6e01f10e941f2c'
 SECRET = 'synthetic-memory763-owned-http-secret'
 TIME = '2000-01-01 00:00:00 +0000 UTC'

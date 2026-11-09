@@ -103,7 +103,6 @@ fn uninstall_dry_run_has_no_side_effects() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn symlink_install_reinstall_and_uninstall_keep_cache_transactional() {
     let source = source();

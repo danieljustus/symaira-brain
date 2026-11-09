@@ -58,7 +58,6 @@ fn run_child_case(test_name: &str, envs: &[(String, String)]) -> String {
 /// until the install layer is given the render path.
 // The Go and Rust runners both publish managed directory symlinks on Windows
 // and Unix, so this verifies the same target layout on both platforms.
-#[cfg(any(unix, windows))]
 #[test]
 fn installed_symlinks_match_the_frozen_go_layout() {
     let fixture = load_fixture();
@@ -250,8 +249,8 @@ fn conflicting_home_variables_use_the_go_platform_home() {
     let tmp = tempfile::tempdir().unwrap();
     let home = tmp.path().join("home");
     let profile = tmp.path().join("profile");
-    let selected = if cfg!(windows) { &profile } else { &home };
-    let other = if cfg!(windows) { &home } else { &profile };
+    let selected = &home;
+    let other = &profile;
     let legacy = selected.join(".local/share/symskills");
     fs::create_dir_all(&legacy).unwrap();
     fs::create_dir_all(other.join(".local/share/symbrain/skills")).unwrap();
@@ -296,7 +295,6 @@ fn a_legacy_symskills_binary_on_path_changes_nothing() {
     fs::create_dir_all(&bin).unwrap();
     let fake = bin.join("symskills");
     fs::write(&fake, "#!/bin/sh\necho legacy\n").unwrap();
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(&fake, fs::Permissions::from_mode(0o755)).unwrap();

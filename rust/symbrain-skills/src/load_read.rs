@@ -3,7 +3,6 @@
 fn open_options() -> OpenOptions {
     let mut options = OpenOptions::new();
     options.read(true);
-    #[cfg(unix)]
     options.custom_flags(rustix::fs::OFlags::NONBLOCK.bits().cast_signed());
     options
 }
@@ -23,12 +22,7 @@ fn open_read_with(
 }
 
 fn go_io_error(error: &std::io::Error) -> String {
-    let message = error.to_string();
-    #[cfg(windows)]
-    if let Some(context) = message.strip_suffix(": no such file or directory") {
-        return format!("{context}: The system cannot find the file specified.");
-    }
-    message
+    error.to_string()
 }
 
 #[derive(Debug)]

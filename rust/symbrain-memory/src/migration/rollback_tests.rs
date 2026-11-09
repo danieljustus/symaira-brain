@@ -172,7 +172,6 @@ fn unknown_sync_trigger_is_preserved_instead_of_replaced() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn successful_public_open_secures_existing_database_without_rewriting_its_rows() {
     use std::os::unix::fs::PermissionsExt;

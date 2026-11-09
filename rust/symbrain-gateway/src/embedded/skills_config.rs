@@ -15,7 +15,7 @@ pub(super) struct Dirs {
 
 /// Go's platform home variable (`os.UserHomeDir`), empty when unset.
 pub(super) fn home_dir() -> PathBuf {
-    std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" })
+    std::env::var_os("HOME")
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)
         .unwrap_or_default()

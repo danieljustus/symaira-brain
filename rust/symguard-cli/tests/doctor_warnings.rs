@@ -1,11 +1,7 @@
 //! The actual Brain compatibility adapter renders every doctor state natively.
 use std::{fs, process::Command};
-#[cfg(unix)]
 #[path = "support/raw_fixture_admission.rs"]
 mod raw_fixture_admission;
-#[cfg(windows)]
-#[path = "support/windows_discovery.rs"]
-mod windows_discovery;
 
 #[path = "../../symbrain-cli/src/guard_cli.rs"]
 #[expect(
@@ -14,15 +10,9 @@ mod windows_discovery;
 )]
 mod brain_adapter;
 
-#[cfg(unix)]
 const ROLES: &[&str] = &["healthy", "semantic", "type", "discovery", "raw"];
-#[cfg(not(unix))]
-const ROLES: &[&str] = &["healthy", "semantic", "type", "discovery"];
 
 fn config_path(directory: &std::path::Path, role: &str) -> std::path::PathBuf {
-    #[cfg(not(unix))]
-    let _ = role;
-    #[cfg(unix)]
     if role == "raw" {
         use std::os::unix::ffi::OsStrExt;
         return directory.join(std::ffi::OsStr::from_bytes(b"owned-\xe2\x82<&>"));
@@ -63,7 +53,6 @@ fn assert_child_role(role: &str) {
         assert!(stdout.starts_with(b"symguard doctor\n"));
         assert!(stderr.starts_with(b"config: warning: unknown key \"owned\" in "));
         assert!(!stderr.strip_suffix(b"\n").unwrap().contains(&b'\n'));
-        #[cfg(unix)]
         if role == "raw" {
             assert!(stderr.windows(2).any(|bytes| bytes == b"\xe2\x82"));
         }
@@ -77,25 +66,20 @@ fn brain_doctor_warning_admission() {
         return;
     }
     let mut executed_roles = Vec::new();
-    #[cfg(unix)]
     let mut unavailable_roles = Vec::new();
     for &role in ROLES {
         let root = tempfile::tempdir().unwrap();
         let home = root.path().join("home");
         let directory = home.join(".config/symguard");
         fs::create_dir_all(&directory).unwrap();
-        #[cfg(windows)]
-        windows_discovery::create_parents(&home, &home.join(".config"));
         let config = config_path(&directory, role);
         let text = match role {
             "semantic" => "owned=1\nsequence={enabled=true,threshold=1}\n",
             "type" => "owned=1\nsequence={enabled=\"bad\"}\n",
             _ => "owned=1\n",
         };
-        #[cfg(unix)]
         let before_entries = raw_fixture_admission::entries(&directory);
         if let Err(error) = fs::write(&config, text) {
-            #[cfg(unix)]
             if role == "raw" {
                 raw_fixture_admission::record_failed_creation(
                     root,
@@ -146,8 +130,5 @@ fn brain_doctor_warning_admission() {
         );
         executed_roles.push(role);
     }
-    #[cfg(unix)]
     raw_fixture_admission::assert_accounting(ROLES, &executed_roles, &unavailable_roles);
-    #[cfg(not(unix))]
-    assert_eq!(executed_roles, ROLES);
 }

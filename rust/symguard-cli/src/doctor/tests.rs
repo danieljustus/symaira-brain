@@ -4,8 +4,6 @@ use super::*;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
-#[cfg(windows)]
-use std::{env, path::PathBuf};
 use toml_edit::{DocumentMut, Value};
 
 fn parse_and_validate_text(text: &str) -> Option<LoadedConfig> {
@@ -25,21 +23,7 @@ fn stdio(command: &str, args: &[&str]) -> Discovered {
 }
 
 fn native_command() -> String {
-    #[cfg(windows)]
-    {
-        let system_root = env::var_os("SystemRoot")
-            .or_else(|| env::var_os("windir"))
-            .unwrap_or_else(|| r"C:\Windows".into());
-        PathBuf::from(system_root)
-            .join("System32")
-            .join("where.exe")
-            .to_string_lossy()
-            .into_owned()
-    }
-    #[cfg(not(windows))]
-    {
-        "/usr/bin/true".to_owned()
-    }
+    "/usr/bin/true".to_owned()
 }
 
 fn parent_path_variant(path: &str) -> String {

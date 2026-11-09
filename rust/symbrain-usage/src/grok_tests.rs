@@ -108,7 +108,6 @@ fn grok_file_credentials_expiry_ambiguity_and_safety() {
     .unwrap();
     assert!(!grok_from_file(&path, chrono::Utc::now()).configured);
     assert!(!grok_from_file(dir.path(), chrono::Utc::now()).configured);
-    #[cfg(unix)]
     {
         let link = dir.path().join("link");
         std::os::unix::fs::symlink(&path, &link).unwrap();

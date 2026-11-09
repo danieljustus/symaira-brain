@@ -161,7 +161,6 @@ fn quotas_and_no_data() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn private_file_and_offline_http_boundaries() {
     use crate::{FixtureTransport, Response};

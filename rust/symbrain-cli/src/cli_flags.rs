@@ -15,7 +15,6 @@ pub fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
             out.push(arg.clone());
             continue;
         }
-        #[cfg(unix)]
         {
             use std::os::unix::ffi::{OsStrExt, OsStringExt};
             let bytes = arg.as_os_str().as_bytes();
@@ -27,18 +26,6 @@ pub fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
                 normalized.push(b'-');
                 normalized.extend_from_slice(&bytes[2..]);
                 out.push(OsString::from_vec(normalized));
-            } else {
-                out.push(arg.clone());
-            }
-        }
-        #[cfg(not(unix))]
-        {
-            let s = arg.to_string_lossy();
-            if s == "--" {
-                terminated = true;
-                out.push(arg.clone());
-            } else if s.starts_with("--") && s.len() > 2 {
-                out.push(OsString::from(format!("-{}", &s[2..])));
             } else {
                 out.push(arg.clone());
             }

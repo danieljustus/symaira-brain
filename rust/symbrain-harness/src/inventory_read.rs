@@ -68,7 +68,6 @@ pub(super) fn inspect(
 
 /// Go's JSON encoder replaces each invalid byte, not each invalid sequence.
 fn path_json_text(path: &Path) -> String {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         let mut bytes = path.as_os_str().as_bytes();
@@ -89,8 +88,6 @@ fn path_json_text(path: &Path) -> String {
         }
         text
     }
-    #[cfg(not(unix))]
-    path.to_string_lossy().into_owned()
 }
 
 /// Decodes a config exactly like Go's `Parse` and lists its servers.
@@ -199,11 +196,7 @@ mod tests {
         ] {
             // Path equality ignores repeated and trailing separators, so
             // compare the spelling.
-            let want = if cfg!(windows) {
-                want.replace('/', "\\")
-            } else {
-                want.to_owned()
-            };
+            let want = want.to_owned();
             assert_eq!(
                 clean_path(Path::new(input)).to_str().unwrap(),
                 want,

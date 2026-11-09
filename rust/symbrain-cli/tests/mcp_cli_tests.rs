@@ -8,11 +8,9 @@ use std::process::{Command, Output, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
-#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use tempfile::TempDir;
 
-#[cfg(unix)]
 #[path = "support/mcp_lifecycle.rs"]
 mod mcp_lifecycle;
 
@@ -54,26 +52,9 @@ struct FakeCommand {
 }
 
 fn write_fake(root: &TempDir) -> FakeCommand {
-    #[cfg(windows)]
     {
         let path = root.path().join("fake-mcp.py");
         std::fs::write(&path, FAKE_MCP).unwrap();
-        let output = Command::new("python")
-            .args(["-c", "import sys; print(sys.executable)"])
-            .output()
-            .expect("Python is required by the native MCP fixture");
-        assert!(output.status.success(), "Python lookup failed: {output:?}");
-        let python = String::from_utf8(output.stdout).unwrap();
-        FakeCommand {
-            command: python.trim().into(),
-            args: vec![path.to_string_lossy().into_owned()],
-        }
-    }
-    #[cfg(not(windows))]
-    {
-        let path = root.path().join("fake-mcp.py");
-        std::fs::write(&path, FAKE_MCP).unwrap();
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             let mut permissions = std::fs::metadata(&path).unwrap().permissions();
@@ -129,25 +110,6 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     }
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command.env_clear().envs(coverage::profile_environment());
-    #[cfg(windows)]
-    {
-        for key in [
-            "SystemRoot",
-            "SYSTEMROOT",
-            "windir",
-            "WINDIR",
-            "PATHEXT",
-            "ComSpec",
-            "COMSPEC",
-            "TEMP",
-            "TMP",
-            "SystemDrive",
-        ] {
-            if let Some(val) = std::env::var_os(key) {
-                command.env(key, val);
-            }
-        }
-    }
     command
         .args(args)
         .env("HOME", root.path().join("home"))
@@ -383,13 +345,11 @@ fn enabled_skills_server_exposes_native_tools_without_go_fallback() {
     assert_eq!(responses[1]["result"]["isError"], false);
 }
 
-#[cfg(unix)]
 #[test]
 fn sigterm_cancels_gateway_and_terminates_child_process_group() {
     mcp_lifecycle::assert_sigterm_shutdown();
 }
 
-#[cfg(unix)]
 #[test]
 fn sigterm_while_idle_exits_cleanly_with_stdin_open() {
     mcp_lifecycle::assert_idle_sigterm_shutdown();
@@ -573,7 +533,6 @@ fn claude_oauth_file_routes_usage_to_native_parser_without_keychain_or_provider_
 }
 
 #[test]
-#[cfg(unix)]
 fn configured_antigravity_does_not_force_the_usage_route_to_go() {
     let root = TempDir::new().unwrap();
     let credentials = root
@@ -938,7 +897,6 @@ fn every_nous_auth_file_shape_reaches_the_native_usage_parser() {
         assert_native_usage_parser(output, id);
     }
 
-    #[cfg(unix)]
     {
         use std::os::unix::fs::symlink;
         let root = TempDir::new().unwrap();

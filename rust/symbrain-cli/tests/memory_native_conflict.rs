@@ -2,8 +2,6 @@
 //! arguments of `symbrain memory set` against the Go oracle (#758). The LLM
 //! and embedding endpoints are local fake servers; no real provider is used.
 
-#![cfg(unix)]
-
 #[path = "support/memory_native_oracle.rs"]
 mod oracle;
 

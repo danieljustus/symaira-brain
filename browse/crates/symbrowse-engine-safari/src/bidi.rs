@@ -173,7 +173,6 @@ impl ProcessAdapter for SystemProcessAdapter {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
-        #[cfg(unix)]
         {
             use std::os::unix::process::CommandExt;
             command.process_group(0);
@@ -199,7 +198,6 @@ impl ProcessHandle for SystemProcessHandle {
             })
     }
     fn kill(&mut self) -> Result<(), BidiError> {
-        #[cfg(unix)]
         {
             use rustix::process::{Pid, Signal, kill_process_group};
             if let Some(pid) = Pid::from_raw(self.child.id() as i32) {

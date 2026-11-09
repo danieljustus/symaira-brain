@@ -77,7 +77,9 @@ def build():
         ref,name=row['git_reference'].split(':',1);info=git('ls-tree',ref,'--',name).decode().split('\t')[0].split();assert info==[row['mode'],'blob',row['blob']]
     archive=ROOT/retained['own_full_review_tar'];assert sha(archive.read_bytes())==retained['own_full_review_tar_sha256']
     own=retained['physical_records'][:59];assert len(own)==59
-    prefix='/workspace/review-artifacts/memory803-a5c65-provider-review-doctor/'
+    # The recorded absolute root is host-specific; bind only to the artifact directory name.
+    prefix=own[0]['original_path'].rsplit('/',1)[0]+'/'
+    assert prefix.rstrip('/').rsplit('/',1)[-1]=='memory803-a5c65-provider-review-doctor',prefix
     with tarfile.open(fileobj=io.BytesIO(gzip.decompress(archive.read_bytes())))as tar:
         assert len(tar.getmembers())==59
         for row in own:

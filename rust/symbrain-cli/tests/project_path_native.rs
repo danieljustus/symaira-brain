@@ -13,7 +13,6 @@
 //! (`EILSEQ`), ext4 accepts them. Each host therefore replays the fixture
 //! recorded by Go on the same OS (macOS: darwin, Linux: linux). Any other unix
 //! target has no recorded oracle and the test fails closed.
-#![cfg(unix)]
 
 #[path = "../../test-support/coverage.rs"]
 mod coverage;

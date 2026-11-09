@@ -52,16 +52,12 @@ fn opencode_api_from_resolved(result: Result<Option<(String, String)>, String>) 
     )
 }
 fn opencode_auth_json_key(dir: &Path) -> Result<Option<String>, &'static str> {
-    #[cfg(unix)]
     let root = match opencode_directory(dir) {
         Ok(root) => cap_std::fs::Dir::from_std_file(root),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
         Err(_) => return Err(OPENCODE_DB_ERROR),
     };
-    #[cfg(unix)]
     let entries = root.entries();
-    #[cfg(not(unix))]
-    let entries = fs::read_dir(dir);
     let entries = match entries {
         Ok(entries) => entries,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
@@ -104,7 +100,6 @@ fn opencode_auth_json_key(dir: &Path) -> Result<Option<String>, &'static str> {
             return Ok(key);
         }
     }
-    #[cfg(unix)]
     let data = {
         let mut options = cap_std::fs::OpenOptions::new();
         options.read(true);
@@ -127,14 +122,6 @@ fn opencode_auth_json_key(dir: &Path) -> Result<Option<String>, &'static str> {
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
             Err(_) => return Err(OPENCODE_DB_ERROR),
         }
-    };
-    #[cfg(not(unix))]
-    let data = {
-        let path = dir.join("auth.json");
-        if fs::symlink_metadata(&path).is_ok_and(|m| m.len() > MAX_CREDENTIAL_FILE_BYTES) {
-            return Err(OPENCODE_DB_ERROR);
-        }
-        read_optional_credential_file(&path).map_err(|()| OPENCODE_DB_ERROR)?
     };
     let Some(data) = data else { return Ok(None) };
     opencode_auth_json_bytes(&data)
@@ -165,7 +152,6 @@ fn opencode_auth_json_bytes(data: &[u8]) -> Result<Option<String>, &'static str>
 mod opencode_api_discovery_tests {
     use super::*;
     #[test]
-    #[cfg(unix)]
     fn opencode_v2_active_checkpoint() {
         let dir = tempfile::tempdir().unwrap();
         let db = rusqlite::Connection::open(dir.path().join("opencode.db")).unwrap();

@@ -47,7 +47,6 @@ fn local_fake_release_is_fetched_then_reused_from_go_compatible_cache() {
     let cache = directory.path().join("symaira/updatecheck/cache.json");
     let first = check_release("v0.0.0", &endpoint, &cache).unwrap().unwrap();
     assert_eq!(first.tag_name, "v0.0.1");
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(
@@ -64,7 +63,6 @@ fn local_fake_release_is_fetched_then_reused_from_go_compatible_cache() {
     assert_eq!(second.tag_name, "v0.0.1");
 }
 
-#[cfg(unix)]
 #[test]
 fn cache_write_rejects_user_symlink_parent() {
     use std::os::unix::fs::symlink;

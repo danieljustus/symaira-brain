@@ -7,7 +7,6 @@
 //! macOS Chrome is installed).  Steps listed in `KNOWN_GAPS` are documented
 //! unimplemented Go-parity commands: they must still differ (so a fixed
 //! command forces the entry to be removed) and are reported, never hidden.
-#![cfg(unix)]
 
 use std::{
     collections::{BTreeMap, BTreeSet},

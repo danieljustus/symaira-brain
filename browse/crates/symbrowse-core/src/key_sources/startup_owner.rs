@@ -70,7 +70,6 @@ pub fn run_startup_provider(args: &[OsString]) -> u8 {
     let Some((program, timeout, provider_args)) = validate(args) else {
         return 1;
     };
-    #[cfg(unix)]
     if rustix::process::getpgrp() != rustix::process::getpid() {
         return 1;
     }
@@ -147,23 +146,11 @@ fn validate(args: &[OsString]) -> Option<(PathBuf, Duration, Vec<String>)> {
     valid.then_some((program, Duration::from_millis(timeout), values))
 }
 
-#[cfg(unix)]
 fn raw_status(status: ExitStatus) -> u32 {
     use std::os::unix::process::ExitStatusExt;
     status.into_raw() as u32
 }
-#[cfg(unix)]
 fn from_raw_status(status: u32) -> ExitStatus {
     use std::os::unix::process::ExitStatusExt;
     ExitStatus::from_raw(status as i32)
-}
-#[cfg(windows)]
-fn raw_status(status: ExitStatus) -> u32 {
-    // Windows ExitStatus always carries the process DWORD, represented as i32.
-    status.code().unwrap_or(1) as u32
-}
-#[cfg(windows)]
-fn from_raw_status(status: u32) -> ExitStatus {
-    use std::os::windows::process::ExitStatusExt;
-    ExitStatus::from_raw(status)
 }

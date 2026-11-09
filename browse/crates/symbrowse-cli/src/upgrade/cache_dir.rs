@@ -14,7 +14,6 @@ pub(super) fn safe_cache_dir(path: &Path) -> io::Result<()> {
         current.push(component);
         match fs::symlink_metadata(&current) {
             Ok(metadata) if metadata.file_type().is_symlink() => {
-                #[cfg(unix)]
                 {
                     use std::os::unix::fs::MetadataExt;
                     if metadata.uid() == 0 {
@@ -28,7 +27,6 @@ pub(super) fn safe_cache_dir(path: &Path) -> io::Result<()> {
             Ok(_) => return Err(io::Error::other("cache parent is not a directory")),
             Err(error) if error.kind() == io::ErrorKind::NotFound => {
                 let builder = fs::DirBuilder::new();
-                #[cfg(unix)]
                 let builder = {
                     use std::os::unix::fs::DirBuilderExt;
                     let mut builder = builder;

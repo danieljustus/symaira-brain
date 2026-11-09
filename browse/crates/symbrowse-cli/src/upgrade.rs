@@ -213,7 +213,7 @@ fn default_cache_path(owner: &str, repository: &str) -> PathBuf {
 }
 
 fn user_home() -> Option<PathBuf> {
-    env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" }).map(PathBuf::from)
+    env::var_os("HOME").map(PathBuf::from)
 }
 
 fn check_release(
@@ -293,7 +293,6 @@ fn write_cache(path: &Path, entry: &CacheEntry) {
     let temporary = parent.join(format!(".updatecheck-{}-{counter}.tmp", std::process::id()));
     let mut options = fs::OpenOptions::new();
     options.write(true).create_new(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);

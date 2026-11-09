@@ -185,7 +185,17 @@ def controls(cases: list) -> list:
     return results
 
 
+HISTORICAL_RECORD_BANNER = (
+    "HISTORICAL RECORD MODE (#1004): daemon_process.py drives a Go binary and the Go "
+    "oracle probes that were removed in #1003. It only works from a checkout of the "
+    "pre-removal revision 57c26c76e (full: 57c26c76e238e458d9027d5ee4362df24d30b47e). Replay of "
+    "sealed fixtures (make parity-smoke init-differential) needs no Go. See "
+    "docs/adr/historical-go-record-paths-1004.md."
+)
+
+
 def main() -> int:
+    raise SystemExit(HISTORICAL_RECORD_BANNER)
     parser = argparse.ArgumentParser()
     parser.add_argument("--go", type=Path, required=True)
     parser.add_argument("--rust", type=Path, required=True)

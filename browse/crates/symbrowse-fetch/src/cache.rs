@@ -355,7 +355,6 @@ fn cap_utf8_bytes(text: &str, max: usize) -> String {
 fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), CacheError> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             fs::set_permissions(parent, fs::Permissions::from_mode(0o700))?;
@@ -368,7 +367,6 @@ fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), CacheError> {
     ));
     let mut options = OpenOptions::new();
     options.write(true).create_new(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
@@ -381,7 +379,6 @@ fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), CacheError> {
         let _ = fs::remove_file(&tmp);
         return Err(error.into());
     }
-    #[cfg(unix)]
     if let Some(parent) = path.parent() {
         fs::File::open(parent)?.sync_all()?;
     }

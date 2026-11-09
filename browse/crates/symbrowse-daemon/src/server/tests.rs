@@ -37,17 +37,6 @@ fn paths_use_one_session_component() {
     );
 }
 
-#[cfg(windows)]
-#[test]
-fn first_pipe_instance_contention_is_already_running() {
-    let error = io::Error::from_raw_os_error(5); // ERROR_ACCESS_DENIED
-    assert!(matches!(
-        named_pipe_create_error(error),
-        ServerError::AlreadyRunning
-    ));
-}
-
-#[cfg(unix)]
 #[test]
 fn browser_state_save_and_load_fail_before_store_access() {
     for command in ["state.save", "state.load"] {

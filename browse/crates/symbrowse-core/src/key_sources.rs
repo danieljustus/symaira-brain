@@ -257,7 +257,6 @@ fn prepare_lock_parent(path: &Path) -> std::io::Result<()> {
         ));
     }
     fs::create_dir_all(parent)?;
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(parent, fs::Permissions::from_mode(0o700))?;
@@ -265,7 +264,6 @@ fn prepare_lock_parent(path: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-#[cfg(unix)]
 fn open_init_lock(path: &Path) -> std::io::Result<fs::File> {
     use rustix::fs::{Mode, OFlags, open};
 
@@ -276,22 +274,6 @@ fn open_init_lock(path: &Path) -> std::io::Result<fs::File> {
         Mode::RUSR | Mode::WUSR,
     )?;
     Ok(fs::File::from(descriptor))
-}
-
-#[cfg(not(unix))]
-fn open_init_lock(path: &Path) -> std::io::Result<fs::File> {
-    prepare_lock_parent(path)?;
-    if let Ok(metadata) = fs::symlink_metadata(path)
-        && metadata.file_type().is_symlink()
-    {
-        return Err(std::io::Error::other("key-init lock is a symlink"));
-    }
-    fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .truncate(false)
-        .open(path)
 }
 
 fn hex_key(key: &[u8; 32]) -> String {
@@ -311,14 +293,6 @@ mod tests {
     #[test]
     fn etxtbsy_spawn_is_retried_within_command_deadline() {
         INJECT_ETXTBSY.with(|remaining| remaining.set(1));
-        #[cfg(windows)]
-        let (program, args) = (
-            std::env::var_os("ComSpec")
-                .map(PathBuf::from)
-                .unwrap_or_else(|| PathBuf::from(r"C:\Windows\System32\cmd.exe")),
-            vec!["/C", "exit", "0"],
-        );
-        #[cfg(not(windows))]
         let (program, args) = (PathBuf::from("/usr/bin/true"), Vec::new());
         let output = run_command(&program, &args, None, Duration::from_secs(1))
             .expect("transient ETXTBSY should be retried");

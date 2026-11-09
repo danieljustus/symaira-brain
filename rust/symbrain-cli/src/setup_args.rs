@@ -91,14 +91,9 @@ pub(super) fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<Se
 }
 
 fn os_value(bytes: &[u8]) -> OsString {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStringExt;
         OsString::from_vec(bytes.to_vec())
-    }
-    #[cfg(not(unix))]
-    {
-        String::from_utf8_lossy(bytes).into_owned().into()
     }
 }
 

@@ -1,6 +1,5 @@
 #![deny(unsafe_code)]
 
-#[cfg(unix)]
 #[allow(clippy::result_large_err)]
 mod unix {
     use std::{

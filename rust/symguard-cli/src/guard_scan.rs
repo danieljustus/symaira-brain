@@ -268,14 +268,7 @@ pub(crate) fn missing_source_is_silent(error: &io::Error) -> bool {
     if error.kind() != io::ErrorKind::NotFound {
         return false;
     }
-    #[cfg(windows)]
-    {
-        error.raw_os_error() != Some(3)
-    }
-    #[cfg(not(windows))]
-    {
-        true
-    }
+    true
 }
 
 /// A failed `os.ReadFile`: Go reports the failing step (`open` or `read`) in its `PathError`.
@@ -324,7 +317,7 @@ pub(crate) fn io_detail(error: &io::Error) -> String {
 /// stays platform text.
 fn go_errno_text(error: &io::Error) -> String {
     let detail = io_detail(error);
-    if cfg!(unix) && error.raw_os_error().is_some() {
+    if error.raw_os_error().is_some() {
         let mut chars = detail.chars();
         if let Some(first) = chars.next() {
             return first.to_lowercase().chain(chars).collect();

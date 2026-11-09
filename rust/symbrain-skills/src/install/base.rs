@@ -14,7 +14,6 @@ use std::path::{Path, PathBuf};
 
 use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt};
 use cap_std::fs::OpenOptions;
-#[cfg(unix)]
 use cap_std::fs::PermissionsExt;
 use serde::{Deserialize, Serialize};
 
@@ -371,18 +370,7 @@ fn validate_name(name: &str) -> Result<(), SkillError> {
 }
 
 fn file_mode(metadata: &cap_std::fs::Metadata) -> String {
-    #[cfg(unix)]
     {
         return format!("{:04o}", metadata.permissions().mode() & 0o777);
-    }
-    #[cfg(windows)]
-    {
-        let _ = metadata;
-        "0666".to_owned()
-    }
-    #[cfg(not(any(unix, windows)))]
-    {
-        let _ = metadata;
-        "0644".to_owned()
     }
 }

@@ -473,11 +473,7 @@ pub fn skills_data_root() -> Result<PathBuf, SkillError> {
 
 /// Reads the platform home variable with Go's `os.UserHomeDir` error text.
 fn home_dir() -> Result<PathBuf, SkillError> {
-    let (name, error) = if cfg!(windows) {
-        ("USERPROFILE", "%userprofile% is not defined")
-    } else {
-        ("HOME", "$HOME is not defined")
-    };
+    let (name, error) = ("HOME", "$HOME is not defined");
     std::env::var_os(name)
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)

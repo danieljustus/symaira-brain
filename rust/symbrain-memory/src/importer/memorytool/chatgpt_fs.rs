@@ -113,15 +113,9 @@ fn walk(
     Ok(())
 }
 
-#[cfg(unix)]
 fn same_file(a: &std::fs::Metadata, b: &std::fs::Metadata) -> bool {
     use std::os::unix::fs::MetadataExt;
     a.dev() == b.dev() && a.ino() == b.ino()
-}
-
-#[cfg(not(unix))]
-fn same_file(_: &std::fs::Metadata, _: &std::fs::Metadata) -> bool {
-    true
 }
 
 /// Reads one export: regular file, no symlink, at most [`MAX_EXPORT_BYTES`].

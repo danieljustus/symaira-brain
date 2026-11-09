@@ -20,13 +20,10 @@ fn snapshot(root: &Path) -> BTreeMap<PathBuf, (bool, u32, SystemTime, Vec<u8>)> 
         out: &mut BTreeMap<PathBuf, (bool, u32, SystemTime, Vec<u8>)>,
     ) {
         let meta = fs::symlink_metadata(path).unwrap();
-        #[cfg(unix)]
         let mode = {
             use std::os::unix::fs::PermissionsExt;
             meta.permissions().mode()
         };
-        #[cfg(not(unix))]
-        let mode = u32::from(meta.permissions().readonly());
         let bytes = if meta.is_file() {
             fs::read(path).unwrap()
         } else {
@@ -54,11 +51,6 @@ fn chrome_root(root: &Path) -> PathBuf {
             .join("Application Support")
             .join("Google")
             .join("Chrome")
-    } else if cfg!(windows) {
-        root.join("local-app-data")
-            .join("Google")
-            .join("Chrome")
-            .join("User Data")
     } else {
         root.join("home").join(".config").join("google-chrome")
     }

@@ -310,9 +310,6 @@ fn symskills_library_override_status_is_native_and_read_only() {
 
     // Unix temp aliases must not trigger the symlink fallback. Windows keeps
     // its plain spelling because canonicalization introduces a verbatim path.
-    #[cfg(windows)]
-    let alt = root.path().join("alt");
-    #[cfg(not(windows))]
     let alt = root.path().canonicalize().unwrap().join("alt");
     let library = alt.join("library");
     std::fs::create_dir_all(library.join("managed")).unwrap();
@@ -455,7 +452,6 @@ fn symskills_unreplayable_env_shapes_are_native() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn symskills_library_override_symlink_is_native() {
     let root = TempDir::new().unwrap();
@@ -468,7 +464,6 @@ fn symskills_library_override_symlink_is_native() {
     expect(&root, "status_opencode/linked_library", &mut status);
 }
 
-#[cfg(unix)]
 #[test]
 fn opencode_user_status_link_onto_file_matches_go_bytes() {
     let root = TempDir::new().unwrap();
@@ -487,7 +482,6 @@ fn opencode_user_status_link_onto_file_matches_go_bytes() {
     assert_eq!(output.stdout, expected.as_bytes());
 }
 
-#[cfg(unix)]
 #[test]
 fn opencode_user_status_symlink_chain_is_native() {
     let root = TempDir::new().unwrap();
@@ -578,9 +572,6 @@ fn opencode_project_status_matches_go_bytes() {
     // therefore carry the resolved root, so the expectation has to be built
     // from it too. Only this case needs it: every other case in this file is
     // user scope, where the root comes from the environment verbatim.
-    #[cfg(windows)]
-    let resolved = root.path().to_path_buf();
-    #[cfg(not(windows))]
     let resolved = root.path().canonicalize().unwrap();
     let skill = resolved
         .join("project")
@@ -624,7 +615,6 @@ fn opencode_project_status_ignores_the_user_root() {
     assert!(String::from_utf8_lossy(&output.stdout).contains("only-here"));
 }
 
-#[cfg(unix)]
 #[test]
 fn opencode_project_status_symlink_chain_is_native() {
     let root = TempDir::new().unwrap();

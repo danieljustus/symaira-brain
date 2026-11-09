@@ -206,39 +206,15 @@ fn binary_for(target: &str) -> Option<PathBuf> {
         .find(|path| path.is_file() && executable(path))
 }
 
-#[cfg(windows)]
-fn binary_names(name: &str) -> Vec<OsString> {
-    let mut names = vec![OsString::from(name)];
-    if Path::new(name).extension().is_none()
-        && let Some(extensions) = std::env::var_os("PATHEXT")
-    {
-        names.extend(
-            extensions
-                .to_string_lossy()
-                .split(';')
-                .filter(|extension| !extension.is_empty())
-                .map(|extension| OsString::from(format!("{name}{extension}"))),
-        );
-    }
-    names
-}
-
-#[cfg(not(windows))]
 fn binary_names(name: &str) -> Vec<OsString> {
     vec![OsString::from(name)]
 }
 
-#[cfg(unix)]
 fn executable(path: &Path) -> bool {
     use std::os::unix::fs::PermissionsExt;
 
     path.metadata()
         .is_ok_and(|metadata| metadata.permissions().mode() & 0o111 != 0)
-}
-
-#[cfg(not(unix))]
-fn executable(path: &Path) -> bool {
-    path.is_file()
 }
 
 fn runtime_capabilities(target: &str) -> BTreeMap<&'static str, &'static str> {
@@ -286,19 +262,14 @@ mod tests {
         let skill_root = home.join(".config/opencode/skills");
         fs::create_dir_all(skill_root.join("manual")).expect("manual skill root");
         fs::write(skill_root.join("manual/.symskills.json"), b"not-json").expect("marker");
-        #[cfg(unix)]
         std::os::unix::fs::symlink("manual", skill_root.join("linked")).expect("linked skill");
         fs::create_dir_all(skill_root.join("unmanaged")).expect("unmanaged skill");
         let present = target_status("opencode", &home, None, "user").expect("present");
         assert_eq!(present["display_name"], "OpenCode");
-        #[cfg(unix)]
         assert_eq!(present["managed_skills_count"], 2);
-        #[cfg(not(unix))]
-        assert_eq!(present["managed_skills_count"], 1);
         assert_eq!(present["unmanaged_skills_count"], 1);
         assert_eq!(present["install_state"], "mixed");
 
-        #[cfg(unix)]
         {
             let real_root = root.join("real-opencode-skills");
             fs::rename(&skill_root, &real_root).expect("move real skill root");

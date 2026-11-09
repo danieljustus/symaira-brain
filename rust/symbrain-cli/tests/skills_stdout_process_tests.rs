@@ -45,7 +45,6 @@ fn command(root: &TempDir, report: &[&str], format: &str) -> Command {
     command
 }
 
-#[cfg(unix)]
 #[test]
 fn readonly_stdout_descriptor_fails_with_bad_file_descriptor() {
     for format in ["table", "json"] {
@@ -70,7 +69,6 @@ fn readonly_stdout_descriptor_fails_with_bad_file_descriptor() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn closed_reader_terminates_with_sigpipe() {
     use std::os::unix::process::ExitStatusExt;

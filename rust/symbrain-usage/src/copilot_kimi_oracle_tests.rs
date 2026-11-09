@@ -201,7 +201,7 @@ fn copilot_kimi_oracle_replay() {
             );
         }
     }
-    assert_eq!(gated, if cfg!(windows) { 8 } else { 7 });
+    assert_eq!(gated, 7);
     assert_eq!(full + gated, 89);
     baseline_routes(&evidence, &input);
     owner_matches_frozen_go(&evidence);

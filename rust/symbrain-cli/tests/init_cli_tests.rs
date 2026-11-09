@@ -21,25 +21,6 @@ fn init_command(root: &TempDir, args: &[&str]) -> Command {
 
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command.env_clear().envs(coverage::profile_environment());
-    #[cfg(windows)]
-    {
-        for key in [
-            "SystemRoot",
-            "SYSTEMROOT",
-            "windir",
-            "WINDIR",
-            "PATHEXT",
-            "ComSpec",
-            "COMSPEC",
-            "TEMP",
-            "TMP",
-            "SystemDrive",
-        ] {
-            if let Some(val) = std::env::var_os(key) {
-                command.env(key, val);
-            }
-        }
-    }
     command
         .current_dir(&cwd)
         .args(args)
@@ -128,7 +109,6 @@ fn fresh_init_creates_files_and_dirs_with_proper_modes() {
     assert!(stdout.contains(&format!("created {}", restricted_file.display())));
     assert!(stdout.contains(&format!("created {}", foreign_file.display())));
 
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(
@@ -221,25 +201,6 @@ fn missing_home_fails_with_expected_error() {
 
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command.env_clear().envs(coverage::profile_environment());
-    #[cfg(windows)]
-    {
-        for key in [
-            "SystemRoot",
-            "SYSTEMROOT",
-            "windir",
-            "WINDIR",
-            "PATHEXT",
-            "ComSpec",
-            "COMSPEC",
-            "TEMP",
-            "TMP",
-            "SystemDrive",
-        ] {
-            if let Some(val) = std::env::var_os(key) {
-                command.env(key, val);
-            }
-        }
-    }
     command
         .current_dir(&cwd)
         .arg("init")
@@ -253,9 +214,6 @@ fn missing_home_fails_with_expected_error() {
     assert!(output.stdout.is_empty());
 
     let stderr = String::from_utf8_lossy(&output.stderr);
-    #[cfg(windows)]
-    assert_eq!(stderr, "symbrain init: %userprofile% is not defined\n");
-    #[cfg(not(windows))]
     assert!(stderr.contains("symbrain init: $HOME is not defined"));
 }
 
@@ -343,7 +301,6 @@ fn custom_xdg_environment_variables_honored() {
     assert!(cache_dir.is_dir());
 }
 
-#[cfg(unix)]
 #[test]
 fn dangling_symlink_is_replaced() {
     let root = TempDir::new().unwrap();
@@ -362,7 +319,6 @@ fn dangling_symlink_is_replaced() {
     assert_eq!(fs::read_to_string(&target).unwrap(), PERSONAL_PROFILE_TOML);
 }
 
-#[cfg(unix)]
 #[test]
 fn symlink_to_existing_file_is_skipped() {
     let root = TempDir::new().unwrap();

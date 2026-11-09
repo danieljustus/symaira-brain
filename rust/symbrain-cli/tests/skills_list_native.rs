@@ -132,7 +132,6 @@ fn marker_install_and_access_time_fill_the_record() {
         br#"{"schema_version":1,"managed_by":"symskills","target":"opencode","name":"demo","mode":"copy","installed":"2026-01-02T03:04:05Z","source_hash":"abc123"}"#,
     )
     .unwrap();
-    #[cfg(unix)]
     {
         use std::time::{Duration, SystemTime};
         let written = SystemTime::UNIX_EPOCH + Duration::from_secs(1_767_323_045);
@@ -154,7 +153,6 @@ fn marker_install_and_access_time_fill_the_record() {
     assert_eq!(installs.len(), 1);
     assert_eq!(installs[0]["target"], "opencode");
     assert_eq!(installs[0]["installed_at"], "2026-01-02T03:04:05Z");
-    #[cfg(unix)]
     {
         // atime > mtime and beyond the install gap: the only usage evidence.
         assert_eq!(entry["last_used"], "2026-01-02T04:04:05Z");
@@ -162,7 +160,6 @@ fn marker_install_and_access_time_fill_the_record() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn access_time_inside_the_install_gap_is_not_usage() {
     // A read within a minute of the install is symskills' own bookkeeping, not
@@ -261,7 +258,6 @@ fn oversize_skill_md_is_reported_natively_as_skill_load_even_with_an_override() 
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn special_installed_marker_does_not_block_or_fabricate_an_install() {
     let root = TempDir::new().unwrap();
@@ -298,9 +294,6 @@ fn symskills_library_override_moves_the_scan_natively() {
     // gate keeps on Go, so pin the real path. Windows keeps the plain
     // `C:\...` spelling a user types: `canonicalize` there yields a verbatim
     // `\\?\C:\...` path that the gate deliberately leaves to Go.
-    #[cfg(windows)]
-    let alternate = root.path().join("alt-library");
-    #[cfg(not(windows))]
     let alternate = root.path().canonicalize().unwrap().join("alt-library");
     std::fs::create_dir_all(alternate.join("moved")).unwrap();
     std::fs::write(
@@ -355,9 +348,6 @@ fn config_file_library_is_listed_natively_with_go_precedence() {
     // and an apply error or an invalid VCS bool resets to the default library.
     let root = TempDir::new().unwrap();
     write_library_skill(&root, "default-skill", "");
-    #[cfg(windows)]
-    let base = root.path().to_path_buf();
-    #[cfg(not(windows))]
     let base = root.path().canonicalize().unwrap();
     let make_library = |name: &str| {
         let dir = base.join(name);

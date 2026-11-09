@@ -2,8 +2,6 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-#[cfg(not(unix))]
-use std::fs::OpenOptions;
 use std::{
     collections::BTreeSet,
     fs::{self, File},
@@ -167,7 +165,6 @@ impl Store {
             ));
         }
         fs::create_dir_all(dir)?;
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             fs::set_permissions(dir, fs::Permissions::from_mode(0o700))?;
@@ -293,7 +290,6 @@ impl Store {
     }
 }
 
-#[cfg(unix)]
 fn open_append(path: &Path) -> std::io::Result<File> {
     use rustix::fs::{Mode, OFlags, open};
     open(
@@ -305,24 +301,11 @@ fn open_append(path: &Path) -> std::io::Result<File> {
     .map_err(std::io::Error::other)
 }
 
-#[cfg(not(unix))]
-fn open_append(path: &Path) -> std::io::Result<File> {
-    let mut options = OpenOptions::new();
-    options.create(true).append(true);
-    options.open(path)
-}
-
-#[cfg(unix)]
 fn open_read(path: &Path) -> std::io::Result<File> {
     use rustix::fs::{Mode, OFlags, open};
     open(path, OFlags::RDONLY | OFlags::NOFOLLOW, Mode::empty())
         .map(File::from)
         .map_err(std::io::Error::other)
-}
-
-#[cfg(not(unix))]
-fn open_read(path: &Path) -> std::io::Result<File> {
-    File::open(path)
 }
 
 #[cfg(test)]
@@ -338,7 +321,6 @@ mod tests {
         assert!(!out.to_string().contains("fixture-secret-value"));
     }
 
-    #[cfg(unix)]
     #[test]
     fn store_rejects_symlinks_and_preserves_concurrent_lines() {
         use std::os::unix::fs::{PermissionsExt, symlink};

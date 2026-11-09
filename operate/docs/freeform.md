@@ -171,7 +171,7 @@ cache/status file itself is reported on stderr and produces a nonzero exit.
 Run from the repository root yourself:
 
 ```bash
-export SYMAIRA_EXTERNAL_RUNTIME_ROOT=/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/.worktrees/freeform-961/runtime
+export SYMAIRA_EXTERNAL_RUNTIME_ROOT="<external-build-volume>/<runtime-root>"  # any writable directory on the external build volume
 operate/scripts/freeform-snapshot-helper.sh \
   --sign 'Developer ID Application: Daniel Justus (M4744F3TAA)'
 launchctl bootstrap gui/$(id -u) "$HOME/Library/LaunchAgents/com.symaira.operate.freeform-snapshot.plist"

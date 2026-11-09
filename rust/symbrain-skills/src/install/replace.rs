@@ -9,10 +9,8 @@ use std::io::{self, Read, Write};
 use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
-#[cfg(unix)]
 use cap_fs_ext::OpenOptionsExt;
 use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
-#[cfg(unix)]
 use cap_std::fs::PermissionsExt;
 use cap_std::fs::{Dir, OpenOptions};
 
@@ -167,7 +165,7 @@ pub(crate) fn open_existing_dir(path: &Path) -> io::Result<Dir> {
                 "unsafe existing root path",
             ));
         };
-        let next = if cfg!(unix) && first_normal && name == "var" {
+        let next = if first_normal && name == "var" {
             current.open_dir(name)
         } else {
             open_child_nofollow(&current, Path::new(name))
@@ -191,7 +189,7 @@ pub(crate) fn open_trusted_dir(path: &Path) -> Result<Dir, SkillError> {
             }
             return Err(SkillError("unsafe trusted root path".to_owned()));
         };
-        let next = if cfg!(unix) && first_normal && name == "var" {
+        let next = if first_normal && name == "var" {
             current.open_dir(name)
         } else {
             open_child_nofollow(&current, Path::new(name))
@@ -336,7 +334,6 @@ fn copy_tree(
             ));
         }
         let permissions = metadata.permissions();
-        #[cfg(unix)]
         let permissions = {
             let mut permissions = permissions;
             let mut bits = permissions.mode() & 0o777;
@@ -374,10 +371,7 @@ pub(crate) fn write_bytes(
         .create(true)
         .truncate(true)
         .follow(FollowSymlinks::No);
-    #[cfg(unix)]
     options.mode(mode);
-    #[cfg(not(unix))]
-    let _ = mode;
     let mut file = root
         .open_with(path, &options)
         .map_err(|error| SkillError(format!("create staged file: {error}")))?;

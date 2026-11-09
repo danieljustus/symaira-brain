@@ -160,7 +160,6 @@ fn native_grants_does_not_rewrite_ephemeral_revoke() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn native_grants_preserves_existing_store_directory_mode() {
     use std::os::unix::fs::{MetadataExt, PermissionsExt};
@@ -223,7 +222,6 @@ fn native_grants_accepts_go_null_defaults_but_rejects_empty_timestamps() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn native_grants_creates_new_store_directory_with_go_mode() {
     use std::os::unix::fs::MetadataExt;

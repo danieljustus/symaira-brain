@@ -1,6 +1,5 @@
 //! Actual process stdout EPIPE terminates Set only after committed persistence.
 
-#[cfg(unix)]
 #[test]
 fn actual_stdout_closed_reader_preserves_committed_set_and_sigpipe() {
     use std::os::unix::process::ExitStatusExt;

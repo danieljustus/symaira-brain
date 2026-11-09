@@ -190,29 +190,7 @@ fn strip_verbatim_prefix(path: PathBuf) -> PathBuf {
 }
 
 fn path_within(root: &Path, path: &Path) -> bool {
-    #[cfg(windows)]
-    {
-        let mut root_components = root.components();
-        let mut path_components = path.components();
-        loop {
-            match (root_components.next(), path_components.next()) {
-                (Some(root), Some(path)) if component_equal(root, path) => {}
-                (None, _) => return true,
-                _ => return false,
-            }
-        }
-    }
-    #[cfg(not(windows))]
-    {
-        path.starts_with(root)
-    }
-}
-
-#[cfg(windows)]
-fn component_equal(left: Component<'_>, right: Component<'_>) -> bool {
-    left.as_os_str()
-        .to_string_lossy()
-        .eq_ignore_ascii_case(&right.as_os_str().to_string_lossy())
+    path.starts_with(root)
 }
 
 fn path_to_string(path: PathBuf) -> String {
@@ -258,7 +236,6 @@ impl Error for DownloadError {
     }
 }
 
-#[cfg(unix)]
 fn missing_directories(path: &Path) -> Vec<PathBuf> {
     let mut current = PathBuf::new();
     let mut missing = Vec::new();
@@ -285,13 +262,11 @@ pub fn download_behavior(directory: &str) -> Result<DownloadBehavior, DownloadEr
         directory: directory.to_owned(),
         source,
     })?;
-    #[cfg(unix)]
     let missing = missing_directories(&absolute);
     fs::create_dir_all(&absolute).map_err(|source| DownloadError::Create {
         directory: directory.to_owned(),
         source,
     })?;
-    #[cfg(unix)]
     for path in missing {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(path, fs::Permissions::from_mode(0o700)).map_err(|source| {

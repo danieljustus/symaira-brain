@@ -97,13 +97,6 @@ pub(super) fn default_user_data_root() -> PathBuf {
     {
         return PathBuf::from(home).join("Library/Caches/symbrowse/sessions");
     }
-    if cfg!(windows)
-        && let Ok(local_app_data) = std::env::var("LOCALAPPDATA")
-    {
-        return PathBuf::from(local_app_data)
-            .join("symbrowse")
-            .join("sessions");
-    }
     if let Ok(path) = std::env::var("XDG_CACHE_HOME") {
         return PathBuf::from(path).join("symbrowse").join("sessions");
     }
@@ -136,16 +129,6 @@ pub fn default_socket_path(session: &str) -> PathBuf {
     crate::spec::default_socket_path(session)
 }
 
-#[cfg(not(unix))]
-pub(super) fn builtin_handler(_frame: Frame) -> HandlerResult {
-    Err(DaemonError {
-        code: codes::OPERATION_FAILED.into(),
-        message: "daemon state operations are unavailable on this platform".into(),
-        ..Default::default()
-    })
-}
-
-#[cfg(unix)]
 pub(super) fn builtin_handler(frame: Frame) -> HandlerResult {
     if !frame.cmd.starts_with("state.") {
         return Err(DaemonError {
@@ -213,7 +196,6 @@ pub(super) fn builtin_handler(frame: Frame) -> HandlerResult {
     }
 }
 
-#[cfg(unix)]
 pub(super) fn required_state_name(
     args: Option<&serde_json::Map<String, Value>>,
 ) -> Result<&str, DaemonError> {
@@ -226,7 +208,6 @@ pub(super) fn required_state_name(
             ..Default::default()
         })
 }
-#[cfg(unix)]
 pub(super) fn store_error(error: impl std::fmt::Display) -> DaemonError {
     DaemonError {
         code: codes::OPERATION_FAILED.into(),
@@ -234,7 +215,6 @@ pub(super) fn store_error(error: impl std::fmt::Display) -> DaemonError {
         ..Default::default()
     }
 }
-#[cfg(unix)]
 pub(super) fn state_root() -> PathBuf {
     if let Ok(path) = std::env::var("SYMBROWSE_STATE_DIR") {
         return PathBuf::from(path).join("states");

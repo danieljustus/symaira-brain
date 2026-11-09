@@ -129,7 +129,6 @@ fn isolation_errors_order_and_clear_preserve_private_profiles() {
         timestamp_at_least(&touched.last_activity, &alpha.last_activity),
         "touch must not move last_activity backwards",
     );
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(

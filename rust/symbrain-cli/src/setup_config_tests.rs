@@ -125,11 +125,7 @@ fn directory_config_reports_the_read_failure_like_go() {
     let config = root.path().join("config.toml");
     std::fs::create_dir(&config).unwrap();
     let shown = config.display().to_string();
-    let detail = if cfg!(windows) {
-        symbrain_managed::format_io_error(&std::io::Error::from_raw_os_error(1))
-    } else {
-        "is a directory".to_owned()
-    };
+    let detail = "is a directory".to_owned();
     let mut modules = [false; 3];
     let error = merge_file(&mut modules, &config, shown.as_bytes()).unwrap_err();
     assert_eq!(

@@ -40,28 +40,6 @@ fn fixture_binary(platform: Platform, unix_bytes: &'static [u8]) -> &'static [u8
     }
 }
 
-#[cfg(windows)]
-fn compile_version_probe(temp: &Path, name: &str, source: &str) -> std::path::PathBuf {
-    let source_path = temp.join(format!("{name}.rs"));
-    let binary_path = temp.join(format!("{name}.exe"));
-    std::fs::write(&source_path, source).expect("write native Windows fixture source");
-    let rustc = std::env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
-    let output = std::process::Command::new(rustc)
-        .arg("--edition=2024")
-        .arg(&source_path)
-        .arg("-o")
-        .arg(&binary_path)
-        .output()
-        .expect("run rustc for native Windows version fixture");
-    assert!(
-        output.status.success(),
-        "rustc fixture failed: {}\n{}",
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr)
-    );
-    binary_path
-}
-
 /// Serializes every test that writes an executable fixture and then execs it
 /// (#927). `fork` copies the whole fd table, so while another test thread is
 /// between `fork` and `exec` it holds a duplicate of any fixture's write
@@ -70,7 +48,6 @@ fn compile_version_probe(temp: &Path, name: &str, source: &str) -> std::path::Pa
 /// intended probe ever starts. Holding this lock across write + probe means no
 /// other probe can fork inside that window. Nothing is retried and no assertion
 /// is relaxed: a genuine ETXTBSY would still fail the test.
-#[cfg(unix)]
 fn exec_fixture_lock() -> std::sync::MutexGuard<'static, ()> {
     static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
     LOCK.lock()
@@ -136,7 +113,6 @@ fn installer_downloads_fallback_asset_verifies_and_installs() {
         "{prefix}{}",
         core.asset_name_alt(platform.os, platform.arch)
     )));
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(
@@ -261,7 +237,6 @@ fn checksum_failure_leaves_existing_binary_untouched() {
 }
 
 #[test]
-#[cfg(unix)]
 fn installed_version_probes_json_and_normalizes_v_prefix() {
     use std::os::unix::fs::PermissionsExt;
 
@@ -281,63 +256,6 @@ fn installed_version_probes_json_and_normalizes_v_prefix() {
 }
 
 #[test]
-#[cfg(windows)]
-fn installed_version_probes_native_windows_executable() {
-    let temp = tempfile::tempdir().unwrap();
-    let binary = compile_version_probe(
-        temp.path(),
-        "version-fixture",
-        r##"fn main() {
-            println!("{}", r#"{"version":"1.2.3"}"#);
-        }"##,
-    );
-    assert!(
-        std::process::Command::new(&binary)
-            .args(["version", "--json"])
-            .output()
-            .expect("run native fixture")
-            .status
-            .success()
-    );
-
-    let bin_dir = tempfile::tempdir().unwrap();
-    let installed = bin_dir.path().join("tool");
-    std::fs::copy(&binary, installed).expect("install original native probe fixture");
-    std::fs::copy(binary, bin_dir.path().join("tool.exe")).expect("install executable candidate");
-    let version = installed_version(bin_dir.path(), "tool").unwrap();
-    assert_eq!(version, "1.2.3");
-    assert!(versions_match(&version, "v1.2.3"));
-    assert_eq!(
-        installed_version(&temp.path().join("absent"), "tool").unwrap(),
-        ""
-    );
-}
-
-#[test]
-#[cfg(windows)]
-fn installed_version_timeout_kills_native_windows_executable() {
-    use std::time::Duration;
-
-    let temp = tempfile::tempdir().unwrap();
-    let binary = compile_version_probe(
-        temp.path(),
-        "slow-version-fixture",
-        "fn main() { std::thread::sleep(std::time::Duration::from_secs(20)); }",
-    );
-    let bin_dir = tempfile::tempdir().unwrap();
-    let installed = bin_dir.path().join("tool");
-    std::fs::copy(&binary, installed).expect("install original slow probe fixture");
-    std::fs::copy(binary, bin_dir.path().join("tool.exe"))
-        .expect("install slow executable candidate");
-
-    let started = std::time::Instant::now();
-    let error = installed_version(bin_dir.path(), "tool").unwrap_err();
-    assert_eq!(error.to_string(), "probe tool: exit status 1");
-    assert!(started.elapsed() < Duration::from_secs(5));
-}
-
-#[test]
-#[cfg(unix)]
 fn installed_version_timeout_is_bounded_and_reaps_descendants() {
     use std::os::unix::fs::PermissionsExt;
     use std::process::{Command, Stdio};

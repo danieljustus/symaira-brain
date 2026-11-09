@@ -4,26 +4,8 @@ use crate::{
 };
 use std::path::Path;
 
-#[cfg(not(unix))]
-pub(crate) fn read(_: &Path, _: &Cancellation) -> Result<(Vec<Event>, usize), ()> {
-    Err(())
-}
-
-#[cfg(unix)]
 pub(crate) fn read(home: &Path, cancel: &Cancellation) -> Result<(Vec<Event>, usize), ()> {
     read_json(home, "sessions", false, cancel, parse_line)
-}
-
-#[cfg(not(unix))]
-pub(crate) fn read_json_reset(
-    _: &Path,
-    _: &str,
-    _: bool,
-    _: &Cancellation,
-    _: Option<std::time::Instant>,
-    _: impl FnMut(Option<&[u8]>, &Path) -> Result<Option<Vec<Event>>, ()>,
-) -> Result<(Vec<Event>, usize), ()> {
-    Err(())
 }
 
 pub(crate) fn read_json(
@@ -39,7 +21,6 @@ pub(crate) fn read_json(
     })
 }
 
-#[cfg(unix)]
 pub(crate) fn read_json_reset(
     home: &Path,
     subdir: &str,
@@ -87,7 +68,6 @@ pub(crate) fn read_json_reset(
     state.walk(&Dir::from_std_file(sessions.into()), 0, Path::new(""))?;
     Ok((state.events, state.excluded))
 }
-#[cfg(unix)]
 struct State<'a, F> {
     claude: bool,
     parse: &'a mut F,
@@ -100,7 +80,6 @@ struct State<'a, F> {
     excluded: usize,
     events: Vec<Event>,
 }
-#[cfg(unix)]
 impl<F: FnMut(Option<&[u8]>, &Path) -> Result<Option<Vec<Event>>, ()>> State<'_, F> {
     fn check(&self) -> Result<(), ()> {
         if self.cancel.is_cancelled() || std::time::Instant::now() >= self.deadline {

@@ -103,10 +103,7 @@ pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
                     Err(_) => return Err(err(first)),
                 },
             }
-            #[cfg(unix)]
             root.symlink(&target, &path).map_err(err)?;
-            #[cfg(windows)]
-            root.symlink_file(&target, &path).map_err(err)?;
             continue;
         }
         if !kind.is_file() {
@@ -125,7 +122,6 @@ pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
         entry.read_to_end(&mut bytes).map_err(err)?;
         let mut options = cap_std::fs::OpenOptions::new();
         options.write(true).create(true).truncate(true);
-        #[cfg(unix)]
         {
             use cap_std::fs::OpenOptionsExt;
             // Applied at creation like Go, so umask stays authoritative.
@@ -188,13 +184,10 @@ fn copy_file(src: &Path, dst: &Path) -> Result<(), SkillError> {
     }
     let mut options = std::fs::OpenOptions::new();
     options.write(true).create(true).truncate(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
         options.mode(mode.mode() & 0o777);
     }
-    #[cfg(not(unix))]
-    let _ = mode;
     let mut output = options.open(dst).map_err(err)?;
     std::io::copy(&mut input, &mut output).map_err(err)?;
     Ok(())

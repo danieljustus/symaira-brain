@@ -88,11 +88,6 @@ fn data_dir(xdg_data_home: Option<&Path>, home: Option<&Path>, temp: &Path) -> P
 #[must_use]
 pub fn default_key_path() -> PathBuf {
     let xdg = env::var_os("XDG_DATA_HOME").map(PathBuf::from);
-    #[cfg(windows)]
-    let home = env::var_os("USERPROFILE")
-        .or_else(|| env::var_os("HOME"))
-        .map(PathBuf::from);
-    #[cfg(not(windows))]
     let home = env::var_os("HOME").map(PathBuf::from);
     data_dir(xdg.as_deref(), home.as_deref(), &env::temp_dir()).join("capability.key")
 }
@@ -152,7 +147,6 @@ pub fn load_or_create_key(path: impl AsRef<Path>) -> Result<Vec<u8>, KeyError> {
     }
     let key = generate_key()?;
     write_key(path, &key)?;
-    #[cfg(unix)]
     set_owner_only_permissions(path)?;
     Ok(key)
 }
@@ -160,7 +154,6 @@ pub fn load_or_create_key(path: impl AsRef<Path>) -> Result<Vec<u8>, KeyError> {
 fn write_key(path: &Path, key: &[u8]) -> Result<(), KeyError> {
     let mut options = OpenOptions::new();
     options.write(true).create(true).truncate(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
@@ -173,7 +166,6 @@ fn write_key(path: &Path, key: &[u8]) -> Result<(), KeyError> {
     Ok(())
 }
 
-#[cfg(unix)]
 fn set_owner_only_permissions(path: &Path) -> Result<(), KeyError> {
     use std::os::unix::fs::PermissionsExt;
     let mut permissions = fs::metadata(path)
@@ -187,7 +179,6 @@ fn set_owner_only_permissions(path: &Path) -> Result<(), KeyError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[cfg(unix)]
     use std::os::unix::fs::PermissionsExt;
 
     #[test]
@@ -229,7 +220,6 @@ mod tests {
         let second = load_or_create_key(&path).expect("load key");
         assert_eq!(first, second);
         assert_eq!(first.len(), KEY_SIZE);
-        #[cfg(unix)]
         assert_eq!(
             fs::metadata(&path)
                 .expect("key metadata")

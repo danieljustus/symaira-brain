@@ -1,5 +1,4 @@
 use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
-#[cfg(unix)]
 use cap_std::fs::OpenOptionsExt;
 use cap_std::fs::{Dir, OpenOptions};
 use std::env;
@@ -45,9 +44,6 @@ pub fn go_io_text(error: &io::Error) -> String {
         (Some(_), Some(index)) => text[..index].to_owned(),
         _ => text,
     };
-    if cfg!(windows) {
-        return text;
-    }
     let mut chars = text.chars();
     chars.next().map_or_else(String::new, |first| {
         first.to_lowercase().chain(chars).collect()
@@ -79,14 +75,9 @@ impl std::fmt::Display for RawMessage {
 impl std::error::Error for RawMessage {}
 
 fn path_bytes(path: &Path) -> Vec<u8> {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         path.as_os_str().as_bytes().to_vec()
-    }
-    #[cfg(not(unix))]
-    {
-        path.to_string_lossy().into_owned().into_bytes()
     }
 }
 
@@ -110,11 +101,7 @@ impl Source {
     #[must_use]
     pub fn new(project_dir: Option<&Path>) -> Self {
         let xdg = env::var_os("XDG_CONFIG_HOME").map(PathBuf::from);
-        let home = if cfg!(windows) {
-            env::var_os("USERPROFILE").map(PathBuf::from)
-        } else {
-            env::var_os("HOME").map(PathBuf::from)
-        };
+        let home = env::var_os("HOME").map(PathBuf::from);
         Self::with_environment(project_dir, xdg.as_deref(), home.as_deref())
     }
 
@@ -252,7 +239,6 @@ fn read_capability(capability: &SourceCapability) -> io::Result<Vec<u8>> {
     }
     let mut options = OpenOptions::new();
     options.read(true).follow(FollowSymlinks::No);
-    #[cfg(unix)]
     options.custom_flags(libc::O_NONBLOCK);
     let file = capability.parent.open_with(&capability.name, &options)?;
     let mut bytes = Vec::new();

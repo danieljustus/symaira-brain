@@ -1,5 +1,5 @@
 use std::env;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -9,51 +9,14 @@ use std::time::{Duration, Instant};
 pub(super) fn which(binary: &str) -> Option<PathBuf> {
     let path = env::var_os("PATH")?;
     env::split_paths(&path)
-        .flat_map(|dir| {
-            executable_names(
-                OsStr::new(binary),
-                env::var_os("PATHEXT").as_deref(),
-                cfg!(windows),
-            )
-            .into_iter()
-            .map(move |name| dir.join(name))
-        })
+        .map(|dir| dir.join(binary))
         .find(|candidate| candidate.is_file() && is_executable(candidate))
 }
 
-fn executable_names(binary: &OsStr, path_ext: Option<&OsStr>, windows: bool) -> Vec<OsString> {
-    if windows {
-        let extensions =
-            path_ext.map_or_else(|| ".com;.exe;.bat;.cmd".into(), OsStr::to_string_lossy);
-        let candidates = extensions
-            .split(';')
-            .filter(|extension| !extension.is_empty())
-            .map(|extension| {
-                let extension = extension.to_ascii_lowercase();
-                let separator = if extension.starts_with('.') { "" } else { "." };
-                OsString::from(format!(
-                    "{}{separator}{extension}",
-                    binary.to_string_lossy()
-                ))
-            });
-        std::iter::once(binary.to_os_string())
-            .filter(|_| Path::new(binary).extension().is_some())
-            .chain(candidates)
-            .collect()
-    } else {
-        vec![binary.to_os_string()]
-    }
-}
-
-#[cfg(unix)]
 fn is_executable(path: &Path) -> bool {
     use std::os::unix::fs::PermissionsExt;
     path.metadata()
         .is_ok_and(|meta| meta.permissions().mode() & 0o111 != 0)
-}
-#[cfg(not(unix))]
-fn is_executable(path: &Path) -> bool {
-    path.is_file()
 }
 
 pub(super) fn run_process(
@@ -81,7 +44,6 @@ pub(crate) fn run_process_with_input(
         })
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
-    #[cfg(unix)]
     {
         use std::os::unix::process::CommandExt;
         command.process_group(0);
@@ -149,7 +111,6 @@ pub(crate) fn run_process_with_input(
 }
 
 fn terminate(child: &mut Child) {
-    #[cfg(unix)]
     {
         let _ = Command::new("/bin/kill")
             .args(["-KILL", "--", &format!("-{}", child.id())])
@@ -180,39 +141,6 @@ fn join_reader(
 }
 
 #[cfg(test)]
-mod executable_name_tests {
-    use super::executable_names;
-    use std::ffi::{OsStr, OsString};
-
-    #[test]
-    fn windows_lookup_follows_pathext_order_and_ignores_extensionless_files() {
-        assert_eq!(
-            executable_names(OsStr::new("symvault"), Some(OsStr::new(".EXE;.CMD")), true),
-            vec![
-                OsString::from("symvault.exe"),
-                OsString::from("symvault.cmd")
-            ]
-        );
-        assert_eq!(
-            executable_names(
-                OsStr::new("symvault.exe"),
-                Some(OsStr::new(".EXE;.CMD")),
-                true,
-            ),
-            vec![
-                OsString::from("symvault.exe"),
-                OsString::from("symvault.exe.exe"),
-                OsString::from("symvault.exe.cmd"),
-            ]
-        );
-        assert_eq!(
-            executable_names(OsStr::new("symvault"), Some(OsStr::new("EXE")), true),
-            vec![OsString::from("symvault.exe")]
-        );
-    }
-}
-
-#[cfg(all(test, unix))]
 mod tests {
     use super::run_process;
     use std::fs;

@@ -1008,11 +1008,9 @@ fn network_har(ctx: &mut Ctx<'_>, args: &[String]) -> Handled {
 
 fn write_private_file(path: &str, data: &[u8]) -> Handled {
     use std::io::Write as _;
-    #[cfg(unix)]
     use std::os::unix::fs::OpenOptionsExt;
     let mut options = std::fs::OpenOptions::new();
     options.write(true).create(true).truncate(true);
-    #[cfg(unix)]
     options.mode(0o600);
     options
         .open(path)

@@ -1,5 +1,4 @@
 //! Synthetic native DB/WAL discovery through the public provider constructor, in bounded fresh processes.
-#![cfg(unix)]
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
 use sha2::{Digest, Sha256};

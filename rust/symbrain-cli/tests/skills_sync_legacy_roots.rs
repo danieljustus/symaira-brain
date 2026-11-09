@@ -20,24 +20,19 @@
 mod coverage;
 
 use std::path::Path;
-#[cfg(unix)]
 use std::path::PathBuf;
 use std::process::{Command, Output};
 
-#[cfg(unix)]
 use sha2::{Digest, Sha256};
 use tempfile::TempDir;
 
 // Full materialization currently rejects Windows drive prefixes in the
 // no-follow capability guard; keep resolver coverage native on both platforms.
-#[cfg(unix)]
 const SKILL_V1: &str = "---\nname: demo\ndescription: A demo\n---\n\n# Demo\nBody.\n";
-#[cfg(unix)]
 const SKILL_V2: &str =
     "---\nname: demo\ndescription: A demo\n---\n\n# Demo\nBody.\n\n## New rule added in library\n";
 
 /// Go's `skills sync` table for the repaired legacy layout, verbatim.
-#[cfg(unix)]
 const GO_SYNC_TABLE: &str = "TARGET\tSKILL\tACTION\tDETAIL\n\
     antigravity\tdemo\tinstalled\t-\n\
     claude\tdemo\tinstalled\t-\n\
@@ -48,7 +43,6 @@ const GO_SYNC_TABLE: &str = "TARGET\tSKILL\tACTION\tDETAIL\n\
 
 /// sha256 of each target's rendered `SKILL.md` after Go's repair — the same
 /// bytes land in `<data root>/base/<target>/demo/SKILL.md`.
-#[cfg(unix)]
 const GO_RENDERED_SHA: &[(&str, &str)] = &[
     (
         "antigravity",
@@ -77,7 +71,6 @@ const GO_RENDERED_SHA: &[(&str, &str)] = &[
 ];
 
 /// One frozen `defaults` scenario from the Go runner oracle.
-#[cfg(unix)]
 fn fixture_default(name: &str) -> serde_json::Value {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../symbrain-skills/tests/fixtures/runner_oracle.json");
@@ -96,7 +89,6 @@ fn fixture_default(name: &str) -> serde_json::Value {
 /// Resolves a fixture path. The fixture's `$ROOT` is the generator's global
 /// temp root; every scenario lives at `$ROOT/<scenario name>/...`, so the
 /// caller passes the temp root this test's scenario directory sits under.
-#[cfg(unix)]
 fn fixture_path(case: &serde_json::Value, key: &str, root: &Path) -> PathBuf {
     let recorded = case
         .get(key)
@@ -135,7 +127,6 @@ fn command(scenario: &Path, xdg_data_home: Option<&Path>, args: &[&str]) -> Comm
     command
 }
 
-#[cfg(unix)]
 fn run(scenario: &Path, xdg_data_home: Option<&Path>, args: &[&str]) -> Output {
     command(scenario, xdg_data_home, args).output().unwrap()
 }
@@ -144,7 +135,6 @@ fn stdout(output: &Output) -> String {
     String::from_utf8(output.stdout.clone()).expect("stdout is utf-8")
 }
 
-#[cfg(unix)]
 fn sha256_hex(path: &Path) -> String {
     let bytes = std::fs::read(path).unwrap_or_else(|error| panic!("{error}"));
     format!("{:x}", Sha256::digest(bytes))
@@ -169,7 +159,6 @@ fn write_named_skill(dir: &Path, name: &str) {
 /// `XDG_DATA_HOME` is unset (the oracle's `xdg_unset_uses_legacy` scenario).
 /// Native bootstrap, root bytes, repair table and every repaired hash must
 /// match what Go produced for the same scenario.
-#[cfg(unix)]
 #[test]
 fn legacy_layout_sync_repairs_like_go() {
     let tmp = TempDir::new().unwrap();
@@ -286,7 +275,6 @@ fn legacy_layout_sync_repairs_like_go() {
 /// When both namespaces exist the current one wins (the oracle's
 /// `xdg_absolute_both_exist` scenario): native sync installs from
 /// `symbrain/skills` and never touches the legacy tree.
-#[cfg(unix)]
 #[test]
 fn both_layouts_present_sync_uses_the_current_namespace() {
     let tmp = TempDir::new().unwrap();
@@ -365,7 +353,7 @@ fn native_sync_plan_uses_the_platform_home_when_home_variables_disagree() {
     write_named_skill(&legacy.join("library/demo"), "demo");
 
     let mut command = command(&scenario, None, &["sync", "--dry-run"]);
-    command.env(if cfg!(windows) { "HOME" } else { "USERPROFILE" }, &other);
+    command.env("USERPROFILE", &other);
     let output = command.output().unwrap();
     assert!(
         output.status.success(),

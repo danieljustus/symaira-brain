@@ -1,7 +1,6 @@
 //! Go joins `$PWD` with `.symbrain.toml` through `filepath.Join`, which cleans
 //! the result lexically. The expected text below was observed from the real Go
 //! CLI (`0541e64a`, corekit v0.18.2) with each of these `PWD` spellings.
-#![cfg(unix)]
 
 use std::fs;
 use std::process::Command;

@@ -3,7 +3,6 @@
 use std::path::Path;
 
 use cap_std::fs::Dir;
-#[cfg(unix)]
 use cap_std::fs::{Permissions, PermissionsExt};
 
 use super::ModeChange;
@@ -31,9 +30,6 @@ fn collect_modes(
     relative: &Path,
     changes: &mut Vec<ModeChange>,
 ) -> Result<(), SkillError> {
-    #[cfg(not(unix))]
-    let _ = changes;
-
     let entries = read_entries(root, current)?;
     for entry in entries {
         let name = entry.file_name();
@@ -54,7 +50,6 @@ fn collect_modes(
                 "install source contains a special file".to_owned(),
             ));
         }
-        #[cfg(unix)]
         {
             let mode = metadata.permissions().mode() & 0o777;
             if mode & 0o111 != 0 {
@@ -89,7 +84,6 @@ fn strip_modes(root: &Dir, current: &Path) -> Result<(), SkillError> {
                 "install source contains a special file".to_owned(),
             ));
         }
-        #[cfg(unix)]
         {
             let mode = metadata.permissions().mode() & 0o777;
             if mode & 0o111 != 0 {

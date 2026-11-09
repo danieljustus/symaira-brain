@@ -283,7 +283,6 @@ fn clean_root(path: &Path) -> PathBuf {
 pub(crate) fn create_directory(path: &Path) -> io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::DirBuilderExt;
         builder.mode(0o700);
@@ -291,14 +290,9 @@ pub(crate) fn create_directory(path: &Path) -> io::Result<()> {
     builder.create(path)
 }
 
-#[cfg(unix)]
 fn secure_directory(path: &Path) -> io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(0o700))
-}
-#[cfg(not(unix))]
-fn secure_directory(_path: &Path) -> io::Result<()> {
-    Ok(())
 }
 
 fn timestamp_now() -> String {

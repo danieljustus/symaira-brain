@@ -106,9 +106,6 @@ fn vault_administration_matches_real_go_process_contracts() {
         String::from_utf8_lossy(&output.stderr)
     );
     for (index, case) in fixture.results.iter().enumerate() {
-        if case.case.unix_only && !cfg!(unix) {
-            continue;
-        }
         let case_root = temp.path().join(format!("case-{index}"));
         if case.case.extra_env.values().any(String::is_empty) {
             empty_environment_is_rejected(&child, case, &case_root);
@@ -237,7 +234,6 @@ fn run_case(child: &Path, case: &Case, root: &Path) {
         .stdin(Stdio::piped())
         .stdout(stdout.try_clone().unwrap())
         .stderr(stderr.try_clone().unwrap());
-    #[cfg(unix)]
     {
         use std::os::unix::process::CommandExt;
         command.process_group(0);
@@ -257,7 +253,6 @@ fn run_case(child: &Path, case: &Case, root: &Path) {
             break status;
         }
         if Instant::now() >= deadline {
-            #[cfg(unix)]
             {
                 let _ = Command::new("/bin/kill")
                     .args(["-KILL", "--", &format!("-{}", process.id())])
@@ -284,7 +279,6 @@ fn run_case(child: &Path, case: &Case, root: &Path) {
 
 fn case_args(case: &Scenario) -> Vec<OsString> {
     if let Some(raw) = &case.args_raw_hex {
-        #[cfg(unix)]
         {
             use std::os::unix::ffi::OsStringExt;
             return raw
@@ -292,8 +286,6 @@ fn case_args(case: &Scenario) -> Vec<OsString> {
                 .map(|arg| OsString::from_vec(unhex(arg)))
                 .collect();
         }
-        #[cfg(not(unix))]
-        panic!("Unix raw argv case reached another platform: {raw:?}");
     }
     case.args.iter().map(OsString::from).collect()
 }

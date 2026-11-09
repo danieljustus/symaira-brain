@@ -1,5 +1,4 @@
 //! Issue #930: isolated subprocess fixtures, never the operator's vault or network.
-#![cfg(unix)]
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
 use std::{collections::BTreeMap, fs, os::unix::fs::PermissionsExt, process::Command, sync::Arc};

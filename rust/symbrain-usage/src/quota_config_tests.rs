@@ -22,7 +22,6 @@ fn quota_file_credentials_are_bounded_and_fail_closed() {
     )
     .unwrap();
     assert_eq!(devin_file_key(&path).as_deref(), Some("hermetic-key"));
-    #[cfg(unix)]
     {
         let link = root.path().join("link");
         std::os::unix::fs::symlink(&path, &link).unwrap();

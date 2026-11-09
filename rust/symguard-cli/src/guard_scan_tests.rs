@@ -47,13 +47,6 @@ fn empty_format_value_resolves_to_default() {
 fn missing_source_error_classification_matches_go_platform_behavior() {
     let missing_file = io::Error::from(io::ErrorKind::NotFound);
     assert!(missing_source_is_silent(&missing_file));
-
-    #[cfg(windows)]
-    {
-        assert!(missing_source_is_silent(&io::Error::from_raw_os_error(2)));
-        let missing_parent = io::Error::from_raw_os_error(3);
-        assert!(!missing_source_is_silent(&missing_parent));
-    }
 }
 
 #[test]
@@ -69,16 +62,6 @@ fn source_paths_clean_parent_components() {
     assert_eq!(
         clean_native_path(Path::new("foo/../claude/config.json")),
         PathBuf::from("claude").join("config.json")
-    );
-}
-
-#[cfg(windows)]
-#[test]
-fn source_paths_clean_slash_form_windows_base() {
-    let raw = Path::new("C:/parent/../xdg/claude/config.json");
-    assert_eq!(
-        clean_native_path(raw).to_string_lossy(),
-        r"C:\xdg\claude\config.json"
     );
 }
 
@@ -183,7 +166,6 @@ fn json_inventory_is_html_escaped_like_go() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn directory_read_failure_is_a_read_error_with_go_errno_text() {
     let dir = std::env::temp_dir();

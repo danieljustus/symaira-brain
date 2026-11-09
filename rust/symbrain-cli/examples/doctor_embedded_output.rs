@@ -25,17 +25,11 @@ impl Write for Owned {
         self.failed = true;
         Err(match self.mode.as_str() {
             "raw-pipe" => {
-                #[cfg(unix)]
                 let code = 32;
-                #[cfg(not(unix))]
-                let code = 109;
                 io::Error::from_raw_os_error(code)
             }
             "raw-full" => {
-                #[cfg(unix)]
                 let code = 28;
-                #[cfg(not(unix))]
-                let code = 112;
                 io::Error::from_raw_os_error(code)
             }
             _ => io::Error::other("owned partial callback"),

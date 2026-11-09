@@ -150,7 +150,6 @@ int_float = 42.0
     assert!(updated.contains("int_float = 42.0"), "int_float: {updated}");
 }
 
-#[cfg(unix)]
 #[test]
 fn unix_raw_non_utf8_key_and_value_no_collision_with_ufffd() {
     use std::os::unix::ffi::OsStringExt;
@@ -213,7 +212,6 @@ fn unix_raw_non_utf8_key_and_value_no_collision_with_ufffd() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn unix_raw_non_utf8_dotted_keys() {
     use std::os::unix::ffi::OsStringExt;

@@ -193,7 +193,7 @@ fn default_dir() -> PathBuf {
     if let Some(path) = env::var_os("XDG_DATA_HOME").filter(|value| !value.is_empty()) {
         return PathBuf::from(path).join("symguard");
     }
-    let home_key = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
+    let home_key = "HOME";
     env::var_os(home_key)
         .filter(|value| !value.is_empty())
         .map_or_else(

@@ -101,11 +101,6 @@ pub(super) fn discover_vault_binary() -> Result<PathBuf, DiscoveryError> {
         if is_executable_file(&managed) {
             return Ok(managed);
         }
-        if cfg!(windows)
-            && let Some(path) = path_lookup_in(OsStr::new(VAULT_BINARY), [directory])
-        {
-            return Ok(path);
-        }
     }
 
     path_lookup(OsStr::new(VAULT_BINARY)).ok_or(DiscoveryError::Missing)
@@ -125,27 +120,15 @@ fn write_configured_error(
     path: &Path,
     error: &std::io::Error,
 ) {
-    #[cfg(windows)]
-    let operation = if error.kind() == std::io::ErrorKind::NotFound {
-        "GetFileAttributesEx"
-    } else {
-        "CreateFile"
-    };
-    #[cfg(not(windows))]
     let operation = "stat";
     let _ = write!(
         stderr,
         "{context}: broker: configured binary_path {} for \"{VAULT_BINARY}\": {operation} ",
         format_go_quoted(path.as_os_str()),
     );
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         let _ = stderr.write_all(path.as_os_str().as_bytes());
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = write!(stderr, "{}", path.display());
     }
     let _ = writeln!(stderr, ": {}", go_error(error));
 }
@@ -157,14 +140,9 @@ fn is_executable_file(path: &Path) -> bool {
     if !metadata.is_file() {
         return false;
     }
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         metadata.permissions().mode() & 0o111 != 0
-    }
-    #[cfg(not(unix))]
-    {
-        true
     }
 }
 
@@ -190,55 +168,11 @@ where
 }
 
 fn executable_names(binary: &OsStr) -> Vec<OsString> {
-    #[cfg(windows)]
-    {
-        windows_executable_names(
-            &binary.to_string_lossy(),
-            env::var("PATHEXT").ok().as_deref(),
-        )
-    }
-    #[cfg(not(windows))]
-    {
-        vec![binary.to_os_string()]
-    }
-}
-
-#[cfg(any(windows, test))]
-fn windows_executable_names(binary: &str, path_ext: Option<&str>) -> Vec<OsString> {
-    let extensions = path_ext
-        .filter(|value| !value.is_empty())
-        .unwrap_or(".com;.exe;.bat;.cmd")
-        .split(';')
-        .filter(|extension| !extension.is_empty())
-        .map(|extension| {
-            let extension = extension.to_ascii_lowercase();
-            if extension.starts_with('.') {
-                extension
-            } else {
-                format!(".{extension}")
-            }
-        })
-        .collect::<Vec<_>>();
-    if extensions.iter().any(|extension| {
-        binary
-            .to_ascii_lowercase()
-            .ends_with(&extension.to_ascii_lowercase())
-    }) {
-        vec![OsString::from(binary)]
-    } else {
-        extensions
-            .iter()
-            .map(|extension| OsString::from(format!("{binary}{extension}")))
-            .collect()
-    }
+    vec![binary.to_os_string()]
 }
 
 const fn path_not_found_message() -> &'static str {
-    if cfg!(windows) {
-        "executable file not found in %PATH%"
-    } else {
-        "executable file not found in $PATH"
-    }
+    "executable file not found in $PATH"
 }
 
 fn child_exit_code(status: std::process::ExitStatus) -> u8 {
@@ -247,7 +181,6 @@ fn child_exit_code(status: std::process::ExitStatus) -> u8 {
     })
 }
 
-#[cfg(unix)]
 fn execute_child(path: &Path, args: &[OsString], stderr: &mut dyn Write) -> u8 {
     match Command::new(path)
         .args(args)
@@ -271,37 +204,7 @@ fn execute_child(path: &Path, args: &[OsString], stderr: &mut dyn Write) -> u8 {
     }
 }
 
-#[cfg(not(unix))]
-fn execute_child(path: &Path, args: &[OsString], stderr: &mut dyn Write) -> u8 {
-    match Command::new(path)
-        .args(args)
-        .stdin(Stdio::inherit())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .status()
-    {
-        Ok(status) => child_exit_code(status),
-        Err(error) => {
-            let _ = writeln!(
-                stderr,
-                "symbrain vault: failed to start {}: {}",
-                path.display(),
-                go_error(&error)
-            );
-            exit::GENERIC
-        }
-    }
-}
-
 fn go_error(error: &std::io::Error) -> String {
-    #[cfg(windows)]
-    {
-        let rendered = error.to_string();
-        rendered
-            .rsplit_once(" (os error ")
-            .map_or(rendered.clone(), |(message, _)| message.to_string())
-    }
-    #[cfg(not(windows))]
     match error.kind() {
         std::io::ErrorKind::NotFound => "no such file or directory".to_string(),
         std::io::ErrorKind::PermissionDenied => "permission denied".to_string(),

@@ -111,7 +111,7 @@ struct Fixture {
 }
 
 fn fixture(target: &str) -> Fixture {
-    fixture_with_mode(target, if cfg!(unix) { "symlink" } else { "copy" })
+    fixture_with_mode(target, "symlink")
 }
 
 fn fixture_with_mode(target: &str, mode: &'static str) -> Fixture {
@@ -199,11 +199,6 @@ fn compare_go(
     state: &str,
     rust: &serde_json::Value,
 ) -> serde_json::Value {
-    if recorder.is_none() && cfg!(windows) {
-        // The frozen Go reports were recorded on darwin (symlink installs); Windows reports use
-        // copy installs whose Go bytes were never recorded, so no frozen oracle exists there.
-        return serde_json::Value::Null;
-    }
     let go = if let Some(oracle) = recorder {
         // Historical re-recording against a live Go binary.
         let mut go = Command::new(oracle);
@@ -279,13 +274,9 @@ fn write_observations(observations: &[serde_json::Value]) {
     }
 }
 
-#[cfg(any(unix, windows))]
 #[test]
 fn unreadable_real_render_links_keep_json_and_table_reports_read_only() {
     for kind in ["nested-link", "depth", "fifo"] {
-        if kind == "fifo" && !cfg!(unix) {
-            continue;
-        }
         let Fixture {
             temp,
             cache,
@@ -298,10 +289,7 @@ fn unreadable_real_render_links_keep_json_and_table_reports_read_only() {
                 let outside = temp.path().join("outside");
                 fs::create_dir(&outside).unwrap();
                 fs::write(outside.join("secret.md"), "OUTSIDE_SECRET_SENTINEL").unwrap();
-                #[cfg(unix)]
                 std::os::unix::fs::symlink(&outside, cached.join("outside-link")).unwrap();
-                #[cfg(windows)]
-                std::os::windows::fs::symlink_dir(&outside, cached.join("outside-link")).unwrap();
             }
             "depth" => {
                 let mut path = cached.clone();

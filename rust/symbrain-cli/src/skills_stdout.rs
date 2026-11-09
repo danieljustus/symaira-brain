@@ -26,22 +26,7 @@ impl Write for ProcessStdout {
     }
 }
 
-#[cfg(unix)]
 fn duplicate() -> io::Result<std::fs::File> {
     use std::os::fd::AsFd;
     io::stdout().as_fd().try_clone_to_owned().map(Into::into)
-}
-
-#[cfg(windows)]
-fn duplicate() -> io::Result<std::fs::File> {
-    use std::os::windows::io::AsHandle;
-    io::stdout()
-        .as_handle()
-        .try_clone_to_owned()
-        .map(Into::into)
-}
-
-#[cfg(not(any(unix, windows)))]
-fn duplicate() -> io::Result<std::fs::File> {
-    Err(io::Error::from(io::ErrorKind::Unsupported))
 }

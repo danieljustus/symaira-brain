@@ -97,7 +97,6 @@ fn absent_uninstall_does_not_initialize_install_roots() {
     assert_eq!(fs::read_dir(&root).expect("root entries").count(), 0);
 }
 
-#[cfg(unix)]
 #[test]
 fn concurrent_process_symlink_installs_preserve_each_target_path_and_record() {
     run_concurrent_install("symlink");

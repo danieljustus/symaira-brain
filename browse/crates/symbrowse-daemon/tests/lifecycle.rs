@@ -1,6 +1,5 @@
 #![deny(unsafe_code)]
 
-#[cfg(unix)]
 mod unix {
     use std::{
         fs,

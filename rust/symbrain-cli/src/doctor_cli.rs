@@ -174,10 +174,8 @@ fn parse_bool_flag(name: &[u8], value: Option<&[u8]>, stderr: &mut dyn Write) ->
 
 #[cfg(test)]
 mod tests {
-    #[cfg(unix)]
     use super::doctor_core::probe_version_with_args;
     use super::doctor_core::{parse_server_map, profile_arg, sorted_server_names};
-    #[cfg(unix)]
     use super::doctor_links::classify_vault_failure;
     use super::doctor_links::is_secret_reference;
     use super::doctor_types::HARNESSES;
@@ -236,7 +234,6 @@ args = ["mcp", "--profile", "default"]
         assert!(!is_secret_reference("literal-secret"));
     }
 
-    #[cfg(unix)]
     #[test]
     fn arbitrary_vault_stderr_is_not_exposed() {
         let status = std::process::Command::new("/bin/sh")
@@ -253,7 +250,6 @@ args = ["mcp", "--profile", "default"]
         assert_eq!(report.detail, "symvault probe failed: exit status 42");
     }
 
-    #[cfg(unix)]
     #[test]
     fn nonzero_version_probe_cannot_be_accepted() {
         let error = probe_version_with_args(

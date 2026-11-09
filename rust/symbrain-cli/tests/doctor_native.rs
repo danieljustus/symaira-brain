@@ -1,4 +1,3 @@
-#![cfg(unix)]
 #![deny(unsafe_code)]
 
 #[path = "../../test-support/coverage.rs"]

@@ -184,14 +184,8 @@ fn assert_error_family(error: &UploadError, expected: &str) {
     }
 }
 
-#[cfg(unix)]
 fn make_symlink(source: &std::path::Path, link: &std::path::Path) -> std::io::Result<()> {
     std::os::unix::fs::symlink(source, link)
-}
-
-#[cfg(windows)]
-fn make_symlink(source: &std::path::Path, link: &std::path::Path) -> std::io::Result<()> {
-    std::os::windows::fs::symlink_file(source, link)
 }
 
 fn tempfile_root(name: &str) -> PathBuf {

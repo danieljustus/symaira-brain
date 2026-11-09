@@ -7,7 +7,6 @@
 //! isolated HOME/XDG tree, sends one `tools/call` per server process and requires
 //!   * the reply line to be byte-identical to Go's (temp root and discovery hashes expanded), and
 //!   * the post-call tree (files, modes, content hashes, symlinks, git history/status) to equal Go's.
-#![cfg(unix)]
 
 use regex::Regex;
 use serde_json::{Value, json};

@@ -4,8 +4,6 @@
 //! (`--x`) directory refuses. The scan must read that as "no installed skills"
 //! instead of aborting the whole report.
 
-#![cfg(unix)]
-
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;

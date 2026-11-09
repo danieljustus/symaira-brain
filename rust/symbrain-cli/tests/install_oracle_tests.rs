@@ -5,7 +5,6 @@ mod coverage;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::fs;
-#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -56,8 +55,6 @@ fn fixture() -> Oracle {
         "install_oracle_darwin.json"
     } else if cfg!(target_os = "linux") {
         "install_oracle_linux.json"
-    } else if cfg!(target_os = "windows") {
-        "install_oracle_windows.json"
     } else {
         panic!("install oracle has no fixture for this target OS")
     };
@@ -148,13 +145,9 @@ fn setup(case_id: &str, root: &Path) {
 fn write(path: &Path, bytes: &[u8], mode: u32) {
     let parent = path.parent().expect("fixture parent");
     fs::create_dir_all(parent).unwrap();
-    #[cfg(unix)]
     fs::set_permissions(parent, fs::Permissions::from_mode(0o700)).unwrap();
     fs::write(path, bytes).unwrap();
-    #[cfg(unix)]
     fs::set_permissions(path, fs::Permissions::from_mode(mode)).unwrap();
-    #[cfg(not(unix))]
-    let _ = mode;
 }
 
 fn normalize(value: &[u8], root: &Path) -> String {
@@ -240,15 +233,7 @@ fn snapshot(root: &Path) -> Vec<ObservedFile> {
 }
 
 fn permissions_mode(metadata: &fs::Metadata) -> u32 {
-    #[cfg(unix)]
-    {
-        std::os::unix::fs::PermissionsExt::mode(&metadata.permissions()) & 0o777
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = metadata;
-        0
-    }
+    std::os::unix::fs::PermissionsExt::mode(&metadata.permissions()) & 0o777
 }
 
 fn expected_files(files: &[OracleFile]) -> Vec<ObservedFile> {
@@ -260,9 +245,6 @@ fn expected_files(files: &[OracleFile]) -> Vec<ObservedFile> {
             // Windows does not expose POSIX execute/write permission bits.
             // Keep comparing types, paths, symlink targets, and exact bytes;
             // compare POSIX modes on Unix where the filesystem can report them.
-            #[cfg(windows)]
-            mode: 0,
-            #[cfg(not(windows))]
             mode: file.mode,
             bytes: file.bytes.as_deref().map(decode_base64),
             target: file.target.clone(),
@@ -276,7 +258,6 @@ fn run_case(case: &OracleCase) -> (i32, String, String, Vec<ObservedFile>) {
     for dir in ["home", "config", "data", "cache", "project"] {
         let path = root.join(dir);
         fs::create_dir(&path).unwrap();
-        #[cfg(unix)]
         fs::set_permissions(&path, fs::Permissions::from_mode(0o700)).unwrap();
     }
     setup(&case.id, &root);
@@ -305,26 +286,6 @@ fn run_case(case: &OracleCase) -> (i32, String, String, Vec<ObservedFile>) {
         .env("LANG", "C.UTF-8")
         .env("LC_ALL", "C.UTF-8")
         .env("TZ", "UTC");
-    #[cfg(windows)]
-    {
-        command.env("USERPROFILE", root.join("home"));
-        let appdata = root.join("home").join("AppData").join("Roaming");
-        let local_appdata = root.join("home").join("AppData").join("Local");
-        let temp = root.join("temp");
-        for path in [&appdata, &local_appdata, &temp] {
-            fs::create_dir_all(path).unwrap();
-        }
-        for key in ["SystemRoot", "windir", "ComSpec", "SystemDrive"] {
-            if let Some(value) = std::env::var_os(key) {
-                command.env(key, value);
-            }
-        }
-        command
-            .env("APPDATA", appdata)
-            .env("LOCALAPPDATA", local_appdata)
-            .env("TEMP", &temp)
-            .env("TMP", temp);
-    }
     if case.id == "default_profile_env_override" {
         command.env("SYMBRAIN_DEFAULT_PROFILE", "restricted");
     }

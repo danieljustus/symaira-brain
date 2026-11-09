@@ -17,7 +17,6 @@ pub(crate) struct Slot {
 pub(crate) fn try_acquire(store: &Path, app: &str) -> io::Result<Option<Slot>> {
     let mut options = OpenOptions::new();
     options.create(true).append(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);

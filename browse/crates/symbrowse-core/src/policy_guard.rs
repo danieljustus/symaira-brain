@@ -261,68 +261,22 @@ fn find_program(name: &str) -> Option<PathBuf> {
 
 fn program_candidates(directory: &Path, name: &str) -> Vec<PathBuf> {
     let base = directory.join(name);
-    #[cfg(windows)]
-    {
-        let extensions =
-            env::var_os("PATHEXT").unwrap_or_else(|| OsString::from(".COM;.EXE;.BAT;.CMD"));
-        let mut candidates = vec![base.clone()];
-        candidates.extend(
-            extensions
-                .to_string_lossy()
-                .split(';')
-                .filter(|value| !value.is_empty())
-                .map(|extension| directory.join(format!("{name}{extension}"))),
-        );
-        candidates
-    }
-    #[cfg(not(windows))]
     {
         let _ = OsString::new();
         vec![base]
     }
 }
 
-#[cfg(unix)]
 fn configure_process_tree(command: &mut Command) {
     use std::os::unix::process::CommandExt;
     command.process_group(0);
 }
 
-#[cfg(windows)]
-fn configure_process_tree(command: &mut Command) {
-    use std::os::windows::process::CommandExt;
-    const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
-    command.creation_flags(CREATE_NEW_PROCESS_GROUP);
-}
-
-#[cfg(not(any(unix, windows)))]
-fn configure_process_tree(_command: &mut Command) {}
-
-#[cfg(unix)]
 fn terminate_process_tree(child: &mut std::process::Child) {
     use rustix::process::{Pid, Signal, kill_process_group};
     if let Some(pid) = Pid::from_raw(child.id() as i32) {
         let _ = kill_process_group(pid, Signal::KILL);
     }
-    let _ = child.kill();
-    let _ = child.wait();
-}
-
-#[cfg(windows)]
-fn terminate_process_tree(child: &mut std::process::Child) {
-    let pid = child.id().to_string();
-    let _ = Command::new("taskkill.exe")
-        .args(["/PID", &pid, "/T", "/F"])
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status();
-    let _ = child.kill();
-    let _ = child.wait();
-}
-
-#[cfg(not(any(unix, windows)))]
-fn terminate_process_tree(child: &mut std::process::Child) {
     let _ = child.kill();
     let _ = child.wait();
 }

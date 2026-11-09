@@ -25,9 +25,6 @@ pub(crate) fn go_io_text(error: &io::Error) -> String {
         (Some(_), Some(index)) => text[..index].to_owned(),
         _ => text,
     };
-    if cfg!(windows) {
-        return text;
-    }
     let mut chars = text.chars();
     chars.next().map_or_else(String::new, |first| {
         first.to_lowercase().chain(chars).collect()
@@ -36,7 +33,6 @@ pub(crate) fn go_io_text(error: &io::Error) -> String {
 
 /// Reads `path` like Go's `readConfigFile`. `capability` is only used where
 /// the platform has no Go-compatible component walk (non-Unix targets).
-#[cfg(unix)]
 pub(crate) fn read_config(
     path: &Path,
     _capability: Option<(std::path::PathBuf, std::path::PathBuf)>,
@@ -151,7 +147,6 @@ pub(crate) fn read_config(
 }
 
 /// Go's `normalizeSystemAlias` (macOS only).
-#[cfg(unix)]
 fn normalize_system_alias(path: &Path) -> std::path::PathBuf {
     for (alias, real) in [("/var", "/private/var"), ("/tmp", "/private/tmp")] {
         if let Ok(rest) = path.strip_prefix(alias) {
@@ -161,36 +156,7 @@ fn normalize_system_alias(path: &Path) -> std::path::PathBuf {
     path.to_path_buf()
 }
 
-#[cfg(not(unix))]
-pub(crate) fn read_config(
-    path: &Path,
-    capability: Option<(std::path::PathBuf, std::path::PathBuf)>,
-) -> Result<Vec<u8>, ReadFailure> {
-    let display = path.to_string_lossy().into_owned();
-    let Some((trusted_root, relative_path)) = capability else {
-        return Err(ReadFailure::Message("resolve config capability".to_owned()));
-    };
-    let failure = |error: &io::Error| {
-        if error.kind() == io::ErrorKind::NotFound {
-            ReadFailure::NotFound
-        } else if error.to_string() == "configuration target is not a regular file" {
-            ReadFailure::Message(error.to_string())
-        } else if error.to_string() == "configuration target exceeds maximum size" {
-            ReadFailure::Message(format!(
-                "configuration target exceeds maximum size of {MAX_CONFIG_BYTES} bytes"
-            ))
-        } else {
-            ReadFailure::Message(format!("open {display}: {}", go_io_text(error)))
-        }
-    };
-    let file = crate::AtomicFile::open(&trusted_root, &relative_path, path.to_path_buf(), false)
-        .map_err(|error| failure(&error))?;
-    file.read_snapshot()
-        .map(|snapshot| snapshot.bytes)
-        .map_err(|error| failure(&error))
-}
-
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod tests {
     use std::ffi::OsStr;
     use std::os::unix::ffi::OsStrExt;

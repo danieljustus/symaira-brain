@@ -106,7 +106,6 @@ fn set_creates_nested_tables_and_matches_burnt_sushi_ordering() {
         out,
         format!("set z.deep = v in {}\n", path.display()).as_bytes()
     );
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(

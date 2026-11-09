@@ -3,7 +3,6 @@
 //! `tests/fixtures/go_parse_errors.json` is recorded from the pinned Go oracle
 //! by `scripts/config-harness-oracle/run.sh --record-parse-fixture`; each
 //! case is one harness config and the `ConfigInventory` Go printed for it.
-#![cfg(unix)]
 
 use std::path::Path;
 

@@ -70,7 +70,6 @@ fn lifecycle_matrix_covers_all_targets_scopes_modes() {
                 project_dir.as_ref().map(tempfile::TempDir::path),
                 "copy",
             );
-            #[cfg(unix)]
             run_lifecycle_case(
                 &target,
                 scope,

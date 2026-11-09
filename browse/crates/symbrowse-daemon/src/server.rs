@@ -2,19 +2,13 @@ use crate::{
     DaemonError, Frame, MAX_FRAME_BYTES, Response, Warning, codes, decode_frame, error_response,
     success_response,
 };
-#[cfg(unix)]
 use fs2::FileExt;
 use serde_json::Value;
 use serde_json::json;
-#[cfg(unix)]
 use std::fs;
-#[cfg(unix)]
 use std::fs::{File, OpenOptions};
-#[cfg(not(windows))]
 use std::io::BufRead;
-#[cfg(unix)]
 use std::os::unix::fs::{FileTypeExt, MetadataExt};
-#[cfg(any(unix, windows))]
 use std::sync::mpsc;
 use std::{
     io::{self, BufReader, Write},
@@ -26,7 +20,6 @@ use std::{
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
-#[cfg(unix)]
 use symbrowse_core::state_store::Store;
 
 pub type HandlerResult = Result<(Option<Value>, Vec<Warning>), DaemonError>;
@@ -37,7 +30,6 @@ pub type ShutdownHandler = Arc<dyn Fn() + Send + Sync + 'static>;
 // Connections can stay open for several request frames. Bound the number of
 // connection threads so short-lived CLI requests do not create one OS thread
 // per daemon round trip, while retaining enough workers for concurrent clients.
-#[cfg(any(unix, windows))]
 const CONNECTION_WORKERS: usize = 32;
 
 #[derive(Clone, Debug)]
@@ -246,30 +238,15 @@ impl Server {
     pub fn stop(&self) {
         let _gate = self.dispatch_gate.lock().ok();
         self.stopping.store(true, Ordering::Release);
-        #[cfg(windows)]
-        wake_windows_listener(&self.options.socket_path);
     }
 
     pub fn listen_and_serve(&self) -> Result<(), ServerError> {
-        #[cfg(unix)]
         {
             let result = self.listen_unix();
             if let Some(shutdown) = &self.options.shutdown_handler {
                 shutdown();
             }
             result
-        }
-        #[cfg(windows)]
-        {
-            let result = listen_windows(self);
-            if let Some(shutdown) = &self.options.shutdown_handler {
-                shutdown();
-            }
-            result
-        }
-        #[cfg(not(any(unix, windows)))]
-        {
-            Err(ServerError::Unsupported)
         }
     }
 
@@ -287,13 +264,8 @@ impl Server {
     }
 }
 
-#[cfg(unix)]
-mod unix;
-#[cfg(windows)]
-mod windows;
-#[cfg(windows)]
-use windows::*;
 mod connection;
+mod unix;
 use connection::*;
 mod helpers;
 use helpers::*;

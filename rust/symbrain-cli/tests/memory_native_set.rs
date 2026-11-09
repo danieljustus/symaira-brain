@@ -2,8 +2,6 @@
 //! PII redaction and fact extraction enabled (#758). The Rust process has no
 //! Go fallback available.
 
-#![cfg(unix)]
-
 #[path = "support/memory_native_oracle.rs"]
 mod oracle;
 

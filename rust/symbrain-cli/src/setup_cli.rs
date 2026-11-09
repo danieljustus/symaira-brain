@@ -78,9 +78,6 @@ fn run_setup(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) 
         Ok(args) => args,
         Err(code) => return code,
     };
-    #[cfg(windows)]
-    let home_label = "%userprofile%";
-    #[cfg(not(windows))]
     let home_label = "$HOME";
     let Some(bin_dir) = crate::managed_home::bin_dir() else {
         let _ = writeln!(

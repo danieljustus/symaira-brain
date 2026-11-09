@@ -1,9 +1,7 @@
 #![allow(missing_docs)]
 
-#[cfg(unix)]
 use std::path::Path;
 
-#[cfg(unix)]
 #[test]
 fn adapter_rejects_a_symlinked_trusted_root() {
     let temp = tempfile::tempdir().expect("temporary root");

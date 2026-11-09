@@ -12,14 +12,9 @@ use super::encode::{ConfigTable, ConfigValue, encode_document, set_key_in_table}
 
 #[must_use]
 pub fn os_bytes(s: &OsStr) -> Cow<'_, [u8]> {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
         Cow::Borrowed(s.as_bytes())
-    }
-    #[cfg(not(unix))]
-    {
-        Cow::Owned(s.to_string_lossy().into_owned().into_bytes())
     }
 }
 

@@ -75,14 +75,9 @@ pub(super) fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Wr
     }
 }
 
-#[cfg(unix)]
 fn os_from(value: &[u8]) -> OsString {
     use std::os::unix::ffi::OsStringExt;
     OsString::from_vec(value.to_vec())
-}
-#[cfg(not(unix))]
-fn os_from(value: &[u8]) -> OsString {
-    String::from_utf8_lossy(value).into_owned().into()
 }
 
 fn usage(stderr: &mut dyn Write) {

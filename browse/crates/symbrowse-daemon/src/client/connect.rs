@@ -1,6 +1,5 @@
 use super::*;
 
-#[cfg(unix)]
 /// Connect to a Unix daemon endpoint without allowing the kernel connect call
 /// to block past `timeout`. The returned stream is restored to blocking mode;
 /// subsequent reads and writes use their own socket deadlines.
@@ -50,7 +49,6 @@ pub fn connect_unix(path: &Path, timeout: Duration) -> io::Result<UnixStream> {
     Ok(stream)
 }
 
-#[cfg(unix)]
 fn wait_for_connect_ready(fd: std::os::fd::BorrowedFd<'_>, timeout: Duration) -> io::Result<()> {
     use nix::poll::{PollFd, PollFlags, poll};
 
@@ -75,12 +73,10 @@ fn wait_for_connect_ready(fd: std::os::fd::BorrowedFd<'_>, timeout: Duration) ->
     }
 }
 
-#[cfg(unix)]
 fn nix_io_error(error: nix::errno::Errno) -> io::Error {
     io::Error::from_raw_os_error(error as i32)
 }
 
-#[cfg(unix)]
 pub(super) fn connect_error(options: &ClientOptions, error: io::Error) -> ClientError {
     if error.kind() == io::ErrorKind::TimedOut {
         map_io_error(options, error, "connect to daemon")

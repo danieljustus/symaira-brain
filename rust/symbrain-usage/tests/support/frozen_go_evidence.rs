@@ -74,14 +74,10 @@ fn unhex(value: &str) -> Vec<u8> {
         .collect()
 }
 
-#[cfg(unix)]
 fn set_mode(path: &Path, mode: u32) {
     use std::os::unix::fs::PermissionsExt;
     std::fs::set_permissions(path, std::fs::Permissions::from_mode(mode)).expect("mode");
 }
-
-#[cfg(not(unix))]
-fn set_mode(_path: &Path, _mode: u32) {}
 
 fn restore_tree(root: &Path, entries: &[Value]) {
     let mut dirs = Vec::new();
@@ -98,7 +94,6 @@ fn restore_tree(root: &Path, entries: &[Value]) {
                 set_mode(&path, mode);
             }
             "symlink" => {
-                #[cfg(unix)]
                 std::os::unix::fs::symlink(entry["target"].as_str().expect("target"), &path)
                     .expect("symlink");
             }

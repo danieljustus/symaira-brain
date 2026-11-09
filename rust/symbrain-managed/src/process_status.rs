@@ -5,16 +5,8 @@ use std::process::ExitStatus;
 #[must_use]
 pub fn format(status: ExitStatus) -> String {
     if let Some(code) = status.code() {
-        #[cfg(windows)]
-        {
-            let unsigned = u32::from_ne_bytes(code.to_ne_bytes());
-            if unsigned >= 1 << 16 {
-                return format!("exit status 0x{unsigned:x}");
-            }
-        }
         return format!("exit status {code}");
     }
-    #[cfg(unix)]
     {
         use std::os::unix::process::ExitStatusExt;
         let signal = status.signal().unwrap_or_default();
@@ -29,10 +21,6 @@ pub fn format(status: ExitStatus) -> String {
             ""
         };
         format!("signal: {name}{core_dump}")
-    }
-    #[cfg(not(unix))]
-    {
-        status.to_string()
     }
 }
 
@@ -112,7 +100,6 @@ const SIGNAL_NAMES: &[&str] = &[
 #[cfg(test)]
 mod tests {
     use super::format;
-    #[cfg(unix)]
     #[test]
     fn unix_termination_keeps_the_actual_signal_and_core_flag() {
         use std::os::unix::process::ExitStatusExt;
@@ -132,18 +119,5 @@ mod tests {
             format(std::process::ExitStatus::from_raw(42 << 8)),
             "exit status 42"
         );
-    }
-    #[cfg(windows)]
-    #[test]
-    fn windows_large_status_codes_preserve_unsigned_hex() {
-        use std::os::windows::process::ExitStatusExt;
-        for (code, expected) in [
-            (42, "exit status 42"),
-            (65535, "exit status 65535"),
-            (65536, "exit status 0x10000"),
-            (0xc000_0005, "exit status 0xc0000005"),
-        ] {
-            assert_eq!(format(std::process::ExitStatus::from_raw(code)), expected);
-        }
     }
 }

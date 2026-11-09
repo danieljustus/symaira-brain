@@ -171,12 +171,6 @@ fn cancellation_child_env(marker: &Path) -> Vec<(String, String)> {
             marker.to_string_lossy().into_owned(),
         ),
     ];
-    #[cfg(windows)]
-    for key in ["SystemRoot", "windir", "ComSpec", "PATHEXT", "PATH"] {
-        if let Ok(value) = std::env::var(key) {
-            env.push((key.to_string(), value));
-        }
-    }
     env
 }
 

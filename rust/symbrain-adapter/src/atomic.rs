@@ -1,24 +1,12 @@
 use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt};
-#[cfg(unix)]
 use cap_std::fs::OpenOptionsExt;
-#[cfg(windows)]
-use cap_std::fs::OpenOptionsExt;
-#[cfg(unix)]
 use cap_std::fs::Permissions;
 use cap_std::fs::{Dir, OpenOptions};
 use std::io::{self, Read, Write};
-#[cfg(unix)]
 use std::os::fd::AsFd;
 use std::path::{Component, Path, PathBuf};
-#[cfg(windows)]
-use windows_sys::Win32::Storage::FileSystem::{
-    DELETE, FILE_GENERIC_READ, FILE_GENERIC_WRITE, SYNCHRONIZE, WRITE_DAC, WRITE_OWNER,
-};
 
-#[cfg(unix)]
 use super::metadata_unix;
-#[cfg(windows)]
-use super::metadata_windows;
 use super::path::validate_relative_target_path;
 
 /// A capability to one validated target and its containing directory.
@@ -71,7 +59,6 @@ impl AtomicFile {
         }
         let mut options = OpenOptions::new();
         options.read(true).follow(FollowSymlinks::No);
-        #[cfg(unix)]
         options.custom_flags(libc::O_NONBLOCK);
         let file = self.parent.open_with(&self.name, &options)?;
         let opened_metadata = file.metadata()?;
@@ -139,19 +126,9 @@ impl AtomicFile {
             ));
             let mut options = OpenOptions::new();
             options.write(true).create_new(true);
-            #[cfg(unix)]
             {
                 options.mode(0o600);
             }
-            #[cfg(windows)]
-            options.access_mode(
-                FILE_GENERIC_READ
-                    | FILE_GENERIC_WRITE
-                    | DELETE
-                    | SYNCHRONIZE
-                    | WRITE_DAC
-                    | WRITE_OWNER,
-            );
             match self.parent.open_with(&temporary_name, &options) {
                 Ok(file) => {
                     temporary = Some(file);
@@ -171,21 +148,11 @@ impl AtomicFile {
         let result = (|| {
             if let Some(metadata) = &existing_metadata {
                 temporary.set_permissions(metadata.permissions())?;
-                #[cfg(unix)]
                 metadata_unix::copy(&self.parent, &self.name, &temporary)?;
-                #[cfg(windows)]
-                metadata_windows::copy(&self.parent, &self.name, &temporary)?;
             } else {
-                #[cfg(unix)]
                 {
                     use cap_std::fs::PermissionsExt;
                     temporary.set_permissions(Permissions::from_mode(0o600))?;
-                }
-                #[cfg(not(unix))]
-                {
-                    let mut permissions = temporary.metadata()?.permissions();
-                    permissions.set_readonly(false);
-                    temporary.set_permissions(permissions)?;
                 }
             }
             temporary.write_all(data)?;
@@ -194,17 +161,13 @@ impl AtomicFile {
                 // source metadata after the bytes are written as well as
                 // before, while retaining the same no-follow source handle
                 // boundary and without ever mutating the source inode.
-                #[cfg(unix)]
                 metadata_unix::copy(&self.parent, &self.name, &temporary)?;
-                #[cfg(windows)]
-                metadata_windows::copy(&self.parent, &self.name, &temporary)?;
             }
             temporary.sync_all()?;
             drop(temporary);
             self.parent
                 .rename(&temporary_name, &self.parent, &self.name)?;
             renamed = true;
-            #[cfg(not(windows))]
             sync_directory(&self.parent)?;
             Ok(())
         })();
@@ -215,7 +178,6 @@ impl AtomicFile {
     }
 }
 
-#[cfg(unix)]
 fn sync_directory(parent: &Dir) -> io::Result<()> {
     use rustix::fs::{self, OFlags};
 
@@ -256,7 +218,6 @@ fn open_parent_capability(root: &Dir, parent: &Path, create: bool) -> io::Result
         }
         let next = current.open_dir_nofollow(name)?;
         if created {
-            #[cfg(unix)]
             {
                 use cap_std::fs::PermissionsExt;
                 next.set_permissions(".", Permissions::from_mode(0o700))?;

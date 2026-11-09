@@ -75,27 +75,21 @@ fn decode_hex(text: &str) -> Vec<u8> {
 }
 fn paths_match_frozen_go(evidence: &frozen::Frozen) {
     let records: Vec<serde_json::Value> = evidence.documents("path").as_array().unwrap().clone();
-    assert_eq!(records.len(), if cfg!(windows) { 21 } else { 22 });
+    assert_eq!(records.len(), 22);
     for record in &records {
         let bytes = decode_hex(record["base_hex"].as_str().unwrap());
-        #[cfg(unix)]
         let path = {
             use std::os::unix::ffi::OsStringExt;
             PathBuf::from(std::ffi::OsString::from_vec(bytes))
         };
-        #[cfg(windows)]
-        let path = PathBuf::from(String::from_utf8(bytes).unwrap());
         let clean = super::credential_path_from_units(&super::credential_clean_units(
             &super::credential_path_units(&path),
         ));
         let joined = super::credential_join(&path, record["child"].as_str().unwrap());
-        #[cfg(unix)]
         let as_bytes = |path: &std::path::Path| {
             use std::os::unix::ffi::OsStrExt;
             path.as_os_str().as_bytes().to_vec()
         };
-        #[cfg(windows)]
-        let as_bytes = |path: &std::path::Path| path.to_str().unwrap().as_bytes().to_vec();
         assert_eq!(
             hex(&as_bytes(&clean)),
             record["clean_hex"],

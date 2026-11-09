@@ -22,14 +22,9 @@ pub struct GoBytes(Vec<u8>);
 
 impl GoBytes {
     fn from_path(path: &Path) -> Self {
-        #[cfg(unix)]
         {
             use std::os::unix::ffi::OsStrExt;
             Self(path.as_os_str().as_bytes().to_vec())
-        }
-        #[cfg(not(unix))]
-        {
-            Self(path.to_string_lossy().into_owned().into_bytes())
         }
     }
 
@@ -113,14 +108,9 @@ const SYNC_FLAGS_USAGE: &str = "Usage of sync:\n  -dry-run\n    \tshow what woul
 
 /// The raw bytes of `arg` after its first `skip` bytes (the flag prefix).
 fn os_suffix(arg: &OsString, skip: usize) -> OsString {
-    #[cfg(unix)]
     {
         use std::os::unix::ffi::{OsStrExt, OsStringExt};
         OsString::from_vec(arg.as_os_str().as_bytes()[skip..].to_vec())
-    }
-    #[cfg(not(unix))]
-    {
-        OsString::from(arg.to_string_lossy()[skip..].to_owned())
     }
 }
 

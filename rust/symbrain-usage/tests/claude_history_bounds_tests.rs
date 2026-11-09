@@ -1,4 +1,3 @@
-#![cfg(unix)]
 use symbrain_usage::{Cancellation, scan_claude_history};
 #[test]
 fn claude_history_native_bounds() {

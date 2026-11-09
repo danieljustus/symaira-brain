@@ -104,6 +104,6 @@ mod kimi_file_access_oracle_tests;
 #[path = "quota_config_tests.rs"]
 mod quota_config_tests;
 
-#[cfg(all(test, unix))]
+#[cfg(test)]
 #[path = "native_gates_oracle_tests.rs"]
 mod native_gates_oracle_tests;

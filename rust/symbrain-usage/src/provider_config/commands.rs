@@ -37,7 +37,6 @@ fn run_command_capture(
         .stdin(Stdio::null())
         .stderr(Stdio::from(stderr_handle))
         .stdout(Stdio::from(handle));
-    #[cfg(unix)]
     std::os::unix::process::CommandExt::process_group(&mut child_command, 0);
     let mut child = match child_command.spawn() {
         Ok(child) => child,
@@ -121,7 +120,6 @@ fn bounded_command_stdout(
 }
 
 fn terminate_child(child: &mut std::process::Child) {
-    #[cfg(unix)]
     {
         let _ = rustix::process::kill_process_group(
             rustix::process::Pid::from_child(child),

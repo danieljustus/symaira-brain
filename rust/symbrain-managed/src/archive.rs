@@ -1,6 +1,5 @@
 //! Managed release integrity checks, secure archive selection, and atomic install.
 
-#[cfg(unix)]
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
@@ -326,7 +325,6 @@ pub fn atomic_install(bin_dir: &Path, binary_name: &str, data: &[u8]) -> Result<
         })?;
     temporary.write_all(data)?;
     temporary.as_file_mut().sync_all()?;
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         temporary
@@ -335,14 +333,11 @@ pub fn atomic_install(bin_dir: &Path, binary_name: &str, data: &[u8]) -> Result<
     }
     let target = bin_dir.join(binary_name);
     temporary.persist(&target).map_err(|error| {
-        #[cfg(unix)]
         let detail = if error.error.kind() == std::io::ErrorKind::IsADirectory {
             "file exists".into()
         } else {
             crate::format_io_error(&error.error)
         };
-        #[cfg(not(unix))]
-        let detail = crate::format_io_error(&error.error);
         let mut message =
             crate::GoText::path("atomic install: rename: rename ", error.file.path(), " ");
         message.push(&symbrain_core::config::os_bytes(target.as_os_str()));

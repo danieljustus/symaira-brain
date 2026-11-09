@@ -48,16 +48,6 @@ pub fn discover_chrome_executable() -> Result<PathBuf, String> {
             ),
             PathBuf::from("/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta"),
         ]);
-    } else if cfg!(target_os = "windows") {
-        for variable in ["LOCALAPPDATA", "PROGRAMFILES", "PROGRAMFILES(X86)"] {
-            if let Some(root) = env::var_os(variable) {
-                let root = PathBuf::from(root);
-                candidates.extend([
-                    root.join("Google/Chrome/Application/chrome.exe"),
-                    root.join("Chromium/Application/chrome.exe"),
-                ]);
-            }
-        }
     } else {
         candidates.extend([
             PathBuf::from("/usr/bin/google-chrome"),
@@ -111,16 +101,11 @@ fn usable_executable(path: &Path) -> Option<PathBuf> {
 
 fn is_executable(path: &Path) -> bool {
     path.is_file() && {
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             path.metadata()
                 .map(|metadata| metadata.permissions().mode() & 0o111 != 0)
                 .unwrap_or(false)
-        }
-        #[cfg(not(unix))]
-        {
-            true
         }
     }
 }
@@ -172,19 +157,10 @@ mod tests {
     fn path_lookup_requires_an_executable_file() {
         let path =
             env::temp_dir().join(format!("symbrowse-chrome-discovery-{}", std::process::id()));
-        #[cfg(unix)]
         {
             std::fs::write(&path, b"not a browser").expect("write discovery fixture");
             assert!(usable_executable(&path).is_none());
             let _ = std::fs::remove_file(&path);
-        }
-        #[cfg(not(unix))]
-        {
-            // Windows has no executable permission bit; use a non-file path
-            // to exercise the same discovery rejection without a fake mode.
-            std::fs::create_dir(&path).expect("create discovery fixture");
-            assert!(usable_executable(&path).is_none());
-            let _ = std::fs::remove_dir(&path);
         }
     }
 

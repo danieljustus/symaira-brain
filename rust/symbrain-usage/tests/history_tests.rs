@@ -1,4 +1,3 @@
-#![cfg(unix)]
 use chrono::{DateTime, FixedOffset};
 use serde::Deserialize;
 use std::collections::BTreeMap;

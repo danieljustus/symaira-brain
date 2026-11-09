@@ -38,14 +38,9 @@ fn decode(hex: &str) -> Vec<u8> {
         })
         .collect()
 }
-#[cfg(unix)]
 fn raw_arg(hex: &str) -> OsString {
     use std::os::unix::ffi::OsStringExt;
     OsString::from_vec(decode(hex))
-}
-#[cfg(not(unix))]
-fn raw_arg(_hex: &str) -> OsString {
-    unreachable!("Unix-only raw argument")
 }
 
 #[test]
@@ -67,9 +62,6 @@ fn activity_validation_matches_complete_go_process_fixture_without_fallback() {
     let mut count = 0;
     let mut names = std::collections::BTreeSet::new();
     for case in fixture.cases {
-        if cfg!(windows) && case.args.iter().any(|a| matches!(a, Arg::Raw { .. })) {
-            continue;
-        }
         assert!(names.insert(case.name.clone()), "duplicate activity case");
         let root = tempdir().expect("isolated activity root");
         let home = root.path().join("home");
@@ -92,12 +84,6 @@ fn activity_validation_matches_complete_go_process_fixture_without_fallback() {
             .env("XDG_CACHE_HOME", root.path().join("cache"))
             .env("XDG_STATE_HOME", root.path().join("state"))
             .env("SYMBRAIN_GO_BINARY", root.path().join("absent-go-fallback"));
-        #[cfg(windows)]
-        for key in ["SystemRoot", "windir", "ComSpec", "PATHEXT"] {
-            if let Some(value) = std::env::var_os(key) {
-                command.env(key, value);
-            }
-        }
         let output = command.output().expect("native activity process");
         assert_eq!(output.status.code(), Some(case.exit), "{} exit", case.name);
         assert_eq!(
@@ -114,9 +100,5 @@ fn activity_validation_matches_complete_go_process_fixture_without_fallback() {
         );
         count += 1;
     }
-    assert_eq!(
-        count,
-        if cfg!(windows) { 237 } else { 265 },
-        "complete activity process case count"
-    );
+    assert_eq!(count, 265, "complete activity process case count");
 }

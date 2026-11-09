@@ -65,7 +65,7 @@ pub(super) fn load() -> &'static Config {
 
 fn load_checked() -> Option<Config> {
     // configkit checks UserHomeDir before consulting XDG or project/env values.
-    let home = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" })
+    let home = std::env::var_os("HOME")
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)?;
     let root = std::env::var_os("XDG_CONFIG_HOME")

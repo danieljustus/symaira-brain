@@ -4,7 +4,6 @@ use std::ffi::OsString;
 use std::fs;
 use tempfile::tempdir;
 
-#[cfg(unix)]
 #[test]
 fn config_get_quotes_raw_unix_arguments_like_go() {
     use std::os::unix::ffi::OsStringExt;
@@ -70,7 +69,6 @@ fn config_get_quotes_raw_unix_arguments_like_go() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn invalid_utf8_key_cannot_match_replacement_character_key() {
     use std::os::unix::ffi::OsStringExt;

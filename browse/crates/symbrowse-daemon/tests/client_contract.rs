@@ -131,7 +131,6 @@ fn startup_deadline_returns_readiness_failure_and_reaps_its_owned_child() {
         log_text.contains("owned child pid="),
         "child never executed: {log_text}"
     );
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         assert_eq!(
@@ -244,7 +243,6 @@ fn config_owned_child() {
     );
 }
 
-#[cfg(unix)]
 fn client_status_fixture(
     status_data: serde_json::Value,
     stop_response: serde_json::Value,
@@ -318,7 +316,6 @@ fn client_status_fixture(
     (commands, result)
 }
 
-#[cfg(unix)]
 #[test]
 fn status_identity_must_be_present_and_match_before_autostart_or_dispatch() {
     for status in [
@@ -339,7 +336,6 @@ fn status_identity_must_be_present_and_match_before_autostart_or_dispatch() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn incompatible_owner_stop_requires_a_success_acknowledgment() {
     let (commands, result) = client_status_fixture(
@@ -376,14 +372,7 @@ fn explicit_engine_and_policy_checks_stop_incompatible_owner_before_dispatch() {
         let root = root();
         // Windows listeners require an isolated named pipe, not a filesystem
         // socket path. Retain the same owner and dispatch assertions on both.
-        let endpoint = if cfg!(windows) {
-            symbrowse_daemon::default_socket_path(&format!(
-                "guarded-{}",
-                root.file_name().unwrap().to_string_lossy()
-            ))
-        } else {
-            symbrowse_daemon::socket_path(&root, "guarded").unwrap()
-        };
+        let endpoint = symbrowse_daemon::socket_path(&root, "guarded").unwrap();
         let dispatched = Arc::new(AtomicBool::new(false));
         let marker = dispatched.clone();
         let server = Arc::new(

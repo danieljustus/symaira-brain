@@ -1,12 +1,9 @@
-#[cfg(unix)]
 use cap_fs_ext::OpenOptionsExt;
 use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
-#[cfg(unix)]
 use cap_std::fs::PermissionsExt as CapPermissionsExt;
 use cap_std::fs::{Dir, OpenOptions, Permissions};
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Read, Write};
-#[cfg(unix)]
 use std::os::fd::AsFd;
 use std::path::{Path, PathBuf};
 
@@ -76,7 +73,6 @@ impl AtomicFile {
     pub fn read_snapshot(&self) -> io::Result<FileSnapshot> {
         let mut options = OpenOptions::new();
         options.read(true).follow(FollowSymlinks::No);
-        #[cfg(unix)]
         options.custom_flags(libc::O_NONBLOCK);
         let file = self.parent.open_with(&self.name, &options)?;
         let metadata = file.metadata()?;
@@ -143,7 +139,6 @@ impl AtomicFile {
         } else {
             self.parent.remove_file(&self.name)?;
         }
-        #[cfg(unix)]
         self.sync_parent()?;
         Ok(true)
     }
@@ -177,7 +172,6 @@ impl AtomicFile {
             let result = self.write_reserved_backup(&backup_name, snapshot);
             match result {
                 Ok(()) => {
-                    #[cfg(unix)]
                     self.sync_parent()?;
                     return Ok(self.display_path.with_file_name(backup_name));
                 }
@@ -228,8 +222,6 @@ impl AtomicFile {
     /// Returns an I/O error for unsafe targets, failed writes, replacement,
     /// cleanup, or durability synchronization.
     pub fn write(&self, data: &[u8], mode: u32) -> io::Result<()> {
-        #[cfg(not(unix))]
-        let _ = mode;
         if data.len() > MAX_CONFIG_BYTES {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
@@ -250,20 +242,12 @@ impl AtomicFile {
         let (temporary_name, mut temporary) = self.create_temp()?;
         let mut replaced = false;
         let result = (|| {
-            #[cfg(unix)]
             temporary.set_permissions(Permissions::from_mode(mode))?;
-            #[cfg(not(unix))]
-            {
-                let mut permissions = temporary.metadata()?.permissions();
-                permissions.set_readonly(false);
-                temporary.set_permissions(permissions)?;
-            }
             temporary.write_all(data)?;
             temporary.sync_all()?;
             drop(temporary);
             replace_existing(&self.parent, &temporary_name, &self.name)?;
             replaced = true;
-            #[cfg(unix)]
             self.sync_parent()?;
             Ok(())
         })();
@@ -288,7 +272,6 @@ impl AtomicFile {
             let name = temporary_name(base, std::process::id(), suffix);
             let mut options = OpenOptions::new();
             options.write(true).create_new(true);
-            #[cfg(unix)]
             options.mode(0o600);
             match self.parent.open_with(&name, &options) {
                 Ok(file) => return Ok((name, file)),
@@ -302,12 +285,10 @@ impl AtomicFile {
         ))
     }
 
-    #[cfg(unix)]
     fn sync_parent(&self) -> io::Result<()> {
         sync_directory(&self.parent)
     }
 }
-#[cfg(unix)]
 fn sync_directory(parent: &Dir) -> io::Result<()> {
     use rustix::fs::{self, OFlags};
 
@@ -345,7 +326,7 @@ pub(super) fn temporary_name(base: &OsStr, process_id: u32, suffix: u32) -> Path
     PathBuf::from(name)
 }
 
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod tests {
     use super::backup_name;
     use std::os::unix::ffi::{OsStrExt, OsStringExt};

@@ -225,23 +225,13 @@ fn reorder(args: &[OsString], verb: &str) -> Vec<OsString> {
     flags
 }
 
-#[cfg(unix)]
 pub(super) fn bytes(arg: &OsStr) -> Vec<u8> {
     use std::os::unix::ffi::OsStrExt;
     arg.as_bytes().to_vec()
 }
-#[cfg(not(unix))]
-pub(super) fn bytes(arg: &OsStr) -> Vec<u8> {
-    arg.to_string_lossy().as_bytes().to_vec()
-}
-#[cfg(unix)]
 fn os(value: &[u8]) -> OsString {
     use std::os::unix::ffi::OsStringExt;
     OsString::from_vec(value.to_vec())
-}
-#[cfg(not(unix))]
-fn os(value: &[u8]) -> OsString {
-    String::from_utf8_lossy(value).into_owned().into()
 }
 pub(super) fn go_string(mut value: &[u8]) -> String {
     let mut text = String::new();

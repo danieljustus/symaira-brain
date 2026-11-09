@@ -166,12 +166,8 @@ fn absent_render_cache_preserves_the_old_status_shape() {
     }
 }
 
-#[cfg(any(unix, windows))]
 fn link_directory(target: &Path, link: &Path) {
-    #[cfg(unix)]
     std::os::unix::fs::symlink(target, link).unwrap();
-    #[cfg(windows)]
-    std::os::windows::fs::symlink_dir(target, link).unwrap();
 }
 
 #[test]
@@ -192,7 +188,6 @@ fn deeply_edited_cache_is_rejected_before_unbounded_recursion() {
     );
 }
 
-#[cfg(any(unix, windows))]
 #[test]
 fn managed_hermes_links_are_healthy_until_the_render_is_edited() {
     let fixture = Fixture::new("hermes", "symlink");
@@ -214,7 +209,6 @@ fn managed_hermes_links_are_healthy_until_the_render_is_edited() {
     assert_eq!(snapshot(fixture.root.path()), before);
 }
 
-#[cfg(any(unix, windows))]
 #[test]
 fn cache_root_and_nested_links_do_not_expand_read_authority() {
     for nested in [false, true] {
@@ -242,7 +236,6 @@ fn cache_root_and_nested_links_do_not_expand_read_authority() {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn render_special_files_are_rejected_without_opening_them() {
     let fixture = Fixture::new("opencode", "copy");
@@ -260,13 +253,9 @@ fn render_special_files_are_rejected_without_opening_them() {
     assert!(row.render_error.unwrap().contains("special file"));
 }
 
-#[cfg(any(unix, windows))]
 #[test]
 fn unreadable_linked_render_keeps_both_comparison_diagnostics() {
     for kind in ["nested-link", "depth", "fifo"] {
-        if kind == "fifo" && !cfg!(unix) {
-            continue;
-        }
         let fixture = Fixture::new("hermes", "symlink");
         match kind {
             "nested-link" => {

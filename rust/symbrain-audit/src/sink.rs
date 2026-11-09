@@ -321,7 +321,6 @@ fn write_segment_anchor(path: &Path, anchor: &SegmentAnchor) -> io::Result<()> {
     data.push(b'\n');
     let mut options = OpenOptions::new();
     options.create(true).truncate(true).write(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
@@ -418,20 +417,11 @@ fn replace_path(from: &Path, to: &Path) -> io::Result<()> {
 }
 
 // Directory sync is a no-op on Windows while preserving the fallible interface for Unix platforms without inventing directory durability.
-#[cfg_attr(windows, allow(clippy::unnecessary_wraps))]
 fn sync_directory(path: Option<&Path>) -> io::Result<()> {
     let Some(path) = path else {
         return Ok(());
     };
-    #[cfg(not(windows))]
-    {
-        File::open(path)?.sync_all()
-    }
-    #[cfg(windows)]
-    {
-        let _ = path;
-        Ok(())
-    }
+    File::open(path)?.sync_all()
 }
 
 fn invalid_data(message: &str) -> io::Error {
@@ -468,7 +458,6 @@ pub(crate) fn go_json<T: Serialize>(value: &T) -> io::Result<String> {
 fn open_private_append(path: &Path) -> io::Result<File> {
     let mut options = OpenOptions::new();
     options.create(true).write(true).append(true);
-    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
@@ -477,10 +466,8 @@ fn open_private_append(path: &Path) -> io::Result<File> {
 }
 
 fn create_private_dir(path: &Path) -> io::Result<()> {
-    #[cfg(unix)]
     let existed = path.exists();
     fs::create_dir_all(path)?;
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         if !existed && fs::metadata(path)?.permissions().mode() & 0o777 != 0o700 {
@@ -661,7 +648,6 @@ mod tests {
         assert_eq!(error.kind(), io::ErrorKind::InvalidData);
     }
 
-    #[cfg(unix)]
     #[test]
     fn sink_creates_private_directory_and_file() {
         use std::os::unix::fs::PermissionsExt;

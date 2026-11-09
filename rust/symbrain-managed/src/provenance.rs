@@ -3,7 +3,6 @@
 use std::io::Write;
 use std::path::Path;
 
-#[cfg(unix)]
 use std::fs;
 
 use chrono::{SecondsFormat, Utc};
@@ -111,14 +110,7 @@ fn decode_source_record(bytes: &[u8]) -> Result<SourceRecord, String> {
 pub fn go_io_error(error: &std::io::Error) -> String {
     let text = error.to_string();
     let text = text.split(" (os error ").next().unwrap_or(&text);
-    #[cfg(unix)]
-    {
-        text.to_lowercase()
-    }
-    #[cfg(not(unix))]
-    {
-        text.into()
-    }
+    text.to_lowercase()
 }
 
 #[derive(Serialize)]
@@ -179,7 +171,6 @@ pub(super) fn write_record(
         .as_file_mut()
         .sync_all()
         .map_err(|error| ManagedError::Context(format!("managed: sync provenance: {error}")))?;
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         temporary
@@ -191,14 +182,11 @@ pub(super) fn write_record(
     }
     let target = bin_dir.join(format!("{binary_name}.provenance.json"));
     temporary.persist(&target).map_err(|error| {
-        #[cfg(unix)]
         let detail = if error.error.kind() == std::io::ErrorKind::IsADirectory {
             "file exists".into()
         } else {
             go_io_error(&error.error)
         };
-        #[cfg(not(unix))]
-        let detail = go_io_error(&error.error);
         let mut message = crate::GoText::path(
             "managed: rename provenance: rename ",
             error.file.path(),
@@ -263,7 +251,6 @@ mod tests {
             value["binary_sha256"],
             "e145acca56d558b65847ef309f65716afbc714552e7eac95ed0c7ac6371c16c8"
         );
-        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             assert_eq!(

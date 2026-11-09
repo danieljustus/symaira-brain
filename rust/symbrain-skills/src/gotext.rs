@@ -148,7 +148,6 @@ mod tests {
         assert_eq!(join("a", ".."), PathBuf::from("."));
     }
 
-    #[cfg(unix)]
     #[test]
     fn io_text_is_go_errno_text() {
         let error = io::Error::from_raw_os_error(2);

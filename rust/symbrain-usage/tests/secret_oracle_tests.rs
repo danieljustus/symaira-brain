@@ -161,17 +161,12 @@ fn fake_symvault_image() -> &'static [u8] {
 }
 
 fn executable_name(base: &str) -> String {
-    if cfg!(windows) {
-        format!("{base}.exe")
-    } else {
-        base.to_owned()
-    }
+    base.to_owned()
 }
 
 fn write_fake_symvault(bin_dir: &Path, args_path: &Path, spec: &SymvaultSpec) {
     let path = bin_dir.join(executable_name("symvault"));
     fs::write(&path, fake_symvault_image()).expect("fake symvault executable");
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         let mut permissions = fs::metadata(&path)

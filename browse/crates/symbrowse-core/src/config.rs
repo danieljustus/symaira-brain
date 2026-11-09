@@ -761,16 +761,9 @@ mod process_env_tests {
     use super::process_env;
     use std::ffi::OsString;
 
-    #[cfg(unix)]
     fn invalid() -> OsString {
         use std::os::unix::ffi::OsStringExt;
         OsString::from_vec(b"/owned/raw-\xff".to_vec())
-    }
-    #[cfg(windows)]
-    fn invalid() -> OsString {
-        use std::os::windows::ffi::OsStringExt;
-        // The provider-discovery raw-wide-path PATH: a lone UTF-16 surrogate.
-        OsString::from_wide(&[0x72, 0x61, 0x77, 0x2d, 0xd800])
     }
 
     #[test]

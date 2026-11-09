@@ -1,15 +1,10 @@
-#[cfg(unix)]
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
 
 use std::collections::BTreeMap;
-#[cfg(unix)]
 use std::fs;
-#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
-#[cfg(unix)]
 use std::path::{Path, PathBuf};
-#[cfg(unix)]
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -248,7 +243,6 @@ impl Transport for DeadlineTransport {
     }
 }
 
-#[cfg(unix)]
 #[test]
 fn production_usage_discovery_is_lazy_and_per_call() {
     let directory = TestTempDir::new();
@@ -287,7 +281,6 @@ fn production_usage_discovery_is_lazy_and_per_call() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn production_usage_discovery_helper() {
     if std::env::var_os("SYMBRAIN_USAGE_DISCOVERY_HELPER").is_none() {
@@ -345,7 +338,6 @@ fn production_usage_discovery_helper() {
     assert_eq!(codex_configured(&second), Some(true));
 }
 
-#[cfg(unix)]
 fn codex_configured(response: &symbrain_gateway::GatewayResponse) -> Option<bool> {
     let wire: Value = serde_json::from_str(response.result.as_ref()?.get()).ok()?;
     let report: Value = serde_json::from_str(wire["content"][0]["text"].as_str()?).ok()?;
@@ -356,10 +348,8 @@ fn codex_configured(response: &symbrain_gateway::GatewayResponse) -> Option<bool
         .as_bool()
 }
 
-#[cfg(unix)]
 struct TestTempDir(PathBuf);
 
-#[cfg(unix)]
 impl TestTempDir {
     fn new() -> Self {
         use std::sync::atomic::{AtomicU64, Ordering};
@@ -378,7 +368,6 @@ impl TestTempDir {
     }
 }
 
-#[cfg(unix)]
 impl Drop for TestTempDir {
     fn drop(&mut self) {
         let _ = fs::remove_dir_all(&self.0);

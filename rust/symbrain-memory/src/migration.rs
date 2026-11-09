@@ -6,12 +6,10 @@ mod defaults;
 mod facts;
 mod fts;
 mod initial;
-#[cfg(unix)]
 mod permissions;
 mod runner;
 mod sql;
 
-#[cfg(unix)]
 pub(crate) use permissions::secure_files;
 #[cfg(test)]
 mod backfill_tests;

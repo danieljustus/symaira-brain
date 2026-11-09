@@ -38,13 +38,28 @@ Removed outright: the Go-compiled Windows stub builder in
 evidence and cannot be renamed without re-sealing. A grep for `go_tool` matches
 it; that is expected.
 
-## Not covered by this change
+## Browse and Guard remainder (#1004)
 
-Outside the paths this change was allowed to edit, and still to be deleted or
-fenced the same way:
+The remaining Go-dependent code is fenced the same way: the `main()` of each
+script fails fast with a banner naming the pre-removal revision
+`57c26c76e238e458d9027d5ee4362df24d30b47e` before touching Go, and nothing a
+gate runs reaches that code.
 
-- `browse/port/harness/*.go.in` (11 files) and `daemon_state_key.py`,
-  `daemon_provider_discovery.py`, `daemon_registry.py`, `daemon_process.py`,
-  `daemon_mcp.py` with their `--go`/`--go-tool` modes; `browse/port/bench`.
-- `guard/scripts/guard-scan-oracle/oracle.py` (`go build` in record mode).
-- `migration/evidence/**/*.go.in` (4 files) are sealed evidence and stay as is.
+| Path | What needs Go | Supported replacement |
+|---|---|---|
+| `browse/port/harness/daemon_state_key.py`, `daemon_provider_discovery.py`, `daemon_registry.py`, `daemon_process.py`, `daemon_mcp.py` (`--go`, `--go-tool`) | a Go `symbrowse` binary and Go probe programs | `run.py` suites and the std-only Rust fixture programs (`fixture_programs.py`) |
+| `browse/port/bench/run.py` (`--go`, `--go-build-receipt`), `chrome_pair.py`, `build_receipt.py --kind go` | the Go build receipt and the paired Go benchmark | Rust-only measurement in `run.py` |
+| `guard/scripts/guard-scan-oracle/oracle.py` (`write`/`check`, `build_and_run`) | `go build ./cmd/symbrain` of the pinned commit | `parity.py` and the sealed guard-scan fixtures (`make guard-scan-parity`) |
+
+The modules stay importable because CI-run harness tests import helpers from
+them (`test_registry_daemon_lifetime.py`, `test_daemon_provider_discovery_ownership.py`,
+`startup_key_paths.py`).
+
+Removed outright: the 11 `browse/port/harness/*.go.in` probe sources. They are
+recoverable from the pre-removal revision; their Rust replacements
+(`state_key_fixture.rs`, `state_key_control.rs`, `startup_key_path_control.rs`)
+stay. `migration/evidence/**/*.go.in` (4 files) are sealed evidence and stay as
+is.
+
+Also removed: `scripts/guard-standalone-oracle/windows_path_reference.py` and
+its call in that directory's historical `run.sh` (#992).

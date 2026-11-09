@@ -1,6 +1,5 @@
 use super::*;
 
-#[cfg(unix)]
 fn executable(path: &Path, body: &str) {
     use std::os::unix::fs::PermissionsExt;
 
@@ -8,11 +7,6 @@ fn executable(path: &Path, body: &str) {
     let mut permissions = fs::metadata(path).expect("stat executable").permissions();
     permissions.set_mode(0o755);
     fs::set_permissions(path, permissions).expect("chmod executable");
-}
-
-#[cfg(not(unix))]
-fn executable(path: &Path, body: &str) {
-    fs::write(path, body).expect("write executable");
 }
 
 #[test]
@@ -41,7 +35,6 @@ fn empty_config_binary_path_is_not_an_override() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn configured_path_diagnostic_preserves_non_utf8_bytes() {
     use std::os::unix::ffi::OsStringExt;
@@ -73,7 +66,6 @@ fn managed_binary_requires_regular_executable_file() {
     executable(&binary, "");
     assert!(is_executable_file(&binary));
 
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         let mut permissions = fs::metadata(&binary).expect("stat binary").permissions();
@@ -90,38 +82,10 @@ fn path_lookup_finds_binary_in_ordered_path_entry() {
     let second = root.path().join("second");
     fs::create_dir_all(&first).expect("first dir");
     fs::create_dir_all(&second).expect("second dir");
-    #[cfg(windows)]
-    let expected_binary = second.join(format!("{VAULT_BINARY}.exe"));
-    #[cfg(not(windows))]
     let expected_binary = second.join(VAULT_BINARY);
     executable(&expected_binary, "");
 
     let found = path_lookup_in(OsStr::new(VAULT_BINARY), vec![first, second.clone()]);
     assert_eq!(found, Some(expected_binary.clone()));
     assert!(is_executable_file(&expected_binary));
-}
-
-#[test]
-fn windows_path_extensions_match_go_defaults() {
-    assert_eq!(
-        windows_executable_names("symvault", Some("")),
-        [
-            "symvault.com",
-            "symvault.exe",
-            "symvault.bat",
-            "symvault.cmd"
-        ]
-        .map(OsString::from)
-    );
-    assert_eq!(
-        windows_executable_names("symvault.EXE", Some(".COM;.EXE")),
-        vec![OsString::from("symvault.EXE")]
-    );
-    assert_eq!(
-        windows_executable_names("symvault", Some("COM;Exe")),
-        vec![
-            OsString::from("symvault.com"),
-            OsString::from("symvault.exe")
-        ]
-    );
 }

@@ -1,6 +1,5 @@
 //! First Rust run over Go-created state: automatic verified backup, unchanged
 //! reads, one-time behavior and the documented `cp -Rp` restore.
-#![cfg(unix)]
 
 use std::fs;
 use std::path::{Path, PathBuf};

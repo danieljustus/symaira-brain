@@ -35,15 +35,10 @@ struct Confirmed<'a> {
 }
 
 fn path_json(path: &OsStr) -> Box<RawValue> {
-    #[cfg(unix)]
     let mut remaining = {
         use std::os::unix::ffi::OsStrExt;
         path.as_bytes()
     };
-    #[cfg(not(unix))]
-    let display = path.to_string_lossy();
-    #[cfg(not(unix))]
-    let mut remaining = display.as_bytes();
     let mut encoded = String::from("\"");
     while !remaining.is_empty() {
         let (valid, invalid) = match std::str::from_utf8(remaining) {

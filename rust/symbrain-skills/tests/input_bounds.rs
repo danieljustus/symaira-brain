@@ -148,7 +148,6 @@ fn aggregate_resource_bytes_exact_boundary_and_one_over() {
     );
 }
 
-#[cfg(unix)]
 #[test]
 fn fifo_control_resources_and_library_never_block() {
     for name in [

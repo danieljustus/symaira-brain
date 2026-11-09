@@ -174,9 +174,6 @@ pub fn default_log_path() -> PathBuf {
 
 #[must_use]
 pub fn default_socket_path(session: &str) -> PathBuf {
-    if cfg!(windows) {
-        return PathBuf::from(format!(r"\\.\pipe\symbrowse-{session}"));
-    }
     if cfg!(target_os = "macos") {
         return std::env::var_os("HOME").map_or_else(
             || std::env::temp_dir().join(format!("symbrowse-{session}.sock")),
