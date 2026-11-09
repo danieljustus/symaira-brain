@@ -271,7 +271,7 @@ jobs:
           prerelease=()
           if [[ "$VERSION" == *-* ]]; then prerelease=(--prerelease); fi
           gh release create "$RELEASE_TAG" --verify-tag --title "$RELEASE_TAG" --generate-notes \
-            "${prerelease[@]}" "$RUNNER_TEMP"/dist/*
+            ${prerelease[@]+"${prerelease[@]}"} "$RUNNER_TEMP"/dist/*
           readback="$(mktemp -d "$RUNNER_TEMP/release-readback.XXXXXX")"
           gh release download "$RELEASE_TAG" --pattern 'symbrain_*.tar.gz' --pattern checksums.txt --dir "$readback"
           python scripts/rust-release/package.py verify --version "$VERSION" --dir "$readback"
