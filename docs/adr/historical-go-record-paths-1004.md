@@ -48,6 +48,8 @@ gate runs reaches that code.
 | Path | What needs Go | Supported replacement |
 |---|---|---|
 | `browse/port/harness/daemon_state_key.py`, `daemon_provider_discovery.py`, `daemon_registry.py`, `daemon_process.py`, `daemon_mcp.py` (`--go`, `--go-tool`) | a Go `symbrowse` binary and Go probe programs | `run.py` suites and the std-only Rust fixture programs (`fixture_programs.py`) |
+| `browse/port/harness/daemon_state_key.py` (state-key gate, #772) | a Go `symbrowse` binary, the Go oracle API probe and Go sources | `daemon_state_key_replay.py`: replays the sealed Linux recording in `migration/evidence/browse-state-key-772/candidate-4cd` (pinned `retention.json`) against Rust |
+| `browse/scripts/rust-port/browser_fixture_gen.py` regeneration (#776) | `go test` of the removed Go engine packages | `--check` verifies the sealed `testdata/port/engine` recordings against pinned manifest hashes |
 | `browse/port/bench/run.py` (`--go`, `--go-build-receipt`), `chrome_pair.py`, `build_receipt.py --kind go` | the Go build receipt and the paired Go benchmark | Rust-only measurement in `run.py` |
 | `guard/scripts/guard-scan-oracle/oracle.py` (`write`/`check`, `build_and_run`) | `go build ./cmd/symbrain` of the pinned commit | `parity.py` and the sealed guard-scan fixtures (`make guard-scan-parity`) |
 

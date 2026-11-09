@@ -42,6 +42,12 @@ jobs:
         id: cft
         run: python3 port/harness/chrome_for_testing.py --platform "${{ matrix.cft }}" --destination "$RUNNER_TEMP/symbrowse-cft"
 
+      - name: Verify sealed Chrome recording and contract fixture
+        run: |
+          set -euo pipefail
+          python3 -B scripts/rust-port/test_browser_fixture_gen.py
+          python3 port/harness/run.py --suite chrome-full
+
       - name: Run real Chrome engine E2E
         env:
           SYMBROWSE_E2E: '1'
