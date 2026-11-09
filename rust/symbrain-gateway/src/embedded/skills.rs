@@ -27,28 +27,14 @@ pub(crate) fn dispatch(name: &str, value: &Value) -> Result<String, GatewayError
 }
 
 pub(super) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
+    // Same data root as `symbrain skills` (legacy `symskills` fallback, #1017).
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let library_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR") {
-        PathBuf::from(path)
-    } else if let Some(data) = symbrain_core::xdg::data_dir() {
-        data.join("skills").join("library")
-    } else {
-        home.join(".local")
-            .join("share")
-            .join("symskills")
-            .join("library")
-    };
-
-    let base_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR") {
-        PathBuf::from(path)
-    } else if let Some(data) = symbrain_core::xdg::data_dir() {
-        data.join("skills").join("base")
-    } else {
-        home.join(".local")
-            .join("share")
-            .join("symskills")
-            .join("base")
-    };
+    let data_root = symbrain_skills::runner::skills_data_root()
+        .unwrap_or_else(|_| home.join(".local").join("share").join("symskills"));
+    let library_dir = std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR")
+        .map_or_else(|| data_root.join("library"), PathBuf::from);
+    let base_dir = std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR")
+        .map_or_else(|| data_root.join("base"), PathBuf::from);
 
     (library_dir, base_dir, home)
 }

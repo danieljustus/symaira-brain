@@ -82,14 +82,24 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
     );
 
     let audit = if profile.audit.enabled {
-        match Logger::open(
+        match Logger::open_preserving_unverified(
             &profile.name,
             AuditConfig {
                 enabled: true,
                 verbose: profile.audit.verbose,
             },
         ) {
-            Ok(logger) => Some(Arc::new(logger)),
+            Ok((logger, preserved)) => {
+                if let Some(preserved) = preserved {
+                    let reason = format!(
+                        "previous audit log failed chain verification; preserved as {} and started a new chain",
+                        preserved.display()
+                    );
+                    let _ = writeln!(stderr, "symbrain mcp: {reason}");
+                    logger.log_degradation("audit", &reason, "warning");
+                }
+                Some(Arc::new(logger))
+            }
             Err(error) => {
                 let _ = writeln!(stderr, "symbrain mcp: failed to open audit log: {error}");
                 None
@@ -99,10 +109,11 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         None
     };
 
-    let gateway = match Gateway::new(
+    let gateway = match Gateway::with_memory_db(
         profile,
         backends,
         option_env!("SYMBRAIN_VERSION").unwrap_or("dev"),
+        Some(crate::memory_cli::resolve_db_path(None)),
     )
     .map(|gateway| gateway.with_audit(audit))
     {
@@ -281,6 +292,19 @@ fn check_embedded_handlers(_profile: &Profile, _stderr: &mut dyn Write) -> bool 
     true
 }
 
+/// Vault agent used when `--vault-agent` is absent, as the usage text documents.
+pub(crate) const DEFAULT_VAULT_AGENT: &str = "claude-code";
+
+/// The vault child argv shared by the gateway and doctor's handshake probe.
+///
+/// symvault only accepts `--allow-locked` in stdio mode, and stdio mode needs
+/// an agent; without both a plain `serve` starts the HTTP server (#1018).
+pub(crate) fn vault_child_args(agent: &str) -> Vec<String> {
+    ["serve", "--stdio", "--agent", agent, "--allow-locked"]
+        .map(str::to_string)
+        .to_vec()
+}
+
 fn build_backends(
     profile: &Profile,
     vault_agent: Option<&str>,
@@ -297,13 +321,7 @@ fn build_backends(
         match symbrain_broker::discover(VAULT_BINARY, override_path.as_deref().unwrap_or_default())
         {
             Ok(path) => {
-                let mut args = vec!["serve".to_string()];
-                if let Some(agent) = vault_agent {
-                    args.push("--stdio".to_string());
-                    args.push("--agent".to_string());
-                    args.push(agent.to_string());
-                }
-                args.push("--allow-locked".to_string());
+                let args = vault_child_args(vault_agent.unwrap_or(DEFAULT_VAULT_AGENT));
                 insert_managed("vault", path, args, managed, backends);
             }
             Err(error) => {

@@ -1,29 +1,20 @@
 //! Read-only memory health checks; inspection never invokes store repair.
 
 use super::super::doctor_types::MemoryDbCheck;
-use super::component_location;
 use std::fs;
 
 pub(in crate::doctor_cli) fn check_memory_db() -> MemoryDbCheck {
-    let Some(data) = component_location("memory", "symmemory", ".local/share") else {
-        return MemoryDbCheck {
-            path: String::new(),
-            exists: false,
-            mode: String::new(),
-            mode_ok: false,
-            quick_check: String::new(),
-            legacy: false,
-            error: "resolve memory data directory".to_string(),
-        };
-    };
-    let path = data.path.join("default.db");
+    // Inspect exactly the store the memory commands and the gateway open (#1017).
+    let path = crate::memory_cli::resolve_db_path(None);
+    let legacy = path.parent().and_then(std::path::Path::file_name)
+        == Some(std::ffi::OsStr::new("symmemory"));
     let mut check = MemoryDbCheck {
         path: path.display().to_string(),
         exists: false,
         mode: String::new(),
         mode_ok: false,
         quick_check: String::new(),
-        legacy: data.legacy,
+        legacy,
         error: String::new(),
     };
     let metadata = match fs::metadata(&path) {

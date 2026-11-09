@@ -87,17 +87,13 @@ fn probe_handshake(
         unknown: 0,
         error: String::new(),
     };
-    let args = if vault_agent.is_empty() {
-        vec!["serve".to_string()]
+    // Probe exactly the argv the gateway spawns (#1018).
+    let agent = if vault_agent.is_empty() {
+        crate::mcp_cli::DEFAULT_VAULT_AGENT
     } else {
-        vec![
-            "serve".to_string(),
-            "--stdio".to_string(),
-            "--agent".to_string(),
-            vault_agent.to_string(),
-            "--allow-locked".to_string(),
-        ]
+        vault_agent
     };
+    let args = crate::mcp_cli::vault_child_args(agent);
     let deadline = Instant::now() + HANDSHAKE_TIMEOUT;
     let client = match Client::spawn(
         path,

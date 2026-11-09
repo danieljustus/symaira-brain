@@ -118,6 +118,21 @@ impl Gateway {
         servers: BTreeMap<String, Arc<dyn GatewayBackend>>,
         version: impl Into<String>,
     ) -> Result<Self, GatewayError> {
+        Self::with_memory_db(profile, servers, version, None)
+    }
+
+    /// Like [`Gateway::new`], but opens the embedded memory store at
+    /// `memory_db` — the path the memory commands resolve — so the gateway
+    /// and the CLI share one store (#1017). `SYMBRAIN_MEMORY_DB` still wins.
+    ///
+    /// # Errors
+    /// Returns policy failures or namespaced tool collisions.
+    pub fn with_memory_db(
+        profile: Profile,
+        servers: BTreeMap<String, Arc<dyn GatewayBackend>>,
+        version: impl Into<String>,
+        memory_db: Option<std::path::PathBuf>,
+    ) -> Result<Self, GatewayError> {
         let assembly = build_catalog(&profile, &servers)?;
         let usage_config = profile.server(symbrain_policy::SERVER_USAGE);
         let usage_report = symbrain_policy::evaluate(
@@ -147,8 +162,12 @@ impl Gateway {
         {
             let path = std::env::var_os("SYMBRAIN_MEMORY_DB")
                 .map(std::path::PathBuf::from)
+                .or(memory_db)
                 .or_else(|| {
-                    symbrain_core::xdg::data_dir().map(|dir| dir.join("memory").join("default.db"))
+                    // Legacy-aware: never create `symbrain/memory` next to a
+                    // live `symmemory` store.
+                    symbrain_core::paths::memory_data_dir()
+                        .map(|location| location.dir.join("default.db"))
                 })
                 .ok_or_else(|| {
                     GatewayError::Policy("resolve embedded memory database path".into())

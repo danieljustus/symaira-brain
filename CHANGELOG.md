@@ -21,6 +21,22 @@ the [Unreleased] section is moved into a dated version section.
 - iOS companion restyled with the shared page and form components, Symaira tab
   icons and system appearance.
 
+### Fixed
+- `symbrain mcp` opens the same memory store and skills library as the CLI.
+  The gateway used hardcoded `symbrain/{memory,skills}` paths, created an empty
+  memory directory next to a legacy `symmemory` store, and from then on every
+  harness, the CLI and the app saw an empty store. An empty current directory
+  no longer shadows a legacy store that holds data, and `doctor` inspects the
+  store the commands open (#1017).
+- The vault child always runs in stdio mode. Without `--vault-agent` the
+  gateway passed `--allow-locked` without `--stdio`, which symvault rejects, so
+  vault tools were missing. The documented default agent `claude-code` now
+  applies, and `doctor` probes the same argv as the gateway (#1018).
+- A retained audit log that fails chain verification (Go-era logs restarted
+  the chain in every process) no longer turns auditing off. It is kept as
+  `<profile>.jsonl.unverified-<utc>`, a new chain starts and the event is
+  recorded as a degradation (#1019).
+
 ## [v0.13.0] - 2026-11-09
 
 Breaking: the Go implementation is removed and `symbrain` is Rust-only (see

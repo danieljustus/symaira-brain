@@ -4,6 +4,7 @@
 
 mod logger;
 mod model;
+mod preserve;
 mod raw;
 mod redact;
 mod sink;
