@@ -1,7 +1,10 @@
 # Engines und die Engine-Grenze
 
 `symbrowse` spricht nie direkt mit einem Browser, sondern immer über die
-Engine-Grenze in [`internal/engine`](../internal/engine). Dieses Dokument hält
+Engine-Grenze in [`crates/symbrowse-engine`](../crates/symbrowse-engine); die
+Implementierungen liegen in `crates/symbrowse-engine-chrome`,
+`crates/symbrowse-engine-safari` und `crates/symbrowse-engine-firefox`. Dieses
+Dokument hält
 fest, welche Engines es gibt, welche Fähigkeiten eine Engine haben *muss* und
 warum ein Safari-Backend anders behandelt wird als ein zweiter
 Chromium-Browser.
@@ -9,7 +12,9 @@ Chromium-Browser.
 ## Was eine Engine ist
 
 Die Grenze besteht aus einem Pflicht-Interface und derzeit 19 optionalen
-Erweiterungen:
+Erweiterungen (kanonische, sortierte Liste: `OPTIONAL_INTERFACE_NAMES` in
+[`capabilities.rs`](../crates/symbrowse-engine/src/capabilities.rs), gepinnt durch
+[`oracle_fixture.rs`](../crates/symbrowse-engine/tests/oracle_fixture.rs)):
 
 - `Engine` (Pflicht): Launch, Context, Page, Navigate, Evaluate, AXTree,
   Screenshot, Close.
@@ -31,9 +36,13 @@ als „von dieser Engine nicht unterstützt" scheitern.
 | `safari-attach` | Apple Events (`do JavaScript`) | Lesen vollständig; Navigation policy-guarded; Bedienen hinter Opt-in (issue #297) |
 | `safari-bidi` | WebDriver BiDi über WebSocket (`safaridriver --bidi`) | Lesen in isolierter Sitzung; **kein** Bedienen, **keine** Events, **keine** Subresource-Policy — Safari implementiert die nötigen Module nicht (issue #355) |
 
-Die CDP-Engine ist nicht auf Google Chrome festgelegt. Die Discovery in
-[`internal/engine/doctor`](../internal/engine/doctor) findet Chrome, Chromium
+Die CDP-Engine ist nicht auf Google Chrome festgelegt. Die Discovery des
+`doctor` (`search_paths` und `discover` in
+[`extra.rs`](../crates/symbrowse-cli/src/extra.rs)) findet Chrome, Chromium
 und Edge; `executable_path` bzw. `SYMBROWSE_EXECUTABLE_PATH` überschreibt sie.
+Der Start der Engine selbst nutzt `discover_chrome_executable` in
+[`launch.rs`](../crates/symbrowse-engine-chrome/src/launch.rs)
+(Override: `SYMBROWSE_CHROME_EXECUTABLE`).
 „Chrome-only" ist damit ungenau — korrekt ist **CDP-only**.
 
 ## Warum kein zweiter Browser „einfach so"
@@ -57,8 +66,10 @@ Voraussetzungen hat:
 
 ### Gemessene Fähigkeiten
 
-Gemessen am 2026-08-27 gegen die Fixtures aus
-[`internal/testserver`](../internal/testserver), Safari 27.0
+Gemessen am 2026-08-27 gegen die Fixtures des damaligen Go-Testservers (mit der
+Go-Entfernung, #1003, aus dem Repository verschwunden; die Routen `/form`,
+`/shadow-dom`, `/iframe`, `/spa`, `/overlay` und `/static` gibt es in Rust nicht
+mehr), Safari 27.0
 (22625.1.29.11.25), macOS 27.0. Kein geschätztes Ergebnis.
 
 | Fähigkeit | Fixture | Ergebnis |
@@ -154,11 +165,10 @@ nennt die jeweilige Abhilfe, statt Apples Timeout weiterzureichen.
 
 ### Gemessene Fähigkeiten
 
-Gemessen am 2026-09-03 gegen die Fixtures aus
-[`internal/testserver`](../internal/testserver), Safari 27.0 (26A5425a),
-macOS 27.0, mit der Enumeration in
-[`probe_surface_test.go`](../internal/engine/safaribidi/probe_surface_test.go).
-Kein geschätztes Ergebnis.
+Gemessen am 2026-09-03 gegen die Fixtures des damaligen Go-Testservers (siehe
+oben), Safari 27.0 (26A5425a), macOS 27.0, mit einer Enumeration der
+Kommando-Oberfläche (Go-Test `ProbeSurface`, nicht nach Rust portiert). Kein
+geschätztes Ergebnis.
 
 | BiDi-Modul | Ergebnis |
 |---|---|
@@ -211,7 +221,10 @@ eine Durchsetzung zu suggerieren, die es nicht gibt.
 
 `safari-bidi` implementiert `InspectionEngine`, `NavigationStateProvider`,
 `NetworkPolicyReporter`, `FrameManager` und `TabManager`. Alles andere meldet
-es als nicht unterstützt. `AXTree` und `Screenshot` gehören zum
+es als nicht unterstützt (gepinnt in
+[`safari.json`](../testdata/port/engine/safari.json) und geprüft durch
+`bidi_capabilities_partition_excludes_unsupported_interactions` in
+[`bidi.rs`](../crates/symbrowse-engine-safari/tests/bidi.rs)). `AXTree` und `Screenshot` gehören zum
 Pflicht-Interface: `AXTree` wird aus der **gerenderten** DOM synthetisiert (wie
 in `static`, aber nach Skriptausführung), `Screenshot` scheitert typisiert.
 
@@ -223,19 +236,23 @@ aber einen echten Browser mit echtem Netzwerkzugang, was `static` nicht tut.
 
 ### Wann diese Messung neu zu machen ist
 
-[`probe_surface_test.go`](../internal/engine/safaribidi/probe_surface_test.go)
-enumeriert die Kommando-Oberfläche und die Event-Zustellung gegen ein echtes
-Safari:
+Die Enumeration der Kommando-Oberfläche und der Event-Zustellung gegen ein
+echtes Safari (Go-Test `ProbeSurface`) wurde nicht nach Rust portiert; eine
+Neumessung braucht heute eine ad-hoc-Probe gegen `safaridriver --bidi`. Offline
+gepinnt ist die Fähigkeitsmatrix; gegen ein echtes Safari laufen die opt-in
+Gates (aus `browse/`, nach `sudo safaridriver --enable` und mit beendetem Safari):
 
 ```text
-SYMBROWSE_SAFARI_BIDI=1 go test ./internal/engine/safaribidi -run ProbeSurface -v
+cargo test -p symbrowse-engine-safari --test bidi
+SYMBROWSE_NATIVE_TARGETS=1 cargo test -p symbrowse-engine-safari --test bidi real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate
+SYMBROWSE_E2E=1 cargo test -p symbrowse-daemon --test safari_native
 ```
 
 Wandert ein Kommando von ABSENT nach PRESENT, darf die Engine die zugehörige
-Fähigkeit melden — vorher nicht. Die Live-Tests in `live_test.go` schlagen
-absichtlich fehl, wenn Safari plötzlich einen HTTP-Status liefert: eine
-stillschweigende Verbesserung hinter einer unveränderten Matrix wäre genau die
-Art Abweichung, die dieses Dokument verhindern soll.
+Fähigkeit melden — vorher nicht — und `safari.json` samt Test ändern sich in
+derselben Änderung. Eine stillschweigende Verbesserung hinter einer
+unveränderten Matrix wäre genau die Art Abweichung, die dieses Dokument
+verhindern soll.
 
 ## Entscheidung
 

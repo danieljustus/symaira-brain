@@ -8,23 +8,35 @@
 Das Schema liegt seit der Repo-Konsolidierung im Code dieses Repos, nicht
 mehr als kopierte Datei:
 
-- [`internal/fetch/agentdom/document.go`](../internal/fetch/agentdom/document.go)
-  — JSON-Feldnamen des `Document`-Typs
-- [`internal/fetch/render/frontmatter.go`](../internal/fetch/render/frontmatter.go)
-  — YAML-Frontmatter-Schlüssel
+- [`Document` und `Meta` in `crates/symbrowse-fetch/src/render.rs`](../crates/symbrowse-fetch/src/render.rs)
+  — JSON-Feldnamen des Fetch-Pfads (`fetch_url`, `fetch_batch`)
+- `frontmatter_at` in derselben Datei — YAML-Frontmatter-Schlüssel des
+  Fetch-Pfads
+- [`Document::frontmatter` in `crates/symbrowse-cli/src/read.rs`](../crates/symbrowse-cli/src/read.rs)
+  — Frontmatter und JSON-Felder des `read`-Pfads
 
-Der Konformitätstest ist
-[`cmd/symbrowse/read_conformance_test.go`](../cmd/symbrowse/read_conformance_test.go)
-(`TestHermeticReadConformance`). Er vergleicht hermetisch gegen eine
-statische Fixture, **was beide Wege tatsächlich zurückgeben** — die
-`fetch.url`-Frame-Antwort gegen den `read`-Pfad —, nicht was die Renderer
-könnten. Genau das ist der Punkt: Ein Test, der `render.GenerateFrontmatter`
-direkt aufruft, besteht auch dann, wenn kein Aufrufer die Funktion
-verdrahtet.
+Die Tests pinnen beide Wege getrennt; ein Test, der beide Antworten gegen
+dieselbe Fixture vergleicht, wurde mit der Go-Entfernung nicht übernommen:
+
+- Fetch-Pfad:
+  [`frontmatter_and_output_budget_are_deterministic`](../crates/symbrowse-fetch/tests/static_controls.rs)
+  und
+  [`frontmatter_keeps_final_url_and_schema_type`](../crates/symbrowse-fetch/tests/pipeline_controls.rs)
+  (`cargo test -p symbrowse-fetch`).
+- Read-Pfad:
+  [`rust_cli_matches_frozen_go_cli_observations`](../crates/symbrowse-cli/tests/cli_oracle.rs)
+  vergleicht die CLI-Ausgabe (Markdown mit Frontmatter und `--json`) mit den
+  eingefrorenen Beobachtungen in
+  [`cli_oracle.json`](../crates/symbrowse-cli/tests/fixtures/cli/cli_oracle.json)
+  (`cargo test -p symbrowse-cli --test cli_oracle`).
+
+Beide laufen im Workspace `browse/`. Der Read-Test geht durch die verdrahtete
+CLI; ein Test, der nur `frontmatter_at` aufruft, besteht auch dann, wenn kein
+Aufrufer die Funktion verdrahtet.
 
 Geprüft werden Frontmatter-Schlüssel, deren Werte (`title`, `lang`,
 `schema_type`, RFC3339-`fetched_at`), die JSON-Feldnamen und der
-Markdown-Körper beider Seiten.
+Markdown-Körper.
 
 ## Frontmatter-Schlüssel (Markdown-Modus)
 
@@ -130,11 +142,18 @@ tatsächlich laufende. Das Schema ist stabil und maschinenlesbar:
 - `launch_mode` — `launch` (eigener Browserprozess) oder `attach` (Verbindung
   zu einem bestehenden DevTools-Endpoint, Issue #296).
 - `interfaces` — die implementierten optionalen Engine-Erweiterungen, aus der
-  kanonischen Liste in `internal/engine` (`OptionalInterfaceNames`).
+  kanonischen Liste `OPTIONAL_INTERFACE_NAMES` in
+  [`capabilities.rs`](../crates/symbrowse-engine/src/capabilities.rs).
 - `unsupported` — die bekannten optionalen Erweiterungen, die die Engine
   nicht unterstützt. Ein Aufruf einer nicht unterstützten Operation schlägt
-  mit dem typisierten `UnsupportedOperationError` fehl — nie mit einem
+  mit dem typisierten
+  [`UnsupportedOperation`](../crates/symbrowse-engine-chrome/src/full.rs) fehl — nie mit einem
   plausibel aussehenden Teilergebnis.
 
-`symbrowse doctor` meldet denselben Deskriptor im Check `engine`, damit
-Diagnose und Laufzeit nie über die Engine-Grenze auseinanderliegen.
+`symbrowse doctor` meldet den Deskriptor im Check `engine`
+(`doctor_inner` in [`extra.rs`](../crates/symbrowse-cli/src/extra.rs)), damit
+Diagnose und Laufzeit nie über die Engine-Grenze auseinanderliegen. Der Frame
+`engine.info` selbst ist im Rust-Quellcode nicht implementiert (kein Treffer
+unter `browse/crates/*/src`); belegt ist er nur durch die eingefrorene
+Daemon-Beobachtung in
+[`go_chrome.json`](../crates/symbrowse-daemon/tests/fixtures/daemon_oracle/go_chrome.json).

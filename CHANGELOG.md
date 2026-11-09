@@ -25,6 +25,9 @@ the [Unreleased] section is moved into a dated version section.
   (re-hashing it) and copies only the rest, so `symbrain version`, `doctor` and
   `memory ...` no longer restart a 300 MB copy each time. The manifest is still
   verified before the marker is written (#1020).
+- `browse/docs/engines.md` and `browse/docs/output-schema.md` no longer link to
+  removed Go sources; every claim now points to the Rust crates, tests and
+  `cargo test` commands under `browse/` (#1016).
 
 ## [v0.13.1] - 2026-11-09
 
