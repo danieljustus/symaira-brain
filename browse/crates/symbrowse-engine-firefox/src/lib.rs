@@ -208,15 +208,15 @@ impl FirefoxSession {
             .and_then(Value::as_str)
             .unwrap_or_default()
             .to_owned();
-        let tree = session
+        // Own a fresh content tab. The first context of a new profile can be a
+        // privileged first-run page, where Firefox rejects script evaluation
+        // ("System access is required").
+        let created = session
             .bidi
-            .command("browsingContext.getTree", json!({}), limit)
+            .command("browsingContext.create", json!({"type":"tab"}), limit)
             .await?;
-        session.context = tree
-            .get("contexts")
-            .and_then(Value::as_array)
-            .and_then(|v| v.first())
-            .and_then(|v| v.get("context"))
+        session.context = created
+            .get("context")
             .and_then(Value::as_str)
             .ok_or_else(|| FirefoxError::Driver("Firefox returned no browsing context".into()))?
             .into();

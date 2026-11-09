@@ -1,0 +1,83 @@
+name: Browse Firefox native gate
+
+# RUST-013 (#777): the owned Firefox WebDriver BiDi adapter must pass against a
+# real Firefox before it is advertised on a platform. No geckodriver involved.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browse-firefox-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  firefox-native:
+    name: Firefox BiDi native gate (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux-amd64
+          - runner: macos-15
+            platform: darwin-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Locate the runner Firefox
+        id: firefox
+        run: |
+          set -euo pipefail
+          if [[ "$RUNNER_OS" == macOS ]]; then
+            executable=/Applications/Firefox.app/Contents/MacOS/firefox
+          else
+            executable=$(command -v firefox)
+          fi
+          "$executable" --version
+          echo "executable=$executable" >> "$GITHUB_OUTPUT"
+
+      - name: Firefox adapter unit and contract tests
+        run: cargo test --locked -p symbrowse-engine-firefox
+
+      - name: Run the native BiDi gate against a loopback fixture
+        env:
+          SYMBROWSE_E2E: '1'
+          SYMBROWSE_FIREFOX_EXECUTABLE: ${{ steps.firefox.outputs.executable }}
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/firefox-fixture"
+          mkdir -p "$fixture"
+          printf '<title>symbrowse firefox gate</title><p id="ready">ok</p>' > "$fixture/index.html"
+          python3 -m http.server 38917 --bind 127.0.0.1 --directory "$fixture" &
+          server=$!
+          trap 'kill "$server"' EXIT
+          for _ in $(seq 50); do curl -fsS http://127.0.0.1:38917/index.html >/dev/null && break; sleep 0.1; done
+          # Fresh-session evaluation on the owned blank tab, then a navigation.
+          cargo run --locked -p symbrowse-engine-firefox --bin symbrowse-firefox-spike 2>&1 \
+            | tee "$RUNNER_TEMP/browse-firefox-native.log"
+          grep -F '"value":"about:blank"' "$RUNNER_TEMP/browse-firefox-native.log"
+          export SYMBROWSE_FIREFOX_FIXTURE_URL=http://127.0.0.1:38917/index.html
+          cargo run --locked -p symbrowse-engine-firefox --bin symbrowse-firefox-spike 2>&1 \
+            | tee -a "$RUNNER_TEMP/browse-firefox-native.log"
+          grep -F 'Firefox navigation settled at http://127.0.0.1:38917/index.html' "$RUNNER_TEMP/browse-firefox-native.log"
+          grep -F '"value":"complete"' "$RUNNER_TEMP/browse-firefox-native.log"
+
+      - name: Upload native Firefox receipt
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browse-firefox-native-${{ matrix.platform }}-${{ github.sha }}
+          path: ${{ runner.temp }}/browse-firefox-native.log
+          if-no-files-found: error
+          retention-days: 14

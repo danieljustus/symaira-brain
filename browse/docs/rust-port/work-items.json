@@ -314,7 +314,7 @@
         "python3 port/harness/run.py --suite safari --native macos"
       ],
       "stop_rule": "Keep Safari cfg-gated; stop if the port adds a privilege or installation contract.",
-      "remaining_scope": "2026-11-08 macOS arm64: Safari attach/BiDi and Firefox unit and contract tests pass. Native gates not run: Firefox needs geckodriver (absent) and Safari needs Remote Automation on the user's real Safari, which this worker must not drive. Item stays in_progress; adapters must not be advertised on a platform until its native gate passes."
+      "remaining_scope": "2026-11-08 macOS arm64: Safari attach/BiDi and Firefox unit and contract tests pass. Safari needs Remote Automation on the user's real Safari, which an agent must not drive (maintainer gate). 2026-11-09 Firefox native gate (no geckodriver; the adapter launches Firefox with BiDi directly): the adapter now owns a fresh browsingContext.create tab because Firefox 159 rejects evaluation in the first context of a new profile (\"System access is required\"); the symbrowse-firefox-spike gate passes on macOS arm64 against Firefox 159.0.1 for a fresh blank tab and a loopback http navigation. .github/workflows/browse-firefox-native.yml runs the same gate on Linux amd64 and macOS; its receipt is pending. Item stays in_progress; adapters must not be advertised on a platform until its native gate passes."
     },
     {
       "id": "RUST-014",
