@@ -9,6 +9,8 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.13.1] - 2026-11-09
+
 ### Changed
 - macOS app rebuilt on the symaira-appkit 0.18.1 workspace: `SymairaWorkspace`
   shell with seven destinations (Overview, Harnesses, Profiles, Memory, Skills,
