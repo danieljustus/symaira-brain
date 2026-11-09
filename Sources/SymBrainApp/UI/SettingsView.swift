@@ -76,7 +76,7 @@ struct SettingsView: View {
             }
         }
         .padding(SymairaSpacing.xLarge)
-        .glassCard()
+        .symairaCard()
     }
 
     // MARK: - Version
@@ -94,7 +94,7 @@ struct SettingsView: View {
                     tone: .critical
                 )
                 Button(action: { Task { await vm.refresh() } }) {
-                    Label("Retry", systemImage: "arrow.clockwise")
+                    Label("Retry", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Retry")
@@ -134,7 +134,7 @@ struct SettingsView: View {
             }
         }
         .padding(SymairaSpacing.xLarge)
-        .glassCard()
+        .symairaCard()
     }
 
     // MARK: - Update
@@ -163,7 +163,7 @@ struct SettingsView: View {
                 SymairaLoadingState("Checking for updates…")
             } else {
                 Button(action: { Task { await vm.checkForUpdate() } }) {
-                    Label("Check for Updates", systemImage: "arrow.up.circle")
+                    Label("Check for Updates", symairaIcon: .search)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Check for Updates")
@@ -173,13 +173,13 @@ struct SettingsView: View {
             // Install button when update is available
             if case .available(let release) = vm.updateStatus {
                 Button(action: { Task { await vm.installUpdate(release) } }) {
-                    Label("Install \(release.tagName)", systemImage: "arrow.down.circle")
+                    Label("Install \(release.tagName)", symairaIcon: .download)
                 }
                 .symairaButtonStyle(.primary)
                 .accessibilityLabel("Install \(release.tagName)")
 
                 Button(action: { vm.skipUpdate(release) }) {
-                    Label("Skip This Version", systemImage: "xmark.circle")
+                    Label("Skip This Version", symairaIcon: .close)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Skip This Version")
@@ -202,7 +202,7 @@ struct SettingsView: View {
             }
         }
         .padding(SymairaSpacing.xLarge)
-        .glassCard()
+        .symairaCard()
     }
 
     // MARK: - Tone helper
@@ -236,7 +236,7 @@ struct SettingsView: View {
                 .italic()
         }
         .padding(SymairaSpacing.xLarge)
-        .glassCard()
+        .symairaCard()
     }
 
     // MARK: - Helpers

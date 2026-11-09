@@ -26,7 +26,7 @@ struct ProfilesView: View {
                     VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                         SymairaNotice(title: "Error", message: error, tone: .critical)
                         Button(action: { Task { await vm.loadProfiles() } }) {
-                            Label("Retry", systemImage: "arrow.clockwise")
+                            Label("Retry", symairaIcon: .refresh)
                         }
                         .symairaButtonStyle(.primary)
                         .accessibilityLabel("Retry loading profiles")
@@ -78,7 +78,7 @@ struct ProfilesView: View {
             }
             Spacer()
             Button(action: { showNewProfileSheet = true }) {
-                Label("New Profile", systemImage: "plus")
+                Label("New Profile", symairaIcon: .add)
             }
             .symairaButtonStyle(.primary)
             .accessibilityLabel("New profile")
@@ -119,7 +119,7 @@ struct ProfilesView: View {
                 Task { await vm.selectProfile(profile.name) }
             }) {
                 HStack {
-                    Image(systemName: vm.selectedProfile?.name == profile.name ? "chevron.down" : "chevron.right")
+                    SymairaIconView(vm.selectedProfile?.name == profile.name ? .collapse : .expand)
                         .font(SymairaTypography.caption)
                         .foregroundStyle(SymairaTheme.textSecondary)
                     VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
@@ -154,14 +154,14 @@ struct ProfilesView: View {
                 profileToDelete = profile.name
                 showDeleteConfirmation = true
             }) {
-                Image(systemName: "trash")
+                SymairaIconView(.delete)
                     .foregroundStyle(SymairaTheme.critical)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Delete profile \(profile.name)")
         }
         .padding(SymairaSpacing.medium)
-        .glassCard()
+        .symairaCard()
 
         // Detail pane inline
         if vm.selectedProfile?.name == profile.name, let detail = vm.selectedProfile {
@@ -216,7 +216,7 @@ struct ProfilesView: View {
                     }
                 }
                 .padding(SymairaSpacing.medium)
-                .glassCard()
+                .symairaCard()
             }
         }
         .padding(.leading, SymairaSpacing.xLarge)

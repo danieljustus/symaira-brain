@@ -551,6 +551,9 @@ jobs:
             *) echo "::error::Expected Xcode 26 or newer, got: $XCODE_VERSION"; exit 1 ;;
           esac
 
+      - name: Install Metal Toolchain
+        run: xcodebuild -downloadComponent MetalToolchain
+
       - name: Install XcodeGen
         run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
 

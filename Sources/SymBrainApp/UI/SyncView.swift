@@ -40,7 +40,7 @@ struct SyncView: View {
                     skillsSection(summary)
                 } else {
                     SymairaEmptyState(
-                        systemImage: "arrow.triangle.2.circlepath",
+                        icon: .sync,
                         title: "Sync Ready",
                         message: "Run sync to propagate profile and skill changes to your installed harnesses. Instruction files are written relative to the working directory: CLAUDE.md for Claude, .cursor/rules/symbrain.mdc for Cursor, GEMINI.md for Gemini. Harnesses without an instruction adapter (e.g., Codex) are skipped. Enable Dry Run to preview without writing."
                     )
@@ -112,7 +112,7 @@ struct SyncView: View {
                                 .scaleEffect(0.7)
                                 .frame(width: 14, height: 14)
                         } else {
-                            Image(systemName: "arrow.triangle.2.circlepath")
+                            SymairaIconView(.sync)
                         }
                         Text("Sync Now")
                     }
@@ -133,7 +133,7 @@ struct SyncView: View {
             }
         }
         .padding(SymairaSpacing.medium)
-        .glassCard()
+        .symairaCard()
     }
 
     // MARK: - Targets
@@ -161,7 +161,7 @@ struct SyncView: View {
             }
         }
         .padding(SymairaSpacing.xLarge)
-        .glassCard()
+        .symairaCard()
     }
 
     private func targetRow(_ target: SyncTargetStatus) -> some View {
@@ -206,7 +206,7 @@ struct SyncView: View {
                     }
                 }
                 .padding(SymairaSpacing.xLarge)
-                .glassCard()
+                .symairaCard()
             }
         }
     }

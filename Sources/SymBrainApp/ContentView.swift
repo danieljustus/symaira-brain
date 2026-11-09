@@ -2,6 +2,17 @@ import SwiftUI
 import SymairaTheme
 import SymBrainCore
 
+private struct DestinationFocusKey: FocusedValueKey {
+    typealias Value = Binding<ContentView.DisplayMode>
+}
+
+extension FocusedValues {
+    var brainDestination: Binding<ContentView.DisplayMode>? {
+        get { self[DestinationFocusKey.self] }
+        set { self[DestinationFocusKey.self] = newValue }
+    }
+}
+
 struct ContentView: View {
     let client: SymBrainClient
 
@@ -20,19 +31,19 @@ struct ContentView: View {
         case skills = "Skills"
         case settings = "Settings"
 
-        var systemImage: String {
+        var icon: SymairaIcon? {
             switch self {
-            case .dashboard: "gauge.with.dots.needle.33percent"
-            case .profiles: "person.crop.rectangle.stack"
-            case .harnesses: "terminal"
-            case .sync: "arrow.triangle.2.circlepath"
-            case .audit: "doc.text.magnifyingglass"
-            case .memory: "brain"
-            case .vault: "lock.square.stack"
-            case .operate: "hand.tap"
-            case .scope: "network"
-            case .skills: "square.stack.3d.up"
-            case .settings: "gearshape"
+            case .dashboard: .dashboard
+            case .profiles: .stack
+            case .harnesses: .terminal
+            case .sync: .sync
+            case .audit: .documentSearch
+            case .memory: .productBrain
+            case .vault: .productVault
+            case .operate: nil
+            case .scope: .network
+            case .skills: .stack
+            case .settings: .settings
             }
         }
 
@@ -99,14 +110,19 @@ struct ContentView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
+        .focusedSceneValue(\.brainDestination, $displayMode)
         .frame(minWidth: 900, minHeight: 580)
         .background(WindowMinSizeConfigurator(minSize: CGSize(width: 900, height: 580)))
     }
 
     private func sidebarRow(_ mode: DisplayMode) -> some View {
         HStack {
-            Image(systemName: mode.systemImage)
-                .frame(width: 20)
+            if let icon = mode.icon {
+                SymairaIconView(icon)
+            } else {
+                Image(systemName: "hand.tap")
+                    .frame(width: 20)
+            }
             Text(mode.rawValue)
         }
         .tag(mode)
@@ -118,10 +134,12 @@ struct ContentView: View {
 /// Full-window screen wrapper with backdrop and padding.
 struct SymairaScreen<Content: View>: View {
     @ViewBuilder let content: Content
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
-            SymairaBackdrop(gridStyle: .dots)
+            SymairaTheme.backgroundPrimary(for: colorScheme)
+                .ignoresSafeArea()
             content
                 .padding(SymairaSpacing.large)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

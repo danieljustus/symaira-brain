@@ -43,7 +43,7 @@ struct MemoryView: View {
                 VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                     SymairaNotice(title: "Memory unavailable", message: message, tone: .critical)
                     Button(action: { Task { await vm.refresh() } }) {
-                        Label("Try Again", systemImage: "arrow.clockwise")
+                        Label("Try Again", symairaIcon: .refresh)
                     }
                     .symairaButtonStyle(.primary)
                     .accessibilityLabel("Try Again")
@@ -120,14 +120,14 @@ struct MemoryView: View {
             }
 
             Button(action: { showAddSheet = true }) {
-                Label("New Memory", systemImage: "plus")
+                Label("New Memory", symairaIcon: .add)
             }
             .symairaButtonStyle(.primary)
             .accessibilityLabel("New Memory")
             .disabled(vm.availability != .ready)
 
             Button(action: { Task { await vm.refresh() } }) {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label("Refresh", symairaIcon: .refresh)
             }
             .symairaButtonStyle(.secondary)
             .accessibilityLabel("Refresh")
@@ -136,7 +136,7 @@ struct MemoryView: View {
 
     private var missingRuntimeSection: some View {
         SymairaEmptyState(
-            systemImage: "brain",
+            icon: .productBrain,
             title: "SymBrain CLI not found",
             message: "Memory runs inside symbrain. Install the symbrain CLI, then reload this screen."
         ) {
@@ -149,13 +149,13 @@ struct MemoryView: View {
                     Button {
                         vm.copyToPasteboard(vm.homebrewCommand, label: "Install command")
                     } label: {
-                        Image(systemName: "doc.on.doc")
+                        SymairaIconView(.copy)
                     }
                     .buttonStyle(.plain)
                     .help("Copy command")
                 }
                 Button(action: { Task { await vm.refresh() } }) {
-                    Label("Check Again", systemImage: "arrow.clockwise")
+                    Label("Check Again", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.primary)
                 .accessibilityLabel("Check Again")
@@ -184,7 +184,7 @@ struct MemoryView: View {
                 }
 
                 Button(action: { Task { await vm.loadMemories() } }) {
-                    Label("Search", systemImage: "magnifyingglass")
+                    Label("Search", symairaIcon: .search)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Search")
@@ -194,7 +194,7 @@ struct MemoryView: View {
                 SymairaLoadingState("Loading memories…")
             } else if vm.memories.isEmpty {
                 SymairaEmptyState(
-                    systemImage: "tray",
+                    icon: .inbox,
                     title: "No Memories",
                     message: "Nothing stored for this scope yet. Add one, or let an agent write "
                         + "through the memory MCP server."
@@ -311,12 +311,12 @@ struct MemoryView: View {
 
                     HStack {
                         Button(action: { vm.copyToPasteboard(memory.content, label: "Memory") }) {
-                            Label("Copy", systemImage: "doc.on.doc")
+                            Label("Copy", symairaIcon: .copy)
                         }
                         .symairaButtonStyle(.secondary)
                         .accessibilityLabel("Copy")
                         Button(role: .destructive, action: { memoryToDelete = memory }) {
-                            Label("Delete", systemImage: "trash")
+                            Label("Delete", symairaIcon: .delete)
                         }
                         .symairaButtonStyle(.secondary)
                         .accessibilityLabel("Delete")
@@ -329,7 +329,7 @@ struct MemoryView: View {
             .frame(minWidth: 300)
         } else {
             SymairaEmptyState(
-                systemImage: "sidebar.right",
+                icon: .sidebar,
                 title: "No Memory Selected",
                 message: "Select an entry to see its metadata and provenance."
             )
@@ -343,7 +343,7 @@ struct MemoryView: View {
         Group {
             if vm.rules.isEmpty {
                 SymairaEmptyState(
-                    systemImage: "list.bullet.rectangle",
+                    icon: .list,
                     title: "No Rules",
                     message: "Procedural rules stored in the memory core appear here."
                 )
@@ -423,7 +423,7 @@ struct MemoryView: View {
                 }
             } else {
                 SymairaEmptyState(
-                    systemImage: "chart.bar.doc.horizontal",
+                    icon: .chart,
                     title: "No Queries Logged",
                     message: "The memory query log records every MCP retrieval. It fills up once "
                         + "an agent searches the store."
@@ -447,7 +447,7 @@ struct MemoryView: View {
     private var healthSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Button(action: { Task { await vm.runDoctor() } }) {
-                Label("Run symbrain doctor", systemImage: "stethoscope")
+                Label("Run symbrain doctor", symairaIcon: .diagnose)
             }
             .symairaButtonStyle(.primary)
             .accessibilityLabel("Run symbrain doctor")
@@ -469,7 +469,7 @@ struct MemoryView: View {
                 )
             } else {
                 SymairaEmptyState(
-                    systemImage: "stethoscope",
+                    icon: .diagnose,
                     title: "No Report Yet",
                     message: "Run the doctor to check the database, embedding backend and "
                         + "configuration."
@@ -580,7 +580,7 @@ struct ModuleActivityTable: View {
                     .foregroundStyle(SymairaTheme.textSecondary)
                 Spacer()
                 Button(action: onRefresh) {
-                    Label("Reload", systemImage: "arrow.clockwise")
+                    Label("Reload", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Reload")
@@ -588,7 +588,7 @@ struct ModuleActivityTable: View {
 
             if entries.isEmpty {
                 SymairaEmptyState(
-                    systemImage: "doc.text.magnifyingglass",
+                    icon: .documentSearch,
                     title: "No Broker Activity",
                     message: emptyMessage
                 )

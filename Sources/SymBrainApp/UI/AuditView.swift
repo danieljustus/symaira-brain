@@ -20,7 +20,7 @@ struct AuditView: View {
                 SymairaLoadingState("Loading audit log…")
             } else if vm.entries.isEmpty {
                 SymairaEmptyState(
-                    systemImage: "doc.text.magnifyingglass",
+                    icon: .documentSearch,
                     title: "No Audit Entries",
                     message: "Audit entries will appear here once tool calls are routed through symbrain."
                 )
@@ -62,7 +62,7 @@ struct AuditView: View {
             }
 
             Button(action: { Task { await vm.refresh() } }) {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label("Refresh", symairaIcon: .refresh)
             }
             .symairaButtonStyle(.secondary)
             .accessibilityLabel("Refresh")

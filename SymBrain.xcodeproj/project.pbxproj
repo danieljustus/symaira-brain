@@ -944,7 +944,7 @@
 			repositoryURL = "https://github.com/danieljustus/symaira-appkit.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.14.2;
+				version = 0.18.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

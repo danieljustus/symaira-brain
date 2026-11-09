@@ -39,7 +39,7 @@ struct VaultView: View {
                 VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                     SymairaNotice(title: "Vault unavailable", message: message, tone: .critical)
                     Button(action: { Task { await vm.refresh() } }) {
-                        Label("Try Again", systemImage: "arrow.clockwise")
+                        Label("Try Again", symairaIcon: .refresh)
                     }
                     .symairaButtonStyle(.primary)
                     .accessibilityLabel("Try Again")
@@ -98,14 +98,14 @@ struct VaultView: View {
 
             if vm.isReady {
                 Button(action: { Task { await vm.lock() } }) {
-                    Label("Lock", systemImage: "lock.fill")
+                    Label("Lock", symairaIcon: .lock)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Lock")
             }
 
             Button(action: { Task { await vm.refresh() } }) {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label("Refresh", symairaIcon: .refresh)
             }
             .symairaButtonStyle(.secondary)
             .accessibilityLabel("Refresh")
@@ -135,7 +135,7 @@ struct VaultView: View {
 
     private var missingRuntimeSection: some View {
         SymairaEmptyState(
-            systemImage: "lock.square.stack",
+            icon: .productVault,
             title: "symvault not found",
             message: "Install the Symaira Vault runtime, then reload this screen."
         ) {
@@ -148,13 +148,13 @@ struct VaultView: View {
                     Button {
                         vm.copyInstallCommand()
                     } label: {
-                        Image(systemName: "doc.on.doc")
+                        SymairaIconView(.copy)
                     }
                     .buttonStyle(.plain)
                     .help("Copy command")
                 }
                 Button(action: { Task { await vm.refresh() } }) {
-                    Label("Check Again", systemImage: "arrow.clockwise")
+                    Label("Check Again", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.primary)
                 .accessibilityLabel("Check Again")
@@ -189,7 +189,7 @@ struct VaultView: View {
                 .frame(width: 180)
 
                 Button(action: { Task { await vm.unlock() } }) {
-                    Label("Unlock", systemImage: "lock.open")
+                    Label("Unlock", symairaIcon: .unlock)
                 }
                 .symairaButtonStyle(.primary)
                 .accessibilityLabel("Unlock")
@@ -234,12 +234,12 @@ struct VaultView: View {
                     Button {
                         Task { await vm.generatePassword(length: passwordLength, symbols: passwordSymbols) }
                     } label: {
-                        Label("Generate", systemImage: "wand.and.stars")
+                        Label("Generate", symairaIcon: .magic)
                     }
                     .symairaButtonStyle(.secondary)
                     .disabled(vm.isGenerating)
                     Button(action: { Task { await vm.createEntry() } }) {
-                        Label("Create", systemImage: "plus")
+                        Label("Create", symairaIcon: .add)
                     }
                     .symairaButtonStyle(.primary)
                     .accessibilityLabel("Create secret")
@@ -275,12 +275,12 @@ struct VaultView: View {
                         TextField("URL", text: $vm.editURL).textFieldStyle(.roundedBorder)
                         TextField("Notes", text: $vm.editNotes).textFieldStyle(.roundedBorder)
                         Button(action: { Task { await vm.setSelectedEntry() } }) {
-                            Label("Update Selected", systemImage: "pencil")
+                            Label("Update Selected", symairaIcon: .edit)
                         }
                         .symairaButtonStyle(.secondary)
                         .disabled(vm.isEditing)
                         Button(role: .destructive) { deletePath = path } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label("Delete", symairaIcon: .delete)
                         }
                         .disabled(vm.isDeleting)
                     }
@@ -298,7 +298,7 @@ struct VaultView: View {
                     .textFieldStyle(.roundedBorder)
                     .onSubmit { Task { await vm.loadEntries() } }
                 Button(action: { Task { await vm.loadEntries() } }) {
-                    Label("Search", systemImage: "magnifyingglass")
+                    Label("Search", symairaIcon: .search)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Search")
@@ -308,7 +308,7 @@ struct VaultView: View {
                 SymairaLoadingState("Loading entries…")
             } else if vm.entries.isEmpty {
                 SymairaEmptyState(
-                    systemImage: "key",
+                    icon: .key,
                     title: "No Entries",
                     message: "This vault has no entries matching the current filter."
                 )
@@ -405,7 +405,7 @@ struct VaultView: View {
             selectedSummary(summary)
         } else {
             SymairaEmptyState(
-                systemImage: "sidebar.right",
+                icon: .sidebar,
                 title: "No Entry Selected",
                 message: "Select an entry to view its fields. Secrets stay masked until revealed."
             )
@@ -430,7 +430,7 @@ struct VaultView: View {
             if let hasValue = summary.hasValue { metadataRow("Has value", hasValue ? "Yes" : "No") }
             if let autoRotate = summary.autoRotate { metadataRow("Auto-rotate", autoRotate ? "Enabled" : "Disabled") }
             Button { Task { await vm.revealSelectedEntry() } } label: {
-                Label("Reveal Entry", systemImage: "eye")
+                Label("Reveal Entry", symairaIcon: .visible)
             }
             .symairaButtonStyle(.primary)
             .disabled(!vm.isReady)
@@ -481,7 +481,7 @@ struct VaultView: View {
                 Button {
                     vm.toggleReveal(field: field.key)
                 } label: {
-                    Image(systemName: revealed ? "eye.slash" : "eye")
+                    SymairaIconView(revealed ? .hidden : .visible)
                 }
                 .buttonStyle(.plain)
                 .help(revealed ? "Hide value" : "Reveal value")
@@ -490,7 +490,7 @@ struct VaultView: View {
             Button {
                 vm.copyField(field.key)
             } label: {
-                Image(systemName: "doc.on.doc")
+                SymairaIconView(.copy)
             }
             .buttonStyle(.plain)
             .disabled(field.isSensitive && !revealed)
@@ -539,7 +539,7 @@ struct VaultView: View {
                 Text("Pending approval requests").font(SymairaTypography.subheading)
                 Spacer()
                 Button { Task { await vm.loadApprovals() } } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
+                    Label("Refresh", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.secondary)
                 .disabled(vm.isLoadingApprovals)
@@ -547,7 +547,7 @@ struct VaultView: View {
             if vm.isLoadingApprovals {
                 SymairaLoadingState("Loading approval requests…")
             } else if vm.approvalRequests.isEmpty {
-                SymairaEmptyState(systemImage: "checkmark.shield", title: "No pending approvals", message: "The vault service has no pending human approval requests.")
+                SymairaEmptyState(icon: .shieldCheck, title: "No pending approvals", message: "The vault service has no pending human approval requests.")
             } else {
                 ForEach(vm.approvalRequests) { request in
                     VStack(alignment: .leading, spacing: SymairaSpacing.small) {

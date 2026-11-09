@@ -74,7 +74,7 @@ struct OperateView: View {
             }
 
             Button(action: { Task { await vm.refresh() } }) {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label("Refresh", symairaIcon: .refresh)
             }
             .symairaButtonStyle(.secondary)
             .accessibilityLabel("Refresh")
@@ -137,7 +137,7 @@ struct OperateView: View {
                     Button(action: chooseSourceCheckout) {
                         Label(
                             vm.sourceRoot == nil ? "Choose Brain Source Checkout…" : "Change Brain Source Checkout…",
-                            systemImage: "folder"
+                            symairaIcon: .folder
                         )
                     }
                     .symairaButtonStyle(.secondary)
@@ -145,7 +145,7 @@ struct OperateView: View {
 
                     if let sourceRoot = vm.sourceRoot {
                         Button(action: { Task { await vm.buildAndInstall(sourceRoot: sourceRoot) } }) {
-                            Label("Build & Install Now", systemImage: "hammer")
+                            Label("Build & Install Now", symairaIcon: .tools)
                         }
                         .symairaButtonStyle(.primary)
                         .accessibilityLabel("Build and Install Now")
@@ -153,7 +153,7 @@ struct OperateView: View {
                 }
 
                 Button(action: { Task { await vm.refresh() } }) {
-                    Label("Check Again", systemImage: "arrow.clockwise")
+                    Label("Check Again", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Check Again")
@@ -198,7 +198,7 @@ struct OperateView: View {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(command, forType: .string)
             } label: {
-                Image(systemName: "doc.on.doc")
+                SymairaIconView(.copy)
             }
             .buttonStyle(.plain)
             .help("Copy command")
@@ -261,7 +261,7 @@ struct OperateView: View {
             .font(SymairaTypography.caption)
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private var profileSection: some View {
@@ -282,7 +282,7 @@ struct OperateView: View {
             }
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private var versionSection: some View {
@@ -291,7 +291,7 @@ struct OperateView: View {
                 Text("Version").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.checkVersion() } }) {
-                    Label("Check for Updates", systemImage: "network")
+                    Label("Check for Updates", symairaIcon: .network)
                 }
                 .symairaButtonStyle(.secondary)
                 .disabled(vm.isCheckingVersion)
@@ -319,7 +319,7 @@ struct OperateView: View {
             }
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private var doctorSection: some View {
@@ -328,7 +328,7 @@ struct OperateView: View {
                 Text("Health").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.runDoctor() } }) {
-                    Label("Run Doctor", systemImage: "stethoscope")
+                    Label("Run Doctor", symairaIcon: .diagnose)
                 }
                 .symairaButtonStyle(.secondary)
                 .disabled(vm.isRunningDoctor)
@@ -358,7 +358,7 @@ struct OperateView: View {
             }
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private func permissionBadge(_ name: String, granted: Bool) -> some View {

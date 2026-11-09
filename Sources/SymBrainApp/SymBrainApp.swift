@@ -25,6 +25,7 @@ final class ClientHolder: ObservableObject {
 
 @main
 struct SymBrainApp: App {
+    @FocusedValue(\.brainDestination) private var destination
     @AppStorage("binaryPathOverride") private var binaryPathOverride = ""
 
     @StateObject private var clientHolder: ClientHolder
@@ -51,6 +52,19 @@ struct SymBrainApp: App {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 1024, height: 680)
+        .commands {
+            if let destination {
+                SymairaCommands(
+                    destinations: ContentView.DisplayMode.allCases.map { (value: $0, label: $0.rawValue) },
+                    selection: destination
+                )
+            }
+        }
+        SymairaSettingsScene {
+            SettingsView(client: clientHolder.client)
+                .frame(minWidth: 600, minHeight: 500)
+                .environmentObject(clientHolder)
+        }
     }
 
     // MARK: - Launch auto-update check

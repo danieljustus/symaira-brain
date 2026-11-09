@@ -74,7 +74,7 @@ struct ScopeView: View {
             }
 
             Button(action: { Task { await vm.refresh() } }) {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label("Refresh", symairaIcon: .refresh)
             }
             .symairaButtonStyle(.secondary)
             .accessibilityLabel("Refresh")
@@ -104,7 +104,7 @@ struct ScopeView: View {
 
     private var disabledSection: some View {
         SymairaEmptyState(
-            systemImage: "network",
+            icon: .network,
             title: "Scope is disabled",
             message: "This module is off in symbrain's global config, so Brain does not manage a symscope binary for it. Enabling it does not by itself expose it to any profile."
         ) {
@@ -116,7 +116,7 @@ struct ScopeView: View {
 
     private var missingBinarySection: some View {
         SymairaEmptyState(
-            systemImage: "network",
+            icon: .network,
             title: "symscope not installed",
             message: "No managed symscope binary was found. Build it from the in-repo receiving copy, or check again if you installed it another way."
         ) {
@@ -137,7 +137,7 @@ struct ScopeView: View {
                     Button(action: chooseSourceCheckout) {
                         Label(
                             vm.sourceRoot == nil ? "Choose Brain Source Checkout…" : "Change Brain Source Checkout…",
-                            systemImage: "folder"
+                            symairaIcon: .folder
                         )
                     }
                     .symairaButtonStyle(.secondary)
@@ -145,7 +145,7 @@ struct ScopeView: View {
 
                     if let sourceRoot = vm.sourceRoot {
                         Button(action: { Task { await vm.buildAndInstall(sourceRoot: sourceRoot) } }) {
-                            Label("Build & Install Now", systemImage: "hammer")
+                            Label("Build & Install Now", symairaIcon: .tools)
                         }
                         .symairaButtonStyle(.primary)
                         .accessibilityLabel("Build and Install Now")
@@ -153,7 +153,7 @@ struct ScopeView: View {
                 }
 
                 Button(action: { Task { await vm.refresh() } }) {
-                    Label("Check Again", systemImage: "arrow.clockwise")
+                    Label("Check Again", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Check Again")
@@ -198,7 +198,7 @@ struct ScopeView: View {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(command, forType: .string)
             } label: {
-                Image(systemName: "doc.on.doc")
+                SymairaIconView(.copy)
             }
             .buttonStyle(.plain)
             .help("Copy command")
@@ -261,7 +261,7 @@ struct ScopeView: View {
             .font(SymairaTypography.caption)
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private var profileSection: some View {
@@ -282,7 +282,7 @@ struct ScopeView: View {
             }
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private var versionSection: some View {
@@ -291,7 +291,7 @@ struct ScopeView: View {
                 Text("Version").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.checkVersion() } }) {
-                    Label("Check Version", systemImage: "info.circle")
+                    Label("Check Version", symairaIcon: .info)
                 }
                 .symairaButtonStyle(.secondary)
                 .disabled(vm.isCheckingVersion)
@@ -313,7 +313,7 @@ struct ScopeView: View {
             }
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private var scanSection: some View {
@@ -322,7 +322,7 @@ struct ScopeView: View {
                 Text("Health").font(SymairaTypography.subheading)
                 Spacer()
                 Button(action: { Task { await vm.runScan() } }) {
-                    Label("Scan Now", systemImage: "magnifyingglass")
+                    Label("Scan Now", symairaIcon: .search)
                 }
                 .symairaButtonStyle(.secondary)
                 .disabled(vm.isScanning)
@@ -346,7 +346,7 @@ struct ScopeView: View {
             }
         }
         .padding(SymairaSpacing.large)
-        .glassCard()
+        .symairaCard()
     }
 
     private func countStat(_ label: String, _ value: Int) -> some View {

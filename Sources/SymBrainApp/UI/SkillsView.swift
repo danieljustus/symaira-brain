@@ -44,7 +44,7 @@ struct SkillsView: View {
                 VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                     SymairaNotice(title: "Skills unavailable", message: message, tone: .critical)
                     Button(action: { Task { await vm.refresh() } }) {
-                        Label("Try Again", systemImage: "arrow.clockwise")
+                        Label("Try Again", symairaIcon: .refresh)
                     }
                     .symairaButtonStyle(.primary)
                     .accessibilityLabel("Try Again")
@@ -106,7 +106,7 @@ struct SkillsView: View {
             }
 
             Button(action: { Task { await vm.refresh() } }) {
-                Label("Refresh", systemImage: "arrow.clockwise")
+                Label("Refresh", symairaIcon: .refresh)
             }
             .symairaButtonStyle(.secondary)
             .accessibilityLabel("Refresh")
@@ -115,7 +115,7 @@ struct SkillsView: View {
 
     private var missingRuntimeSection: some View {
         SymairaEmptyState(
-            systemImage: "square.stack.3d.up",
+            icon: .stack,
             title: "SymBrain CLI not found",
             message: "Skills run inside symbrain. Install the symbrain CLI, then reload this screen."
         ) {
@@ -128,13 +128,13 @@ struct SkillsView: View {
                     Button {
                         vm.copyToPasteboard(vm.homebrewCommand, label: "Install command")
                     } label: {
-                        Image(systemName: "doc.on.doc")
+                        SymairaIconView(.copy)
                     }
                     .buttonStyle(.plain)
                     .help("Copy command")
                 }
                 Button(action: { Task { await vm.refresh() } }) {
-                    Label("Check Again", systemImage: "arrow.clockwise")
+                    Label("Check Again", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.primary)
                 .accessibilityLabel("Check Again")
@@ -162,7 +162,7 @@ struct SkillsView: View {
                 SymairaLoadingState("Loading skill library…")
             } else if vm.skills.isEmpty {
                 SymairaEmptyState(
-                    systemImage: "square.stack.3d.up.slash",
+                    icon: .stack,
                     title: "No Skills",
                     message: "The skill library is empty, or nothing matches the search."
                 )
@@ -258,7 +258,7 @@ struct SkillsView: View {
                     }
 
                     Button(action: { vm.copyToPasteboard(skill.path, label: "Skill path") }) {
-                        Label("Copy Path", systemImage: "doc.on.doc")
+                        Label("Copy Path", symairaIcon: .copy)
                     }
                     .symairaButtonStyle(.secondary)
                     .accessibilityLabel("Copy Path")
@@ -270,7 +270,7 @@ struct SkillsView: View {
             .frame(minWidth: 320)
         } else {
             SymairaEmptyState(
-                systemImage: "sidebar.right",
+                icon: .sidebar,
                 title: "No Skill Selected",
                 message: "Select a skill to see where it lives and which harnesses have it."
             )
@@ -297,13 +297,13 @@ struct SkillsView: View {
                 Spacer()
 
                 Button(action: { Task { await vm.previewSync() } }) {
-                    Label("Preview Sync", systemImage: "eye")
+                    Label("Preview Sync", symairaIcon: .visible)
                 }
                 .symairaButtonStyle(.secondary)
                 .accessibilityLabel("Preview Sync")
 
                 Button(action: { showSyncConfirmation = true }) {
-                    Label("Sync", systemImage: "arrow.triangle.2.circlepath")
+                    Label("Sync", symairaIcon: .sync)
                 }
                 .symairaButtonStyle(.primary)
                 .accessibilityLabel("Sync")
@@ -338,7 +338,7 @@ struct SkillsView: View {
 
             if vm.statusReport?.rows.isEmpty ?? true {
                 SymairaEmptyState(
-                    systemImage: "checkmark.seal",
+                    icon: .verified,
                     title: "No Managed Installs",
                     message: "Nothing is installed into a harness for this filter yet."
                 )
@@ -418,7 +418,7 @@ struct SkillsView: View {
         Group {
             if vm.targetsReport?.rows.isEmpty ?? true {
                 SymairaEmptyState(
-                    systemImage: "desktopcomputer",
+                    icon: .device,
                     title: "No Harnesses Detected",
                     message: "No supported agent harness was found on this Mac."
                 )
@@ -487,7 +487,7 @@ struct SkillsView: View {
         Group {
             if vm.logEntries.isEmpty {
                 SymairaEmptyState(
-                    systemImage: "list.bullet.rectangle.portrait",
+                    icon: .list,
                     title: "No Operations Logged",
                     message: "Every render, install and sync the skill core performs is recorded here."
                 )
@@ -543,7 +543,7 @@ struct SkillsView: View {
     private var healthSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Button(action: { Task { await vm.runDoctor() } }) {
-                Label("Run skills doctor", systemImage: "stethoscope")
+                Label("Run skills doctor", symairaIcon: .diagnose)
             }
             .symairaButtonStyle(.primary)
             .accessibilityLabel("Run skills doctor")
@@ -582,7 +582,7 @@ struct SkillsView: View {
                 )
             } else {
                 SymairaEmptyState(
-                    systemImage: "stethoscope",
+                    icon: .diagnose,
                     title: "No Report Yet",
                     message: "Run the doctor to see the library, render and target paths."
                 )

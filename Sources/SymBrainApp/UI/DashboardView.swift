@@ -43,7 +43,7 @@ struct DashboardView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.small) {
             HStack {
-                Image(systemName: "brain")
+                SymairaIconView(.productBrain)
                     .font(SymairaTypography.display)
                     .foregroundStyle(SymairaTheme.goldPrimary)
                 Text("SymBrain")
@@ -94,7 +94,7 @@ struct DashboardView: View {
                         pasteboard.setString("brew install danieljustus/tap/symbrain", forType: .string)
                         #endif
                     }) {
-                        Label("Copy", systemImage: "doc.on.doc")
+                        Label("Copy", symairaIcon: .copy)
                     }
                     .symairaButtonStyle(.secondary)
                     .accessibilityLabel("Copy install command")
@@ -112,11 +112,11 @@ struct DashboardView: View {
                 }
             }
             .padding(SymairaSpacing.medium)
-            .glassCard()
+            .symairaCard()
 
             HStack(spacing: SymairaSpacing.medium) {
                 Button(action: { Task { await vm.refresh() } }) {
-                    Label("Retry", systemImage: "arrow.clockwise")
+                    Label("Retry", symairaIcon: .refresh)
                 }
                 .symairaButtonStyle(.primary)
                 .accessibilityLabel("Retry")
@@ -224,7 +224,7 @@ struct DashboardView: View {
                     .padding(.top, SymairaSpacing.xSmall)
 
                 Button(action: { createDirectory(status.path) }) {
-                    Label("Create Directory", systemImage: "folder.badge.plus")
+                    Label("Create Directory", symairaIcon: .folderAdd)
                         .font(SymairaTypography.caption)
                 }
                 .symairaButtonStyle(.secondary)
@@ -233,7 +233,7 @@ struct DashboardView: View {
             }
         }
         .padding(SymairaSpacing.medium)
-        .glassCard()
+        .symairaCard()
     }
 
     private func createDirectory(_ path: String) {
@@ -270,7 +270,7 @@ struct DashboardView: View {
                     Button(action: { Task { await initializeConfig() } }) {
                         Label(
                             isInitializing ? "Initializing…" : "Run symbrain init",
-                            systemImage: isInitializing ? "hourglass" : "play.fill"
+                            symairaIcon: isInitializing ? .pending : .play
                         )
                         .font(SymairaTypography.caption)
                     }
@@ -292,7 +292,7 @@ struct DashboardView: View {
             }
         }
         .padding(SymairaSpacing.medium)
-        .glassCard()
+        .symairaCard()
     }
 
     private func initializeConfig() async {
@@ -335,7 +335,7 @@ struct DashboardView: View {
             }
         }
         .padding(SymairaSpacing.medium)
-        .glassCard()
+        .symairaCard()
     }
 
     private func harnessCard(_ harness: HarnessStatus) -> some View {
@@ -367,6 +367,6 @@ struct DashboardView: View {
             }
         }
         .padding(SymairaSpacing.medium)
-        .glassCard()
+        .symairaCard()
     }
 }

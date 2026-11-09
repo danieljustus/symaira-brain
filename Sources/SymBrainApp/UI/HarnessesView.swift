@@ -46,7 +46,7 @@ struct HarnessesView: View {
                     VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
                         SymairaNotice(title: "Error", message: error, tone: .critical)
                         Button(action: { Task { await vm.refresh() } }) {
-                            Label("Retry", systemImage: "arrow.clockwise")
+                            Label("Retry", symairaIcon: .refresh)
                         }
                         .symairaButtonStyle(.primary)
                         .accessibilityLabel("Retry")
@@ -222,7 +222,7 @@ struct HarnessesView: View {
                         }
                     }
                 } label: {
-                    Label("Install", systemImage: "arrow.down.to.line")
+                    Label("Install", symairaIcon: .download)
                         .font(SymairaTypography.caption)
                 }
                 // #151: bordered style with intrinsic width so the hit area is
@@ -240,7 +240,7 @@ struct HarnessesView: View {
                     // sheet's profile picker is shown (#73).
                     dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: true)
                 }) {
-                    Label("Dry Run", systemImage: "doc.text.magnifyingglass")
+                    Label("Dry Run", symairaIcon: .documentSearch)
                         .font(SymairaTypography.caption)
                 }
                 .buttonStyle(.plain)
@@ -253,7 +253,7 @@ struct HarnessesView: View {
                     Button(action: {
                         dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: false)
                     }) {
-                        Label("Dry Run", systemImage: "doc.text.magnifyingglass")
+                        Label("Dry Run", symairaIcon: .documentSearch)
                             .font(SymairaTypography.caption)
                     }
                     .buttonStyle(.plain)
@@ -265,7 +265,7 @@ struct HarnessesView: View {
                     Button(action: {
                         pendingUninstall = UninstallConfirmation(harness: name)
                     }) {
-                        Label("Uninstall", systemImage: "arrow.up.from.line")
+                        Label("Uninstall", symairaIcon: .upload)
                             .font(SymairaTypography.caption)
                     }
                     .buttonStyle(.plain)
@@ -276,7 +276,7 @@ struct HarnessesView: View {
             .frame(width: 380, alignment: .trailing)
         }
         .padding(SymairaSpacing.medium)
-        .glassCard()
+        .symairaCard()
     }
 }
 
@@ -397,7 +397,7 @@ struct DryRunSheet: View {
                         .foregroundStyle(SymairaTheme.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(SymairaSpacing.medium)
-                        .glassCard()
+                        .symairaCard()
                 }
 
                 Button("Done") { dismiss() }
