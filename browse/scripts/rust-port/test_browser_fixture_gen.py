@@ -49,6 +49,32 @@ class SealedRecordingTest(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "unregistered or missing"):
             self.verify()
 
+    def test_differently_named_recording_fails(self):
+        (self.dir / "extra-recording.json").write_text("{}")
+        with self.assertRaisesRegex(SystemExit, "unregistered or missing"):
+            self.verify()
+
+    def test_nested_recording_fails(self):
+        (self.dir / "nested").mkdir()
+        (self.dir / "nested" / "chrome-full.json").write_text("{}")
+        with self.assertRaisesRegex(SystemExit, "unregistered or missing"):
+            self.verify("safari")
+
+    def test_symlinked_recordings_fail(self):
+        outside = Path(self.temp.name + "-outside")
+        outside.mkdir()
+        self.addCleanup(shutil.rmtree, outside)
+        (outside / "unregistered.json").write_text("{}")
+        (self.dir / "linked-dir").symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(SystemExit, "symlink"):
+            self.verify()
+        (self.dir / "linked-dir").unlink()
+        moved = outside / "chrome-full.json"
+        (self.dir / "chrome-full.json").rename(moved)
+        (self.dir / "chrome-full.json").symlink_to(moved)
+        with self.assertRaisesRegex(SystemExit, "symlink"):
+            self.verify()
+
     def test_missing_recording_fails(self):
         (self.dir / "safari.json").unlink()
         with self.assertRaisesRegex(SystemExit, "unregistered or missing"):

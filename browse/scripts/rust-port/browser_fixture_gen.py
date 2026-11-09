@@ -61,6 +61,12 @@ SEALED_MANIFESTS = {
     "chrome-full": ("chrome-full-manifest.json", "ea6a45c394e6b58b8a10b9fe98bbaeec7533b1c41a13e9cba085cea83ab2612c"),
     "safari": ("safari-manifest.json", "e64f353076906d92a9a066bd147360eb620a2c8693430c5e34bd0889acdfa9d9"),
 }
+# Complete inventory of the engine fixture directory (other suites' files too):
+# any extra, nested or missing file fails --check.
+ENGINE_FIXTURE_FILES = {
+    "chrome-full.json", "chrome-full-manifest.json", "safari.json", "safari-manifest.json",
+    "engine-neutral.json", "file-guards.json", "file-guards-manifest.json", "manifest.json",
+}
 HISTORICAL_RECORD_BANNER = (
     "HISTORICAL RECORD MODE (#1004): regenerating the browser fixtures runs the Go engine "
     "packages removed in #1003 and only works from the pre-removal revision 57c26c76e "
@@ -83,10 +89,11 @@ def load(path: Path) -> dict[str, Any]:
 def verify_sealed(suite: str, fixture: Path, sources: tuple[str, ...], fixture_dir: Path = FIXTURE_DIR) -> dict[str, Any]:
     """Fail unless the suite's recording is exactly the sealed one."""
     manifest_name, pinned = SEALED_MANIFESTS[suite]
-    expected = {fixture.name, manifest_name}
-    present = {path.name for path in fixture_dir.iterdir() if path.is_file() and path.name.startswith(suite)}
-    if present != expected:
-        raise SystemExit(f"{suite}: unregistered or missing recording files: {sorted(present ^ expected)}")
+    if any(path.is_symlink() for path in fixture_dir.rglob("*")):
+        raise SystemExit(f"{suite}: symlink in the engine fixture directory")
+    present = {path.relative_to(fixture_dir).as_posix() for path in fixture_dir.rglob("*") if not path.is_dir()}
+    if present != ENGINE_FIXTURE_FILES:
+        raise SystemExit(f"{suite}: unregistered or missing recording files: {sorted(present ^ ENGINE_FIXTURE_FILES)}")
     manifest_path = fixture_dir / manifest_name
     if sha256(manifest_path.read_bytes()) != pinned:
         raise SystemExit(f"{suite}: manifest differs from the pinned seal")

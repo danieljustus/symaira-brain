@@ -40,6 +40,7 @@ CONTROLS = (("wrong-environment", "environment-ab"),
 # Release builds back up pre-Rust state once on first run (symaira-cutover);
 # the historical Go recording predates that notice, so the replay opts out.
 REPLAY_ENV = {"SYMAIRA_CUTOVER_BACKUP": "off"}
+KEYCHAIN_LOOKUP = ["find-generic-password", "-s", "symbrowse", "-a", "encryption-key", "-w"]
 STORE_WARNING = ('WARN re-saving encrypted state without an encryption key '
                  'state="existing" previous_key_source="environment"')
 
@@ -56,7 +57,13 @@ def verify_seal(directory: Path, retention_sha256: str = RETENTION_SHA256) -> di
     if registry.process.digest(retention_path) != retention_sha256:
         raise SealError(f"{RETENTION} differs from the pinned seal")
     sealed = json.loads(retention_path.read_text())["files_sha256"]
-    present = {path.name for path in directory.iterdir() if path.is_file()} - {RETENTION}
+    # Recursive: a nested or differently named file is unregistered too, and
+    # symlinks (which rglob neither follows nor reports as files) are refused.
+    links = [path for path in directory.rglob("*") if path.is_symlink()]
+    if links:
+        raise SealError(f"symlink in recording directory: {links[0].relative_to(directory).as_posix()}")
+    present = {path.relative_to(directory).as_posix() for path in directory.rglob("*")
+               if not path.is_dir()} - {RETENTION}
     failures = [f"unregistered recording file: {name}" for name in sorted(present - sealed.keys())]
     failures += [f"missing recording file: {name}" for name in sorted(sealed.keys() - present)]
     failures += [f"changed recording file: {name}" for name in sorted(present & sealed.keys())
@@ -96,6 +103,10 @@ def comparable(observation: dict) -> dict:
         if record["request"].get("session") == session:
             record["request"]["session"] = "<SESSION>"
     if platform.system() == "Darwin":
+        keychain = [query for query in value["queries"] if query["name"] == "security"]
+        # At most one lookup, and only of the daemon's own key item.
+        if len(keychain) > 1 or any(query["arguments"] != KEYCHAIN_LOOKUP for query in keychain):
+            raise AssertionError(f"unexpected keychain queries: {keychain}")
         value["queries"] = [query for query in value["queries"] if query["name"] != "security"]
     return value
 

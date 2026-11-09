@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import tempfile
 import unittest
+import unittest.mock
 
 import daemon_registry as registry
 import daemon_state_key_replay as replay
@@ -38,6 +39,38 @@ class SealTest(unittest.TestCase):
         (self.dir / "extra-recording.json").write_text("{}")
         with self.assertRaisesRegex(replay.SealError, "unregistered recording file: extra-recording.json"):
             self.seal()
+
+    def test_nested_unregistered_recording_fails(self):
+        (self.dir / "nested").mkdir()
+        (self.dir / "nested" / "symaira-state-key-final-gate.json").write_text("{}")
+        with self.assertRaisesRegex(replay.SealError, "unregistered recording file: nested/"):
+            self.seal()
+
+    def test_symlinked_recordings_fail(self):
+        outside = Path(self.temp.name) / "outside"
+        outside.mkdir()
+        (outside / "unregistered.json").write_text("{}")
+        (self.dir / "linked-dir").symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(replay.SealError, "symlink in recording directory"):
+            self.seal()
+        (self.dir / "linked-dir").unlink()
+        target = self.dir / replay.RECORDING
+        moved = outside / replay.RECORDING
+        target.rename(moved)
+        target.symlink_to(moved)
+        with self.assertRaisesRegex(replay.SealError, "symlink in recording directory"):
+            self.seal()
+
+    def test_unexpected_keychain_query_fails_on_darwin(self):
+        recording = self.seal()
+        observation = json.loads(json.dumps(recording["cases"][0]["go"]))
+        observation["queries"] = [{"name": "security", "pid": 1, "arguments": ["find-generic-password", "-s", "other"]}]
+        with unittest.mock.patch.object(replay.platform, "system", return_value="Darwin"):
+            with self.assertRaisesRegex(AssertionError, "unexpected keychain queries"):
+                replay.comparable(observation)
+        observation["queries"][0]["arguments"] = replay.KEYCHAIN_LOOKUP
+        with unittest.mock.patch.object(replay.platform, "system", return_value="Darwin"):
+            self.assertEqual(replay.comparable(observation)["queries"], [])
 
     def test_missing_recording_fails(self):
         (self.dir / replay.RECORDING).unlink()
