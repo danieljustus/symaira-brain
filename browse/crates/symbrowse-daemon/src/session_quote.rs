@@ -39,7 +39,11 @@ mod tests {
             }
         }
         assert_eq!(
-            format!("{:x}", digest.finalize()),
+            digest
+                .finalize()
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>(),
             "4c752b4c6e90df8c641d6ac02a6da80113943bc8fc476c825f27aef51db2a055"
         );
     }

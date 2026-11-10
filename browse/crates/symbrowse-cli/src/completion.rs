@@ -230,7 +230,10 @@ mod tests {
             let bytes = script(shell).expect("known shell").as_bytes();
             assert_eq!(bytes.len(), length, "{shell} byte length");
             assert_eq!(
-                format!("{:x}", Sha256::digest(bytes)),
+                Sha256::digest(bytes)
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>(),
                 digest,
                 "{shell} SHA-256"
             );

@@ -37,7 +37,7 @@ nix = { version = "=0.31.3", features = ["fs", "poll", "signal", "socket", "user
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.151"
 symaira-core-version = { git = "https://github.com/danieljustus/symaira-corekit", rev = "d382b8615ce879bac6f23c7250e13667934e8f93", version = "=0.0.0" }
-sha2 = "=0.10.9"
+sha2 = "=0.11.1"
 symbrowse-core = { path = "crates/symbrowse-core", version = "=0.0.0" }
 symbrowse-daemon = { path = "crates/symbrowse-daemon", version = "=0.0.0" }
 symbrowse-engine = { path = "crates/symbrowse-engine", version = "=0.0.0" }
