@@ -135,20 +135,65 @@ pub(crate) fn entry_exists(path: &Path) -> Result<bool, SkillError> {
 }
 
 pub(crate) fn entry_metadata(path: &Path) -> Result<Option<cap_std::fs::Metadata>, SkillError> {
-    entry_metadata_inner(path, false)
+    entry_metadata_inner(path, false).map_err(SkillError::from)
 }
 
 /// Like [`entry_metadata`] for a status scan root: an ancestor that is
 /// search-only (mode `--x`) cannot be opened by the confined walk, which reads
 /// as "no installed skills" rather than a scan failure.
 pub(crate) fn root_metadata(path: &Path) -> Result<Option<cap_std::fs::Metadata>, SkillError> {
-    entry_metadata_inner(path, true)
+    entry_metadata_inner(path, true).map_err(SkillError::from)
+}
+
+/// Read-only probe of a path discovered inside a status scan (for example the
+/// target of an installed symlink).
+///
+/// A parent component that exists but is not a directory (a regular file, or a
+/// link to one) is reported as [`EntryProbe::ParentNotDirectory`] so the scan
+/// can flag that one entry. Mutating callers keep using [`entry_metadata`],
+/// which still fails closed on the same condition.
+pub(crate) enum EntryProbe {
+    /// Nothing exists at the path.
+    Absent,
+    /// The path exists; its metadata is not followed through symlinks.
+    Present(cap_std::fs::Metadata),
+    /// An ancestor of the path exists but is not a directory.
+    ParentNotDirectory,
+}
+
+pub(crate) fn probe_entry(path: &Path) -> Result<EntryProbe, SkillError> {
+    match entry_metadata_inner(path, false) {
+        Ok(Some(metadata)) => Ok(EntryProbe::Present(metadata)),
+        Ok(None) => Ok(EntryProbe::Absent),
+        Err(EntryError::ParentNotDirectory(_)) => Ok(EntryProbe::ParentNotDirectory),
+        Err(EntryError::Other(error)) => Err(error),
+    }
+}
+
+/// Distinguishes the one failure a status scan may downgrade from the rest.
+enum EntryError {
+    ParentNotDirectory(SkillError),
+    Other(SkillError),
+}
+
+impl From<SkillError> for EntryError {
+    fn from(error: SkillError) -> Self {
+        Self::Other(error)
+    }
+}
+
+impl From<EntryError> for SkillError {
+    fn from(error: EntryError) -> Self {
+        match error {
+            EntryError::ParentNotDirectory(error) | EntryError::Other(error) => error,
+        }
+    }
 }
 
 fn entry_metadata_inner(
     path: &Path,
     unreadable_ancestor_is_absent: bool,
-) -> Result<Option<cap_std::fs::Metadata>, SkillError> {
+) -> Result<Option<cap_std::fs::Metadata>, EntryError> {
     let parent = path
         .parent()
         .ok_or_else(|| SkillError("path has no parent".to_owned()))?;
@@ -161,13 +206,20 @@ fn entry_metadata_inner(
         {
             return Ok(None);
         }
-        Err(error) => return Err(SkillError(format!("open existing root: {error}"))),
+        Err(error) if error.kind() == std::io::ErrorKind::NotADirectory => {
+            return Err(EntryError::ParentNotDirectory(SkillError(format!(
+                "open existing root: {error}"
+            ))));
+        }
+        Err(error) => {
+            return Err(SkillError(format!("open existing root: {error}")).into());
+        }
     };
     let name = safe_name(path.file_name())?;
     match root.symlink_metadata(name) {
         Ok(metadata) => Ok(Some(metadata)),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
-        Err(error) => Err(SkillError(format!("stat lifecycle path: {error}"))),
+        Err(error) => Err(SkillError(format!("stat lifecycle path: {error}")).into()),
     }
 }
 

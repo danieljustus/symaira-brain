@@ -16,6 +16,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+#[path = "../../test-support/fs_walk.rs"]
+mod fs_walk;
 #[path = "common/skills_restore_contract.rs"]
 mod skills_restore_contract;
 
@@ -283,15 +285,21 @@ fn replace_bytes(data: &[u8], from: &[u8], to: &[u8]) -> Vec<u8> {
     out
 }
 
+/// Entries a finished process removes while the walk runs (lock or staging files) are skipped; any other
+/// error stays fatal.
 fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
-    let mut entries: Vec<_> = std::fs::read_dir(dir)
-        .unwrap()
-        .map(|e| e.unwrap().path())
+    let Some(listing) = fs_walk::skip_vanished(std::fs::read_dir(dir), dir) else {
+        return;
+    };
+    let mut entries: Vec<_> = listing
+        .filter_map(|e| fs_walk::skip_vanished(e, dir).map(|e| e.path()))
         .collect();
     entries.sort();
     for path in entries {
+        let Some(meta) = fs_walk::skip_vanished(std::fs::symlink_metadata(&path), &path) else {
+            continue;
+        };
         out.push(path.clone());
-        let meta = std::fs::symlink_metadata(&path).unwrap();
         if meta.is_dir() {
             walk(&path, out);
         }
@@ -330,15 +338,22 @@ fn snapshot(oracle: &Value, root: &Path) -> Value {
             }
             continue;
         }
-        let meta = std::fs::symlink_metadata(&path).unwrap();
+        let Some(meta) = fs_walk::skip_vanished(std::fs::symlink_metadata(&path), &path) else {
+            continue;
+        };
         let value = if meta.file_type().is_symlink() {
-            json!({"type": "symlink", "target": std::fs::read_link(&path).unwrap().to_string_lossy()})
+            let Some(link) = fs_walk::skip_vanished(std::fs::read_link(&path), &path) else {
+                continue;
+            };
+            json!({"type": "symlink", "target": link.to_string_lossy()})
         } else if meta.is_dir() {
             json!({"type": "dir", "mode": meta.permissions().mode() & 0o777})
         } else {
             let name = path.file_name().unwrap().to_string_lossy().into_owned();
             let root_bytes = root.as_os_str().as_encoded_bytes();
-            let raw = std::fs::read(&path).unwrap();
+            let Some(raw) = fs_walk::skip_vanished(std::fs::read(&path), &path) else {
+                continue;
+            };
             let raw = replace_bytes(&raw, root_bytes, b"<ROOT>");
             let data = masked(&name, raw);
             let mode = meta.permissions().mode() & 0o777;

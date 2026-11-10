@@ -9,6 +9,9 @@
 
 #![allow(dead_code, clippy::pedantic)]
 
+#[path = "../../../test-support/fs_walk.rs"]
+mod fs_walk;
+
 use rusqlite::{Connection, OpenFlags, types::ValueRef};
 use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::{OsStr, OsString};
@@ -454,12 +457,14 @@ pub fn manifest(root: &Path) -> Vec<String> {
                 .unwrap()
                 .to_string_lossy()
                 .into_owned();
-            let meta = std::fs::symlink_metadata(&path).expect("metadata");
-            let kind = if meta.is_dir() { "dir" } else { "file" };
             // WAL side files appear and vanish with connection state.
             if rel.ends_with("-wal") || rel.ends_with("-shm") || rel.ends_with("-journal") {
                 continue;
             }
+            let Some(meta) = fs_walk::skip_vanished(std::fs::symlink_metadata(&path), &path) else {
+                continue;
+            };
+            let kind = if meta.is_dir() { "dir" } else { "file" };
             out.push(format!(
                 "{kind} {rel} {:o}",
                 meta.permissions().mode() & 0o7777

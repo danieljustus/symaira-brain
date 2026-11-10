@@ -10,24 +10,32 @@ use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 use symbrain_usage::{ProviderSelection, selected_providers};
 
+#[path = "../../test-support/fs_walk.rs"]
+mod fs_walk;
+
 fn inventory(root: &Path) -> BTreeMap<String, (u32, u64, i64, i64, Vec<u8>)> {
     let mut result = BTreeMap::new();
     for entry in fs::read_dir(root).unwrap() {
         let entry = entry.unwrap();
         let path = entry.path();
-        let m = fs::symlink_metadata(&path).unwrap();
+        // An entry removed since the listing is gone, not an error.
+        let Some(m) = fs_walk::skip_vanished(fs::symlink_metadata(&path), &path) else {
+            continue;
+        };
         if m.is_dir() {
             result.extend(inventory(&path));
             continue;
         }
         let content = if m.is_file() {
-            Sha256::digest(fs::read(&path).unwrap()).to_vec()
+            let Some(bytes) = fs_walk::skip_vanished(fs::read(&path), &path) else {
+                continue;
+            };
+            Sha256::digest(bytes).to_vec()
         } else if m.file_type().is_symlink() {
-            fs::read_link(&path)
-                .unwrap()
-                .as_os_str()
-                .as_encoded_bytes()
-                .to_vec()
+            let Some(link) = fs_walk::skip_vanished(fs::read_link(&path), &path) else {
+                continue;
+            };
+            link.as_os_str().as_encoded_bytes().to_vec()
         } else {
             assert!(m.file_type().is_fifo());
             Vec::new()
