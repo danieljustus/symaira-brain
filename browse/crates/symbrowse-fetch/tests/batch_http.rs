@@ -102,15 +102,13 @@ async fn twenty_one_urls_are_rejected_before_any_request() {
     assert_eq!(urls.len(), 21);
     let error = batch::fetch_urls(client(), urls, 4, true)
         .await
-        .err()
-        .expect("21 URLs must be a contract error");
+        .expect_err("21 URLs must be a contract error");
     assert_eq!(error, "too many URLs: maximum is 20");
     assert_eq!(server.counters.hits.load(Ordering::SeqCst), 0);
 
     let empty = batch::fetch_urls(client(), Vec::new(), 4, true)
         .await
-        .err()
-        .expect("empty batch must be a contract error");
+        .expect_err("empty batch must be a contract error");
     assert_eq!(empty, "at least one URL is required");
 }
 
