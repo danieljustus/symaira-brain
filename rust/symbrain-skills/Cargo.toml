@@ -19,6 +19,7 @@ fs2 = "=0.4.3"
 libc.workspace = true
 ambient-authority = "=0.0.2"
 sha2.workspace = true
+symbrain-core.workspace = true
 symbrain-harness.workspace = true
 tar = { version = "=0.4.46", default-features = false }
 tempfile.workspace = true

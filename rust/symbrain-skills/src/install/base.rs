@@ -130,7 +130,7 @@ fn project_id(project: &Path) -> Result<String, SkillError> {
     let absolute = std::path::absolute(project)
         .map_err(|error| SkillError(format!("resolve project identity: {error}")))?;
     let digest = Sha256::digest(absolute.to_string_lossy().as_bytes());
-    Ok(format!("{digest:x}"))
+    Ok(symbrain_core::hex::lower(digest))
 }
 
 /// Writes the default OpenCode user-scope snapshot.

@@ -119,7 +119,7 @@ fn compare_record(record: &serde_json::Value) -> bool {
     assert_eq!(before.is_some(), record["file_present"].as_bool().unwrap());
     if let Some(contents) = &before {
         assert_eq!(
-            format!("{:x}", Sha256::digest(contents)),
+            symbrain_core::hex::lower(Sha256::digest(contents)),
             record["sha256"].as_str().unwrap()
         );
     }

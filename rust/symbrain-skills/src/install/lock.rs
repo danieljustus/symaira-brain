@@ -158,7 +158,7 @@ fn lock_file(file: &File, path: &Path, shared: bool, deadline: Instant) -> Resul
 
 fn lock_name(path: &Path) -> String {
     let digest = Sha256::digest(path.to_string_lossy().as_bytes());
-    format!(".symskills-lock-{digest:x}")
+    format!(".symskills-lock-{}", symbrain_core::hex::lower(digest))
 }
 
 #[cfg(test)]

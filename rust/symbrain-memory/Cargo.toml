@@ -10,7 +10,7 @@ repository.workspace = true
 [dependencies]
 # Existing locked codecs/HTTP runtime; one bounded native memory HTTP owner.
 base64 = "=0.23.1"
-hmac = "=0.12.1"
+hmac = "=0.13.0"
 zeroize = "=1.9.1"
 # AES-256-GCM and PBKDF2 of the encrypted-relay payloads; already locked via rustls.
 ring = "=0.17.14"
@@ -31,9 +31,10 @@ sha2.workspace = true
 getrandom = "=0.4.3"
 # Unicode NFD/NFC for entity-name matching (Go: golang.org/x/text/unicode/norm).
 # Pure Rust, MIT/Apache-2.0, only dep tinyvec (already locked).
-unicode-normalization = "=0.1.25"
+unicode-normalization = "=0.1.26"
 symaira-core-llm.workspace = true
 symbrain-activity.workspace = true
+symbrain-core.workspace = true
 
 [lints.rust]
 unsafe_code = "deny"

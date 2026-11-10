@@ -255,7 +255,7 @@ fn expand(expected: &str, root: &Path) -> String {
                 hash.update(real.as_os_str().as_encoded_bytes());
                 hash.update([0]);
                 hash.update(std::fs::read(real.join("SKILL.md")).unwrap_or_default());
-                format!("sha256:{:.16}", format!("{:x}", hash.finalize()))
+                format!("sha256:{:.16}", symbrain_core::hex::lower(hash.finalize()))
             },
         )
         .into_owned()
@@ -366,7 +366,7 @@ fn snapshot(oracle: &Value, root: &Path) -> Value {
                 json!({"type": "file", "mode": mode, "marker": marker})
             } else {
                 json!({"type": "file", "mode": mode,
-                       "sha256": format!("{:x}", Sha256::digest(&data)), "size": data.len()})
+                       "sha256": symbrain_core::hex::lower(Sha256::digest(&data)), "size": data.len()})
             }
         };
         entries.insert(rel, value);

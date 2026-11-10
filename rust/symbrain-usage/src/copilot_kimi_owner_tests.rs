@@ -19,7 +19,7 @@ fn owner_matches_frozen_go(evidence: &frozen::Frozen) {
             .map(|(path, hash)| {
                 let bytes = std::fs::read(path).unwrap();
                 assert_eq!(
-                    format!("{:x}", Sha256::digest(&bytes)),
+                    symbrain_core::hex::lower(Sha256::digest(&bytes)),
                     hash.as_str().unwrap()
                 );
                 (path, bytes)

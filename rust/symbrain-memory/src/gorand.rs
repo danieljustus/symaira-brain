@@ -477,7 +477,7 @@ mod tests {
         for value in values {
             hasher.update(value.to_bits().to_le_bytes());
         }
-        format!("{:x}", hasher.finalize())
+        symbrain_core::hex::lower(hasher.finalize())
     }
 
     #[test]

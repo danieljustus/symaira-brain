@@ -68,7 +68,7 @@ fn vault_administration_matches_real_go_process_contracts() {
     assert!(fixture.total > 80, "empty/incomplete corpus");
     let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/support/vault_child.rs");
     assert_eq!(
-        format!("{:x}", Sha256::digest(fs::read(&source).unwrap())),
+        symbrain_core::hex::lower(Sha256::digest(fs::read(&source).unwrap())),
         fixture.child_sha256,
         "child fixture changed without actual Go regeneration"
     );

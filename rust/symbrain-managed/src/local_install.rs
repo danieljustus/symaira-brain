@@ -69,7 +69,7 @@ pub fn install_source(
             )
         },
         built_at: Utc::now().to_rfc3339_opts(SecondsFormat::AutoSi, true),
-        binary_sha256: format!("{:x}", Sha256::digest(binary)),
+        binary_sha256: symbrain_core::hex::lower(Sha256::digest(binary)),
     };
     crate::provenance::write_record(bin_dir, binary_name, &record).map_err(|error| {
         ManagedError::RawContext(

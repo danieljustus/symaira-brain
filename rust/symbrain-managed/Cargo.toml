@@ -9,15 +9,15 @@ repository.workspace = true
 
 [dependencies]
 chrono.workspace = true
-flate2 = "=1.1.10"
+flate2 = "=1.1.11"
 serde.workspace = true
 serde_json.workspace = true
-sha2 = "0.10.9"
+sha2 = "0.11.1"
 symbrain-core.workspace = true
 tar = { version = "=0.4.46", default-features = false }
 tempfile.workspace = true
 ureq.workspace = true
-zip = { version = "=9.2.1", default-features = false, features = ["deflate-flate2"] }
+zip = { version = "=9.4.1", default-features = false, features = ["deflate-flate2"] }
 
 [lints.rust]
 unsafe_code = "deny"

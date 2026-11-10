@@ -181,7 +181,7 @@ impl ResponseCache {
             hasher.update(part.as_bytes());
             hasher.update(*b"|");
         }
-        format!("{:x}", hasher.finalize())
+        hex_prefix(&hasher.finalize(), 64)
     }
 
     pub fn put(&self, key: &str, body: &[u8], meta: &serde_json::Value) -> Result<(), CacheError> {

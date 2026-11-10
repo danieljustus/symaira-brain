@@ -25,7 +25,7 @@ fn decode_hex(value: &str) -> Vec<u8> {
 #[allow(clippy::too_many_lines)]
 fn production_binary_matches_frozen_raw_byte_responses_and_audits() {
     assert_eq!(
-        format!("{:x}", Sha256::digest(FIXTURE.as_bytes())),
+        symbrain_core::hex::lower(Sha256::digest(FIXTURE.as_bytes())),
         trust_anchor::TRUSTED_FIXTURE_SHA256
     );
     let fixture: Value = serde_json::from_str(FIXTURE).expect("raw-byte fixture JSON");
@@ -46,13 +46,13 @@ fn production_binary_matches_frozen_raw_byte_responses_and_audits() {
     let generator = include_str!("../../../guard/scripts/guard-decide-oracle/repair_parity.py")
         .replace("\r\n", "\n");
     assert_eq!(
-        format!("{:x}", Sha256::digest(generator.as_bytes())),
+        symbrain_core::hex::lower(Sha256::digest(generator.as_bytes())),
         trust_anchor::TRUSTED_GENERATOR_SHA256
     );
     let validator = include_str!("../../../guard/scripts/guard-decide-oracle/native_repair.py")
         .replace("\r\n", "\n");
     assert_eq!(
-        format!("{:x}", Sha256::digest(validator.as_bytes())),
+        symbrain_core::hex::lower(Sha256::digest(validator.as_bytes())),
         trust_anchor::TRUSTED_VALIDATOR_SHA256
     );
     let cases = fixture["cases"].as_array().expect("fixture cases");

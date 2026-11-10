@@ -4,6 +4,7 @@ pub mod config;
 pub mod exit;
 pub mod go_json_float;
 mod go_text;
+pub mod hex;
 mod json_string;
 pub mod output;
 pub mod paths;

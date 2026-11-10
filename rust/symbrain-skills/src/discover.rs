@@ -39,7 +39,7 @@ fn source_id(path: &Path) -> String {
     hash.update(path.as_os_str().as_encoded_bytes());
     hash.update([0]);
     hash.update(content);
-    format!("sha256:{:x}", hash.finalize())[..23].into()
+    format!("sha256:{}", symbrain_core::hex::lower(hash.finalize()))[..23].into()
 }
 
 fn base_name(path: &Path) -> String {

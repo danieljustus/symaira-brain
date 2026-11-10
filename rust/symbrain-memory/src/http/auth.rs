@@ -2,7 +2,7 @@
 
 use super::Server;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, KeyInit, Mac};
 use rusqlite::{OptionalExtension, params};
 use serde::Deserialize;
 use sha2::Sha256;

@@ -35,10 +35,7 @@ const HISTORICAL_FIXTURE: &str = "tests/fixtures/opencode_discovery.json";
 
 fn digest_text(data: &[u8]) -> String {
     let text = String::from_utf8(data.to_vec()).expect("provenance input must be UTF-8");
-    format!(
-        "{:x}",
-        Sha256::digest(text.replace("\r\n", "\n").as_bytes())
-    )
+    symbrain_core::hex::lower(Sha256::digest(text.replace("\r\n", "\n").as_bytes()))
 }
 
 fn is_sha256_hex(value: &str) -> bool {

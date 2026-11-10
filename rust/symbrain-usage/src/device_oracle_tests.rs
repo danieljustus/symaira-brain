@@ -95,7 +95,7 @@ fn prepare(row: &Value) -> BTreeMap<String, Vec<u8>> {
         let path = root.join(name);
         let bytes = std::fs::read(&path).unwrap();
         assert_eq!(
-            format!("{:x}", Sha256::digest(&bytes)),
+            symbrain_core::hex::lower(Sha256::digest(&bytes)),
             row[key].as_str().unwrap()
         );
         files.insert(path.to_str().unwrap().to_owned(), bytes);

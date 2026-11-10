@@ -25,6 +25,7 @@ regex.workspace = true
 
 [dev-dependencies]
 sha2.workspace = true
+symbrain-core.workspace = true
 
 [lints.rust]
 unsafe_code = "deny"

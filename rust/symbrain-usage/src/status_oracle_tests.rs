@@ -8,7 +8,7 @@ fn file_state(root: &std::path::Path) -> BTreeMap<String, Value> {
         } else {
             None
         };
-        values.insert(path.strip_prefix(root).unwrap().to_string_lossy().into_owned(),json!({"readonly":metadata.permissions().readonly(),"length":metadata.len(),"modified":metadata.modified().unwrap().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos().to_string(),"sha256":bytes.map(|b|format!("{:x}",Sha256::digest(&b)))}));
+        values.insert(path.strip_prefix(root).unwrap().to_string_lossy().into_owned(),json!({"readonly":metadata.permissions().readonly(),"length":metadata.len(),"modified":metadata.modified().unwrap().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos().to_string(),"sha256":bytes.map(|b|symbrain_core::hex::lower(Sha256::digest(&b)))}));
         if metadata.is_dir() {
             for item in std::fs::read_dir(path).unwrap() {
                 visit(&item.unwrap().path(), root, values);

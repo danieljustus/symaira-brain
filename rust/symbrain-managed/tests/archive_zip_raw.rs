@@ -57,8 +57,10 @@ fn repeated_raw_zip_names_cannot_hide_entries_or_replace_installed_bytes() {
                 };
                 let asset = core.asset_name(platform.os, platform.arch);
                 let mut core = core;
-                core.sha256 =
-                    BTreeMap::from([(asset.clone(), format!("{:x}", Sha256::digest(&bytes)))]);
+                core.sha256 = BTreeMap::from([(
+                    asset.clone(),
+                    symbrain_core::hex::lower(Sha256::digest(&bytes)),
+                )]);
                 let prefix = format!("/{}/releases/download/{}/", core.repo, core.tag());
                 let routes = BTreeMap::from([(format!("{prefix}{asset}"), bytes)]);
                 let server = if zip64 {

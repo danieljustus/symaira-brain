@@ -24,20 +24,20 @@ hyper = { version = "=1.12.0", features = ["client", "http1"] }
 hyper-util = { version = "=0.1.21", features = ["tokio"] }
 native-tls = "=0.2.18"
 tokio-native-tls = "=0.3.1"
-html5ever = "=0.39.0"
-markup5ever_rcdom = "=0.39.0"
+html5ever = "=0.40.1"
+markup5ever_rcdom = "=0.40.1"
 rand = "=0.9.5"
 reqwest = { version = "=0.13.5", default-features = false, features = ["cookies", "http2", "native-tls", "socks", "stream"] }
 encoding_rs = "=0.8.44"
 brotli = "=8.0.2"
-flate2 = { version = "=1.1.10", default-features = false, features = ["rust_backend"] }
+flate2 = { version = "=1.1.11", default-features = false, features = ["rust_backend"] }
 ruzstd = "=0.9.1"
 rustix = { version = "=1.1.6", features = ["process"] }
 nix = { version = "=0.31.3", features = ["fs", "poll", "signal", "socket", "user"] }
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.151"
 symaira-core-version = { git = "https://github.com/danieljustus/symaira-corekit", rev = "d382b8615ce879bac6f23c7250e13667934e8f93", version = "=0.0.0" }
-sha2 = "=0.10.9"
+sha2 = "=0.11.1"
 symbrowse-core = { path = "crates/symbrowse-core", version = "=0.0.0" }
 symbrowse-daemon = { path = "crates/symbrowse-daemon", version = "=0.0.0" }
 symbrowse-engine = { path = "crates/symbrowse-engine", version = "=0.0.0" }
@@ -45,7 +45,7 @@ symbrowse-mcp = { path = "crates/symbrowse-mcp", version = "=0.0.0" }
 symbrowse-protocol = { path = "crates/symbrowse-protocol", version = "=0.0.0" }
 time = { version = "=0.3.55", features = ["formatting", "local-offset", "macros", "parsing"] }
 tokio = { version = "=1.54.1", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "sync", "time"] }
-toml = "=1.1.8"
+toml = "=1.2.0"
 url = "=2.5.8"
 wait-timeout = "=0.2.1"
 yaml-rust2 = "=0.12.0"

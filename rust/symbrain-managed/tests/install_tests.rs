@@ -72,7 +72,7 @@ fn fixture_core() -> Core {
 fn fixture_routes(core: &Core, platform: Platform, archive: &[u8]) -> BTreeMap<String, Vec<u8>> {
     let alternate = core.asset_name_alt(platform.os, platform.arch);
     let prefix = format!("/{}/releases/download/{}/", core.repo, core.tag());
-    let digest = format!("{:x}", Sha256::digest(archive));
+    let digest = symbrain_core::hex::lower(Sha256::digest(archive));
     BTreeMap::from([
         (format!("{prefix}{alternate}"), archive.to_vec()),
         (
@@ -162,8 +162,10 @@ fn installer_prefers_versioned_asset_with_manifest_pin() {
     let binary = fixture_binary(platform, b"versioned");
     let archive = archive(platform, &core.binary_name, binary);
     let primary = core.asset_name(platform.os, platform.arch);
-    core.sha256
-        .insert(primary.clone(), format!("{:x}", Sha256::digest(&archive)));
+    core.sha256.insert(
+        primary.clone(),
+        symbrain_core::hex::lower(Sha256::digest(&archive)),
+    );
     let prefix = format!("/{}/releases/download/{}/", core.repo, core.tag());
     let server = TestServer::start(BTreeMap::from([(format!("{prefix}{primary}"), archive)]));
     let temp = tempfile::tempdir().unwrap();
@@ -189,7 +191,7 @@ fn pinned_primary_mismatch_does_not_downgrade_to_alternate() {
     let alternate = core.asset_name_alt(platform.os, platform.arch);
     core.sha256.insert(primary.clone(), "0".repeat(64));
     let prefix = format!("/{}/releases/download/{}/", core.repo, core.tag());
-    let digest = format!("{:x}", Sha256::digest(&archive));
+    let digest = symbrain_core::hex::lower(Sha256::digest(&archive));
     let server = TestServer::start(BTreeMap::from([
         (format!("{prefix}{primary}"), archive.clone()),
         (format!("{prefix}{alternate}"), archive),
