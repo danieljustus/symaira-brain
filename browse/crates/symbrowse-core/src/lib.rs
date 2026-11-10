@@ -2,6 +2,7 @@
 
 //! Deterministic domain contracts for the staged Symaira Browse Rust port.
 
+pub mod advertise;
 pub mod batch;
 pub mod browser_state;
 pub mod budget;

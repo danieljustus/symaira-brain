@@ -112,6 +112,22 @@ pub(crate) fn run_mcp(
 }
 
 pub(crate) fn validate_engine(value: &str) -> Result<(), String> {
+    validate_engine_on(value, std::env::consts::OS)
+}
+
+/// `firefox` is accepted only where its native gate passed; Safari engines stay
+/// selectable for the maintainer gate but are not part of the advertised set.
+fn validate_engine_on(value: &str, os: &str) -> Result<(), String> {
+    if value == "firefox" {
+        return if symbrowse_core::advertise::is_advertised(
+            symbrowse_core::config::BrowserEngine::Firefox,
+            os,
+        ) {
+            Ok(())
+        } else {
+            Err(symbrowse_core::advertise::not_advertised_message(value, os))
+        };
+    }
     if matches!(value, "chrome" | "static" | "safari-attach" | "safari-bidi") {
         Ok(())
     } else {
@@ -388,4 +404,28 @@ pub(crate) fn write_batch_error(
         let _ = io::stdout().write_all(output.as_bytes());
     }
     ExitCode::from(exit_code)
+}
+
+#[cfg(test)]
+mod engine_validation_tests {
+    use super::validate_engine_on;
+
+    #[test]
+    fn firefox_is_selectable_only_on_macos_and_linux() {
+        assert!(validate_engine_on("firefox", "macos").is_ok());
+        assert!(validate_engine_on("firefox", "linux").is_ok());
+        let error = validate_engine_on("firefox", "windows").unwrap_err();
+        assert!(error.starts_with("engine_not_advertised:"), "{error}");
+    }
+
+    #[test]
+    fn existing_engines_and_oracle_error_text_are_unchanged() {
+        for engine in ["chrome", "static", "safari-attach", "safari-bidi"] {
+            assert!(validate_engine_on(engine, "linux").is_ok(), "{engine}");
+        }
+        assert_eq!(
+            validate_engine_on("wat", "linux").unwrap_err(),
+            "invalid engine \"wat\": use one of chrome, static, safari-attach, safari-bidi"
+        );
+    }
 }

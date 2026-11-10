@@ -433,6 +433,9 @@ impl DispatchRuntime {
                         ..Default::default()
                     });
                 }
+                if self.spec.engine == "firefox" {
+                    ensure_firefox_advertised(std::env::consts::OS)?;
+                }
                 Ok((
                     Some(
                         serde_json::to_value(if self.spec.engine == "firefox" {
@@ -1337,6 +1340,7 @@ impl DispatchRuntime {
     }
 
     async fn firefox_command(&self, frame: &Frame) -> HandlerResult {
+        ensure_firefox_advertised(std::env::consts::OS)?;
         let args = object_args(frame)?;
         let mut guard = self.firefox.lock().await;
         if guard.is_none() {
@@ -2038,6 +2042,21 @@ fn selection_error(message: String) -> DaemonError {
     }
 }
 
+/// Firefox BiDi is offered only where its native gate passed (RUST-013); a
+/// request elsewhere is a typed error, never another engine.
+fn ensure_firefox_advertised(os: &str) -> Result<(), DaemonError> {
+    if symbrowse_core::advertise::is_advertised(symbrowse_core::config::BrowserEngine::Firefox, os)
+    {
+        return Ok(());
+    }
+    Err(DaemonError {
+        code: "unsupported".into(),
+        message: symbrowse_core::advertise::not_advertised_message("firefox", os),
+        hint: "Firefox is advertised on macOS and Linux only".into(),
+        ..Default::default()
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2502,6 +2521,39 @@ mod tests {
         restarted.stop();
         assert!(restart_thread.join().unwrap().is_ok());
         let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn firefox_is_refused_with_a_typed_error_outside_macos_and_linux() {
+        for os in ["macos", "linux"] {
+            assert!(ensure_firefox_advertised(os).is_ok(), "{os}");
+        }
+        let error = ensure_firefox_advertised("windows").expect_err("windows must refuse");
+        assert_eq!(error.code, "unsupported");
+        assert!(error.message.starts_with("engine_not_advertised:"));
+    }
+
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
+    #[test]
+    fn firefox_capabilities_report_only_implemented_interfaces() {
+        let mut spec = temp_spec("firefox-capabilities");
+        spec.engine = "firefox".into();
+        let runtime = test_runtime(spec).expect("runtime");
+        let (data, _) = runtime
+            .runtime
+            .block_on(runtime.dispatch(
+                Frame {
+                    cmd: "capabilities".into(),
+                    ..Frame::default()
+                },
+                OperationContext::for_test(),
+            ))
+            .expect("firefox capabilities are advertised on this target");
+        let data = data.expect("capabilities data");
+        assert_eq!(data["kind"], "firefox");
+        let interfaces = data["interfaces"].as_array().expect("interfaces");
+        assert!(interfaces.iter().any(|name| name == "TabManager"));
+        assert!(!interfaces.iter().any(|name| name == "NetworkEvents"));
     }
 
     #[test]
