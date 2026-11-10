@@ -1,0 +1,1 @@
+<html lang="fr"><body><main><h1>Visible résumé</h1><p aria-hidden="true">Do not include this.</p><p style="display: none">Also hidden.</p><p class="sr-only">Secret assistive text.</p><p>Keep this sentence.</p></main></body></html>

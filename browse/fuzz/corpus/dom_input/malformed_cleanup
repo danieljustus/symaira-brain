@@ -1,0 +1,1 @@
+<html lang="en"><head><title>  Static Guide </title><script>drop()</script></head><body><main id="content" data-noise="x"><h1>Static Guide</h1><p>Keep <strong>important</strong> content.</p><div hidden>secret</div><a href="https://example.com/docs">Docs</a></main><script type="application/ld+json">{"@type":"Article","headline":"Static Guide"}</script></body></html>
