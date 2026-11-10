@@ -1,5 +1,7 @@
 #![deny(unsafe_code)]
 
+mod common;
+
 #[allow(clippy::result_large_err)]
 mod unix {
     use std::{
@@ -245,6 +247,7 @@ mod unix {
         let server = Arc::new(
             Server::new(ServerOptions {
                 session_spec: Some(spec.clone()),
+                state_key_sources: Some(crate::common::isolated_key_sources()),
                 ..Default::default()
             })
             .unwrap(),
@@ -294,6 +297,7 @@ mod unix {
         let restarted = Arc::new(
             Server::new(ServerOptions {
                 session_spec: Some(spec),
+                state_key_sources: Some(crate::common::isolated_key_sources()),
                 ..Default::default()
             })
             .unwrap(),

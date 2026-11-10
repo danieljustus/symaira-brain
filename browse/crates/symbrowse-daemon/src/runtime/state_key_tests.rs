@@ -80,6 +80,61 @@ fn denied_provider_fails_before_creating_store() {
     assert_eq!(calls.load(Ordering::SeqCst), 1);
     assert!(!spec.state_store_dir().exists());
 }
+fn server_with_sources(
+    spec: &SessionSpec,
+    sources: Arc<dyn KeySources>,
+) -> Result<crate::Server, crate::ServerError> {
+    let registry = Arc::new(crate::SessionRegistry::new(crate::SessionRegistryOptions {
+        user_data_root: spec.cache_dir.join("registry"),
+        pid: std::process::id(),
+        scope: String::new(),
+        origin_path: String::new(),
+    }));
+    crate::Server::new(crate::ServerOptions {
+        session_spec: Some(spec.clone()),
+        registry: Some(registry),
+        state_key_sources: Some(sources),
+        ..Default::default()
+    })
+}
+#[test]
+fn production_server_resolves_the_key_only_through_injected_sources() {
+    // `Server::new` without a handler is the production construction path.
+    // The injected providers must replace the host symvault/Keychain probes
+    // entirely: `Sources` panics on any fallback and counts the vault lookup.
+    let spec = spec("injected-server");
+    let calls = Arc::new(AtomicUsize::new(0));
+    let server = server_with_sources(
+        &spec,
+        Arc::new(Sources {
+            calls: calls.clone(),
+            denied: false,
+        }),
+    )
+    .expect("production server with injected sources");
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    drop(server);
+
+    let denied_calls = Arc::new(AtomicUsize::new(0));
+    let error = match server_with_sources(
+        &spec,
+        Arc::new(Sources {
+            calls: denied_calls.clone(),
+            denied: true,
+        }),
+    ) {
+        Ok(_) => panic!("denied injected provider admitted the server"),
+        Err(error) => error,
+    };
+    assert!(
+        error
+            .to_string()
+            .contains("resolve state encryption key: symvault entry"),
+        "{error}"
+    );
+    assert_eq!(denied_calls.load(Ordering::SeqCst), 1);
+    fs::remove_dir_all(spec.state_dir.parent().unwrap()).unwrap();
+}
 #[test]
 fn shared_runtime_decrypts_all_versions_and_encrypts_fresh_capture_once() {
     let spec = spec("shared");

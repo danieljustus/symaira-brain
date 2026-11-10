@@ -1,5 +1,7 @@
 #![deny(unsafe_code)]
 
+mod common;
+
 mod unix {
     use std::{
         fs,
@@ -30,6 +32,7 @@ mod unix {
                 socket_path: socket.clone(),
                 session: "default".to_owned(),
                 idle_timeout: None,
+                state_key_sources: Some(crate::common::isolated_key_sources()),
                 ..Default::default()
             })
             .unwrap(),
@@ -127,6 +130,7 @@ mod unix {
                 socket_path: socket.clone(),
                 session: "default".to_owned(),
                 idle_timeout: None,
+                state_key_sources: Some(crate::common::isolated_key_sources()),
                 ..Default::default()
             })
             .unwrap(),
@@ -163,6 +167,7 @@ mod unix {
                 socket_path: socket.clone(),
                 session: "default".to_owned(),
                 idle_timeout: None,
+                state_key_sources: Some(crate::common::isolated_key_sources()),
                 ..Default::default()
             })
             .unwrap(),
@@ -181,6 +186,7 @@ mod unix {
             socket_path: socket.clone(),
             session: "default".to_owned(),
             idle_timeout: None,
+            state_key_sources: Some(crate::common::isolated_key_sources()),
             ..Default::default()
         })
         .unwrap();
@@ -434,6 +440,7 @@ mod unix {
                 session: owner.clone(),
                 idle_timeout: None,
                 registry: Some(registry.clone()),
+                state_key_sources: Some(crate::common::isolated_key_sources()),
                 ..Default::default()
             })
             .unwrap(),
@@ -485,6 +492,7 @@ mod unix {
                 socket_path: nested_endpoint.clone(),
                 session: format!("nested-{}", std::process::id()),
                 idle_timeout: None,
+                state_key_sources: Some(crate::common::isolated_key_sources()),
                 ..Default::default()
             })
             .unwrap(),
