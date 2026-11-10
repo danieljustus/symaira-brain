@@ -12,7 +12,7 @@ This directory is the Brain receiving copy for PB-2026-09-09 package 3 (Operate)
 - **Source exclusions:** `.swiftlint.yml`, `AGENTS.md`, `CHANGELOG.md`, `LICENSE`, `Makefile`, `NOTICE`, `SAFETY_AUDIT.md`, `assets/branding/product-logo.png`, `docs/assets/social-preview.png`
 - **Intentional adaptations:** none; all 80 imported files match source paths, modes, and blobs.
 - **Support source:** `history/` at the same source commit, received once at `symaira-brain/history/` (14 files); Operate uses that shared `SymCockpitHistory` package.
-- **Manifest pins:** `symaira-appkit` exact `0.14.2`; `history` remains a local package dependency.
+- **Manifest pins:** `symaira-corekit` exact `0.20.0` (AppKit modules; formerly `symaira-appkit`); `history` remains a local package dependency.
 
 The source/consumer cutover completed on 2026-09-13. Brain owns and managed-builds `symoperate` from this tree; the Cockpit `operate/` source package and `symcockpit operate` source route were removed in Cockpit's tune-only cutover. The standalone macOS permission/TCC identity and data boundaries remain unchanged. Brain starts the module only when explicitly enabled; signed release/package-manager migration remains a separate gate.
 

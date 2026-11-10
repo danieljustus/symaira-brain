@@ -14,7 +14,7 @@ let package = Package(
         .executable(name: "symoperate-freeform-snapshot", targets: ["symoperate-freeform-snapshot"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/danieljustus/symaira-appkit.git", exact: "0.15.1"),
+        .package(url: "https://github.com/danieljustus/symaira-corekit.git", exact: "0.20.0"),
         .package(path: "../history"),
     ],
     targets: [
@@ -25,7 +25,7 @@ let package = Package(
             dependencies: [
                 "FreeformSnapshotCore",
                 .product(name: "SymCockpitHistory", package: "history"),
-                .product(name: "SymairaUpdateCheck", package: "symaira-appkit"),
+                .product(name: "SymairaUpdateCheck", package: "symaira-corekit"),
             ],
             resources: [.process("Resources")],
             linkerSettings: [
@@ -38,7 +38,7 @@ let package = Package(
             name: "SymOperateMCP",
             dependencies: [
                 "SymOperateCore",
-                .product(name: "SymairaMCP", package: "symaira-appkit"),
+                .product(name: "SymairaMCP", package: "symaira-corekit"),
             ]
         ),
         .target(
@@ -54,8 +54,8 @@ let package = Package(
             dependencies: [
                 "SymOperateCore",
                 "SymOperateMCP",
-                .product(name: "SymairaUpdateCheck", package: "symaira-appkit"),
-                .product(name: "SymairaMCP", package: "symaira-appkit"),
+                .product(name: "SymairaUpdateCheck", package: "symaira-corekit"),
+                .product(name: "SymairaMCP", package: "symaira-corekit"),
             ]
         ),
         .testTarget(

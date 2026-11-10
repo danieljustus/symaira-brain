@@ -720,7 +720,7 @@ expectations.
 ## Native Apps
 
 Native SwiftUI apps for macOS and iOS are included in the repo. They use
-[`symaira-appkit`](https://github.com/danieljustus/symaira-appkit) for
+[`symaira-corekit`](https://github.com/danieljustus/symaira-corekit) (AppKit modules) for
 theme, CLI runner, and tool detection.
 
 ![SymBrain macOS dashboard](assets/dashboard.png)

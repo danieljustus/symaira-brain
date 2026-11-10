@@ -10,11 +10,11 @@ options:
       file: true
   generateEmptyDirectories: false
 
-# Pin the shared appkit dependency to an exact released version for reproducible builds.
+# Pin the shared AppKit dependency (symaira-corekit) to an exact released version for reproducible builds.
 packages:
-  symaira-appkit:
-    url: https://github.com/danieljustus/symaira-appkit.git
-    exactVersion: 0.18.1
+  symaira-corekit:
+    url: https://github.com/danieljustus/symaira-corekit.git
+    exactVersion: 0.20.0
 
 targets:
   SymBrainCore:
@@ -23,15 +23,15 @@ targets:
     sources:
       - Sources/SymBrainCore
     dependencies:
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaTheme
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaCLIRunner
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaToolKit
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaDaemonKit
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaUpdateCheck
     settings:
       base:
@@ -48,15 +48,15 @@ targets:
         buildPhase: resources
     dependencies:
       - target: SymBrainCore
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaTheme
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaCLIRunner
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaToolKit
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaDaemonKit
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaUpdateCheck
     settings:
       base:
@@ -79,15 +79,15 @@ targets:
       - Tests/SymBrainCoreTests
     dependencies:
       - target: SymBrainCore
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaTheme
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaCLIRunner
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaToolKit
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaDaemonKit
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaUpdateCheck
     settings:
       base:
@@ -104,9 +104,9 @@ targets:
         type: file
         buildPhase: resources
     dependencies:
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaTheme
-      - package: symaira-appkit
+      - package: symaira-corekit
         product: SymairaToolKit
     settings:
       base:

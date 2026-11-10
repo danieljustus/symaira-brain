@@ -11,7 +11,7 @@ This directory is the Brain receiving copy for PB-2026-09-09 package 3a (Scope).
 - **Imported tracked files:** 29; all source tracked paths are present.
 - **Intentional adaptations (2):** `scope/Sources/SymScopeMCP/SymScopeMCPServer.swift` explicitly advertises `capabilities.tools.listChanged` as `false`; `scope/Tests/SymScopeMCPTests/SymScopeMCPTests.swift` tests that metadata and the receiving copy's seven-tool contract.
 - **Support source:** `history/` at the same source commit, received once at `symaira-brain/history/` (14 files); Scope uses that shared package and no second copy.
-- **Manifest pins:** `symaira-appkit` exact `0.14.2`; `history` remains a local package dependency.
+- **Manifest pins:** `symaira-corekit` exact `0.20.0` (AppKit modules; formerly `symaira-appkit`); `history` remains a local package dependency.
 
 All other imported Scope files match source paths, modes, and blob hashes. The source/consumer cutover completed on 2026-09-13: Brain owns and managed-builds `symscope` from this tree; the Cockpit `scope/` source package and `symcockpit scope` source route were removed in Cockpit's tune-only cutover. Scope remains explicitly opt-in and starts no probes/watchers while disabled. No signed Brain-side release or package-manager replacement is implied.
 

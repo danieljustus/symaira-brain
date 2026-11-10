@@ -13,7 +13,7 @@ let package = Package(
         .executable(name: "symscope", targets: ["symscope"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/danieljustus/symaira-appkit.git", exact: "0.15.1"),
+        .package(url: "https://github.com/danieljustus/symaira-corekit.git", exact: "0.20.0"),
         .package(path: "../history"),
     ],
     targets: [
@@ -27,7 +27,7 @@ let package = Package(
             name: "SymScopeMCP",
             dependencies: [
                 "SymScopeCore",
-                .product(name: "SymairaMCP", package: "symaira-appkit"),
+                .product(name: "SymairaMCP", package: "symaira-corekit"),
             ]
         ),
         .target(
