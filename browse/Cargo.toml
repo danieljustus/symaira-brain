@@ -24,7 +24,7 @@ hyper = { version = "=1.12.0", features = ["client", "http1"] }
 hyper-util = { version = "=0.1.21", features = ["tokio"] }
 native-tls = "=0.2.18"
 tokio-native-tls = "=0.3.1"
-html5ever = "=0.39.0"
+html5ever = "=0.40.1"
 markup5ever_rcdom = "=0.39.0"
 rand = "=0.9.5"
 reqwest = { version = "=0.13.5", default-features = false, features = ["cookies", "http2", "native-tls", "socks", "stream"] }
