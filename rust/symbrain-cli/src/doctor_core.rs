@@ -124,11 +124,38 @@ pub(super) fn check_harnesses(profiles_dir: &Path) -> Vec<HarnessCheck> {
         .collect()
 }
 
+/// Profile-scoped Hermes configs (`<hermes home>/profiles/*/config.yaml`), read-only.
+pub(super) fn check_hermes_profiles(profiles_dir: &Path) -> Vec<HarnessCheck> {
+    let (Some(spec), Some(locations)) = (
+        HARNESSES.iter().find(|spec| spec.name == "hermes"),
+        symbrain_harness::hermes_locations(),
+    ) else {
+        return Vec::new();
+    };
+    locations
+        .profiles
+        .iter()
+        .map(|profile| {
+            let name = format!("hermes:{}", profile.name);
+            check_harness_at(*spec, name, &profile.config, profiles_dir)
+        })
+        .collect()
+}
+
 pub(super) fn check_harness(spec: HarnessSpec, profiles_dir: &Path) -> HarnessCheck {
     let path = harness_path(spec).unwrap_or_default();
+    check_harness_at(spec, spec.name.to_string(), &path, profiles_dir)
+}
+
+fn check_harness_at(
+    spec: HarnessSpec,
+    name: String,
+    path: &Path,
+    profiles_dir: &Path,
+) -> HarnessCheck {
     let read_only = spec.format == "yaml";
     let mut check = HarnessCheck {
-        name: spec.name.to_string(),
+        name,
         config_path: path.display().to_string(),
         config_found: false,
         config_parsed: false,
@@ -149,7 +176,7 @@ pub(super) fn check_harness(spec: HarnessSpec, profiles_dir: &Path) -> HarnessCh
         check.config_error = "resolve harness config path".to_string();
         return check;
     }
-    let bytes = match fs::read(&path) {
+    let bytes = match fs::read(path) {
         Ok(bytes) => bytes,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return check,
         Err(error) => {
@@ -213,9 +240,8 @@ pub(super) fn check_harness(spec: HarnessSpec, profiles_dir: &Path) -> HarnessCh
 
 pub(super) fn harness_path(spec: HarnessSpec) -> Option<PathBuf> {
     if spec.name == "hermes" {
-        // shortcut: only ~/.hermes/config.yaml, not profiles/*/config.yaml; extend when a profile-scoped Hermes needs checking.
-        let home = std::env::var_os("HOME").filter(|home| !home.is_empty())?;
-        return Some(Path::new(&home).join(".hermes").join("config.yaml"));
+        // `$HERMES_HOME` (default `~/.hermes`); profiles are listed separately.
+        return symbrain_harness::hermes_locations().map(|locations| locations.global);
     }
     symbrain_harness::lookup(spec.name).ok()?.config_path().ok()
 }

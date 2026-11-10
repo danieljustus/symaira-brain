@@ -52,3 +52,11 @@ pub(crate) fn remove_orphans(store: &Path, app: &str) {
         }
     }
 }
+
+/// True while a live run holds the backup slot. Never creates the lock file.
+pub(crate) fn is_held(store: &Path, app: &str) -> bool {
+    let Ok(file) = File::open(store.join(format!(".{app}.lock"))) else {
+        return false;
+    };
+    matches!(file.try_lock_shared(), Err(TryLockError::WouldBlock))
+}

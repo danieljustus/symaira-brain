@@ -200,7 +200,25 @@ fn normalize_accepted_differences(s: &str) -> String {
         out = path.replace_all(&out, "<claude-desktop-dir>").to_string();
     }
 
-    out
+    strip_hermes_list_entry(&out)
+}
+
+/// #1024 accepted divergence: Rust's `harness list` ends with one read-only
+/// Hermes entry (a text block or the last JSON array element) that the
+/// frozen Go output never had. Only that exact block
+/// (global/profile rows plus the read-only note, at the very end) is removed;
+/// any other drift, or a block elsewhere, still fails the comparison.
+fn strip_hermes_list_entry(s: &str) -> String {
+    let block = regex::Regex::new(
+        r"(?m)^hermes\tHermes\n(?:  (?:global|profile [^\t\n]+)\t[^\t\n]*config\.yaml\t(?:missing|parsed|unparsed|invalid)\tservers=[^\n]*\n|    error: [^\n]*\n)+  note\tread-only: symbrain install/uninstall do not support Hermes\n\n\z",
+    )
+    .unwrap();
+    let json = regex::Regex::new(
+        r#",\{"name":"hermes","display_name":"Hermes","global":\{"path":"[^"]*config\.yaml","exists":false,"parsed":false,"servers":\[\]\},"read_only":true\}(\]\}\n?)\z"#,
+    )
+    .unwrap();
+    let out = block.replace(s, "");
+    json.replace(&out, "$1").to_string()
 }
 
 /// Cases that can never match this test's environment (no `SYMBRAIN_GO_BINARY`,

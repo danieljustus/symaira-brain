@@ -11,6 +11,7 @@ mod go_letters;
 mod go_quote;
 mod go_read;
 mod go_toml;
+mod hermes;
 mod inventory;
 mod inventory_read;
 mod json;
@@ -24,9 +25,12 @@ pub use backup::{backup, backup_at};
 pub use diff::unified_diff;
 pub use document::{Document, empty, load, parse};
 pub use entry::{Entry, SUPERSEDED_CORE_NAMES};
+pub use hermes::{
+    HERMES_HOME_ENV, HermesLocations, HermesProfile, hermes_locations, locations_from,
+};
 pub use inventory::{
-    Binding, BindingScan, BindingScanError, ConfigInventory, HarnessInventory, Inventory, list,
-    list_for_env, profile_bindings,
+    Binding, BindingScan, BindingScanError, ConfigInventory, HarnessInventory, Inventory,
+    ProfileInventory, list, list_for_env, profile_bindings,
 };
 pub use registry::{
     ConfigLocation, Format, Harness, HarnessName, InstructionAdapter, Name, SERVER_NAME,

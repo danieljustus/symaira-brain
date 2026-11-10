@@ -7,7 +7,9 @@ use symbrain_core::xdg;
 use symbrain_managed::{Manifest, Platform, installed_version, versions_match};
 use toml_edit::DocumentMut;
 
-use super::doctor_core::{check_harnesses, check_memory_db, check_skills_library, probe_version};
+use super::doctor_core::{
+    check_harnesses, check_hermes_profiles, check_memory_db, check_skills_library, probe_version,
+};
 use super::doctor_links::{check_foreign_access_risks, check_handshakes, check_links};
 use super::doctor_process::which;
 use super::doctor_types::{
@@ -49,6 +51,8 @@ pub(super) fn run_checks(vault_agent: &str) -> DoctorReport {
                 ..Degradation::default()
             }],
         },
+        hermes_profiles: check_hermes_profiles(&profiles_dir),
+        pending_backups: super::doctor_backup::check_pending_backups(),
         harnesses,
     }
 }

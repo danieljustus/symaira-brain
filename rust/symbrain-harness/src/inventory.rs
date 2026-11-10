@@ -27,6 +27,15 @@ pub struct ConfigInventory {
     pub servers: Vec<crate::ServerInfo>,
 }
 
+/// Configuration state of one named, profile-scoped harness config.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProfileInventory {
+    /// Profile name.
+    pub name: String,
+    /// State of the profile's configuration file.
+    pub config: ConfigInventory,
+}
+
 /// Global and optional project configuration state for one harness.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HarnessInventory {
@@ -39,6 +48,12 @@ pub struct HarnessInventory {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Project-local configuration state when supported and requested.
     pub project: Option<ConfigInventory>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    /// Profile-scoped configurations (Hermes only).
+    pub profiles: Vec<ProfileInventory>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    /// True when symbrain only reads this harness and cannot install into it.
+    pub read_only: bool,
 }
 
 /// Read-only inventory of every install-capable harness.
@@ -128,6 +143,8 @@ fn list_with_locations(
             global: inspect(harness, global_path, global_capability),
             project: project
                 .map(|(path, capability)| inspect(harness, Some(path), Some(capability))),
+            profiles: Vec::new(),
+            read_only: false,
         });
     }
     Inventory {

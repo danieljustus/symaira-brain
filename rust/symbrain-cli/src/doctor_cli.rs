@@ -15,6 +15,8 @@ mod doctor_output;
 #[path = "doctor_render.rs"]
 mod doctor_render;
 
+#[path = "doctor_backup.rs"]
+mod doctor_backup;
 #[path = "doctor_checks.rs"]
 mod doctor_checks;
 #[path = "doctor_core.rs"]

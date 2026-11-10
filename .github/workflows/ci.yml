@@ -104,6 +104,8 @@ jobs:
           fetch-depth: 0
       - name: Differential harness timeout handling
         run: python3 -m unittest discover -s scripts -p test_rust_differential.py -v
+      - name: Accepted-divergence contracts (doctor and harness list)
+        run: python3 -m unittest discover -s scripts -p 'test_*_contract.py' -v
       - name: Skills-status mutant classification
         run: python3 -m unittest discover -s scripts/skills-status-config-oracle -p test_run.py -v
       - name: Memory store corrupt-read classification

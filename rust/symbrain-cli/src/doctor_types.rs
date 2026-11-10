@@ -125,6 +125,17 @@ pub(crate) struct HarnessCheck {
     pub(crate) superseded: Vec<String>,
 }
 
+/// A first-run state backup that was paused before it finished (#1020).
+#[derive(Debug, Serialize)]
+pub(crate) struct PendingBackup {
+    pub(crate) app: String,
+    pub(crate) partial_path: String,
+    /// A live process is copying right now.
+    pub(crate) running: bool,
+    /// How to let the backup finish.
+    pub(crate) finish: String,
+}
+
 #[derive(Debug, Serialize)]
 pub(crate) struct ProfileHandshake {
     pub(crate) profile: String,
@@ -173,6 +184,11 @@ pub(crate) struct DoctorReport {
     pub(crate) skills_library: SkillsLibraryCheck,
     pub(crate) profiles: Vec<String>,
     pub(crate) harnesses: Vec<HarnessCheck>,
+    /// `profiles/*/config.yaml` of Hermes; read-only (#1024).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) hermes_profiles: Vec<HarnessCheck>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) pending_backups: Vec<PendingBackup>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub(crate) handshakes: Vec<ProfileHandshake>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
