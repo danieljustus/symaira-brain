@@ -23,7 +23,7 @@ pub(crate) fn cache_path(
         let absolute = std::path::absolute(project)
             .map_err(|error| SkillError(format!("resolve project cache identity: {error}")))?;
         let digest = Sha256::digest(absolute.to_string_lossy().as_bytes());
-        format!("{digest:x}")
+        symbrain_core::hex::lower(digest)
     } else {
         "user".to_owned()
     };

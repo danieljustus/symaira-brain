@@ -137,7 +137,7 @@ fn stdout(output: &Output) -> String {
 
 fn sha256_hex(path: &Path) -> String {
     let bytes = std::fs::read(path).unwrap_or_else(|error| panic!("{error}"));
-    format!("{:x}", Sha256::digest(bytes))
+    symbrain_core::hex::lower(Sha256::digest(bytes))
 }
 
 fn write_skill(path: &Path, body: &str) {

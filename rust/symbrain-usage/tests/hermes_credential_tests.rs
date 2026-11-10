@@ -101,7 +101,7 @@ fn usage_hermes_768_matches_frozen_go_file_and_jwt_contracts() {
         );
         if let Some(contents) = &before {
             assert_eq!(
-                format!("{:x}", Sha256::digest(contents)),
+                symbrain_core::hex::lower(Sha256::digest(contents)),
                 record["sha256"].as_str().expect("source hash")
             );
         }

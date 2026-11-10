@@ -139,7 +139,7 @@ fn source_fingerprint(bundle: &Bundle) -> Result<String, SkillError> {
         hasher.update(&bytes);
         hasher.update([0]);
     }
-    Ok(format!("{:x}", hasher.finalize()))
+    Ok(symbrain_core::hex::lower(hasher.finalize()))
 }
 
 fn source_hash_with_tree(tree_hash: &str, rendered: &Rendered) -> String {
@@ -153,7 +153,7 @@ fn source_hash_with_tree(tree_hash: &str, rendered: &Rendered) -> String {
         hasher.update([0]);
         hasher.update(files_hash.as_bytes());
     }
-    format!("{:x}", hasher.finalize())
+    symbrain_core::hex::lower(hasher.finalize())
 }
 
 fn source_tree_hash(bundle: &Bundle) -> Result<String, SkillError> {
@@ -181,7 +181,7 @@ fn source_tree_hash(bundle: &Bundle) -> Result<String, SkillError> {
         hasher.update(&bytes);
         hasher.update([0]);
     }
-    Ok(format!("{:x}", hasher.finalize()))
+    Ok(symbrain_core::hex::lower(hasher.finalize()))
 }
 
 fn variant_files_hash(files: &BTreeMap<String, Vec<u8>>) -> Option<String> {
@@ -195,5 +195,5 @@ fn variant_files_hash(files: &BTreeMap<String, Vec<u8>>) -> Option<String> {
         hasher.update(bytes);
         hasher.update([0]);
     }
-    Some(format!("{:x}", hasher.finalize()))
+    Some(symbrain_core::hex::lower(hasher.finalize()))
 }

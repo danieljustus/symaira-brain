@@ -434,13 +434,13 @@ pub fn hash_entry(data: &str, previous_hash: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(previous_hash.as_bytes());
     hasher.update(data.as_bytes());
-    format!("{:x}", hasher.finalize())
+    symbrain_core::hex::lower(hasher.finalize())
 }
 
 fn hash_bytes(data: &[u8]) -> String {
     let mut hasher = Sha256::new();
     hasher.update(data);
-    format!("{:x}", hasher.finalize())
+    symbrain_core::hex::lower(hasher.finalize())
 }
 
 pub(crate) fn go_json<T: Serialize>(value: &T) -> io::Result<String> {

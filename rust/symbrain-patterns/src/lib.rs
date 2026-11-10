@@ -75,7 +75,7 @@ pub fn name(profile: &str, steps: &[Step]) -> String {
             .map(|step| format!("{}_{}", step.server, step.tool)),
     );
     let slug = parts.join("_");
-    let hash = format!("{:x}", Sha256::digest(sequence_key(profile, steps)));
+    let hash = symbrain_core::hex::lower(Sha256::digest(sequence_key(profile, steps)));
     format!("{slug}_{}", &hash[..8])
 }
 

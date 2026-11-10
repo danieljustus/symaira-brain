@@ -17,8 +17,17 @@ use crate::{Core, ManagedError};
 pub fn sha256_file(path: &Path) -> Result<String, ManagedError> {
     let mut file = File::open(path)?;
     let mut hasher = Sha256::new();
-    std::io::copy(&mut file, &mut hasher).map_err(ManagedError::Io)?;
-    Ok(format!("{:x}", hasher.finalize()))
+    let mut buffer = [0_u8; 8 * 1024];
+    loop {
+        // sha2 0.11 hashers no longer implement `io::Write`, so stream by hand.
+        match file.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(read) => hasher.update(&buffer[..read]),
+            Err(err) if err.kind() == std::io::ErrorKind::Interrupted => {}
+            Err(err) => return Err(ManagedError::Io(err)),
+        }
+    }
+    Ok(symbrain_core::hex::lower(hasher.finalize()))
 }
 
 /// Verifies a file against a case-insensitive, whitespace-tolerant digest.

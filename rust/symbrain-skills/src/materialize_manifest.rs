@@ -186,7 +186,7 @@ fn collect_manifest_inner(
                 kind: "file".into(),
                 mode: format!("{mode:04o}"),
                 size: bytes.len() as u64,
-                sha256: format!("{sum:x}"),
+                sha256: symbrain_core::hex::lower(sum),
             });
         } else {
             return Err(io::Error::other(
@@ -200,5 +200,5 @@ fn collect_manifest_inner(
 fn manifest_digest(manifest: &[OutputEntry]) -> Result<String, SkillError> {
     let bytes = serde_json::to_vec(manifest)
         .map_err(|error| SkillError(format!("encode output manifest: {error}")))?;
-    Ok(format!("{:x}", Sha256::digest(bytes)))
+    Ok(symbrain_core::hex::lower(Sha256::digest(bytes)))
 }

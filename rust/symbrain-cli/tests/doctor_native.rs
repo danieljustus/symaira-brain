@@ -223,7 +223,9 @@ fn doctor_flags_a_provenance_sidecar_that_no_longer_matches_the_binary() {
     };
 
     // A sidecar describing the installed binary changes nothing.
-    write_sidecar(&format!("{:x}", Sha256::digest(script.as_bytes())));
+    write_sidecar(&symbrain_core::hex::lower(Sha256::digest(
+        script.as_bytes(),
+    )));
     assert_eq!(
         command(&root, &["doctor"]).output().unwrap().stdout,
         human_without_sidecar

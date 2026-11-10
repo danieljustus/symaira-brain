@@ -235,7 +235,7 @@ pub fn stable_id(parts: &[&str]) -> String {
         hasher.update(part.as_bytes());
         hasher.update([0]);
     }
-    let hash = format!("{:x}", hasher.finalize());
+    let hash = symbrain_core::hex::lower(hasher.finalize());
     format!("activity-{}", &hash[..32])
 }
 

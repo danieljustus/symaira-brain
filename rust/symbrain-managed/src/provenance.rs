@@ -113,14 +113,10 @@ pub fn sidecar_is_stale(managed_dir: &Path, binary: &str, recorded_sha256: &str)
     if recorded_sha256.len() != 64 || !recorded_sha256.bytes().all(|b| b.is_ascii_hexdigit()) {
         return false;
     }
-    let Ok(mut file) = fs::File::open(managed_dir.join(binary)) else {
+    let Ok(actual) = crate::archive::sha256_file(&managed_dir.join(binary)) else {
         return false;
     };
-    let mut hasher = Sha256::new();
-    if std::io::copy(&mut file, &mut hasher).is_err() {
-        return false;
-    }
-    !format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(recorded_sha256)
+    !actual.eq_ignore_ascii_case(recorded_sha256)
 }
 
 /// Formats an operating-system error without Rust's extra numeric suffix.
@@ -153,7 +149,7 @@ pub(super) fn record_release_provenance(
         version: &core.version,
         repo: &core.repo,
         built_at: Utc::now().to_rfc3339_opts(SecondsFormat::AutoSi, true),
-        binary_sha256: format!("{:x}", Sha256::digest(binary)),
+        binary_sha256: symbrain_core::hex::lower(Sha256::digest(binary)),
     };
     write_record(bin_dir, &core.binary_name, &provenance)
 }

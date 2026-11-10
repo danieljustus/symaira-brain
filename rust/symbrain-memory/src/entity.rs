@@ -273,6 +273,6 @@ pub(crate) fn stable_id(parts: &[&str]) -> String {
         hasher.update(part.as_bytes());
         hasher.update([0]);
     }
-    let hex = format!("{:x}", hasher.finalize());
+    let hex = symbrain_core::hex::lower(hasher.finalize());
     format!("memory-{}", &hex[..32])
 }

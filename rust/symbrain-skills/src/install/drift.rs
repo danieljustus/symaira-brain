@@ -248,7 +248,7 @@ fn walk_hashes(
                 "skill tree exceeds maximum total size".to_owned(),
             ));
         }
-        output.insert(relative, format!("{:x}", Sha256::digest(bytes)));
+        output.insert(relative, symbrain_core::hex::lower(Sha256::digest(bytes)));
     }
     Ok(())
 }

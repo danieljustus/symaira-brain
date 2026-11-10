@@ -92,7 +92,7 @@ fn jsonl_bytes_hash_and_go_roundtrip_match() {
     evidence::encode_jsonl(&mut encoded, &oracle.extractions).unwrap();
     assert_eq!(encoded, oracle.jsonl.as_bytes());
     assert_eq!(
-        format!("{:x}", Sha256::digest(&encoded)),
+        symbrain_core::hex::lower(Sha256::digest(&encoded)),
         oracle.jsonl_sha256
     );
 }

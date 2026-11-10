@@ -151,7 +151,7 @@ fn copilot_kimi_oracle_replay() {
         for (path, hash) in record["file_sha256"].as_object().unwrap() {
             let bytes = std::fs::read(path).unwrap();
             assert_eq!(
-                format!("{:x}", Sha256::digest(&bytes)),
+                symbrain_core::hex::lower(Sha256::digest(&bytes)),
                 hash.as_str().unwrap()
             );
             before.insert(path, bytes);
@@ -254,7 +254,7 @@ fn baseline_routes(evidence: &frozen::Frozen, current: &[serde_json::Value]) {
             .map(|(path, hash)| {
                 let bytes = std::fs::read(path).unwrap();
                 assert_eq!(
-                    format!("{:x}", Sha256::digest(&bytes)),
+                    symbrain_core::hex::lower(Sha256::digest(&bytes)),
                     hash.as_str().unwrap()
                 );
                 (path, bytes)
