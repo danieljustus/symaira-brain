@@ -31,7 +31,7 @@ sha2.workspace = true
 getrandom = "=0.4.3"
 # Unicode NFD/NFC for entity-name matching (Go: golang.org/x/text/unicode/norm).
 # Pure Rust, MIT/Apache-2.0, only dep tinyvec (already locked).
-unicode-normalization = "=0.1.25"
+unicode-normalization = "=0.1.26"
 symaira-core-llm.workspace = true
 symbrain-activity.workspace = true
 

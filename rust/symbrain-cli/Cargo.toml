@@ -36,7 +36,7 @@ symbrain-policy.workspace = true
 symbrain-skills.workspace = true
 symbrain-usage.workspace = true
 # Go inflates gzip response bodies transparently; same pinned crate symbrain-managed locks.
-flate2 = "=1.1.10"
+flate2 = "=1.1.11"
 ureq.workspace = true
 toml_edit.workspace = true
 tempfile.workspace = true
