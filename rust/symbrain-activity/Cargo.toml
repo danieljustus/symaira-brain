@@ -10,7 +10,7 @@ repository.workspace = true
 [dependencies]
 chrono.workspace = true
 serde.workspace = true
-sha2 = "0.10.9"
+sha2 = "0.11.1"
 symbrain-policy.workspace = true
 
 [dev-dependencies]
