@@ -299,3 +299,18 @@ seam local-fixture cost, not isolated Fetch latency, a frequency claim or anothe
 acceptance threshold. The original loaded failure and all prior240/120 proof
 remain historical; no sample was discarded. Complete#773/native6/default
 cutover, inherited parity gaps and connection reuse optimization remain open.
+
+## Addendum 2026-11-10: fixed-threshold fetch p95 on macOS arm64
+
+Go is removed, so the value gate is the recorded Go fetch p95 (5.894 ms) x 1.10 =
+6.4834 ms for the Rust release binary on the unchanged `rust016-static-fetch-html-v1`
+workload, measured by the unmodified `port/bench/run.py --rust` (30 samples,
+nearest-rank). Previous Rust evidence was 30.326 ms. The gap was not the HTTP stack:
+each gated `fetch.url` journal append flushed with `File::sync_all`, which is
+`fcntl(F_FULLFSYNC)` on macOS (p90 ~5.9 ms on the benchmark volume). The journal now
+uses plain `fsync(2)` on macOS; fetch controls are unchanged. Result: p95 0.568-0.689 ms
+in three runs at load ~15 (`port/evidence/fetch-control-773/macos-fetch-p95/`;
+`port/harness/fetch_p95_gate.py` recomputes the p95 from the raw samples). Power-loss
+durability of the newest audit line is the accepted trade-off; contention on a saturated
+volume can still hurt both flush modes. This is local macOS evidence only; native CI rows
+and #773 closure remain pending.

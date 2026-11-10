@@ -209,7 +209,7 @@ impl Store {
         fs2::FileExt::lock_exclusive(&file)?;
         let result = (|| {
             file.write_all(&line)?;
-            file.sync_all()
+            flush_to_storage(&file)
         })();
         let unlock = fs2::FileExt::unlock(&file);
         result?;
@@ -287,6 +287,25 @@ impl Store {
         };
         names.sort();
         Ok(names)
+    }
+}
+
+/// Make one appended journal line durable against process and kernel crashes.
+///
+/// `File::sync_all` is `fcntl(F_FULLFSYNC)` on macOS: it also drains the drive
+/// write cache and, on the shared NVMe, regularly stalls for ~6 ms. That cost
+/// landed on every gated `fetch.url` request (#773 p95 gate). Plain `fsync(2)`
+/// keeps the write ordered and visible to every later reader, as SQLite does by
+/// default; only an abrupt power loss may drop the newest audit lines. Other
+/// Unix systems keep `sync_all`, which already is `fsync(2)` there.
+fn flush_to_storage(file: &File) -> std::io::Result<()> {
+    #[cfg(target_os = "macos")]
+    {
+        rustix::fs::fsync(file).map_err(std::io::Error::from)
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        file.sync_all()
     }
 }
 

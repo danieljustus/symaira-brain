@@ -197,7 +197,30 @@
         "cargo nextest run -p symbrowse-fetch",
         "python3 port/harness/run.py --suite fetch-control"
       ],
-      "stop_rule": "No public-Internet oracle; every redirect hop remains policy checked."
+      "stop_rule": "No public-Internet oracle; every redirect hop remains policy checked.",
+      "value_gate": {
+        "issue": "#773",
+        "threshold_ms": 6.4834,
+        "basis": "recorded Go fetch p95 5.894 ms x 1.10 (Go removed; fixed threshold)",
+        "workload_fixture": "rust016-static-fetch-html-v1",
+        "previous_rust_p95_ms": 30.326,
+        "macos_arm64_local": {
+          "p95_ms": [
+            0.6887,
+            0.5681,
+            0.6284
+          ],
+          "median_ms": [
+            0.4045,
+            0.4126,
+            0.3733
+          ],
+          "samples_per_run": 30,
+          "evidence": "port/evidence/fetch-control-773/macos-fetch-p95",
+          "gate": "pass locally; native CI rows pending"
+        },
+        "root_cause": "journal append used File::sync_all (F_FULLFSYNC on macOS) on every gated fetch.url"
+      }
     },
     {
       "id": "RUST-008",
