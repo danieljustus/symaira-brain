@@ -1,5 +1,5 @@
 //! Browser-grade HTML parsing and deterministic DOM cleanup.
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Cursor;
 
 use html5ever::{parse_document, tendril::TendrilSink};
@@ -311,14 +311,27 @@ pub fn select(root: &Node, selector: &str) -> Result<Vec<Node>, SelectorError> {
     // CSS querySelectorAll returns document order and never returns an element
     // twice when it matches two comma-separated groups.
     let mut seen = HashSet::new();
-    let unique = matches
+    let mut order = HashMap::new();
+    document_order(root, &mut order);
+    let mut unique = matches
         .into_iter()
-        .filter_map(|(identity, node)| seen.insert(identity).then_some(node))
+        .filter_map(|(identity, node)| seen.insert(identity).then_some((identity, node)))
         .collect::<Vec<_>>();
+    unique.sort_by_key(|(identity, _)| order.get(identity).copied().unwrap_or(usize::MAX));
+    let unique = unique.into_iter().map(|(_, node)| node).collect::<Vec<_>>();
     if unique.is_empty() {
         Err(SelectorError(selector.to_owned()))
     } else {
         Ok(unique)
+    }
+}
+
+/// Pre-order position of every node, keyed by address, so comma groups can be
+/// merged into document order like `querySelectorAll`.
+fn document_order(node: &Node, order: &mut HashMap<*const Node, usize>) {
+    order.insert(std::ptr::from_ref(node), order.len());
+    for child in children(node) {
+        document_order(child, order);
     }
 }
 
@@ -337,6 +350,11 @@ fn parse_selector_groups(selector: &str) -> Result<Vec<Vec<(Combinator, String)>
         let mut chars = group.trim().chars().peekable();
         while let Some(ch) = chars.next() {
             if ch == '>' {
+                if current.trim().is_empty() && (tokens.is_empty() || pending == Combinator::Child)
+                {
+                    // Leading or doubled combinator: not a valid selector.
+                    return Err(SelectorError(selector.to_owned()));
+                }
                 if !current.trim().is_empty() {
                     tokens.push((pending, current.trim().to_owned()));
                     current.clear();
@@ -363,6 +381,9 @@ fn parse_selector_groups(selector: &str) -> Result<Vec<Vec<(Combinator, String)>
         }
         if !current.trim().is_empty() {
             tokens.push((pending, current.trim().to_owned()));
+        } else if pending == Combinator::Child {
+            // Trailing combinator with nothing after it.
+            return Err(SelectorError(selector.to_owned()));
         }
         if tokens.is_empty()
             || tokens.len() > 64
