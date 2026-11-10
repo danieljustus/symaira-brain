@@ -353,10 +353,22 @@ fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'sta
     )
 }
 
+/// `Page.navigate` reports an HTTP error page with an empty body as a
+/// navigation error, although the server answered. Chrome 155 uses
+/// `net::ERR_ABORTED`, Chrome 156 `net::ERR_HTTP_RESPONSE_CODE_FAILURE`; Go's
+/// polling contract treats both as a completed navigation.
+#[must_use]
+pub fn is_http_response_navigation(error_text: &str) -> bool {
+    matches!(
+        error_text,
+        "net::ERR_ABORTED" | "net::ERR_HTTP_RESPONSE_CODE_FAILURE"
+    )
+}
+
 fn page_navigate_error(result: page::NavigateReturns) -> Option<chromiumoxide::error::CdpError> {
     result
         .error_text
-        .filter(|message| message != "net::ERR_ABORTED")
+        .filter(|message| !is_http_response_navigation(message))
         .map(chromiumoxide::error::CdpError::ChromeMessage)
 }
 
@@ -1351,6 +1363,13 @@ mod tests {
         }))
         .expect("decode aborted Page.navigate response");
         assert!(page_navigate_error(aborted).is_none());
+
+        let empty_error_page: page::NavigateReturns = serde_json::from_value(json!({
+            "frameId": "frame-id",
+            "errorText": "net::ERR_HTTP_RESPONSE_CODE_FAILURE"
+        }))
+        .expect("decode empty error page Page.navigate response");
+        assert!(page_navigate_error(empty_error_page).is_none());
     }
 
     #[test]

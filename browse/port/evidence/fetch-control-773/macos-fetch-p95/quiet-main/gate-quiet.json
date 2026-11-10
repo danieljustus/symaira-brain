@@ -1,0 +1,40 @@
+{
+  "threshold_ms": 6.4834,
+  "workload_fixture": "rust016-static-fetch-html-v1",
+  "runs": [
+    {
+      "report": "bench-quiet-1.json",
+      "samples": 30,
+      "p95_ns": 1290167,
+      "p95_ms": 1.2902,
+      "median_ms": 0.7607,
+      "max_ms": 2.9502,
+      "under_threshold": true,
+      "binary_sha256": "5899cca74cbbf0093cf91ec87058fbf8c69d09bc302836c222f6776972c5c18d",
+      "problems": []
+    },
+    {
+      "report": "bench-quiet-2.json",
+      "samples": 30,
+      "p95_ns": 1549083,
+      "p95_ms": 1.5491,
+      "median_ms": 0.7183,
+      "max_ms": 2.4768,
+      "under_threshold": true,
+      "binary_sha256": "5899cca74cbbf0093cf91ec87058fbf8c69d09bc302836c222f6776972c5c18d",
+      "problems": []
+    },
+    {
+      "report": "bench-quiet-3.json",
+      "samples": 30,
+      "p95_ns": 3011125,
+      "p95_ms": 3.0111,
+      "median_ms": 1.8037,
+      "max_ms": 3.9453,
+      "under_threshold": true,
+      "binary_sha256": "5899cca74cbbf0093cf91ec87058fbf8c69d09bc302836c222f6776972c5c18d",
+      "problems": []
+    }
+  ],
+  "pass": true
+}

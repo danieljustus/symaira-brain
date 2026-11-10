@@ -69,3 +69,24 @@ So the committed claim is limited to a quiet benchmark host; a loaded/contended 
 fail it. Making the journal write non-blocking for the request (group commit / flush off the
 request path) is the open design decision if the gate must hold under contention; it changes the
 audit-line durability contract and was not done here.
+
+## Quiet-host gate on main 712e3e31b (2026-11-10)
+
+Decision for #773: the p95 gate is measured on a quiet host only; the journal write stays
+synchronous (no group commit), so the audit-line durability contract is unchanged.
+
+Release binary built at `712e3e31b` (sha256 `5899cca7...c5c18d`), then
+`port/bench/run.py --workload fetch --runs 30` three times at 1-minute load ~15
+(`quiet-main/bench-quiet-{1,2,3}.json`, recomputed in `quiet-main/gate-quiet.json`):
+
+| Run | p95 (ms) | median (ms) | max (ms) | Gate (<= 6.4834 ms) |
+|---|---|---|---|---|
+| 1 | 1.290 | 0.761 | 2.950 | pass |
+| 2 | 1.549 | 0.718 | 2.477 | pass |
+| 3 | 3.011 | 1.804 | 3.945 | pass |
+
+All 90 samples passed the response-semantics check and the wrong-but-fast negative control was
+rejected. Under contention (load 20-90) the gate is not stable, see the section above.
+On macOS the runner needs `SYMAIRA_EXTERNAL_RUNTIME_ROOT` set to a very short directory on the
+NVMe volume, otherwise the daemon socket path exceeds `SUN_LEN` and the report records
+`status: error` with zero samples.
