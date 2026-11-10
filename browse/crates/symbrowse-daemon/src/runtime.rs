@@ -136,7 +136,56 @@ impl DispatchRuntime {
         }
     }
 
+    /// Close every engine this runtime may own. Chrome, Firefox and Safari are
+    /// each closed explicitly so shutdown never depends on `Drop` ordering or
+    /// on a process-exit kill; one engine failing never skips the others.
     fn shutdown_browser(&self) {
+        self.shutdown_chrome();
+        self.shutdown_firefox();
+        #[cfg(target_os = "macos")]
+        self.shutdown_safari();
+    }
+
+    fn shutdown_firefox(&self) {
+        let started = std::time::Instant::now();
+        let outcome = block_on_timeout(&self.runtime, Duration::from_secs(3), async {
+            let session = self.firefox.lock().await.take();
+            match session {
+                None => "none",
+                Some(mut session) => match session.close().await {
+                    Ok(()) => "closed",
+                    Err(_) => "close-error",
+                },
+            }
+        })
+        .unwrap_or("close-timeout");
+        eprintln!(
+            "symbrowse shutdown: firefox {outcome} elapsed_ms={}",
+            started.elapsed().as_millis()
+        );
+    }
+
+    #[cfg(target_os = "macos")]
+    fn shutdown_safari(&self) {
+        let started = std::time::Instant::now();
+        let outcome = block_on_timeout(&self.runtime, Duration::from_secs(3), async {
+            let session = self.safari.lock().await.take();
+            match session {
+                None => "none",
+                Some(mut session) => match session.close().await {
+                    Ok(()) => "closed",
+                    Err(_) => "close-error",
+                },
+            }
+        })
+        .unwrap_or("close-timeout");
+        eprintln!(
+            "symbrowse shutdown: safari {outcome} elapsed_ms={}",
+            started.elapsed().as_millis()
+        );
+    }
+
+    fn shutdown_chrome(&self) {
         eprintln!("symbrowse shutdown: begin");
         let browser = self
             .browser
@@ -2149,6 +2198,21 @@ mod tests {
     ) -> Result<Arc<DispatchRuntime>, DaemonError> {
         let store = state_key::initialize_with_sources(&spec, state_key::tests::AbsentSources)?;
         DispatchRuntime::new_with_store(spec, url, store)
+    }
+
+    #[test]
+    fn shutdown_visits_every_engine_slot_and_is_idempotent() {
+        let runtime = test_runtime(temp_spec("shutdown-all-engines")).expect("runtime");
+        // No engine was launched: every slot is empty and each close step must
+        // finish promptly without leaving a lock held.
+        runtime.shutdown_browser();
+        runtime.shutdown_browser();
+        runtime.runtime.block_on(async {
+            assert!(runtime.firefox.lock().await.is_none());
+            #[cfg(target_os = "macos")]
+            assert!(runtime.safari.lock().await.is_none());
+        });
+        assert!(runtime.browser.lock().unwrap().is_none());
     }
 
     fn temp_spec(name: &str) -> SessionSpec {

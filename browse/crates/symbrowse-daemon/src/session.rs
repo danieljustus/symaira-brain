@@ -2,7 +2,7 @@ use std::{
     collections::BTreeMap,
     fs, io,
     path::{Path, PathBuf},
-    sync::RwLock,
+    sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
 pub const SESSION_SCHEMA_VERSION: u32 = 1;
@@ -109,6 +109,21 @@ impl SessionRegistry {
         }
     }
 
+    /// Recover from a poisoned lock instead of panicking in a request path.
+    /// Every mutation below is a single map insert/update/clear, so a panic
+    /// in another thread cannot leave the map half-written.
+    fn read_sessions(&self) -> RwLockReadGuard<'_, BTreeMap<String, Session>> {
+        self.sessions
+            .read()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    fn write_sessions(&self) -> RwLockWriteGuard<'_, BTreeMap<String, Session>> {
+        self.sessions
+            .write()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
     pub fn user_data_root(&self) -> &Path {
         &self.user_data_root
     }
@@ -117,15 +132,10 @@ impl SessionRegistry {
         if !crate::validate_session(name) {
             return Err(SessionError::InvalidName(name.to_owned()));
         }
-        if let Some(session) = self
-            .sessions
-            .read()
-            .expect("session registry poisoned")
-            .get(name)
-        {
+        if let Some(session) = self.read_sessions().get(name) {
             return Ok(session.info.clone());
         }
-        let mut sessions = self.sessions.write().expect("session registry poisoned");
+        let mut sessions = self.write_sessions();
         if let Some(session) = sessions.get(name) {
             return Ok(session.info.clone());
         }
@@ -164,18 +174,14 @@ impl SessionRegistry {
     }
 
     pub fn get(&self, name: &str) -> Result<SessionInfo, SessionError> {
-        self.sessions
-            .read()
-            .expect("session registry poisoned")
+        self.read_sessions()
             .get(name)
             .map(|session| session.info.clone())
             .ok_or_else(|| SessionError::NotFound(name.to_owned()))
     }
 
     pub fn list(&self) -> Vec<SessionInfo> {
-        self.sessions
-            .read()
-            .expect("session registry poisoned")
+        self.read_sessions()
             .values()
             .map(|session| session.info.clone())
             .collect()
@@ -189,7 +195,7 @@ impl SessionRegistry {
     }
 
     pub fn touch(&self, name: &str) -> Result<(), SessionError> {
-        let mut sessions = self.sessions.write().expect("session registry poisoned");
+        let mut sessions = self.write_sessions();
         let session = sessions
             .get_mut(name)
             .ok_or_else(|| SessionError::NotFound(name.to_owned()))?;
@@ -203,7 +209,7 @@ impl SessionRegistry {
                 "active tab count cannot be negative".into(),
             ));
         }
-        let mut sessions = self.sessions.write().expect("session registry poisoned");
+        let mut sessions = self.write_sessions();
         let session = sessions
             .get_mut(name)
             .ok_or_else(|| SessionError::NotFound(name.to_owned()))?;
@@ -217,7 +223,7 @@ impl SessionRegistry {
                 "ref key and ref are required".into(),
             ));
         }
-        let mut sessions = self.sessions.write().expect("session registry poisoned");
+        let mut sessions = self.write_sessions();
         let session = sessions
             .get_mut(name)
             .ok_or_else(|| SessionError::NotFound(name.to_owned()))?;
@@ -227,9 +233,7 @@ impl SessionRegistry {
     }
 
     pub fn reference(&self, name: &str, key: &str) -> Result<String, SessionError> {
-        self.sessions
-            .read()
-            .expect("session registry poisoned")
+        self.read_sessions()
             .get(name)
             .ok_or_else(|| SessionError::NotFound(name.to_owned()))?
             .refs
@@ -241,17 +245,12 @@ impl SessionRegistry {
     }
 
     pub fn clear(&self) {
-        self.sessions
-            .write()
-            .expect("session registry poisoned")
-            .clear();
+        self.write_sessions().clear();
     }
 
     /// Return a copy so callers cannot mutate another session's references.
     pub fn ref_table(&self, name: &str) -> Result<BTreeMap<String, String>, SessionError> {
-        self.sessions
-            .read()
-            .expect("session registry poisoned")
+        self.read_sessions()
             .get(name)
             .map(|session| session.refs.clone())
             .ok_or_else(|| SessionError::NotFound(name.to_owned()))
@@ -330,6 +329,36 @@ mod tests {
         assert!(registry.reference("beta", "save").is_err());
         assert_eq!(registry.list_data().sessions[0].name, "alpha");
         assert_eq!(registry.get("alpha").unwrap().ref_count, 1);
+        registry.clear();
+        assert!(registry.list().is_empty());
+        let _ = fs::remove_dir_all(registry.user_data_root());
+    }
+
+    #[test]
+    fn poisoned_registry_lock_is_recovered_without_panicking() {
+        let registry = std::sync::Arc::new(SessionRegistry::new(SessionRegistryOptions {
+            user_data_root: std::env::temp_dir()
+                .join(format!("symbrowse-session-poison-{}", std::process::id())),
+            pid: 4243,
+            scope: String::new(),
+            origin_path: String::new(),
+        }));
+        registry.ensure("alpha").unwrap();
+        let poisoner = registry.clone();
+        let result = std::thread::spawn(move || {
+            let _guard = poisoner.sessions.write().unwrap();
+            panic!("poison the registry lock");
+        })
+        .join();
+        assert!(result.is_err());
+        assert!(registry.sessions.is_poisoned());
+        assert_eq!(registry.get("alpha").unwrap().name, "alpha");
+        assert_eq!(registry.list().len(), 1);
+        registry.set_active_tabs("alpha", 2).unwrap();
+        registry.set_ref("alpha", "k", "@e1").unwrap();
+        assert_eq!(registry.reference("alpha", "k").unwrap(), "@e1");
+        registry.touch("alpha").unwrap();
+        assert_eq!(registry.ensure("beta").unwrap().name, "beta");
         registry.clear();
         assert!(registry.list().is_empty());
         let _ = fs::remove_dir_all(registry.user_data_root());

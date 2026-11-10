@@ -65,6 +65,16 @@ impl SafariRuntime {
         })
     }
 
+    /// Close the Safari session explicitly. Attach mode only detaches (the
+    /// human's Safari is never touched); BiDi mode ends the driver session
+    /// and reaps the `safaridriver` process it owns.
+    pub async fn close(&mut self) -> Result<(), DaemonError> {
+        match &mut self.session {
+            SafariSession::Attach { engine, .. } => engine.close().map_err(runtime_error),
+            SafariSession::Bidi { engine, .. } => engine.close().await.map_err(runtime_error),
+        }
+    }
+
     #[must_use]
     pub fn planned_capabilities(spec: &SessionSpec) -> Capabilities {
         if spec.engine == "safari-attach" {
