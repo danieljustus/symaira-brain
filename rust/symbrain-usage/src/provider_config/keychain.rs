@@ -327,15 +327,31 @@ fn suffixed_claude_keychain_services() -> Vec<String> {
 
 #[cfg(target_os = "macos")]
 fn claude_keychain_dump_names() -> Vec<String> {
-    let Some(output) = bounded_command_stdout(
-        "/usr/bin/security",
-        &["dump-keychain"],
-        CLAUDE_KEYCHAIN_TIMEOUT,
-        MAX_PROBE_OUTPUT_BYTES,
-    ) else {
-        return Vec::new();
-    };
-    names_from_keychain_dump(&String::from_utf8_lossy(&output))
+    // A listing that failed or exceeded the cap yields no suffixed variants
+    // (the bare service was already tried); it is never parsed partially.
+    keychain_dump_names("/usr/bin/security", MAX_KEYCHAIN_LISTING_BYTES).unwrap_or_default()
+}
+
+/// Why the keychain listing could not be used.
+#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+enum KeychainListingError {
+    /// The dump exceeded `cap` bytes; nothing from it is trusted.
+    Truncated,
+    /// The tool is missing, timed out or exited non-zero.
+    Unavailable,
+}
+
+/// Service names in `<command> dump-keychain`, which lists item attributes
+/// only (no secret values); only the `svce` attribute is extracted. `command`
+/// is injectable so tests use a fake `security` binary.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+fn keychain_dump_names(command: &str, cap: u64) -> Result<Vec<String>, KeychainListingError> {
+    match run_command_capture(command, &["dump-keychain"], CLAUDE_KEYCHAIN_TIMEOUT, cap) {
+        Ok(output) => Ok(names_from_keychain_dump(&String::from_utf8_lossy(&output))),
+        Err(CommandFailure::OutputTooLarge) => Err(KeychainListingError::Truncated),
+        Err(_) => Err(KeychainListingError::Unavailable),
+    }
 }
 
 /// Pulls the service out of a `dump-keychain` attribute line:

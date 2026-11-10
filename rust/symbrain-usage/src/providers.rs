@@ -82,6 +82,9 @@ pub struct Provider {
     device_id_bytes: Option<Vec<u8>>,
     enterprise_host: Option<String>,
     kimi_cli_expires_at: Option<f64>,
+    /// Unresolved `KIMI_CODE_API_KEY` reference failure, kept for the error
+    /// chain when another credential keeps the provider configured (#931).
+    kimi_api_failure: Option<String>,
     /// Claude plan label read with the login; reported on OAuth snapshots only.
     plan: Option<String>,
     /// Claude/Codex accounts, set only when attribution is ambiguous (#1000).
@@ -131,6 +134,7 @@ impl Provider {
             device_id_bytes: None,
             enterprise_host: None,
             kimi_cli_expires_at: None,
+            kimi_api_failure: None,
             plan: None,
             accounts: Vec::new(),
         }

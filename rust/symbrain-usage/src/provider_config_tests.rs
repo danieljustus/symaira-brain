@@ -1,3 +1,5 @@
+#[cfg(unix)]
+use super::{KeychainListingError, MAX_KEYCHAIN_LISTING_BYTES, keychain_dump_names};
 use super::{
     MAX_CREDENTIAL_FILE_BYTES, claude_file_token_in, codex_file_token, codex_from_resolved,
     copilot_file_token_in, decode_base64url, go_trim_space, json_string, kimi_store,
@@ -529,4 +531,73 @@ fn kimi_device_id_trims_like_go_and_keeps_invalid_utf8_bytes() {
         );
     }
     assert_eq!(go_trim_space(b"\xc2\xa0 x \xe3\x80\x80"), b"x");
+}
+
+/// A fake `security` that prints `dump`, so keychain listing tests stay offline.
+#[cfg(unix)]
+fn fake_security(directory: &Path, dump: &str) -> PathBuf {
+    use std::os::unix::fs::PermissionsExt;
+    let data = write(directory, "dump.txt", dump);
+    let script = directory.join("security");
+    fs::write(
+        &script,
+        format!("#!/bin/sh\nexec /bin/cat '{}'\n", data.display()),
+    )
+    .expect("fake security");
+    fs::set_permissions(&script, fs::Permissions::from_mode(0o755)).expect("chmod");
+    script
+}
+
+/// A dump of roughly `filler_lines * 100` bytes with the suffixed Claude item
+/// last, like a real login keychain (about 550 KB) listing it after the filler.
+#[cfg(unix)]
+fn large_dump(filler_lines: usize) -> String {
+    let mut dump = String::from("keychain: \"/Users/dev/Library/Keychains/login.keychain-db\"\n");
+    let filler = "x".repeat(60);
+    dump.extend(
+        (0..filler_lines)
+            .map(|index| format!("    \"svce\"<blob>=\"filler-service-{index:08}-{filler}\"\n")),
+    );
+    dump.push_str("    \"svce\"<blob>=\"Claude Code-credentials-552ffa86\"\n");
+    dump
+}
+
+#[cfg(unix)]
+#[test]
+fn keychain_listing_reads_a_dump_larger_than_the_old_64_kb_cap() {
+    let directory = tempfile::tempdir().expect("temporary directory");
+    let dump = large_dump(6_000);
+    assert!(dump.len() > 500 * 1024, "dump is {} bytes", dump.len());
+    let command = fake_security(directory.path(), &dump);
+    let names = keychain_dump_names(command.to_str().unwrap(), MAX_KEYCHAIN_LISTING_BYTES)
+        .expect("full listing");
+    assert_eq!(
+        names.last().map(String::as_str),
+        Some("Claude Code-credentials-552ffa86")
+    );
+    assert_eq!(names.len(), 6_001);
+    // Attribute names only: the listing never carries credential material.
+    assert!(names.iter().all(|name| !name.contains("password")));
+}
+
+#[cfg(unix)]
+#[test]
+fn keychain_listing_over_the_cap_is_reported_truncated_not_cut_short() {
+    let directory = tempfile::tempdir().expect("temporary directory");
+    let command = fake_security(directory.path(), &large_dump(6_000));
+    assert_eq!(
+        keychain_dump_names(command.to_str().unwrap(), 64 * 1024),
+        Err(KeychainListingError::Truncated)
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn keychain_listing_without_the_tool_is_unavailable() {
+    let directory = tempfile::tempdir().expect("temporary directory");
+    let missing = directory.path().join("no-security");
+    assert_eq!(
+        keychain_dump_names(missing.to_str().unwrap(), MAX_KEYCHAIN_LISTING_BYTES),
+        Err(KeychainListingError::Unavailable)
+    );
 }

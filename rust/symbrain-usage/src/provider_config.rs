@@ -37,9 +37,12 @@ const CLAUDE_KEYCHAIN_SERVICE: &str = "Claude Code-credentials";
 /// an unattended machine.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 const CLAUDE_KEYCHAIN_TIMEOUT: Duration = Duration::from_secs(20);
-/// Bound for the prompt-free macOS Keychain listing.
-#[cfg(target_os = "macos")]
-const MAX_PROBE_OUTPUT_BYTES: u64 = 64 * 1024;
+/// Bound for the prompt-free macOS Keychain listing (`security dump-keychain`).
+/// A real login keychain dumps about 550 KB; the cap leaves ample headroom and
+/// an over-limit dump is reported as [`KeychainListingError::Truncated`], never
+/// parsed partially.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+const MAX_KEYCHAIN_LISTING_BYTES: u64 = 16 * 1024 * 1024;
 
 include!("provider_config/environment.rs");
 include!("provider_config/commands.rs");

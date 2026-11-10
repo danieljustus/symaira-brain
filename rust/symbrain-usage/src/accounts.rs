@@ -58,6 +58,8 @@ pub(crate) struct ClaudeScan {
 }
 
 /// Everything read-only discovery learned about Codex; no credential values.
+/// Single Codex home only: the active `CODEX_HOME` or the default `~/.codex`;
+/// further Codex logins are deliberately not discovered (#1000).
 #[derive(Debug, Default)]
 pub(crate) struct CodexScan {
     pub token_source: Option<String>,

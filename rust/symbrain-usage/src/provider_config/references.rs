@@ -89,6 +89,7 @@ fn command_failure_message(
                 format!("{status}: {detail}")
             }
         }
+        CommandFailure::OutputTooLarge => "command output exceeds the bounded read limit".into(),
         CommandFailure::Other(message) => message,
     }
 }

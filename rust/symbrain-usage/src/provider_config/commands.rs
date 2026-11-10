@@ -5,6 +5,8 @@ enum CommandFailure {
     NotFound,
     TimedOut,
     ExitFailed { code: Option<i32>, stderr: Vec<u8> },
+    /// stdout grew past the caller's cap; never returned truncated.
+    OutputTooLarge,
     Other(String),
 }
 
@@ -83,9 +85,7 @@ fn run_command_capture(
         .read_to_end(&mut output)
         .map_err(|error| CommandFailure::Other(error.to_string()))?;
     if output.len() as u64 > cap {
-        return Err(CommandFailure::Other(
-            "command output exceeds the bounded read limit".into(),
-        ));
+        return Err(CommandFailure::OutputTooLarge);
     }
     Ok(output)
 }
