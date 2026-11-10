@@ -179,6 +179,76 @@ fn doctor_flags_managed_core_version_mismatch_with_setup_fix_hint() {
     );
 }
 
+fn symvault_core(root: &TempDir) -> serde_json::Value {
+    let json = command(root, &["doctor", "--json"]).output().unwrap();
+    let report: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    report["managed_cores"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|core| core["name"] == "symvault")
+        .unwrap()
+        .clone()
+}
+
+#[test]
+fn doctor_flags_a_provenance_sidecar_that_no_longer_matches_the_binary() {
+    use sha2::{Digest, Sha256};
+
+    let root = TempDir::new().unwrap();
+    let managed = root.path().join("home/.symaira/bin");
+    fs::create_dir_all(&managed).unwrap();
+    let pinned = symvault_core(&root)["pinned"].as_str().unwrap().to_string();
+    let binary = managed.join("symvault");
+    let script = format!("#!/bin/sh\nprintf '{{\"version\":\"{pinned}\"}}\\n'\n");
+    fs::write(&binary, &script).unwrap();
+    fs::set_permissions(&binary, fs::Permissions::from_mode(0o755)).unwrap();
+    let human_without_sidecar = command(&root, &["doctor"]).output().unwrap().stdout;
+    let json_without_sidecar = command(&root, &["doctor", "--json"])
+        .output()
+        .unwrap()
+        .stdout;
+
+    let sidecar = managed.join("symvault.provenance.json");
+    let write_sidecar = |sha: &str| {
+        let record = json!({
+            "binary": "symvault",
+            "source": "release",
+            "version": pinned,
+            "repo": "danieljustus/symvault",
+            "built_at": "2026-10-02T10:00:00Z",
+            "binary_sha256": sha,
+        });
+        fs::write(&sidecar, serde_json::to_vec_pretty(&record).unwrap()).unwrap();
+    };
+
+    // A sidecar describing the installed binary changes nothing.
+    write_sidecar(&format!("{:x}", Sha256::digest(script.as_bytes())));
+    assert_eq!(
+        command(&root, &["doctor"]).output().unwrap().stdout,
+        human_without_sidecar
+    );
+    assert_eq!(
+        command(&root, &["doctor", "--json"])
+            .output()
+            .unwrap()
+            .stdout,
+        json_without_sidecar
+    );
+
+    // A sidecar left behind by an out-of-band upgrade is reported.
+    write_sidecar(&"0".repeat(64));
+    let core = symvault_core(&root);
+    assert_eq!(core["mismatch"], json!(null));
+    assert_eq!(core["provenance_stale"], json!(true));
+    let text = String::from_utf8(command(&root, &["doctor"]).output().unwrap().stdout).unwrap();
+    assert!(
+        text.lines().any(|line| line.starts_with("    !  symvault")
+            && line.contains("symvault.provenance.json does not describe the installed binary")),
+        "{text}"
+    );
+}
+
 #[test]
 fn doctor_json_true_uses_json_output() {
     let root = TempDir::new().unwrap();

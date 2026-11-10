@@ -45,12 +45,19 @@ pub(crate) struct ServerCheck {
 #[derive(Debug, Serialize)]
 pub(crate) struct ManagedCoreCheck {
     pub(crate) name: String,
+    /// Binary file name, for human hints only; not part of the JSON shape.
+    #[serde(skip)]
+    pub(crate) binary: String,
     pub(crate) pinned: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub(crate) version: String,
     /// Installed binary reports a version other than the pinned one.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub(crate) mismatch: bool,
+    /// The provenance sidecar records a binary hash other than the installed
+    /// binary's, e.g. after an upgrade outside symbrain.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub(crate) provenance_stale: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -78,6 +85,9 @@ pub(crate) struct ManagedModuleCheck {
     pub(crate) path: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) provenance: Option<ManagedModuleProvenance>,
+    /// See [`ManagedCoreCheck::provenance_stale`].
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub(crate) provenance_stale: bool,
 }
 
 #[derive(Debug, Serialize)]

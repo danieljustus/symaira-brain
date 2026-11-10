@@ -4,7 +4,9 @@ use std::path::Path;
 
 use symbrain_audit::Degradation;
 use symbrain_core::xdg;
-use symbrain_managed::{Manifest, Platform, installed_version, versions_match};
+use symbrain_managed::{
+    Manifest, Platform, installed_version, read_provenance, sidecar_is_stale, versions_match,
+};
 use toml_edit::DocumentMut;
 
 use super::doctor_core::{
@@ -138,11 +140,20 @@ fn check_managed_cores(managed_dir: &Path) -> Vec<ManagedCoreCheck> {
         .filter(|(_, core)| core.supports_platform(platform.os))
         .map(|(name, core)| {
             let version = installed_version(managed_dir, &core.binary_name).unwrap_or_default();
+            let provenance_stale = !version.is_empty()
+                && read_provenance(managed_dir, &core.binary_name)
+                    .ok()
+                    .flatten()
+                    .is_some_and(|record| {
+                        sidecar_is_stale(managed_dir, &core.binary_name, &record.binary_sha256)
+                    });
             ManagedCoreCheck {
                 name: name.clone(),
+                binary: core.binary_name.clone(),
                 pinned: core.version.clone(),
                 mismatch: !version.is_empty() && !versions_match(&version, &core.version),
                 version,
+                provenance_stale,
             }
         })
         .collect::<Vec<_>>();
@@ -161,12 +172,17 @@ fn check_managed_modules(managed_dir: &Path) -> Vec<ManagedModuleCheck> {
             if !metadata.file_type().is_file() {
                 return None;
             }
+            let provenance = read_module_provenance(managed_dir, module, binary);
+            let provenance_stale = provenance
+                .as_ref()
+                .is_some_and(|record| sidecar_is_stale(managed_dir, binary, &record.binary_sha256));
             Some(ManagedModuleCheck {
                 module: (*module).to_string(),
                 binary: (*binary).to_string(),
                 installed: true,
                 path: path.display().to_string(),
-                provenance: read_module_provenance(managed_dir, module, binary),
+                provenance,
+                provenance_stale,
             })
         })
         .collect()

@@ -80,12 +80,7 @@ fn repair(
             }
         };
         if versions_match(&existing, &core.version) {
-            log::event(
-                stderr,
-                "INFO",
-                "already correct",
-                &[("binary", &name), ("version", &existing)],
-            );
+            already_correct(bin_dir, &core.binary_name, &name, &existing, stderr);
             skipped += 1;
             continue;
         }
@@ -187,4 +182,33 @@ fn protected(
         Ok(_) => {}
     }
     false
+}
+
+/// A matching version skips reinstalling, so a sidecar left behind by an
+/// upgrade outside symbrain would otherwise go unnoticed. Flag it; rewriting
+/// it would assert a release origin this binary may not have.
+fn already_correct(
+    bin_dir: &std::path::Path,
+    binary: &str,
+    name: &str,
+    existing: &str,
+    stderr: &mut dyn Write,
+) {
+    log::event(
+        stderr,
+        "INFO",
+        "already correct",
+        &[("binary", name), ("version", existing)],
+    );
+    let Ok(Some(record)) = read_provenance_bytes(bin_dir, binary) else {
+        return;
+    };
+    if symbrain_managed::sidecar_is_stale(bin_dir, binary, &record.binary_sha256) {
+        log::event(
+            stderr,
+            "WARN",
+            "provenance sidecar does not match the installed binary",
+            &[("binary", name)],
+        );
+    }
 }

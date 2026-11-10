@@ -23,7 +23,7 @@ pub use manifest::{
 pub use process_status::format as format_process_exit_status;
 pub use provenance::go_io_error as format_io_error;
 pub use provenance::{
-    SourceRecord, is_brain_source_install, read_provenance, read_provenance_bytes,
+    SourceRecord, is_brain_source_install, read_provenance, read_provenance_bytes, sidecar_is_stale,
 };
 pub use symbrain_core::{GoText, go_json_string_bytes};
 

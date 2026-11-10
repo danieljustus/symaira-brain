@@ -105,6 +105,24 @@ fn decode_source_record(bytes: &[u8]) -> Result<SourceRecord, String> {
     first_error.map_or(Ok(record), Err)
 }
 
+/// Reports a sidecar whose recorded hash no longer describes the installed
+/// binary. A missing or malformed hash, or an unreadable binary, is unknown
+/// rather than stale: doctor only warns on a positive mismatch.
+#[must_use]
+pub fn sidecar_is_stale(managed_dir: &Path, binary: &str, recorded_sha256: &str) -> bool {
+    if recorded_sha256.len() != 64 || !recorded_sha256.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return false;
+    }
+    let Ok(mut file) = fs::File::open(managed_dir.join(binary)) else {
+        return false;
+    };
+    let mut hasher = Sha256::new();
+    if std::io::copy(&mut file, &mut hasher).is_err() {
+        return false;
+    }
+    !format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(recorded_sha256)
+}
+
 /// Formats an operating-system error without Rust's extra numeric suffix.
 #[must_use]
 pub fn go_io_error(error: &std::io::Error) -> String {
@@ -256,6 +274,34 @@ mod tests {
             assert_eq!(
                 fs::metadata(path).expect("metadata").permissions().mode() & 0o777,
                 0o644
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+mod stale_tests {
+    use super::sidecar_is_stale;
+
+    #[test]
+    fn sidecar_staleness_requires_a_positive_hash_mismatch() {
+        let dir = tempfile::TempDir::new().unwrap();
+        std::fs::write(dir.path().join("tool"), b"binary").unwrap();
+        // sha256("binary")
+        let actual = "9a3a45d01531a20e89ac6ae10b0b0beb0492acd7216a368aa062d1a5fecaf9cd";
+        let other = "0".repeat(64);
+        for (binary, recorded, stale) in [
+            ("tool", actual, false),
+            ("tool", &actual.to_uppercase(), false),
+            ("tool", other.as_str(), true),
+            ("tool", "", false),
+            ("tool", "not-a-hash", false),
+            ("missing", other.as_str(), false),
+        ] {
+            assert_eq!(
+                sidecar_is_stale(dir.path(), binary, recorded),
+                stale,
+                "{binary} {recorded}"
             );
         }
     }

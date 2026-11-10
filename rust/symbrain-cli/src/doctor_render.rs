@@ -44,6 +44,13 @@ pub(super) fn human(w: &mut dyn Write, report: &DoctorReport) -> io::Result<()> 
                     core.name, core.version, core.pinned
                 )?;
             }
+            if core.provenance_stale {
+                writeln!(
+                    w,
+                    "    !  {:<10} {}.provenance.json does not describe the installed binary (replaced outside symbrain?) — delete it if intended, or reinstall",
+                    core.name, core.binary
+                )?;
+            }
         }
     }
     writeln!(w)?;
