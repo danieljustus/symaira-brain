@@ -304,7 +304,7 @@ fn normalize_request(request: &Recorded, port: u16, passphrase: Option<&str>) ->
             let value = if name == "referer" {
                 value
                     .replace("include_embeddings=true&include_graph=true&", "")
-                    .replace(&port.to_string(), "{PORT}")
+                    .replace(&format!(":{port}"), ":{PORT}")
             } else {
                 value.clone()
             };
@@ -318,7 +318,7 @@ fn normalize_request(request: &Recorded, port: u16, passphrase: Option<&str>) ->
         .map_or("", |(_, value)| value.as_str());
     headers.insert(
         "host".to_owned(),
-        Value::String(host.replace(&port.to_string(), "{PORT}")),
+        Value::String(host.replace(&format!(":{port}"), ":{PORT}")),
     );
     let mut out = Map::new();
     out.insert("method".into(), Value::String(request.method.clone()));
@@ -351,7 +351,9 @@ fn normalize_request(request: &Recorded, port: u16, passphrase: Option<&str>) ->
     } else {
         out.insert(
             "body".into(),
-            Value::String(without_vector(&body).replace(&port.to_string(), "{PORT}")),
+            Value::String(
+                without_vector(&body).replace(&format!("127.0.0.1:{port}"), "127.0.0.1:{PORT}"),
+            ),
         );
     }
     Value::Object(out)
@@ -570,10 +572,13 @@ fn run_fixture(fixture: &Value, scratch: &Path) -> Vec<String> {
     };
     let mut dump = dump_db(&db_path);
     if !dump.is_null() {
+        // Only the "127.0.0.1:<port>" form is masked (with or without userinfo
+        // in front): a bare port string also matches digits inside content
+        // hashes and timestamps, which made bulk pulls flaky.
         let text = serde_json::to_string(&dump)
             .unwrap()
             .replace(&base, "http://127.0.0.1:{PORT}")
-            .replace(&server.port.to_string(), "{PORT}");
+            .replace(&format!("@127.0.0.1:{}", server.port), "@127.0.0.1:{PORT}");
         dump = serde_json::from_str(&text).unwrap();
     }
     if dump != fixture["db"] {
