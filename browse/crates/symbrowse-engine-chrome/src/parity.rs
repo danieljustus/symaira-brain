@@ -14,7 +14,7 @@ use std::{
 use chromiumoxide::{
     Command, Method, Page,
     cdp::{
-        browser_protocol::{fetch, network},
+        browser_protocol::{browser, fetch, network},
         js_protocol::runtime,
     },
     error::CdpError,
@@ -23,6 +23,8 @@ use chromiumoxide::{
 use futures::StreamExt;
 use serde::Serialize;
 use serde_json::{Value, json};
+
+use symbrowse_engine::files::{DownloadError, DownloadEvent, DownloadRegistry};
 
 use crate::ChromePage;
 
@@ -98,6 +100,7 @@ pub struct NetworkRoute {
 }
 
 const MAX_NETWORK_REQUESTS: usize = 2000;
+const DOWNLOAD_SESSION: &str = "page";
 
 #[derive(Default)]
 struct Buffers {
@@ -139,6 +142,7 @@ fn route_matches(pattern: &str, url: &str) -> bool {
 #[derive(Clone)]
 pub(crate) struct RuntimeMonitor {
     buffers: Arc<StdMutex<Buffers>>,
+    downloads: Arc<StdMutex<DownloadRegistry>>,
     active_frame_context: Arc<StdMutex<i64>>,
     _tasks: Arc<Vec<tokio::task::JoinHandle<()>>>,
 }
@@ -210,6 +214,13 @@ impl RuntimeMonitor {
             .await?;
         let mut failed = page.event_listener::<network::EventLoadingFailed>().await?;
         let mut paused = page.event_listener::<fetch::EventRequestPaused>().await?;
+        let mut download_begin = page
+            .event_listener::<browser::EventDownloadWillBegin>()
+            .await?;
+        let mut download_progress = page
+            .event_listener::<browser::EventDownloadProgress>()
+            .await?;
+        let downloads = Arc::new(StdMutex::new(DownloadRegistry::new()));
         // Runtime.enable is idempotent; the listeners above only receive
         // events once the domain is enabled for this target.
         page.execute(runtime::EnableParams::default()).await?;
@@ -384,10 +395,49 @@ impl RuntimeMonitor {
                 }
             }
         });
+        // Browser.downloadWillBegin/Progress only flow after
+        // `Browser.setDownloadBehavior` enabled events (see `set_download_dir`).
+        let begin_downloads = Arc::clone(&downloads);
+        let progress_downloads = Arc::clone(&downloads);
+        let download_task = tokio::spawn(async move {
+            loop {
+                tokio::select! {
+                    Some(event) = download_begin.next() => {
+                        if let Ok(mut registry) = begin_downloads.lock() {
+                            registry.record_download_will_begin_now(
+                                DOWNLOAD_SESSION,
+                                event.guid.clone(),
+                                event.url.clone(),
+                                event.suggested_filename.clone(),
+                            );
+                        }
+                    }
+                    Some(event) = download_progress.next() => {
+                        if let Ok(mut registry) = progress_downloads.lock() {
+                            registry.record_download_progress(
+                                DOWNLOAD_SESSION,
+                                &event.guid,
+                                event.state.as_ref(),
+                                event.received_bytes as i64,
+                                event.total_bytes as i64,
+                            );
+                        }
+                    }
+                    else => break,
+                }
+            }
+        });
         Ok(Self {
             buffers,
+            downloads,
             active_frame_context: Arc::new(StdMutex::new(0)),
-            _tasks: Arc::new(vec![console_task, error_task, network_task, route_task]),
+            _tasks: Arc::new(vec![
+                console_task,
+                error_task,
+                network_task,
+                route_task,
+                download_task,
+            ]),
         })
     }
 }
@@ -402,6 +452,36 @@ fn cdp_error(method: &str, error: CdpError) -> Box<dyn Error + Send + Sync> {
 }
 
 impl ChromePage {
+    /// Allow downloads into `directory` (created `0700` when missing) and
+    /// start recording GUID-named download events; an empty directory denies
+    /// downloads. Returns the absolute directory (empty when denied).
+    pub async fn set_download_dir(
+        &self,
+        directory: &str,
+    ) -> Result<String, Box<dyn Error + Send + Sync>> {
+        let behavior = self
+            .events
+            .downloads
+            .lock()
+            .map_err(|_| "download registry lock poisoned")?
+            .set_download_behavior(DOWNLOAD_SESSION, directory)
+            .map_err(|error: DownloadError| error.to_string())?;
+        let path = (!behavior.download_path.is_empty())
+            .then(|| std::path::PathBuf::from(&behavior.download_path));
+        self.set_download_behavior(path.as_deref()).await?;
+        Ok(behavior.download_path)
+    }
+
+    /// Download events seen since the page started, oldest first. Completed
+    /// entries carry the sha256 of the GUID-named file.
+    pub fn download_events(&self) -> Vec<DownloadEvent> {
+        self.events
+            .downloads
+            .lock()
+            .map(|registry| registry.events(DOWNLOAD_SESSION))
+            .unwrap_or_default()
+    }
+
     /// Execute one raw CDP command on this page's session.
     pub async fn cdp(
         &self,

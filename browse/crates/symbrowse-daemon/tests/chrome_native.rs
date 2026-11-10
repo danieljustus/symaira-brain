@@ -1,8 +1,13 @@
-#![cfg(target_os = "macos")]
+//! Production-daemon Chrome suite for ENG-005/006/007 (RUST-012): every
+//! operation goes through the Unix-socket daemon against a real, isolated
+//! Chrome. Each executed parity case prints `PARITY_CASE <id> PASS`; the
+//! harness (`run.py --suite chrome-daemon`) requires the full expected set, so a
+//! skipped or partial run is never evidence.
+#![cfg(unix)]
 
 use std::{
     fs,
-    io::{BufRead, BufReader, Read, Write},
+    io::{BufRead, BufReader, Write},
     net::TcpListener,
     os::unix::net::UnixStream,
     path::PathBuf,
@@ -12,6 +17,99 @@ use std::{
 
 use serde_json::{Value, json};
 use symbrowse_daemon::{Frame, Server, ServerOptions, SessionSpec};
+
+/// SHA-256 of `DOWNLOAD_BODY`, computed independently of the daemon.
+const DOWNLOAD_BODY: &[u8] = b"downloaded-by-daemon";
+const DOWNLOAD_SHA256: &str = "6f05c819223207bada3ec8fad4c3c9c452ed782589d09fed4a536ebb3cac4a21";
+
+fn case(id: &str) {
+    println!("PARITY_CASE {id} PASS");
+}
+
+/// Persistent loopback fixture: `/` page, `/form` (upload input + download
+/// link), `/dl` (attachment), `/blocked/x`; anything else is 404.
+fn serve_fixture() -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind fixture server");
+    let address = listener.local_addr().expect("fixture address");
+    thread::spawn(move || {
+        for stream in listener.incoming() {
+            let Ok(mut stream) = stream else { continue };
+            thread::spawn(move || {
+                let mut reader = BufReader::new(stream.try_clone().expect("clone stream"));
+                let mut line = String::new();
+                if reader.read_line(&mut line).is_err() {
+                    return;
+                }
+                loop {
+                    let mut header = String::new();
+                    if reader.read_line(&mut header).unwrap_or(0) == 0 || header == "\r\n" {
+                        break;
+                    }
+                }
+                let path = line.split_whitespace().nth(1).unwrap_or("/").to_owned();
+                let (status, content_type, extra, body): (&str, &str, &str, Vec<u8>) =
+                    match path.as_str() {
+                        "/" => ("200 OK", "text/html", "", b"<h1>network</h1>".to_vec()),
+                        "/entry" => (
+                            "200 OK",
+                            "text/html",
+                            "",
+                            b"<title>entry</title><input id=name><input id=key><button id=go onclick=\"document.getElementById('out').textContent='clicked';document.title='clicked'\">Go</button><div id=out></div><a id=link href=#there>link</a><div style='height:3000px'></div><p id=bottom>bottom</p>".to_vec(),
+                        ),
+                        "/form" => (
+                            "200 OK",
+                            "text/html",
+                            "",
+                            b"<title>form</title><input id=file type=file><a id=dl href=/dl>download</a>"
+                                .to_vec(),
+                        ),
+                        "/dl" => (
+                            "200 OK",
+                            "application/octet-stream",
+                            "Content-Disposition: attachment; filename=\"daemon.txt\"\r\n",
+                            DOWNLOAD_BODY.to_vec(),
+                        ),
+                        "/blocked/x" => ("200 OK", "text/html", "", b"<h1>blocked</h1>".to_vec()),
+                        _ => ("404 Not Found", "text/plain", "", b"missing".to_vec()),
+                    };
+                let head = format!(
+                    "HTTP/1.1 {status}\r\nContent-Type: {content_type}\r\n{extra}Content-Length: {}\r\nConnection: close\r\n\r\n",
+                    body.len()
+                );
+                let _ = stream.write_all(head.as_bytes());
+                let _ = stream.write_all(&body);
+            });
+        }
+    });
+    format!("http://{address}")
+}
+
+/// Send a `confirm`-class command and approve its out-of-band prompt, the way a
+/// human would through `oob.complete` (production gate path, not a bypass).
+fn request_approved(socket: &PathBuf, command: &str, args: Value) -> Value {
+    let worker_socket = socket.clone();
+    let frame_command = command.to_owned();
+    let worker = thread::spawn(move || request(&worker_socket, &frame_command, args));
+    for _ in 0..100 {
+        thread::sleep(Duration::from_millis(100));
+        let status = request(socket, "oob.status", json!({}));
+        if let Some(id) = status["data"]["prompt"]["id"].as_str() {
+            let done = request(socket, "oob.complete", json!({"id": id}));
+            assert_eq!(done["success"], true, "oob.complete: {done}");
+            break;
+        }
+    }
+    worker.join().expect("approval worker")
+}
+
+fn artifact_bytes(response: &Value) -> Vec<u8> {
+    response["data"]["bytes"]
+        .as_array()
+        .expect("artifact bytes")
+        .iter()
+        .map(|byte| byte.as_u64().expect("byte") as u8)
+        .collect()
+}
 
 fn enabled() -> bool {
     std::env::var_os("SYMBROWSE_E2E").as_deref() == Some(std::ffi::OsStr::new("1"))
@@ -42,18 +140,34 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     let root = std::env::temp_dir().join(format!("symbrowse-daemon-chrome-{}", std::process::id()));
     let _ = fs::remove_dir_all(&root);
     fs::create_dir_all(&root).expect("create isolated root");
+    // One test per binary: point HOME/XDG at the isolated root before the
+    // daemon derives its session profile, so no user cache or profile is used.
+    #[allow(unsafe_code)]
+    unsafe {
+        std::env::set_var("HOME", root.join("home"));
+        std::env::set_var("XDG_CACHE_HOME", root.join("xdg-cache"));
+        std::env::set_var("XDG_STATE_HOME", root.join("xdg-state"));
+        // Hermetic policy: no external guard binary, no desktop notification,
+        // CLI (TTY) mode so Upload/Download stay `confirm` and need approval.
+        std::env::set_var("SYMBROWSE_SYMGUARD", "off");
+        std::env::set_var("SYMBROWSE_OOB_NOTIFY", "off");
+        std::env::remove_var("SYMBROWSE_MCP");
+    }
     let mut spec = SessionSpec::for_session("native-chrome");
     spec.state_dir = root.join("state");
     spec.cache_dir = root.join("cache");
-    spec.socket_path = root.join("daemon.sock");
-    spec.operation_timeout = Duration::from_secs(10);
+    // Unix socket paths are limited to ~100 bytes; TMPDIR may be longer.
+    spec.socket_path = PathBuf::from(format!("/tmp/sbcn-{}.sock", std::process::id()));
+    spec.operation_timeout = Duration::from_secs(60);
     spec.idle_timeout = Some(Duration::from_secs(30));
+    // The loopback fixture is a private address.
+    spec.allow_private = true;
     let profile = spec.user_data_dir();
 
     let server = std::sync::Arc::new(
         Server::new(ServerOptions {
             session_spec: Some(spec.clone()),
-            operation_timeout: Duration::from_secs(10),
+            operation_timeout: Duration::from_secs(60),
             idle_timeout: Some(Duration::from_secs(30)),
             ..ServerOptions::default()
         })
@@ -85,6 +199,7 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
             .is_some_and(|text| text.contains("native")),
         "read response: {script}"
     );
+    case("ENG-005.navigate-read");
     let tabs = request(&socket, "tabs.list", json!({}));
     assert_eq!(tabs["success"], true, "tabs response: {tabs}");
     let listed = tabs["data"]["tabs"].as_array().expect("tab list");
@@ -136,32 +251,16 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
         closed_window["success"], true,
         "close active tab: {closed_window}"
     );
-    let listener = TcpListener::bind("127.0.0.1:0").expect("bind fixture server");
-    let address = listener.local_addr().expect("fixture address");
-    let fixture = thread::spawn(move || {
-        let (mut stream, _) = listener.accept().expect("accept fixture request");
-        let mut request = [0_u8; 1024];
-        let _ = stream.read(&mut request).expect("read fixture request");
-        let body = b"<h1>network</h1>";
-        let header = format!(
-            "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-            body.len()
-        );
-        stream
-            .write_all(header.as_bytes())
-            .expect("write fixture header");
-        stream.write_all(body).expect("write fixture body");
-    });
+    case("ENG-006.tabs");
+    let base = serve_fixture();
     let started = request(&socket, "network.capture", json!({}));
     assert_eq!(started["success"], true, "network capture start: {started}");
     assert_eq!(started["data"]["started"], true);
-    let url = format!("http://{address}/");
-    let network_page = request(&socket, "open", json!({"url": url}));
+    let network_page = request(&socket, "open", json!({"url": format!("{base}/")}));
     assert_eq!(
         network_page["success"], true,
         "network page: {network_page}"
     );
-    fixture.join().expect("fixture thread");
     let captured = request(&socket, "network.requests", json!({}));
     assert_eq!(captured["success"], true, "network capture: {captured}");
     assert!(
@@ -175,6 +274,7 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
             .is_some_and(|events| events.iter().any(|event| event["status"] == 200)),
         "network capture: {captured}"
     );
+    case("ENG-007.network-capture");
     let framed = request(
         &socket,
         "open",
@@ -202,8 +302,10 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
         listed.iter().any(|frame| frame["parent_id"].is_string()),
         "frame response: {frames}"
     );
+    case("ENG-006.frames");
     let ax = request(&socket, "a11y", json!({}));
     assert_eq!(ax["success"], true, "a11y response: {ax}");
+    case("ENG-007.a11y");
 
     let interactions = request(
         &socket,
@@ -254,7 +356,10 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     assert_eq!(selected["data"], "two", "select state: {selected}");
     let checked = request(&socket, "is.checked", json!({"selector":"#check"}));
     assert_eq!(checked["data"], false, "uncheck state: {checked}");
+    case("ENG-005.interactions");
 
+    // Dialogs fire 1s after load so a slow readyState poll on a loaded host
+    // cannot race the blocking alert (evaluate hangs while a dialog is open).
     let no_dialog = request(&socket, "dialog.status", json!({}));
     assert_eq!(
         no_dialog["success"], true,
@@ -264,10 +369,10 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     let prompt_page = request(
         &socket,
         "open",
-        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Eprompt('native%20prompt'%2C'seed')%2C100)%3C%2Fscript%3E"}),
+        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Eprompt('native%20prompt'%2C'seed')%2C1000)%3C%2Fscript%3E"}),
     );
     assert_eq!(prompt_page["success"], true, "prompt page: {prompt_page}");
-    thread::sleep(Duration::from_millis(250));
+    thread::sleep(Duration::from_millis(1300));
     let prompt_status = request(&socket, "dialog.status", json!({}));
     assert_eq!(
         prompt_status["success"], true,
@@ -285,14 +390,15 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
         handled["data"]["handled"], true,
         "handled status: {handled}"
     );
+    case("ENG-006.dialogs-manual");
 
     let alert_page = request(
         &socket,
         "open",
-        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('native%20alert')%2C100)%3C%2Fscript%3E"}),
+        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('native%20alert')%2C1000)%3C%2Fscript%3E"}),
     );
     assert_eq!(alert_page["success"], true, "alert page: {alert_page}");
-    thread::sleep(Duration::from_millis(250));
+    thread::sleep(Duration::from_millis(1300));
     let dismissed = request(&socket, "dialog.dismiss", json!({}));
     assert_eq!(dismissed["success"], true, "dialog dismiss: {dismissed}");
     assert_eq!(
@@ -311,10 +417,10 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     let auto_alert = request(
         &socket,
         "open",
-        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('auto%20dismiss')%2C100)%3C%2Fscript%3E"}),
+        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('auto%20dismiss')%2C1000)%3C%2Fscript%3E"}),
     );
     assert_eq!(auto_alert["success"], true, "auto alert page: {auto_alert}");
-    thread::sleep(Duration::from_millis(250));
+    thread::sleep(Duration::from_millis(1300));
     let auto_status = request(&socket, "dialog.status", json!({}));
     assert_eq!(auto_status["success"], true, "auto status: {auto_status}");
     assert_eq!(auto_status["data"]["handled"], true);
@@ -322,6 +428,249 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     let auto_off = request(&socket, "dialog.auto", json!({"mode":"off"}));
     assert_eq!(auto_off["success"], true, "dialog auto off: {auto_off}");
     assert_eq!(auto_off["data"], json!({"auto_mode":"off"}));
+    case("ENG-006.dialogs-auto");
+
+    // ---- ENG-005: text entry, click, inspection, waits and history ----------
+    let form_page = request(&socket, "open", json!({"url": format!("{base}/entry")}));
+    assert_eq!(form_page["success"], true, "form page: {form_page}");
+    for (command, args) in [
+        ("fill", json!({"selector":"#name","value":"alice"})),
+        ("type", json!({"selector":"#key","value":"bob"})),
+        ("press", json!({"selector":"#key","key":"Enter"})),
+        ("click", json!({"selector":"#go"})),
+        ("scrollintoview", json!({"selector":"#bottom"})),
+    ] {
+        let response = request(&socket, command, args);
+        assert_eq!(response["success"], true, "{command} response: {response}");
+    }
+    let filled = request(&socket, "get.value", json!({"selector":"#name"}));
+    assert_eq!(filled["data"], "alice", "fill state: {filled}");
+    let typed = request(&socket, "get.value", json!({"selector":"#key"}));
+    assert_eq!(typed["data"], "bob", "type state: {typed}");
+    let out = request(&socket, "get.text", json!({"selector":"#out"}));
+    assert_eq!(out["data"], "clicked", "click state: {out}");
+    case("ENG-005.form-input");
+
+    let title = request(&socket, "get.title", json!({}));
+    assert_eq!(title["data"], "clicked", "title: {title}");
+    for (command, args) in [
+        ("get.html", json!({"selector":"#out"})),
+        ("get.count", json!({"selector":"input"})),
+        ("get.box", json!({"selector":"#go"})),
+        ("get.styles", json!({"selector":"#go"})),
+        ("is.visible", json!({"selector":"#go"})),
+        ("is.enabled", json!({"selector":"#go"})),
+        ("find", json!({"kind":"text","query":"Go"})),
+    ] {
+        let response = request(&socket, command, args);
+        assert_eq!(response["success"], true, "{command} response: {response}");
+    }
+    let count = request(&socket, "get.count", json!({"selector":"input"}));
+    assert_eq!(count["data"], 2, "count: {count}");
+    let visible = request(&socket, "is.visible", json!({"selector":"#go"}));
+    assert_eq!(visible["data"], true, "visible: {visible}");
+    let waited = request(&socket, "wait", json!({"kind":"selector","value":"#out"}));
+    assert_eq!(waited["success"], true, "wait selector: {waited}");
+    let waited = request(&socket, "wait", json!({"kind":"text","value":"clicked"}));
+    assert_eq!(waited["success"], true, "wait text: {waited}");
+    let navigated = request(&socket, "click", json!({"selector":"#link"}));
+    assert_eq!(navigated["success"], true, "hash click: {navigated}");
+    let waited = request(&socket, "wait", json!({"kind":"url","value":"#there"}));
+    assert_eq!(waited["success"], true, "wait url: {waited}");
+    let missing = request(&socket, "click", json!({"selector":"#does-not-exist"}));
+    assert_eq!(missing["success"], false, "missing selector: {missing}");
+    let reloaded = request(&socket, "reload", json!({}));
+    assert_eq!(reloaded["success"], true, "reload: {reloaded}");
+    case("ENG-005.inspect-find-wait");
+
+    // ---- ENG-007: offline and URL blocking -----------------------------------
+    let offline = request(&socket, "network.offline", json!({"offline": true}));
+    assert_eq!(offline["success"], true, "offline on: {offline}");
+    let refused = request(&socket, "open", json!({"url": format!("{base}/")}));
+    assert_eq!(refused["success"], false, "offline navigation: {refused}");
+    let online = request(&socket, "network.offline", json!({"offline": false}));
+    assert_eq!(online["success"], true, "offline off: {online}");
+    let restored = request(&socket, "open", json!({"url": format!("{base}/")}));
+    assert_eq!(restored["success"], true, "online navigation: {restored}");
+    let probe = format!("fetch('{base}/blocked/x').then(() => 'loaded', () => 'blocked')");
+    let blocked = request(
+        &socket,
+        "network.block",
+        json!({"urls":[format!("{base}/blocked/*")]}),
+    );
+    assert_eq!(blocked["success"], true, "block: {blocked}");
+    // Chrome applies Network.setBlockedURLs to subresource requests only (a
+    // main-frame navigation to a blocked URL still commits), so probe with a
+    // same-origin fetch from the already loaded page.
+    let refused = request_approved(&socket, "eval", json!({"expression": probe}));
+    assert_eq!(refused["success"], true, "blocked fetch eval: {refused}");
+    assert!(
+        refused["data"].to_string().contains("blocked"),
+        "blocked fetch: {refused}"
+    );
+    let unblocked = request(&socket, "network.block", json!({"urls":[]}));
+    assert_eq!(unblocked["success"], true, "unblock: {unblocked}");
+    let reloaded_fetch = request_approved(&socket, "eval", json!({"expression": probe}));
+    assert!(
+        reloaded_fetch["data"].to_string().contains("loaded"),
+        "unblocked fetch: {reloaded_fetch}"
+    );
+    case("ENG-007.network-offline-block");
+
+    // ---- ENG-007: HAR start/stop ---------------------------------------------
+    let har_start = request(&socket, "network.har", json!({"action":"start"}));
+    assert_eq!(har_start["success"], true, "har start: {har_start}");
+    let har_page = request(&socket, "open", json!({"url": format!("{base}/")}));
+    assert_eq!(har_page["success"], true, "har page: {har_page}");
+    let har_stop = request(&socket, "network.har", json!({"action":"stop"}));
+    assert_eq!(har_stop["success"], true, "har stop: {har_stop}");
+    assert!(
+        har_stop["data"]["entries"].as_u64().is_some_and(|n| n > 0),
+        "har entries: {har_stop}"
+    );
+    assert!(
+        har_stop["data"]["har"]["log"]["entries"]
+            .as_array()
+            .is_some_and(|entries| entries
+                .iter()
+                .any(|entry| entry["request"]["url"] == format!("{base}/"))),
+        "har content: {har_stop}"
+    );
+    case("ENG-007.network-har");
+
+    // ---- ENG-007: screenshots and PDF ----------------------------------------
+    let png = request(&socket, "screenshot", json!({}));
+    assert_eq!(png["success"], true, "png: {}", png.to_string().len());
+    assert_eq!(png["data"]["mime_type"], "image/png");
+    assert_eq!(&artifact_bytes(&png)[..4], &[0x89, b'P', b'N', b'G']);
+    let jpeg = request(&socket, "screenshot", json!({"format":"jpeg","quality":60}));
+    assert_eq!(jpeg["success"], true, "jpeg: {}", jpeg.to_string().len());
+    assert_eq!(jpeg["data"]["mime_type"], "image/jpeg");
+    assert_eq!(&artifact_bytes(&jpeg)[..3], &[0xff, 0xd8, 0xff]);
+    let full = request(&socket, "screenshot", json!({"full_page": true}));
+    assert_eq!(
+        full["success"],
+        true,
+        "full page: {}",
+        full.to_string().len()
+    );
+    assert_eq!(&artifact_bytes(&full)[..4], &[0x89, b'P', b'N', b'G']);
+    let element = request(&socket, "screenshot", json!({"selector":"h1"}));
+    assert_eq!(
+        element["success"],
+        true,
+        "selector: {}",
+        element.to_string().len()
+    );
+    assert!(
+        artifact_bytes(&element).len() < artifact_bytes(&png).len(),
+        "an element capture must be smaller than the viewport capture"
+    );
+    let bad_format = request(&socket, "screenshot", json!({"format":"gif"}));
+    assert_eq!(
+        bad_format["success"], false,
+        "unsupported format: {bad_format}"
+    );
+    case("ENG-007.screenshot");
+    let pdf = request(&socket, "pdf", json!({}));
+    assert_eq!(pdf["success"], true, "pdf: {}", pdf.to_string().len());
+    assert_eq!(pdf["data"]["mime_type"], "application/pdf");
+    assert_eq!(&artifact_bytes(&pdf)[..5], b"%PDF-");
+    case("ENG-007.pdf");
+
+    // ---- ENG-007: upload (allow-listed) and download (GUID + checksum) -------
+    let form = request(&socket, "open", json!({"url": format!("{base}/form")}));
+    assert_eq!(form["success"], true, "form page: {form}");
+    let uploads = root.join("uploads");
+    fs::create_dir_all(&uploads).expect("create upload directory");
+    let upload_file = uploads.join("upload.txt");
+    fs::write(&upload_file, b"upload-body").expect("write upload fixture");
+    let uploaded = request_approved(
+        &socket,
+        "upload",
+        json!({"selector":"#file","files":[upload_file.to_string_lossy()],"allowed_dirs":[uploads.to_string_lossy()]}),
+    );
+    assert_eq!(uploaded["success"], true, "upload: {uploaded}");
+    let chosen = request(&socket, "get.value", json!({"selector":"#file"}));
+    assert!(
+        chosen["data"]
+            .as_str()
+            .is_some_and(|value| value.ends_with("upload.txt")),
+        "upload state: {chosen}"
+    );
+    let outside = root.join("outside.txt");
+    fs::write(&outside, b"secret").expect("write outside fixture");
+    let rejected = request_approved(
+        &socket,
+        "upload",
+        json!({"selector":"#file","files":[outside.to_string_lossy()],"allowed_dirs":[uploads.to_string_lossy()]}),
+    );
+    assert_eq!(rejected["success"], false, "outside upload: {rejected}");
+    case("ENG-007.upload");
+
+    let empty = request(&socket, "downloads.list", json!({}));
+    assert_eq!(empty["data"]["count"], 0, "no downloads yet: {empty}");
+    let downloads_dir = root.join("downloads");
+    let set_dir = request_approved(
+        &socket,
+        "download.setdir",
+        json!({"dir": downloads_dir.to_string_lossy()}),
+    );
+    assert_eq!(set_dir["success"], true, "setdir: {set_dir}");
+    assert_eq!(
+        PathBuf::from(
+            set_dir["data"]["download_dir"]
+                .as_str()
+                .expect("download_dir")
+        )
+        .canonicalize()
+        .expect("canonical download dir"),
+        downloads_dir
+            .canonicalize()
+            .expect("canonical expected dir")
+    );
+    let clicked = request(&socket, "click", json!({"selector":"#dl"}));
+    assert_eq!(clicked["success"], true, "download click: {clicked}");
+    let mut completed = Value::Null;
+    for _ in 0..100 {
+        let listed = request(&socket, "downloads.list", json!({}));
+        if let Some(entry) = listed["data"]["downloads"]
+            .as_array()
+            .and_then(|entries| entries.iter().find(|e| e["state"] == "completed"))
+        {
+            completed = entry.clone();
+            break;
+        }
+        thread::sleep(Duration::from_millis(100));
+    }
+    assert!(completed.is_object(), "download did not complete");
+    assert_eq!(completed["filename"], "daemon.txt");
+    assert_eq!(completed["url"], format!("{base}/dl"));
+    assert_eq!(completed["sha256"], DOWNLOAD_SHA256);
+    let guid = completed["guid"].as_str().expect("download guid");
+    assert_eq!(
+        fs::read(downloads_dir.join(guid)).expect("GUID-named download file"),
+        DOWNLOAD_BODY
+    );
+    case("ENG-007.download");
+
+    // ---- ENG-007: explicit unsupported operations ----------------------------
+    for (command, args) in [
+        ("axe.audit", json!({})),
+        ("download", json!({})),
+        ("network.har", json!({"action":"stop","content":"all"})),
+    ] {
+        let response = request(&socket, command, args);
+        assert_eq!(
+            response["success"], false,
+            "{command} must fail: {response}"
+        );
+    }
+    let axe = request(&socket, "axe.audit", json!({}));
+    assert_eq!(axe["error"]["code"], "unsupported", "axe: {axe}");
+    let bare = request(&socket, "download", json!({}));
+    assert_eq!(bare["error"]["code"], "unsupported", "download: {bare}");
+    case("ENG-007.unsupported-explicit");
 
     // Go implements network.har; an empty action is rejected like Go does.
     let bad_har = request(&socket, "network.har", json!({}));

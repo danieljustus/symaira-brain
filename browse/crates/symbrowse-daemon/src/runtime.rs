@@ -1253,6 +1253,14 @@ impl DispatchRuntime {
                 .navigation(frame.cmd.as_str())
                 .await
                 .map_err(runtime_error)?,
+            "download" => {
+                return Err(DaemonError {
+                    code: "unsupported".into(),
+                    message: "Chrome daemon does not implement \"download\"".into(),
+                    hint: "use download.setdir and downloads.list".into(),
+                    ..Default::default()
+                });
+            }
             _ => {
                 return Err(DaemonError {
                     code: codes::UNKNOWN_COMMAND.into(),
