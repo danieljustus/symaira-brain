@@ -49,6 +49,11 @@ const NONDETERMINISTIC_KEYS: &[&str] = &[
     "startedDateTime",
 ];
 
+/// Request headers Chrome derives from its own version. The oracle was
+/// recorded with one Chrome build and CI installs the current Chrome for
+/// Testing Stable, so their values are compared as present, not verbatim.
+const BROWSER_VERSION_HEADERS: &[&str] = &["User-Agent", "sec-ch-ua"];
+
 fn fixtures() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/daemon_oracle")
 }
@@ -142,6 +147,9 @@ fn normalize(value: &Value, base: &str, work: &str, state: &str, key: &str) -> V
             if NONDETERMINISTIC_KEYS.contains(&key) {
                 return json!("<nondeterministic>");
             }
+            if BROWSER_VERSION_HEADERS.contains(&key) {
+                return json!("<browser-version>");
+            }
             let mut text = text.replace(base, "{BASE}").replace(work, "{WORK}");
             if text.ends_with("/policy.toml") {
                 text = "{STATE}/policy.toml".into();
@@ -170,6 +178,14 @@ fn normalize(value: &Value, base: &str, work: &str, state: &str, key: &str) -> V
                 // fixture servers differ in Date/Server, so those are dropped.
                 items.retain(|item| !matches!(item["name"].as_str(), Some("Date" | "Server")));
                 items.sort_by_key(|item| item["name"].as_str().unwrap_or_default().to_owned());
+                for item in &mut items {
+                    if item["name"]
+                        .as_str()
+                        .is_some_and(|name| BROWSER_VERSION_HEADERS.contains(&name))
+                    {
+                        item["value"] = json!("<browser-version>");
+                    }
+                }
             }
             Value::Array(items)
         }

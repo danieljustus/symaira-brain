@@ -15,7 +15,7 @@ mod parity;
 pub use full::{
     Artifact, ChromeCapabilities, ChromePage, ChromeSession, DialogInfo, FindOptions, FrameInfo,
     InteractionResult, NetworkCapture, NetworkEvent, ScreenshotOptions, UnsupportedOperation,
-    capabilities,
+    capabilities, is_http_response_navigation,
 };
 pub use parity::{ConsoleEntry, ErrorEntry, NetworkRequestEntry, NetworkRoute};
 

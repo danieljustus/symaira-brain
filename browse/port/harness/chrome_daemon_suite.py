@@ -37,7 +37,9 @@ EXPECTED_CASES = (
 # Go steps the Rust daemon documents as not reproduced (see oracle_replay.rs).
 EXPECTED_KNOWN_GAPS = 1
 
-CASE_RE = re.compile(r"^PARITY_CASE (\S+) PASS$", re.MULTILINE)
+# libtest prints `test <name> ... ` without a newline before the test's own
+# output, so the first case shares its line with that prefix.
+CASE_RE = re.compile(r"^(?:test \S+ \.\.\. )?PARITY_CASE (\S+) PASS$", re.MULTILINE)
 REPLAY_RE = re.compile(
     r"oracle replay: (\d+) matched, (\d+) mismatched \((\d+) known gaps\) of (\d+) steps"
 )

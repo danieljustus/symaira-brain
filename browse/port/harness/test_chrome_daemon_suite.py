@@ -19,6 +19,17 @@ class CaseVerificationTests(unittest.TestCase):
     def test_full_run_is_accepted(self) -> None:
         suite.verify_cases(passing_output())
 
+    def test_first_case_after_the_libtest_prefix_is_counted(self) -> None:
+        prefix = "test production_daemon_path_runs_chrome_and_reaps_owned_profile ... "
+        suite.verify_cases(prefix + passing_output())
+
+    def test_case_inside_other_text_is_not_counted(self) -> None:
+        output = passing_output().replace(
+            "PARITY_CASE ENG-007.download PASS", "note: PARITY_CASE ENG-007.download PASS"
+        )
+        with self.assertRaisesRegex(AssertionError, "ENG-007.download"):
+            suite.verify_cases(output)
+
     def test_skipped_run_is_rejected(self) -> None:
         with self.assertRaisesRegex(AssertionError, "missing"):
             suite.verify_cases("test result: ok. 1 passed; 0 failed; 0 ignored\n")

@@ -5,12 +5,14 @@
 use super::*;
 use symbrowse_engine_chrome::{ConsoleEntry, ErrorEntry};
 
-/// `Page.navigate` `errorText` that must fail the command; `net::ERR_ABORTED`
-/// is the one value Go's polling contract treats as success.
+/// `Page.navigate` `errorText` that must fail the command. An empty-body HTTP
+/// error page is a response, not a network failure: Go's polling contract
+/// reports success for it (frozen oracle step `state_load`). Chrome 155 marks
+/// it `net::ERR_ABORTED`, Chrome 156 `net::ERR_HTTP_RESPONSE_CODE_FAILURE`.
 fn navigation_error_text(result: &Value) -> Option<&str> {
-    result["errorText"]
-        .as_str()
-        .filter(|text| !text.is_empty() && *text != "net::ERR_ABORTED")
+    result["errorText"].as_str().filter(|text| {
+        !text.is_empty() && !symbrowse_engine_chrome::is_http_response_navigation(text)
+    })
 }
 
 fn failed(message: impl Into<String>) -> DaemonError {
@@ -1088,8 +1090,8 @@ impl DispatchRuntime {
     /// Go `NavigationService.navigate`: `Page.navigate`, then wait for
     /// `readyState == complete` and report the final URL/status.
     ///
-    /// `net::ERR_ABORTED` is not an error (frozen Go oracle: an empty-404
-    /// origin reports success).  Every other `errorText` (offline, blocked,
+    /// An empty-body HTTP error page is not an error (frozen Go oracle: an
+    /// empty-404 origin reports success; see `navigation_error_text`).  Every other `errorText` (offline, blocked,
     /// refused, DNS) lands Chrome on `chrome-error://chromewebdata/`; that is
     /// returned as a typed failure instead of a success with `http_status: 0`,
     /// matching the engine-level `page_navigate_error` rule.
@@ -1265,6 +1267,10 @@ mod tests {
             (json!({"frameId": "f"}), None),
             (json!({"frameId": "f", "errorText": ""}), None),
             (json!({"errorText": "net::ERR_ABORTED"}), None),
+            (
+                json!({"errorText": "net::ERR_HTTP_RESPONSE_CODE_FAILURE"}),
+                None,
+            ),
             (
                 json!({"errorText": "net::ERR_INTERNET_DISCONNECTED"}),
                 Some("net::ERR_INTERNET_DISCONNECTED"),
