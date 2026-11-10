@@ -117,16 +117,8 @@ final class SmokeTests: XCTestCase {
     // MARK: - Doctor
 
     func testDoctorOutputsContainCapabilities() throws {
-        let repoRoot = URL(fileURLWithPath: #file)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-        let binary = repoRoot
-            .appendingPathComponent(".build")
-            .appendingPathComponent("debug")
-            .appendingPathComponent("symoperate")
         let process = Process()
-        process.executableURL = binary
+        process.executableURL = operateBuiltBinaryURL()
         process.arguments = ["doctor"]
 
         let pipe = Pipe()
@@ -134,9 +126,10 @@ final class SmokeTests: XCTestCase {
         process.standardError = Pipe()
 
         try process.run()
+        // Drain before waiting: doctor output may exceed the pipe buffer.
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             XCTFail("doctor did not emit valid JSON")
             return

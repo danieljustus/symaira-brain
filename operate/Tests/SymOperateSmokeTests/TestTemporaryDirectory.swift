@@ -43,3 +43,13 @@ func operateSmokeTestTemporaryDirectory() -> URL {
     }
     return baseURL
 }
+
+/// The `symoperate` executable built alongside the test bundle. SwiftPM
+/// places test bundles next to the products of the same build, also under a
+/// custom `--scratch-path`, so `<package>/.build/debug` is not a safe guess.
+func operateBuiltBinaryURL() -> URL {
+    final class Anchor {}
+    return Bundle(for: Anchor.self).bundleURL
+        .deletingLastPathComponent()
+        .appendingPathComponent("symoperate")
+}

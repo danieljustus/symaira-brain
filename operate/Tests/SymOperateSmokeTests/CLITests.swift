@@ -3,16 +3,24 @@ import XCTest
 final class CLITests: XCTestCase {
     private var binary: URL!
 
-    override func setUp() {
-        super.setUp()
-        let repoRoot = URL(fileURLWithPath: #file)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-        binary = repoRoot
-            .appendingPathComponent(".build")
-            .appendingPathComponent("debug")
-            .appendingPathComponent("symoperate")
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        binary = operateBuiltBinaryURL()
+        guard FileManager.default.isExecutableFile(atPath: binary.path) else {
+            throw CLITestError.missingBinary(binary.path)
+        }
+    }
+
+    private enum CLITestError: Error, CustomStringConvertible {
+        case missingBinary(String)
+        case launchFailed(String)
+
+        var description: String {
+            switch self {
+            case .missingBinary(let path): return "symoperate binary not found at \(path); build the package first"
+            case .launchFailed(let message): return "could not launch symoperate: \(message)"
+            }
+        }
     }
 
     // MARK: - Helpers
@@ -33,11 +41,20 @@ final class CLITests: XCTestCase {
         process.standardOutput = outPipe
         process.standardError = errPipe
 
-        try? process.run()
-        process.waitUntilExit()
+        do {
+            try process.run()
+        } catch {
+            // A failed launch leaves our own pipe write ends open, so reading
+            // to EOF below would block forever instead of failing the test.
+            XCTFail(CLITestError.launchFailed(error.localizedDescription).description)
+            return RunResult(stdout: "", stderr: "", status: -1)
+        }
 
+        // Drain stdout before waiting so output larger than the pipe buffer
+        // cannot deadlock the child against this reader.
         let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
         let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
         return RunResult(
             stdout: String(data: outData, encoding: .utf8) ?? "",
             stderr: String(data: errData, encoding: .utf8) ?? "",
