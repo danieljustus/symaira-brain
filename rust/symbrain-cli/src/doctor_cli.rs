@@ -226,6 +226,21 @@ args = ["mcp", "--profile", "default"]
     }
 
     #[test]
+    fn yaml_harness_entries_and_single_dash_profile_are_read() {
+        let map = parse_server_map(
+            HARNESSES[7],
+            b"mcp_servers:\n  symbrain:\n    command: symbrain\n    args: [mcp, -profile, personal]\n",
+        )
+        .expect("valid harness YAML");
+        assert_eq!(
+            profile_arg(map["symbrain"].get("args").unwrap().as_array().unwrap()),
+            Some("personal".to_string())
+        );
+        assert!(parse_server_map(HARNESSES[7], b"").unwrap().is_empty());
+        assert!(parse_server_map(HARNESSES[7], b"mcp_servers: [").is_err());
+    }
+
+    #[test]
     fn secret_reference_classification_is_compatible_with_go() {
         assert!(is_secret_reference("symvault://memory/jwt"));
         assert!(is_secret_reference("vault://memory/jwt"));

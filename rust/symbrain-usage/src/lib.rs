@@ -1,6 +1,7 @@
 //! Schema-versioned, read-only AI provider usage reporting.
 #![deny(unsafe_code)]
 
+mod accounts;
 mod claude_history;
 mod codex_history;
 mod go_decimal;
@@ -25,6 +26,7 @@ mod retry_after;
 mod snapshot_extra;
 mod transport;
 
+pub use accounts::AccountRef;
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
 pub use providers::{
     Provider, ProviderSelection, ProviderSpec, UsageError, all_providers, is_secret_reference,
@@ -32,7 +34,7 @@ pub use providers::{
     selected_providers, set_secretref_timeout,
 };
 pub use retry_after::parse_retry_after;
-pub use snapshot_extra::{ResetGrant, ResetGrantStatus};
+pub use snapshot_extra::{OrgBilling, ResetGrant, ResetGrantStatus};
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
 
 use std::collections::BTreeSet;

@@ -73,11 +73,27 @@ fn copy_dir(
 ) -> io::Result<()> {
     walk.check()?;
     let mode = fs::metadata(src)?.permissions().mode() & 0o7777;
-    fs::DirBuilder::new().mode(0o700).create(dest)?;
+    // A directory left by a cancelled run is resumed, not recopied.
+    let resumed = fs::symlink_metadata(dest).is_ok_and(|meta| meta.is_dir());
+    if resumed {
+        fs::set_permissions(dest, fs::Permissions::from_mode(0o700))?;
+    } else {
+        clear(dest)?;
+        fs::DirBuilder::new().mode(0o700).create(dest)?;
+    }
     walk.entries
         .push(entry(label, rel, "dir", mode, None, None));
     let mut children: Vec<_> = fs::read_dir(src)?.collect::<io::Result<_>>()?;
     children.sort_by_key(fs::DirEntry::file_name);
+    if resumed {
+        // Sources deleted since the cancelled run must not stay in the backup.
+        for stale in fs::read_dir(dest)? {
+            let stale = stale?;
+            if !children.iter().any(|c| c.file_name() == stale.file_name()) {
+                clear(&stale.path())?;
+            }
+        }
+    }
     for child in children {
         let name = child.file_name();
         let (from, to, child_rel) = (src.join(&name), dest.join(&name), rel.join(&name));
@@ -87,6 +103,7 @@ fn copy_dir(
             copy_dir(&from, &to, &child_rel, label, walk)?;
         } else if kind.is_symlink() {
             let target = fs::read_link(&from)?;
+            clear(&to)?;
             symlink(&target, &to)?;
             let mut value = entry(label, &child_rel, "symlink", 0, None, None);
             value["target_hex"] = hex(target.as_os_str()).into();
@@ -111,12 +128,40 @@ fn copy_dir(
     fs::set_permissions(dest, fs::Permissions::from_mode(mode))
 }
 
+/// Removes whatever sits at `path` (a leftover of a cancelled run); absent is fine.
+fn clear(path: &Path) -> io::Result<()> {
+    match fs::symlink_metadata(path) {
+        Ok(meta) if meta.is_dir() => fs::remove_dir_all(path),
+        Ok(_) => fs::remove_file(path),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error),
+    }
+}
+
+/// A file copied by a cancelled run carries the source's size and mtime (set
+/// only after a complete, stable copy); it is hashed again instead of copied.
+fn resume_file(from: &Path, to: &Path) -> io::Result<Option<(String, u64)>> {
+    let Ok(meta) = fs::symlink_metadata(to) else {
+        return Ok(None);
+    };
+    let before = stamp(from)?;
+    if !meta.is_file() || before.1.is_none() || (meta.len(), meta.modified().ok()) != before {
+        return Ok(None);
+    }
+    let (sha, size) = crate::sha256_file(to)?;
+    Ok((stamp(from)? == before && size == before.0).then_some((sha, size)))
+}
+
 fn copy_file(from: &Path, to: &Path, walk: &Walk<'_>) -> io::Result<(String, u64)> {
+    if let Some(done) = resume_file(from, to)? {
+        return Ok(done);
+    }
     for _ in 0..STABLE_ATTEMPTS {
         walk.check()?;
         #[cfg(test)]
         crate::tests_background::slow_down(from);
         let before = stamp(from)?;
+        clear(to)?;
         let mut source = fs::File::open(from)?;
         let mut target = fs::OpenOptions::new()
             .write(true)
@@ -138,6 +183,9 @@ fn copy_file(from: &Path, to: &Path, walk: &Walk<'_>) -> io::Result<(String, u64
             walk.check()?;
         }
         if stamp(from)? == before && before.0 == size {
+            if let Some(modified) = before.1 {
+                target.set_modified(modified)?;
+            }
             return Ok((hex_bytes(&hasher.finalize()), size));
         }
     }

@@ -9,6 +9,53 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Fixed
+- `symbrain doctor` detects Hermes read-only through `~/.hermes/config.yaml`
+  (`mcp_servers.symbrain`, including the single-dash `-profile` form), so the
+  Hermes profile counts as bound. Harnesses without an MCP config path print
+  `unsupported (no MCP config path)` instead of `config not found: ` with an
+  empty path. Managed cores whose installed version differs from the pin show
+  `!` with a `symbrain setup --fix` hint (`mismatch` in `--json`). Accepted
+  divergence from the frozen Go doctor output: `scripts/doctor_harness_contract.py`.
+  Not yet: `symbrain harness list` still omits Hermes, and
+  `~/.hermes/profiles/*/config.yaml` is not read (#1021).
+- The first-run state backup now converges across short CLI commands. A copy
+  cancelled at command exit keeps its single `.<app>-resume.partial` tree, and
+  the next run reuses every file whose size and mtime still match the source
+  (re-hashing it) and copies only the rest, so `symbrain version`, `doctor` and
+  `memory ...` no longer restart a 300 MB copy each time. The manifest is still
+  verified before the marker is written (#1020).
+- `browse/docs/engines.md` and `browse/docs/output-schema.md` no longer link to
+  removed Go sources; every claim now points to the Rust crates, tests and
+  `cargo test` commands under `browse/` (#1016).
+- Usage: documented the Kimi credential walk (accepted `symvault://` key
+  references, expired CLI login handled without refresh or writes) and why an
+  unresolved key reference stays hidden next to a CLI token (sealed oracle). Refs #931.
+- Usage: documented why Antigravity has no read-only quota source while the app
+  is closed (stale undocumented protobuf cache, OAuth token out of scope) and
+  pinned the "not running" behaviour with a no-HTTP fixture test (#934).
+
+### Added
+- `symbrain skills uninstall <skill> [--target all|a,b] [--scope] [--dry-run]`
+  removes the managed install on every selected target, reports one result per
+  target and removes the generated `rendered/<target>/<skill>` copy, so the
+  retired `symskills uninstall` is no longer needed (#1015).
+- `symbrain skills install|status|sync` report `source-dirty` (a `warnings`
+  field in `--json`, a stderr line in text) when the library skill's own git
+  repository has uncommitted changes; `install --require-clean` refuses such a
+  source. Clean sources produce the same output as before (#1013).
+- `symbrain usage` names the local account behind a Claude or Codex row when
+  more than one login exists or the credential's owner is ambiguous
+  (`accounts` with a stable non-secret label and `used` / `not_read` /
+  `candidate` / `unattributed` state). Discovery is read-only (Claude Code CLI
+  and Desktop account ids, Codex `auth.json`), accounts are never merged, and
+  single-login reports are unchanged (#1000).
+- Copilot seats billed to an organization show the organization's month-to-date
+  Copilot credits from `GET /user/orgs` and
+  `GET /orgs/{org}/settings/billing/usage/summary`. A 403 (not owner or billing
+  manager), no organization or an outage is reported in `org_billing` and does
+  not fail the report; no cost is computed (#1001).
+
 ## [v0.13.1] - 2026-11-09
 
 ### Changed

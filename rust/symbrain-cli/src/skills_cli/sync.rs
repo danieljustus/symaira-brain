@@ -12,11 +12,12 @@ use symbrain_skills::install::{self, SyncOptions, SyncResult};
 use super::env::Env;
 use super::flags::{self, Verb};
 use super::status::{HOME_UNDEFINED, resolve_target_scope};
+use super::warn::{self, Warned};
 use super::{cleaned, finish, json_line};
 
 #[derive(Debug, Serialize)]
-struct Report {
-    results: Vec<SyncResult>,
+struct Report<'a> {
+    results: Vec<Warned<&'a SyncResult>>,
     dry_run: bool,
 }
 
@@ -66,10 +67,18 @@ pub(super) fn run(
             return exit::GENERIC;
         }
     };
-    let report = Report { results, dry_run };
+    let tagged = warn::tag_all(&results, |row| {
+        symbrain_skills::gotext::join(&options.library_dir, &row.name)
+    });
     let output = match format {
-        OutputFormat::Json => json_line(&report),
-        OutputFormat::Table => table(&report.results),
+        OutputFormat::Json => json_line(&Report {
+            results: tagged,
+            dry_run,
+        }),
+        OutputFormat::Table => {
+            warn::print("sync", &tagged, stderr);
+            table(&results)
+        }
     };
     finish("sync", &output, stdout, stderr)
 }

@@ -28,6 +28,7 @@ fn claude_with_keychain(
         oauth_expires_at = expires_at;
     }
     let plan_source = oauth_value.as_ref().map(|(source, _)| source.clone());
+    let admin_key = admin_value.is_some();
     let mut provider = claude_from_resolved(
         admin_value,
         admin_error,
@@ -40,6 +41,14 @@ fn claude_with_keychain(
         Some("keychain") => take_claude_keychain_plan(),
         _ => None,
     };
+    let service = (plan_source.as_deref() == Some("keychain"))
+        .then(take_claude_keychain_service)
+        .flatten();
+    provider.accounts = crate::accounts::claude_accounts(&claude_account_scan(
+        plan_source,
+        admin_key,
+        service,
+    ));
     provider
 }
 
@@ -107,7 +116,13 @@ fn codex() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
-    codex_from_resolved(value, error, home_dir.join("auth.json").exists())
+    let scan = crate::accounts::CodexScan {
+        token_source: value.as_ref().map(|(source, _)| source.clone()),
+        file_account_id: codex_file_account_id(&home_dir),
+    };
+    let mut provider = codex_from_resolved(value, error, home_dir.join("auth.json").exists());
+    provider.accounts = crate::accounts::codex_accounts(&scan);
+    provider
 }
 
 pub(crate) fn codex_from_resolved(

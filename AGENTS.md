@@ -359,7 +359,7 @@ workspace is macOS only (GUIDELINES.md section 12).
 | `symbrain memory sync --remote <url> [--pull\|--push]` | Peer-to-peer sync between the user's own stores (self-hosted peer, optional encrypted relay) |
 | `symbrain memory serve [--port <n>]` | Run the memory HTTP API on loopback as the sync peer for `memory sync --remote` |
 | `symbrain skills list \| status \| targets \| log \| sync \| doctor` | Inspect and repair the embedded skill library and its installs |
-| `symbrain skills import \| pull \| install \| render \| validate \| history \| restore` | Manage skill content: import and pull into the library, install, render per target, validate, and read or restore history |
+| `symbrain skills import \| pull \| install \| uninstall \| render \| validate \| history \| restore` | Manage skill content: import and pull into the library, install, uninstall (all targets, one result each, drops the render copy), render per target, validate, and read or restore history. install/status/sync warn `source-dirty` when `library/<name>` has uncommitted git changes (`install --require-clean` refuses) |
 | `symbrain activity` | Read bounded activity summaries with explicit profile access |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log |
 | `symbrain vault` | Human credential create/set/delete commands and symvault passthrough |

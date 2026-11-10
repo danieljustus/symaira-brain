@@ -17,6 +17,7 @@ symguard-cli.workspace = true
 chrono.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+serde_yaml_ng.workspace = true
 rusqlite.workspace = true
 signal-hook.workspace = true
 symbrain-audit.workspace = true

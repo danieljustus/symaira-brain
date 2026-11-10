@@ -17,8 +17,10 @@
 //! waits at most [`EXIT_GRACE`] before cancelling. Files are not fsynced one by
 //! one (that is minutes of `F_FULLFSYNC` on macOS); the manifest and the
 //! directories are, once, before the marker is written. A per-app advisory
-//! lock keeps concurrent runs apart and tells a live copy from an orphan:
-//! `.partial` trees of dead runs are removed by the next run.
+//! lock keeps concurrent runs apart and tells a live copy from an orphan.
+//! A cancelled or killed copy keeps its single `.<app>-resume.partial` tree:
+//! the next run reuses every file whose size and mtime still match the source
+//! (hashing it again) and copies only the rest, so short commands converge.
 //!
 //! `SYMAIRA_CUTOVER_BACKUP=off` disables the mechanism for users who manage
 //! their own backups; debug builds need `=on` (see [`disabled`]). Caches are
@@ -137,8 +139,9 @@ pub fn disabled() -> bool {
 /// Backs up `roots` once for `app` into `store`.
 ///
 /// # Errors
-/// Returns an error when an existing root cannot be copied or verified; the
-/// partial backup is removed and no marker is written, so the next run retries.
+/// Returns an error when an existing root cannot be copied or verified; no
+/// marker is written, so the next run retries. A failed partial backup is
+/// removed; a cancelled one (`Interrupted`) is kept and resumed.
 pub fn ensure(app: &str, roots: &[Root], store: &Path) -> io::Result<Outcome> {
     ensure_cancellable(app, roots, store, &AtomicBool::new(false))
 }
@@ -179,7 +182,8 @@ pub(crate) fn ensure_cancellable(
     lock::remove_orphans(store, app);
     let stamp = clock::utc_stamp();
     let final_dir = store.join(format!("{app}-{stamp}-{}", std::process::id()));
-    let partial = store.join(format!(".{app}-{stamp}-{}.partial", std::process::id()));
+    // One fixed name per app: a cancelled run's copy is resumed by the next run.
+    let partial = store.join(format!(".{app}-resume.partial"));
     let result = backup_into(app, &present, &partial, cancel).and_then(|(files, bytes)| {
         verify_tree(&partial)?;
         fs::rename(&partial, &final_dir)?;
@@ -204,7 +208,10 @@ pub(crate) fn ensure_cancellable(
             bytes,
         }),
         Err(error) => {
-            let _ = fs::remove_dir_all(&partial);
+            // A cancelled copy is kept so the next run resumes it (#1020).
+            if error.kind() != io::ErrorKind::Interrupted {
+                let _ = fs::remove_dir_all(&partial);
+            }
             Err(error)
         }
     }
@@ -217,6 +224,18 @@ fn backup_into(
     cancel: &AtomicBool,
 ) -> io::Result<(u64, u64)> {
     create_private_dir(partial)?;
+    // A resumed partial may hold a stale manifest, temp file or removed root.
+    for child in fs::read_dir(partial)? {
+        let child = child?;
+        if !roots.iter().any(|root| child.file_name() == root.label) {
+            let path = child.path();
+            if child.file_type()?.is_dir() {
+                fs::remove_dir_all(path)?;
+            } else {
+                fs::remove_file(path)?;
+            }
+        }
+    }
     let mut walk = copy::Walk::new(cancel);
     for root in roots {
         let dest = partial.join(root.label);

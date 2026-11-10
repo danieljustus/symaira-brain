@@ -132,7 +132,7 @@ fn text(v: Option<&Value>) -> Option<&str> {
 fn obj<'a>(v: &'a Value, key: &str) -> Option<&'a Value> {
     v.get(key)
 }
-fn fmt_num(v: f64) -> String {
+pub(crate) fn fmt_num(v: f64) -> String {
     if v == -0.0 {
         "0".into()
     } else {

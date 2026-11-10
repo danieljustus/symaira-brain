@@ -31,6 +31,12 @@ pub(super) fn human(w: &mut dyn Write, report: &DoctorReport) -> io::Result<()> 
                     "    →  {:<10} not installed (pinned {}) — run `symbrain doctor --fix`",
                     core.name, core.pinned
                 )?;
+            } else if core.mismatch {
+                writeln!(
+                    w,
+                    "    !  {:<10} {} (pinned {}) — run `symbrain setup --fix`",
+                    core.name, core.version, core.pinned
+                )?;
             } else {
                 writeln!(
                     w,
@@ -198,7 +204,13 @@ fn skills_library(w: &mut dyn Write, check: &SkillsLibraryCheck) -> io::Result<(
     }
 }
 fn harness_line(w: &mut dyn Write, check: &HarnessCheck) -> io::Result<()> {
-    if !check.config_found {
+    if check.config_path.is_empty() {
+        writeln!(
+            w,
+            "  →  {:<14} unsupported (no MCP config path)",
+            check.name
+        )?;
+    } else if !check.config_found {
         writeln!(
             w,
             "  →  {:<14} config not found: {}",

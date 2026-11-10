@@ -10,12 +10,14 @@ use symbrain_skills::{load_bundle, render_target};
 
 use super::env::Env;
 use super::opargs::{self, Spec};
+use super::warn::{self, Dirty, Warned};
 use super::{cleaned, finish, json_line, ops};
 
 const SPEC: Spec = Spec {
     verb: "install",
     bools: &[
         "dry-run",
+        "require-clean",
         "force",
         "allow-executable",
         "ignore-capabilities",
@@ -29,6 +31,7 @@ Flags:\n\
   --scope user|project   install scope (default user)\n\
   --mode symlink|copy    install mode (default symlink)\n\
   --dry-run              plan without writing\n\
+  --require-clean        refuse a source with uncommitted git changes\n\\
   --force                adopt an unmanaged skill at the target path\n\
   --allow-executable     keep executable bits on resource files\n\
   --ignore-capabilities  install despite unsupported target capabilities\n\
@@ -80,9 +83,17 @@ pub(super) fn run(
         || cleaned(&env.cfg.render_dir),
         |dir| env.project_dir.join(dir),
     );
-    let mut results: Vec<InstallResult> = Vec::new();
+    let mut results = Vec::new();
+    let mut dirty = Dirty::default();
     let mut failed = false;
     for job in &jobs {
+        if parsed.flag("require-clean") && dirty.check(&job.path) {
+            let message = format!(
+                "{} has uncommitted changes (source-dirty)",
+                job.path.display()
+            );
+            return ops::fail(stderr, "install", message);
+        }
         let bundle = match load_bundle(&job.path) {
             Ok(bundle) => bundle,
             Err(error) => return ops::fail(stderr, "install", format!("load skill: {error}")),
@@ -104,7 +115,7 @@ pub(super) fn run(
             let outcome = render_target(&bundle, target, &job.metadata)
                 .and_then(|rendered| install::install_rendered(&bundle, &rendered, &options));
             match outcome {
-                Ok(result) => results.push(result),
+                Ok(result) => results.push(dirty.tag(result, job.path.clone())),
                 Err(error) => {
                     failed = true;
                     let _ = writeln!(
@@ -121,22 +132,30 @@ pub(super) fn run(
             json_line(&results[0])
         }
         OutputFormat::Json => json_line(&results),
-        OutputFormat::Table => results
-            .iter()
-            .flat_map(|result| {
-                let verb = if result.action == "planned" {
-                    "planned"
-                } else {
-                    "installed"
-                };
-                format!("{verb} {} at {}\n", result.name, result.path.display()).into_bytes()
-            })
-            .collect(),
+        OutputFormat::Table => table(&results),
     };
+    if format == OutputFormat::Table {
+        warn::print("install", &results, stderr);
+    }
     let code = finish("install", &output, stdout, stderr);
     if code == exit::OK && failed {
         exit::GENERIC
     } else {
         code
     }
+}
+
+fn table(results: &[Warned<InstallResult>]) -> Vec<u8> {
+    results
+        .iter()
+        .flat_map(|warned| {
+            let result = &warned.row;
+            let verb = if result.action == "planned" {
+                "planned"
+            } else {
+                "installed"
+            };
+            format!("{verb} {} at {}\n", result.name, result.path.display()).into_bytes()
+        })
+        .collect()
 }

@@ -12,6 +12,7 @@ use symbrain_skills::install::{self, InstallStatus, RenderStatus, StatusKind, St
 
 use super::env::Env;
 use super::flags::{self, Flags, Verb, bytes};
+use super::warn::{self, Warned};
 use super::{cleaned, finish, json_line};
 
 #[derive(Debug, Default, Serialize)]
@@ -25,8 +26,8 @@ struct Summary {
 }
 
 #[derive(Debug, Serialize)]
-struct Report {
-    installs: Vec<InstallStatus>,
+struct Report<'a> {
+    installs: Vec<Warned<&'a InstallStatus>>,
     summary: Summary,
 }
 
@@ -143,10 +144,19 @@ pub(super) fn run(
             StatusKind::Unmanaged => summary.unmanaged += 1,
         }
     }
-    let report = Report { installs, summary };
+    let library = cleaned(&env.cfg.library_dir);
+    let installs_tagged = warn::tag_all(&installs, |row| {
+        symbrain_skills::gotext::join(&library, &row.name)
+    });
     let output = match format {
-        OutputFormat::Json => json_line(&report),
-        OutputFormat::Table => table(&report.installs),
+        OutputFormat::Json => json_line(&Report {
+            installs: installs_tagged,
+            summary,
+        }),
+        OutputFormat::Table => {
+            warn::print("status", &installs_tagged, stderr);
+            table(&installs)
+        }
     };
     finish("status", &output, stdout, stderr)
 }

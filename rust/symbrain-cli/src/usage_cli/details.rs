@@ -11,6 +11,13 @@ pub(super) fn write_details(
     if let Some(plan) = &snapshot.plan {
         writeln!(writer, "  plan\t{plan}")?;
     }
+    if let Some(billing) = &snapshot.org_billing {
+        writeln!(
+            writer,
+            "  organization billing\t{}\t{}",
+            billing.state, billing.detail
+        )?;
+    }
     if let Some(status) = &snapshot.reset_grants {
         let left: u64 = status.grants.iter().map(|grant| grant.resets_left).sum();
         write!(

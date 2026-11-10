@@ -16,6 +16,8 @@ pub(crate) use provider_requests::trusted_https_url;
 use provider_requests::{command_output_with_cancel, request_for};
 #[path = "provider_antigravity.rs"]
 mod provider_antigravity;
+#[path = "provider_copilot_org.rs"]
+mod provider_copilot_org;
 #[path = "provider_fetch.rs"]
 mod provider_fetch;
 #[path = "provider_identity.rs"]
@@ -82,6 +84,8 @@ pub struct Provider {
     kimi_cli_expires_at: Option<f64>,
     /// Claude plan label read with the login; reported on OAuth snapshots only.
     plan: Option<String>,
+    /// Claude/Codex accounts, set only when attribution is ambiguous (#1000).
+    pub(crate) accounts: Vec<crate::AccountRef>,
 }
 
 impl std::fmt::Debug for Provider {
@@ -128,6 +132,7 @@ impl Provider {
             enterprise_host: None,
             kimi_cli_expires_at: None,
             plan: None,
+            accounts: Vec::new(),
         }
     }
 
@@ -207,7 +212,8 @@ impl Provider {
                     "oauth",
                     request_for(self, "oauth", self.credential(), None),
                 ),
-                "copilot" | "moonshot" | "nous" | "openrouter" | "grok" => self.fetch_one(
+                "copilot" => provider_copilot_org::fetch(self, transport, cancel),
+                "moonshot" | "nous" | "openrouter" | "grok" => self.fetch_one(
                     transport,
                     cancel,
                     "api",

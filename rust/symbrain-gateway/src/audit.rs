@@ -239,6 +239,7 @@ mod tests {
             configured: true,
             auth_status: AuthStatus::default(),
             history: None,
+            accounts: Vec::new(),
             snapshot: snapshot.then(UsageSnapshot::default),
             error: error.map(str::to_owned),
         }

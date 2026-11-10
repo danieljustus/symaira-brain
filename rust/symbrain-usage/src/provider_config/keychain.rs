@@ -37,6 +37,7 @@ fn claude_keychain_service_credential(service: &str) -> Option<(String, Option<S
     )?;
     let parsed = parse_claude_keychain_blob(&blob)?;
     remember_claude_keychain_plan(&blob);
+    remember_claude_keychain_service(service);
     Some(parsed)
 }
 

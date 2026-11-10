@@ -41,6 +41,10 @@ pub struct ProviderUsage {
     pub snapshot: Option<UsageSnapshot>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// Local accounts behind this row; emitted only when more than one login
+    /// exists or the credential in use cannot be tied to one (#1000).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub accounts: Vec<crate::AccountRef>,
 }
 
 impl ProviderUsage {
@@ -59,6 +63,7 @@ impl ProviderUsage {
             history: None,
             snapshot: None,
             error: resolution_failed.then(|| provider.auth_status.detail.clone()),
+            accounts: provider.accounts.clone(),
         }
     }
 }
@@ -83,6 +88,10 @@ pub struct UsageSnapshot {
     /// complete, well-formed block.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reset_grants: Option<crate::ResetGrantStatus>,
+    /// Copilot seats billed to an organization: what the organization billing
+    /// lookup returned (#1001). Absent for personal seats.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub org_billing: Option<crate::OrgBilling>,
 }
 
 /// One normalized quota or balance meter.
