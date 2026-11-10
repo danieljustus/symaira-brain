@@ -63,10 +63,12 @@ fn output_cache_rejects_ids_that_could_escape_the_root() {
 #[test]
 fn output_cache_entries_expire_and_are_removed_on_read() {
     let dir = root("ttl");
-    let cache = OutputCache::new(&dir, Some(Duration::from_millis(20)));
+    // The TTL must outlast store + first load even on a heavily loaded host.
+    let ttl = Duration::from_secs(2);
+    let cache = OutputCache::new(&dir, Some(ttl));
     let id = cache.store(b"short lived").unwrap();
     assert_eq!(cache.load(&id).unwrap(), b"short lived");
-    std::thread::sleep(Duration::from_millis(60));
+    std::thread::sleep(ttl + Duration::from_millis(500));
     assert!(matches!(cache.load(&id), Err(CacheError::Expired(_))));
     assert!(matches!(cache.load(&id), Err(CacheError::NotFound(_))));
     let _ = std::fs::remove_dir_all(dir);
