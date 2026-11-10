@@ -19,7 +19,7 @@ endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash "$(CURDIR)/scripts/run-external-env.sh"
 
-.PHONY: rust-coverage build build-rust parity-smoke parity-smoke-record-fixture init-differential oracle-freeze-check oracle-freeze-selftest workflow-policy-check rust-replay-checks usage-gateway-lifecycle-check rust-go-printable-check usage-oracle-check usage-opencode-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-runner-oracle-check skills-config-toml-oracle-check skills-raw-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check cli-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test guard-scan-parity rust-guard-check memory-oracle-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race coverage lint actionlint fmt-check fmt vet clean oracle-freeze-seal
+.PHONY: rust-coverage build build-rust parity-smoke parity-smoke-record-fixture init-differential oracle-freeze-check oracle-freeze-selftest workflow-policy-check rust-replay-checks usage-gateway-lifecycle-check rust-go-printable-check usage-oracle-check usage-opencode-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check skills-runner-oracle-check skills-config-toml-oracle-check skills-raw-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check cli-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test guard-scan-parity rust-guard-check memory-oracle-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke rust-fetch-static-slice rust-fetch-fuzz-build rust-fetch-fuzz-smoke test test-race coverage lint actionlint fmt-check fmt vet clean oracle-freeze-seal
 
 ## coverage: Rust workspace line coverage (floor enforced) plus coverage.json and the badge files
 coverage: rust-coverage
@@ -210,6 +210,31 @@ rust-fuzz-smoke: rust-fuzz-build
 	cp fuzz/corpus/jsonrpc_envelope/* "$$tmp/envelope/"; \
 	$(EXTERNAL_RUN) cargo +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
 	$(EXTERNAL_RUN) cargo +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
+
+## rust-fetch-static-slice: Run the Browse static-document slice (RUST-008, FETCH-006/007/008)
+#
+# A thin recipe over real tests: the sealed 28-vector render corpus (bytes),
+# selector/cache/pipeline controls, HTTP-backed batch, Wayback and 404/410
+# recovery (JSON-semantic) and the stable replay of the dom-input fuzz seeds.
+# Browse is its own Cargo workspace, so the run happens inside browse/.
+rust-fetch-static-slice:
+	cd browse && $(EXTERNAL_RUN) cargo test -p symbrowse-fetch --locked \
+		--test render_corpus --test static_controls --test pipeline_controls \
+		--test selector_contract --test cache_contract --test batch_http \
+		--test archive_http --test recovery_http --test dom_input_smoke
+
+## rust-fetch-fuzz-build: Compile the Browse dom-input fuzz target with nightly libFuzzer
+rust-fetch-fuzz-build:
+	cd browse && $(EXTERNAL_RUN) cargo metadata --locked --format-version 1 --manifest-path fuzz/Cargo.toml >/dev/null
+	cd browse && $(EXTERNAL_RUN) cargo +nightly fuzz build dom-input
+
+## rust-fetch-fuzz-smoke: Run dom-input over a scratch copy of its tracked seeds
+rust-fetch-fuzz-smoke: rust-fetch-fuzz-build
+	@set -eu; \
+	tmp=$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$$TMPDIR/symbrowse-dom.XXXXXX"'); \
+	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
+	cp browse/fuzz/corpus/dom_input/* "$$tmp/"; \
+	cd browse && $(EXTERNAL_RUN) cargo +nightly fuzz run dom-input "$$tmp" -- -runs=2000 -max_len=65536 -rss_limit_mb=2048
 
 ## test: Run all Rust tests
 test:
