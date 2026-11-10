@@ -49,10 +49,11 @@ const NONDETERMINISTIC_KEYS: &[&str] = &[
     "startedDateTime",
 ];
 
-/// Request headers Chrome derives from its own version. The oracle was
-/// recorded with one Chrome build and CI installs the current Chrome for
-/// Testing Stable, so their values are compared as present, not verbatim.
-const BROWSER_VERSION_HEADERS: &[&str] = &["User-Agent", "sec-ch-ua"];
+/// Request headers Chrome derives from its own build and host OS. The oracle
+/// was recorded with Chrome 155 on macOS, while CI installs the current Chrome
+/// for Testing Stable on macOS and Linux, so their values are compared as
+/// present, not verbatim.
+const BROWSER_VERSION_HEADERS: &[&str] = &["User-Agent", "sec-ch-ua", "sec-ch-ua-platform"];
 
 fn fixtures() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/daemon_oracle")
