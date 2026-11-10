@@ -24,7 +24,7 @@ Point Claude Code, Cursor, Codex, Antigravity, or opencode at `symbrain` once, a
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.13.1` released, in active development. Interfaces may
+> **Status:** `v0.13.2` released, in active development. Interfaces may
 > still change before `v1.0.0`.
 
 ## Why symbrain
@@ -458,7 +458,7 @@ Implemented today:
 | `symbrain setup --from-source DIR [--modules browse,operate,scope]` | Build optional module binaries from the in-repo Brain sources at `DIR` and install them into the managed directory with a provenance sidecar (see "Building module binaries from Brain sources" above) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain config path \| get \| set` | Inspect the global configuration path and read or update configuration values |
-| `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |
+| `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`); Hermes is listed read-only from `$HERMES_HOME` (`config.yaml` and every profile config) |
 | `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of every registered server (stdio servers only; concurrent, bounded per server) |
 | `symbrain usage` | AI subscription/token usage per provider |
 | `symbrain mcp --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive. `serve` is a deprecated alias for this command (stderr-only notice; see below) |
@@ -479,6 +479,7 @@ Implemented today:
 | `symbrain skills log [--skill <name>] [--target <target>] [--limit <N>]` | Read the local skill operation log, newest first (`--output table\|json`, default table) |
 | `symbrain skills sync [--dry-run] [--target <target>] [--scope user\|project]` | Repair drifted installs; harness-side edits and conflicts are reported, never overwritten (`--output table\|json`, default table) |
 | `symbrain skills doctor` | Report the configured skill paths and per-target skill roots (`--output table\|json`, default table) |
+| `symbrain skills import \| pull \| install \| uninstall \| render \| validate \| history \| restore` | Manage skill content: import or pull into the library, install, uninstall from every selected target (one result per target, removes the render copy), render per target, validate, and read or restore history. `install`, `status` and `sync` warn `source-dirty` when the library skill has uncommitted git changes; `install --require-clean` refuses such a source |
 | `symbrain activity search <query> --from <RFC3339> --to <RFC3339> --limit <N> --max-tokens <N>` | Search bounded, redacted activity summaries (explicit time and result/token bounds required) |
 | `symbrain activity get <id> --max-tokens <N>` | Read one bounded, redacted activity item with provenance |
 | `symbrain activity status --max-tokens <N>` | Show bounded activity-store status without content |

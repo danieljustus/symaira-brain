@@ -9,6 +9,8 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.13.2] - 2026-11-10
+
 ### Added
 - `symbrain harness list` now ends with a read-only Hermes entry (`read_only`
   in `--json`): `$HERMES_HOME` (default `~/.hermes`) `config.yaml` plus every
@@ -19,6 +21,28 @@ the [Unreleased] section is moved into a dated version section.
   divergences from the frozen Go output, no fixture re-seal:
   `scripts/harness_list_contract.py` and `scripts/doctor_harness_contract.py`
   (#1024).
+- `symbrain skills uninstall <skill> [--target all|a,b] [--scope] [--dry-run]`
+  removes the managed install on every selected target, reports one result per
+  target and removes the generated `rendered/<target>/<skill>` copy, so the
+  retired `symskills uninstall` is no longer needed (#1015).
+- `symbrain skills install|status|sync` report `source-dirty` (a `warnings`
+  field in `--json`, a stderr line in text) when the library skill's own git
+  repository has uncommitted changes; `install --require-clean` refuses such a
+  source. Clean sources produce the same output as before (#1013).
+- `symbrain usage` names the local account behind a Claude or Codex row when
+  more than one login exists or the credential's owner is ambiguous
+  (`accounts` with a stable non-secret label and `used` / `not_read` /
+  `candidate` / `unattributed` state). Discovery is read-only (Claude Code CLI
+  and Desktop account ids, Codex `auth.json`), accounts are never merged, and
+  single-login reports are unchanged (#1000).
+- Copilot seats billed to an organization show the organization's month-to-date
+  Copilot credits from `GET /user/orgs` and
+  `GET /orgs/{org}/settings/billing/usage/summary`. A 403 (not owner or billing
+  manager), no organization or an outage is reported in `org_billing` and does
+  not fail the report; no cost is computed (#1001).
+- Browse: the fetch value gate is recorded on a quiet host (p95 1.29 to 3.01 ms
+  against the 6.48 ms ceiling); the audit journal write stays synchronous
+  (#773).
 
 ### Fixed
 - `symbrain doctor` detects Hermes read-only through `~/.hermes/config.yaml`
@@ -44,27 +68,28 @@ the [Unreleased] section is moved into a dated version section.
 - Usage: documented why Antigravity has no read-only quota source while the app
   is closed (stale undocumented protobuf cache, OAuth token out of scope) and
   pinned the "not running" behaviour with a no-HTTP fixture test (#934).
-
-### Added
-- `symbrain skills uninstall <skill> [--target all|a,b] [--scope] [--dry-run]`
-  removes the managed install on every selected target, reports one result per
-  target and removes the generated `rendered/<target>/<skill>` copy, so the
-  retired `symskills uninstall` is no longer needed (#1015).
-- `symbrain skills install|status|sync` report `source-dirty` (a `warnings`
-  field in `--json`, a stderr line in text) when the library skill's own git
-  repository has uncommitted changes; `install --require-clean` refuses such a
-  source. Clean sources produce the same output as before (#1013).
-- `symbrain usage` names the local account behind a Claude or Codex row when
-  more than one login exists or the credential's owner is ambiguous
-  (`accounts` with a stable non-secret label and `used` / `not_read` /
-  `candidate` / `unattributed` state). Discovery is read-only (Claude Code CLI
-  and Desktop account ids, Codex `auth.json`), accounts are never merged, and
-  single-login reports are unchanged (#1000).
-- Copilot seats billed to an organization show the organization's month-to-date
-  Copilot credits from `GET /user/orgs` and
-  `GET /orgs/{org}/settings/billing/usage/summary`. A 403 (not owner or billing
-  manager), no organization or an outage is reported in `org_billing` and does
-  not fail the report; no cost is computed (#1001).
+- `symbrain skills status` no longer aborts the whole scan when one install
+  path has a non-directory parent (`ENOTDIR`); that path is reported and the
+  scan continues (#1022).
+- `symbrain doctor` detects a stale provenance sidecar after an out-of-band
+  binary upgrade (#1027).
+- Browse: `open` succeeds again on an empty-body HTTP error page. Chrome 156
+  reports it as `net::ERR_HTTP_RESPONSE_CODE_FAILURE` (Chrome 155 used
+  `net::ERR_ABORTED`); both are server responses, while real network failures
+  stay a typed `operation_failed`. The production-daemon Chrome suite counts
+  every parity case and runs natively on macOS and Linux (#776).
+- Dependencies: sha2 0.11, hmac 0.13, signal-hook 0.4, html5ever 0.40 and the
+  November minor/patch updates. Digests are encoded through one hex helper with
+  byte-identical output. serde_json stays at 1.0.151 until the pinned CoreKit
+  releases its exact pin.
+- Tests: the skills oracle walk tolerates files that vanish mid-scan (#1023),
+  the operate MCP server test expects all 28 tools (#1028), the memory sync
+  replay masks only the URL form of its server port (a bare port string also
+  matched digits inside hashes), the memory serve raw-request helper stops
+  writing once a reply starts and reports each retry's cause (#1046), and the Browse daemon tests inject their state
+  key instead of probing the host `symvault` and Keychain (#1030).
+- Security: the six real CodeQL findings from the first Rust analysis are
+  fixed; test-only alerts are dismissed with a justification (#1026).
 
 ## [v0.13.1] - 2026-11-09
 

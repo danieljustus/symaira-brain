@@ -390,36 +390,122 @@ fn dechunk(mut body: &[u8]) -> Vec<u8> {
     }
 }
 
+const RAW_ATTEMPTS: u32 = 4;
+const RAW_CHUNK: usize = 16 * 1024;
+
+/// Names an I/O failure by its kind so a failed attempt can be diagnosed.
+fn io_cause(error: &std::io::Error) -> String {
+    use std::io::ErrorKind::{
+        BrokenPipe, ConnectionAborted, ConnectionReset, TimedOut, UnexpectedEof, WouldBlock,
+    };
+    let class = match error.kind() {
+        ConnectionReset => "reset by peer",
+        ConnectionAborted => "aborted",
+        BrokenPipe => "broken pipe",
+        TimedOut | WouldBlock => "timeout",
+        UnexpectedEof => "unexpected EOF",
+        _ => "I/O error",
+    };
+    format!("{class} ({error})")
+}
+
+/// One connection: writes the request in chunks while reading the reply, and
+/// returns whatever was received plus a description of how both halves ended.
+fn raw_exchange(port: u16, request: &str) -> (Vec<u8>, String) {
+    use std::sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    };
+    let stream = match TcpStream::connect(("127.0.0.1", port)) {
+        Ok(stream) => stream,
+        Err(error) => return (Vec::new(), format!("connect failed: {}", io_cause(&error))),
+    };
+    stream
+        .set_read_timeout(Some(Duration::from_secs(10)))
+        .unwrap();
+    let mut writer = stream.try_clone().unwrap();
+    let payload = request.as_bytes().to_vec();
+    let replied = Arc::new(AtomicBool::new(false));
+    let seen = Arc::clone(&replied);
+    let sender = std::thread::spawn(move || {
+        let mut sent = 0;
+        for chunk in payload.chunks(RAW_CHUNK) {
+            // Once the server has started to answer, more bytes would only be
+            // read after it closed and turn its close into a reset that may
+            // discard the reply before this client has read it.
+            if seen.load(Ordering::Acquire) {
+                return format!(
+                    "stopped after {sent} of {} bytes: reply started",
+                    payload.len()
+                );
+            }
+            if let Err(error) = writer.write_all(chunk) {
+                return format!(
+                    "failed after {sent} of {} bytes: {}",
+                    payload.len(),
+                    io_cause(&error)
+                );
+            }
+            sent += chunk.len();
+        }
+        format!("sent all {sent} bytes")
+    });
+    let mut reader = stream;
+    let mut bytes = Vec::new();
+    let mut buffer = vec![0_u8; RAW_CHUNK];
+    let read_end = loop {
+        match reader.read(&mut buffer) {
+            Ok(0) => break "EOF".to_owned(),
+            Ok(count) => {
+                bytes.extend_from_slice(&buffer[..count]);
+                replied.store(true, Ordering::Release);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => {}
+            Err(error) => break io_cause(&error),
+        }
+    };
+    let write_end = sender
+        .join()
+        .unwrap_or_else(|_| "writer thread panicked".to_owned());
+    let cause = format!(
+        "read ended: {read_end} after {} bytes; write {write_end}",
+        bytes.len()
+    );
+    (bytes, cause)
+}
+
 /// Sends one literal request and reads the whole reply (the request must
 /// carry `Connection: close`).
 pub fn raw(port: u16, request: &str) -> Response {
     // A server may answer and close before it has read a very large body; the
-    // client then sees a reset instead of the reply. The request is retried a
-    // few times, and the body is written while the reply is read, so the
-    // outcome does not depend on scheduling under load.
+    // client then sees a reset or an empty close instead of the reply, most
+    // often on a loaded host. The request is retried with a growing pause, and
+    // every failed attempt is recorded so the final failure names its cause.
+    let mut causes = Vec::new();
     let mut bytes = Vec::new();
-    for _ in 0..4 {
-        let stream = TcpStream::connect(("127.0.0.1", port)).unwrap();
-        stream
-            .set_read_timeout(Some(Duration::from_secs(10)))
-            .unwrap();
-        let mut writer = stream.try_clone().unwrap();
-        let payload = request.as_bytes().to_vec();
-        let sender = std::thread::spawn(move || {
-            let _ = writer.write_all(&payload);
-        });
-        let mut reader = stream;
-        bytes.clear();
-        let _ = reader.read_to_end(&mut bytes);
-        let _ = sender.join();
-        if !bytes.is_empty() {
+    for attempt in 0..RAW_ATTEMPTS {
+        if attempt > 0 {
+            std::thread::sleep(Duration::from_millis(50 << attempt));
+        }
+        let (received, cause) = raw_exchange(port, request);
+        bytes = received;
+        if bytes.windows(4).any(|w| w == b"\r\n\r\n") {
             break;
         }
+        causes.push(format!("attempt {}: {cause}", attempt + 1));
     }
     let split = bytes
         .windows(4)
         .position(|w| w == b"\r\n\r\n")
-        .unwrap_or_else(|| panic!("no response head: {:?}", String::from_utf8_lossy(&bytes)));
+        .unwrap_or_else(|| {
+            panic!(
+                "no response head from 127.0.0.1:{port} for `{}` after {RAW_ATTEMPTS} attempts \
+                 (last bytes: {:?}):\n{}",
+                request.lines().next().unwrap_or_default(),
+                String::from_utf8_lossy(&bytes),
+                causes.join("\n")
+            )
+        });
     let head = String::from_utf8_lossy(&bytes[..split]).into_owned();
     let mut lines = head.split("\r\n");
     let status = lines
