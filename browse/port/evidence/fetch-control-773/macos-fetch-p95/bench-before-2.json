@@ -1,0 +1,213 @@
+{
+  "schema_version": 2,
+  "report_version": "rust016-benchmark-v2",
+  "captured_at": "2026-11-10T11:11:24Z",
+  "source_revision": "c46e9e3b48bf653b45486f7ca9668f41f5eec058",
+  "host": {
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "runs_per_workload": 30,
+  "cache_policy": "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe",
+  "workload_fixture": "rust016-static-fetch-html-v1",
+  "workloads": [
+    "fetch"
+  ],
+  "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+  "binaries": {
+    "go": {
+      "status": "blocked",
+      "reason": "binary argument not supplied"
+    },
+    "rust": {
+      "identity": {
+        "path": "/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/.worktrees/w-773-fetch/browse/target/release/symbrowse",
+        "size_bytes": 10175376,
+        "sha256": "e70609cbf40393f118054466f744546f6b7d36e00c34b081a3691be945298cba",
+        "vcs_revision": "unknown"
+      },
+      "fetch": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 14241750,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 8870208,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 23885792,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 18955833,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 21825084,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 9137000,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 1694250,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6480750,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2839208,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6165584,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6649167,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2006375,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2056833,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6514459,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2218250,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2178541,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 1979042,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 7601291,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 9620625,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 41139292,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6504500,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 1907667,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2062167,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 1851125,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6752334,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 1799417,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6438541,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2113500,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 6712500,
+            "peak_rss_bytes": null
+          },
+          {
+            "duration_ns": 2104833,
+            "peak_rss_bytes": null
+          }
+        ],
+        "median_duration_ns": 6459645,
+        "p95_duration_ns": 23885792,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "semantic_contract": {
+          "fixture_id": "rust016-static-fetch-html-v1",
+          "checks": [
+            "final_url",
+            "status_code",
+            "body",
+            "document_metadata",
+            "errors"
+          ],
+          "negative_control": {
+            "candidate": "success=true with wrong title/body",
+            "rejected": true
+          }
+        }
+      }
+    }
+  },
+  "gate": "blocked",
+  "limitations": [
+    "Peak RSS is collected from child-process resource usage where the host exposes it; daemon RSS remains unavailable in this portable runner.",
+    "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
+    "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result."
+  ],
+  "candidate_size_bytes": 10175376
+}

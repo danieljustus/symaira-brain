@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 
 #[path = "common/mod.rs"]
 mod common;
+#[path = "../../test-support/fs_walk.rs"]
+mod fs_walk;
 
 use serde::Deserialize;
 use symbrain_skills::install::{InstallOptions, StatusOptions, install_rendered, status};
@@ -247,7 +249,10 @@ fn collect_artifacts(case_root: &Path, root: &Path, output: &mut Vec<Artifact>) 
     for entry in fs::read_dir(root).expect("artifact directory") {
         let entry = entry.expect("artifact entry");
         let path = entry.path();
-        let metadata = fs::symlink_metadata(&path).expect("artifact metadata");
+        // A lock file removed since the listing is gone, not an error.
+        let Some(metadata) = fs_walk::skip_vanished(fs::symlink_metadata(&path), &path) else {
+            continue;
+        };
         let relative = path
             .strip_prefix(case_root)
             .expect("artifact relative")

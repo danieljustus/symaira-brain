@@ -94,7 +94,11 @@ fn run_list(
     }
     let project_dir = project_flag(&parsed);
 
-    let inventory = list(project_dir.as_deref());
+    let mut inventory = list(project_dir.as_deref());
+    // Hermes is read-only (no install support), so `list` does not return it.
+    inventory
+        .harnesses
+        .extend(crate::hermes_config::inventory());
 
     let result = match format {
         OutputFormat::Json => output::render_json(&mut *stdout, &inventory),
@@ -130,6 +134,17 @@ fn render_inventory_table(
         render_config_table(stdout, "  global", &harness.global)?;
         if let Some(project) = &harness.project {
             render_config_table(stdout, "  project", project)?;
+        }
+        for profile in &harness.profiles {
+            let label = format!("  profile {}", profile.name);
+            render_config_table(stdout, &label, &profile.config)?;
+        }
+        if harness.read_only {
+            writeln!(
+                stdout,
+                "  note\tread-only: symbrain install/uninstall do not support {}",
+                harness.display_name
+            )?;
         }
         writeln!(stdout)?;
     }

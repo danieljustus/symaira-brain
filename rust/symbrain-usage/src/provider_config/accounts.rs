@@ -109,6 +109,10 @@ pub(crate) fn claude_from_resolved(
     provider
 }
 
+/// Codex credential walk. Single-Codex-home boundary (#1000, maintainer
+/// decision 2026-11-10): only the active `CODEX_HOME`, else the default
+/// `~/.codex`, is inspected. Additional Codex logins are not discovered, so
+/// `accounts` can name at most the file login and the credential in use.
 fn codex() -> Provider {
     let home_dir = codex_home();
     let resolved = resolve_env_or_file("CODEX_ACCESS_TOKEN", || codex_file_token(&home_dir));
@@ -323,6 +327,9 @@ pub(crate) fn kimi_from_resolved(
         AuthStatus::default(),
     );
     provider.configured = api_value.is_some() || cli_token.is_some() || auth_value.is_some();
+    // Accepted divergence from the sealed oracle (#931): keep the failure of an
+    // unresolved key reference once another credential keeps Kimi configured.
+    provider.kimi_api_failure = api_failure.clone().filter(|_| provider.configured);
     provider.auth_status = if !provider.configured {
         match (api_failure, auth_failure) {
             (Some(failure), _) | (None, Some(failure)) => auth_error(&failure),

@@ -2,6 +2,8 @@
 
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
+#[path = "../../test-support/fs_walk.rs"]
+mod fs_walk;
 
 use std::process::{Command, Output};
 
@@ -266,9 +268,12 @@ fn status_of(output: &Output) -> String {
 
 fn tree_snapshot(root: &std::path::Path) -> Vec<(String, Vec<u8>)> {
     fn walk(path: &std::path::Path, root: &std::path::Path, out: &mut Vec<(String, Vec<u8>)>) {
-        let mut entries: Vec<_> = std::fs::read_dir(path)
-            .unwrap()
-            .map(|entry| entry.unwrap().path())
+        // Entries removed since the listing are gone, not an error.
+        let Some(listing) = fs_walk::skip_vanished(std::fs::read_dir(path), path) else {
+            return;
+        };
+        let mut entries: Vec<_> = listing
+            .filter_map(|entry| fs_walk::skip_vanished(entry, path).map(|entry| entry.path()))
             .collect();
         entries.sort();
         for entry in entries {
@@ -277,7 +282,10 @@ fn tree_snapshot(root: &std::path::Path) -> Vec<(String, Vec<u8>)> {
                 .unwrap()
                 .to_string_lossy()
                 .into_owned();
-            let metadata = std::fs::symlink_metadata(&entry).unwrap();
+            let Some(metadata) = fs_walk::skip_vanished(std::fs::symlink_metadata(&entry), &entry)
+            else {
+                continue;
+            };
             let stamp = metadata
                 .modified()
                 .unwrap()

@@ -18,8 +18,8 @@ use super::destination::root_metadata;
 use super::lock;
 use super::replace::open_trusted_dir;
 use super::status_compare::{
-    compare_one, is_regular_skill_source, read_entries, resolve_link, resolves_to_directory,
-    unmanaged,
+    LinkTarget, compare_one, is_regular_skill_source, link_target_state, read_entries,
+    resolve_link, unmanaged,
 };
 use crate::BundleLoader;
 use crate::model::SkillError;
@@ -260,8 +260,24 @@ fn status_target(
             .file_type()
             .map_err(|error| SkillError(format!("stat installed skill {name}: {error}")))?;
         let installed_tree = if file_type.is_symlink() {
-            match resolve_link(&open_root.join(&name_os)) {
-                Some(resolved) if resolves_to_directory(&resolved)? => resolved,
+            let resolved = resolve_link(&open_root.join(&name_os));
+            let state = match &resolved {
+                Some(resolved) => link_target_state(resolved)?,
+                None => LinkTarget::NoMarkerPossible,
+            };
+            match (resolved, state) {
+                (Some(resolved), LinkTarget::Directory) => resolved,
+                // A parent of the link target is a file: flag this one entry
+                // and name the unreachable target so it can be repaired.
+                (Some(resolved), LinkTarget::ParentNotDirectory) => {
+                    let mut row = unmanaged(target, &name, path);
+                    row.error = Some(format!(
+                        "symlink target {} is unreachable: a parent is not a directory",
+                        resolved.display()
+                    ));
+                    rows.push(row);
+                    continue;
+                }
                 // Go reads the marker through the link; a link whose target is
                 // missing or not a directory simply carries no marker and stays
                 // unmanaged. Opening it as a directory would abort the scan.

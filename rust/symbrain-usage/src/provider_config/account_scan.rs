@@ -4,10 +4,6 @@
 
 /// Account files may be large (`~/.claude.json` carries every project).
 const MAX_ACCOUNT_FILE_BYTES: u64 = 32 * 1024 * 1024;
-/// `security dump-keychain` lists attributes of every item; the login keychain
-/// is far larger than the credential cap.
-#[cfg(target_os = "macos")]
-const MAX_KEYCHAIN_LISTING_BYTES: u64 = 16 * 1024 * 1024;
 
 /// Service the real keychain reader took the Claude token from; handed over once
 /// like the plan so the keychain is never read twice.
@@ -101,15 +97,10 @@ fn codex_file_account_id(codex_home: &Path) -> Option<String> {
 
 #[cfg(target_os = "macos")]
 fn claude_keychain_service_names() -> Vec<String> {
-    let Some(output) = bounded_command_stdout(
-        "/usr/bin/security",
-        &["dump-keychain"],
-        CLAUDE_KEYCHAIN_TIMEOUT,
-        MAX_KEYCHAIN_LISTING_BYTES,
-    ) else {
+    let Ok(listed) = keychain_dump_names("/usr/bin/security", MAX_KEYCHAIN_LISTING_BYTES) else {
         return Vec::new();
     };
-    let mut names: Vec<String> = names_from_keychain_dump(&String::from_utf8_lossy(&output))
+    let mut names: Vec<String> = listed
         .into_iter()
         .filter(|name| valid_claude_service_name(name))
         .collect();

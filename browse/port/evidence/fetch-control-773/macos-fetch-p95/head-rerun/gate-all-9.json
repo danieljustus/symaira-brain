@@ -1,0 +1,106 @@
+{
+  "threshold_ms": 6.4834,
+  "workload_fixture": "rust016-static-fetch-html-v1",
+  "runs": [
+    {
+      "report": "bench-A1.json",
+      "samples": 30,
+      "p95_ns": 3189292,
+      "p95_ms": 3.1893,
+      "median_ms": 1.3132,
+      "max_ms": 16.9669,
+      "under_threshold": true,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-A2.json",
+      "samples": 30,
+      "p95_ns": 81343334,
+      "p95_ms": 81.3433,
+      "median_ms": 1.3423,
+      "max_ms": 163.0728,
+      "under_threshold": false,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-A3.json",
+      "samples": 30,
+      "p95_ns": 5470125,
+      "p95_ms": 5.4701,
+      "median_ms": 0.8158,
+      "max_ms": 134.6204,
+      "under_threshold": true,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-B1.json",
+      "samples": 30,
+      "p95_ns": 37213250,
+      "p95_ms": 37.2133,
+      "median_ms": 1.9853,
+      "max_ms": 47.9441,
+      "under_threshold": false,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-B2.json",
+      "samples": 30,
+      "p95_ns": 6208541,
+      "p95_ms": 6.2085,
+      "median_ms": 0.9848,
+      "max_ms": 28.5899,
+      "under_threshold": true,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-B3.json",
+      "samples": 30,
+      "p95_ns": 1115042,
+      "p95_ms": 1.115,
+      "median_ms": 0.8731,
+      "max_ms": 1.8727,
+      "under_threshold": true,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-C1.json",
+      "samples": 30,
+      "p95_ns": 42200917,
+      "p95_ms": 42.2009,
+      "median_ms": 1.5555,
+      "max_ms": 71.7797,
+      "under_threshold": false,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-C2.json",
+      "samples": 30,
+      "p95_ns": 3763208,
+      "p95_ms": 3.7632,
+      "median_ms": 1.4912,
+      "max_ms": 48.123,
+      "under_threshold": true,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    },
+    {
+      "report": "bench-C3.json",
+      "samples": 30,
+      "p95_ns": 58651209,
+      "p95_ms": 58.6512,
+      "median_ms": 1.5128,
+      "max_ms": 122.1112,
+      "under_threshold": false,
+      "binary_sha256": "869e4c19475435e23476f834232bab806b6e0061d4289c62052c2d1cbeb58170",
+      "problems": []
+    }
+  ],
+  "pass": false
+}

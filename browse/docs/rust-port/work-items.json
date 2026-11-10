@@ -197,7 +197,30 @@
         "cargo nextest run -p symbrowse-fetch",
         "python3 port/harness/run.py --suite fetch-control"
       ],
-      "stop_rule": "No public-Internet oracle; every redirect hop remains policy checked."
+      "stop_rule": "No public-Internet oracle; every redirect hop remains policy checked.",
+      "value_gate": {
+        "issue": "#773",
+        "threshold_ms": 6.4834,
+        "basis": "recorded Go fetch p95 5.894 ms x 1.10 (Go removed; fixed threshold)",
+        "workload_fixture": "rust016-static-fetch-html-v1",
+        "previous_rust_p95_ms": 30.326,
+        "macos_arm64_local": {
+          "p95_ms": [
+            0.6887,
+            0.5681,
+            0.6284
+          ],
+          "median_ms": [
+            0.4045,
+            0.4126,
+            0.3733
+          ],
+          "samples_per_run": 30,
+          "evidence": "port/evidence/fetch-control-773/macos-fetch-p95",
+          "gate": "pass locally; native CI rows pending"
+        },
+        "root_cause": "journal append used File::sync_all (F_FULLFSYNC on macOS) on every gated fetch.url"
+      }
     },
     {
       "id": "RUST-008",
@@ -297,7 +320,7 @@
         "SYMBROWSE_E2E=1 SYMBROWSE_HEADLESS=1 python3 port/harness/run.py --suite chrome-full"
       ],
       "stop_rule": "No reported capability without an executable parity case; unsupported operations fail explicitly.",
-      "remaining_scope": "2026-11-08 macOS arm64: SYMBROWSE_E2E=1 SYMBROWSE_HEADLESS=1 cargo test -p symbrowse-engine-chrome --all-features --locked passes against installed Chrome with isolated temp profiles (test server idle-timeout flake fixed). 2026-11-09: browser_fixture_gen.py --check now verifies the sealed Go recordings (fixture bound to a manifest whose sha256 is pinned) without Go sources, so port/harness/run.py --suite chrome-full runs on a Rust-only checkout; the browse-chrome-native-e2e workflow runs it before the real-Chrome E2E. Native Chrome workflow receipt pending, item stays in_progress."
+      "remaining_scope": "2026-11-08 macOS arm64: SYMBROWSE_E2E=1 SYMBROWSE_HEADLESS=1 cargo test -p symbrowse-engine-chrome --all-features --locked passes against installed Chrome with isolated temp profiles (test server idle-timeout flake fixed). 2026-11-09: browser_fixture_gen.py --check now verifies the sealed Go recordings (fixture bound to a manifest whose sha256 is pinned) without Go sources, so port/harness/run.py --suite chrome-full runs on a Rust-only checkout; the browse-chrome-native-e2e workflow runs it before the real-Chrome E2E. 2026-11-10 macOS arm64: the production daemon path (SYMBROWSE_E2E=1 cargo test -p symbrowse-daemon --test chrome_native, real Chrome 156, isolated HOME/profile) passes all 17 PARITY_CASE sections (navigate, tabs, network capture/offline/blocking/HAR, frames, a11y, interactions, dialogs, forms, screenshot, pdf, upload, download, explicit unsupported) and port/harness/run.py --suite chrome-daemon requires each of them; Page.navigate errorText other than net::ERR_ABORTED is now a typed operation_failed instead of success on chrome-error://. Native Chrome workflow receipt (macOS and Linux CI) pending, item stays in_progress."
     },
     {
       "id": "RUST-013",
@@ -314,7 +337,7 @@
         "python3 port/harness/run.py --suite safari --native macos"
       ],
       "stop_rule": "Keep Safari cfg-gated; stop if the port adds a privilege or installation contract.",
-      "remaining_scope": "2026-11-08 macOS arm64: Safari attach/BiDi and Firefox unit and contract tests pass. Safari needs Remote Automation on the user's real Safari, which an agent must not drive (maintainer gate). 2026-11-09 Firefox native gate (no geckodriver; the adapter launches Firefox with BiDi directly): the adapter now owns a fresh browsingContext.create tab because Firefox 159 rejects evaluation in the first context of a new profile (\"System access is required\"); the symbrowse-firefox-spike gate passes on macOS arm64 against Firefox 159.0.1 for a fresh blank tab and a loopback http navigation. .github/workflows/browse-firefox-native.yml runs the same gate on Linux amd64 and macOS; its receipt is pending. Item stays in_progress; adapters must not be advertised on a platform until its native gate passes."
+      "remaining_scope": "2026-11-08 macOS arm64: Safari attach/BiDi and Firefox unit and contract tests pass. Safari needs Remote Automation on the user's real Safari, which an agent must not drive (maintainer gate). 2026-11-09 Firefox native gate (no geckodriver; the adapter launches Firefox with BiDi directly): the adapter now owns a fresh browsingContext.create tab because Firefox 159 rejects evaluation in the first context of a new profile (\"System access is required\"); the symbrowse-firefox-spike gate passes on macOS arm64 against Firefox 159.0.1 for a fresh blank tab and a loopback http navigation. .github/workflows/browse-firefox-native.yml runs the same gate on Linux amd64 and macOS; its receipt is pending. Firefox native gate receipt: browse-firefox-native.yml green on linux-amd64 and darwin-arm64; local re-run 2026-11-10 on macOS arm64 against Firefox 159.0.1 passes (unit tests 2/2, blank-tab and loopback-navigation spike, production-daemon firefox_native test 1/1). Firefox BiDi is therefore advertised on macOS and Linux only (symbrowse-core advertise module: --engine validation, daemon capabilities handshake; typed engine_not_advertised elsewhere). Safari is NOT advertised and stays cfg-gated: its native gate needs Remote Automation on the user's real Safari, a maintainer step. Item stays in_progress until that Safari gate passes."
     },
     {
       "id": "RUST-014",

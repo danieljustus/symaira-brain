@@ -19,6 +19,7 @@ mod go_json_escape;
 pub mod guard_cli;
 mod harness_cli;
 mod health_probe;
+mod hermes_config;
 mod init_cli;
 mod install_cli;
 mod managed_home;

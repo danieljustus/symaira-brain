@@ -3,7 +3,7 @@
 //! Chrome) against the Rust daemon and compares response JSON step by step.
 //!
 //! The Rust side needs no Go.  It does need real Chrome, so the test only runs
-//! when `SYMBROWSE_LIVE_CHROME=1` (and `SYMBROWSE_CHROME_PATH`/the default
+//! when `SYMBROWSE_LIVE_CHROME=1` (and `SYMBROWSE_CHROME_EXECUTABLE`/the default
 //! macOS Chrome is installed).  Steps listed in `KNOWN_GAPS` are documented
 //! unimplemented Go-parity commands: they must still differ (so a fixed
 //! command forces the entry to be removed) and are reported, never hidden.
@@ -27,10 +27,6 @@ use symbrowse_daemon::{Server, ServerOptions, SessionSpec};
 const KNOWN_GAPS: &[&str] = &[
     // auth.login needs the symvault credential path (vault.go) - not ported.
     "auth_login_noentry",
-    // Browser download events (Browser.downloadWillBegin/Progress) are not
-    // captured yet, so downloads.list/download.setdir stay unimplemented.
-    "download_setdir",
-    "downloads_list",
 ];
 
 /// Keys whose values are explicitly nondeterministic (timestamps, ids, pids,

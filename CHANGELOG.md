@@ -9,6 +9,17 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Added
+- `symbrain harness list` now ends with a read-only Hermes entry (`read_only`
+  in `--json`): `$HERMES_HOME` (default `~/.hermes`) `config.yaml` plus every
+  `profiles/*/config.yaml`, MCP servers redacted. `symbrain doctor` honours
+  `HERMES_HOME`, checks the profile configs (`hermes_profiles`) and reports a
+  paused first-run backup (`pending_backups`: the `.<app>-resume.partial` tree
+  and how to finish it). Hermes install/uninstall stay unsupported. Accepted
+  divergences from the frozen Go output, no fixture re-seal:
+  `scripts/harness_list_contract.py` and `scripts/doctor_harness_contract.py`
+  (#1024).
+
 ### Fixed
 - `symbrain doctor` detects Hermes read-only through `~/.hermes/config.yaml`
   (`mcp_servers.symbrain`, including the single-dash `-profile` form), so the
@@ -17,8 +28,7 @@ the [Unreleased] section is moved into a dated version section.
   empty path. Managed cores whose installed version differs from the pin show
   `!` with a `symbrain setup --fix` hint (`mismatch` in `--json`). Accepted
   divergence from the frozen Go doctor output: `scripts/doctor_harness_contract.py`.
-  Not yet: `symbrain harness list` still omits Hermes, and
-  `~/.hermes/profiles/*/config.yaml` is not read (#1021).
+  (#1021; `harness list` and the profile configs followed in #1024.)
 - The first-run state backup now converges across short CLI commands. A copy
   cancelled at command exit keeps its single `.<app>-resume.partial` tree, and
   the next run reuses every file whose size and mtime still match the source

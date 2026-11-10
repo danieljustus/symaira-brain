@@ -1,0 +1,1 @@
+<html><body><form action="/submit" method="post"><label for="name">Name</label><input id="name" type="text" value="Ada"><button type="submit">Send</button><select name="kind"><option>One</option></select></form></body></html>

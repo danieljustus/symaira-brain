@@ -5,6 +5,14 @@
 use super::*;
 use symbrowse_engine_chrome::{ConsoleEntry, ErrorEntry};
 
+/// `Page.navigate` `errorText` that must fail the command; `net::ERR_ABORTED`
+/// is the one value Go's polling contract treats as success.
+fn navigation_error_text(result: &Value) -> Option<&str> {
+    result["errorText"]
+        .as_str()
+        .filter(|text| !text.is_empty() && *text != "net::ERR_ABORTED")
+}
+
 fn failed(message: impl Into<String>) -> DaemonError {
     DaemonError {
         code: codes::OPERATION_FAILED.into(),
@@ -147,6 +155,8 @@ pub(super) const GO_CHROME_COMMANDS: &[&str] = &[
     "network.route",
     "network.unroute",
     "network.har",
+    "download.setdir",
+    "downloads.list",
     "scroll",
     "trace.replay",
 ];
@@ -260,6 +270,39 @@ impl DispatchRuntime {
             .lock()
             .ok()
             .and_then(|browser| browser.as_ref().map(|state| state.page.clone()))
+    }
+
+    /// Every open tab (the owned browser keeps one page per tab).
+    fn live_pages(&self) -> Vec<ChromePage> {
+        self.browser
+            .lock()
+            .ok()
+            .and_then(|browser| {
+                browser.as_ref().map(|state| {
+                    let mut pages: Vec<ChromePage> =
+                        state.tabs.iter().map(|tab| tab.page.clone()).collect();
+                    pages.push(state.page.clone());
+                    pages
+                })
+            })
+            .unwrap_or_default()
+    }
+
+    /// Download events across tabs, deduplicated by GUID. Browser events are
+    /// delivered to the session that enabled them, which need not be the
+    /// active tab.
+    fn download_events(&self) -> Vec<symbrowse_engine::files::DownloadEvent> {
+        let mut seen = std::collections::BTreeSet::new();
+        let mut events = Vec::new();
+        for page in self.live_pages() {
+            for event in page.download_events() {
+                if seen.insert(event.guid.clone()) {
+                    events.push(event);
+                }
+            }
+        }
+        events.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+        events
     }
 
     async fn go_origin(page: &ChromePage) -> String {
@@ -823,6 +866,24 @@ impl DispatchRuntime {
                     }
                 }
             }
+            "download.setdir" => {
+                #[derive(serde::Deserialize, Default)]
+                struct Request {
+                    #[serde(default)]
+                    dir: String,
+                }
+                let request: Request = decode(frame)?;
+                let page = self.ensure_browser(operation).await?;
+                let directory = page
+                    .set_download_dir(&request.dir)
+                    .await
+                    .map_err(|error| failed(format!("set download directory: {error}")))?;
+                json!({"download_dir": directory})
+            }
+            "downloads.list" => {
+                let events = self.download_events();
+                json!({"count": events.len(), "downloads": events})
+            }
             "scroll" => {
                 #[derive(serde::Deserialize, Default)]
                 struct Request {
@@ -1024,18 +1085,27 @@ impl DispatchRuntime {
         Ok((Some(data), Vec::new()))
     }
 
-    /// Go `NavigationService.navigate`: `Page.navigate` (its `errorText` is
-    /// not an error, exactly like Go), then wait for `readyState == complete`
-    /// and report the final URL/status.
+    /// Go `NavigationService.navigate`: `Page.navigate`, then wait for
+    /// `readyState == complete` and report the final URL/status.
+    ///
+    /// `net::ERR_ABORTED` is not an error (frozen Go oracle: an empty-404
+    /// origin reports success).  Every other `errorText` (offline, blocked,
+    /// refused, DNS) lands Chrome on `chrome-error://chromewebdata/`; that is
+    /// returned as a typed failure instead of a success with `http_status: 0`,
+    /// matching the engine-level `page_navigate_error` rule.
     pub(super) async fn go_navigate(
         page: &ChromePage,
         action: &str,
         url: &str,
         operation: &OperationContext,
     ) -> Result<Value, DaemonError> {
-        page.cdp("Page.navigate", json!({"url": url}))
+        let navigated = page
+            .cdp("Page.navigate", json!({"url": url}))
             .await
             .map_err(|error| failed(format!("{action} {url:?}: {error}")))?;
+        if let Some(text) = navigation_error_text(&navigated) {
+            return Err(failed(format!("{action} {url:?}: {text}")));
+        }
         loop {
             let state = page
                 .evaluate_expression(NAVIGATION_STATE)
@@ -1183,4 +1253,28 @@ fn frame_node(node: &Value) -> Value {
         );
     }
     Value::Object(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn navigation_error_text_follows_go_polling_contract() {
+        for (result, expected) in [
+            (json!({"frameId": "f"}), None),
+            (json!({"frameId": "f", "errorText": ""}), None),
+            (json!({"errorText": "net::ERR_ABORTED"}), None),
+            (
+                json!({"errorText": "net::ERR_INTERNET_DISCONNECTED"}),
+                Some("net::ERR_INTERNET_DISCONNECTED"),
+            ),
+            (
+                json!({"errorText": "net::ERR_BLOCKED_BY_CLIENT"}),
+                Some("net::ERR_BLOCKED_BY_CLIENT"),
+            ),
+        ] {
+            assert_eq!(navigation_error_text(&result), expected, "{result}");
+        }
+    }
 }

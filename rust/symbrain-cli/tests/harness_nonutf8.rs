@@ -128,10 +128,30 @@ fn replay_go(argv: &[&str], observed: &Output, root: &std::path::Path, suffix: &
     let go_stdout = unhex(case["stdout_hex"].as_str().unwrap());
     let native_stdout = tokenize(&observed.stdout, root);
     if argv[0] == "harness" && argv.contains(&"--json") {
+        let mut native: serde_json::Value = serde_json::from_slice(&native_stdout).unwrap();
+        // #1024 accepted divergence: one trailing read-only Hermes entry.
+        let harnesses = native["harnesses"].as_array_mut().unwrap();
+        let hermes = harnesses.pop().unwrap();
+        assert_eq!(hermes["name"], "hermes");
+        assert_eq!(hermes["read_only"], true);
         assert_eq!(
             serde_json::from_slice::<serde_json::Value>(&go_stdout).unwrap(),
-            serde_json::from_slice::<serde_json::Value>(&native_stdout).unwrap(),
+            native,
             "{argv:?}"
+        );
+    } else if argv[0] == "harness" {
+        // #1024 accepted divergence: one trailing read-only Hermes block.
+        let marker = b"hermes\tHermes\n";
+        let at = native_stdout
+            .windows(marker.len())
+            .rposition(|window| window == marker)
+            .expect("hermes block");
+        let note = b"  note\tread-only: symbrain install/uninstall do not support Hermes\n\n";
+        assert!(native_stdout.ends_with(note));
+        assert_eq!(
+            go_stdout,
+            native_stdout[..at],
+            "{argv:?} stdout bytes differ from frozen Go"
         );
     } else {
         assert_eq!(

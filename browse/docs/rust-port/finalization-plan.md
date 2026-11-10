@@ -31,7 +31,7 @@ Go at 5.894 ms; the maximum permitted Rust p95 is 6.4834 ms.
 
 **Make target status at this checkout:** Browse has no module-local Makefile, and
 neither its directory nor the repository-root Makefile defines
-`rust-fetch-contract`, `rust-fetch-static-slice`, `rust-browser-contract`,
+`rust-fetch-contract`, `rust-browser-contract`,
 `rust-hardening`, `rust-gates`, `rust-native-browser-contract`, or
 `port-contract`. These are intended future targets, not runnable acceptance
 checks or evidence until their recipes are implemented. The final matrix's
@@ -136,10 +136,11 @@ regressions; native named-session tests additionally preserve jar isolation.
 3. Preserve byte comparison wherever formatting is contractually fixed; declare
    semantic comparison explicitly where byte equality is not the contract.
 
-**Acceptance (planned target, not implemented here):**
-`make rust-fetch-static-slice`, full `fetch-render` harness, and
-`FETCH-006/007/008` green. Do not treat the Make target as runnable evidence
-until its recipe exists.
+**Acceptance:** `make rust-fetch-static-slice` (recipe exists at the
+repository root since this slice; it runs inside `browse/`), the full
+`fetch-render` harness, and `FETCH-006/007/008` green on macOS arm64 and Linux.
+The Linux leg needs a native CI run; the Go generator named in step 1 was
+removed, so the corpus is replayed, not regenerated (2026-11-06 scope update).
 
 ## Phase 2 — repair and enforce the value gate before browser expansion
 

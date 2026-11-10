@@ -1,8 +1,8 @@
 use std::io::{self, Write};
 
 use super::doctor_types::{
-    ConfigCheck, DirCheck, DoctorReport, HarnessCheck, LinkCheck, MemoryDbCheck, ProfileHandshake,
-    ServerCheck, SkillsLibraryCheck,
+    ConfigCheck, DirCheck, DoctorReport, HarnessCheck, LinkCheck, MemoryDbCheck, PendingBackup,
+    ProfileHandshake, ServerCheck, SkillsLibraryCheck,
 };
 
 pub(super) fn human(w: &mut dyn Write, report: &DoctorReport) -> io::Result<()> {
@@ -44,6 +44,13 @@ pub(super) fn human(w: &mut dyn Write, report: &DoctorReport) -> io::Result<()> 
                     core.name, core.version, core.pinned
                 )?;
             }
+            if core.provenance_stale {
+                writeln!(
+                    w,
+                    "    !  {:<10} {}.provenance.json does not describe the installed binary (replaced outside symbrain?) — delete it if intended, or reinstall",
+                    core.name, core.binary
+                )?;
+            }
         }
     }
     writeln!(w)?;
@@ -59,6 +66,7 @@ pub(super) fn human(w: &mut dyn Write, report: &DoctorReport) -> io::Result<()> 
     for harness in &report.harnesses {
         harness_line(w, harness)?;
     }
+    hermes_profiles(w, &report.hermes_profiles)?;
     if !report.handshakes.is_empty() {
         writeln!(w, "\n  profile handshakes:")?;
         for handshake in &report.handshakes {
@@ -81,6 +89,7 @@ pub(super) fn human(w: &mut dyn Write, report: &DoctorReport) -> io::Result<()> 
             )?;
         }
     }
+    pending_backups(w, &report.pending_backups)?;
     if !report.degradations.is_empty() {
         writeln!(w, "\n  startup degradations:")?;
         for degradation in &report.degradations {
@@ -222,6 +231,13 @@ fn harness_line(w: &mut dyn Write, check: &HarnessCheck) -> io::Result<()> {
             "  ✗  {:<14} {} (invalid config: {})",
             check.name, check.config_path, check.config_error
         )?;
+    } else if !check.installed && !check.supports_mcp_install {
+        // Read-only harness (Hermes): `symbrain install` cannot register it.
+        writeln!(
+            w,
+            "  →  {:<14} config found, symbrain not registered (read-only; `symbrain install` does not support it): {}",
+            check.name, check.config_path
+        )?;
     } else if !check.installed {
         writeln!(
             w,
@@ -264,6 +280,39 @@ fn harness_line(w: &mut dyn Write, check: &HarnessCheck) -> io::Result<()> {
         }
     }
     Ok(())
+}
+fn hermes_profiles(w: &mut dyn Write, profiles: &[HarnessCheck]) -> io::Result<()> {
+    if profiles.is_empty() {
+        return Ok(());
+    }
+    writeln!(w, "\n  hermes profiles:")?;
+    for profile in profiles {
+        let mut line = Vec::new();
+        harness_line(&mut line, profile)?;
+        for text in String::from_utf8_lossy(&line).lines() {
+            writeln!(w, "  {text}")?;
+        }
+    }
+    Ok(())
+}
+fn pending_backups(w: &mut dyn Write, backups: &[PendingBackup]) -> io::Result<()> {
+    if backups.is_empty() {
+        return Ok(());
+    }
+    writeln!(w, "\n  pending first-run backup:")?;
+    for backup in backups {
+        pending_backup_lines(w, backup)?;
+    }
+    Ok(())
+}
+fn pending_backup_lines(w: &mut dyn Write, backup: &PendingBackup) -> io::Result<()> {
+    let state = if backup.running { "running" } else { "paused" };
+    writeln!(
+        w,
+        "    !  {:<10} {} ({state})",
+        backup.app, backup.partial_path
+    )?;
+    writeln!(w, "       finish: {}", backup.finish)
 }
 fn handshake_line(w: &mut dyn Write, check: &ProfileHandshake) -> io::Result<()> {
     if check.error.is_empty() {

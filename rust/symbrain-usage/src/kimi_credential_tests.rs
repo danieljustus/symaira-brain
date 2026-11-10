@@ -97,3 +97,55 @@ fn unexpired_cli_token_keeps_the_generic_rejection_text() {
         "{text}"
     );
 }
+
+const KEY_FAILURE: &str = "resolve KIMI_CODE_API_KEY: secret resolution failed for symvault://kimi/api: symvault not installed";
+
+fn with_unresolved_key(cli: bool, web: bool) -> Provider {
+    kimi_from_resolved(
+        None,
+        Some(KEY_FAILURE.to_owned()),
+        cli.then_some("placeholder-cli"),
+        web.then(|| ("env".to_owned(), "placeholder-web".to_owned())),
+        None,
+        "https://api.kimi.com".into(),
+        None,
+    )
+}
+
+#[test]
+fn unresolved_key_reference_leads_the_chain_next_to_a_cli_token() {
+    let (text, requests, ok) = run(
+        &with_unresolved_key(true, false),
+        vec![Ok(response(401, "no"))],
+    );
+    assert!(!ok);
+    assert_eq!(requests, 1, "the CLI strategy is still tried");
+    assert_eq!(
+        text,
+        format!(
+            "all AI usage fallbacks failed: {KEY_FAILURE}; Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        )
+    );
+    assert!(!text.contains("placeholder"), "{text}");
+}
+
+#[test]
+fn unresolved_key_reference_does_not_block_a_working_cli_token() {
+    let (source, requests, ok) = run(
+        &with_unresolved_key(true, false),
+        vec![Ok(response(200, METERS))],
+    );
+    assert!(ok);
+    assert_eq!((source.as_str(), requests), ("cli", 1));
+}
+
+#[test]
+fn unresolved_key_reference_is_reported_once_when_nothing_else_is_configured() {
+    let provider = with_unresolved_key(false, false);
+    assert!(!provider.configured);
+    assert!(provider.auth_status.detail.contains(KEY_FAILURE));
+    assert!(
+        provider.kimi_api_failure.is_none(),
+        "no duplicate in the chain"
+    );
+}

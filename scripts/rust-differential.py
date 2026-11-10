@@ -41,6 +41,7 @@ from harness_health_contract import (
     legacy_health_view,
 )
 from doctor_harness_contract import legacy_doctor_view
+from harness_list_contract import legacy_harness_list_view
 from skills_render_contract import RENDER_DEVIATIONS, legacy_render_view
 RELEASE_BASE_URL = ""
 # Some setups seed state by running the reference binary in BOTH fixture roots.
@@ -6425,6 +6426,15 @@ def main() -> int:
                     except (AssertionError, ValueError, TypeError, KeyError) as err:
                         failures.append(f"{case.name}: HAR-007 seeded health rows failed: {err}")
                         continue
+                if case.name.startswith("harness_list_"):
+                    try:
+                        projected = legacy_harness_list_view(go_stdout, rust_stdout)
+                    except AssertionError as err:
+                        failures.append(f"{case.name}: HERMES-LIST harness list contract failed: {err}")
+                        continue
+                    if projected != rust_stdout:
+                        print(f"ACCEPTED HERMES-LIST {case.name} (validated read-only Hermes entry)")
+                    rust_stdout = projected
                 if case.name.startswith("doctor_"):
                     try:
                         projected = legacy_doctor_view(go_stdout, rust_stdout)

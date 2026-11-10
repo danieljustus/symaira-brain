@@ -33,9 +33,20 @@ Rules:
   Brain does not touch Safe Storage.
 - Nothing is written to any CLI or Desktop store.
 
-Known limits: only the active `CODEX_HOME` is inspected (no multi-home scan;
-no layout with several Codex logins was available to record), and the
-Keychain listing runs only when the Claude token came from the Keychain.
+Known limits:
+
+- **Single Codex home (maintainer decision 2026-11-10).** Only the active
+  `CODEX_HOME` and, when it is unset, the default `~/.codex` are inspected.
+  Additional Codex logins are deliberately not discovered: there is no
+  multi-home or multi-account scan, no accounts directory exists, and no
+  layout with several Codex logins was available to record. A second login
+  therefore never appears in `accounts`; point `CODEX_HOME` at it to report it.
+- The Keychain listing (`security dump-keychain`, attributes only) runs only
+  when the Claude token came from the Keychain or a suffixed
+  `Claude Code-credentials-<hex>` item is looked for. A real dump is about
+  550 KB; the output is read in full up to 16 MiB (20 s timeout). A larger
+  dump is reported as truncated and ignored as a whole, never parsed
+  partially, so no suffixed login is guessed from a cut-off listing.
 
 ## #1001 — Copilot seats billed to an organization
 

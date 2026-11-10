@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use cap_std::fs::Dir;
 
 use super::base::{manifest_hashes, read_manifest_for};
-use super::destination::read_link_at;
+use super::destination::{EntryProbe, read_link_at};
 use super::drift::{DriftKind, DriftSummary, classify_drift, file_hashes, summarize};
 use super::replace::open_trusted_dir;
 use super::status::{InstallStatus, StatusKind, StatusOptions};
@@ -163,8 +163,23 @@ pub(super) fn resolve_link(path: &Path) -> Option<PathBuf> {
 /// missing or is not a directory carries no marker and the entry stays
 /// unmanaged. The check must not create anything (a status scan is read-only)
 /// and must not follow a second link, which the native scan refuses by design.
-pub(super) fn resolves_to_directory(path: &Path) -> Result<bool, SkillError> {
-    Ok(super::destination::entry_metadata(path)?.is_some_and(|metadata| metadata.is_dir()))
+pub(super) fn link_target_state(path: &Path) -> Result<LinkTarget, SkillError> {
+    Ok(match super::destination::probe_entry(path)? {
+        EntryProbe::Present(metadata) if metadata.is_dir() => LinkTarget::Directory,
+        EntryProbe::Present(_) | EntryProbe::Absent => LinkTarget::NoMarkerPossible,
+        EntryProbe::ParentNotDirectory => LinkTarget::ParentNotDirectory,
+    })
+}
+
+/// What a status scan found at the resolved target of an installed symlink.
+pub(super) enum LinkTarget {
+    /// A directory that may carry a marker.
+    Directory,
+    /// Missing or not a directory: no marker, so the entry stays unmanaged.
+    NoMarkerPossible,
+    /// A parent of the target is a file (or a link to one); the entry is
+    /// reported as a per-entry problem instead of aborting the scan.
+    ParentNotDirectory,
 }
 
 pub(super) fn unmanaged(target: &str, name: &str, path: PathBuf) -> InstallStatus {

@@ -136,7 +136,56 @@ impl DispatchRuntime {
         }
     }
 
+    /// Close every engine this runtime may own. Chrome, Firefox and Safari are
+    /// each closed explicitly so shutdown never depends on `Drop` ordering or
+    /// on a process-exit kill; one engine failing never skips the others.
     fn shutdown_browser(&self) {
+        self.shutdown_chrome();
+        self.shutdown_firefox();
+        #[cfg(target_os = "macos")]
+        self.shutdown_safari();
+    }
+
+    fn shutdown_firefox(&self) {
+        let started = std::time::Instant::now();
+        let outcome = block_on_timeout(&self.runtime, Duration::from_secs(3), async {
+            let session = self.firefox.lock().await.take();
+            match session {
+                None => "none",
+                Some(mut session) => match session.close().await {
+                    Ok(()) => "closed",
+                    Err(_) => "close-error",
+                },
+            }
+        })
+        .unwrap_or("close-timeout");
+        eprintln!(
+            "symbrowse shutdown: firefox {outcome} elapsed_ms={}",
+            started.elapsed().as_millis()
+        );
+    }
+
+    #[cfg(target_os = "macos")]
+    fn shutdown_safari(&self) {
+        let started = std::time::Instant::now();
+        let outcome = block_on_timeout(&self.runtime, Duration::from_secs(3), async {
+            let session = self.safari.lock().await.take();
+            match session {
+                None => "none",
+                Some(mut session) => match session.close().await {
+                    Ok(()) => "closed",
+                    Err(_) => "close-error",
+                },
+            }
+        })
+        .unwrap_or("close-timeout");
+        eprintln!(
+            "symbrowse shutdown: safari {outcome} elapsed_ms={}",
+            started.elapsed().as_millis()
+        );
+    }
+
+    fn shutdown_chrome(&self) {
         eprintln!("symbrowse shutdown: begin");
         let browser = self
             .browser
@@ -432,6 +481,9 @@ impl DispatchRuntime {
                         message: "Safari engines are only available on macOS".into(),
                         ..Default::default()
                     });
+                }
+                if self.spec.engine == "firefox" {
+                    ensure_firefox_advertised(std::env::consts::OS)?;
                 }
                 Ok((
                     Some(
@@ -1250,6 +1302,14 @@ impl DispatchRuntime {
                 .navigation(frame.cmd.as_str())
                 .await
                 .map_err(runtime_error)?,
+            "download" => {
+                return Err(DaemonError {
+                    code: "unsupported".into(),
+                    message: "Chrome daemon does not implement \"download\"".into(),
+                    hint: "use download.setdir and downloads.list".into(),
+                    ..Default::default()
+                });
+            }
             _ => {
                 return Err(DaemonError {
                     code: codes::UNKNOWN_COMMAND.into(),
@@ -1337,6 +1397,7 @@ impl DispatchRuntime {
     }
 
     async fn firefox_command(&self, frame: &Frame) -> HandlerResult {
+        ensure_firefox_advertised(std::env::consts::OS)?;
         let args = object_args(frame)?;
         let mut guard = self.firefox.lock().await;
         if guard.is_none() {
@@ -2038,6 +2099,21 @@ fn selection_error(message: String) -> DaemonError {
     }
 }
 
+/// Firefox BiDi is offered only where its native gate passed (RUST-013); a
+/// request elsewhere is a typed error, never another engine.
+fn ensure_firefox_advertised(os: &str) -> Result<(), DaemonError> {
+    if symbrowse_core::advertise::is_advertised(symbrowse_core::config::BrowserEngine::Firefox, os)
+    {
+        return Ok(());
+    }
+    Err(DaemonError {
+        code: "unsupported".into(),
+        message: symbrowse_core::advertise::not_advertised_message("firefox", os),
+        hint: "Firefox is advertised on macOS and Linux only".into(),
+        ..Default::default()
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2122,6 +2198,21 @@ mod tests {
     ) -> Result<Arc<DispatchRuntime>, DaemonError> {
         let store = state_key::initialize_with_sources(&spec, state_key::tests::AbsentSources)?;
         DispatchRuntime::new_with_store(spec, url, store)
+    }
+
+    #[test]
+    fn shutdown_visits_every_engine_slot_and_is_idempotent() {
+        let runtime = test_runtime(temp_spec("shutdown-all-engines")).expect("runtime");
+        // No engine was launched: every slot is empty and each close step must
+        // finish promptly without leaving a lock held.
+        runtime.shutdown_browser();
+        runtime.shutdown_browser();
+        runtime.runtime.block_on(async {
+            assert!(runtime.firefox.lock().await.is_none());
+            #[cfg(target_os = "macos")]
+            assert!(runtime.safari.lock().await.is_none());
+        });
+        assert!(runtime.browser.lock().unwrap().is_none());
     }
 
     fn temp_spec(name: &str) -> SessionSpec {
@@ -2502,6 +2593,39 @@ mod tests {
         restarted.stop();
         assert!(restart_thread.join().unwrap().is_ok());
         let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn firefox_is_refused_with_a_typed_error_outside_macos_and_linux() {
+        for os in ["macos", "linux"] {
+            assert!(ensure_firefox_advertised(os).is_ok(), "{os}");
+        }
+        let error = ensure_firefox_advertised("windows").expect_err("windows must refuse");
+        assert_eq!(error.code, "unsupported");
+        assert!(error.message.starts_with("engine_not_advertised:"));
+    }
+
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
+    #[test]
+    fn firefox_capabilities_report_only_implemented_interfaces() {
+        let mut spec = temp_spec("firefox-capabilities");
+        spec.engine = "firefox".into();
+        let runtime = test_runtime(spec).expect("runtime");
+        let (data, _) = runtime
+            .runtime
+            .block_on(runtime.dispatch(
+                Frame {
+                    cmd: "capabilities".into(),
+                    ..Frame::default()
+                },
+                OperationContext::for_test(),
+            ))
+            .expect("firefox capabilities are advertised on this target");
+        let data = data.expect("capabilities data");
+        assert_eq!(data["kind"], "firefox");
+        let interfaces = data["interfaces"].as_array().expect("interfaces");
+        assert!(interfaces.iter().any(|name| name == "TabManager"));
+        assert!(!interfaces.iter().any(|name| name == "NetworkEvents"));
     }
 
     #[test]

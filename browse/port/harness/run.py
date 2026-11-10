@@ -536,6 +536,11 @@ def main() -> int:
             run(["cargo", "test", "-p", package, "--test", "contract_fixture", "--locked"], root, env)
         print(f"{args.suite} suite passed")
         return 0
+    elif args.suite == "chrome-daemon":
+        from chrome_daemon_suite import chrome_daemon_suite
+
+        chrome_daemon_suite(root, env)
+        return 0
     elif args.suite == "daemon":
         daemon_suite(root, env, rounds=1, starters=1)
         return 0

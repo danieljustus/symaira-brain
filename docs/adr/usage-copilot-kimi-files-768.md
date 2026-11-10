@@ -124,3 +124,17 @@ reachable in the new scope. The original failure is preserved, and the corrected
 lexical path design, complete owner probes and later clean-source validation are
 recorded in `docs/adr/usage-credential-path-owner-768.md`. The earlier passing
 test checkpoint is historical and is not an independent approval.
+
+## 2026-11-10 note: accepted divergence for `kimi-error-api-retains-cli` (#931)
+
+The sealed Go case `kimi-error-api-retains-cli` records a `KIMI_CODE_API_KEY`
+reference that fails to resolve next to a present Kimi CLI token, and its report
+drops that failure. Maintainer decision 2026-11-10: Rust surfaces it. The
+unresolved reference and the resolver message (reference/path kind only, never a
+secret value) now lead the error chain, followed by the CLI failure. The
+fixture `usage_768_copilot_kimi_go.json` stays byte-identical and sealed. The
+replay registers the change as one accepted divergence for that one case and
+one field (`providers[0].error`) in
+`rust/symbrain-usage/src/copilot_kimi_divergence.rs`; it asserts the frozen Go
+bytes and the exact new text, and counts that exactly one divergence was
+applied, so any other drift still fails.

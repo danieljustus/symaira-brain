@@ -16,6 +16,8 @@
 
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
+#[path = "../../test-support/fs_walk.rs"]
+mod fs_walk;
 
 use std::collections::BTreeMap;
 use std::ffi::OsString;
@@ -147,7 +149,8 @@ fn manifest(root: &Path) -> BTreeMap<Vec<u8>, (String, u32, String)> {
         };
         for entry in entries.flatten() {
             let path = entry.path();
-            let Ok(metadata) = std::fs::symlink_metadata(&path) else {
+            let Some(metadata) = fs_walk::skip_vanished(std::fs::symlink_metadata(&path), &path)
+            else {
                 continue;
             };
             // Raw bytes: ext4 allows names that are not valid UTF-8.
@@ -156,7 +159,9 @@ fn manifest(root: &Path) -> BTreeMap<Vec<u8>, (String, u32, String)> {
             let mode = metadata.mode() & 0o777;
             let file_type = metadata.file_type();
             if file_type.is_symlink() {
-                let target = std::fs::read_link(&path).unwrap();
+                let Some(target) = fs_walk::skip_vanished(std::fs::read_link(&path), &path) else {
+                    continue;
+                };
                 let hex = hex(target.into_os_string().as_encoded_bytes());
                 // A symlink's own mode is platform noise (0o755 on macOS,
                 // always 0o777 on Linux); only its target is compared.

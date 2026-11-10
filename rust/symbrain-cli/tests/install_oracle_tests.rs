@@ -1,6 +1,8 @@
 #![allow(clippy::items_after_statements, clippy::manual_let_else)]
 #[path = "../../test-support/coverage.rs"]
 mod coverage;
+#[path = "../../test-support/fs_walk.rs"]
+mod fs_walk;
 
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -189,18 +191,21 @@ fn snapshot(root: &Path) -> Vec<ObservedFile> {
                 .map_or(relative.clone(), |(prefix, _)| {
                     format!("{prefix}.bak.<timestamp>")
                 });
-            let metadata = fs::symlink_metadata(&path).unwrap();
+            // An entry removed since the listing is gone, not an error.
+            let Some(metadata) = fs_walk::skip_vanished(fs::symlink_metadata(&path), &path) else {
+                continue;
+            };
             let mode = permissions_mode(&metadata);
             if metadata.file_type().is_symlink() {
+                let Some(link) = fs_walk::skip_vanished(fs::read_link(&path), &path) else {
+                    continue;
+                };
                 out.push(ObservedFile {
                     path: relative,
                     file_type: "symlink".into(),
                     mode,
                     bytes: None,
-                    target: Some(normalize(
-                        fs::read_link(&path).unwrap().to_string_lossy().as_bytes(),
-                        root,
-                    )),
+                    target: Some(normalize(link.to_string_lossy().as_bytes(), root)),
                 });
             } else if metadata.is_dir() {
                 out.push(ObservedFile {
@@ -212,11 +217,14 @@ fn snapshot(root: &Path) -> Vec<ObservedFile> {
                 });
                 walk(root, &path, out);
             } else if metadata.is_file() {
+                let Some(bytes) = fs_walk::skip_vanished(fs::read(&path), &path) else {
+                    continue;
+                };
                 out.push(ObservedFile {
                     path: relative,
                     file_type: "file".into(),
                     mode,
-                    bytes: Some(fs::read(&path).unwrap()),
+                    bytes: Some(bytes),
                     target: None,
                 });
             }

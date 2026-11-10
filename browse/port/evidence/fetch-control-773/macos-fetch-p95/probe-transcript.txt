@@ -1,0 +1,21 @@
+# Verbatim console output of daemon_latency_probe.py (N=200 per row, ms). Not benchmark evidence; profiling aid.
+# PRE-FIX binary (F_FULLFSYNC journal), NVMe root, load average 80-95 -> 45-55 across the runs:
+daemon.ping                first   1.47 min  0.03 p25  0.04 p50  0.05 p75  0.06 p90   0.08 p95   0.09 max   1.47
+fetch.url (bench frame)    first  15.41 min  0.97 p25  1.66 p50  2.49 p75  6.27 p90  11.68 p95  15.41 max  23.81
+fetch.url refused port     first   1.48 min  0.72 p25  0.86 p50  1.07 p75  4.27 p90   5.49 p95   5.81 max   6.87
+python urllib -> fixture   first   5.45 min  0.19 p25  0.25 p50  0.31 p75  0.37 p90   0.43 p95   0.48 max   5.45
+fetch.url (bench frame)    first   6.87 min  0.80 p25  1.03 p50  1.24 p75  3.95 p90   6.10 p95   6.87 max  46.75
+fetch.url refused port     first   0.92 min  0.66 p25  0.95 p50  1.90 p75  5.61 p90   8.73 p95  12.14 max  20.38
+fetch.url (bench frame)    first   3.00 min  0.95 p25  1.07 p50  1.17 p75  1.64 p90   6.23 p95   6.50 max   8.08
+fetch.url refused port     first   0.96 min  0.70 p25  0.80 p50  0.97 p75  1.30 p90   5.95 p95   6.16 max   7.65
+fetch.url (bench frame)    first   2.75 min  0.81 p25  0.97 p50  1.06 p75  1.35 p90   5.75 p95   5.90 max  12.77
+fetch.url refused port     first   0.80 min  0.73 p25  0.84 p50  0.91 p75  4.88 p90   5.95 p95   6.05 max  11.12
+# Same binary with HOME on the internal volume (F_FULLFSYNC slower there):
+fetch.url (bench frame)    first  14.73 min  3.03 p25  4.13 p50  4.97 p75  5.30 p90  10.15 p95  16.68 max  76.85
+fetch.url refused port     first   4.47 min  2.74 p25  3.82 p50  3.97 p75  4.03 p90   4.13 p95   4.25 max   6.10
+# Python F_FULLFSYNC alone, N=500 on the NVMe: min 0.69 p50 0.90 p75 1.14 p90 5.90 p95 6.09 max 22.03
+# POST-FIX binary (fsync(2) journal), NVMe root, load average 17:
+fetch.url (bench frame)    first   1.99 min  0.29 p25  0.35 p50  0.41 p75  0.48 p90  0.59 p95  0.72 max   1.99
+fetch.url refused port     first   0.72 min  0.13 p25  0.18 p50  0.22 p75  0.27 p90  0.34 p95  0.40 max   0.72
+fetch.url (bench frame)    first   3.88 min  0.32 p25  0.43 p50  0.49 p75  0.58 p90  0.68 p95  0.79 max   3.88
+fetch.url refused port     first   0.37 min  0.14 p25  0.18 p50  0.20 p75  0.23 p90   0.31 p95   0.37 max   0.70

@@ -36,6 +36,12 @@ als „von dieser Engine nicht unterstützt" scheitern.
 | `safari-attach` | Apple Events (`do JavaScript`) | Lesen vollständig; Navigation policy-guarded; Bedienen hinter Opt-in (issue #297) |
 | `safari-bidi` | WebDriver BiDi über WebSocket (`safaridriver --bidi`) | Lesen in isolierter Sitzung; **kein** Bedienen, **keine** Events, **keine** Subresource-Policy — Safari implementiert die nötigen Module nicht (issue #355) |
 
+| `firefox` | WebDriver BiDi über WebSocket (eigener Start, kein geckodriver) | Navigation, Auswerten, Cookies/Storage, Tabs/Frames, Screenshots; Netzwerk/Downloads sind typed unsupported. Wird nur auf macOS und Linux angeboten (nativer Gate bestanden, RUST-013) |
+
+Angeboten (advertised) wird eine Engine erst, wenn ihr eigener nativer Gate auf
+der Plattform bestanden hat (`symbrowse-core::advertise`). Safari ist bis zum
+Maintainer-Gate mit echter Remote Automation **nicht** angeboten.
+
 Die CDP-Engine ist nicht auf Google Chrome festgelegt. Die Discovery des
 `doctor` (`search_paths` und `discover` in
 [`extra.rs`](../crates/symbrowse-cli/src/extra.rs)) findet Chrome, Chromium

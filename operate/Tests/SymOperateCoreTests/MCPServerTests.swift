@@ -26,8 +26,8 @@ final class MCPServerTests: XCTestCase {
     func testToolsListReturnsAllTools() async throws {
         let result = try await server.dispatch(method: "tools/list", params: [:])
         let tools = result["tools"] as? [[String: Any]]
-        XCTAssertEqual(tools?.count, 27)
         let names = tools?.compactMap { $0["name"] as? String }
+        XCTAssertEqual(names, Self.expectedToolNames)
         XCTAssertTrue(names?.contains("snapshot") ?? false)
         XCTAssertTrue(names?.contains("click") ?? false)
         XCTAssertTrue(names?.contains("list_displays") ?? false)
@@ -345,7 +345,7 @@ extension MCPServerTests {
             #"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#,
         ])
         let tools = (responses[0]["result"] as? [String: Any])?["tools"] as? [[String: Any]]
-        XCTAssertEqual(tools?.count, 27)
+        XCTAssertEqual(tools?.compactMap { $0["name"] as? String }, Self.expectedToolNames)
     }
 
     func testWireToolsCallKeepsNumericStructuredContent() async throws {
@@ -435,10 +435,44 @@ extension MCPServerTests {
 
 
 extension MCPServerTests {
+    /// The advertised catalog, in `tools/list` order. Adding, removing or
+    /// reordering a tool is a deliberate client-visible change: update this
+    /// one list (the count follows from it).
+    static let expectedToolNames: [String] = [
+        "list_apps",
+        "list_windows",
+        "list_displays",
+        "snapshot",
+        "query_ui",
+        "query_ui_ocr",
+        "find_ui",
+        "click",
+        "type_text",
+        "press_keys",
+        "scroll",
+        "drag",
+        "launch_app",
+        "focus_window",
+        "menu_action",
+        "wait_for",
+        "permissions_status",
+        "get_policy",
+        "set_policy",
+        "version",
+        "freeform_doctor",
+        "freeform_insert",
+        "freeform_connect",
+        "freeform_connect_existing",
+        "freeform_move",
+        "freeform_read_board",
+        "freeform_list_boards",
+        "freeform_snapshot",
+    ]
+
     func testToolCatalogNamesMatchExposedToolsInOrder() async throws {
         let definitions = SymOperateMCP.MCPServer.toolDefinitions
         let catalogNames = definitions.map(\.name)
-        XCTAssertEqual(definitions.count, 27)
+        XCTAssertEqual(catalogNames, Self.expectedToolNames)
         XCTAssertEqual(Set(catalogNames).count, catalogNames.count, "Tool catalog names must be unique")
         XCTAssertTrue(definitions.allSatisfy { !$0.description.isEmpty })
 

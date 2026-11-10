@@ -23,6 +23,35 @@ pub struct ServerInfo {
 }
 
 impl ServerInfo {
+    /// Builds the redacted summary of one server from a decoded config value
+    /// (JSON or YAML). Only names, never environment values, are kept.
+    #[must_use]
+    pub fn from_value(name: &str, value: &serde_json::Value) -> Self {
+        let mut fields = Vec::new();
+        if let Some(object) = value.as_object() {
+            for (key, value) in object {
+                match (key.as_str(), value) {
+                    ("command" | "url" | "transport" | "type", serde_json::Value::String(text)) => {
+                        fields.push((key.clone(), ValueKind::String(text.clone())));
+                    }
+                    ("args", serde_json::Value::Array(items)) => {
+                        let args = items
+                            .iter()
+                            .filter_map(|item| item.as_str().map(str::to_owned))
+                            .collect();
+                        fields.push((key.clone(), ValueKind::Strings(args)));
+                    }
+                    ("env", serde_json::Value::Object(env)) => {
+                        let names = env.keys().cloned().collect();
+                        fields.push((key.clone(), ValueKind::Names(names)));
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Self::from_fields(name, &fields)
+    }
+
     pub(crate) fn from_fields(name: &str, fields: &[(String, ValueKind)]) -> Self {
         let mut info = Self {
             name: name.to_owned(),

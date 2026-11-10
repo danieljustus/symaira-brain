@@ -252,13 +252,21 @@ remain pending; matrix rows are fixture-ready rather than full-parity claims.
 
 **Objective:** Reproduce the SymFetch-compatible document pipeline byte-for-byte.
 
-**Progress:** Complete. Rust now has HTML5 parsing and cleanup, selector-aware
-rendering, semantic extraction, Markdown/JSON rendering, Unicode budgeting,
-BM25 section ranking, response/output caches, bounded ordered HTTP-backed batch
-fetching, and CDX/Wayback plus 404/410 recovery. The pinned Go generator
-produces the complete 28-vector corpus; byte comparison is used for FETCH-006
-and FETCH-007, while FETCH-008 is explicitly JSON-semantic. The static slice,
-full fetch-render harness, and package tests pass.
+**Progress:** Implemented and locally verified on macOS arm64; status stays
+`in_progress` until the native Linux CI run of the slice is green. Rust has
+HTML5 parsing and cleanup, selector-aware rendering, semantic extraction,
+Markdown/JSON rendering, Unicode budgeting, BM25 section ranking, response and
+output caches, bounded ordered HTTP-backed batch fetching, and CDX/Wayback plus
+404/410 recovery. Byte comparison (FETCH-006/007) is pinned by the 28-vector
+corpus `port/fixtures/fetch/static.json` (captured from the since-removed Go
+generator `scripts/rust-port/fetch_fixture_gen.go`; it is not yet registered in
+`scripts/oracle-freeze/registry.json`, which needs a maintainer re-seal).
+Selector, cache, HTTP-backed batch, partial-failure, Wayback and 404/410
+families have no Go-recorded fixture and are covered by Rust behavior tests
+(`selector_contract`, `cache_contract`, `batch_http`, `archive_http`,
+`recovery_http`); FETCH-008 stays JSON-semantic. The `dom-input` fuzz target
+lives in `browse/fuzz` and is replayed on stable Rust by
+`dom_input_smoke`. `make rust-fetch-static-slice` runs the slice.
 
 **Files:**
 

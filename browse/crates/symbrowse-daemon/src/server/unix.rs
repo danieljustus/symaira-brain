@@ -158,6 +158,13 @@ pub(super) fn wait_for_unix_listener(
     Ok(())
 }
 
+/// A connection is served only when its peer runs as the daemon's own
+/// effective user; any other UID, including root, is dropped. Pure so the
+/// negative case is testable without a foreign-UID process.
+pub(super) fn peer_uid_is_current(peer: u32, effective: u32) -> bool {
+    peer == effective
+}
+
 #[cfg(all(
     unix,
     any(
@@ -171,14 +178,20 @@ pub(super) fn wait_for_unix_listener(
 ))]
 pub(super) fn peer_is_current_user(stream: &std::os::unix::net::UnixStream) -> io::Result<bool> {
     let (uid, _) = nix::unistd::getpeereid(stream).map_err(io::Error::other)?;
-    Ok(uid == nix::unistd::Uid::effective())
+    Ok(peer_uid_is_current(
+        uid.as_raw(),
+        nix::unistd::Uid::effective().as_raw(),
+    ))
 }
 
 #[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 pub(super) fn peer_is_current_user(stream: &std::os::unix::net::UnixStream) -> io::Result<bool> {
     use nix::sys::socket::{getsockopt, sockopt::PeerCredentials};
     let credentials = getsockopt(stream, PeerCredentials).map_err(io::Error::other)?;
-    Ok(credentials.uid() == nix::unistd::Uid::effective().as_raw())
+    Ok(peer_uid_is_current(
+        credentials.uid(),
+        nix::unistd::Uid::effective().as_raw(),
+    ))
 }
 
 #[cfg(all(
@@ -223,16 +236,18 @@ pub(super) fn serve_connection(
 
 pub(super) fn acquire_lock(path: &Path) -> Result<File, ServerError> {
     let file = {
-        {
-            use std::os::unix::fs::OpenOptionsExt;
-            OpenOptions::new()
-                .create(true)
-                .truncate(false)
-                .read(true)
-                .write(true)
-                .mode(0o600)
-                .open(path)?
-        }
+        use std::os::unix::fs::OpenOptionsExt;
+        // O_NOFOLLOW: a symlink planted at the lock path must fail the open
+        // instead of redirecting the lock (and its create/truncate-free open)
+        // to a file the attacker chose.
+        OpenOptions::new()
+            .create(true)
+            .truncate(false)
+            .read(true)
+            .write(true)
+            .mode(0o600)
+            .custom_flags(nix::fcntl::OFlag::O_NOFOLLOW.bits())
+            .open(path)?
     };
     file.try_lock_exclusive().map_err(|error| {
         if error.kind() == io::ErrorKind::WouldBlock {
@@ -276,4 +291,53 @@ pub(super) fn prepare_socket(path: &Path) -> Result<(), ServerError> {
 pub(super) fn set_mode(path: &Path, mode: u32) -> io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(mode))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn peer_uid_check_accepts_only_the_effective_user() {
+        let own = nix::unistd::Uid::effective().as_raw();
+        let cases = [
+            (own, own, true),
+            (own.wrapping_add(1), own, false),
+            (0, 501, false),
+            (501, 0, false),
+            (u32::MAX, 501, false),
+        ];
+        for (peer, effective, expected) in cases {
+            assert_eq!(
+                peer_uid_is_current(peer, effective),
+                expected,
+                "peer={peer} effective={effective}"
+            );
+        }
+    }
+
+    #[test]
+    fn lock_file_open_refuses_a_symlink_at_the_lock_path() {
+        use std::os::unix::fs::symlink;
+        let root = std::env::temp_dir().join(format!("sbl{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        let target = root.join("victim");
+        fs::write(&target, b"keep").unwrap();
+        let lock = root.join("d.sock.lock");
+        symlink(&target, &lock).unwrap();
+        let error = acquire_lock(&lock).expect_err("symlinked lock path must be refused");
+        assert!(matches!(error, ServerError::Io(_)), "{error:?}");
+        assert_eq!(fs::read(&target).unwrap(), b"keep");
+
+        // A regular lock file is still acquired exactly once.
+        let regular = root.join("r.sock.lock");
+        let held = acquire_lock(&regular).expect("regular lock file");
+        assert!(matches!(
+            acquire_lock(&regular),
+            Err(ServerError::AlreadyRunning)
+        ));
+        drop(held);
+        let _ = fs::remove_dir_all(&root);
+    }
 }

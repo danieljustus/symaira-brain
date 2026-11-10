@@ -5,6 +5,7 @@ updates:
       - "/"
       - "/browse"
       - "/fuzz"
+      - "/browse/fuzz"
     schedule:
       interval: "weekly"
     groups:

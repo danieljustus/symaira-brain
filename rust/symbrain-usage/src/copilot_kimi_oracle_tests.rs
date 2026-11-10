@@ -9,6 +9,7 @@ use std::sync::{Arc, Mutex};
 use super::provider_file_oracle_tests::frozen;
 
 include!("copilot_kimi_owner_tests.rs");
+include!("copilot_kimi_divergence.rs");
 
 fn hex(bytes: &[u8]) -> String {
     const DIGITS: &[u8; 16] = b"0123456789abcdef";
@@ -142,6 +143,7 @@ fn copilot_kimi_oracle_replay() {
     assert_eq!(observed, expected, "exact Copilot/Kimi case coverage");
     let mut full = 0;
     let mut gated = 0;
+    let mut diverged = 0;
     for record in &records {
         prepare(record);
         let gate = record["gated"].as_bool().unwrap();
@@ -179,6 +181,10 @@ fn copilot_kimi_oracle_replay() {
                     provider["error"] = detail.into();
                 }
             }
+            diverged += usize::from(apply_accepted_divergence(
+                record["id"].as_str().unwrap(),
+                &mut expected,
+            ));
             assert_eq!(
                 actual, expected,
                 "{}: complete Copilot/Kimi report",
@@ -202,6 +208,7 @@ fn copilot_kimi_oracle_replay() {
         }
     }
     assert_eq!(gated, 7);
+    assert_eq!(diverged, ACCEPTED_DIVERGENCES.len(), "accepted divergences");
     assert_eq!(full + gated, 89);
     baseline_routes(&evidence, &input);
     owner_matches_frozen_go(&evidence);

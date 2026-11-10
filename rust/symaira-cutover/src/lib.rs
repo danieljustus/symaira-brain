@@ -38,9 +38,11 @@ mod clock;
 mod copy;
 mod launch;
 mod lock;
+mod pending;
 mod verify;
 
 pub use launch::{Backup, EXIT_GRACE, START_GRACE, run_for_binary, start_for_binary};
+pub use pending::{Pending, pending};
 pub use verify::{verify_restore, verify_tree};
 
 /// Environment variable that switches the backup `on` or `off` (see [`disabled`]).

@@ -45,12 +45,19 @@ pub(crate) struct ServerCheck {
 #[derive(Debug, Serialize)]
 pub(crate) struct ManagedCoreCheck {
     pub(crate) name: String,
+    /// Binary file name, for human hints only; not part of the JSON shape.
+    #[serde(skip)]
+    pub(crate) binary: String,
     pub(crate) pinned: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub(crate) version: String,
     /// Installed binary reports a version other than the pinned one.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub(crate) mismatch: bool,
+    /// The provenance sidecar records a binary hash other than the installed
+    /// binary's, e.g. after an upgrade outside symbrain.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub(crate) provenance_stale: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -78,6 +85,9 @@ pub(crate) struct ManagedModuleCheck {
     pub(crate) path: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) provenance: Option<ManagedModuleProvenance>,
+    /// See [`ManagedCoreCheck::provenance_stale`].
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub(crate) provenance_stale: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -123,6 +133,17 @@ pub(crate) struct HarnessCheck {
     pub(crate) profile_missing: bool,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub(crate) superseded: Vec<String>,
+}
+
+/// A first-run state backup that was paused before it finished (#1020).
+#[derive(Debug, Serialize)]
+pub(crate) struct PendingBackup {
+    pub(crate) app: String,
+    pub(crate) partial_path: String,
+    /// A live process is copying right now.
+    pub(crate) running: bool,
+    /// How to let the backup finish.
+    pub(crate) finish: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -173,6 +194,11 @@ pub(crate) struct DoctorReport {
     pub(crate) skills_library: SkillsLibraryCheck,
     pub(crate) profiles: Vec<String>,
     pub(crate) harnesses: Vec<HarnessCheck>,
+    /// `profiles/*/config.yaml` of Hermes; read-only (#1024).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) hermes_profiles: Vec<HarnessCheck>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) pending_backups: Vec<PendingBackup>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub(crate) handshakes: Vec<ProfileHandshake>,
     #[serde(skip_serializing_if = "Vec::is_empty")]

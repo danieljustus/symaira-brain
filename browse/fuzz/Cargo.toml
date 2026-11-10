@@ -1,0 +1,23 @@
+[package]
+name = "symbrowse-fetch-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+rust-version = "1.98"
+license = "Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.13"
+symbrowse-fetch = { path = "../crates/symbrowse-fetch" }
+
+[[bin]]
+name = "dom-input"
+path = "fuzz_targets/dom_input.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

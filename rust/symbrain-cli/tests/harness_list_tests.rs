@@ -97,7 +97,12 @@ antigravity\tAntigravity\n  global\t{}\tmissing\tservers=(none)\n\n",
         home.join(".codex/config.toml").display(),
         home.join(".gemini/config/mcp_config.json").display(),
     );
-    assert_eq!(stdout, expected);
+    // The Go layout is byte-exact; Rust appends one read-only Hermes block (#1024).
+    let hermes = format!(
+        "hermes\tHermes\n  global\t{}\tmissing\tservers=(none)\n  note\tread-only: symbrain install/uninstall do not support Hermes\n\n",
+        home.join(".hermes/config.yaml").display()
+    );
+    assert_eq!(stdout, format!("{expected}{hermes}"));
 }
 
 #[test]
