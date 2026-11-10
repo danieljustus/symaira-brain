@@ -9,7 +9,7 @@
 
 use ring::aead::{AES_256_GCM, Aad, LessSafeKey, NONCE_LEN, Nonce, UnboundKey};
 use ring::pbkdf2::{PBKDF2_HMAC_SHA256, derive};
-use ring::rand::{SecureRandom, SystemRandom};
+use ring::rand::{SecureRandom, SystemRandom, generate};
 use std::num::NonZeroU32;
 
 const ITERATIONS: u32 = 600_000;
@@ -36,6 +36,14 @@ fn derive_key(passphrase: &[u8], salt: &[u8]) -> [u8; 32] {
         derive(PBKDF2_HMAC_SHA256, iterations, salt, passphrase, &mut key);
     }
     key
+}
+
+/// A fresh v1 salt taken straight from the random source, so no placeholder
+/// value is ever staged in a buffer that later feeds key derivation.
+fn random_salt(random: &SystemRandom) -> Result<[u8; SALT_V1], String> {
+    generate::<[u8; SALT_V1]>(random)
+        .map(ring::rand::Random::expose)
+        .map_err(|_| "random source failed".to_owned())
 }
 
 impl RelayCipher {
@@ -70,17 +78,14 @@ impl RelayCipher {
         let (salt, key) = match &self.cached {
             Some(cached) if cached.passphrase == passphrase => (cached.salt.clone(), cached.key),
             _ => {
-                let mut salt = vec![0_u8; SALT_V1];
-                random
-                    .fill(&mut salt)
-                    .map_err(|_| "random source failed".to_owned())?;
+                let salt = random_salt(&random)?;
                 let key = derive_key(passphrase, &salt);
                 self.cached = Some(Derived {
                     passphrase: passphrase.to_vec(),
-                    salt: salt.clone(),
+                    salt: salt.to_vec(),
                     key,
                 });
-                (salt, key)
+                (salt.to_vec(), key)
             }
         };
         let unbound =
@@ -183,6 +188,16 @@ mod tests {
             reader.decrypt(&[1; 20], b"pw").unwrap_err(),
             "encrypted payload too short"
         );
+    }
+
+    #[test]
+    fn random_salts_are_full_length_and_distinct() {
+        let random = SystemRandom::new();
+        let first = random_salt(&random).unwrap();
+        let second = random_salt(&random).unwrap();
+        assert_eq!(first.len(), SALT_V1);
+        assert_ne!(first, second, "two draws must not repeat");
+        assert_ne!(first, [0_u8; SALT_V1], "the salt is never the zero buffer");
     }
 
     #[test]

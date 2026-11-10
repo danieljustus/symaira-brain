@@ -177,16 +177,16 @@ impl<'a> Registry<'a> {
             .discover_sessions(since)
             .map_err(|e| format!("failed to discover sessions: {e}"))?;
         eprintln!("Found {} sessions from {name}", sessions.len());
-        for session in &sessions {
+        let total = sessions.len();
+        for (index, session) in sessions.iter().enumerate() {
+            // Diagnostics name the session by position, never by its id or path.
+            let label = format!("session {}/{total} of {name}", index + 1);
             if (self.cancelled)() {
                 return Err("context canceled".into());
             }
             match self.store.is_session_imported(name, &session.session_id) {
                 Err(e) => {
-                    eprintln!(
-                        "Error checking import state for {}: {e}",
-                        session.session_id
-                    );
+                    eprintln!("Error checking import state for {label}: {e}");
                     result.errors += 1;
                     continue;
                 }
@@ -199,7 +199,7 @@ impl<'a> Registry<'a> {
             let mut facts = match importer.import_session(session) {
                 Ok(facts) => facts,
                 Err(e) => {
-                    eprintln!("Error importing session {}: {e}", session.session_id);
+                    eprintln!("Error importing {label}: {e}");
                     result.errors += 1;
                     continue;
                 }
@@ -217,7 +217,7 @@ impl<'a> Registry<'a> {
             result.sessions += 1;
             result.facts += facts.len();
             if !dry_run {
-                self.finish_session(importer, session, &facts, &mut result);
+                self.finish_session(importer, session, &label, &facts, &mut result);
             }
         }
         Ok(result)
@@ -227,14 +227,12 @@ impl<'a> Registry<'a> {
         &self,
         importer: &dyn SessionImporter,
         session: &SessionRef,
+        label: &str,
         facts: &[ImportedFact],
         result: &mut ToolResult,
     ) {
         if let Err(e) = self.store_facts(facts, importer) {
-            eprintln!(
-                "Error storing facts for session {}: {e}",
-                session.session_id
-            );
+            eprintln!("Error storing facts for {label}: {e}");
             result.errors += 1;
             return;
         }
@@ -244,17 +242,11 @@ impl<'a> Registry<'a> {
             facts.len(),
             (self.now)(),
         ) {
-            eprintln!(
-                "Error marking session {} as imported: {e}",
-                session.session_id
-            );
+            eprintln!("Error marking {label} as imported: {e}");
             result.errors += 1;
         }
         if let Err(e) = importer.mark_imported(session) {
-            eprintln!(
-                "Error marking importer cursor for {}: {e}",
-                session.session_id
-            );
+            eprintln!("Error marking importer cursor for {label}: {e}");
             result.errors += 1;
         }
     }
