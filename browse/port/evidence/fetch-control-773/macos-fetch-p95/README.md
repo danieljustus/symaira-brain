@@ -47,3 +47,25 @@ systematic F_FULLFSYNC cost, not external disk contention. Moving the journal fl
 request path (group commit) would be the architectural option if that is required.
 
 Not covered here: Linux/native CI contract rows (CI workflow `Browse honest fetch native contracts`).
+
+## Re-run at HEAD e2110dc89 under shared-host load (2026-11-10, later session)
+
+Rebuilt `target/release/symbrowse` (sha256 `869e4c19...b58170`) at `e2110dc89` and repeated the
+unmodified `port/bench/run.py --workload fetch --runs 30` nine times (`head-rerun/bench-{A,B,C}{1,2,3}.json`,
+recomputed in `head-rerun/gate-all-9.json`). Series A ran at 1-minute load ~86-89 (other agents'
+builds), series B and C at ~20. All 270 samples passed the response-semantics check.
+
+| Series | p95 (ms) per run | Gate |
+|---|---|---|
+| A (load ~88) | 3.189 / 81.343 / 5.470 | 2 of 3 under 6.4834 |
+| B (load ~20) | 37.213 / 6.209 / 1.115 | 2 of 3 under 6.4834 |
+| C (load ~20) | 42.201 / 3.763 / 58.651 | 1 of 3 under 6.4834 |
+
+Medians stay 0.8-2.0 ms in every run: the systematic `F_FULLFSYNC` cost is gone. The p95 gate,
+however, is **not stable on a busy host**: 5 of 9 runs pass, 4 fail with a few slow samples
+(max 28-163 ms), the same shape as the fsync tail in `fsync-microbench.json`. The three quiet-host
+runs recorded above (p95 0.568-0.689 ms, load ~15) remain the only runs where the gate held 3/3.
+So the committed claim is limited to a quiet benchmark host; a loaded/contended volume can still
+fail it. Making the journal write non-blocking for the request (group commit / flush off the
+request path) is the open design decision if the gate must hold under contention; it changes the
+audit-line durability contract and was not done here.
