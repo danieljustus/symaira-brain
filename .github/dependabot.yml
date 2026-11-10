@@ -8,6 +8,10 @@ updates:
       - "/browse/fuzz"
     schedule:
       interval: "weekly"
+    ignore:
+      # The pinned CoreKit requires serde_json =1.0.151, so any newer version
+      # fails to resolve. Remove after danieljustus/symaira-corekit#475.
+      - dependency-name: "serde_json"
     groups:
       cargo-minor-patch:
         update-types:

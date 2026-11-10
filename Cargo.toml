@@ -24,7 +24,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.13.1"
+version = "0.13.2"
 edition = "2024"
 rust-version = "1.98"
 license = "Apache-2.0"
@@ -47,24 +47,24 @@ rusqlite = { version = "0.41.1", features = ["bundled", "functions"] }
 regex = "1"
 ureq = { version = "=3.4.1", default-features = false, features = ["rustls"] }
 symaira-core-llm = { version = "=0.0.0", git = "https://github.com/danieljustus/symaira-corekit", rev = "7515add9acd865fa56f908643d0b3b689a70946b", package = "symaira-core-llm" }
-symbrain-activity = { version = "0.13.1", path = "rust/symbrain-activity" }
-symbrain-memory = { version = "0.13.1", path = "rust/symbrain-memory" }
-symbrain-audit = { version = "0.13.1", path = "rust/symbrain-audit" }
-symbrain-broker = { version = "0.13.1", path = "rust/symbrain-broker" }
-symbrain-catalog = { version = "0.13.1", path = "rust/symbrain-catalog" }
-symbrain-core = { version = "0.13.1", path = "rust/symbrain-core" }
-symaira-cutover = { version = "0.13.1", path = "rust/symaira-cutover" }
-symbrain-gateway = { version = "0.13.1", path = "rust/symbrain-gateway" }
-symbrain-harness = { version = "0.13.1", path = "rust/symbrain-harness" }
-symbrain-instructions = { version = "0.13.1", path = "rust/symbrain-instructions" }
-symbrain-mcp = { version = "0.13.1", path = "rust/symbrain-mcp" }
-symbrain-managed = { version = "0.13.1", path = "rust/symbrain-managed" }
-symbrain-patterns = { version = "0.13.1", path = "rust/symbrain-patterns" }
-symbrain-policy = { version = "0.13.1", path = "rust/symbrain-policy" }
-symbrain-adapter = { version = "0.13.1", path = "rust/symbrain-adapter" }
-symbrain-skills = { version = "0.13.1", path = "rust/symbrain-skills" }
-symbrain-usage = { version = "0.13.1", path = "rust/symbrain-usage" }
-symbrain-guard-core = { version = "0.13.1", path = "rust/symbrain-guard-core" }
-symguard-cli = { version = "0.13.1", path = "rust/symguard-cli" }
+symbrain-activity = { version = "0.13.2", path = "rust/symbrain-activity" }
+symbrain-memory = { version = "0.13.2", path = "rust/symbrain-memory" }
+symbrain-audit = { version = "0.13.2", path = "rust/symbrain-audit" }
+symbrain-broker = { version = "0.13.2", path = "rust/symbrain-broker" }
+symbrain-catalog = { version = "0.13.2", path = "rust/symbrain-catalog" }
+symbrain-core = { version = "0.13.2", path = "rust/symbrain-core" }
+symaira-cutover = { version = "0.13.2", path = "rust/symaira-cutover" }
+symbrain-gateway = { version = "0.13.2", path = "rust/symbrain-gateway" }
+symbrain-harness = { version = "0.13.2", path = "rust/symbrain-harness" }
+symbrain-instructions = { version = "0.13.2", path = "rust/symbrain-instructions" }
+symbrain-mcp = { version = "0.13.2", path = "rust/symbrain-mcp" }
+symbrain-managed = { version = "0.13.2", path = "rust/symbrain-managed" }
+symbrain-patterns = { version = "0.13.2", path = "rust/symbrain-patterns" }
+symbrain-policy = { version = "0.13.2", path = "rust/symbrain-policy" }
+symbrain-adapter = { version = "0.13.2", path = "rust/symbrain-adapter" }
+symbrain-skills = { version = "0.13.2", path = "rust/symbrain-skills" }
+symbrain-usage = { version = "0.13.2", path = "rust/symbrain-usage" }
+symbrain-guard-core = { version = "0.13.2", path = "rust/symbrain-guard-core" }
+symguard-cli = { version = "0.13.2", path = "rust/symguard-cli" }
 tempfile = "3.27.0"
 toml_edit = "0.25.13"
