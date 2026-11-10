@@ -321,9 +321,9 @@ stable (guard pins schemas and the frozen fixtures pin the bytes).
 ### Native UI
 
 `Sources/SymBrainApp` and `Sources/SymBrainMobile` follow the Symaira
-Interface Guidelines shipped with the pinned `symaira-corekit` (AppKit modules, `appkit/`): read its
+Interface Guidelines shipped with the pinned `symaira-corekit` (AppKit modules, `swift/`; `appkit/` up to v0.20.0): read its
 `GUIDELINES.md`, then `DESIGN.md` and `docs/workspace-foundation.md`, and
-review a UI change with `python3 <symaira-corekit>/appkit/scripts/gui-review.py
+review a UI change with `python3 <symaira-corekit>/swift/scripts/gui-review.py
 Sources/SymBrainApp` plus the manual checklist in GUIDELINES.md section 13.
 iOS keeps native `NavigationSplitView` and `TabView`; the drag-resizable
 workspace is macOS only (GUIDELINES.md section 12).
