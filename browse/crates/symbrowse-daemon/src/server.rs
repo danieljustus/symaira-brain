@@ -85,6 +85,12 @@ pub struct ServerOptions {
     /// Explicit CLI startup executable owning provider lifetimes; library users
     /// keep the existing standalone resolver unless they opt in.
     pub startup_provider_owner: Option<PathBuf>,
+    /// Replaces the host key providers (`symvault`, Keychain, environment) used
+    /// to resolve the state encryption key when the server builds its own
+    /// handlers. `None` keeps the production resolver and its startup-owner
+    /// handling unchanged; tests set it to avoid touching the operator's
+    /// credential stores. Ignored when `handler` is supplied.
+    pub state_key_sources: Option<Arc<dyn symbrowse_core::key_resolver::KeySources>>,
     pub policy: PolicyStatus,
     pub engine: String,
     pub mode: String,
@@ -102,6 +108,7 @@ impl Default for ServerOptions {
             registry: None,
             session_spec: None,
             startup_provider_owner: None,
+            state_key_sources: None,
             policy: PolicyStatus::default(),
             engine: "chrome".into(),
             mode: "browser".into(),
@@ -213,6 +220,7 @@ impl Server {
             let handlers = crate::runtime::handlers_with_startup_owner(
                 spec,
                 options.startup_provider_owner.clone(),
+                options.state_key_sources.clone(),
                 Some(Arc::clone(&registry)),
             );
             let (handler, shutdown_handler) =

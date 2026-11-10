@@ -252,16 +252,17 @@ impl DispatchRuntime {
         spec: SessionSpec,
         wayback_cdx_url: impl Into<String>,
     ) -> Result<Arc<Self>, DaemonError> {
-        Self::new_with_startup_owner(spec, wayback_cdx_url, None)
+        Self::new_with_startup_owner(spec, wayback_cdx_url, None, None)
     }
 
     fn new_with_startup_owner(
         spec: SessionSpec,
         wayback_cdx_url: impl Into<String>,
         owner: Option<std::path::PathBuf>,
+        key_sources: Option<Arc<dyn symbrowse_core::key_resolver::KeySources>>,
     ) -> Result<Arc<Self>, DaemonError> {
         spec.validate_selection().map_err(selection_error)?;
-        let state_store = state_key::initialize(&spec, owner)?;
+        let state_store = state_key::initialize(&spec, owner, key_sources)?;
         Self::new_with_store(spec, wayback_cdx_url, state_store)
     }
 
@@ -1829,12 +1830,14 @@ impl DispatchRuntime {
 pub(crate) fn handlers_with_startup_owner(
     spec: SessionSpec,
     owner: Option<std::path::PathBuf>,
+    key_sources: Option<Arc<dyn symbrowse_core::key_resolver::KeySources>>,
     registry: Option<Arc<crate::SessionRegistry>>,
 ) -> Result<(crate::DaemonHandler, crate::ShutdownHandler), DaemonError> {
     let runtime = DispatchRuntime::new_with_startup_owner(
         spec,
         "https://web.archive.org/cdx/search/cdx",
         owner,
+        key_sources,
     )?;
     if let Ok(mut slot) = runtime.registry.lock() {
         *slot = registry;
@@ -2570,6 +2573,7 @@ mod tests {
         let restarted = Arc::new(
             crate::Server::new(crate::ServerOptions {
                 session_spec: Some(spec),
+                state_key_sources: Some(Arc::new(state_key::tests::AbsentSources)),
                 ..Default::default()
             })
             .expect("restarted server"),

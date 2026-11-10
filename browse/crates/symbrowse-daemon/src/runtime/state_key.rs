@@ -1,14 +1,33 @@
 //! Resolve the existing key providers before IPC; own one store per runtime.
 use super::*;
 use symbrowse_core::{
-    key_resolver::{KeyResolver, KeySources, ResolveError},
+    key_resolver::{KeyResolver, KeySources, ProbeError, ResolveError},
     key_sources::SystemKeySources,
 };
+
+/// Wraps injected providers so they satisfy the by-value `KeySources` bound.
+struct SharedSources(std::sync::Arc<dyn KeySources>);
+
+impl KeySources for SharedSources {
+    fn vault(&self, entry: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+        self.0.vault(entry)
+    }
+    fn keychain(&self, service: &str, account: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+        self.0.keychain(service, account)
+    }
+    fn environment(&self, name: &str) -> Option<String> {
+        self.0.environment(name)
+    }
+}
 
 pub(super) fn initialize(
     spec: &SessionSpec,
     owner: Option<std::path::PathBuf>,
+    injected: Option<std::sync::Arc<dyn KeySources>>,
 ) -> Result<Store, DaemonError> {
+    if let Some(injected) = injected {
+        return initialize_with_sources(spec, SharedSources(injected));
+    }
     let sources = SystemKeySources::default();
     let sources = match owner {
         Some(owner) => sources.with_startup_owner(owner),

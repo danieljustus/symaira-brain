@@ -819,7 +819,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "parity"
     },
     {
       "id": "ENG-006",
@@ -836,7 +836,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "parity"
     },
     {
       "id": "ENG-007",
@@ -853,7 +853,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "parity"
     },
     {
       "id": "ENG-008",
