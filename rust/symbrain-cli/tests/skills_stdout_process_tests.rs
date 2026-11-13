@@ -77,12 +77,14 @@ fn closed_reader_terminates_with_sigpipe() {
     for format in ["table", "json"] {
         for report in REPORTS {
             let root = TempDir::new().unwrap();
-            let mut child = command(&root, report, format)
-                .stdout(Stdio::piped())
-                .spawn()
+            // Close the read end before the child starts: dropping a piped
+            // stdout after spawn races a short report into the pipe buffer.
+            let (reader, writer) = std::io::pipe().unwrap();
+            drop(reader);
+            let output = command(&root, report, format)
+                .stdout(writer)
+                .output()
                 .unwrap();
-            drop(child.stdout.take());
-            let output = child.wait_with_output().unwrap();
             let label = format!("skills {report:?} --output {format}");
             assert_eq!(
                 output.status.signal(),

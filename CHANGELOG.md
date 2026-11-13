@@ -9,6 +9,42 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.14.0] - 2026-11-13
+
+### Added
+- `symbrain mcp` honours the global `audit.enabled` setting and
+  `SYMBRAIN_AUDIT_ENABLED`: audit logging needs both the profile and the global
+  setting. The global value is validated before any child server starts, and an
+  invalid value exits 2 even when audit is otherwise off. Disabled memory and
+  audit cores create no startup state; nothing writes history automatically.
+  See `docs/adr/startup-state-opt-in-834.md` (#834, #1002).
+- Browse: Rust-only replays of the sealed Go daemon recordings
+  (`daemon_registry_replay.py`, `daemon_process_replay.py`) run in the native
+  daemon workflow on Linux and macOS and fail on any changed, missing or
+  unregistered recording. RUST-006, RUST-007, RUST-008 and RUST-009 of the
+  Browse port are complete (#772, #774).
+
+### Fixed
+- `symbrain skills validate` no longer reports `harness_coupling` for targets
+  that `symskills.toml` disables, and only names harnesses that still render
+  the text. Inline code spans and URLs (for example `~/.hermes/...` paths or a
+  repository name) no longer count as harness mentions. `--strict --json`
+  exits non-zero for warnings-only input, the same as `--strict` (#1056,
+  #1057).
+- Skills: a copy-mode install with a render root keeps the rendered tree, so
+  the install marker no longer points at a deleted temporary directory (#859).
+  Status labels a render as linked when two path spellings name the same
+  directory, such as `/var` and `/private/var` on macOS (#832).
+- Browse daemon and CLI, found by the sealed recording replays: non-UTF-8
+  session arguments are quoted as `\xNN` instead of being replaced, `state
+  clean --output yaml` prints `removed: []` instead of `removed: null`, the
+  daemon rejects a JSON array or scalar as a request frame, and a
+  whitespace-only `cmd` is treated as a command name like in the Go daemon.
+- Dependencies: rustix 1.1.6 for RUSTSEC-2026-0486 (xattr functions marked
+  unwritten bytes as initialized), with the pinned CoreKit moved to v0.22.0.
+  Browse moves to rand 0.10, brotli 9, yaml-rust2 0.13 and async-tungstenite
+  0.35, plus the zip 9.4.2 and toml 1.2.1 updates.
+
 ## [v0.13.2] - 2026-11-10
 
 ### Added
