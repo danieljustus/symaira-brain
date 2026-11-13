@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use rand::Rng;
+use rand::RngExt;
 
 /// Exponential retry configuration. Delays include Go-compatible 50–100% jitter.
 #[derive(Clone, Copy, Debug, PartialEq)]
