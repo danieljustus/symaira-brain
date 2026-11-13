@@ -149,9 +149,13 @@ fn install_rendered_inner(
         .map_err(|error| SkillError(format!("create install staging root: {error}")))?;
     let materialized = materialize(bundle, rendered, output.path())?;
     // A symlink must outlive the temporary materialization. Keep the rendered
-    // tree under a stable per-user cache for that mode; copies can use the
-    // private staging root and remain fully transactional.
-    if effective_mode(options) == "symlink" && !options.dry_run {
+    // tree under a stable per-user cache for that mode. A copy install that
+    // names a render root retains its tree there as well, so the marker's
+    // `rendered_at` never points at a deleted staging directory (#859); copies
+    // without a render root use the private staging root.
+    let retains_render = effective_mode(options) == "symlink"
+        || (effective_mode(options) == "copy" && options.render_dir.is_some());
+    if retains_render && !options.dry_run {
         // Validate the destination before changing the cache. A rejected
         // unmanaged collision must not refresh or replace the cache tree.
         preflight_destination(&rendered.target, &rendered.name, options)?;
