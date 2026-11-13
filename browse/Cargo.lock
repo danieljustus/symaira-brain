@@ -89,7 +89,23 @@ dependencies = [
  "log",
  "pin-project-lite",
  "tokio",
- "tungstenite",
+ "tungstenite 0.28.0",
+]
+
+[[package]]
+name = "async-tungstenite"
+version = "0.35.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d6ab5b7664abf9ccae07576888c72bc93750c7090c1ff4ffee9317cc05d11618"
+dependencies = [
+ "atomic-waker",
+ "futures-core",
+ "futures-io",
+ "futures-task",
+ "log",
+ "pin-project-lite",
+ "tokio",
+ "tungstenite 0.30.0",
 ]
 
 [[package]]
@@ -255,7 +271,7 @@ version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26ed067eb6c1f660bdb87c05efb964421d2ca262bae0296cdfe38cf0cd949a3e"
 dependencies = [
- "async-tungstenite",
+ "async-tungstenite 0.32.1",
  "base64 0.22.1",
  "chromiumoxide_cdp",
  "chromiumoxide_types",
@@ -1533,6 +1549,7 @@ version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65c9fb96cbc91e3478eaae79a69fcd3f1ae4ad052e471fe6732fff548984b4af"
 dependencies = [
+ "chacha20",
  "getrandom 0.4.3",
  "rand_core 0.10.1",
 ]
@@ -1838,6 +1855,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha1"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aacc4cc499359472b4abe1bf11d0b12e688af9a805fa5e3016f9a386dc2d0214"
+dependencies = [
+ "cfg-if",
+ "cpufeatures 0.3.1",
+ "digest 0.11.3",
+]
+
+[[package]]
 name = "sha2"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2032,7 +2060,7 @@ dependencies = [
 name = "symbrowse-engine-chrome"
 version = "0.0.0"
 dependencies = [
- "async-tungstenite",
+ "async-tungstenite 0.35.0",
  "chromiumoxide",
  "futures",
  "serde",
@@ -2045,7 +2073,7 @@ dependencies = [
 name = "symbrowse-engine-firefox"
 version = "0.0.0"
 dependencies = [
- "async-tungstenite",
+ "async-tungstenite 0.35.0",
  "futures-util",
  "serde_json",
  "symbrowse-engine",
@@ -2057,7 +2085,7 @@ dependencies = [
 name = "symbrowse-engine-safari"
 version = "0.0.0"
 dependencies = [
- "async-tungstenite",
+ "async-tungstenite 0.35.0",
  "futures-util",
  "reqwest",
  "rustix",
@@ -2451,9 +2479,25 @@ dependencies = [
  "httparse",
  "log",
  "rand 0.9.5",
- "sha1",
+ "sha1 0.10.7",
  "thiserror",
  "utf-8",
+]
+
+[[package]]
+name = "tungstenite"
+version = "0.30.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e48ac77174b19c110a50ab2128b24215ac9cb40e0e12e093fb602d175c569d22"
+dependencies = [
+ "bytes",
+ "data-encoding",
+ "http",
+ "httparse",
+ "log",
+ "rand 0.10.3",
+ "sha1 0.11.0",
+ "thiserror",
 ]
 
 [[package]]
