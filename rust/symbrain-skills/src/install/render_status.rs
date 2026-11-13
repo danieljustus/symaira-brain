@@ -79,11 +79,7 @@ pub(super) fn inspect(
         });
         // This is a presentation mode only. Persisted markers and sync options
         // remain `symlink`; other destinations retain their ordinary mode.
-        if row.mode.as_deref() == Some("symlink")
-            && let (Ok(installed), Ok(cached)) =
-                (std::path::absolute(installed), std::path::absolute(&cached))
-            && installed == cached
-        {
+        if row.mode.as_deref() == Some("symlink") && same_location(installed, &cached) {
             row.mode = Some("linked".to_owned());
         }
         Ok(())
@@ -91,5 +87,47 @@ pub(super) fn inspect(
     if let Err(error) = result {
         row.render_status = Some(RenderStatus::Unreadable);
         row.render_error = Some(error.0);
+    }
+}
+
+/// Whether `installed` (the resolved link target) is the retained render.
+///
+/// Spellings may differ only by an alias in the path, such as macOS
+/// `/var` -> `/private/var` (#832), so compare absolute spellings first and
+/// fall back to resolved identities. Resolution reads no file content and
+/// does not widen the cache's read authority; failures mean "not the same".
+fn same_location(installed: &Path, cached: &Path) -> bool {
+    if let (Ok(installed), Ok(cached)) =
+        (std::path::absolute(installed), std::path::absolute(cached))
+        && installed == cached
+    {
+        return true;
+    }
+    matches!(
+        (std::fs::canonicalize(installed), std::fs::canonicalize(cached)),
+        (Ok(installed), Ok(cached)) if installed == cached
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::same_location;
+
+    #[test]
+    fn aliased_spellings_of_one_directory_are_the_same_location() {
+        let root = tempfile::tempdir().unwrap();
+        let real = root.path().join("real");
+        std::fs::create_dir_all(real.join("target/name")).unwrap();
+        let alias = root.path().join("alias");
+        std::os::unix::fs::symlink(&real, &alias).unwrap();
+        let resolved = std::fs::canonicalize(real.join("target/name")).unwrap();
+        assert!(same_location(&resolved, &alias.join("target/name")));
+        assert!(same_location(
+            &alias.join("target/name"),
+            &real.join("target/name")
+        ));
+        std::fs::create_dir_all(real.join("target/other")).unwrap();
+        assert!(!same_location(&resolved, &alias.join("target/other")));
+        assert!(!same_location(&resolved, &alias.join("target/missing")));
     }
 }

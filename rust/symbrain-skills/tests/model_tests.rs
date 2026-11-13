@@ -267,3 +267,22 @@ fn loader_matches_go_oracle_fixture() {
         assert_eq!(actual, expected, "Go loader drift for {id}");
     }
 }
+
+/// #831: an absent or empty manifest keeps `targets` an object, never null.
+#[test]
+fn inspected_bundle_keeps_empty_targets_as_an_object() {
+    for manifest in [None, Some("[skill]\nversion = \"1\"\n")] {
+        let root = tempfile::tempdir().expect("bundle root");
+        fs::write(
+            root.path().join("SKILL.md"),
+            "---\nname: empty-targets\ndescription: no targets\n---\nBody\n",
+        )
+        .expect("skill");
+        if let Some(manifest) = manifest {
+            fs::write(root.path().join("skill.toml"), manifest).expect("manifest");
+        }
+        let bundle = load_bundle(root.path()).expect("bundle");
+        let value = serde_json::to_value(&bundle.manifest).expect("manifest json");
+        assert_eq!(value["targets"], json!({}), "manifest {manifest:?}");
+    }
+}
