@@ -1,0 +1,121 @@
+{
+  "issue": "#772",
+  "work_item": "RUST-006",
+  "date": "2026-11-13",
+  "base_head": "3c9c4ff9c (working tree with the RUST-006 completion changes on top)",
+  "scripts": [
+    "browse/port/harness/daemon_registry_replay.py",
+    "browse/port/harness/daemon_process_replay.py",
+    "browse/port/harness/daemon_state_key_replay.py"
+  ],
+  "go_is_not_run": "Go is removed; only sealed recordings are read. Changed, missing or unregistered recording files fail before any case runs.",
+  "macos_arm64": {
+    "platform": "macOS-27.2.1-arm64-arm-64bit-Mach-O",
+    "rust_sha256": "e2d8c841f98cfe40472998ec66bd70e40a8df99255688bcc4dd2a719e6734928",
+    "registry_replay": {
+      "recording": "symaira-state-key-final-registry.json",
+      "counts_per_binary": {
+        "cli_observations": 510,
+        "invalid_session_cli_observations": 48,
+        "literal_cli_edge_observations": 392,
+        "selected_invalid_output_observations": 4,
+        "implemented_help_observations": 6,
+        "recorded_raw_frames": 20,
+        "concurrent_clients": 8,
+        "persisted_go_fixtures": 3
+      },
+      "matches": true,
+      "negative_controls_rejected": 10,
+      "root_prefix_cases_matching": 12,
+      "root_prefix_cases": 12,
+      "root_prefix_controls_rejected": 3
+    },
+    "process_replay": {
+      "linux-process-report.json": {
+        "recording_sha256": "17d680e6ccacdecfb521a3ce48ac2092a41f4dcb65b193f0cfdfad3eb8cb3527",
+        "recorded_cases": 9,
+        "replayed_cases": 6,
+        "requests_replayed": 42,
+        "matches": true,
+        "negative_controls_rejected": 3,
+        "platform_unavailable_cases": [
+          {
+            "session": "parity804964-3",
+            "reason": "XDG_CACHE_HOME selects the cache root on Linux only"
+          },
+          {
+            "session": "parity804964-5",
+            "reason": "the kernel rejects the raw filename (EILSEQ 92)"
+          },
+          {
+            "session": "parity804964-6",
+            "reason": "the kernel rejects the raw filename (EILSEQ 92)"
+          }
+        ]
+      },
+      "original-linux-process-report.json": {
+        "recording_sha256": "57dae74d6a033b4969316cdcc912e66c91d06ed66d60bf6f1e39267a7a1d006d",
+        "recorded_cases": 3,
+        "replayed_cases": 3,
+        "requests_replayed": 21,
+        "matches": true,
+        "negative_controls_rejected": 3,
+        "platform_unavailable_cases": []
+      }
+    },
+    "notes": "release build; Linux recordings replayed on macOS: three Linux-only process cases are platform-unavailable, not parity"
+  },
+  "linux_arm64": {
+    "platform": "Linux-7.2.12-orbstack-00394-gbecdd6130068-aarch64-with-glibc2.36",
+    "rust_sha256": "c2776846c734b80f5a6dd08fb642dd8b83960b00d71330f11e612cef291fb7eb",
+    "registry_replay": {
+      "recording": "symaira-state-key-final-registry.json",
+      "counts_per_binary": {
+        "cli_observations": 510,
+        "invalid_session_cli_observations": 48,
+        "literal_cli_edge_observations": 392,
+        "selected_invalid_output_observations": 4,
+        "implemented_help_observations": 6,
+        "recorded_raw_frames": 20,
+        "concurrent_clients": 8,
+        "persisted_go_fixtures": 3
+      },
+      "matches": true,
+      "negative_controls_rejected": 10,
+      "root_prefix_cases_matching": 12,
+      "root_prefix_cases": 12,
+      "root_prefix_controls_rejected": 3
+    },
+    "process_replay": {
+      "linux-process-report.json": {
+        "recording_sha256": "17d680e6ccacdecfb521a3ce48ac2092a41f4dcb65b193f0cfdfad3eb8cb3527",
+        "recorded_cases": 9,
+        "replayed_cases": 9,
+        "requests_replayed": 63,
+        "matches": true,
+        "negative_controls_rejected": 3,
+        "platform_unavailable_cases": []
+      },
+      "original-linux-process-report.json": {
+        "recording_sha256": "57dae74d6a033b4969316cdcc912e66c91d06ed66d60bf6f1e39267a7a1d006d",
+        "recorded_cases": 3,
+        "replayed_cases": 3,
+        "requests_replayed": 21,
+        "matches": true,
+        "negative_controls_rejected": 3,
+        "platform_unavailable_cases": []
+      }
+    },
+    "notes": "release build in rust:1.98.0-bookworm (linux/arm64) on the same working tree; every recorded process case replayed"
+  },
+  "state_key_replay_macos_arm64": "31/31 cases match, 3/3 controls rejected, store probe matches",
+  "regressions_fixed_in_rust": [
+    "non-UTF-8 argv bytes were lossy-converted by the CLI (invalid session printed U+FFFD instead of Go's \\xNN)",
+    "state clean --output yaml printed `removed: null` where Go prints `removed: []`",
+    "the daemon accepted a JSON array as a frame (serde tuple form) and rejected a whitespace-only cmd that Go treats as a command"
+  ],
+  "harness_changes": [
+    "session id is implemented in the Rust CLI, so the sealed Go help is compared without removing its advertisement row",
+    "Rust daemon shutdown diagnostics now include optional firefox/safari lines"
+  ]
+}

@@ -254,7 +254,7 @@
         "all"
       ],
       "status": "parity",
-      "supplemental_process_gate": "port/harness/daemon_process.py: 21 actual requests against immutable integrated Go dcddcef0; PID/timestamps validated; only owned roots and documented Rust mode/session extensions projected; six native candidate receipts pending"
+      "supplemental_process_gate": "port/harness/daemon_process_replay.py replays the sha256-pinned Go recordings migration/evidence/browse-daemon-772/linux-process-report.json (9 cases, 63 daemon requests) and original-linux-process-report.json (3 cases, 21 requests) against Rust without running Go; PID/timestamps validated, only owned roots, documented Rust mode/session extensions and the macOS directory layout projected; 3 rejecting controls per recording; 2026-11-13 macOS arm64 6/9 and 3/3 cases match (three Linux-only cases are platform-unavailable, not parity), Linux arm64 9/9 and 3/3 match (migration/evidence/browse-daemon-772/rust-only-replay-receipt-20261113.json); the browse-daemon-native workflow runs it on ubuntu-24.04, ubuntu-24.04-arm and macos-15"
     },
     {
       "id": "DMN-002",
@@ -266,7 +266,10 @@
       "platforms": [
         "all"
       ],
-      "status": "fixture-ready"
+      "status": "parity",
+      "rust_test": "crates/symbrowse-daemon/tests/frame_limits.rs",
+      "evidence": "Go sources at 57c26c76e (protocol.go DecodeFrame, server.go serveConn/handleLine, bufio.Scanner with maxFrameBytes = 1<<20) read statically; Go is not run. Rust tests: empty cmd, malformed JSON and non-object frames get malformed_request on a still-usable connection; a 1 MiB-1 line is served; a 1 MiB line and an unterminated oversized line close the connection without a response. Two Rust divergences fixed (JSON array accepted as a frame; whitespace-only cmd rejected).",
+      "known_gap": "Go encoding/json message texts for syntax and field-type errors inside objects, and its case-insensitive key matching, are not reproduced; codes, the missing cmd text, the Go text for non-object frames and the connection behavior match."
     },
     {
       "id": "DMN-003",
@@ -281,7 +284,9 @@
         "linux-amd64",
         "linux-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "parity",
+      "rust_test": "crates/symbrowse-daemon/tests/lifecycle.rs",
+      "evidence": "Go expectations from static server_test.go TestSocketPathValidationAndMode and peer_uid_linux.go validatePeerUID (same effective UID only); Go is not run. Rust: socket mode 0600 and owned directory 0700, caller-parent mode preserved, wrong-owner stop leaves the live server, peer_uid_is_current unit table. A foreign-UID peer cannot be created without a second account, so rejection is covered by the pure UID comparison only."
     },
     {
       "id": "DMN-004",
@@ -296,8 +301,9 @@
         "linux-amd64",
         "linux-arm64"
       ],
-      "status": "fixture-ready",
-      "rust_test": "crates/symbrowse-daemon/tests/lifecycle.rs"
+      "status": "parity",
+      "rust_test": "crates/symbrowse-daemon/tests/lifecycle.rs",
+      "evidence": "Go expectations from static server_test.go TestConcurrentStartupYieldsOneOwner and TestStaleSocketIsReplaced; Go is not run. Rust: stale_socket_is_recovered_but_live_socket_is_not_unlinked, concurrent_unix_starts_have_one_owner_and_recover_after_stop (run.py --suite daemon-races --repeat 50 = 50 rounds x 50 starters)."
     },
     {
       "id": "DMN-005",
@@ -312,8 +318,8 @@
         "linux-amd64",
         "linux-arm64"
       ],
-      "status": "fixture-ready",
-      "supplemental_process_gate": "port/harness/daemon_process.py: 21 actual requests against immutable integrated Go dcddcef0; PID/timestamps validated; only owned roots and documented Rust mode/session extensions projected; six native candidate receipts pending"
+      "status": "parity",
+      "supplemental_process_gate": "port/harness/daemon_process_replay.py replays the sha256-pinned Go recordings migration/evidence/browse-daemon-772/linux-process-report.json (9 cases, 63 daemon requests) and original-linux-process-report.json (3 cases, 21 requests) against Rust without running Go; PID/timestamps validated, only owned roots, documented Rust mode/session extensions and the macOS directory layout projected; 3 rejecting controls per recording; 2026-11-13 macOS arm64 6/9 and 3/3 cases match (three Linux-only cases are platform-unavailable, not parity), Linux arm64 9/9 and 3/3 match (migration/evidence/browse-daemon-772/rust-only-replay-receipt-20261113.json); the browse-daemon-native workflow runs it on ubuntu-24.04, ubuntu-24.04-arm and macos-15"
     },
     {
       "id": "DMN-006",
@@ -340,8 +346,8 @@
       "platforms": [
         "all"
       ],
-      "status": "fixture-ready",
-      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 510 Unix or 294 Windows CLI observations (original108 including48 invalid plus392 Unix/176 Windows literal edge cases including exact12 JSON-output review regressions and20 root-flag controls,4 selected invalid-output controls and6 supported help pairs), 20 recorded raw frames, 8 concurrent autostart clients and3 actual Go-produced persisted v3 files per binary;8 rejecting controls; raw argv/output pairs literal; only verified unsupported Go session-id root-help advertisement omitted; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
+      "status": "parity",
+      "supplemental_process_gate": "port/harness/daemon_registry_replay.py replays the sealed Go recording symaira-state-key-final-registry.json (retention.json-pinned): 510 CLI observations (108 original including 48 invalid-session, 392 literal edge cases, 4 selected invalid-output, 6 help pairs), 20 raw frames, 8 concurrent autostart clients and 3 Go-produced persisted v3 files against a fresh Rust run; raw argv/output pairs literal, full help compared (session id is implemented), only validated owned paths/PIDs/timestamps and the macOS directory layout projected; 10 rejecting controls; also 12/12 sealed Go root-prefix --session observations; 2026-11-13 macOS arm64 and Linux arm64 match (migration/evidence/browse-daemon-772/rust-only-replay-receipt-20261113.json)"
     },
     {
       "id": "DMN-008",
@@ -358,8 +364,8 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "fixture-ready",
-      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 510 Unix or 294 Windows CLI observations (original108 including48 invalid plus392 Unix/176 Windows literal edge cases including exact12 JSON-output review regressions and20 root-flag controls,4 selected invalid-output controls and6 supported help pairs), 20 recorded raw frames, 8 concurrent autostart clients and3 actual Go-produced persisted v3 files per binary;8 rejecting controls; raw argv/output pairs literal; only verified unsupported Go session-id root-help advertisement omitted; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
+      "status": "parity",
+      "supplemental_process_gate": "port/harness/daemon_registry_replay.py replays the sealed Go recording symaira-state-key-final-registry.json (retention.json-pinned): 510 CLI observations (108 original including 48 invalid-session, 392 literal edge cases, 4 selected invalid-output, 6 help pairs), 20 raw frames, 8 concurrent autostart clients and 3 Go-produced persisted v3 files against a fresh Rust run; raw argv/output pairs literal, full help compared (session id is implemented), only validated owned paths/PIDs/timestamps and the macOS directory layout projected; 10 rejecting controls; also 12/12 sealed Go root-prefix --session observations; 2026-11-13 macOS arm64 and Linux arm64 match (migration/evidence/browse-daemon-772/rust-only-replay-receipt-20261113.json)"
     },
     {
       "id": "CFG-001",

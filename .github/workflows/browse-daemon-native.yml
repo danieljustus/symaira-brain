@@ -46,6 +46,7 @@ jobs:
           python3 -B port/harness/test_daemon_state_key_ownership.py
           python3 -B port/harness/test_startup_key_paths.py
           python3 -B port/harness/test_daemon_state_key_replay.py
+          python3 -B port/harness/test_daemon_registry_replay.py
 
       - name: Build the Rust CLI
         run: |
@@ -98,6 +99,17 @@ jobs:
             --out "$RUNNER_TEMP/browse-daemon-state-key-replay.json" \
             2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key-replay.log"
 
+      - name: Replay sealed Go registry and process recordings
+        run: |
+          set -euo pipefail
+          rust_binary="$GITHUB_WORKSPACE/browse/target/release/symbrowse"
+          python3 port/harness/daemon_registry_replay.py --rust "$rust_binary" \
+            --out "$RUNNER_TEMP/browse-daemon-registry-replay.json" \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-registry-replay.log"
+          python3 port/harness/daemon_process_replay.py --rust "$rust_binary" \
+            --out "$RUNNER_TEMP/browse-daemon-process-replay.json" \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-process-replay.log"
+
       - name: Retain exact-head daemon receipt
         if: always()
         env:
@@ -131,5 +143,9 @@ jobs:
             ${{ runner.temp }}/browse-daemon-state-key-ownership.log
             ${{ runner.temp }}/browse-daemon-state-key-replay.json
             ${{ runner.temp }}/browse-daemon-state-key-replay.log
+            ${{ runner.temp }}/browse-daemon-registry-replay.json
+            ${{ runner.temp }}/browse-daemon-registry-replay.log
+            ${{ runner.temp }}/browse-daemon-process-replay.json
+            ${{ runner.temp }}/browse-daemon-process-replay.log
           if-no-files-found: error
           retention-days: 14

@@ -1256,9 +1256,12 @@ fn state_clean(ctx: &mut Ctx<'_>) -> Handled {
         .cloned()
         .unwrap_or_default();
     if ctx.structured() {
-        // stateCleanPayload{Removed []string `json:"removed"`}: a missing list is null.
+        // stateCleanPayload{Removed []string `json:"removed"`}: a nil slice is
+        // null in JSON but an empty sequence in YAML.
         let list = if data.contains_key("removed") && data.get("removed") != Some(&Value::Null) {
             Value::Array(removed.iter().filter(|v| v.is_string()).cloned().collect())
+        } else if ctx.format()? == symbrowse_core::output::Format::Yaml {
+            Value::Array(Vec::new())
         } else {
             Value::Null
         };

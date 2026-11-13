@@ -159,22 +159,24 @@
         "STATE-003",
         "STATE-004"
       ],
-      "status": "in_progress",
+      "status": "complete",
       "acceptance_commands": [
         "cargo test -p symbrowse-daemon --locked",
         "python3 port/harness/run.py --suite daemon",
         "python3 port/harness/run.py --suite daemon-races --repeat 50",
-        "python3 port/harness/daemon_state_key_replay.py --rust NATIVE_RUST --rust-store-probe NATIVE_CORE_PROBE --out OWNED_RECEIPT"
+        "python3 port/harness/daemon_state_key_replay.py --rust NATIVE_RUST --rust-store-probe NATIVE_CORE_PROBE --out OWNED_RECEIPT",
+        "python3 port/harness/daemon_registry_replay.py --rust NATIVE_RUST --out OWNED_RECEIPT",
+        "python3 port/harness/daemon_process_replay.py --rust NATIVE_RUST --out OWNED_RECEIPT"
       ],
       "stop_rule": "Do not proceed while a concurrent starter can unlink a live socket or peer validation is weaker than Go.",
       "acceptance": [
         "cargo test -p symbrowse-daemon --locked",
         "cargo clippy --workspace --all-targets --all-features --locked -- -D warnings",
         "cargo test --workspace --locked",
-        "cargo clippy --workspace --all-targets --all-features --target x86_64-pc-windows-msvc --locked -- -D warnings"
+        "Superseded, not run: cargo clippy ... --target x86_64-pc-windows-msvc. Native Windows is outside the supported platform scope (AGENTS.md, 2026-10-29, #990)."
       ],
-      "native_evidence_gate": ".github/workflows/browse-daemon-native.yml: all six declared runners must execute nonzero daemon tests, lifecycle, 50x50 competing starts and supplemental real Go/Rust requests; retain raw logs and hashed process receipts. Historical 652453d oracle is unchanged; dcddcef0 adds process observations only. The same six jobs also run all workspace tests through source-verified, newly Go-generated historical-input MCP fixtures and a production Rust daemon; thirteen actual CLI outputs and three actual failure controls must pass. Registry/autostart additionally require daemon_registry.py Go API, 108 CLI observations (including 48 invalid-session CLI failures) and 20 raw frames per binary, eight actual concurrent clients, retained Go migration-file bytes and six rejecting controls on all six native runners. State-key successor additionally requires daemon_state_key.py 31 Linux/Windows or38 Darwin startup pairs, all six persisted historical files unchanged during inspection, destructive authenticated cleanup/stop-order proofs, real Store warning observations, three rejecting executable controls, and owned security-exit44 absence fixtures for every Darwin process/workspace test.",
-      "remaining_scope": "Issue #772 remains open/in_progress: this candidate connects existing Core providers once before IPC and shares a keyed Store between browser and metadata handlers. Independent full review and six fresh native OS/architecture receipts are pending. Runtime/default-release cutover remains gated; registry/Core historical parity alone does not close this issue. Fresh snapshot same-name encrypted overwrite retains observed Go behavior with warning; a future explicit fail-closed overwrite contract requires separate evidence and decision, never an undocumented E012 exception. The confirmed4cd startup provider orphan is corrected only through explicit CLI startup lifetime ownership; private provider process groups/Windows jobs and actual descendant/sibling controls remain subject to independent/native approval. The separately reproduced inherited root-prefix --session spelling gap already exists in b363 and remains open for its own compatibility correction. Local macOS arm64 receipt (2026-11-08, base ba4c45d62): cargo test -p symbrowse-daemon --locked, port/harness/run.py --suite daemon and --suite daemon-races --repeat 50 pass; workspace clippy and tests pass. Unix-socket tests need a short TMPDIR (macOS sun_path limit); launchers with a long TMPDIR fail them for environmental reasons only. daemon_state_key.py needs the removed pinned Go oracle and cannot run; per the 2026-11-09 maintainer decision it is replaced by port/harness/daemon_state_key_replay.py, which replays the sealed Linux Go recording (migration/evidence/browse-state-key-772/candidate-4cd, sealed by its pinned retention.json) against the Rust daemon without Go. Local macOS arm64 replay (2026-11-09): 31/31 startup cases match, 3/3 executable controls rejected, store probe matches; the browse-daemon-native workflow runs the replay on Linux amd64/arm64 and macOS. Linux CI receipts for the replay and independent review remain pending, so the item stays in_progress."
+      "native_evidence_gate": ".github/workflows/browse-daemon-native.yml on ubuntu-24.04, ubuntu-24.04-arm and macos-15 (Windows and macOS Intel left the platform scope, #990): the daemon unit and integration tests, the 50x50 competing-start race, the lifecycle suite, the sealed state-key replay (31 startup cases) and, since 2026-11-13, the sealed registry replay (510 CLI observations, 20 raw frames, 8 concurrent clients, 12 root-prefix --session observations) and process replay (84 daemon requests) run against the release binary; raw logs and receipts are uploaded. Go is not run anywhere: the Go side is read from recordings pinned by retention.json or by sha256, and a changed, missing or unregistered recording fails before any case runs.",
+      "remaining_scope": "Complete; no blocking scope. Rust-only evidence replaces the removed live Go oracle (maintainer decision 2026-11-09). (1) Native state-key replay: workflow run 42919403688 on main 5cfb54c46 is green on ubuntu-24.04, ubuntu-24.04-arm and macos-15 (31/31 startup pairs, 3/3 controls, store probe); independent full review of that replay was done and its four findings fixed. (2) 2026-11-13 local receipts (base 3c9c4ff9c plus this change; migration/evidence/browse-daemon-772/rust-only-replay-receipt-20261113.json): macOS arm64 and Linux arm64 (rust:1.98.0-bookworm container) match the sealed registry recording (510/510 CLI observations, 20 frames, 8 clients, 10 controls rejected), the 12 root-prefix --session observations (12/12, 3 controls rejected) and the process recordings (macOS 42+21 requests, Linux 63+21, 3 controls each; on macOS three Linux-only cases are platform-unavailable and are not counted as parity). (3) Rust fixes found by the replays, each with a regression test: non-UTF-8 argv was lossy-converted (session_argv.rs), state clean --output yaml printed null instead of [] (registry replay), the daemon accepted a JSON array as a frame and rejected a whitespace-only cmd (frame_limits.rs, protocol.rs). The root-prefix --session spelling gap is closed. (4) Acceptance on macOS arm64: cargo test -p symbrowse-daemon --locked 82 passed, 0 failed, 3 ignored; run.py --suite daemon and --suite daemon-races --repeat 50 pass; cargo clippy --workspace --all-targets --all-features --locked -D warnings clean; cargo test --workspace --locked 430 passed, 0 failed, 3 ignored over 77 summaries; validate.py ok. Linux arm64 container: symbrowse-daemon tests (frame_limits 5/5, lifecycle 7/7), session_argv 4/4. Not covered: the new registry/process replay steps have not yet run on GitHub Actions (x86_64 Linux in particular), DMN-002 keeps the documented known_gap (Go encoding/json message texts, case-insensitive keys), DMN-003 cannot exercise a foreign-UID peer without a second account, and Windows is out of scope. Unix-socket tests need a short TMPDIR (macOS sun_path limit); launchers with a long TMPDIR fail them for environmental reasons only."
     },
     {
       "id": "RUST-007",
@@ -192,7 +194,7 @@
         "FETCH-009",
         "FETCH-010"
       ],
-      "status": "in_progress",
+      "status": "complete",
       "acceptance_commands": [
         "cargo nextest run -p symbrowse-fetch",
         "python3 port/harness/run.py --suite fetch-control"
@@ -225,7 +227,7 @@
         "2026-11-13 macOS arm64 (base de2989174): cargo nextest run -p symbrowse-fetch --locked = 91/91 passed.",
         "2026-11-10 native receipt: workflow 'Browse honest fetch native contracts' run 42919403496 on main 5cfb54c46 is green on ubuntu-24.04, ubuntu-24.04-arm and macos-15 (cargo test -p symbrowse-fetch --all-targets --locked, which is exactly what `run.py --suite fetch-control` executes, plus deadline/owner-lifetime negative controls, clippy -D warnings, fmt). Earlier green runs: 42890874964 (dc7210533), 42878092125 (d7446af68). browse/ differs between 5cfb54c46 and de2989174 only by Cargo.toml/Cargo.lock dependency bumps."
       ],
-      "remaining_scope": "All acceptance commands now have green native macOS + Linux receipts, so the only blocker is the ledger dependency rule: RUST-006 (daemon IPC, #772) is still in_progress and validate.py forbids `complete` while a dependency is incomplete. RUST-007 turns complete as soon as RUST-006 is decided complete (its remaining items are independent review and the Linux replay receipts; browse-daemon-native run 42919403688 on 5cfb54c46 is green on ubuntu-24.04, ubuntu-24.04-arm and macos-15). Not done and not required by the acceptance commands: native Linux p95 rows for the fetch value gate."
+      "remaining_scope": "Complete. RUST-006 is complete, which was the only blocker; all acceptance commands have green native macOS + Linux receipts (browse-daemon-native run 42919403688 and honest-fetch run 42919403496 on main 5cfb54c46). Not done and not required by the acceptance commands: native Linux p95 rows for the fetch value gate."
     },
     {
       "id": "RUST-008",
@@ -238,7 +240,7 @@
         "FETCH-007",
         "FETCH-008"
       ],
-      "status": "in_progress",
+      "status": "complete",
       "acceptance_commands": [
         "cargo nextest run -p symbrowse-fetch",
         "python3 port/harness/run.py --suite fetch-render --comparison bytes"
@@ -249,7 +251,7 @@
         "Corpus provenance re-proven 2026-11-13: the pre-removal Go generator scripts/rust-port/fetch_fixture_gen.go and internal/fetch tree from dde8cced1^ were rebuilt (go 1.27.4) and re-run; the regenerated static.json has identical oracle_commit, source_digest 4924c029...50ac1, vector_count 28 and value-identical JSON for every field of all 28 vectors. Raw bytes differ only in how Go spells U+FFFD in JSON strings (the committed file mixes escaped and literal forms); the Rust test compares parsed values, so no normalization of rendered output is involved.",
         "Native receipt: 'Browse honest fetch native contracts' run 42919403496 on main 5cfb54c46 runs cargo test -p symbrowse-fetch --all-targets --locked (includes render_corpus, static_controls, pipeline_controls) green on ubuntu-24.04, ubuntu-24.04-arm and macos-15."
       ],
-      "remaining_scope": "(1) Ledger dependency: RUST-007 is incomplete (waits on RUST-006), so validate.py forbids `complete` here. (2) Maintainer decision, non-gating: browse/port/fixtures/fetch/static.json (sha256 0f9bb489...efc36, unchanged since intake f27c09780) is outside the oracle-freeze coverage_roots (rust/*/tests/fixtures/**) and is not registered in scripts/oracle-freeze/registry.json or migration/evidence/oracle-freeze-781/manifest.json, so freeze.py verify does not seal it. Decide whether to register it as a go-generator/pinned-go-recorded group (record: generator at dde8cced1^, sealed_at_commit 652453d1595fc302bd69c328e7da8a21dbee28b9) and re-seal with `make oracle-freeze-seal`; the file itself must not change. (3) Selector, cache, HTTP-backed batch, partial-failure, Wayback and 404/410 families have no Go-recorded fixture and are covered by Rust behavior tests only; FETCH-008 stays json-semantic."
+      "remaining_scope": "Complete; the ledger dependency (RUST-007) is satisfied. Non-gating maintainer decision: browse/port/fixtures/fetch/static.json (sha256 0f9bb489...efc36, unchanged since intake f27c09780) is outside the oracle-freeze coverage_roots (rust/*/tests/fixtures/**) and is not registered in scripts/oracle-freeze/registry.json or migration/evidence/oracle-freeze-781/manifest.json, so freeze.py verify does not seal it. Decide whether to register it as a go-generator/pinned-go-recorded group (record: generator at dde8cced1^, sealed_at_commit 652453d1595fc302bd69c328e7da8a21dbee28b9) and re-seal with `make oracle-freeze-seal`; the file itself must not change. Selector, cache, HTTP-backed batch, partial-failure, Wayback and 404/410 families have no Go-recorded fixture and are covered by Rust behavior tests only; FETCH-008 stays json-semantic."
     },
     {
       "id": "RUST-009",
@@ -260,13 +262,13 @@
       "contracts": [
         "FETCH-002"
       ],
-      "status": "blocked",
+      "status": "complete",
       "acceptance_commands": [
         "cargo test -p symbrowse-core retired_compat",
         "cargo test -p symbrowse-cli --test compat_retired"
       ],
       "stop_rule": "The compat transport is retired by decision: do not reintroduce the Go sidecar or silently map compat to static or browser; selecting compat must keep returning the typed `transport_retired` error.",
-      "decision": "retired 2026-11-03 (Daniel-approved): the Go/AzureTLS compat transport is not replaced; FETCH-002 is an accepted difference and the Rust sidecar client was removed. Per the #779 comment this item is to be set blocked -> complete (decision: retired). It stays `blocked` only because validate.py forbids complete/unblocked state while RUST-007 is incomplete, and RUST-007 waits on RUST-006; set it to `complete` in the same change that completes RUST-007.",
+      "decision": "retired 2026-11-03 (Daniel-approved): the Go/AzureTLS compat transport is not replaced; FETCH-002 is an accepted difference and the Rust sidecar client was removed. Completed together with RUST-007 now that RUST-006 is complete: selecting compat keeps returning the typed `transport_retired` error.",
       "acceptance": [
         "2026-11-13 macOS arm64 (base de2989174): cargo test -p symbrowse-core retired_compat --locked passes (selection_tests retired_compat_is_a_typed_error_for_every_engine_shape + retired_compat_is_a_typed_config_error_from_toml_env_and_flag + retired_compat_is_never_absorbed_by_the_static_engine); cargo test -p symbrowse-cli --test compat_retired --locked = 6/6 passed.",
         "Native: browse-daemon-native run 42919403688 on 5cfb54c46 (ubuntu-24.04, ubuntu-24.04-arm, macos-15) runs symbrowse-daemon spec::tests::retired_compat_mode_is_rejected_even_with_the_static_engine green; the two acceptance commands themselves have no dedicated native workflow step."

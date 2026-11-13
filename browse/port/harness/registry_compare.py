@@ -8,6 +8,12 @@ import os
 import re
 import daemon_registry_cli as cli_edges
 
+# Rust-only shutdown diagnostics on stderr; the Firefox and Safari lines appear
+# only where those engines exist (Safari on macOS), so they are optional.
+RUST_SHUTDOWN = re.compile(
+    r"symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n"
+    r"(symbrowse shutdown: (?:firefox|safari) none elapsed_ms=\d+\n){0,2}")
+
 
 def normalize(record: dict, *, rust: bool) -> dict:
     value = copy.deepcopy(record)
@@ -41,7 +47,7 @@ def normalize(record: dict, *, rust: bool) -> dict:
         stop_result = value.pop(key)
         assert stop_result["exit"] == 0 and stop_result["stdout"] == ""
         if rust:
-            assert stop_result["stderr"] == "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n"
+            assert RUST_SHUTDOWN.fullmatch(stop_result["stderr"]), f"unrecognized Rust diagnostic: {stop_result['stderr']!r}"
         else:
             line = stop_result["stderr"]
             match = re.fullmatch(r'time=([^ ]+) level=WARN msg="no external risk decider available \(symbrain not found or disabled\); risk decisions fall back to the built-in policy"\n', line)

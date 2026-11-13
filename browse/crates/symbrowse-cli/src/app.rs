@@ -316,7 +316,7 @@ fn socket_path(session: &str) -> Result<std::path::PathBuf, CliError> {
     if !valid_session(session) {
         return Err(CliError::plain(format!(
             "invalid session {}: use 1-64 letters, digits, '.', '_' or '-'",
-            symbrowse_core::go_quote::quote(session)
+            symbrowse_core::go_quote::quote_argv(session)
         )));
     }
     Ok(default_socket_path(session))

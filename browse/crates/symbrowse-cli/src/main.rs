@@ -33,7 +33,7 @@ fn main() -> ExitCode {
     }
     let values: Vec<String> = args
         .iter()
-        .map(|value| value.to_string_lossy().into_owned())
+        .map(|value| symbrowse_core::go_quote::argv_text(value))
         .collect();
     if let Some(first) = values.first()
         && matches!(first.as_str(), "__complete" | "__completeNoDesc")

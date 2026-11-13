@@ -6,7 +6,10 @@ pub(crate) use symbrowse_core::go_quote::quote;
 pub fn invalid_session_message(value: &[u8]) -> String {
     format!(
         "invalid session {}: use 1-64 letters, digits, '.', '_' or '-'",
-        symbrowse_core::go_quote::quote_bytes(value)
+        std::str::from_utf8(value).map_or_else(
+            |_| symbrowse_core::go_quote::quote_bytes(value),
+            symbrowse_core::go_quote::quote_argv
+        )
     )
 }
 #[cfg(test)]

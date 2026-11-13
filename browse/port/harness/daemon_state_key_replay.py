@@ -49,8 +49,8 @@ class SealError(AssertionError):
     """The recording is not the sealed one."""
 
 
-def verify_seal(directory: Path, retention_sha256: str = RETENTION_SHA256) -> dict:
-    """Return the sealed recording or raise SealError naming every failure."""
+def verify_seal(directory: Path, retention_sha256: str = RETENTION_SHA256, recording: str = RECORDING) -> dict:
+    """Return the named sealed recording or raise SealError naming every failure."""
     retention_path = directory / RETENTION
     if not retention_path.is_file():
         raise SealError(f"missing {RETENTION} in {directory}")
@@ -68,11 +68,11 @@ def verify_seal(directory: Path, retention_sha256: str = RETENTION_SHA256) -> di
     failures += [f"missing recording file: {name}" for name in sorted(sealed.keys() - present)]
     failures += [f"changed recording file: {name}" for name in sorted(present & sealed.keys())
                  if registry.process.digest(directory / name) != sealed[name]]
-    if RECORDING not in sealed:
-        failures.append(f"{RECORDING} is not part of the seal")
+    if recording not in sealed:
+        failures.append(f"{recording} is not part of the seal")
     if failures:
         raise SealError("\n".join(failures))
-    return json.loads((directory / RECORDING).read_text())
+    return json.loads((directory / recording).read_text())
 
 
 def check_inputs(recording: dict) -> None:

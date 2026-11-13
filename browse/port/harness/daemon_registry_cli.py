@@ -5,7 +5,6 @@ import os
 import subprocess
 from registry_cli_process import capture
 
-UNSUPPORTED_ID_ROW = b"  id          Derive a stable, collision-free session id from the local repository layout\n"
 COMMANDS = [("session", "list"), ("session", "info"), ("daemon", "status"), ("state", "list")]
 FORMATS = [[], ["--json"], ["--output", "yaml"]]
 
@@ -82,18 +81,15 @@ def observe(binary, root, env, progress=None):
 
 
 def comparable_help(observed, *, go):
+    """Help bytes are compared unprojected.
+
+    The native CLI used to omit `session id`, so the Go advertisement row was
+    removed before comparing. `session id` is implemented now in the Rust
+    CLI, and the sealed Go help is compared byte for
+    byte, including that row, the descriptions, global flags and footer.
+    """
     result = copy.deepcopy(observed)
     assert result["exit"] == 0 and result["stderr_base64"] == "", result
-    if go and result["arguments_base64"] in (
-        [base64.b64encode(b"session").decode()],
-        [base64.b64encode(b"session").decode(), base64.b64encode(b"--help").decode()],
-    ):
-        text = base64.b64decode(result["stdout_base64"])
-        # The native increment intentionally does not implement session id.
-        # Verify and remove exactly its known advertisement, preserving every
-        # other help byte, including descriptions, global flags and footer.
-        assert text.count(UNSUPPORTED_ID_ROW) == 1, text
-        result["stdout_base64"] = base64.b64encode(text.replace(UNSUPPORTED_ID_ROW, b"", 1)).decode()
     return result
 
 

@@ -91,9 +91,12 @@ Brain Go targets; run them from the repository root, not as Browse module gates.
 **Acceptance (from `browse/`):** `cargo test -p symbrowse-daemon --locked`,
 `python3 port/harness/run.py --suite daemon`, and
 `python3 port/harness/run.py --suite daemon-races --repeat 50`. The dedicated
-`browse-daemon-native.yml` workflow executes all three on the six declared
-OS/architecture runners; `DMN-001/002/003/004/005/007/008` remain open until
-those exact-candidate native receipts pass.
+`browse-daemon-native.yml` workflow executes all three on ubuntu-24.04,
+ubuntu-24.04-arm and macos-15 (Windows and macOS Intel left the platform scope,
+#990) together with the Go-free `daemon_state_key_replay.py`,
+`daemon_registry_replay.py` and `daemon_process_replay.py`, which replay sealed
+Go recordings against Rust. RUST-006 was closed on 2026-11-13; see its
+`remaining_scope` in `work-items.json` for the receipts and what is not covered.
 
 ### 1B. Static fetch semantics (RUST-007)
 
