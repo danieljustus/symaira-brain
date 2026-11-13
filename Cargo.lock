@@ -1276,9 +1276,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "1.1.4"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
+checksum = "e5e76742e5294153d4dde1207dbec5bdd81eef6fabdc0d2118babadabfd858aa"
 dependencies = [
  "bitflags",
  "errno",
@@ -1584,12 +1584,12 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "symaira-core-exit"
 version = "0.0.0"
-source = "git+https://github.com/danieljustus/symaira-corekit?rev=7515add9acd865fa56f908643d0b3b689a70946b#7515add9acd865fa56f908643d0b3b689a70946b"
+source = "git+https://github.com/danieljustus/symaira-corekit?rev=eaa2fb01914f11713f629a73e4d6f82f1fbdea55#eaa2fb01914f11713f629a73e4d6f82f1fbdea55"
 
 [[package]]
 name = "symaira-core-llm"
 version = "0.0.0"
-source = "git+https://github.com/danieljustus/symaira-corekit?rev=7515add9acd865fa56f908643d0b3b689a70946b#7515add9acd865fa56f908643d0b3b689a70946b"
+source = "git+https://github.com/danieljustus/symaira-corekit?rev=eaa2fb01914f11713f629a73e4d6f82f1fbdea55#eaa2fb01914f11713f629a73e4d6f82f1fbdea55"
 dependencies = [
  "reqwest",
  "serde",
@@ -1604,7 +1604,7 @@ dependencies = [
 [[package]]
 name = "symaira-core-secretref"
 version = "0.0.0"
-source = "git+https://github.com/danieljustus/symaira-corekit?rev=7515add9acd865fa56f908643d0b3b689a70946b#7515add9acd865fa56f908643d0b3b689a70946b"
+source = "git+https://github.com/danieljustus/symaira-corekit?rev=eaa2fb01914f11713f629a73e4d6f82f1fbdea55#eaa2fb01914f11713f629a73e4d6f82f1fbdea55"
 dependencies = [
  "rustix",
  "serde",
