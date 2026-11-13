@@ -217,10 +217,15 @@
           ],
           "samples_per_run": 30,
           "evidence": "port/evidence/fetch-control-773/macos-fetch-p95",
-          "gate": "pass locally; native CI rows pending"
+          "gate": "pass locally on macOS arm64; Linux p95 rows were never captured and are not part of the acceptance commands"
         },
         "root_cause": "journal append used File::sync_all (F_FULLFSYNC on macOS) on every gated fetch.url"
-      }
+      },
+      "acceptance": [
+        "2026-11-13 macOS arm64 (base de2989174): cargo nextest run -p symbrowse-fetch --locked = 91/91 passed.",
+        "2026-11-10 native receipt: workflow 'Browse honest fetch native contracts' run 42919403496 on main 5cfb54c46 is green on ubuntu-24.04, ubuntu-24.04-arm and macos-15 (cargo test -p symbrowse-fetch --all-targets --locked, which is exactly what `run.py --suite fetch-control` executes, plus deadline/owner-lifetime negative controls, clippy -D warnings, fmt). Earlier green runs: 42890874964 (dc7210533), 42878092125 (d7446af68). browse/ differs between 5cfb54c46 and de2989174 only by Cargo.toml/Cargo.lock dependency bumps."
+      ],
+      "remaining_scope": "All acceptance commands now have green native macOS + Linux receipts, so the only blocker is the ledger dependency rule: RUST-006 (daemon IPC, #772) is still in_progress and validate.py forbids `complete` while a dependency is incomplete. RUST-007 turns complete as soon as RUST-006 is decided complete (its remaining items are independent review and the Linux replay receipts; browse-daemon-native run 42919403688 on 5cfb54c46 is green on ubuntu-24.04, ubuntu-24.04-arm and macos-15). Not done and not required by the acceptance commands: native Linux p95 rows for the fetch value gate."
     },
     {
       "id": "RUST-008",
@@ -238,7 +243,13 @@
         "cargo nextest run -p symbrowse-fetch",
         "python3 port/harness/run.py --suite fetch-render --comparison bytes"
       ],
-      "stop_rule": "Do not select a renderer until the complete corpus passes; unexplained byte differences are not normalizable."
+      "stop_rule": "Do not select a renderer until the complete corpus passes; unexplained byte differences are not normalizable.",
+      "acceptance": [
+        "2026-11-13 macOS arm64 (base de2989174): python3 port/harness/run.py --suite fetch-render --comparison bytes passes (render_corpus 1/1 over 28 vectors, static_controls 5/5, pipeline_controls 8/8); cargo nextest run -p symbrowse-fetch --locked = 91/91 passed. No byte difference exists: no Rust renderer change was needed.",
+        "Corpus provenance re-proven 2026-11-13: the pre-removal Go generator scripts/rust-port/fetch_fixture_gen.go and internal/fetch tree from dde8cced1^ were rebuilt (go 1.27.4) and re-run; the regenerated static.json has identical oracle_commit, source_digest 4924c029...50ac1, vector_count 28 and value-identical JSON for every field of all 28 vectors. Raw bytes differ only in how Go spells U+FFFD in JSON strings (the committed file mixes escaped and literal forms); the Rust test compares parsed values, so no normalization of rendered output is involved.",
+        "Native receipt: 'Browse honest fetch native contracts' run 42919403496 on main 5cfb54c46 runs cargo test -p symbrowse-fetch --all-targets --locked (includes render_corpus, static_controls, pipeline_controls) green on ubuntu-24.04, ubuntu-24.04-arm and macos-15."
+      ],
+      "remaining_scope": "(1) Ledger dependency: RUST-007 is incomplete (waits on RUST-006), so validate.py forbids `complete` here. (2) Maintainer decision, non-gating: browse/port/fixtures/fetch/static.json (sha256 0f9bb489...efc36, unchanged since intake f27c09780) is outside the oracle-freeze coverage_roots (rust/*/tests/fixtures/**) and is not registered in scripts/oracle-freeze/registry.json or migration/evidence/oracle-freeze-781/manifest.json, so freeze.py verify does not seal it. Decide whether to register it as a go-generator/pinned-go-recorded group (record: generator at dde8cced1^, sealed_at_commit 652453d1595fc302bd69c328e7da8a21dbee28b9) and re-seal with `make oracle-freeze-seal`; the file itself must not change. (3) Selector, cache, HTTP-backed batch, partial-failure, Wayback and 404/410 families have no Go-recorded fixture and are covered by Rust behavior tests only; FETCH-008 stays json-semantic."
     },
     {
       "id": "RUST-009",
@@ -255,7 +266,11 @@
         "cargo test -p symbrowse-cli --test compat_retired"
       ],
       "stop_rule": "The compat transport is retired by decision: do not reintroduce the Go sidecar or silently map compat to static or browser; selecting compat must keep returning the typed `transport_retired` error.",
-      "decision": "retired 2026-11-03 (Daniel-approved): the Go/AzureTLS compat transport is not replaced; FETCH-002 is an accepted difference and the Rust sidecar client was removed. The item stays `blocked` only because RUST-007 is not yet complete (validate.py dependency rule), not because of compat."
+      "decision": "retired 2026-11-03 (Daniel-approved): the Go/AzureTLS compat transport is not replaced; FETCH-002 is an accepted difference and the Rust sidecar client was removed. Per the #779 comment this item is to be set blocked -> complete (decision: retired). It stays `blocked` only because validate.py forbids complete/unblocked state while RUST-007 is incomplete, and RUST-007 waits on RUST-006; set it to `complete` in the same change that completes RUST-007.",
+      "acceptance": [
+        "2026-11-13 macOS arm64 (base de2989174): cargo test -p symbrowse-core retired_compat --locked passes (selection_tests retired_compat_is_a_typed_error_for_every_engine_shape + retired_compat_is_a_typed_config_error_from_toml_env_and_flag + retired_compat_is_never_absorbed_by_the_static_engine); cargo test -p symbrowse-cli --test compat_retired --locked = 6/6 passed.",
+        "Native: browse-daemon-native run 42919403688 on 5cfb54c46 (ubuntu-24.04, ubuntu-24.04-arm, macos-15) runs symbrowse-daemon spec::tests::retired_compat_mode_is_rejected_even_with_the_static_engine green; the two acceptance commands themselves have no dedicated native workflow step."
+      ]
     },
     {
       "id": "RUST-010",
