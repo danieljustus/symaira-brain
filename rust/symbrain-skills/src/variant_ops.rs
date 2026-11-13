@@ -162,8 +162,30 @@ pub fn unscoped_text(src: &str) -> String {
 fn word(c: char) -> bool {
     c.is_ascii_alphanumeric() || c == '_'
 }
+/// Blanks inline code spans and URLs: they quote paths, commands and repository
+/// names rather than address a harness.
+fn prose_only(line: &str) -> String {
+    let segments = line.split('`').collect::<Vec<_>>();
+    // An unmatched trailing backtick opens no span; its remainder stays prose.
+    let closed = segments.len() % 2 == 1;
+    let mut output = String::with_capacity(line.len());
+    for (index, token) in segments.iter().enumerate() {
+        let last = index + 1 == segments.len();
+        if index % 2 == 1 && (closed || !last) {
+            continue;
+        }
+        let prose = token
+            .split(' ')
+            .map(|word| if word.contains("://") { "" } else { word })
+            .collect::<Vec<_>>()
+            .join(" ");
+        output.push_str(&prose);
+        output.push(' ');
+    }
+    output
+}
 fn contains_word(line: &str, name: &str) -> bool {
-    let line = line.to_ascii_lowercase();
+    let line = prose_only(line).to_ascii_lowercase();
     let name = name.to_ascii_lowercase();
     let mut offset = 0;
     while let Some(index) = line[offset..].find(&name) {

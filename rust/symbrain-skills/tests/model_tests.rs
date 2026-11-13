@@ -148,6 +148,50 @@ fn validation_reports_source_marker_line_and_known_target_warnings() {
     assert!(issues.iter().all(|issue| !issue.message.is_empty()));
 }
 
+fn coupling_lines(manifest: &str, body: &str) -> Vec<String> {
+    let temp = tempfile::tempdir().expect("tempdir");
+    let root = temp.path().join("coupled");
+    fs::create_dir_all(&root).expect("root");
+    fs::write(
+        root.join("SKILL.md"),
+        format!("---\nname: coupled\ndescription: test\ncategory: dev\n---\n{body}"),
+    )
+    .expect("skill");
+    fs::write(root.join("symskills.toml"), manifest).expect("manifest");
+    let bundle = load_bundle(&root).expect("bundle");
+    let known = ["opencode", "claude", "codex", "hermes"]
+        .into_iter()
+        .map(String::from)
+        .collect::<Vec<_>>();
+    validate_with_targets(&bundle, &known)
+        .into_iter()
+        .filter(|issue| issue.code == "harness_coupling")
+        .map(|issue| issue.message)
+        .collect()
+}
+
+#[test]
+fn harness_coupling_respects_disabled_targets_and_quoted_text() {
+    let hermes_only = "[targets.opencode]\nenabled = false\n[targets.claude]\nenabled = false\n[targets.codex]\nenabled = false\n";
+    let body = "Ask claude or hermes for help.\n";
+    // #1057: one enabled target (hermes, unlisted = enabled) renders nothing elsewhere.
+    assert!(coupling_lines(hermes_only, body).is_empty());
+
+    let two = "[targets.opencode]\nenabled = false\n[targets.claude]\nenabled = false\n";
+    let warnings = coupling_lines(two, "Use codex here.\nAsk claude.\n");
+    assert_eq!(warnings.len(), 1, "{warnings:?}");
+    assert!(warnings[0].contains("\"codex\""), "{warnings:?}");
+
+    let quoted = "Run `~/.hermes/scripts/x.sh` from https://github.com/o/codex-skills\n";
+    let warnings = coupling_lines(two, quoted);
+    assert!(warnings.is_empty(), "{warnings:?}");
+    // Prose outside a closed span and after an unmatched backtick still counts.
+    let warnings = coupling_lines("", "Run `x` then ask codex.\n");
+    assert_eq!(warnings.len(), 1, "{warnings:?}");
+    let warnings = coupling_lines(two, "a stray ` before hermes\n");
+    assert_eq!(warnings.len(), 1, "{warnings:?}");
+}
+
 #[test]
 fn validation_rejects_parent_traversal_overlay_reference() {
     let temp = tempfile::tempdir().expect("tempdir");

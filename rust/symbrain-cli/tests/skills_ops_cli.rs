@@ -134,6 +134,14 @@ fn validate_reports_errors_warnings_and_strict_mode() {
             .code,
         1
     );
+    // The strict gate must not depend on the output format (#1056).
+    let strict_json = sandbox.skills(&["validate", "--strict", "--json", warn.to_str().unwrap()]);
+    assert_eq!(strict_json.code, 1, "{}", strict_json.err);
+    assert_eq!(strict_json.json()["valid"], false);
+    assert_eq!(strict_json.json()["issues"][0]["severity"], "warning");
+    let lenient_json = sandbox.skills(&["validate", "--json", warn.to_str().unwrap()]);
+    assert_eq!(lenient_json.code, 0, "{}", lenient_json.err);
+    assert_eq!(lenient_json.json()["valid"], true);
 
     let missing = sandbox.skills(&["validate", "nope"]);
     assert_eq!(missing.code, 1);

@@ -203,14 +203,20 @@ pub fn validate_with_targets(bundle: &Bundle, known_targets: &[String]) -> Vec<I
     let mut paths = bundle.markdown.keys().cloned().collect::<Vec<_>>();
     paths.sort();
     paths.insert(0, "SKILL.md".into());
-    let single_target = bundle
-        .manifest
-        .targets
-        .values()
-        .filter(|config| config.enabled)
-        .count()
-        == 1;
-    let check_coupling = !known_targets.is_empty() && !single_target;
+    // Render treats a target without a manifest entry as enabled, so only an
+    // explicit `enabled = false` removes it from the set that renders this text.
+    let enabled_targets = known_targets
+        .iter()
+        .filter(|target| {
+            bundle
+                .manifest
+                .targets
+                .get(target.as_str())
+                .is_none_or(|config| config.enabled)
+        })
+        .cloned()
+        .collect::<Vec<_>>();
+    let check_coupling = enabled_targets.len() > 1;
     let mut definitions = BTreeMap::<String, String>::new();
     let mut source_ids = Vec::new();
     for path in paths {
@@ -222,7 +228,7 @@ pub fn validate_with_targets(bundle: &Bundle, known_targets: &[String]) -> Vec<I
             (markdown_text.as_ref(), 0)
         };
         if check_coupling {
-            for mention in variant::find_mentions(text, known_targets) {
+            for mention in variant::find_mentions(text, &enabled_targets) {
                 issues.push(normalize_issue(variant::CODE_HARNESS_COUPLING, "warning", format!("line {}: names harness {:?} outside any symskills:only region; every other target renders this text too", mention.line + offset, mention.name), &path));
             }
         }
