@@ -21,6 +21,8 @@ use symbrain_gateway::{Gateway, GatewayBackend};
 use symbrain_policy::{Profile, SERVER_OPERATE, SERVER_SCOPE, VAULT_MODE_OFF, load, load_file};
 use toml_edit::{DocumentMut, Item, Value};
 
+mod audit_config;
+
 const VAULT_BINARY: &str = "symvault";
 const VAULT_BINARY_ENV: &str = "SYMBRAIN_SERVERS_VAULT_BINARY_PATH";
 const OPERATE_BINARY: &str = "symoperate";
@@ -71,6 +73,15 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         return exit::NO_INPUT;
     }
 
+    let global_audit_enabled = match audit_config::load_global_audit_enabled() {
+        Ok(enabled) => enabled,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain mcp: {error}");
+            return exit::NO_INPUT;
+        }
+    };
+    let audit_enabled = profile.audit.enabled && global_audit_enabled;
+
     let mut managed = Vec::new();
     let mut backends: BTreeMap<String, Arc<dyn GatewayBackend>> = BTreeMap::new();
     build_backends(
@@ -81,30 +92,10 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         &mut backends,
     );
 
-    let audit = if profile.audit.enabled {
-        match Logger::open_preserving_unverified(
-            &profile.name,
-            AuditConfig {
-                enabled: true,
-                verbose: profile.audit.verbose,
-            },
-        ) {
-            Ok((logger, preserved)) => {
-                if let Some(preserved) = preserved {
-                    let reason = format!(
-                        "previous audit log failed chain verification; preserved as {} and started a new chain",
-                        preserved.display()
-                    );
-                    let _ = writeln!(stderr, "symbrain mcp: {reason}");
-                    logger.log_degradation("audit", &reason, "warning");
-                }
-                Some(Arc::new(logger))
-            }
-            Err(error) => {
-                let _ = writeln!(stderr, "symbrain mcp: failed to open audit log: {error}");
-                None
-            }
-        }
+    // Startup state is opt-in (#834): audit needs both the profile and the
+    // resolved global setting, and is validated before any child starts.
+    let audit = if audit_enabled {
+        open_audit(&profile, stderr)
     } else {
         None
     };
@@ -156,6 +147,32 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
             return exit::OK;
         }
         thread::sleep(Duration::from_millis(10));
+    }
+}
+
+fn open_audit(profile: &Profile, stderr: &mut dyn Write) -> Option<Arc<Logger>> {
+    match Logger::open_preserving_unverified(
+        &profile.name,
+        AuditConfig {
+            enabled: true,
+            verbose: profile.audit.verbose,
+        },
+    ) {
+        Ok((logger, preserved)) => {
+            if let Some(preserved) = preserved {
+                let reason = format!(
+                    "previous audit log failed chain verification; preserved as {} and started a new chain",
+                    preserved.display()
+                );
+                let _ = writeln!(stderr, "symbrain mcp: {reason}");
+                logger.log_degradation("audit", &reason, "warning");
+            }
+            Some(Arc::new(logger))
+        }
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain mcp: failed to open audit log: {error}");
+            None
+        }
     }
 }
 
