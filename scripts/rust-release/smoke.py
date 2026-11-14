@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Smoke-test one extracted release archive on its native platform.
 
-  smoke.py --dir extracted --version V
-  smoke.py --archive-dir dist --version V   # extracts the single archive in dist
+  smoke.py --dir extracted --version V [--product symbrowse]
+  smoke.py --archive-dir dist --version V [--product symbrowse]
+      # extracts the single archive of that product in dist
 
-Checks that the archive holds no Go fallback, that `symbrain version` reports
-V, that `symbrain help` succeeds and that a malformed flag is rejected by the
-native CLI itself. The environment is minimal and owned: an empty HOME/XDG
-tree and a PATH of the extracted archive plus the system directories.
+Checks that the archive holds no Go fallback, that `<product> version` reports
+V, that `<product> help` succeeds and that a malformed flag is rejected by the
+native CLI itself. The product defaults to symbrain. The environment is minimal
+and owned: an empty HOME/XDG tree and a PATH of the extracted archive plus the
+system directories.
 """
 
 from __future__ import annotations
@@ -21,7 +23,11 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-MALFORMED_ARGS = ["skills", "targets", "--candidate-smoke-unknown"]
+PRODUCTS = ["symbrain", "symbrowse"]
+MALFORMED_ARGS = {
+    "symbrain": ["skills", "targets", "--candidate-smoke-unknown"],
+    "symbrowse": ["--candidate-smoke-unknown"],
+}
 
 
 def environment(candidate: Path, scratch: Path) -> dict[str, str]:
@@ -53,29 +59,32 @@ def main(argv: list[str]) -> int:
     source.add_argument("--dir", type=Path, help="already extracted archive")
     source.add_argument("--archive-dir", type=Path, help="directory holding exactly one archive")
     parser.add_argument("--version", required=True)
+    parser.add_argument("--product", default="symbrain", choices=PRODUCTS)
     args = parser.parse_args(argv)
+    product = args.product
     if args.archive_dir:
-        archives = sorted(args.archive_dir.glob("symbrain_*"))
+        archives = sorted(args.archive_dir.glob(f"{product}_*.tar.gz")) + sorted(
+            args.archive_dir.glob(f"{product}_*.zip"))
         if len(archives) != 1:
-            raise SystemExit(f"expected one archive in {args.archive_dir}, found {archives}")
-        extracted = Path(tempfile.mkdtemp(prefix="symbrain-release-extract-"))
+            raise SystemExit(f"expected one {product} archive in {args.archive_dir}, found {archives}")
+        extracted = Path(tempfile.mkdtemp(prefix=f"{product}-release-extract-"))
         if archives[0].suffix == ".zip":
             with zipfile.ZipFile(archives[0]) as archive:
                 archive.extractall(extracted)
         else:
             with tarfile.open(archives[0]) as archive:
                 archive.extractall(extracted, filter="tar")
-        return main(["--dir", str(extracted), "--version", args.version])
+        return main(["--dir", str(extracted), "--version", args.version, "--product", product])
     candidate = args.dir.resolve()
     exe = ".exe" if os.name == "nt" else ""
-    rust = candidate / ("symbrain" + exe)
+    rust = candidate / (product + exe)
     if not rust.is_file() or (os.name != "nt" and not os.access(rust, os.X_OK)):
         raise SystemExit(f"missing executable {rust.name}")
-    leftovers = sorted(p.name for p in candidate.iterdir() if p.name.startswith("symbrain-go"))
+    leftovers = sorted(p.name for p in candidate.iterdir() if p.name.startswith(f"{product}-go"))
     if leftovers:
         raise SystemExit(f"archive still ships a Go fallback: {leftovers}")
 
-    with tempfile.TemporaryDirectory(prefix="symbrain-release-smoke-") as raw:
+    with tempfile.TemporaryDirectory(prefix=f"{product}-release-smoke-") as raw:
         scratch = Path(raw)
         env = environment(candidate, scratch)
         work = scratch / "work"
@@ -83,14 +92,14 @@ def main(argv: list[str]) -> int:
 
         version = run(rust, ["version"], env, work)
         if version.returncode != 0 or args.version.encode() not in version.stdout:
-            raise SystemExit(f"symbrain version did not report {args.version}: {version!r}")
+            raise SystemExit(f"{product} version did not report {args.version}: {version!r}")
         usage = run(rust, ["help"], env, work)
         if usage.returncode != 0 or b"Usage:" not in usage.stdout:
-            raise SystemExit(f"symbrain help failed: {usage!r}")
-        malformed = run(rust, MALFORMED_ARGS, env, work)
+            raise SystemExit(f"{product} help failed: {usage!r}")
+        malformed = run(rust, MALFORMED_ARGS[product], env, work)
         if malformed.returncode == 0 or not malformed.stderr or b"Go fallback" in malformed.stderr:
             raise SystemExit(f"native CLI did not reject the malformed flag itself: {malformed!r}")
-    print(f"release smoke: PASS {args.version}: Rust-only archive; version, help and flag validation are native")
+    print(f"release smoke: PASS {product} {args.version}: Rust-only archive; version, help and flag validation are native")
     return 0
 
 if __name__ == "__main__":

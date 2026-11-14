@@ -1,6 +1,43 @@
 # RUST-016 release, rollback, and value gates
 
-Status: **prepared, blocked, no cutover**
+> **Superseded 2026-11-14 (#780, building on #990 and #1003).** Everything
+> below this note is **historical Go-era evidence** and is kept unchanged: the
+> six-target matrix (with Windows and macOS Intel), the Go oracle and the
+> `SYMBROWSE_IMPL` dual-implementation selection and fallback table no longer
+> apply. The Go implementation was removed in #1003 and there is no Go fallback.
+>
+> ## Current release contract (Rust only)
+>
+> - **Source and pipeline:** `symbrowse` is built from `browse/` (its own Cargo
+>   workspace and pinned toolchain) with `cargo auditable build --locked
+>   --release -p symbrowse-cli` and `SYMBROWSE_VERSION=<version>`, in the same
+>   matrix job as `symbrain` in `.github/workflows/release.yml` (tag `v*`). It is
+>   versioned with the symaira-brain release, not independently. The unpublished
+>   candidate run is `.github/workflows/rust-release.yml`.
+> - **Targets (three):** `darwin/arm64`, `linux/amd64`, `linux/arm64`. No
+>   Windows and no macOS Intel (#990).
+> - **Names:** `symbrowse_<version>_<os>_<arch>.tar.gz` (no leading `v`),
+>   holding `symbrowse`, `AGENTS.md`, `LICENSE` and `README.md`, packaged by
+>   `scripts/rust-release/package.py archive --product symbrowse`. Reproducible
+>   for the same inputs and `SOURCE_DATE_EPOCH`.
+> - **Companions:** `<archive>.sbom.json` (CycloneDX), `<archive>.sig` and
+>   `<archive>.pem` (keyless cosign), and the archive is listed in the release
+>   `checksums.txt` (itself signed). The darwin binary is Developer ID signed
+>   (`com.symaira.browse.cli`) and notarized before it is archived.
+> - **Gates:** `package.py verify` requires both products on all three
+>   platforms (six archives); `smoke.py --product symbrowse` runs `version`,
+>   `help` and native flag validation on each native runner;
+>   `scripts/dist-oracle/verify-release.py` accepts both products' archives.
+> - **Rollback:** the previous Rust release. There is no Go fallback and no
+>   `SYMBROWSE_IMPL` switch; Go-era assets (v0.8.0 of the deleted
+>   `symaira-browse` repository) remain only as history.
+> - **Managed manifest:** `rust/symbrain-managed/assets/manifest.json` still pins
+>   the deleted `symaira-browse` v0.8.0 until the first release that ships these
+>   archives. Then it is repinned to `danieljustus/symaira-brain` with the
+>   sha256 values of the published archives; digests are never filled in before
+>   real artifacts exist.
+
+Status: **prepared, blocked, no cutover** *(historical, 2026-09-07)*
 
 Evidence captured: `2026-09-07T10:31:35Z` on the local darwin/arm64 host.
 The existing Go release remains the oracle and default. The release workflow now

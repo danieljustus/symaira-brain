@@ -27,6 +27,9 @@ HERE = Path(__file__).resolve().parent
 DEFAULT_MANIFEST = HERE / "fixtures" / "manifest_v0.11.0.json"
 DEFAULT_TAP_MANIFEST = HERE / "fixtures" / "tap_v0.11.0.json"
 OIDC_ISSUER = "https://token.actions.githubusercontent.com"
+# Products published as release archives. Only symbrain is a Homebrew formula;
+# symbrowse is installed by `symbrain setup` from its own archives.
+PRODUCTS = ("symbrain", "symbrowse")
 
 
 def require(ok: bool, message: str) -> None:
@@ -39,6 +42,17 @@ def require_pinned_bytes(data: bytes, expected: str, label: str) -> None:
     require(actual == expected, f"{label} differs from pinned live tap bytes: {actual}")
 
 
+def archive_product(name: str) -> str:
+    """Product an archive ships (`symbrain` or `symbrowse`), from `<product>_<version>_<os>_<arch>.*`."""
+    product = name.split("_", 1)[0]
+    require(product in PRODUCTS, f"archive {name} belongs to no known product {PRODUCTS}")
+    return product
+
+
+def archive_binary_name(name: str) -> str:
+    return archive_product(name) + (".exe" if "_windows_" in name else "")
+
+
 def verify_tap_links(formula: str, cask: str, manifest: dict) -> tuple[int, int]:
     version = manifest["version"]
     repo_url = f"https://{manifest['repository']}/releases/download/v{version}/"
@@ -46,7 +60,7 @@ def verify_tap_links(formula: str, cask: str, manifest: dict) -> tuple[int, int]
     expected_formula = {
         name: asset["digest"].removeprefix("sha256:")
         for name, asset in assets.items()
-        if name.endswith((".tar.gz", ".zip")) and "_windows_" not in name
+        if name.endswith((".tar.gz", ".zip")) and "_windows_" not in name and archive_product(name) == "symbrain"
     }
     expected_formula_urls = {repo_url + name for name in expected_formula}
     all_formula_urls = re.findall(r'^\s*url "([^"]*/releases/download/[^"]+)"\s*$', formula, re.MULTILINE)
@@ -167,7 +181,7 @@ def main() -> None:
     archive_names = {name for name in assets if name.endswith((".tar.gz", ".zip"))}
     for name in sorted(archive_names):
         names = archive_file_names(args.assets, name)
-        binary = "symbrain.exe" if "_windows_" in name else "symbrain"
+        binary = archive_binary_name(name)
         require(len(names) == len(set(names)), f"duplicate archive entries in {name}")
         require(set(names) == {"AGENTS.md", "LICENSE", "README.md", binary}, f"unexpected archive contents in {name}: {names}")
     print(f"ok: {len(archive_names)} archive file sets and binary names")
