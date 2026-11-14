@@ -238,6 +238,19 @@ fn teardown(setup: CaseSetup) {
     drop(setup);
 }
 
+/// Accepted divergence (#1060): the sealed Go oracle recorded
+/// `get -- <path> --print`, which the real symvault CLI rejects. Native code
+/// passes the flag before the separator; the fixture stays byte-identical.
+fn native_argv(case: &Case) -> Vec<String> {
+    let argv = case.argv.clone().unwrap_or_default();
+    match argv.as_slice() {
+        [get, sep, path, print] if get == "get" && sep == "--" && print == "--print" => {
+            vec![get.clone(), print.clone(), sep.clone(), path.clone()]
+        }
+        _ => argv,
+    }
+}
+
 fn read_argv(path: &Path) -> Vec<String> {
     let Ok(text) = fs::read_to_string(path) else {
         return Vec::new();
@@ -340,12 +353,7 @@ fn run_case(case: &Case) {
         (Some(false), Ok(value)) => panic!("{}: expected error, got value {value}", case.id),
         (None, _) => panic!("{}: fixture case lacks success flag", case.id),
     }
-    assert_eq!(
-        argv,
-        case.argv.clone().unwrap_or_default(),
-        "argv for {}",
-        case.id
-    );
+    assert_eq!(argv, native_argv(case), "argv for {}", case.id);
     teardown(setup);
 }
 
@@ -403,10 +411,7 @@ fn non_utf8_secret_fails_closed_instead_of_silently_changing_bytes() {
         "secret resolution failed for symvault://raw/bytes: resolve symvault://raw/bytes: non-UTF-8 secret output; set env var  as fallback or install symvault"
     );
     assert!(!error.contains(char::REPLACEMENT_CHARACTER));
-    assert_eq!(
-        read_argv(&setup.args_path),
-        case.argv.clone().unwrap_or_default()
-    );
+    assert_eq!(read_argv(&setup.args_path), native_argv(case));
     teardown(setup);
 }
 

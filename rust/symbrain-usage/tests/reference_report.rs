@@ -25,7 +25,7 @@ fn reference_report() {
             let dir = tempfile::tempdir().expect("fixture directory");
             if mode != "binary" {
                 let script = format!(
-                    "#!/bin/sh\n[ \"$1\" = get ] && [ \"$2\" = -- ] && [ \"$3\" = fixture/openrouter ] && [ \"$4\" = --print ] || exit 9\nprintf 'fixture-secret\\n'\n{}",
+                    "#!/bin/sh\n[ \"$1\" = get ] && [ \"$2\" = --print ] && [ \"$3\" = -- ] && [ \"$4\" = fixture/openrouter ] || exit 9\nprintf 'fixture-secret\\n'\n{}",
                     if mode == "ok" {
                         String::new()
                     } else {

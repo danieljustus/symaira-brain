@@ -133,9 +133,14 @@ fn resolve_symvault_reference(reference: &str, path: &str) -> Result<String, Str
     let label = reference_label(reference);
     validate_vault_path(path).map_err(|error| format!("resolve {label}: {error}"))?;
     let timeout = secretref_timeout();
+    // Accepted divergence from the sealed Go oracle (#1060): Go passed
+    // `get -- <path> --print`, which the real symvault CLI rejects with
+    // "accepts 1 arg(s), received 2" because every argument after `--` is
+    // positional. The flag must precede the separator; the leading-'-' path
+    // check above keeps the separator's protection meaningful.
     let output = run_command_capture(
         "symvault",
-        &["get", "--", path, "--print"],
+        &["get", "--print", "--", path],
         timeout,
         MAX_CREDENTIAL_FILE_BYTES,
     )
@@ -145,7 +150,22 @@ fn resolve_symvault_reference(reference: &str, path: &str) -> Result<String, Str
             command_failure_message(failure, "symvault get", "symvault", timeout)
         )
     })?;
-    decode_secret_stdout(output, label)
+    let secret = decode_secret_stdout(output, label)?;
+    if is_entry_listing(&secret) {
+        // A field-less path prints the whole entry (`Path:`, `Modified:`,
+        // fields). Sending that block as a credential is never right, and
+        // the message must not echo it.
+        return Err(format!(
+            "resolve {label}: symvault printed a whole entry, not one field; reference a field, for example {label}.password"
+        ));
+    }
+    Ok(secret)
+}
+
+/// Whether `symvault get --print` returned its multi-line entry listing
+/// instead of a single field value.
+fn is_entry_listing(output: &str) -> bool {
+    output.starts_with("Path: ") && output.contains('\n')
 }
 
 fn decode_secret_stdout(output: Vec<u8>, label: &str) -> Result<String, String> {
@@ -235,4 +255,21 @@ pub fn resolve_reference_or_env(value: &str, env_name: &str) -> Result<String, S
         return resolve_reference(value, env_name);
     }
     Ok(env_raw(env_name).unwrap_or_default())
+}
+
+#[cfg(test)]
+mod entry_listing_tests {
+    use super::is_entry_listing;
+
+    #[test]
+    fn entry_listing_is_told_apart_from_field_values() {
+        for (output, listing) in [
+            ("Path: kimi/api\nModified: 2026-11-14\n\npassword: s", true),
+            ("sk-single-line-value", false),
+            ("Path: literal-single-line", false),
+            ("-----BEGIN KEY-----\nPath: x\n-----END KEY-----", false),
+        ] {
+            assert_eq!(is_entry_listing(output), listing, "{output:?}");
+        }
+    }
 }

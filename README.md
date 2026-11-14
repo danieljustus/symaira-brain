@@ -581,7 +581,10 @@ filtered:
   Antigravity) and returns the same schema-versioned report as
   `symbrain usage --output json`. Read-only; unconfigured providers are
   reported as not set up, never as errors. Credential environment variables
-  accept `symvault://<path>` references (`vault://` remains a deprecated alias).
+  accept `symvault://<path>.<field>` references, for example
+  `symvault://kimi-code/api-key.api_key` (`vault://` remains a deprecated
+  alias). A path without a field is rejected with a hint instead of sending
+  the whole entry listing as the credential.
   A reference that cannot be resolved is reported as `configured: true` with
   a credential-resolution error, not as an absent credential; no provider
   request is started for that failure.
