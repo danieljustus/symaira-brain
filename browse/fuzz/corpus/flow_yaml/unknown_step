@@ -1,0 +1,5 @@
+name: x
+version: 1
+domains: [a.b]
+steps:
+  - nope: {}

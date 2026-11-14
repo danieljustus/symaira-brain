@@ -37,6 +37,8 @@ mod redirect;
 #[path = "honest/response.rs"]
 mod response;
 use response::read_response;
+#[doc(hidden)]
+pub use response::{fuzz_decode_content, fuzz_normalize_charset};
 
 type ResolverLookup = dyn Fn(&str) -> Result<Vec<SocketAddr>, String> + Send + Sync;
 

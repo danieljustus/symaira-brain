@@ -21,6 +21,8 @@ pub use client::{
     BodyTooLarge, Client, ClientOptions, FetchClient, FetchError, Profile, Request, Response,
 };
 pub use honest::PinnedResolver;
+#[doc(hidden)]
+pub use honest::{fuzz_decode_content, fuzz_normalize_charset};
 pub use rate_limit::{
     CircuitBreaker, CircuitBreakerConfig, CircuitState, HostRateLimiter, RateLimitConfig,
 };

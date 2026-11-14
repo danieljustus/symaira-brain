@@ -1,0 +1,6 @@
+User-agent: a
+User-agent: b
+Disallow: /x
+
+User-agent: *
+Crawl-delay: 3

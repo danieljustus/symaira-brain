@@ -1,0 +1,7 @@
+name: form
+version: 1
+domains: [example.com]
+steps:
+  - open: {url: https://example.com/login}
+  - type: {label: Email, text: a@b.c}
+  - click: {label: Submit}

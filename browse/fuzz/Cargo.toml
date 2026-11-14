@@ -11,11 +11,56 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "=0.4.13"
-symbrowse-fetch = { path = "../crates/symbrowse-fetch" }
+symbrowse-core = { path = "../crates/symbrowse-core", version = "=0.0.0" }
+symbrowse-daemon = { path = "../crates/symbrowse-daemon", version = "=0.0.0" }
+symbrowse-fetch = { path = "../crates/symbrowse-fetch", version = "=0.0.0" }
+symbrowse-mcp = { path = "../crates/symbrowse-mcp", version = "=0.0.0" }
 
 [[bin]]
 name = "dom-input"
 path = "fuzz_targets/dom_input.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "daemon-mcp-frames"
+path = "fuzz_targets/daemon_mcp_frames.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fetch-text"
+path = "fuzz_targets/fetch_text.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "flow-yaml"
+path = "fuzz_targets/flow_yaml.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "state-headers"
+path = "fuzz_targets/state_headers.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "urls"
+path = "fuzz_targets/urls.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "http-body-decode"
+path = "fuzz_targets/http_body_decode.rs"
 test = false
 doc = false
 bench = false

@@ -7,6 +7,7 @@
 //! macOS Chrome is installed).  Steps listed in `KNOWN_GAPS` are documented
 //! unimplemented Go-parity commands: they must still differ (so a fixed
 //! command forces the entry to be removed) and are reported, never hidden.
+#![deny(unsafe_code)]
 
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -19,6 +20,8 @@ use std::{
     thread,
     time::Duration,
 };
+
+mod common;
 
 use serde_json::{Value, json};
 use symbrowse_daemon::{Server, ServerOptions, SessionSpec};
@@ -285,19 +288,14 @@ fn rust_daemon_matches_frozen_go_oracle() {
     let site = read_json(&fixtures().join("fixture_site.json"));
     let base = serve_site(site);
 
-    let root = std::env::temp_dir().join(format!("symbrowse-oracle-replay-{}", std::process::id()));
-    let _ = fs::remove_dir_all(&root);
-    fs::create_dir_all(&root).unwrap();
-    // One test per binary: isolate HOME/XDG before the daemon reads them.
-    #[allow(unsafe_code)]
-    unsafe {
-        std::env::set_var("HOME", root.join("home"));
-        std::env::set_var("XDG_STATE_HOME", root.join("xdg-state"));
-        std::env::set_var("XDG_CACHE_HOME", root.join("xdg-cache"));
-        std::env::set_var("SYMBROWSE_OOB_NOTIFY", "off");
-        std::env::remove_var("SYMBROWSE_MCP");
-        std::env::set_var("SYMBROWSE_SYMGUARD", "off");
-    }
+    // The daemon reads HOME/XDG at startup; run in a re-executed process whose
+    // environment points at an isolated root.
+    let Some(root) = common::isolated_environment_root(
+        "symbrowse-oracle-replay",
+        "rust_daemon_matches_frozen_go_oracle",
+    ) else {
+        return;
+    };
     let session = scenarios["session"].as_str().unwrap_or("oracle").to_owned();
     let mut spec = SessionSpec::for_session(session.clone());
     spec.state_dir = root.join("state");

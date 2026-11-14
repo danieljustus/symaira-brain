@@ -140,6 +140,24 @@ fn decode_content(
     Ok(decoded)
 }
 
+/// Fuzz/replay entry point for the bounded content-encoding decoder; the
+/// decoded body never exceeds `max` bytes.
+#[doc(hidden)]
+pub fn fuzz_decode_content(
+    input: &[u8],
+    encoding: &str,
+    max: usize,
+) -> Result<Vec<u8>, FetchError> {
+    decode_content(input, encoding, max, "https://fuzz.invalid/")
+}
+
+/// Fuzz/replay entry point for charset detection and transcoding to UTF-8.
+#[doc(hidden)]
+#[must_use]
+pub fn fuzz_normalize_charset(body: Vec<u8>, content_type: Option<&str>) -> Vec<u8> {
+    normalize_charset(body, content_type)
+}
+
 enum LimitError {
     TooLarge,
     Read(String),

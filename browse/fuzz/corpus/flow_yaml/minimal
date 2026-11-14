@@ -1,0 +1,5 @@
+name: demo
+version: 1
+domains: [example.com]
+steps:
+  - open: {url: https://example.com/}

@@ -4,6 +4,7 @@
 //! harness (`run.py --suite chrome-daemon`) requires the full expected set, so a
 //! skipped or partial run is never evidence.
 #![cfg(unix)]
+#![deny(unsafe_code)]
 
 use std::{
     fs,
@@ -14,6 +15,8 @@ use std::{
     thread,
     time::Duration,
 };
+
+mod common;
 
 use serde_json::{Value, json};
 use symbrowse_daemon::{Frame, Server, ServerOptions, SessionSpec};
@@ -137,22 +140,15 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     if !enabled() {
         return;
     }
-    let root = std::env::temp_dir().join(format!("symbrowse-daemon-chrome-{}", std::process::id()));
-    let _ = fs::remove_dir_all(&root);
-    fs::create_dir_all(&root).expect("create isolated root");
-    // One test per binary: point HOME/XDG at the isolated root before the
-    // daemon derives its session profile, so no user cache or profile is used.
-    #[allow(unsafe_code)]
-    unsafe {
-        std::env::set_var("HOME", root.join("home"));
-        std::env::set_var("XDG_CACHE_HOME", root.join("xdg-cache"));
-        std::env::set_var("XDG_STATE_HOME", root.join("xdg-state"));
-        // Hermetic policy: no external guard binary, no desktop notification,
-        // CLI (TTY) mode so Upload/Download stay `confirm` and need approval.
-        std::env::set_var("SYMBROWSE_SYMGUARD", "off");
-        std::env::set_var("SYMBROWSE_OOB_NOTIFY", "off");
-        std::env::remove_var("SYMBROWSE_MCP");
-    }
+    // The daemon reads HOME/XDG at startup; run in a re-executed process whose
+    // environment points at an isolated root, so no user cache or profile is used.
+    // CLI (TTY) mode keeps Upload/Download at `confirm`, needing approval.
+    let Some(root) = common::isolated_environment_root(
+        "symbrowse-daemon-chrome",
+        "production_daemon_path_runs_chrome_and_reaps_owned_profile",
+    ) else {
+        return;
+    };
     let mut spec = SessionSpec::for_session("native-chrome");
     spec.state_dir = root.join("state");
     spec.cache_dir = root.join("cache");
