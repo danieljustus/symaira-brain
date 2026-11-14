@@ -77,10 +77,9 @@ pub fn validate_name(name: &str) -> Result<(), StateError> {
             "state name must not contain path separators",
         ));
     }
-    if name
-        .chars()
-        .any(|character| character < '\u{20}' || character == '\u{7f}')
-    {
+    // `is_control` covers C0, DEL and C1 (U+0080..U+009F); C1 sequences can
+    // still drive terminals when a name is listed or logged (#1061).
+    if name.chars().any(char::is_control) {
         return Err(StateError::InvalidName(
             "state name contains control characters",
         ));
@@ -292,7 +291,15 @@ mod tests {
 
     #[test]
     fn validates_names_like_go() {
-        for invalid in ["", "../escape", "a/b", "a\0b"] {
+        for invalid in [
+            "",
+            "../escape",
+            "a/b",
+            "a\0b",
+            "a\u{7f}b",
+            "a\u{85}b",
+            "a\u{9b}b",
+        ] {
             assert!(validate_name(invalid).is_err(), "{invalid:?}");
         }
         assert_eq!(

@@ -19,10 +19,9 @@ fuzz_target!(|data: &[u8]| {
     }
     let name = String::from_utf8_lossy(data);
     if validate_name(&name).is_ok() {
-        // Contract of `validate_name`: one path component, no ASCII controls.
-        // C1 controls (U+0080..U+009F) are accepted by the current contract; they
-        // are not path syntax, see docs/rust-port/hardening.md.
+        // Contract of `validate_name`: one path component, no control characters
+        // (C0, DEL and C1, #1061).
         assert!(!name.contains('/'));
-        assert!(!name.chars().any(|c| c < '\u{20}' || c == '\u{7f}'));
+        assert!(!name.chars().any(char::is_control));
     }
 });

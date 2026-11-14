@@ -73,7 +73,7 @@ fn state_header_seeds_are_total() {
         let name = String::from_utf8_lossy(data);
         if validate_name(&name).is_ok() {
             assert!(!name.contains('/'));
-            assert!(!name.chars().any(|c| c < '\u{20}' || c == '\u{7f}'));
+            assert!(!name.chars().any(char::is_control));
         }
     });
 }

@@ -151,12 +151,12 @@ from the report.
 - **cargo-deny on the fuzz manifest.** `fuzz/Cargo.toml` declared its path
   dependency without a version, tripping `bans.wildcards = "deny"`. All path
   dependencies now carry `version = "=0.0.0"`, matching the workspace.
-- **Reviewed, not changed.** A first `state-headers` fuzz run found that
-  `validate_name` accepts C1 control characters (U+0080–U+009F) while rejecting
-  ASCII controls and `/`. They are not path syntax and no Go-recorded fixture
-  pins either behavior, so the contract is left unchanged and the fuzz/replay
-  assertion states the actual contract (single path component, no ASCII
-  control). Revisit if names are ever echoed to a terminal unescaped.
+- **C1 control characters in state names (#1061).** A first `state-headers`
+  fuzz run found that `validate_name` accepted C1 control characters
+  (U+0080–U+009F) while rejecting ASCII controls and `/`. No Go-recorded
+  fixture pins either behavior; because names are listed and logged, it now
+  rejects every `char::is_control` character, and the fuzz/replay assertions
+  state that contract.
 
 ## CI policy
 
