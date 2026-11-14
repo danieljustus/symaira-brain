@@ -760,6 +760,29 @@ and profile). Settings (⌘,) holds appearance, the CLI path and updates; ⌘1 t
 **SymBrainMobile** (iOS) is a read-only companion showing the state-core
 overview, tool registry, and setup guide.
 
+### iOS TestFlight
+
+The companion ships to internal TestFlight testers only (external testing
+and the App Review 4.2 assessment come later). `scripts/ios-testflight.sh`
+builds an unsigned check (`preflight`), a signed archive (`archive`), an App
+Store IPA (`export`) or uploads it (`upload`), with Xcode automatic signing
+through the App Store Connect API key. Build numbers are UTC timestamps, so
+local and CI uploads stay monotonic.
+
+```bash
+scripts/ios-testflight.sh preflight
+symvault run --env ASC_API_KEY=apple-developer/notary-api-key.password \
+  --env ASC_KEY_ID=apple-developer/notary-api-key-id.password \
+  --env ASC_ISSUER_ID=apple-developer/notary-api-issuer-id.password -- \
+  scripts/ios-testflight.sh upload
+```
+
+`symvault run` starts the script with a clean environment, so pass
+`IOS_BUILD_ROOT` or `BUILD_NUMBER` after `--` (for example
+`-- env IOS_BUILD_ROOT=/path scripts/ios-testflight.sh upload`). The manual
+**iOS TestFlight** workflow runs the same script with the `release`
+environment's key.
+
 ## License
 
 Apache License 2.0 — see [LICENSE](LICENSE).
