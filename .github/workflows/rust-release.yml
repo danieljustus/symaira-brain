@@ -1,6 +1,7 @@
-# Unpublished release candidate. Builds the three supported release archives
-# from the Rust CLI exactly like release.yml, verifies them against the release
-# archive contract and smoke-tests each one on its native platform. It never
+# Unpublished release candidate. Builds the six supported release archives
+# (symbrain and symbrowse on each of the three native targets) exactly like
+# release.yml, verifies them against the release archive contract and
+# smoke-tests each one on its native platform. It never
 # creates a tag, release or tap update and never signs; signing and publication
 # happen only in release.yml on a v* tag.
 
@@ -74,6 +75,11 @@ jobs:
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
+      # browse/ is its own Cargo workspace with its own pinned toolchain.
+      - name: Resolve pinned Rust toolchain (browse)
+        working-directory: browse
+        run: rustup show active-toolchain
+
       # cargo-auditable embeds the locked dependency list in the binary; the
       # bundle job's Syft SBOM reads it (a plain Rust binary has no components).
       - name: Install cargo-auditable
@@ -84,14 +90,27 @@ jobs:
           SYMBRAIN_VERSION: ${{ env.VERSION }}
         run: cargo auditable build --locked --release -p symbrain-cli
 
-      - name: Package archive
-        run: >-
-          python scripts/rust-release/package.py archive --version "$VERSION"
-          --os "${{ matrix.os }}" --arch "${{ matrix.arch }}"
-          --rust "target/release/symbrain$EXE" --out "$RUNNER_TEMP/dist"
+      - name: Build symbrowse
+        working-directory: browse
+        env:
+          SYMBROWSE_VERSION: ${{ env.VERSION }}
+        run: cargo auditable build --locked --release -p symbrowse-cli
 
-      - name: Smoke-test the extracted archive
-        run: python scripts/rust-release/smoke.py --archive-dir "$RUNNER_TEMP/dist" --version "$VERSION"
+      - name: Package archives
+        run: |
+          set -euo pipefail
+          python scripts/rust-release/package.py archive --version "$VERSION" \
+            --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" \
+            --rust "target/release/symbrain$EXE" --out "$RUNNER_TEMP/dist"
+          python scripts/rust-release/package.py archive --version "$VERSION" \
+            --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" --product symbrowse \
+            --rust "browse/target/release/symbrowse$EXE" --out "$RUNNER_TEMP/dist"
+
+      - name: Smoke-test the extracted archives
+        run: |
+          set -euo pipefail
+          python scripts/rust-release/smoke.py --archive-dir "$RUNNER_TEMP/dist" --version "$VERSION"
+          python scripts/rust-release/smoke.py --archive-dir "$RUNNER_TEMP/dist" --version "$VERSION" --product symbrowse
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -121,7 +140,7 @@ jobs:
       - name: Write checksums
         run: python3 scripts/rust-release/package.py checksums --dir "$RUNNER_TEMP/dist"
 
-      - name: Verify the archive contract for all three supported platforms
+      - name: Verify the archive contract for both products on all three supported platforms
         run: python3 scripts/rust-release/package.py verify --version "$VERSION" --dir "$RUNNER_TEMP/dist"
 
       - name: Render Homebrew formula (not published)
@@ -134,7 +153,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/sbom"
-          for archive in "$RUNNER_TEMP"/dist/symbrain_*; do
+          for archive in "$RUNNER_TEMP"/dist/symbrain_* "$RUNNER_TEMP"/dist/symbrowse_*; do
             name="$(basename "$archive")"
             syft "$archive" --output "cyclonedx-json=$RUNNER_TEMP/sbom/$name.sbom.json"
             python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["bomFormat"]=="CycloneDX" and d.get("components"), sys.argv[1]' "$RUNNER_TEMP/sbom/$name.sbom.json"

@@ -65,6 +65,18 @@ class Manifests(unittest.TestCase):
         self.assertNotIn("_darwin_amd64", formula)
         self.assertNotIn("_windows_", formula)
 
+    def test_symbrowse_checksum_lines_do_not_reach_the_symbrain_formula(self):
+        checksums, digests = self.candidate_checksums()
+        lines = checksums.read_text().splitlines()
+        for name in list(digests):
+            browse = name.replace("symbrain_", "symbrowse_", 1)
+            lines += [f"{hashlib.sha256(browse.encode()).hexdigest()}  {browse}", f"{'0' * 64}  {browse}.sbom.json"]
+        with_browse = self.tmp / "with-browse-checksums.txt"
+        with_browse.write_text("\n".join(lines) + "\n")
+        formula = self.render(VERSION, with_browse)
+        self.assertEqual(formula, self.render(VERSION, checksums))
+        self.assertNotIn("symbrowse", formula)
+
     @unittest.skipUnless(shutil.which("ruby"), "needs ruby")
     def test_formula_is_valid_ruby(self):
         checksums, _ = self.candidate_checksums()

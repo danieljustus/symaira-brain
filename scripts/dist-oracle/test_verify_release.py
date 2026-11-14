@@ -85,6 +85,30 @@ class ReleaseVerifierTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "cask has extra or missing release-download URLs"):
             verify_release.verify_tap_links(formula, extra_cask, manifest)
 
+    def test_archive_binary_name_follows_the_product(self) -> None:
+        cases = {
+            "symbrain_0.15.0_darwin_arm64.tar.gz": "symbrain",
+            "symbrowse_0.15.0_linux_amd64.tar.gz": "symbrowse",
+            "symbrain_0.11.0_windows_amd64.zip": "symbrain.exe",
+        }
+        for name, binary in cases.items():
+            with self.subTest(name=name):
+                self.assertEqual(verify_release.archive_binary_name(name), binary)
+        with self.assertRaisesRegex(SystemExit, "no known product"):
+            verify_release.archive_binary_name("symbrew_0.15.0_linux_amd64.tar.gz")
+
+    def test_symbrowse_archives_are_not_homebrew_formula_links(self) -> None:
+        manifest, formula, cask = self.tap_examples()
+        before = verify_release.verify_tap_links(formula, cask, manifest)
+        version = manifest["version"]
+        for goos, arch in (("darwin", "arm64"), ("linux", "amd64"), ("linux", "arm64")):
+            manifest["assets"].append({
+                "name": f"symbrowse_{version}_{goos}_{arch}.tar.gz",
+                "digest": "sha256:" + "b" * 64,
+                "size": 1,
+            })
+        self.assertEqual(verify_release.verify_tap_links(formula, cask, manifest), before)
+
 
 if __name__ == "__main__":
     unittest.main()

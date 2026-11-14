@@ -1,0 +1,64 @@
+name: iOS TestFlight
+
+# Manual lane for the iOS companion (com.symaira.brain.mobile, #409). It
+# archives with Xcode automatic signing through the App Store Connect API key
+# of the protected `release` environment and uploads the build for internal
+# TestFlight testers. The build number is a UTC timestamp, shared with local
+# uploads through scripts/ios-testflight.sh, so it always increases.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to build (tag, branch or SHA)'
+        required: false
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    name: Archive and upload to TestFlight
+    runs-on: macos-26
+    environment: release
+    timeout-minutes: 60
+    steps:
+      # `inputs.ref` comes only from a manual dispatch, which needs write
+      # access; it is passed to checkout, never interpolated into a shell.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Verify Xcode 26 or newer
+        run: |
+          set -euo pipefail
+          XCODE_VERSION="$(xcodebuild -version | sed -n '1p')"
+          echo "$XCODE_VERSION"
+          case "$XCODE_VERSION" in
+            Xcode\ 26.*|Xcode\ 27.*) ;;
+            *) echo "::error::Expected Xcode 26 or newer, got: $XCODE_VERSION"; exit 1 ;;
+          esac
+
+      - name: Install XcodeGen
+        run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
+
+      - name: Unsigned preflight build
+        env:
+          IOS_BUILD_ROOT: ${{ runner.temp }}/ios-testflight
+        run: scripts/ios-testflight.sh preflight
+
+      - name: Archive and upload
+        env:
+          IOS_BUILD_ROOT: ${{ runner.temp }}/ios-testflight
+          ASC_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+          ASC_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: scripts/ios-testflight.sh upload
