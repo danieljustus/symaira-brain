@@ -61,8 +61,9 @@ jobs:
           # production daemon against the real Firefox.
           {
             cargo test --locked -p symbrowse-engine-firefox --test native -- --nocapture
-            cargo test --locked -p symbrowse-daemon --test engine_native_corpus \
-              unavailable_engine_is_a_typed_error_without_substitution corpus_firefox -- --nocapture
+            # cargo accepts one positional filter; libtest takes several after `--`.
+            cargo test --locked -p symbrowse-daemon --test engine_native_corpus -- \
+              unavailable_engine_is_a_typed_error_without_substitution corpus_firefox --nocapture
           } 2>&1 | tee "$RUNNER_TEMP/browse-firefox-corpus.log"
           for case_id in ENG-010.lifecycle-version ENG-010.cookies ENG-010.response-capture \
               ENG-010.timeout ENG-010.cleanup ENG-009.selected-engine-version.firefox \
