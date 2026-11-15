@@ -11,6 +11,11 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "=0.4.13"
+h2 = "=0.4.19"
+http = "=1.5.0"
+httparse = "=1.10.1"
+tokio = { version = "=1.54.1", features = ["io-util", "macros", "rt", "time"] }
+tungstenite = { version = "=0.30.0", default-features = false, features = ["handshake"] }
 symbrowse-core = { path = "../crates/symbrowse-core", version = "=0.0.0" }
 symbrowse-daemon = { path = "../crates/symbrowse-daemon", version = "=0.0.0" }
 symbrowse-fetch = { path = "../crates/symbrowse-fetch", version = "=0.0.0" }
@@ -61,6 +66,27 @@ bench = false
 [[bin]]
 name = "http-body-decode"
 path = "fuzz_targets/http_body_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "httparse-response"
+path = "fuzz_targets/httparse_response.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "tungstenite-frames"
+path = "fuzz_targets/tungstenite_frames.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "h2-client"
+path = "fuzz_targets/h2_client.rs"
 test = false
 doc = false
 bench = false

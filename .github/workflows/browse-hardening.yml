@@ -1,0 +1,250 @@
+name: Browse hardening gates
+
+# RUST-015: runs the fuzz, dependency and unsafe gates documented in
+# browse/docs/rust-port/hardening.md. Already covered elsewhere and therefore not
+# repeated here: `cargo clippy -D warnings` + `cargo test --workspace` (ci.yml
+# `browse-native` on main/schedule, browse-daemon-native.yml on pull requests)
+# and the stable-Rust fuzz-seed replays (they run inside nextest below).
+# The heavy gates (Miri, cargo-geiger, libFuzzer smoke) stay off pull requests.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-hardening.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-hardening.yml'
+  schedule:
+    - cron: '17 6 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: never
+  # Dated nightly for Miri and cargo-fuzz; the evidence in hardening.md was
+  # recorded on this build.
+  NIGHTLY: nightly-2026-10-29
+
+defaults:
+  run:
+    working-directory: browse
+    shell: bash
+
+jobs:
+  # fmt, check, nextest (includes every fuzz-seed replay and the property
+  # tests), doc tests and the per-feature build matrix.
+  build-gates:
+    name: fmt, check, nextest, doc tests, each-feature
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Cache cargo tools and registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
+            ~/.cargo/bin/cargo-nextest
+            ~/.cargo/bin/cargo-hack
+          key: browse-hardening-build-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('browse/rust-toolchain.toml') }}-${{ hashFiles('browse/Cargo.lock') }}-nextest-0.9.143-hack-0.6.45
+
+      - name: Install pinned cargo-nextest and cargo-hack
+        run: |
+          set -euo pipefail
+          [ "$(cargo nextest --version 2>/dev/null | head -n 1 | awk '{print $2}')" = 0.9.143 ] \
+            || cargo install cargo-nextest --version 0.9.143 --locked
+          [ "$(cargo hack --version 2>/dev/null | awk '{print $2}')" = 0.6.45 ] \
+            || cargo install cargo-hack --version 0.6.45 --locked
+
+      - name: Format and check
+        run: |
+          set -euo pipefail
+          cargo fmt --all --check
+          cargo check --workspace --all-targets --all-features --locked
+
+      - name: nextest (unit, integration, fuzz-seed replays, properties)
+        env:
+          # Unix-socket tests need a short path (sun_path limit).
+          TMPDIR: ${{ runner.temp }}
+        run: cargo nextest run --workspace --all-features --locked
+
+      - name: Doc tests
+        run: cargo test --workspace --doc --all-features --locked
+
+      # cargo-hack strips dev-dependencies from the manifests, which cannot be
+      # combined with --locked; the follow-up diff proves the lockfile is intact.
+      - name: Each feature builds without dev dependencies
+        run: |
+          set -euo pipefail
+          cargo hack check --workspace --each-feature --no-dev-deps
+          git diff --exit-code -- Cargo.lock Cargo.toml 'crates/*/Cargo.toml'
+
+  # Advisories, licenses, sources, the corpus digest manifest and the owned
+  # unsafe inventory. Cheap and deterministic, so it also gates pull requests.
+  supply-chain:
+    name: audit, deny, inventory, seed digests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Cache cargo tools and registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
+            ~/.cargo/bin/cargo-audit
+            ~/.cargo/bin/cargo-deny
+          key: browse-hardening-supply-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('browse/rust-toolchain.toml') }}-audit-0.22.2-deny-0.20.2
+
+      - name: Install pinned cargo-audit and cargo-deny
+        run: |
+          set -euo pipefail
+          [ "$(cargo audit --version 2>/dev/null)" = "cargo-audit-audit 0.22.2" ] \
+            || cargo install cargo-audit --version 0.22.2 --locked
+          [ "$(cargo deny --version 2>/dev/null)" = "cargo-deny 0.20.2" ] \
+            || cargo install cargo-deny --version 0.20.2 --locked
+
+      - name: cargo audit (workspace and fuzz lockfile)
+        run: |
+          set -euo pipefail
+          cargo audit
+          cargo audit --file fuzz/Cargo.lock
+
+      - name: cargo deny (workspace and fuzz manifest)
+        run: |
+          set -euo pipefail
+          cargo deny check
+          # cargo-deny does not discover deny.toml for --manifest-path.
+          cargo deny --manifest-path fuzz/Cargo.toml --config ../deny.toml check
+
+      - name: Owned unsafe inventory and fuzz seed digests
+        run: |
+          set -euo pipefail
+          python3 scripts/rust_hardening_inventory.py --check
+          python3 scripts/fuzz_corpus_hashes.py --check
+
+  # Scoped Miri over the pure property suite and the daemon frame decoder.
+  miri:
+    name: scoped Miri
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install dated nightly with Miri
+        run: rustup toolchain install "$NIGHTLY" --profile minimal --component miri,rust-src
+
+      - name: Cache cargo registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: browse-hardening-miri-${{ runner.os }}-${{ runner.arch }}-${{ env.NIGHTLY }}-${{ hashFiles('browse/Cargo.lock') }}
+
+      - name: scripts/rust_miri.sh
+        env:
+          MIRI_TOOLCHAIN: ${{ env.NIGHTLY }}
+        run: scripts/rust_miri.sh
+
+  # cargo-geiger over every workspace crate; fails on owned unsafe. The JSON
+  # reports are uploaded for the per-category review in hardening.md.
+  geiger:
+    name: cargo-geiger
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Cache cargo tools and registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
+            ~/.cargo/bin/cargo-geiger
+          key: browse-hardening-geiger-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('browse/rust-toolchain.toml') }}-${{ hashFiles('browse/Cargo.lock') }}-geiger-0.13.0
+
+      - name: Install pinned cargo-geiger
+        run: |
+          set -euo pipefail
+          [ "$(cargo geiger --version 2>/dev/null | awk '{print $NF}')" = 0.13.0 ] \
+            || cargo install cargo-geiger --version 0.13.0 --locked
+
+      - name: scripts/rust_geiger.sh
+        run: scripts/rust_geiger.sh
+
+      - name: Upload geiger reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browse-geiger-reports
+          path: browse/target/hardening/geiger/*.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  # Bounded libFuzzer run (4096 executions per target) over scratch copies of
+  # the tracked seed corpora; the script re-verifies the seed digests after.
+  fuzz-smoke:
+    name: libFuzzer smoke
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install dated nightly
+        run: rustup toolchain install "$NIGHTLY" --profile minimal
+
+      - name: Cache cargo tools and registry
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
+            ~/.cargo/bin/cargo-fuzz
+          key: browse-hardening-fuzz-${{ runner.os }}-${{ runner.arch }}-${{ env.NIGHTLY }}-${{ hashFiles('browse/fuzz/Cargo.lock') }}-fuzz-0.13.2
+
+      - name: Install pinned cargo-fuzz
+        run: |
+          set -euo pipefail
+          [ "$(cargo fuzz --version 2>/dev/null | awk '{print $2}')" = 0.13.2 ] \
+            || cargo install cargo-fuzz --version 0.13.2 --locked
+
+      - name: scripts/fuzz_smoke.sh
+        env:
+          FUZZ_RUNS: '4096'
+          FUZZ_TOOLCHAIN: ${{ env.NIGHTLY }}
+        run: scripts/fuzz_smoke.sh

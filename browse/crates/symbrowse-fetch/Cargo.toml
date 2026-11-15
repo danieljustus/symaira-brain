@@ -34,4 +34,6 @@ url.workspace = true
 ruzstd.workspace = true
 
 [dev-dependencies]
+h2.workspace = true
+httparse.workspace = true
 tokio = { workspace = true, features = ["test-util"] }

@@ -18,6 +18,8 @@ fs2 = "=0.4.3"
 futures = "=0.3.34"
 futures-util = { version = "=0.3.34", features = ["sink"] }
 getrandom = "=0.4.3"
+h2 = "=0.4.19"
+httparse = "=1.10.1"
 httpdate = "=1.0.3"
 http = "=1.5.0"
 hyper = { version = "=1.12.0", features = ["client", "http1"] }

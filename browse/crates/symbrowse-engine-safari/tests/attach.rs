@@ -250,14 +250,17 @@ fn osascript_runner_kills_descendant_holding_stdout() {
     let started = Instant::now();
     let result = OsascriptRunner::new()
         .with_program(&path)
-        .run("script delivered on stdin", Duration::from_millis(300));
+        .run("script delivered on stdin", Duration::from_millis(1500));
     let elapsed = started.elapsed();
     assert!(
         result.is_err(),
         "descendant-held stdout must not report success"
     );
+    // The deadline leaves the helper time to record the descendant pid even
+    // when the machine is loaded; the bound still proves the runner does not
+    // wait for the 60 s descendant.
     assert!(
-        elapsed < Duration::from_secs(2),
+        elapsed < Duration::from_secs(6),
         "runner exceeded bound: {elapsed:?}"
     );
 

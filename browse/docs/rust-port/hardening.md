@@ -25,10 +25,13 @@ name, corpus directory under `fuzz/corpus/` uses underscores):
 | `fetch-text` | robots.txt, Wayback CDX JSON, Wayback URLs, `Retry-After` |
 | `http-body-decode` | gzip/brotli/zstd content decoding (output stays within the limit) and charset transcoding |
 | `dom-input` | HTML5 parse, cleanup, render, ranking and bounded selectors |
+| `httparse-response` | HTTP/1 response heads, header blocks and chunk-size lines through the pinned `httparse` (what hyper/reqwest parse from remote servers) |
+| `h2-client` | server-side bytes of an in-memory HTTP/2 connection through the pinned `h2` client (frame decoder, HPACK, flow control); the exchange must finish within a deadline |
+| `tungstenite-frames` | WebSocket frames read by an established client socket and a client opening-handshake response through the pinned `tungstenite` (the version the Chrome, Firefox and Safari engines link), with message/frame caps |
 
 Run the bounded smoke with `scripts/fuzz_smoke.sh`. It copies each tracked seed
 corpus to a temporary directory, runs the configured number of executions
-(`FUZZ_RUNS`, default 64, maximum 4096), requires libFuzzer to report a
+(`FUZZ_RUNS`, default 64, maximum 4096; `FUZZ_TOOLCHAIN` selects the nightly, default `nightly`), requires libFuzzer to report a
 completed bounded run for every target, and checks the tracked seed digests
 before and after. Do not pass `fuzz/corpus/*` directly to libFuzzer: libFuzzer
 may write new interesting inputs there.
@@ -38,7 +41,8 @@ Update the manifest (`--write`) only when deliberately changing a seed, then
 review the seed and target together.
 
 Every target also has a stable-Rust replay (`crates/*/tests/fuzz_seed_replay.rs`,
-`crates/symbrowse-fetch/tests/dom_input_smoke.rs`) that runs the seeds, all of
+`crates/symbrowse-fetch/tests/dom_input_smoke.rs`, and
+`crates/symbrowse-fetch/tests/parser_dependency_replay.rs` for `httparse-response` and `h2-client`) that runs the seeds, all of
 their prefixes and a deterministic byte-mutation sweep in the normal test run.
 Keep each target body and its replay in sync.
 
@@ -125,8 +129,8 @@ protocol/serialization crates (`hyper`, `h2`, `httparse`, `tungstenite`,
 widely used, advisory-clean crates, not a line-level audit. The dependencies
 that consume attacker-controlled bytes (`html5ever`, `serde_json`, `brotli`,
 `flate2`, `ruzstd`, `encoding_rs`, `url`, `idna`, `yaml-rust2`) are reached by
-the fuzz targets above; `h2`, `httparse` and `tungstenite` are reached only
-through live HTTP/WebSocket traffic and are not fuzzed here. cargo-geiger could
+the fuzz targets above; `h2`, `httparse` and `tungstenite` are fuzzed directly
+since 2026-11-15 (see below). cargo-geiger could
 not parse `signal-hook-registry` 1.4.8 (`syn` error), so its count is missing
 from the report.
 
@@ -160,11 +164,34 @@ from the report.
 
 ## CI policy
 
-`rust-ci.yml` and `rust-hardening.yml`, named by the finalization plan, do not
-exist in this tree; only the native browse workflows and the root `ci.yml` jobs
-do. Wiring the commands above into a `main`/schedule workflow is still open.
-Until then this document is the only record of the hardening run; heavy tooling
-(Miri, geiger, fuzz smoke) should stay out of required PR checks.
+`.github/workflows/browse-hardening.yml` (added 2026-11-15; the plan's
+`rust-ci.yml`/`rust-hardening.yml` names were never created) runs the gates.
+Triggers: pull requests and pushes to `main` touching `browse/**` or the
+workflow, a weekly schedule (Mondays 06:17 UTC) and manual dispatch. Tools are
+installed with `cargo install --locked --version` at the versions listed under
+Evidence and cached; Miri and the fuzz smoke use the dated toolchain
+`nightly-2026-10-29`.
+
+| Job | Gates | Runs on |
+| --- | --- | --- |
+| `build-gates` | `cargo fmt --check`, `cargo check`, `cargo nextest run` (includes every fuzz-seed replay and the property tests), doc tests, `cargo hack check --each-feature --no-dev-deps` | PR, main, schedule, dispatch |
+| `supply-chain` | `cargo audit` (+ `fuzz/Cargo.lock`), `cargo deny check` (+ fuzz manifest with `--config ../deny.toml`), `rust_hardening_inventory.py --check`, `fuzz_corpus_hashes.py --check` | PR, main, schedule, dispatch |
+| `miri` | `scripts/rust_miri.sh` | main, schedule, dispatch |
+| `geiger` | `scripts/rust_geiger.sh` (fails on owned unsafe; uploads the JSON reports) | main, schedule, dispatch |
+| `fuzz-smoke` | `scripts/fuzz_smoke.sh` with `FUZZ_RUNS=4096` | main, schedule, dispatch |
+
+Not repeated there because they already run elsewhere: `cargo clippy
+--workspace --all-targets --all-features -- -D warnings` and `cargo test
+--workspace` (`ci.yml` job `browse-native` on main/schedule/dispatch;
+`browse-daemon-native.yml` runs the clippy gate on pull requests and the daemon
+tests on ubuntu-24.04, ubuntu-24.04-arm and macos-15). Everything runs on
+`ubuntu-latest`; no gate here is macOS-specific (the platform-specific
+key-store and daemon behavior is covered by `browse-daemon-native.yml`).
+Miri, geiger and the fuzz smoke stay out of pull requests because of their
+cost; their inputs (seeds, replays, lockfiles) are still checked on every PR by
+`build-gates` and `supply-chain`. The workflow is linted with `actionlint`; it
+has not run on GitHub yet (it lands with this change), so the first hosted run
+is the proof for the Linux-specific install steps.
 
 ## Environment notes
 
@@ -229,6 +256,132 @@ Not covered here: the Safari native gate (Remote Automation on the user's real
 Safari, a maintainer step) and therefore RUST-013; Chrome/Firefox native
 receipts are as recorded in the ledger. Miri was not rerun after the
 fetch-only change because no Miri target depends on it.
+
+## Direct fuzzing of h2, httparse and tungstenite (2026-11-15)
+
+Decision: add thin direct targets (`h2-client`, `httparse-response`,
+`tungstenite-frames`) instead of recording an accepted boundary. The three
+crates are upstream-fuzzed, but the exact pinned versions parse bytes chosen by
+remote parties through paths our existing targets do not reach, and the targets
+are small enough to fit the existing seed/digest/replay layout.
+
+Upstream fuzzing (checked 2026-11-15, not a substitute for the above):
+
+| Crate | Upstream fuzzing |
+| --- | --- |
+| `httparse` | OSS-Fuzz project [`httparse`](https://github.com/google/oss-fuzz/tree/master/projects/httparse) (libFuzzer, ASan); in-repo targets `parse_chunk_size`, `parse_headers`, `parse_request`, `parse_response` and the `*_multspaces` variants ([fuzz/fuzz_targets](https://github.com/seanmonstar/httparse/tree/master/fuzz/fuzz_targets)) |
+| `h2` | OSS-Fuzz project [`hyperium`](https://github.com/google/oss-fuzz/blob/master/projects/hyperium/build.sh) builds `fuzz_client`, `fuzz_e2e` and `fuzz_hpack` ([fuzz/fuzz_targets](https://github.com/hyperium/h2/tree/master/fuzz/fuzz_targets)) |
+| `tungstenite` | OSS-Fuzz project [`tungstenite-rs`](https://github.com/google/oss-fuzz/tree/master/projects/tungstenite-rs); in-repo targets `parse_frame_header`, `read_message_client`, `read_message_server` ([fuzz/fuzz_targets](https://github.com/snapview/tungstenite-rs/tree/master/fuzz/fuzz_targets)) |
+
+Where our code feeds attacker-controlled bytes into them (`cargo tree -i`):
+
+- `httparse` and `h2` are reached through `hyper`/`reqwest` (`symbrowse-fetch`
+  uses `hyper` HTTP/1 and `reqwest` with `http2`). Every response head, header
+  block, chunk-size line and HTTP/2 frame is chosen by the remote server. No
+  existing target reaches them: `http-body-decode` only sees the already
+  de-framed body.
+- `tungstenite` 0.30.0 (through `async-tungstenite` 0.35.0) carries the CDP,
+  WebDriver-BiDi and Safari-driver sockets of the three engine crates; frame
+  content is page- and browser-influenced. `chromiumoxide` additionally links
+  `tungstenite` 0.28.0 for its own CDP connection; the direct target covers
+  0.30.0 only, and 0.28.0 is covered by the upstream fuzzing above.
+
+Targets (seeds in `fuzz/corpus/{httparse_response,h2_client,tungstenite_frames}`,
+digests in `fuzz/corpus/hashes.json`, replays in
+`crates/symbrowse-fetch/tests/parser_dependency_replay.rs` and
+`crates/symbrowse-engine-chrome/tests/fuzz_seed_replay.rs`):
+
+- `httparse-response`: `Response::parse`, `Request::parse`, `parse_headers`,
+  `parse_chunk_size`; asserts totality, determinism and that no parser reports
+  consuming more bytes than given.
+- `h2-client`: the input is the complete server side of an in-memory duplex
+  connection (closed after the last byte); one request is sent, the body is
+  drained and trailers read; a 10 s deadline turns a hang into a failure.
+- `tungstenite-frames`: first byte selects an established client socket
+  reading frames (message/frame size capped at 64 KiB, at most 64 reads) or the
+  client opening handshake reading a server response.
+
+Accepted limits: the targets exercise the crates, not the whole
+reqwest/hyper stack (connection reuse, redirects, TLS, HTTP/2 negotiation), which
+stays covered by the local-server integration tests (`tests/http.rs`,
+`archive_http.rs`, `recovery_http.rs`). The h2 target drives a client connection
+only; server-side `h2` is not used. Handshake success cannot be reached
+(the `Sec-WebSocket-Accept` value depends on a random key), so the handshake
+path fuzzes response parsing and rejection, not an established session.
+
+## Accepted RUST-015 boundary: transitive unsafe (2026-11-15)
+
+Decision (product decision, recorded here as the RUST-015 acceptance level):
+unsafe code in third-party dependencies is accepted **per category** — a
+per-crate category review (above, "Transitive unsafe review") plus the
+continuously enforced gates `cargo audit`, `cargo deny` (advisories, licenses,
+sources, no ignores) and `cargo geiger` — and **not line by line**. Line-by-line
+review of third-party `unsafe` is out of scope for RUST-015 and the port. The
+item's stop rule only forbids *owned* unsafe, untriaged advisories/licenses and
+unfuzzed untrusted parsers, so this boundary does not weaken it. What keeps the
+acceptance honest: owned unsafe is 0 and fails CI (`rust_geiger.sh`,
+`rust_hardening_inventory.py --check`, `deny(unsafe_code)` in every crate root);
+any new third-party crate with unsafe, any new advisory and any license/source
+change surfaces in `cargo deny`/`audit` and in the geiger package count, and
+must be triaged here before it lands; dependencies that read attacker bytes are
+fuzzed directly or through our targets (previous section).
+
+## Evidence — 2026-11-15 (RUST-015 close-out)
+
+Base `509deacd1`, macOS arm64, rustc 1.98.0 (pinned); nightly
+`1.101.0-nightly (92b5b8c87 2026-10-29)` for fuzz and Miri. Tools: cargo-nextest
+0.9.143, cargo-hack 0.6.45, cargo-audit 0.22.2 (1509 advisories), cargo-deny
+0.20.2, cargo-geiger 0.13.0, cargo-fuzz 0.13.2. No Safari was launched or
+automated. Every RUST-015 acceptance command was run from `browse/` through
+`dev-external` with a short `TMPDIR`:
+
+| Command | Result |
+| --- | --- |
+| `cargo fmt --all --check` | clean |
+| `cargo check --workspace --all-targets --all-features --locked` | clean |
+| `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` | clean |
+| `cargo nextest run --workspace --all-features --locked` | 470 passed, 0 failed, 3 skipped (the `#[ignore]` child fixtures); includes the three new replays |
+| `cargo test --workspace --locked` | 474 passed, 0 failed, 3 ignored |
+| `cargo test --workspace --doc --all-features --locked` | clean |
+| `cargo hack check --workspace --each-feature --no-dev-deps` | 10/10 packages, `Cargo.lock` unchanged afterwards (see the `--locked` note below) |
+| `scripts/rust_miri.sh` | `hardening_properties` 5/5 (36 s), daemon `protocol::` 3/3 (368 s) |
+| `cargo audit` / `--file fuzz/Cargo.lock` | no vulnerabilities (307 / 296 crates) |
+| `cargo deny check` / fuzz manifest with `--config ../deny.toml` | advisories, bans, licenses, sources ok; duplicate-version warnings only (`bans.multiple-versions = "warn"`), no ignores |
+| `scripts/rust_geiger.sh` | 239 packages scanned; owned unsafe 0; 145 third-party packages with unsafe (unchanged from 2026-11-14, same category triage) |
+| `scripts/rust_hardening_inventory.py --write` then `--check` | 295 production packages, 0 owned unsafe, 10/10 crates with an `unsafe_code` policy; `security/rust-hardening-inventory.json` unchanged (the new `h2`/`httparse` edges are dev-dependencies of `symbrowse-fetch`) |
+| `scripts/fuzz_smoke.sh` (`FUZZ_RUNS=4096`) | all 10 targets completed 4096 runs; seed digests unchanged before and after |
+| `scripts/fuzz_corpus_hashes.py --check` | 10 targets, 125 seeds, ok |
+| Longer fuzz (not a gate), 60 s each | `h2-client` 1.15M, `httparse-response` 5.56M, `tungstenite-frames` 0.99M executions, no crash |
+| `actionlint .github/workflows/browse-hardening.yml` | clean |
+| `python3 docs/rust-port/validate.py` | ok |
+
+Notes:
+
+- `cargo hack --no-dev-deps` cannot be combined with `--locked` (it rewrites the
+  manifests, and dropping `symbrowse-fetch`'s new `h2`/`httparse`
+  dev-dependencies changes the lock graph). The workflow therefore runs it
+  without `--locked` and asserts `git diff --exit-code` on the lock and
+  manifests afterwards.
+- Test flakes under host load (load average about 20 from parallel workers),
+  neither caused by this change: `symbrowse-engine-safari`
+  `osascript_runner_kills_descendant_holding_stdout` used a 300 ms runner
+  deadline and failed when the fake `osascript` helper had not yet recorded the
+  descendant pid (fake script only, no Safari). The deadline is now 1500 ms with
+  a 6 s elapsed bound, and the test passed 8/8 reruns. `symbrowse-mcp`
+  `proxy::tests::*` (daemon-frame read `WouldBlock`) and one nextest run of
+  `incompatible_owner_requires_stop_ack_but_same_owner_remains_restartable`
+  failed once each in a loaded run and passed in all reruns (3/3 isolated, then
+  the complete nextest and `cargo test --workspace` runs above).
+- The new workflow has only been linted (`actionlint`), not run on GitHub. The
+  Linux install steps (`cargo install --locked` of the pinned tools, the dated
+  nightly) are covered by the first hosted run; the tool version probes were
+  checked against the local binaries' `--version` output formats.
+
+Open points closed: CI workflow (`browse-hardening.yml`), direct fuzzing of
+`h2`/`httparse`/`tungstenite`, and the transitive-unsafe acceptance boundary
+(sections above). Stop rule: owned unsafe 0; no untriaged advisory or license
+violation; every untrusted parser in the production dependency graph that reads
+attacker-controlled bytes has a fuzz target and replay.
 
 ## Evidence — 2026-11-15 (DMN-006, SEC-007)
 
