@@ -379,7 +379,10 @@ pub fn show_fields(result: &Result) -> BTreeMap<String, Field> {
         ("autosave_key", config.autosave_key.clone()),
         ("cache_dir", config.cache_dir.clone()),
         ("cache_ttl_hours", config.cache_ttl_hours.to_string()),
-        ("cdp_endpoint", config.cdp_endpoint.clone()),
+        (
+            "cdp_endpoint",
+            crate::secret_text::scrub(&config.cdp_endpoint),
+        ),
         ("config_dir", config.config_dir.clone()),
         ("daemon_log", config.daemon_log.clone()),
         ("engine", config.engine.clone()),
@@ -474,10 +477,31 @@ fn apply_file(
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
         Err(error) => return Err(ConfigError(error.to_string())),
     };
-    let patch: PartialConfig =
-        toml::from_str(&content).map_err(|error| ConfigError(error.to_string()))?;
+    let patch: PartialConfig = toml::from_str(&content)
+        .map_err(|error| ConfigError(toml_error_summary(&content, &error)))?;
     apply_partial(config, sources, patch, source);
     Ok(())
+}
+
+/// One-line TOML diagnostic. The `toml` crate's own rendering quotes the
+/// offending source lines, which can hold credentials (`password = "..."`), and
+/// its type errors echo the rejected value; only the position and the error
+/// class are kept.
+fn toml_error_summary(content: &str, error: &toml::de::Error) -> String {
+    let mut message = error.message().lines().next().unwrap_or("").to_owned();
+    if let Some(start) = message.find('"') {
+        message.truncate(start);
+        message.push_str("<value hidden>");
+    }
+    match error.span() {
+        Some(span) => {
+            let before = &content[..span.start.min(content.len())];
+            let line = before.matches('\n').count() + 1;
+            let column = before.rsplit('\n').next().map_or(0, |l| l.chars().count()) + 1;
+            format!("TOML parse error at line {line}, column {column}: {message}")
+        }
+        None => format!("TOML parse error: {message}"),
+    }
 }
 
 fn apply_partial(

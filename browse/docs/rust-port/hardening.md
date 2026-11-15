@@ -219,3 +219,57 @@ Not covered here: the Safari native gate (Remote Automation on the user's real
 Safari, a maintainer step) and therefore RUST-013; Chrome/Firefox native
 receipts are as recorded in the ledger. Miri was not rerun after the
 fetch-only change because no Miri target depends on it.
+
+## Evidence — 2026-11-15 (DMN-006, SEC-007)
+
+macOS arm64, rustc 1.98.0, base `e1df254b9`. No Safari was launched or
+automated; the daemon runs use the static engine only.
+
+| Row | Command | Result |
+| --- | --- | --- |
+| DMN-006 | `cargo test -p symbrowse-daemon --locked --test deadlines` | 12 passed, 0 failed |
+| SEC-007 | `cargo test -p symbrowse-cli --locked --test secret_redaction` | 2 passed (15-secret corpus, 16 process runs, scanner self-check) |
+| SEC-007 | `cargo test -p symbrowse-core --locked --lib secret_text` | 2 passed |
+| both | `cargo fmt --all --check`, `cargo clippy --workspace --all-targets --all-features -- -D warnings` | clean |
+| both | `cargo test --workspace --locked` | 452 passed, 0 failed, 3 ignored child fixtures |
+| ledger | `python3 docs/rust-port/validate.py` | ok: 88 contracts, 17 work items |
+
+Both rows are `parity` for darwin-arm64 and linux-amd64/arm64. The tests use
+only std Unix sockets, the built binary and temp dirs; `ci.yml` `browse-native`
+(ubuntu-latest) runs `cargo test --workspace` and `browse-daemon-native` runs
+the daemon tests on ubuntu-24.04, ubuntu-24.04-arm and macos-15. Linux runs
+were not observed locally.
+
+**DMN-006 oracle.** The Go daemon is gone, so the contract is the Go source at
+`57c26c76e` (`server.go` `serveConn`/`handleLine`, `client.go` `requestOnce`,
+`TestOperationTimeoutKeepsConnectionUsable`,
+`TestClientReadTimeoutOperationTimeout`) plus the sealed capture
+`tests/fixtures/daemon_oracle/go_timeout.json`. Pinned behavior: the read
+deadline is re-armed per frame and covers the whole frame (expiry closes the
+connection silently); the operation deadline answers `operation_timeout`,
+keeps the connection usable and never waits for the handler; a vanished client
+is noticed only when the response write fails, and is bounded by the operation
+deadline (40 abandoned operations exceed the 32 workers and the pool
+recovers); stopping the server cancels cooperative handlers and does not wait
+for deaf ones. Finding fixed: the Rust server had only the per-read socket
+timeout, so a client trickling one byte per interval held a worker
+indefinitely; the frame read now has Go's absolute deadline
+(`server/connection.rs`).
+
+**SEC-007 findings, all fixed at the source.** The first corpus run leaked in
+six places: the action journal wrote URL userinfo passwords and `token=` /
+`api_key=` query values; `config show` printed the CDP endpoint password;
+TOML parse errors quoted the offending source lines (including secret lines
+next to the error) and rejected values; CLI errors echoed argv
+(`unknown command "password=..."`, URLs with passwords); MCP
+`Unknown tool`/`Method not found` echoed the name; `fetch_batch` failed items
+echoed the target URL. `symbrowse_core::secret_text::scrub` (URL userinfo
+password plus secret-named `name=value` pairs only) now guards the journal,
+`config show`, CLI stderr and the stdout of failed runs. The corpus test fails
+on the unfixed tree.
+
+Accepted limits: a successful result that echoes the URL the caller itself
+supplied (`read`/`open` `final_url`, frontmatter `url`) is data and unchanged;
+a secret pasted as a plain value into an unrelated flag (no `name=` shape, no
+URL userinfo) cannot be recognised and is not covered; the browser engines'
+own profile files were out of scope (static engine only).

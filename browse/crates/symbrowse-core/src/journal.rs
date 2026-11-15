@@ -118,6 +118,16 @@ impl Redactor {
         })
     }
 }
+/// Scrubs credential-shaped text (URL passwords, `token=` pairs) in every
+/// string of a journaled argument tree.
+fn scrub_strings(value: &mut Value) {
+    match value {
+        Value::String(text) => *text = crate::secret_text::scrub(text),
+        Value::Array(items) => items.iter_mut().for_each(scrub_strings),
+        Value::Object(items) => items.values_mut().for_each(scrub_strings),
+        _ => {}
+    }
+}
 fn replace_values(value: &mut Value, values: &[String]) {
     match value {
         Value::String(text) => {
@@ -192,7 +202,12 @@ impl Store {
         }
         if let Some(args) = entry.args.as_mut() {
             *args = self.redactor.redact(args);
+            scrub_strings(args);
         }
+        // URLs are journaled verbatim by the callers; their userinfo password
+        // and secret query values must not reach the file.
+        entry.url_before = crate::secret_text::scrub(&entry.url_before);
+        entry.url_after = crate::secret_text::scrub(&entry.url_after);
         entry.reason = self.redactor.redact_text(std::mem::take(&mut entry.reason));
         if !entry.result.is_empty() && !entry.result.starts_with("error") {
             entry.result = "ok".to_owned();

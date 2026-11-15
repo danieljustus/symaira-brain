@@ -654,8 +654,12 @@ impl DispatchRuntime {
                 Ok((None, warnings)) => {
                     result.push(json!({"url":url,"ok":true,"warnings":warnings}))
                 }
-                Err(error) => result
-                    .push(json!({"url":url,"ok":false,"code":error.code,"error":error.message})),
+                Err(error) => result.push(json!({
+                    "url": symbrowse_core::secret_text::scrub(url),
+                    "ok": false,
+                    "code": error.code,
+                    "error": error.message
+                })),
             }
         }
         Ok((Some(Value::Array(result)), Vec::new()))
