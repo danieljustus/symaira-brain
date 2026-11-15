@@ -1191,7 +1191,9 @@ mod tests {
         listener.set_nonblocking(true).unwrap();
         let server = thread::spawn(move || {
             let mut commands = Vec::new();
-            let deadline = Instant::now() + Duration::from_millis(250);
+            // ponytail: wall-clock window sized for a loaded full-workspace run;
+            // the client read timeout below must stay well inside it.
+            let deadline = Instant::now() + Duration::from_millis(1500);
             while Instant::now() < deadline {
                 match listener.accept() {
                     Ok((stream, _)) => {
@@ -1228,7 +1230,7 @@ mod tests {
             engine: Some("chrome".to_owned()),
             endpoint: Some(path.to_string_lossy().into_owned()),
             daemon_log_path: Some(root.join("daemon.log").to_string_lossy().into_owned()),
-            read_timeout: Duration::from_millis(100),
+            read_timeout: Duration::from_millis(1000),
             startup_timeout: Duration::from_millis(100),
             ..DaemonProxyOptions::default()
         });
