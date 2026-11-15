@@ -1,0 +1,685 @@
+{
+  "schema_version": 1,
+  "report_version": "perf-2026-11-15",
+  "issue": "danieljustus/symaira-brain#780",
+  "work_item": "RUST-016",
+  "captured_at": "2026-11-15 CET: session 1 15:49-16:17, session 2 16:19-16:28, run.py fetch x3 16:28-16:29",
+  "source_revision": "509deacd1d56e64d67391da32e90ac7fd38776c2 (worktree agent/gcc-20261115/perf, clean at build time)",
+  "host": {
+    "os": "macOS 27.2.1 (26B131)",
+    "kernel": "Darwin 27.2.0",
+    "cpu": "Apple M4 Pro",
+    "logical_cpus": 12,
+    "memory_bytes": 25769803776,
+    "python": "3.14.2",
+    "contention": "Shared host: two other workers ran cargo builds/tests throughout. 1-minute load average was 7.6-26 during measured rounds (never idle) and 40-160 during the 17-minute release build. Per-round load is in the verdict files; a /bin/echo control through the identical spawn path moved 2.6-13.2 ms median between rounds of session 2, so absolute latencies are contention-dominated."
+  },
+  "toolchain": {
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+    "build": "cargo build --release --locked -p symbrowse-cli (browse/Cargo.toml profile.release: codegen-units=1, lto=thin, panic=abort, strip=true); build time 17m20s under load"
+  },
+  "binary": {
+    "size_bytes": 10430256,
+    "sha256": "f16376bbfee9288b434b0dfc723b4d8ab69c21eac3dfd6340ec17d46319c380e",
+    "format": "Mach-O 64-bit arm64, stripped (strip=true), ad-hoc signed by the linker only; not Developer-ID signed or notarized",
+    "version_payload": {
+      "tool": "symbrowse",
+      "version": "dev",
+      "schema_version": 8
+    }
+  },
+  "go_baseline": {
+    "source": "docs/rust-port/baseline.json (captured 2026-09-06, Apple M4 Pro, macOS 27.0; oracle 652453d1 / v0.8.0)",
+    "binary_size_bytes_v0_8_0_darwin_arm64": 18330466,
+    "binary_size_bytes_portbench": 18264882,
+    "note": "Go was removed in #1003 and was NOT run. Only the frozen numbers are used. The Go portbench tool source is not in the repository; its workload argv (version --json, --help, config show --json, mcp initialize+tools/list) is reconstructed from testdata/port/bootstrap/cases.json and port/bench/run.py, and its timing harness (spawn overhead) is unknown, so ratios carry a harness-bias caveat."
+  },
+  "method": {
+    "tool": "browse/port/bench/perf_evidence.py (new) and port/bench/run.py (unmodified, fetch workload)",
+    "warmup_runs": 5,
+    "runs_per_workload": 30,
+    "rounds_per_session": 8,
+    "sessions": 2,
+    "p95": "nearest-rank sorted[ceil(0.95*n)-1]",
+    "rss": "wait4 ru_maxrss of the measured child only (run.py's RUSAGE_CHILDREN delta is not used for RSS)",
+    "steady_state": "one long-lived mcp process (ping x100, tools/call fetch_batch x100, daemon auto-spawned by mcp) and one static daemon (daemon.ping x100, fetch.url x100) per round; RSS/threads/fds via ps/lsof before/after",
+    "network": "loopback fixture only (127.0.0.1); no public network, no Chrome/Safari/Firefox launched",
+    "round_selection": "A round was taken only when 1-minute load < 15; session 1 and 2 are both reported in full, nothing dropped. Gate aggregation is the median across rounds of each round's p95 (fixed before the numbers were read); best/worst round and the count of rounds within the limit are reported next to it.",
+    "isolation": "fresh HOME/XDG/TMPDIR per round, SYMBROWSE_CHECK_UPDATES=0, SYMBROWSE_SYMGUARD=off, SYMBROWSE_ALLOW_PRIVATE=true"
+  },
+  "perf_001_cli_startup_rss": {
+    "limits": "Rust p95 <= 110% Go p95; median peak RSS <= 80% Go median RSS (RSS is claimed)",
+    "session1": {
+      "version-json": {
+        "go_p95_ns": 9015375,
+        "p95_limit_ns": 9916912,
+        "rust_p95_ns_per_round": [
+          10429125,
+          16964083,
+          12202833,
+          32641709,
+          17017750,
+          11333042,
+          7962542,
+          109357000
+        ],
+        "rust_median_ns_per_round": [
+          8805937,
+          8963770,
+          8417333,
+          10031666,
+          13145479,
+          8299375,
+          7283500,
+          22429333
+        ],
+        "rust_p95_median_of_rounds_ns": 14583458,
+        "rust_p95_best_round_ns": 7962542,
+        "rust_p95_worst_round_ns": 109357000,
+        "rounds_p95_within_limit": 1,
+        "rounds": 8,
+        "p95_ratio_vs_go": 1.6176,
+        "p95_pass": false,
+        "go_median_rss_bytes": 25362432,
+        "rust_median_rss_bytes": 8863744,
+        "rss_ratio_vs_go": 0.3495,
+        "rss_pass": true
+      },
+      "root-help": {
+        "go_p95_ns": 13042417,
+        "p95_limit_ns": 14346658,
+        "rust_p95_ns_per_round": [
+          8845167,
+          14934542,
+          9211208,
+          12521916,
+          18005167,
+          9749250,
+          9560459,
+          29963708
+        ],
+        "rust_median_ns_per_round": [
+          8258667,
+          9379729,
+          8492479,
+          10754354,
+          11344812,
+          7782354,
+          7525687,
+          22052896
+        ],
+        "rust_p95_median_of_rounds_ns": 11135583,
+        "rust_p95_best_round_ns": 8845167,
+        "rust_p95_worst_round_ns": 29963708,
+        "rounds_p95_within_limit": 5,
+        "rounds": 8,
+        "p95_ratio_vs_go": 0.8538,
+        "p95_pass": true,
+        "go_median_rss_bytes": 25526272,
+        "rust_median_rss_bytes": 8654848,
+        "rss_ratio_vs_go": 0.3391,
+        "rss_pass": true
+      },
+      "config-show-json": {
+        "go_p95_ns": 38582417,
+        "p95_limit_ns": 42440658,
+        "rust_p95_ns_per_round": [
+          11680791,
+          11524833,
+          13813958,
+          17329000,
+          11972625,
+          16336917,
+          10907042,
+          208767875
+        ],
+        "rust_median_ns_per_round": [
+          8426604,
+          9876250,
+          9429312,
+          12779562,
+          10668916,
+          8879292,
+          7964229,
+          37578562
+        ],
+        "rust_p95_median_of_rounds_ns": 12893291,
+        "rust_p95_best_round_ns": 10907042,
+        "rust_p95_worst_round_ns": 208767875,
+        "rounds_p95_within_limit": 7,
+        "rounds": 8,
+        "p95_ratio_vs_go": 0.3342,
+        "p95_pass": true,
+        "go_median_rss_bytes": 25542656,
+        "rust_median_rss_bytes": 9109504,
+        "rss_ratio_vs_go": 0.3566,
+        "rss_pass": true
+      },
+      "mcp-initialize-list": {
+        "go_p95_ns": 34755125,
+        "p95_limit_ns": 38230637,
+        "rust_p95_ns_per_round": [
+          10852125,
+          18728625,
+          16021417,
+          18017709,
+          13922709,
+          14088250,
+          11548291,
+          93604959
+        ],
+        "rust_median_ns_per_round": [
+          8709708,
+          11812792,
+          10187895,
+          13053187,
+          10434749,
+          9330875,
+          8117208,
+          19131312
+        ],
+        "rust_p95_median_of_rounds_ns": 15054833,
+        "rust_p95_best_round_ns": 10852125,
+        "rust_p95_worst_round_ns": 93604959,
+        "rounds_p95_within_limit": 7,
+        "rounds": 8,
+        "p95_ratio_vs_go": 0.4332,
+        "p95_pass": true,
+        "go_median_rss_bytes": 26673152,
+        "rust_median_rss_bytes": 9437184,
+        "rss_ratio_vs_go": 0.3538,
+        "rss_pass": true
+      }
+    },
+    "session2": {
+      "version-json": {
+        "go_p95_ns": 9015375,
+        "p95_limit_ns": 9916912,
+        "rust_p95_ns_per_round": [
+          10709125,
+          72010167,
+          47018083,
+          46030750,
+          24977541,
+          8339334,
+          52424625,
+          11471459
+        ],
+        "rust_median_ns_per_round": [
+          8371604,
+          19983937,
+          14082333,
+          23978104,
+          18843354,
+          7660854,
+          17143333,
+          8789666
+        ],
+        "rust_p95_median_of_rounds_ns": 35504145,
+        "rust_p95_best_round_ns": 8339334,
+        "rust_p95_worst_round_ns": 72010167,
+        "rounds_p95_within_limit": 1,
+        "rounds": 8,
+        "p95_ratio_vs_go": 3.9382,
+        "p95_pass": false,
+        "go_median_rss_bytes": 25362432,
+        "rust_median_rss_bytes": 8871936,
+        "rss_ratio_vs_go": 0.3498,
+        "rss_pass": true
+      },
+      "root-help": {
+        "go_p95_ns": 13042417,
+        "p95_limit_ns": 14346658,
+        "rust_p95_ns_per_round": [
+          9358709,
+          80736250,
+          14693792,
+          32361208,
+          18145625,
+          7890708,
+          102822875,
+          9605375
+        ],
+        "rust_median_ns_per_round": [
+          8333166,
+          29529417,
+          12529563,
+          22032541,
+          15778833,
+          7319208,
+          16455916,
+          8126958
+        ],
+        "rust_p95_median_of_rounds_ns": 16419708,
+        "rust_p95_best_round_ns": 7890708,
+        "rust_p95_worst_round_ns": 102822875,
+        "rounds_p95_within_limit": 3,
+        "rounds": 8,
+        "p95_ratio_vs_go": 1.2589,
+        "p95_pass": false,
+        "go_median_rss_bytes": 25526272,
+        "rust_median_rss_bytes": 8658944,
+        "rss_ratio_vs_go": 0.3392,
+        "rss_pass": true
+      },
+      "config-show-json": {
+        "go_p95_ns": 38582417,
+        "p95_limit_ns": 42440658,
+        "rust_p95_ns_per_round": [
+          9243166,
+          68480500,
+          17016375,
+          55020417,
+          46605417,
+          7826042,
+          19568667,
+          10141209
+        ],
+        "rust_median_ns_per_round": [
+          8672791,
+          39800041,
+          12383896,
+          16564437,
+          17983208,
+          7315896,
+          13485770,
+          8016041
+        ],
+        "rust_p95_median_of_rounds_ns": 18292521,
+        "rust_p95_best_round_ns": 7826042,
+        "rust_p95_worst_round_ns": 68480500,
+        "rounds_p95_within_limit": 5,
+        "rounds": 8,
+        "p95_ratio_vs_go": 0.4741,
+        "p95_pass": true,
+        "go_median_rss_bytes": 25542656,
+        "rust_median_rss_bytes": 9109504,
+        "rss_ratio_vs_go": 0.3566,
+        "rss_pass": true
+      },
+      "mcp-initialize-list": {
+        "go_p95_ns": 34755125,
+        "p95_limit_ns": 38230637,
+        "rust_p95_ns_per_round": [
+          10270541,
+          42001583,
+          46956250,
+          20095458,
+          49106750,
+          10085125,
+          35632959,
+          9539083
+        ],
+        "rust_median_ns_per_round": [
+          8518312,
+          20477209,
+          17992375,
+          16424166,
+          19362625,
+          7586896,
+          15444875,
+          7868124
+        ],
+        "rust_p95_median_of_rounds_ns": 27864208,
+        "rust_p95_best_round_ns": 9539083,
+        "rust_p95_worst_round_ns": 49106750,
+        "rounds_p95_within_limit": 5,
+        "rounds": 8,
+        "p95_ratio_vs_go": 0.8017,
+        "p95_pass": true,
+        "go_median_rss_bytes": 26673152,
+        "rust_median_rss_bytes": 9437184,
+        "rss_ratio_vs_go": 0.3538,
+        "rss_pass": true
+      }
+    },
+    "session2_quietest_rounds_supplementary": {
+      "selection": "rounds whose /bin/echo control median <= 3 ms (3 of 8: rounds 1, 6, 8); chosen after the fact, informational only, not the gate",
+      "rust_p95_ns": {
+        "version-json": [
+          10709125,
+          8339334,
+          11471459
+        ],
+        "root-help": [
+          9358709,
+          7890708,
+          9605375
+        ],
+        "config-show-json": [
+          9243166,
+          7826042,
+          10141209
+        ],
+        "mcp-initialize-list": [
+          10270541,
+          10085125,
+          9539083
+        ]
+      },
+      "limits_ns": {
+        "version-json": 9916912,
+        "root-help": 14346658,
+        "config-show-json": 42440658,
+        "mcp-initialize-list": 38230637
+      }
+    },
+    "control_echo_session2": {
+      "median_ns_per_round": [
+        2829937,
+        4584166,
+        6313895,
+        6495583,
+        13198687,
+        2580500,
+        4978000,
+        2755708
+      ],
+      "p95_ns_per_round": [
+        3595834,
+        6037250,
+        9746333,
+        8477875,
+        28531083,
+        3002625,
+        17811250,
+        3684542
+      ]
+    },
+    "verdict": "NOT MET (reproducibly). RSS passes everywhere (-64% to -66% vs Go). p95: config-show-json and mcp-initialize-list are within the limit in the median-of-rounds in session 1 and 2; root-help passes in session 1 and fails in session 2; version-json fails both (14.6 ms and 35.5 ms vs 9.92 ms limit). In the quietest rounds version-json p95 is 8.3-11.5 ms against 9.92 ms, i.e. at the limit within noise. Not demonstrable on this shared host; the row stays todo. Needs an idle host or the Linux/macOS CI runner."
+  },
+  "perf_002_mcp_daemon_steady_state": {
+    "mcp_initialize_list_p95": {
+      "session1_ratio_vs_go": 0.4332,
+      "session2_ratio_vs_go": 0.8017,
+      "go_p95_ns": 34755125
+    },
+    "session1": {
+      "frames_per_series": 100,
+      "semantic_checks_all_passed": true,
+      "rss_growth_bytes_over_200_frames": {
+        "mcp_process": [
+          81920,
+          98304,
+          81920,
+          114688,
+          81920,
+          65536,
+          81920,
+          114688
+        ],
+        "mcp_spawned_daemon": [
+          180224,
+          147456,
+          147456,
+          180224,
+          147456,
+          131072,
+          163840,
+          147456
+        ],
+        "static_daemon": [
+          2031616,
+          1998848,
+          1998848,
+          2048000,
+          1998848,
+          2064384,
+          2064384,
+          2031616
+        ]
+      },
+      "thread_growth_static_daemon": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fd_growth_static_daemon": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "thread_growth_mcp_spawned_daemon": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "growth_limit_bytes": 4194304,
+      "bounded_no_unbounded_growth": true,
+      "mcp_ping_p95_ns_per_round": [
+        32333,
+        90959,
+        74875,
+        69334,
+        50875,
+        28084,
+        34834,
+        103667
+      ],
+      "mcp_tools_call_fetch_batch_p95_ns_per_round": [
+        961458,
+        2257833,
+        1495000,
+        1897834,
+        1649083,
+        921583,
+        848666,
+        10366709
+      ],
+      "mcp_tools_call_fetch_batch_median_ns": 1071083,
+      "daemon_ping_p95_ns_per_round": [
+        176166,
+        112666,
+        354917,
+        141917,
+        105959,
+        63750,
+        99291,
+        595917
+      ],
+      "daemon_fetch_url_p95_ns_per_round": [
+        1142541,
+        1033958,
+        1377792,
+        3056166,
+        772667,
+        587958,
+        668417,
+        19413125
+      ],
+      "daemon_fetch_url_median_ns": 618802
+    },
+    "session2": {
+      "frames_per_series": 100,
+      "semantic_checks_all_passed": true,
+      "rss_growth_bytes_over_200_frames": {
+        "mcp_process": [
+          131072,
+          81920,
+          49152,
+          114688,
+          65536,
+          49152,
+          81920,
+          65536
+        ],
+        "mcp_spawned_daemon": [
+          196608,
+          180224,
+          180224,
+          163840,
+          131072,
+          180224,
+          180224,
+          163840
+        ],
+        "static_daemon": [
+          1998848,
+          2048000,
+          2097152,
+          2048000,
+          1998848,
+          2064384,
+          2064384,
+          2080768
+        ]
+      },
+      "thread_growth_static_daemon": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fd_growth_static_daemon": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "thread_growth_mcp_spawned_daemon": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "growth_limit_bytes": 4194304,
+      "bounded_no_unbounded_growth": true,
+      "mcp_ping_p95_ns_per_round": [
+        30833,
+        241000,
+        146042,
+        181333,
+        709750,
+        35459,
+        156375,
+        47458
+      ],
+      "mcp_tools_call_fetch_batch_p95_ns_per_round": [
+        1083792,
+        3274958,
+        17975875,
+        4101000,
+        6266708,
+        1215584,
+        2819208,
+        907666
+      ],
+      "mcp_tools_call_fetch_batch_median_ns": 1697583,
+      "daemon_ping_p95_ns_per_round": [
+        68834,
+        219125,
+        245875,
+        154834,
+        579500,
+        83375,
+        121458,
+        56500
+      ],
+      "daemon_fetch_url_p95_ns_per_round": [
+        715000,
+        1422667,
+        7483500,
+        1041708,
+        12070917,
+        558375,
+        962250,
+        2164292
+      ],
+      "daemon_fetch_url_median_ns": 738375
+    },
+    "verdict": "PARTIAL, row stays todo. Bounded: RSS growth over 200 frames <= 2.1 MiB (static daemon, includes allocator warm-up; mcp process <= 0.13 MiB), threads and file descriptors unchanged in all 16 rounds, all 800 fetch semantics checks passed. Not met: baseline.json has no Go reference for the 100-frame daemon workload or tools/call, so the p95 <= 110% Go comparison cannot be made for them; only the mcp initialize+list process workload has a Go number (passes median-of-rounds in both sessions). No task/channel counters are exposed by the binary; thread/fd/RSS stability is the only growth evidence."
+  },
+  "perf_003_fetch_engine": {
+    "fetch_gate": "fixed ceiling 6.4834 ms = recorded Go fetch p95 5.894 ms x 1.10 (#773), unmodified port/bench/run.py --workload fetch --runs 30 x3 recomputed by port/harness/fetch_p95_gate.py",
+    "run_py_p95_ms": [
+      0.9442,
+      1.2817,
+      0.8179
+    ],
+    "run_py_median_ms": [
+      0.5317,
+      0.6728,
+      0.596
+    ],
+    "run_py_gate_pass": true,
+    "daemon_fetch_url_p95_ms_per_round": {
+      "session1": [
+        1.143,
+        1.034,
+        1.378,
+        3.056,
+        0.773,
+        0.588,
+        0.668,
+        19.413
+      ],
+      "session2": [
+        0.715,
+        1.423,
+        7.484,
+        1.042,
+        12.071,
+        0.558,
+        0.962,
+        2.164
+      ]
+    },
+    "verdict": "Static fetch half MET on this host: 3/3 unmodified run.py runs 0.82-1.28 ms p95 vs the 6.4834 ms ceiling. The 100-frame fetch.url series (daemon steady state) exceeded the ceiling in 3 of 16 rounds under contention (session 1 round 8: 19.4 ms; session 2 rounds 3 and 5: 7.5 ms and 12.1 ms); medians stay 0.4-1.0 ms, so the tail is host contention, as documented in port/evidence/fetch-control-773/macos-fetch-p95/README.md. The real-Chrome fixture flow has no Go reference in baseline.json and port/bench/chrome_pair.py requires a Go binary; it was not run. Row stays todo."
+  },
+  "perf_004_value_gate": {
+    "size_reduction_percent_vs_go_v0_8_0": 43.1,
+    "median_rss_reduction_percent_by_workload": {
+      "version-json": 65.02,
+      "root-help": 66.08,
+      "config-show-json": 64.34,
+      "mcp-initialize-list": 64.62
+    },
+    "value_criterion_met": true,
+    "verdict": "Value criterion (>=20% smaller binary OR >=20% lower median RSS) is met on darwin-arm64: 43.1% smaller (10,430,256 vs 18,330,466 bytes), 64-66% lower median RSS. The 'all no-regression gates passing' clause is not satisfied (PERF-001/002/003 above), so the row stays todo and RUST-016 stays blocked."
+  },
+  "rows": {
+    "PERF-001": "todo",
+    "PERF-002": "todo",
+    "PERF-003": "todo",
+    "PERF-004": "todo"
+  },
+  "linux": "No workflow measures Linux numbers for these rows; port/evidence/fetch-control-773 holds Linux x86_64 Go/Rust paired runs from 2026-10-03 (not the darwin-arm64 baseline, not re-evaluated here).",
+  "side_effect": "The first unisolated run of the new binary (version --json with the real HOME) made symbrowse's cutover logic back up existing Go-era state to ~/.local/state/symaira/cutover-backups/symbrowse-20261115T141645Z-95088; every measurement afterwards used isolated HOME/XDG roots.",
+  "artifacts": {
+    "raw_and_verdicts": "port/evidence/perf-2026-11-15/",
+    "tools": [
+      "port/bench/perf_evidence.py",
+      "port/bench/perf_verdict.py",
+      "port/bench/run.py",
+      "port/harness/fetch_p95_gate.py"
+    ]
+  }
+}

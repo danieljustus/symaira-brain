@@ -1,0 +1,40 @@
+{
+  "threshold_ms": 6.4834,
+  "workload_fixture": "rust016-static-fetch-html-v1",
+  "runs": [
+    {
+      "report": "fetch-1.json",
+      "samples": 30,
+      "p95_ns": 944166,
+      "p95_ms": 0.9442,
+      "median_ms": 0.5317,
+      "max_ms": 2.6837,
+      "under_threshold": true,
+      "binary_sha256": "f16376bbfee9288b434b0dfc723b4d8ab69c21eac3dfd6340ec17d46319c380e",
+      "problems": []
+    },
+    {
+      "report": "fetch-2.json",
+      "samples": 30,
+      "p95_ns": 1281750,
+      "p95_ms": 1.2817,
+      "median_ms": 0.6728,
+      "max_ms": 1.7841,
+      "under_threshold": true,
+      "binary_sha256": "f16376bbfee9288b434b0dfc723b4d8ab69c21eac3dfd6340ec17d46319c380e",
+      "problems": []
+    },
+    {
+      "report": "fetch-3.json",
+      "samples": 30,
+      "p95_ns": 817917,
+      "p95_ms": 0.8179,
+      "median_ms": 0.596,
+      "max_ms": 1.8132,
+      "under_threshold": true,
+      "binary_sha256": "f16376bbfee9288b434b0dfc723b4d8ab69c21eac3dfd6340ec17d46319c380e",
+      "problems": []
+    }
+  ],
+  "pass": true
+}
