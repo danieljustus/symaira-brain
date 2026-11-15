@@ -252,3 +252,40 @@ Local regression evidence: four benchmark-harness tests (including both live
 and exited leaders), 21 Python rust-port tests, and 14 Rust CLI tests passed.
 Rust formatting was corrected and checked. The remaining release blockers above
 remain applicable; no release or default-implementation change was performed.
+
+## 2026-11-15 Rust-only performance evidence (PERF-001..004, #780)
+
+Measured on macOS 27.2.1 arm64 (Apple M4 Pro, 12 CPUs, 24 GiB) with `rustc 1.98.0` /
+`cargo 1.98.0`, source `509deacd1`: `cargo build --release --locked -p symbrowse-cli`
+(thin LTO, `strip = true`) gives a 10,430,256 byte binary
+(sha256 `f16376bb…319c380e`). Go was **not** run (removed in #1003); the reference is the
+frozen `baseline.json` (2026-09-06, same host class, Go v0.8.0 / `652453d1`). Raw
+samples, per-round load and verdict computations are in
+`port/evidence/perf-2026-11-15/`; the summary is `perf-2026-11-15.json`. Tools:
+`port/bench/perf_evidence.py` (30 runs + 5 warmup per workload, 8 rounds per
+session, per-child `wait4` RSS, 100-frame steady state, `/bin/echo` control) and
+`port/bench/perf_verdict.py` (fixed rules, median across rounds of each round's
+nearest-rank p95), plus the unmodified `run.py --workload fetch` for the #773 ceiling.
+Loopback fixtures only; no Chrome was launched.
+
+**Host caveat.** Two other workers built and tested throughout (1-minute load 7.6–26 during
+measured rounds; the `/bin/echo` control's median varied 2.6–13.2 ms between rounds). The
+Go portbench source is not in the repository, so its spawn harness is unknown; workload
+argv was reconstructed from the sealed CLI cases.
+
+| Gate | Result |
+|---|---|
+| Binary size (PERF-004) | 10,430,256 B vs 18,330,466 B Go v0.8.0 darwin-arm64: **−43.1 %** (≥ 20 % needed) |
+| Median peak RSS (PERF-001/004) | 8.7–9.4 MB vs 25.4–26.7 MB Go: **−64…−66 %** (≤ 80 % needed) |
+| CLI p95 ≤ 110 % Go (PERF-001) | median-of-rounds, session 1 / 2: `version --json` 14.6 / 35.5 ms vs 9.92 ms limit **fail**; `--help` 11.1 / 16.4 vs 14.35 pass / fail; `config show --json` 12.9 / 18.3 vs 42.4 pass; `mcp` initialize+list 15.1 / 27.9 vs 38.2 pass. Quietest rounds: `version --json` 8.3–11.5 ms (at the limit within noise) |
+| MCP/daemon steady state (PERF-002) | 100 ping + 100 `tools/call fetch_batch` via mcp, 100 `daemon.ping` + 100 `fetch.url` via daemon, 16 rounds: all semantic checks pass, threads and fds constant, RSS growth ≤ 2.0 MiB. No Go reference exists for these frames |
+| Static fetch p95 (PERF-003) | unmodified `run.py` ×3: 0.94 / 1.28 / 0.82 ms vs 6.4834 ms ceiling **pass**; the 100-frame series exceeds it in 3 of 16 loaded rounds (tail contention, medians 0.4–1.0 ms) |
+| Real-Chrome flow (PERF-003) | not run: no Go reference in `baseline.json`; `chrome_pair.py` needs a Go binary |
+
+**Verdict.** The value criterion (size or RSS ≥ 20 %) is met on darwin-arm64, but the
+no-regression half is not demonstrated: `version --json` fails the p95 gate on this
+shared host, the 100-frame daemon/tools-call and Chrome workloads have no frozen Go
+reference, and Linux numbers are not measured by any workflow. All four PERF rows stay
+`todo`, RUST-016 stays `blocked`. Next: rerun `perf_evidence.py` + `perf_verdict.py` on an
+idle host (or a native CI runner), and decide whether the daemon/Chrome rows get a
+fixed ceiling in the manner of the #773 fetch gate.
