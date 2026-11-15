@@ -67,12 +67,33 @@ fn main() -> ExitCode {
     }
     let mut stdin = std::io::stdin();
     let execution = app::run(&values, VERSION, &mut stdin);
-    let _ = std::io::stdout().write_all(&execution.stdout);
+    let (stdout, stderr) = scrub_diagnostics(&execution);
+    let _ = std::io::stdout().write_all(&stdout);
     let _ = std::io::stdout().flush();
-    let _ = std::io::stderr().write_all(&execution.stderr);
+    let _ = std::io::stderr().write_all(&stderr);
     execution
         .raw
         .unwrap_or_else(|| ExitCode::from(execution.exit))
+}
+
+/// Last line of defense for SEC-007: error text echoes user input (unknown
+/// command names, rejected flag values, URLs), so credential-shaped pairs and
+/// URL passwords are scrubbed from stderr and from the stdout of a failed run
+/// (JSON error envelopes). Successful results are data and stay untouched.
+fn scrub_diagnostics(execution: &app::Execution) -> (Vec<u8>, Vec<u8>) {
+    let scrub = |bytes: &[u8]| match std::str::from_utf8(bytes) {
+        Ok(text) => symbrowse_core::secret_text::scrub(text).into_bytes(),
+        Err(_) => bytes.to_vec(),
+    };
+    let failed = execution.raw.is_none() && execution.exit != 0;
+    (
+        if failed {
+            scrub(&execution.stdout)
+        } else {
+            execution.stdout.clone()
+        },
+        scrub(&execution.stderr),
+    )
 }
 
 fn write_stdout(value: &str) -> ExitCode {

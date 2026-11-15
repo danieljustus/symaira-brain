@@ -25,6 +25,7 @@ pub mod policy;
 pub mod policy_guard;
 pub mod profiles;
 pub mod runner;
+pub mod secret_text;
 pub mod session;
 pub mod settings;
 pub mod state;

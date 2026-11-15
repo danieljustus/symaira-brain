@@ -30,13 +30,13 @@ pub fn parse_error(message: impl Into<String>) -> JsonRpcError {
 pub fn method_not_found(method: &str) -> JsonRpcError {
     JsonRpcError {
         code: -32601,
-        message: format!("Method not found: {method}"),
+        message: format!("Method not found: {}", symbrowse_daemon::redact_str(method)),
     }
 }
 
 pub fn unknown_tool(name: &str) -> JsonRpcError {
     JsonRpcError {
         code: -32601,
-        message: format!("Unknown tool: {name}"),
+        message: format!("Unknown tool: {}", symbrowse_daemon::redact_str(name)),
     }
 }

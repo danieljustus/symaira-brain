@@ -21,7 +21,12 @@ pub(super) fn serve_connection_parts<S>(
             return;
         }
         let mut line = Vec::new();
-        let read_result = read_limited_line(&mut reader, &mut line, MAX_FRAME_BYTES);
+        let read_result = read_limited_line(
+            &mut reader,
+            &mut line,
+            MAX_FRAME_BYTES,
+            options.read_timeout,
+        );
         match read_result {
             Ok(0) | Err(_) => return,
             Ok(_) => {}
@@ -228,12 +233,20 @@ pub(super) fn write_response<W: Write>(stream: &mut W, response: Response) -> io
     stream.flush()
 }
 
+/// Reads one newline-terminated frame. `budget` is an absolute deadline from
+/// the start of the read, like Go's `SetReadDeadline` before each `Scan`: the
+/// socket's per-read timeout alone would let a peer keep a worker busy forever
+/// by trickling one byte per interval. Exceeding it fails with `TimedOut`,
+/// which closes the connection without a response, exactly as an idle socket
+/// read timeout does.
 pub(super) fn read_limited_line<R: BufRead>(
     reader: &mut R,
     output: &mut Vec<u8>,
     limit: usize,
+    budget: Duration,
 ) -> io::Result<usize> {
     output.clear();
+    let started = Instant::now();
     loop {
         let available = reader.fill_buf()?;
         if available.is_empty() {
@@ -253,6 +266,12 @@ pub(super) fn read_limited_line<R: BufRead>(
         reader.consume(take);
         if output.last() == Some(&b'\n') {
             return Ok(output.len());
+        }
+        if started.elapsed() >= budget {
+            return Err(io::Error::new(
+                io::ErrorKind::TimedOut,
+                "daemon frame was not completed within the read timeout",
+            ));
         }
     }
 }
