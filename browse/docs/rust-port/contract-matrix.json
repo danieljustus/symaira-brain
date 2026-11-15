@@ -869,10 +869,10 @@
       "expected": "requested Safari uses local Safari only; launch/attach, navigation, errors, cleanup and capability truth match, while unavailable Remote Automation prerequisites return typed errors without Chrome, Firefox, static or compat substitution",
       "comparison": "process",
       "platforms": [
-        "darwin-amd64",
         "darwin-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-15 macOS 27.2.1 arm64, Safari 27.2: native gate passed (target/native-evidence/safari.json status=passed, test_exit_code=0); sealed Go-oracle recording 652453d1 replays (contract_fixture 3/3). darwin-amd64 is out of product scope (#990)."
     },
     {
       "id": "ENG-009",

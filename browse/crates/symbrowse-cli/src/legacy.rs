@@ -115,8 +115,10 @@ pub(crate) fn validate_engine(value: &str) -> Result<(), String> {
     validate_engine_on(value, std::env::consts::OS)
 }
 
-/// `firefox` is accepted only where its native gate passed; Safari engines stay
-/// selectable for the maintainer gate but are not part of the advertised set.
+/// `firefox` is accepted only where its native gate passed. The Safari engine
+/// names keep their Go-oracle selection behavior on every OS; Safari itself is
+/// advertised on macOS only (its native gate passed there, #777) and its
+/// runtime is cfg-gated to macOS.
 fn validate_engine_on(value: &str, os: &str) -> Result<(), String> {
     if value == "firefox" {
         return if symbrowse_core::advertise::is_advertised(

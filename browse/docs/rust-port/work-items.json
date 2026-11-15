@@ -348,13 +348,13 @@
       "contracts": [
         "ENG-008"
       ],
-      "status": "in_progress",
+      "status": "complete",
       "acceptance_commands": [
         "cargo nextest run -p symbrowse-engine-safari --target aarch64-apple-darwin",
         "python3 port/harness/run.py --suite safari --native macos"
       ],
       "stop_rule": "Keep Safari cfg-gated; stop if the port adds a privilege or installation contract.",
-      "remaining_scope": "2026-11-08 macOS arm64: Safari attach/BiDi and Firefox unit and contract tests pass. Safari needs Remote Automation on the user's real Safari, which an agent must not drive (maintainer gate). 2026-11-09 Firefox native gate (no geckodriver; the adapter launches Firefox with BiDi directly): the adapter now owns a fresh browsingContext.create tab because Firefox 159 rejects evaluation in the first context of a new profile (\"System access is required\"); the symbrowse-firefox-spike gate passes on macOS arm64 against Firefox 159.0.1 for a fresh blank tab and a loopback http navigation. .github/workflows/browse-firefox-native.yml runs the same gate on Linux amd64 and macOS; its receipt is pending. Firefox native gate receipt: browse-firefox-native.yml green on linux-amd64 and darwin-arm64; local re-run 2026-11-10 on macOS arm64 against Firefox 159.0.1 passes (unit tests 2/2, blank-tab and loopback-navigation spike, production-daemon firefox_native test 1/1). Firefox BiDi is therefore advertised on macOS and Linux only (symbrowse-core advertise module: --engine validation, daemon capabilities handshake; typed engine_not_advertised elsewhere). Safari is NOT advertised and stays cfg-gated: its native gate needs Remote Automation on the user's real Safari, a maintainer step. Item stays in_progress until that Safari gate passes."
+      "remaining_scope": "2026-11-08 macOS arm64: Safari attach/BiDi and Firefox unit and contract tests pass. Safari needs Remote Automation on the user's real Safari, which an agent must not drive (maintainer gate). 2026-11-09 Firefox native gate (no geckodriver; the adapter launches Firefox with BiDi directly): the adapter now owns a fresh browsingContext.create tab because Firefox 159 rejects evaluation in the first context of a new profile (\"System access is required\"); the symbrowse-firefox-spike gate passes on macOS arm64 against Firefox 159.0.1 for a fresh blank tab and a loopback http navigation. .github/workflows/browse-firefox-native.yml runs the same gate on Linux amd64 and macOS; its receipt is pending. Firefox native gate receipt: browse-firefox-native.yml green on linux-amd64 and darwin-arm64; local re-run 2026-11-10 on macOS arm64 against Firefox 159.0.1 passes (unit tests 2/2, blank-tab and loopback-navigation spike, production-daemon firefox_native test 1/1). Firefox BiDi is therefore advertised on macOS and Linux only (symbrowse-core advertise module: --engine validation, daemon capabilities handshake; typed engine_not_advertised elsewhere). Safari is NOT advertised and stays cfg-gated: its native gate needs Remote Automation on the user's real Safari, a maintainer step. 2026-11-15 Safari native gate passed on macOS 27.2.1 arm64 with Safari 27.2 after Remote Automation was enabled (safaridriver --enable): python3 port/harness/run.py --suite safari --native macos exit 0, native=passed (isolated safaridriver BiDi launch, session, document.title evaluation, bounded cleanup; owned automation Safari terminated, foreign safaridriver --mcp processes preserved), contract_fixture 3/3. Safari is now advertised on macOS only (symbrowse-core advertise::SAFARI_NATIVE_GATE_PASSED); Linux and Windows stay unadvertised. Complete."
     },
     {
       "id": "RUST-014",
@@ -379,12 +379,13 @@
         "SES-006",
         "STATE-006"
       ],
-      "status": "in_progress",
+      "status": "complete",
       "acceptance_commands": [
         "cargo nextest run --workspace",
         "python3 port/harness/run.py --suite workflows"
       ],
-      "stop_rule": "Human-control stops, confirmations, risks and secret handling may not be weakened; do not remove public Go formflow while any released consumer depends on it."
+      "stop_rule": "Human-control stops, confirmations, risks and secret handling may not be weakened; do not remove public Go formflow while any released consumer depends on it.",
+      "remaining_scope": "2026-11-15: all dependencies complete after the RUST-013 Safari gate. Acceptance re-run on macOS arm64: cargo nextest/test --workspace 436 passed, 0 failed; python3 port/harness/run.py --suite workflows passed (bytes). All eleven contracts (FLOW-001..004, SES-001..006, STATE-006) are parity. Complete."
     },
     {
       "id": "RUST-017",
@@ -402,8 +403,8 @@
         "ENG-009",
         "ENG-010"
       ],
-      "status": "blocked",
-      "remaining_scope": "2026-11-14 macOS arm64, evidence in docs/rust-port/hardening.md. cargo nextest run -p symbrowse-engine-chrome -p symbrowse-engine-safari -p symbrowse-engine-firefox: 45 passed, 0 failed (Safari tests use fake osascript scripts; no Safari was launched or automated). python3 port/harness/run.py --suite browser-transport --native-targets: exit 0; the suite only runs cargo tests (selection_is_exhaustive, retired_compat, compat_retired) and ignores --native-targets, so it starts no browser. cargo test -p symbrowse-cli --test compat_retired: 6 passed; retired compat returns the typed transport_retired error from config file, environment, flag, daemon and MCP, and static/browser selection is unaffected (no silent engine substitution). Chrome and Firefox native receipts are recorded under RUST-011/RUST-012/RUST-013. Still open: status stays blocked until RUST-013's Safari native gate (Remote Automation on the user's real Safari, a maintainer step) passes; Safari must not be advertised before then.",
+      "status": "in_progress",
+      "remaining_scope": "2026-11-14 macOS arm64, evidence in docs/rust-port/hardening.md. cargo nextest run -p symbrowse-engine-chrome -p symbrowse-engine-safari -p symbrowse-engine-firefox: 45 passed, 0 failed (Safari tests use fake osascript scripts; no Safari was launched or automated). python3 port/harness/run.py --suite browser-transport --native-targets: exit 0; the suite only runs cargo tests (selection_is_exhaustive, retired_compat, compat_retired) and ignores --native-targets, so it starts no browser. cargo test -p symbrowse-cli --test compat_retired: 6 passed; retired compat returns the typed transport_retired error from config file, environment, flag, daemon and MCP, and static/browser selection is unaffected (no silent engine substitution). Chrome and Firefox native receipts are recorded under RUST-011/RUST-012/RUST-013. Still open: status stays blocked until RUST-013's Safari native gate (Remote Automation on the user's real Safari, a maintainer step) passes; Safari must not be advertised before then. 2026-11-15: RUST-013 is complete, so the item is unblocked (in_progress). Remaining to close: CFG-006, ENG-009 and ENG-010 contract rows from todo to parity with executable evidence.",
       "acceptance_commands": [
         "cargo nextest run -p symbrowse-engine-chrome -p symbrowse-engine-safari -p symbrowse-engine-firefox",
         "python3 port/harness/run.py --suite browser-transport --native-targets",

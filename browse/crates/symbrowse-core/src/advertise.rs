@@ -9,8 +9,10 @@
 use crate::config::BrowserEngine;
 
 /// Safari needs Remote Automation on the user's real Safari, so its native gate
-/// is a maintainer step. Flip this only together with a recorded gate receipt.
-pub const SAFARI_NATIVE_GATE_PASSED: bool = false;
+/// is a maintainer step. Receipt: `port/harness/run.py --suite safari --native
+/// macos` passed on macOS 27.2.1 arm64 with Safari 27.2 on 2026-11-15
+/// (launch, BiDi session, evaluation, bounded cleanup; #777).
+pub const SAFARI_NATIVE_GATE_PASSED: bool = true;
 
 /// Operating systems whose native Firefox BiDi gate has passed
 /// (`.github/workflows/browse-firefox-native.yml`: linux-amd64, darwin-arm64).
@@ -75,10 +77,13 @@ mod tests {
     }
 
     #[test]
-    fn safari_is_never_advertised_before_its_gate() {
-        for os in ["macos", "linux", "windows"] {
-            assert!(!is_advertised(BrowserEngine::Safari, os), "{os}");
-            assert!(!advertised_engines(os).contains(&BrowserEngine::Safari));
+    fn safari_is_advertised_only_on_macos() {
+        for (os, expected) in [("macos", true), ("linux", false), ("windows", false)] {
+            assert_eq!(is_advertised(BrowserEngine::Safari, os), expected, "{os}");
+            assert_eq!(
+                advertised_engines(os).contains(&BrowserEngine::Safari),
+                expected
+            );
         }
         for name in ["safari", "safari-attach", "safari-bidi"] {
             assert_eq!(engine_kind(name), Some(BrowserEngine::Safari));
@@ -96,7 +101,11 @@ mod tests {
     fn advertised_lists_are_exact() {
         assert_eq!(
             advertised_engines("macos"),
-            [BrowserEngine::Chrome, BrowserEngine::Firefox]
+            [
+                BrowserEngine::Chrome,
+                BrowserEngine::Safari,
+                BrowserEngine::Firefox
+            ]
         );
         assert_eq!(
             advertised_engines("linux"),
