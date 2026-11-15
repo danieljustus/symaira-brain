@@ -431,7 +431,7 @@ def run_all_suites(root: Path, env: dict[str, str], args: argparse.Namespace) ->
         command = [sys.executable, str(Path(__file__).resolve()), "--suite", suite]
         if args.comparison != "bytes" and suite == "fetch-render":
             command.extend(["--comparison", args.comparison])
-        if args.native_targets and suite in {"chrome-full", "safari"}:
+        if args.native_targets and suite in {"chrome-full", "safari", "browser-transport"}:
             command.extend(["--native", "macos"])
         run(command, root, env, timeout=1800)
     if args.native_targets:
@@ -510,6 +510,13 @@ def main() -> int:
             ["cargo", "test", "-p", "symbrowse-core", "selection_is_exhaustive", "--locked"],
             ["cargo", "test", "-p", "symbrowse-core", "retired_compat", "--locked"],
             ["cargo", "test", "-p", "symbrowse-cli", "--test", "compat_retired", "--locked"],
+            # CFG-006: explicit mode/engine selection from TOML, environment and flags.
+            ["cargo", "test", "-p", "symbrowse-core", "--test", "config_contract", "transport_selection", "--locked"],
+            ["cargo", "test", "-p", "symbrowse-cli", "--test", "transport_selection", "--locked"],
+            ["cargo", "test", "-p", "symbrowse-daemon", "--test", "transport_status", "--locked"],
+            # ENG-009/010 typed-unavailable cases need no browser.
+            ["cargo", "test", "-p", "symbrowse-daemon", "--test", "engine_native_corpus", "unavailable_engine_is_a_typed_error_without_substitution", "--locked"],
+            ["cargo", "test", "-p", "symbrowse-engine-firefox", "--test", "native", "missing_executable_is_the_typed_unavailable_error", "--locked"],
         ]
     elif args.suite == "workflows":
         commands = [
@@ -552,6 +559,11 @@ def main() -> int:
 
     for command in commands:
         run(command, root, env)
+    if args.suite == "browser-transport" and native:
+        # ENG-009/ENG-010: shared corpus against the real installed engines.
+        from browser_transport_native import browser_transport_native
+
+        browser_transport_native(root, env)
     if args.suite == "fetch-control":
         print("executed fetch-control case IDs: " + ",".join(FETCH_CONTROL_CASE_IDS), flush=True)
     print(f"{args.suite} suite passed ({args.comparison})")

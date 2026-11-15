@@ -174,6 +174,21 @@ pub fn capabilities() -> ChromeCapabilities {
     }
 }
 
+/// Version the running Chrome reports about itself.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct BrowserVersion {
+    pub product: String,
+    pub user_agent: String,
+}
+
+impl BrowserVersion {
+    /// Bare version number, for example `130.0.6723.58`.
+    #[must_use]
+    pub fn number(&self) -> &str {
+        self.product.rsplit('/').next().unwrap_or(&self.product)
+    }
+}
+
 /// A connected browser plus one page. The handler is kept alive in a task so
 /// chromiumoxide can dispatch CDP events and page commands.
 pub struct ChromeSession {
@@ -220,6 +235,17 @@ impl ChromeSession {
 
     pub fn mode(&self) -> ConnectionMode {
         self.mode
+    }
+
+    /// Product string the connected browser reports about itself over CDP
+    /// (`Browser.getVersion`), for example `Chrome/130.0.6723.58`. The value
+    /// comes from the running engine, never from a configured name.
+    pub async fn browser_version(&self) -> Result<BrowserVersion, Box<dyn Error + Send + Sync>> {
+        let version = self.browser.version().await?;
+        Ok(BrowserVersion {
+            product: version.product,
+            user_agent: version.user_agent,
+        })
     }
 
     pub async fn new_page(

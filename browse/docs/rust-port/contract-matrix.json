@@ -435,9 +435,10 @@
       "expected": "precedence and validation select one explicit transport mode and, in browser mode, one explicit engine; machine-readable config/status identifies the selected mode and engine without exposing browser profile data; unknown, conflicting or unavailable selections return typed errors and never trigger fallback; a selection of the retired `compat` mode from TOML, SYMBROWSE_MODE or --mode returns the typed `transport_retired` error (config error envelope, exit 9, details.code=transport_retired) and is never mapped to static or browser",
       "comparison": "json-semantic",
       "platforms": [
-        "all"
+        "darwin-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-15 macOS 27.2.1 arm64. Every case of testdata/port/core/transport-selection.json (9) resolves exactly or fails typed: symbrowse-core config_contract (transport_selection_fixture_resolves_exactly_or_fails_typed; transport_selection_is_explicit_and_typed_from_every_source: global TOML, project TOML, SYMBROWSE_MODE/ENGINE and flags; transport_selection_precedence_is_flag_env_project_global), symbrowse-cli transport_selection (process level via env, --mode/--engine and TOML: success reports the selected engine without profile keys; failures exit 9 with error.details.code invalid_transport_mode, engine_not_allowed or transport_retired, and a Go-oracle `invalid engine` without code for an unknown engine; daemon --mode wat refuses before binding; engine_not_advertised for an engine without its native gate is covered by the legacy.rs and runtime.rs unit tests) and compat_retired (6: retired compat from TOML, SYMBROWSE_MODE, --mode, daemon and MCP -> transport_retired, never static/browser), symbrowse-daemon transport_status (daemon.status reports mode+engine for static/chrome/firefox/safari-bidi, no profile path, no browser launched). Mode is reported by daemon.status; config show keeps its 26 Go-oracle fields (CFG-004), where engine=static is the static mode. port/harness/run.py --suite browser-transport exits 0. Linux (linux-amd64, linux-arm64) is pending its first CI run: .github/workflows/browse-firefox-native.yml and browse-chrome-native-e2e.yml now run the same cases there, so those platforms are not claimed yet. darwin-amd64 and windows-* are out of product scope (#990)."
     },
     {
       "id": "STATE-001",
@@ -882,14 +883,10 @@
       "expected": "browser mode starts or attaches only to the explicitly requested installed engine and uses that engine's own network stack and browser state; it reports the selected engine and detected version, preserves browser-specific capability truth and returns a typed unavailable/precondition error rather than substituting a different engine or compat mode",
       "comparison": "process",
       "platforms": [
-        "darwin-amd64",
-        "darwin-arm64",
-        "linux-amd64",
-        "linux-arm64",
-        "windows-amd64",
-        "windows-arm64"
+        "darwin-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-15 macOS 27.2.1 arm64, Chrome 156.0.8078.80 and Firefox 160.0: python3 port/harness/run.py --suite browser-transport --native-targets exit 0, 30 verified cases (8 Firefox adapter, 9 Chrome and 9 Firefox daemon corpus, 2 typed-unavailable, Safari bundle-version info, Safari corpus recorded as skipped; target/native-evidence/browser-transport.json). One shared corpus (crates/symbrowse-daemon/tests/engine_native_corpus.rs + tests/common/corpus_fixture.rs) runs through the production daemon against each explicitly requested engine: selected engine and detected version (engine.info; Chrome Browser.getVersion, Firefox BiDi session.new browserVersion, both cross-checked against the executable's --version), redirect, JavaScript (policy-approved eval), cookies (HTTP Set-Cookie, script cookie, daemon-set cookie sent by the engine's own network stack with its own User-Agent), storage, response capture, capability truth (Chrome FileTransfer/NetworkEvents; Firefox NetworkEvents only, download/upload/downloads.list/network.har typed `unsupported`), timeout (typed operation_timeout) and cleanup (no process of the corpus survives). An uninstalled/unusable explicit executable returns the typed engine_unavailable error for chrome and firefox, the daemon keeps reporting the requested engine and nothing is launched or substituted. Safari: corpus_safari_guarded was SKIPPED with reason 'normal Safari is running; refusing to automate the user's session' (the user's Safari was never quit, killed or automated); engine.info reads the installed Safari bundle version without launching it (safari_info_reports_the_installed_version_without_touching_safari); Safari's own native gate is recorded under ENG-008. Linux (linux-amd64, linux-arm64) is pending its first CI run: .github/workflows/browse-firefox-native.yml and browse-chrome-native-e2e.yml now run the same cases there, so those platforms are not claimed yet. darwin-amd64 and windows-* are out of product scope (#990)."
     },
     {
       "id": "ENG-010",
@@ -899,14 +896,10 @@
       "expected": "Firefox is a first-class requested browser engine, using local Firefox through its native automation surface; supported capabilities pass executable native cases and unsupported capabilities fail explicitly without Chrome, Safari or compat substitution",
       "comparison": "process",
       "platforms": [
-        "darwin-amd64",
-        "darwin-arm64",
-        "linux-amd64",
-        "linux-arm64",
-        "windows-amd64",
-        "windows-arm64"
+        "darwin-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-15 macOS 27.2.1 arm64, Firefox 160.0 (BiDi launched directly, no geckodriver): crates/symbrowse-engine-firefox/tests/native.rs passes 8 PARITY_CASEs under SYMBROWSE_E2E=1 (lifecycle-version, navigation-javascript incl. exception text, cookies via BiDi storage incl. a cookie sent by Firefox's own stack, storage, response-capture via network.responseCompleted, typed-unsupported, timeout -> FirefoxError::Timeout, cleanup with no surviving Firefox process); the production-daemon corpus (ENG-009) passes the same loopback fixture for Firefox. Supported: lifecycle, navigation, cookies, storage, JavaScript, response capture (NetworkEvents advertised only after this native case), screenshot, tabs/frames. Unsupported and explicit (typed `unsupported`, no Chrome/Safari/compat substitution): downloads/file transfer, uploads, HAR, dialogs, press. A missing Firefox is the typed Unavailable/engine_unavailable error. Linux (linux-amd64, linux-arm64) is pending its first CI run: .github/workflows/browse-firefox-native.yml and browse-chrome-native-e2e.yml now run the same cases there, so those platforms are not claimed yet. darwin-amd64 and windows-* are out of product scope (#990)."
     },
     {
       "id": "FLOW-001",

@@ -1,3 +1,5 @@
+mod engine_info;
+mod firefox_go;
 mod gate;
 mod go_cmds;
 mod state;
@@ -22,7 +24,7 @@ use symbrowse_core::{
 use symbrowse_engine_chrome::{
     BrowserMode, ChromePage, ChromeSession, NetworkCapture, resolve_chrome_executable,
 };
-use symbrowse_engine_firefox::{FirefoxSession, resolve_firefox_executable};
+use symbrowse_engine_firefox::{FirefoxError, FirefoxSession};
 use symbrowse_fetch::{
     FetchClient, Request,
     archive::{CdxClient, CdxQuery},
@@ -458,7 +460,17 @@ impl DispatchRuntime {
         {
             return Err(SafariRuntime::unsupported_interaction(&frame.cmd));
         }
+        if self.spec.mode == "browser"
+            && self.spec.engine == "firefox"
+            && (FIREFOX_GO_COMMANDS.contains(&frame.cmd.as_str())
+                // Chrome-only Go-shaped commands Firefox does not implement
+                // answer with the typed `unsupported` code, never as unknown.
+                || go_cmds::GO_CHROME_COMMANDS.contains(&frame.cmd.as_str()))
+        {
+            return self.firefox_command(&frame).await;
+        }
         match frame.cmd.as_str() {
+            "engine.info" => self.engine_info(&operation).await,
             "fetch.url" => self.fetch_url(&frame).await,
             "fetch.batch" => self.fetch_batch(&frame).await,
             "cache.get" => self.cache_get(&frame),
@@ -1400,30 +1412,19 @@ impl DispatchRuntime {
     async fn firefox_command(&self, frame: &Frame) -> HandlerResult {
         ensure_firefox_advertised(std::env::consts::OS)?;
         let args = object_args(frame)?;
+        self.ensure_firefox_session().await?;
         let mut guard = self.firefox.lock().await;
-        if guard.is_none() {
-            let executable = resolve_firefox_executable(
-                (!self.spec.executable_path.as_os_str().is_empty())
-                    .then_some(self.spec.executable_path.as_path()),
-            )
-            .map_err(runtime_error)?;
-            let session = FirefoxSession::launch(
-                executable,
-                self.spec.user_data_dir(),
-                self.spec.operation_timeout,
-            )
-            .await
-            .map_err(runtime_error)?;
-            *guard = Some(session);
-        }
         let session = guard
             .as_mut()
             .ok_or_else(|| runtime_error("Firefox runtime was not initialized"))?;
+        if let Some(result) = firefox_go::dispatch(session, frame, args).await {
+            return result;
+        }
         match frame.cmd.as_str() {
             "open" | "goto" | "read" => {
                 let url = required_string(args, "url")?;
-                let navigation = session.navigate(url).await.map_err(runtime_error)?;
-                let value = session.evaluate("({url: location.href, title: document.title, content: document.body?.innerText ?? ''})").await.map_err(runtime_error)?;
+                let navigation = session.navigate(url).await.map_err(firefox_error)?;
+                let value = session.evaluate("({url: location.href, title: document.title, content: document.body?.innerText ?? ''})").await.map_err(firefox_error)?;
                 Ok((
                     Some(
                         json!({"url": navigation.url, "final_url": navigation.url, "title": value.value.as_ref().and_then(|v|v.get("title")).cloned().unwrap_or(Value::Null), "content": value.value.as_ref().and_then(|v|v.get("content")).cloned().unwrap_or(Value::Null)}),
@@ -1435,26 +1436,26 @@ impl DispatchRuntime {
                 let value = session
                     .evaluate("location.href")
                     .await
-                    .map_err(runtime_error)?;
-                Ok((Some(json!({"value":value.value})), Vec::new()))
+                    .map_err(firefox_error)?;
+                Ok((Some(value.value.unwrap_or(Value::Null)), Vec::new()))
             }
             "get.title" => {
                 let value = session
                     .evaluate("document.title")
                     .await
-                    .map_err(runtime_error)?;
-                Ok((Some(json!({"value":value.value})), Vec::new()))
+                    .map_err(firefox_error)?;
+                Ok((Some(value.value.unwrap_or(Value::Null)), Vec::new()))
             }
             "evaluate" | "eval" => {
                 let expression = required_string(args, "expression")?;
-                let value = session.evaluate(expression).await.map_err(runtime_error)?;
+                let value = session.evaluate(expression).await.map_err(firefox_error)?;
                 Ok((
                     Some(serde_json::to_value(value).map_err(runtime_error)?),
                     Vec::new(),
                 ))
             }
             "cookies.get" => Ok((
-                Some(session.cookies().await.map_err(runtime_error)?),
+                Some(session.cookies().await.map_err(firefox_error)?),
                 Vec::new(),
             )),
             "cookies.set" => {
@@ -1463,7 +1464,7 @@ impl DispatchRuntime {
                     .cloned()
                     .ok_or_else(|| malformed("cookies.set requires cookie"))?;
                 Ok((
-                    Some(session.set_cookie(cookie).await.map_err(runtime_error)?),
+                    Some(session.set_cookie(cookie).await.map_err(firefox_error)?),
                     Vec::new(),
                 ))
             }
@@ -1471,7 +1472,7 @@ impl DispatchRuntime {
                 let value = session
                     .evaluate("JSON.stringify({local_storage:Object.fromEntries(Object.entries(localStorage)),session_storage:Object.fromEntries(Object.entries(sessionStorage))})")
                     .await
-                    .map_err(runtime_error)?;
+                    .map_err(firefox_error)?;
                 let data = value
                     .value
                     .and_then(|value| value.as_str().map(str::to_owned))
@@ -1494,7 +1495,7 @@ impl DispatchRuntime {
                 let expression = format!(
                     "(() => {{ for (const [k,v] of Object.entries({local})) localStorage.setItem(k,v); for (const [k,v] of Object.entries({session_storage})) sessionStorage.setItem(k,v); return true; }})()"
                 );
-                let value = session.evaluate(&expression).await.map_err(runtime_error)?;
+                let value = session.evaluate(&expression).await.map_err(firefox_error)?;
                 Ok((Some(value.value.unwrap_or(Value::Null)), Vec::new()))
             }
             "click" | "type" | "fill" => {
@@ -1506,11 +1507,11 @@ impl DispatchRuntime {
                 let data = session
                     .interact(frame.cmd.as_str(), selector, value)
                     .await
-                    .map_err(runtime_error)?;
+                    .map_err(firefox_error)?;
                 Ok((Some(data), Vec::new()))
             }
             "tabs.list" | "frames.list" => {
-                let tree = session.browsing_contexts().await.map_err(runtime_error)?;
+                let tree = session.browsing_contexts().await.map_err(firefox_error)?;
                 Ok((
                     Some(if frame.cmd == "tabs.list" {
                         json!({"tabs":tree.get("contexts").cloned().unwrap_or(Value::Array(Vec::new()))})
@@ -1523,11 +1524,11 @@ impl DispatchRuntime {
             "screenshot" => {
                 let format = args.get("format").and_then(Value::as_str).unwrap_or("png");
                 Ok((
-                    Some(session.screenshot(format).await.map_err(runtime_error)?),
+                    Some(session.screenshot(format).await.map_err(firefox_error)?),
                     Vec::new(),
                 ))
             }
-            "network.capture" | "download" | "network.har" => Err(DaemonError {
+            "download" | "network.har" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Firefox does not implement {:?}", frame.cmd),
                 hint: "the operation is explicitly unsupported by this engine".into(),
@@ -1639,7 +1640,7 @@ impl DispatchRuntime {
             (!self.spec.executable_path.as_os_str().is_empty())
                 .then_some(self.spec.executable_path.as_path()),
         )
-        .map_err(runtime_error)?;
+        .map_err(|error| engine_unavailable("chrome", error))?;
         let session = ChromeSession::connect(
             BrowserMode::Launch {
                 executable,
@@ -2060,6 +2061,50 @@ fn navigation_error(error: Box<dyn std::error::Error + Send + Sync>) -> DaemonEr
         return operation_timeout_error();
     }
     runtime_error(error)
+}
+
+/// Commands Firefox answers in the Go-shaped surface the CLI uses for every
+/// engine (see `firefox_go`).
+const FIREFOX_GO_COMMANDS: &[&str] = &[
+    "eval",
+    "get.text",
+    "get.html",
+    "get.value",
+    "get.count",
+    "get.attr",
+    "cookies.list",
+    "cookies.clear",
+    "storage.list",
+    "storage.clear",
+    "network.requests",
+];
+
+/// Typed refusal for an explicitly requested engine that cannot run here.
+fn engine_unavailable(engine: &str, error: impl std::fmt::Display) -> DaemonError {
+    DaemonError {
+        code: codes::ENGINE_UNAVAILABLE.into(),
+        message: redact_str(&format!("engine_unavailable: {engine}: {error}")),
+        hint: format!(
+            "install {engine} or select an installed engine explicitly; no other engine or static mode is substituted"
+        ),
+        retryable: Some(false),
+        ..Default::default()
+    }
+}
+
+/// Map a Firefox adapter error to its stable daemon code.
+fn firefox_error(error: FirefoxError) -> DaemonError {
+    match error {
+        FirefoxError::Unavailable(message) => engine_unavailable("firefox", message),
+        FirefoxError::Timeout { .. } => operation_timeout_error(),
+        FirefoxError::Unsupported { operation } => DaemonError {
+            code: "unsupported".into(),
+            message: format!("Firefox does not implement {operation:?}"),
+            hint: "the operation is explicitly unsupported by this engine".into(),
+            ..Default::default()
+        },
+        other => runtime_error(other),
+    }
 }
 
 fn operation_timeout_error() -> DaemonError {
@@ -2629,7 +2674,21 @@ mod tests {
         assert_eq!(data["kind"], "firefox");
         let interfaces = data["interfaces"].as_array().expect("interfaces");
         assert!(interfaces.iter().any(|name| name == "TabManager"));
-        assert!(!interfaces.iter().any(|name| name == "NetworkEvents"));
+        // Response capture is implemented over BiDi network.responseCompleted
+        // and has a native case (engine_native_corpus); file transfer and
+        // dialogs are not, and stay explicitly unsupported.
+        assert!(interfaces.iter().any(|name| name == "NetworkEvents"));
+        for name in ["FileTransfer", "DialogController", "A11yAuditor"] {
+            assert!(
+                !interfaces.iter().any(|interface| interface == name),
+                "{name}"
+            );
+            let unsupported = data["unsupported"].as_array().expect("unsupported");
+            assert!(
+                unsupported.iter().any(|interface| interface == name),
+                "{name}"
+            );
+        }
     }
 
     #[test]

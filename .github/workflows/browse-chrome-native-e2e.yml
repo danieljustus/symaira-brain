@@ -86,3 +86,15 @@ jobs:
         env:
           SYMBROWSE_E2E: '1'
         run: python3 port/harness/run.py --suite chrome-daemon
+
+      - name: Run the shared daemon engine corpus against Chrome (ENG-009)
+        env:
+          SYMBROWSE_E2E: '1'
+        run: |
+          set -euo pipefail
+          cargo test --locked -p symbrowse-daemon --test engine_native_corpus \
+            corpus_chrome -- --nocapture 2>&1 | tee "$RUNNER_TEMP/browse-chrome-corpus.log"
+          for case_id in selected-engine-version redirect cookies storage response-capture \
+              capability-truth timeout cleanup; do
+            grep -F "PARITY_CASE ENG-009.$case_id.chrome PASS" "$RUNNER_TEMP/browse-chrome-corpus.log"
+          done

@@ -215,6 +215,16 @@ RUST-017:
 | `python3 port/harness/run.py --suite browser-transport --native-targets` | exit 0, `browser-transport suite passed`. Run as given: the suite only runs three cargo tests (`selection_is_exhaustive`, `retired_compat`, `compat_retired`); `--native-targets` is read only by the `chrome-full`/`safari`/`all` suites, so no browser (and no Safari) is launched |
 | `cargo test -p symbrowse-cli --test compat_retired` | 6 passed: retired compat returns the typed `transport_retired` error for config, env, flag, daemon and MCP, and static/browser selection is unaffected |
 
+2026-11-15 (RUST-017 close-out, macOS arm64, Chrome 156.0.8078.80, Firefox 160.0):
+
+| Command | Result |
+| --- | --- |
+| `python3 port/harness/run.py --suite browser-transport --native-targets` | exit 0; CFG-006 selection tests, the typed-unavailable cases, then the shared native corpus: 30 verified cases (Chrome 9, Firefox 9, Firefox adapter 8, typed unavailable 2, Safari bundle-version info 1, Safari corpus skipped); Safari corpus skipped because the user's normal Safari was running (recorded in `target/native-evidence/browser-transport.json`) |
+| `cargo test -p symbrowse-core --test config_contract` / `-p symbrowse-cli --test transport_selection --test compat_retired` / `-p symbrowse-daemon --test transport_status` | pass |
+
+The first block above predates this close-out: `--native-targets` now runs the
+real-engine corpus for `browser-transport`.
+
 Not covered here: the Safari native gate (Remote Automation on the user's real
 Safari, a maintainer step) and therefore RUST-013; Chrome/Firefox native
 receipts are as recorded in the ledger. Miri was not rerun after the

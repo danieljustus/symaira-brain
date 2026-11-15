@@ -81,6 +81,10 @@ pub mod codes {
     pub const SESSION_USER_CONTROL: &str = "session_user_control";
     pub const SESSION_INACTIVE: &str = "session_inactive";
     pub const HANDOFF_TIMEOUT: &str = "handoff_timeout";
+    /// The explicitly requested engine cannot run on this host (not installed,
+    /// bad configured path, platform without it). Never answered by another
+    /// engine or by static mode.
+    pub const ENGINE_UNAVAILABLE: &str = "engine_unavailable";
 }
 pub use codes as ErrorCode;
 

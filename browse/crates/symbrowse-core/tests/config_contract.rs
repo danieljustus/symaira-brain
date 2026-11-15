@@ -214,6 +214,194 @@ fn static_and_browser_modes_still_load_after_compat_retirement() {
     fs::remove_dir_all(root).expect("remove config fixture root");
 }
 
+#[derive(Deserialize)]
+struct SelectionCase {
+    id: String,
+    mode: String,
+    engine: Option<String>,
+    expect: Option<String>,
+    error: Option<String>,
+}
+
+fn selection_cases() -> Vec<SelectionCase> {
+    const CONTENT: &[u8] = include_bytes!("../../../testdata/port/core/transport-selection.json");
+    #[derive(Deserialize)]
+    struct File {
+        schema_version: u8,
+        cases: Vec<SelectionCase>,
+    }
+    let file: File = serde_json::from_slice(CONTENT).expect("decode transport selection fixture");
+    assert_eq!(file.schema_version, 1);
+    file.cases
+}
+
+/// CFG-006: every fixture case resolves to exactly the expected selection or
+/// the expected typed error code, with no fallback to another mode or engine.
+#[test]
+fn transport_selection_fixture_resolves_exactly_or_fails_typed() {
+    use symbrowse_core::config::resolve_selection;
+    let cases = selection_cases();
+    assert_eq!(cases.len(), 9);
+    for case in cases {
+        let resolved = resolve_selection(Some(&case.mode), case.engine.as_deref());
+        match (&case.expect, &case.error) {
+            (Some(expect), None) => {
+                let selection = resolved.unwrap_or_else(|error| panic!("{}: {error}", case.id));
+                let selected = selection.engine.map_or("static".to_owned(), |engine| {
+                    format!("{engine:?}").to_lowercase()
+                });
+                assert_eq!(&selected, expect, "{}", case.id);
+            }
+            (None, Some(code)) => {
+                let error = resolved.expect_err(&case.id);
+                assert_eq!(error.code, code, "{}", case.id);
+            }
+            _ => panic!(
+                "{}: fixture case needs exactly one of expect/error",
+                case.id
+            ),
+        }
+    }
+}
+
+/// CFG-006: TOML, environment and flag each select an explicit mode and engine;
+/// unknown, conflicting and retired selections fail with their typed code from
+/// every source, and nothing is substituted.
+#[test]
+fn transport_selection_is_explicit_and_typed_from_every_source() {
+    for case in selection_cases()
+        .iter()
+        // Browser mode without an engine is a resolver-level error: the
+        // configuration default engine is `chrome`, never inferred silently.
+        .filter(|case| case.id != "browser-missing-engine")
+    {
+        // The configuration spelling of the static transport is engine "static".
+        let engine = match (&case.engine, case.mode.as_str()) {
+            (Some(engine), _) => Some(engine.clone()),
+            (None, "static") => Some("static".to_owned()),
+            (None, _) => None,
+        };
+        for source in ["global-toml", "project-toml", "env", "flag"] {
+            let root = test_root(&format!("selection-{}-{source}", case.id));
+            let mut context = context(&root);
+            let toml = format!(
+                "mode = \"{}\"\n{}",
+                case.mode,
+                engine
+                    .as_ref()
+                    .map_or(String::new(), |engine| format!("engine = \"{engine}\"\n"))
+            );
+            match source {
+                "global-toml" => {
+                    let global = context
+                        .xdg_config_home
+                        .as_ref()
+                        .unwrap()
+                        .join("symbrowse/config.toml");
+                    fs::create_dir_all(global.parent().unwrap()).expect("config directory");
+                    fs::write(global, toml).expect("write global config");
+                }
+                "project-toml" => {
+                    fs::write(context.cwd.join(".symbrowse.toml"), toml)
+                        .expect("write project config");
+                }
+                "env" => {
+                    context
+                        .env
+                        .insert("SYMBROWSE_MODE".to_owned(), case.mode.clone());
+                    if let Some(engine) = &engine {
+                        context
+                            .env
+                            .insert("SYMBROWSE_ENGINE".to_owned(), engine.clone());
+                    }
+                }
+                _ => {
+                    context.flags.mode = Some(case.mode.clone());
+                    context.flags.engine = engine.clone();
+                }
+            }
+            let loaded = load(&context);
+            match (&case.expect, &case.error) {
+                (Some(expect), None) => {
+                    let config = loaded
+                        .unwrap_or_else(|error| panic!("{} via {source}: {error}", case.id))
+                        .config;
+                    assert_eq!(&config.engine, expect, "{} via {source}", case.id);
+                    assert_eq!(config.mode, case.mode, "{} via {source}", case.id);
+                }
+                (None, Some(code)) => {
+                    let error = loaded
+                        .err()
+                        .unwrap_or_else(|| panic!("{} via {source} must fail", case.id))
+                        .to_string();
+                    // The Go-oracle engine check runs first and carries no code.
+                    let expected = if code == "invalid_browser_engine" {
+                        "invalid engine"
+                    } else {
+                        code.as_str()
+                    };
+                    assert!(
+                        error.contains(expected),
+                        "{} via {source}: {error}",
+                        case.id
+                    );
+                }
+                _ => panic!(
+                    "{}: fixture case needs exactly one of expect/error",
+                    case.id
+                ),
+            }
+            fs::remove_dir_all(root).expect("remove config fixture root");
+        }
+    }
+}
+
+/// CFG-006: flag beats environment beats project TOML beats global TOML for
+/// both the mode and the engine; the winning engine is never overridden by a
+/// lower-precedence source.
+#[test]
+fn transport_selection_precedence_is_flag_env_project_global() {
+    let root = test_root("selection-precedence");
+    let mut context = context(&root);
+    let global = context
+        .xdg_config_home
+        .as_ref()
+        .unwrap()
+        .join("symbrowse/config.toml");
+    fs::create_dir_all(global.parent().unwrap()).expect("config directory");
+    fs::write(global, "mode = \"browser\"\nengine = \"chrome\"\n").expect("global");
+    let load_engine = |context: &LoadContext| {
+        let result = load(context).expect("selection loads");
+        (result.config.engine, result.sources["engine"].clone())
+    };
+    assert_eq!(
+        load_engine(&context),
+        ("chrome".to_owned(), "global".to_owned())
+    );
+    fs::write(
+        context.cwd.join(".symbrowse.toml"),
+        "mode = \"browser\"\nengine = \"firefox\"\n",
+    )
+    .expect("project");
+    assert_eq!(
+        load_engine(&context),
+        ("firefox".to_owned(), "project".to_owned())
+    );
+    context
+        .env
+        .insert("SYMBROWSE_ENGINE".to_owned(), "safari".to_owned());
+    assert_eq!(
+        load_engine(&context),
+        ("safari".to_owned(), "env".to_owned())
+    );
+    context.flags.engine = Some("chrome".to_owned());
+    assert_eq!(
+        load_engine(&context),
+        ("chrome".to_owned(), "flag".to_owned())
+    );
+    fs::remove_dir_all(root).expect("remove config fixture root");
+}
+
 fn context(root: &Path) -> LoadContext {
     let home = root.join("home");
     let cwd = root.join("workspace");

@@ -34,6 +34,10 @@ pub enum FirefoxError {
     },
     Driver(String),
     InvalidTarget(String),
+    /// The requested Firefox cannot be started on this host (not installed,
+    /// bad configured path, exited before BiDi came up). Never substituted by
+    /// another engine.
+    Unavailable(String),
 }
 impl std::fmt::Display for FirefoxError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -42,7 +46,7 @@ impl std::fmt::Display for FirefoxError {
             Self::Timeout { operation, timeout } => {
                 write!(f, "{operation} timed out after {timeout:?}")
             }
-            Self::Driver(s) | Self::InvalidTarget(s) => f.write_str(s),
+            Self::Driver(s) | Self::InvalidTarget(s) | Self::Unavailable(s) => f.write_str(s),
         }
     }
 }
@@ -57,6 +61,7 @@ pub fn canonical_capabilities() -> Capabilities {
             "InspectionEngine",
             "InteractionEngine",
             "NavigationStateProvider",
+            "NetworkEvents",
             "ScreenshotEngine",
             "TabManager",
         ],
@@ -68,7 +73,7 @@ pub fn resolve_firefox_executable(explicit: Option<&Path>) -> Result<PathBuf, Fi
         if path.is_file() {
             return Ok(path.to_owned());
         }
-        return Err(FirefoxError::Driver(format!(
+        return Err(FirefoxError::Unavailable(format!(
             "Firefox executable not found at {}",
             path.display()
         )));
@@ -86,14 +91,39 @@ pub fn resolve_firefox_executable(explicit: Option<&Path>) -> Result<PathBuf, Fi
     candidates
         .into_iter()
         .find(|p| p.is_file())
-        .ok_or_else(|| FirefoxError::Driver("Firefox executable is unavailable".into()))
+        .ok_or_else(|| FirefoxError::Unavailable("Firefox executable is unavailable".into()))
 }
+
+/// Upper bound on buffered BiDi events so a chatty page cannot grow memory.
+const MAX_BUFFERED_EVENTS: usize = 4096;
 
 struct Bidi {
     socket: async_tungstenite::WebSocketStream<async_tungstenite::tokio::ConnectStream>,
     next: u64,
+    /// Events delivered while a command was waiting for its reply.
+    events: Vec<Value>,
 }
 impl Bidi {
+    fn buffer_event(&mut self, value: Value) {
+        if value.get("type").and_then(Value::as_str) == Some("event")
+            && self.events.len() < MAX_BUFFERED_EVENTS
+        {
+            self.events.push(value);
+        }
+    }
+
+    /// Read whatever the browser has already queued without issuing a command.
+    async fn pump(&mut self, window: Duration) {
+        let _ = timeout(window, async {
+            while let Some(Ok(Message::Text(text))) = self.socket.next().await {
+                if let Ok(value) = serde_json::from_str::<Value>(&text) {
+                    self.buffer_event(value);
+                }
+            }
+        })
+        .await;
+    }
+
     async fn command(
         &mut self,
         method: &str,
@@ -123,6 +153,7 @@ impl Bidi {
                         }
                         return Ok(value.get("result").cloned().unwrap_or(Value::Null));
                     }
+                    self.buffer_event(value);
                 }
             }
             Err(FirefoxError::Driver("BiDi socket closed".into()))
@@ -140,6 +171,9 @@ pub struct FirefoxSession {
     child: Option<Child>,
     context: String,
     timeout: Duration,
+    browser_name: String,
+    browser_version: String,
+    capturing: bool,
 }
 impl FirefoxSession {
     pub async fn launch(
@@ -164,7 +198,7 @@ impl FirefoxSession {
             .arg(&profile)
             .kill_on_drop(true)
             .spawn()
-            .map_err(|e| FirefoxError::Driver(format!("launch Firefox: {e}")))?;
+            .map_err(|e| FirefoxError::Unavailable(format!("launch Firefox: {e}")))?;
         let started = Instant::now();
         while started.elapsed() < limit {
             if TcpStream::connect(("127.0.0.1", port)).await.is_ok() {
@@ -175,7 +209,7 @@ impl FirefoxSession {
                 .map_err(|e| FirefoxError::Driver(e.to_string()))?
                 .is_some()
             {
-                return Err(FirefoxError::Driver(
+                return Err(FirefoxError::Unavailable(
                     "Firefox exited before BiDi became ready".into(),
                 ));
             }
@@ -196,14 +230,31 @@ impl FirefoxSession {
             })?;
 
         let mut session = Self {
-            bidi: Bidi { socket, next: 1 },
+            bidi: Bidi {
+                socket,
+                next: 1,
+                events: Vec::new(),
+            },
             child: Some(child),
             context: String::new(),
             timeout: limit,
+            browser_name: String::new(),
+            browser_version: String::new(),
+            capturing: false,
         };
         let result = session.bidi.command("session.new", json!({"capabilities":{"alwaysMatch":{"browserName":"firefox","webSocketUrl":true}}}), limit).await?;
-        session.context = result
-            .get("capabilities")
+        let negotiated = result.get("capabilities");
+        session.browser_name = negotiated
+            .and_then(|v| v.get("browserName"))
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
+        session.browser_version = negotiated
+            .and_then(|v| v.get("browserVersion"))
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
+        session.context = negotiated
             .and_then(|v| v.get("webSocketUrl"))
             .and_then(Value::as_str)
             .unwrap_or_default()
@@ -222,6 +273,19 @@ impl FirefoxSession {
             .into();
         Ok(session)
     }
+    /// Product name the running Firefox negotiated (`firefox`).
+    #[must_use]
+    pub fn browser_name(&self) -> &str {
+        &self.browser_name
+    }
+
+    /// Version the running Firefox reported in `session.new`
+    /// (`capabilities.browserVersion`, for example `160.0`).
+    #[must_use]
+    pub fn browser_version(&self) -> &str {
+        &self.browser_version
+    }
+
     pub async fn navigate(&mut self, target: &str) -> Result<NavigationResult, FirefoxError> {
         if !target.starts_with("http://") && !target.starts_with("https://") {
             return Err(FirefoxError::InvalidTarget(target.into()));
@@ -251,6 +315,19 @@ impl FirefoxSession {
     }
     pub async fn evaluate(&mut self, expression: &str) -> Result<EvaluationResult, FirefoxError> {
         let result = self.bidi.command("script.evaluate", json!({"expression":expression,"target":{"context":self.context},"awaitPromise":true,"resultOwnership":"root"}), self.timeout).await?;
+        if result.get("type").and_then(Value::as_str) == Some("exception") {
+            let text = result
+                .get("exceptionDetails")
+                .and_then(|details| details.get("text"))
+                .and_then(Value::as_str)
+                .unwrap_or("script exception");
+            return Ok(EvaluationResult {
+                value: None,
+                value_type: "exception".into(),
+                description: String::new(),
+                exception_text: text.into(),
+            });
+        }
         let remote = result.get("result").unwrap_or(&Value::Null);
         Ok(EvaluationResult {
             value: remote.get("value").cloned(),
@@ -272,7 +349,18 @@ impl FirefoxSession {
         self.bidi
             .command(
                 "storage.getCookies",
-                json!({"partition":{"context":self.context}}),
+                json!({"partition":{"type":"context","context":self.context}}),
+                self.timeout,
+            )
+            .await
+    }
+
+    /// Delete cookies with `name` through the Firefox BiDi storage module.
+    pub async fn delete_cookies(&mut self, name: &str) -> Result<Value, FirefoxError> {
+        self.bidi
+            .command(
+                "storage.deleteCookies",
+                json!({"filter":{"name":name},"partition":{"type":"context","context":self.context}}),
                 self.timeout,
             )
             .await
@@ -283,7 +371,7 @@ impl FirefoxSession {
         self.bidi
             .command(
                 "storage.setCookie",
-                json!({"cookie":cookie,"partition":{"context":self.context}}),
+                json!({"cookie":cookie,"partition":{"type":"context","context":self.context}}),
                 self.timeout,
             )
             .await
@@ -315,6 +403,53 @@ impl FirefoxSession {
             .await?
             .value
             .unwrap_or(Value::Null))
+    }
+
+    /// Start recording completed network responses for this session. BiDi
+    /// delivers them as `network.responseCompleted` events, so the capture is
+    /// the browser's own view of the traffic, not a proxy.
+    pub async fn start_network_capture(&mut self) -> Result<(), FirefoxError> {
+        if !self.capturing {
+            self.bidi
+                .command(
+                    "session.subscribe",
+                    json!({"events":["network.responseCompleted"]}),
+                    self.timeout,
+                )
+                .await?;
+            self.capturing = true;
+        }
+        self.bidi.events.clear();
+        Ok(())
+    }
+
+    /// Responses completed since [`Self::start_network_capture`], oldest first.
+    pub async fn network_responses(&mut self) -> Result<Vec<Value>, FirefoxError> {
+        if !self.capturing {
+            return Err(FirefoxError::InvalidTarget(
+                "network capture was not started".into(),
+            ));
+        }
+        self.bidi.pump(Duration::from_millis(250)).await;
+        Ok(self
+            .bidi
+            .events
+            .iter()
+            .filter(|event| {
+                event.get("method").and_then(Value::as_str) == Some("network.responseCompleted")
+            })
+            .filter_map(|event| {
+                let params = event.get("params")?;
+                let request = params.get("request")?;
+                let response = params.get("response")?;
+                Some(json!({
+                    "url": response.get("url").or_else(|| request.get("url")).cloned().unwrap_or(Value::Null),
+                    "method": request.get("method").cloned().unwrap_or(Value::Null),
+                    "status": response.get("status").cloned().unwrap_or(Value::Null),
+                    "mime_type": response.get("mimeType").cloned().unwrap_or(Value::Null),
+                }))
+            })
+            .collect())
     }
 
     pub async fn browsing_contexts(&mut self) -> Result<Value, FirefoxError> {
@@ -376,7 +511,7 @@ mod tests {
     fn invalid_explicit_path_is_typed() {
         assert!(matches!(
             resolve_firefox_executable(Some(Path::new("/missing/firefox"))),
-            Err(FirefoxError::Driver(_))
+            Err(FirefoxError::Unavailable(_))
         ));
     }
 }

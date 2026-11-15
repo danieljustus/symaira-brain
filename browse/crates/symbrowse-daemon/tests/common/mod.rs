@@ -1,6 +1,8 @@
 //! Shared integration-test helpers.
 #![allow(dead_code)]
 
+pub mod corpus_fixture;
+
 use std::sync::Arc;
 
 use symbrowse_core::key_resolver::{KeySources, ProbeError};

@@ -59,6 +59,35 @@ and FETCH-011 are accepted differences; historical evidence
 `port/harness/cases/compat-sidecar.json`) is retained unmodified. The
 `compat-sidecar` and `fetch-fingerprints` harness suites are retired.
 
+## Typed selection, status and unavailable errors
+
+- A failed transport selection (`invalid_transport_mode`,
+  `browser_engine_required`, `engine_not_allowed`, `engine_not_advertised`,
+  `transport_retired`) is a `config` error with exit code 9 and the stable code in
+  `error.details.code`, from `config show`, `daemon` and `mcp`. The
+  `invalid configuration` message of the Go oracle is unchanged.
+- `daemon.status` reports the selected `mode` and `engine` and never the
+  browser profile path; `config show` keeps its 26 oracle fields (engine
+  `static` is the static mode).
+- `engine.info` starts (or reuses) the requested engine and reports
+  `{mode, engine, kind, version, product, capabilities}`: the version is what
+  the running browser reports about itself (Chrome `Browser.getVersion`,
+  Firefox BiDi `session.new`); Safari reports the installed application
+  version without being launched.
+- An explicitly requested engine that cannot run (not installed, bad
+  `executable_path`, platform without it) fails with the daemon error code
+  `engine_unavailable`. The daemon keeps reporting that engine; no other engine
+  or static mode answers.
+- Operations an engine does not implement fail with the typed `unsupported`
+  code. Firefox implements navigation, `eval`, cookies, storage, `get.*`,
+  response capture (`NetworkEvents`), screenshots, tabs and frames over BiDi;
+  downloads, uploads, HAR and dialogs are unsupported.
+
+The native evidence is `port/harness/run.py --suite browser-transport
+--native-targets` (shared loopback corpus against real Chrome and Firefox;
+Safari only when the user's normal Safari is not running, otherwise recorded as
+skipped with its reason).
+
 ## Cutover
 
 Release approval requires all static and individual Chrome/Safari/

@@ -43,6 +43,18 @@ const FIELDS: [&str; 26] = [
 /// Stable code for a selection of the retired `compat` (Go/AzureTLS) transport.
 pub const TRANSPORT_RETIRED: &str = "transport_retired";
 
+/// Every stable code [`resolve_selection`] can return. A configuration error
+/// whose message is `<prefix>: <code>: <text>` carries one of these, which the
+/// CLI surfaces as `error.details.code` so scripts never parse prose.
+pub const SELECTION_ERROR_CODES: [&str; 6] = [
+    TRANSPORT_RETIRED,
+    "engine_not_advertised",
+    "invalid_transport_mode",
+    "invalid_browser_engine",
+    "browser_engine_required",
+    "engine_not_allowed",
+];
+
 /// Operator-facing explanation attached to [`TRANSPORT_RETIRED`].
 pub const COMPAT_RETIRED_MESSAGE: &str = "the compat transport (Go/AzureTLS sidecar) has been retired and is no longer available; set mode to static or browser";
 

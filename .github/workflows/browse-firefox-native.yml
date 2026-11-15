@@ -50,6 +50,27 @@ jobs:
       - name: Firefox adapter unit and contract tests
         run: cargo test --locked -p symbrowse-engine-firefox
 
+      - name: Firefox BiDi corpus and daemon engine corpus (ENG-009/ENG-010)
+        env:
+          SYMBROWSE_E2E: '1'
+          SYMBROWSE_FIREFOX_EXECUTABLE: ${{ steps.firefox.outputs.executable }}
+        run: |
+          set -euo pipefail
+          # One shared loopback fixture (redirect, JavaScript, cookies, storage,
+          # response capture, timeout, cleanup) drives the adapter and the
+          # production daemon against the real Firefox.
+          {
+            cargo test --locked -p symbrowse-engine-firefox --test native -- --nocapture
+            cargo test --locked -p symbrowse-daemon --test engine_native_corpus \
+              unavailable_engine_is_a_typed_error_without_substitution corpus_firefox -- --nocapture
+          } 2>&1 | tee "$RUNNER_TEMP/browse-firefox-corpus.log"
+          for case_id in ENG-010.lifecycle-version ENG-010.cookies ENG-010.response-capture \
+              ENG-010.timeout ENG-010.cleanup ENG-009.selected-engine-version.firefox \
+              ENG-009.cookies.firefox ENG-009.timeout.firefox ENG-009.cleanup.firefox \
+              ENG-009.unavailable-typed.firefox; do
+            grep -F "PARITY_CASE $case_id PASS" "$RUNNER_TEMP/browse-firefox-corpus.log"
+          done
+
       - name: Run the native BiDi gate against a loopback fixture
         env:
           SYMBROWSE_E2E: '1'
@@ -78,6 +99,8 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: browse-firefox-native-${{ matrix.platform }}-${{ github.sha }}
-          path: ${{ runner.temp }}/browse-firefox-native.log
+          path: |
+            ${{ runner.temp }}/browse-firefox-native.log
+            ${{ runner.temp }}/browse-firefox-corpus.log
           if-no-files-found: error
           retention-days: 14

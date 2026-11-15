@@ -73,6 +73,9 @@ pub(crate) fn run_mcp(
                 // MCP stdout carries JSON-RPC only: report on stderr.
                 return write_transport_retired(Format::Text, &error.to_string());
             }
+            if selection_code(&error.to_string()).is_some() {
+                return write_config_error(Format::Text, &error.to_string());
+            }
             let _ = writeln!(io::stderr(), "{error}");
             return ExitCode::from(1);
         }
@@ -81,6 +84,9 @@ pub(crate) fn run_mcp(
     let engine = engine.unwrap_or(config.engine);
     let allow_private = allow_private || config.allow_private;
     if let Err(message) = validate_engine(&engine) {
+        if selection_code(&message).is_some() {
+            return write_config_error(Format::Text, &message);
+        }
         let _ = writeln!(io::stderr(), "{message}");
         return ExitCode::from(1);
     }
@@ -224,6 +230,9 @@ pub(crate) fn run_daemon(
             if is_transport_retired(&error.to_string()) {
                 return write_transport_retired(format, &error.to_string());
             }
+            if selection_code(&error.to_string()).is_some() {
+                return write_config_error(format, &error.to_string());
+            }
             let _ = writeln!(io::stderr(), "daemon configuration: {error}");
             return ExitCode::from(1);
         }
@@ -255,14 +264,21 @@ pub(crate) fn run_daemon(
         if error.code == symbrowse_core::config::TRANSPORT_RETIRED {
             return write_transport_retired(format, &error.message);
         }
-        let _ = writeln!(
-            io::stderr(),
-            "invalid transport selection: {}",
-            error.message
+        return write_selection_failure(
+            format,
+            &format!(
+                "invalid transport selection: {}: {}",
+                error.code, error.message
+            ),
+            &format!("invalid transport selection: {}", error.message),
+            error.code,
+            "select static, or browser with an explicit chrome, safari or firefox engine",
         );
-        return ExitCode::from(1);
     }
     if let Err(error) = validate_engine(&engine) {
+        if selection_code(&error).is_some() {
+            return write_config_error(format, &error);
+        }
         let _ = writeln!(io::stderr(), "{error}");
         return ExitCode::from(1);
     }
@@ -350,19 +366,35 @@ pub(crate) fn is_transport_retired(message: &str) -> bool {
     message.contains(symbrowse_core::config::TRANSPORT_RETIRED)
 }
 
-/// Render the retired-transport failure through the existing config error
-/// contract: `config` error code, exit 9, and the stable `transport_retired`
-/// identifier in `details.code`.
-pub(crate) fn write_transport_retired(format: Format, message: &str) -> ExitCode {
+/// Stable selection code carried by a configuration or selection message
+/// (`invalid configuration: <code>: ...` or `<code>: ...`), if any.
+pub(crate) fn selection_code(message: &str) -> Option<&'static str> {
+    symbrowse_core::config::SELECTION_ERROR_CODES
+        .into_iter()
+        .find(|code| {
+            message
+                .split(": ")
+                .any(|part| part == *code || part.starts_with(&format!("{code}:")))
+        })
+}
+
+/// Render a typed selection failure through the config error contract:
+/// `config` error code, exit 9 and the stable selection identifier in
+/// `details.code`. Text output keeps the message on stderr.
+fn write_selection_failure(
+    format: Format,
+    stderr_message: &str,
+    envelope_message: &str,
+    code: &str,
+    hint: &str,
+) -> ExitCode {
     if format == Format::Text {
-        let _ = writeln!(io::stderr(), "{message}");
+        let _ = writeln!(io::stderr(), "{stderr_message}");
     } else {
-        let mut envelope = Envelope::failure(ErrorCode::Config, message);
+        let mut envelope = Envelope::failure(ErrorCode::Config, envelope_message);
         if let Some(error) = envelope.error.as_mut() {
-            error.hint = "set mode to static or browser".to_owned();
-            error.details = Some(serde_json::json!({
-                "code": symbrowse_core::config::TRANSPORT_RETIRED,
-            }));
+            error.hint = hint.to_owned();
+            error.details = Some(serde_json::json!({ "code": code }));
         }
         if let Ok(output) = envelope.render(format) {
             let _ = io::stdout().write_all(output.as_bytes());
@@ -371,9 +403,38 @@ pub(crate) fn write_transport_retired(format: Format, message: &str) -> ExitCode
     ExitCode::from(ErrorCode::Config.exit_code())
 }
 
+/// Render the retired-transport failure through the existing config error
+/// contract: `config` error code, exit 9, and the stable `transport_retired`
+/// identifier in `details.code`.
+pub(crate) fn write_transport_retired(format: Format, message: &str) -> ExitCode {
+    write_selection_failure(
+        format,
+        message,
+        message,
+        symbrowse_core::config::TRANSPORT_RETIRED,
+        "set mode to static or browser",
+    )
+}
+
 pub(crate) fn write_config_error(format: Format, message: &str) -> ExitCode {
     if is_transport_retired(message) {
         return write_transport_retired(format, message);
+    }
+    if let Some(code) = selection_code(message) {
+        // Configuration messages stay Go-compatible (`invalid configuration`);
+        // only `details.code` is added. Other selection messages are kept whole.
+        let envelope_message = if message.starts_with("invalid configuration") {
+            message.split_once(':').map_or(message, |(outer, _)| outer)
+        } else {
+            message
+        };
+        return write_selection_failure(
+            format,
+            message,
+            envelope_message,
+            code,
+            "select static, or browser with an explicit chrome, safari or firefox engine",
+        );
     }
     if format == Format::Text {
         let _ = writeln!(io::stderr(), "{message}");
