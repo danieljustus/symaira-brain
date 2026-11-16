@@ -13,6 +13,11 @@ updates:
       # fails to resolve. Remove after danieljustus/symaira-corekit#475.
       - dependency-name: "serde_json"
     groups:
+      # CoreKit crates share one Git tag; bump them together. Dependabot only
+      # bumps CoreKit pins written as `tag = "vX.Y.Z"`, never `rev = "<sha>"`.
+      symaira-corekit:
+        patterns:
+          - "symaira-core-*"
       cargo-minor-patch:
         update-types:
           - "minor"
@@ -27,3 +32,18 @@ updates:
         update-types:
           - "minor"
           - "patch"
+
+  # CoreKit Swift pins. "/" covers SymBrain.xcodeproj (project.pbxproj +
+  # Package.resolved); Dependabot never edits project.yml, so a bump PR must
+  # also update its exactVersion (scripts/check-corekit-pins.sh enforces it).
+  - package-ecosystem: "swift"
+    directories:
+      - "/"
+      - "/operate"
+      - "/scope"
+    schedule:
+      interval: "weekly"
+    groups:
+      symaira-corekit:
+        patterns:
+          - "*symaira-corekit*"

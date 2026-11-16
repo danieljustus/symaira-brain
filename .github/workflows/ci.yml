@@ -86,6 +86,9 @@ jobs:
           fi
           echo "All actions are pinned to SHA."
 
+      - name: Check symaira-corekit pins match project.yml
+        run: bash scripts/check-corekit-pins.sh
+
   macos-release-verification-contract:
     runs-on: ubuntu-latest
     steps:
