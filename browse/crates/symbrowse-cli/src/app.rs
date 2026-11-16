@@ -18,7 +18,9 @@ use symbrowse_core::{
     go_value,
     output::{Envelope, Format, Warning},
 };
-use symbrowse_daemon::{Client, ClientError, ClientOptions, Frame, Response, default_socket_path};
+use symbrowse_daemon::{
+    Client, ClientError, ClientOptions, Frame, Response, try_default_socket_path,
+};
 
 use crate::cobra::{self, FlagValues, Tree};
 
@@ -319,7 +321,7 @@ fn socket_path(session: &str) -> Result<std::path::PathBuf, CliError> {
             symbrowse_core::go_quote::quote_argv(session)
         )));
     }
-    Ok(default_socket_path(session))
+    try_default_socket_path(session).map_err(CliError::plain)
 }
 
 fn client(session: &str) -> Result<Client, CliError> {

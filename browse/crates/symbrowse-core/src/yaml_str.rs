@@ -5,17 +5,24 @@
 
 pub(crate) enum Encoded {
     Inline(String),
-    /// Literal block: header (`|`, `|-`, `|4+` ...) and the body lines.
+    /// Literal block: the header (`|`, `|-`, `|4+` ...); the body comes from
+    /// [`literal_text`].
     Literal {
         header: String,
-        lines: Vec<String>,
     },
 }
 
+/// yaml.v3 `is_printable`: line feed, ASCII, and U+00A0..U+FFFD without the
+/// byte-order mark and the two non-characters. NEL and everything above the
+/// basic plane (emoji) are *not* printable there, so they are escaped.
 fn is_printable(c: char) -> bool {
     matches!(c,
-        '\u{0a}' | '\u{20}'..='\u{7e}' | '\u{85}' | '\u{a0}'..='\u{d7ff}'
-        | '\u{e000}'..='\u{fefe}' | '\u{ff00}'..='\u{fffd}' | '\u{10000}'..='\u{10ffff}')
+        '\u{0a}' | '\u{20}'..='\u{7e}' | '\u{a0}'..='\u{d7ff}'
+        | '\u{e000}'..='\u{fefe}' | '\u{ff00}'..='\u{fffd}')
+}
+
+fn is_break(c: char) -> bool {
+    matches!(c, '\n' | '\r' | '\u{85}' | '\u{2028}' | '\u{2029}')
 }
 
 struct Analysis {
@@ -31,6 +38,7 @@ fn analyze(value: &str) -> Analysis {
     let mut flow_indicators = false;
     let mut line_breaks = false;
     let mut special = false;
+    let mut has_tab = false;
     let mut leading_space = false;
     let mut leading_break = false;
     let mut trailing_space = false;
@@ -40,15 +48,16 @@ fn analyze(value: &str) -> Analysis {
     let mut preceded_by_whitespace = true;
     let mut previous_space = false;
     let mut previous_break = false;
-    let is_ws = |c: char| {
-        matches!(
-            c,
-            ' ' | '\t' | '\n' | '\r' | '\u{85}' | '\u{2028}' | '\u{2029}'
-        )
-    };
-    let is_break = |c: char| matches!(c, '\n' | '\r' | '\u{85}' | '\u{2028}' | '\u{2029}');
+    // yaml.v3: `is_blank` (space, tab) for look-ahead, `is_blankz` (blank,
+    // break, NUL) for look-behind.
+    let is_blank = |c: char| matches!(c, ' ' | '\t');
+    let is_blankz = |c: char| is_blank(c) || is_break(c) || c == '\0';
+    if value.starts_with("---") || value.starts_with("...") {
+        block_indicators = true;
+        flow_indicators = true;
+    }
     for (i, &c) in chars.iter().enumerate() {
-        let followed_by_whitespace = chars.get(i + 1).is_none_or(|n| is_ws(*n));
+        let followed_by_whitespace = chars.get(i + 1).is_none_or(|n| is_blank(*n));
         if i == 0 {
             match c {
                 '#' | ',' | '[' | ']' | '{' | '}' | '&' | '*' | '!' | '|' | '>' | '\'' | '"'
@@ -84,11 +93,12 @@ fn analyze(value: &str) -> Analysis {
                 _ => {}
             }
         }
-        if !is_printable(c) {
+        if c == '\t' {
+            // yaml.v3 keeps a tab out of plain and single-quoted scalars but a
+            // literal block may carry it (recorded Go behaviour).
+            has_tab = true;
+        } else if !is_printable(c) {
             special = true;
-        }
-        if is_break(c) {
-            line_breaks = true;
         }
         if c == ' ' {
             if i == 0 {
@@ -103,6 +113,7 @@ fn analyze(value: &str) -> Analysis {
             previous_space = true;
             previous_break = false;
         } else if is_break(c) {
+            line_breaks = true;
             if i == 0 {
                 leading_break = true;
             }
@@ -118,7 +129,7 @@ fn analyze(value: &str) -> Analysis {
             previous_space = false;
             previous_break = false;
         }
-        preceded_by_whitespace = is_ws(c);
+        preceded_by_whitespace = is_blankz(c);
     }
     let mut flow_plain_allowed = true;
     let mut block_plain_allowed = true;
@@ -141,6 +152,11 @@ fn analyze(value: &str) -> Analysis {
         block_plain_allowed = false;
         single_quoted_allowed = false;
         block_allowed = false;
+    }
+    if has_tab {
+        flow_plain_allowed = false;
+        block_plain_allowed = false;
+        single_quoted_allowed = false;
     }
     if line_breaks {
         flow_plain_allowed = false;
@@ -286,35 +302,42 @@ fn is_base60_float(value: &str) -> bool {
 }
 
 fn double_quote(value: &str) -> String {
+    // yaml.v3 `is_bom(b, i)` tests `b[0]` instead of `b[i]`: a value that
+    // starts with a byte-order mark has every character escaped.
+    let bom_prefix = value.starts_with('\u{feff}');
     let mut out = String::from("\"");
     for c in value.chars() {
+        if !(bom_prefix || !is_printable(c) || is_break(c) || c == '"' || c == '\\') {
+            out.push(c);
+            continue;
+        }
+        out.push('\\');
         match c {
-            '\0' => out.push_str("\\0"),
-            '\u{7}' => out.push_str("\\a"),
-            '\u{8}' => out.push_str("\\b"),
-            '\t' => out.push_str("\\t"),
-            '\n' => out.push_str("\\n"),
-            '\u{b}' => out.push_str("\\v"),
-            '\u{c}' => out.push_str("\\f"),
-            '\r' => out.push_str("\\r"),
-            '\u{1b}' => out.push_str("\\e"),
-            '"' => out.push_str("\\\""),
-            '\\' => out.push_str("\\\\"),
-            '\u{85}' => out.push_str("\\N"),
-            '\u{a0}' => out.push_str("\\_"),
-            '\u{2028}' => out.push_str("\\L"),
-            '\u{2029}' => out.push_str("\\P"),
-            c if !is_printable(c) || c == '\u{feff}' => {
+            '\0' => out.push('0'),
+            '\u{7}' => out.push('a'),
+            '\u{8}' => out.push('b'),
+            '\t' => out.push('t'),
+            '\n' => out.push('n'),
+            '\u{b}' => out.push('v'),
+            '\u{c}' => out.push('f'),
+            '\r' => out.push('r'),
+            '\u{1b}' => out.push('e'),
+            '"' => out.push('"'),
+            '\\' => out.push('\\'),
+            '\u{85}' => out.push('N'),
+            '\u{a0}' => out.push('_'),
+            '\u{2028}' => out.push('L'),
+            '\u{2029}' => out.push('P'),
+            c => {
                 let code = c as u32;
                 if code <= 0xff {
-                    out.push_str(&format!("\\x{code:02X}"));
+                    out.push_str(&format!("x{code:02X}"));
                 } else if code <= 0xffff {
-                    out.push_str(&format!("\\u{code:04X}"));
+                    out.push_str(&format!("u{code:04X}"));
                 } else {
-                    out.push_str(&format!("\\U{code:08X}"));
+                    out.push_str(&format!("U{code:08X}"));
                 }
             }
-            c => out.push(c),
         }
     }
     out.push('"');
@@ -327,21 +350,13 @@ pub(crate) fn encode(value: &str, key: bool) -> Encoded {
     let analysis = analyze(value);
     if value.contains('\n') {
         if analysis.block_allowed && !key {
-            let leading = value.starts_with([' ', '\n']);
-            let trailing_breaks = value.chars().rev().take_while(|c| *c == '\n').count();
-            let chomp = match trailing_breaks {
-                0 => "-",
-                1 => "",
-                _ => "+",
+            return Encoded::Literal {
+                header: literal_header(value),
             };
-            let header = format!("|{}{chomp}", if leading { "4" } else { "" });
-            let body = value.strip_suffix('\n').unwrap_or(value);
-            let mut lines: Vec<String> = body.split('\n').map(str::to_owned).collect();
-            if trailing_breaks > 1 {
-                lines.truncate(lines.len());
-            }
-            return Encoded::Literal { header, lines };
         }
+        return Encoded::Inline(double_quote(value));
+    }
+    if key && analysis.multiline {
         return Encoded::Inline(double_quote(value));
     }
     let plain_ok =
@@ -356,6 +371,79 @@ pub(crate) fn encode(value: &str, key: bool) -> Encoded {
         return Encoded::Inline(format!("'{}'", value.replace('\'', "''")));
     }
     Encoded::Inline(double_quote(value))
+}
+
+/// yaml.v3 `write_block_scalar_hints`: an indentation hint when the value
+/// starts with a space or break, and a chomping hint (`-` strip, `+` keep).
+fn literal_header(value: &str) -> String {
+    let mut header = String::from("|");
+    if value.starts_with(' ') || value.chars().next().is_some_and(is_break) {
+        header.push('4');
+    }
+    let mut tail = value.chars().rev();
+    match tail.next() {
+        None => header.push('-'),
+        Some(last) if !is_break(last) => header.push('-'),
+        Some(_) => match tail.next() {
+            None => header.push('+'),
+            Some(previous) if is_break(previous) => header.push('+'),
+            Some(_) => {}
+        },
+    }
+    header
+}
+
+/// The text of a literal block scalar after its key: `header`, then the value
+/// verbatim with every non-empty line indented by `pad`, and a final line
+/// break unless the value already ends in one (the emitter's next
+/// `write_indent` supplies it).
+pub(crate) fn literal_text(header: &str, value: &str, pad: &str) -> String {
+    let mut out = String::from(header);
+    let mut at_line_start = false;
+    let mut breaks = true;
+    for c in value.chars() {
+        if is_break(c) {
+            out.push(c);
+            at_line_start = true;
+            breaks = true;
+        } else {
+            if breaks {
+                if !at_line_start {
+                    out.push('\n');
+                }
+                out.push_str(pad);
+            }
+            out.push(c);
+            at_line_start = false;
+            breaks = false;
+        }
+    }
+    if !at_line_start {
+        out.push('\n');
+    }
+    out
+}
+
+/// yaml.v3 writes U+2028/U+2029 in a single-quoted scalar as real line breaks:
+/// the break is copied and the next text starts on the scalar's indent.
+pub(crate) fn single_quoted_breaks(quoted: &str, pad: &str) -> String {
+    let last = quoted.chars().count().saturating_sub(1);
+    let mut out = String::with_capacity(quoted.len());
+    let mut breaks = false;
+    for (index, c) in quoted.chars().enumerate() {
+        if matches!(c, '\u{2028}' | '\u{2029}') {
+            out.push(c);
+            breaks = true;
+            continue;
+        }
+        // The closing quote is an indicator, not text: it gets no indent.
+        if breaks && index != last {
+            out.push_str(pad);
+        }
+        breaks = false;
+        out.push(c);
+    }
+    out
 }
 
 pub fn inline(value: &str, key: bool) -> String {

@@ -207,9 +207,14 @@ fn write_yaml_warnings(output: &mut String, warnings: &[Warning]) {
     }
     output.push_str("warnings:\n");
     for warning in warnings {
-        output.push_str("    - kind: ");
-        output.push_str(&yaml_string(&warning.kind));
-        output.push('\n');
+        output.push_str("    - ");
+        write_yaml_field_at(
+            output,
+            "kind",
+            &Value::String(warning.kind.clone()),
+            6,
+            false,
+        );
         for (key, value) in [
             ("severity", warning.severity.as_str()),
             ("message", warning.message.as_str()),
@@ -217,11 +222,7 @@ fn write_yaml_warnings(output: &mut String, warnings: &[Warning]) {
             ("excerpt", warning.excerpt.as_str()),
         ] {
             if !value.is_empty() {
-                output.push_str("      ");
-                output.push_str(key);
-                output.push_str(": ");
-                output.push_str(&yaml_string(value));
-                output.push('\n');
+                write_yaml_field(output, key, &Value::String(value.to_owned()), 6);
             }
         }
     }
@@ -269,38 +270,177 @@ fn write_yaml_error(output: &mut String, error: Option<&ErrorPayload>) -> Result
     Ok(())
 }
 
+/// yaml.v3 `increase_indent` below a block mapping key: the next multiple of
+/// the 4-column indent (a key in a sequence item sits at an odd offset).
+fn below_key(indent: usize) -> usize {
+    4 * ((indent + 4) / 4)
+}
+
+/// Writes `key: value` for a block mapping whose keys sit in column `indent`.
 pub(crate) fn write_yaml_field(output: &mut String, key: &str, value: &Value, indent: usize) {
-    output.push_str(&" ".repeat(indent));
-    output.push_str(&yaml_key(key));
-    output.push(':');
+    write_yaml_field_at(output, key, value, indent, true);
+}
+
+/// Like [`write_yaml_field`]; `pad` is false for the first key of a mapping
+/// that follows `- ` on the same line.
+pub(crate) fn write_yaml_field_at(
+    output: &mut String,
+    key: &str,
+    value: &Value,
+    indent: usize,
+    pad: bool,
+) {
+    if pad {
+        output.push_str(&" ".repeat(indent));
+    }
+    let name = crate::go_value::yaml_name(key);
+    // yaml.v3 `check_simple_key`: a multi-line or over-long key is written as
+    // an explicit `? key` / `: value` pair.
+    if name.len() > 128 || name.chars().any(is_yaml_break) {
+        output.push_str("? ");
+        match crate::yaml_str::encode(name, false) {
+            crate::yaml_str::Encoded::Literal { header } => output.push_str(
+                &crate::yaml_str::literal_text(&header, name, &" ".repeat(below_key(indent))),
+            ),
+            crate::yaml_str::Encoded::Inline(text) => {
+                output.push_str(&text);
+                output.push('\n');
+            }
+        }
+        output.push_str(&" ".repeat(indent));
+        output.push(':');
+    } else {
+        output.push_str(&yaml_key(key));
+        output.push(':');
+    }
+    write_yaml_value(output, value, indent, false);
+}
+
+fn is_yaml_break(c: char) -> bool {
+    matches!(c, '\n' | '\r' | '\u{85}' | '\u{2028}' | '\u{2029}')
+}
+
+/// yaml.v3 `keyList.Less` for string keys: letters compare by code point,
+/// a letter sorts after a non-letter (unless the common prefix ended in a
+/// digit), and digit runs compare by numeric value.
+fn yaml_key_less(a: &str, b: &str) -> bool {
+    let ar: Vec<char> = a.chars().collect();
+    let br: Vec<char> = b.chars().collect();
+    let mut digits = false;
+    for i in 0..ar.len().min(br.len()) {
+        if ar[i] == br[i] {
+            digits = ar[i].is_numeric();
+            continue;
+        }
+        let (al, bl) = (ar[i].is_alphabetic(), br[i].is_alphabetic());
+        if al && bl {
+            return ar[i] < br[i];
+        }
+        if al || bl {
+            return if digits { al } else { bl };
+        }
+        let (mut an, mut bn) = (0i64, 0i64);
+        if ar[i] == '0' || br[i] == '0' {
+            for j in (0..i).rev() {
+                if !ar[j].is_numeric() {
+                    break;
+                }
+                if ar[j] != '0' {
+                    an = 1;
+                    bn = 1;
+                    break;
+                }
+            }
+        }
+        let mut ai = i;
+        while ai < ar.len() && ar[ai].is_numeric() {
+            an = an
+                .wrapping_mul(10)
+                .wrapping_add(i64::from(ar[ai] as u32) - i64::from('0' as u32));
+            ai += 1;
+        }
+        let mut bi = i;
+        while bi < br.len() && br[bi].is_numeric() {
+            bn = bn
+                .wrapping_mul(10)
+                .wrapping_add(i64::from(br[bi] as u32) - i64::from('0' as u32));
+            bi += 1;
+        }
+        if an != bn {
+            return an < bn;
+        }
+        if ai != bi {
+            return ai < bi;
+        }
+        return ar[i] < br[i];
+    }
+    ar.len() < br.len()
+}
+
+/// Entries in yaml.v3 order. Struct-shaped objects carry ordered keys that
+/// already encode the declaration order and are left alone.
+fn yaml_entries(values: &serde_json::Map<String, Value>) -> Vec<(&String, &Value)> {
+    let mut entries: Vec<(&String, &Value)> = values.iter().collect();
+    if entries.iter().any(|(key, _)| key.starts_with('\u{1}')) {
+        return entries;
+    }
+    // Stable insertion sort: `yaml_key_less` is not a total order, so the
+    // standard sorts (which may reject that) are not used.
+    for index in 1..entries.len() {
+        let mut position = index;
+        while position > 0 && yaml_key_less(entries[position].0, entries[position - 1].0) {
+            entries.swap(position, position - 1);
+            position -= 1;
+        }
+    }
+    entries
+}
+
+/// Writes `- value` for a block sequence whose dashes sit in column `indent`;
+/// `pad` is false for the first item of a sequence that follows `- ` inline.
+fn write_yaml_sequence_item_at(output: &mut String, value: &Value, indent: usize, pad: bool) {
+    if pad {
+        output.push_str(&" ".repeat(indent));
+    }
+    output.push('-');
+    write_yaml_value(output, value, indent, true);
+}
+
+/// Writes the value after `key:` (`in_seq` false, `indent` = key column) or
+/// after `-` (`in_seq` true, `indent` = dash column), following the layout of
+/// yaml.v3's emitter: collections below a key start at the next 4-column
+/// stop, the first node of a sequence item starts two columns right of the
+/// dash on the same line.
+pub(crate) fn write_yaml_value(output: &mut String, value: &Value, indent: usize, in_seq: bool) {
+    let child = if in_seq {
+        indent + 2
+    } else {
+        below_key(indent)
+    };
+    let opener = if in_seq { ' ' } else { '\n' };
     match value {
         Value::Object(values) if !values.is_empty() => {
-            output.push('\n');
-            for (child_key, child_value) in values {
-                write_yaml_field(output, child_key, child_value, indent + 4);
+            output.push(opener);
+            for (index, (key, child_value)) in yaml_entries(values).into_iter().enumerate() {
+                write_yaml_field_at(output, key, child_value, child, !(in_seq && index == 0));
             }
         }
         Value::Array(values) if !values.is_empty() => {
-            output.push('\n');
-            for item in values {
-                write_yaml_sequence_item(output, item, indent + 4);
+            output.push(opener);
+            for (index, item) in values.iter().enumerate() {
+                write_yaml_sequence_item_at(output, item, child, !(in_seq && index == 0));
             }
         }
         Value::Object(_) => output.push_str(" {}\n"),
         Value::Array(_) => output.push_str(" []\n"),
         Value::String(text) if text.contains('\n') => match crate::yaml_str::encode(text, false) {
-            crate::yaml_str::Encoded::Literal { header, lines } => {
+            crate::yaml_str::Encoded::Literal { header } => {
                 output.push(' ');
-                output.push_str(&header);
-                output.push('\n');
-                let pad = " ".repeat(indent + 4);
-                for line in lines {
-                    if !line.is_empty() {
-                        output.push_str(&pad);
-                        output.push_str(&line);
-                    }
-                    output.push('\n');
-                }
+                output.push_str(&crate::yaml_str::literal_text(
+                    &header,
+                    text,
+                    &" ".repeat(child),
+                ));
             }
             crate::yaml_str::Encoded::Inline(text) => {
                 output.push(' ');
@@ -310,56 +450,20 @@ pub(crate) fn write_yaml_field(output: &mut String, key: &str, value: &Value, in
         },
         _ => {
             output.push(' ');
-            output.push_str(&yaml_scalar(value));
-            output.push('\n');
-        }
-    }
-}
-
-pub(crate) fn write_yaml_sequence_item(output: &mut String, value: &Value, indent: usize) {
-    output.push_str(&" ".repeat(indent));
-    output.push('-');
-    match value {
-        Value::Object(values) if !values.is_empty() => {
-            let mut fields = values.iter();
-            if let Some((key, first)) = fields.next() {
-                output.push(' ');
-                output.push_str(&yaml_key(key));
-                output.push(':');
-                if first.is_object() || first.is_array() {
-                    output.push('\n');
-                    write_yaml_children(output, first, indent + 4);
-                } else {
-                    output.push(' ');
-                    output.push_str(&yaml_scalar(first));
-                    output.push('\n');
+            let scalar = yaml_scalar(value);
+            match value {
+                Value::String(text)
+                    if scalar.starts_with('\'') && text.contains(['\u{2028}', '\u{2029}']) =>
+                {
+                    output.push_str(&crate::yaml_str::single_quoted_breaks(
+                        &scalar,
+                        &" ".repeat(child),
+                    ));
                 }
+                _ => output.push_str(&scalar),
             }
-            for (key, child) in fields {
-                write_yaml_field(output, key, child, indent + 2);
-            }
-        }
-        _ => {
-            output.push(' ');
-            output.push_str(&yaml_scalar(value));
             output.push('\n');
         }
-    }
-}
-
-fn write_yaml_children(output: &mut String, value: &Value, indent: usize) {
-    match value {
-        Value::Object(values) => {
-            for (key, child) in values {
-                write_yaml_field(output, key, child, indent);
-            }
-        }
-        Value::Array(values) => {
-            for child in values {
-                write_yaml_sequence_item(output, child, indent);
-            }
-        }
-        _ => {}
     }
 }
 

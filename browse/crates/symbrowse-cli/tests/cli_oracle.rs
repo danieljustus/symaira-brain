@@ -111,26 +111,29 @@ fn mask(text: &str, kinds: &[String]) -> String {
         out = result;
     }
     if has("duration") {
-        let mut result = String::new();
-        let mut rest = out.as_str();
-        while let Some(position) = rest.find("duration_ms") {
-            let (head, tail) = rest.split_at(position + "duration_ms".len());
-            result.push_str(head);
-            let after_quote = tail.strip_prefix('"').unwrap_or(tail);
-            if let Some(after_colon) = after_quote.strip_prefix(':') {
-                let value = after_colon.strip_prefix(' ').unwrap_or(after_colon);
-                let digits = value.bytes().take_while(u8::is_ascii_digit).count();
-                if digits > 0 {
-                    result.push_str(&tail[..tail.len() - value.len()]);
-                    result.push('0');
-                    rest = &value[digits..];
-                    continue;
+        // JSON/text carry `duration_ms`; yaml.v3 names the same field `durationms`.
+        for needle in ["duration_ms", "durationms"] {
+            let mut result = String::new();
+            let mut rest = out.as_str();
+            while let Some(position) = rest.find(needle) {
+                let (head, tail) = rest.split_at(position + needle.len());
+                result.push_str(head);
+                let after_quote = tail.strip_prefix('"').unwrap_or(tail);
+                if let Some(after_colon) = after_quote.strip_prefix(':') {
+                    let value = after_colon.strip_prefix(' ').unwrap_or(after_colon);
+                    let digits = value.bytes().take_while(u8::is_ascii_digit).count();
+                    if digits > 0 {
+                        result.push_str(&tail[..tail.len() - value.len()]);
+                        result.push('0');
+                        rest = &value[digits..];
+                        continue;
+                    }
                 }
+                rest = tail;
             }
-            rest = tail;
+            result.push_str(rest);
+            out = result;
         }
-        result.push_str(rest);
-        out = result;
         let mut result = String::new();
         let mut rest = out.as_str();
         while let Some(position) = rest.find("tokens_est: ") {

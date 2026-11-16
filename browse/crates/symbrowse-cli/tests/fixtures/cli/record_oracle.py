@@ -178,6 +178,296 @@ DAEMON = [
 FLOW_YAML = "name: demo\nversion: 1\ndomains: [\"example.com\"]\nsteps:\n  - open: { url: \"https://example.com/\" }\n  - wait: { url: \"**/done\" }\n"
 
 
+
+HUMAN_PAYLOADS = [
+    ("nav-status", {"action": "open", "url": "https://example.com/", "http_status": 200}),
+    ("nav-nostatus", {"action": "open", "url": "https://example.com/"}),
+    ("nav-status0", {"action": "back", "url": "https://example.com/", "http_status": 0}),
+    ("nav-status-frac", {"action": "open", "url": "https://example.com/", "http_status": 200.5}),
+    ("nav-status-string", {"action": "open", "url": "https://example.com/", "http_status": "200"}),
+    ("nav-no-url", {"action": "open", "url": ""}),
+    ("nav-no-action", {"url": "https://example.com/", "http_status": 200}),
+    ("nav-extra", {"action": "reload", "url": "https://example.com/", "title": "T", "http_status": 304}),
+    ("snap-id", {"snapshot_id": "s1", "tree": "- button \"Go\" [ref=e1]\n- link [ref=e2]\n", "refs": {"e1": {"role": "button"}}}),
+    ("snap-noid", {"tree": "- button\n", "refs": {}}),
+    ("snap-id-norefs", {"snapshot_id": "s2", "tree": "- x"}),
+    ("snap-tree-only", {"tree": "- x"}),
+    ("snap-empty-tree", {"snapshot_id": "s3", "tree": "\n\n", "refs": {}}),
+    ("snap-hint", {"snapshot_id": "s4", "tree": "- a", "refs": {}, "hint": "use @e1"}),
+    ("snap-empty-id", {"snapshot_id": "", "tree": "- a", "refs": {}}),
+    ("snap-tree-nonstring", {"snapshot_id": "s5", "tree": 3, "refs": {}}),
+    ("snap-html", {"snapshot_id": "s6", "tree": "- <b>&</b>", "refs": {}}),
+    ("diff-all", {"snapshot_id": "s7", "added": [{"ref": "e9"}], "removed": [{"refkey": "k1"}], "changed": [{"role": "button", "name": "Go"}], "hint": "h"}),
+    ("diff-items", {"added": [{"role": "link"}, {"name": "only"}, {}, "str", 3, None, {"ref": ""}, {"role": "b", "name": "q\"x"}]}),
+    ("diff-empty", {"added": [], "removed": [], "changed": []}),
+    ("diff-removed-only", {"removed": [{"ref": "e1"}, {"ref": "e2"}]}),
+    ("state-saved", {"saved": "login"}),
+    ("state-saved-meta", {"saved": "login", "metadata": {"name": "login", "schema_version": 3, "saved_at": "2026-01-02T03:04:05Z", "expires_at": "2026-02-01T00:00:00Z", "key_source": "environment", "origins": [{"origin": "https://example.com", "cookie_count": 2, "local_storage_keys": 1, "session_storage_keys": 0}, "weird", {"origin": "x"}]}}),
+    ("state-loaded", {"loaded": "login"}),
+    ("state-loaded-meta", {"loaded": "login", "metadata": {"name": "login", "schema_version": 1.5}}),
+    ("state-cleared", {"cleared": "login"}),
+    ("state-cleared-bool", {"cleared": True}),
+    ("state-removed", {"removed": ["a", "b"]}),
+    ("state-removed-empty", {"removed": []}),
+    ("state-removed-null", {"removed": None}),
+    ("state-removed-mixed", {"removed": ["a", 1]}),
+    ("state-states", {"states": ["login", "other"]}),
+    ("state-states-empty", {"states": []}),
+    ("state-metadata", {"metadata": {"name": "n", "schema_version": 2, "origins": []}}),
+    ("state-metadata-empty", {"metadata": {}}),
+    ("state-toplevel", {"name": "n", "schema_version": 3, "saved_at": "t", "key_source": "keychain", "origins": [{"origin": "https://a", "cookie_count": 1}]}),
+    ("state-toplevel-noorigins", {"schema_version": 3, "key_source": "k"}),
+    ("state-toplevel-bool", {"schema_version": True, "origins": []}),
+    ("cookies-full", {"origin": "https://example.com", "cookies": [{"name": "sid", "value": "s3cret", "domain": ".example.com", "path": "/", "same_site": "Lax", "secure": True, "http_only": True, "session": True}]}),
+    ("cookies-noorigin", {"cookies": [{"name": "a"}, {"domain": "d"}, "str", 4, {"secure": False, "http_only": False}]}),
+    ("cookies-empty", {"origin": "https://example.com", "cookies": []}),
+    ("cookies-null", {"origin": "", "cookies": None}),
+    ("cookies-notlist", {"cookies": "x"}),
+    ("tabs-basic", {"active": "t1", "tabs": [{"id": "t1", "label": "main", "url": "https://example.com/", "active": True}, {"id": "t2", "url": "about:blank"}]}),
+    ("tabs-label-eq-id", {"tabs": [{"id": "t1", "label": "t1", "url": "u"}]}),
+    ("tabs-empty-tab", {"tabs": [{}, "str", 3, {"active": False}, {"label": "L"}]}),
+    ("tabs-none", {"active": "", "tabs": []}),
+    ("tabs-quote-label", {"tabs": [{"id": "t1", "label": "a \"b\" \u00e9\n"}]}),
+    ("tabs-notlist", {"tabs": 3}),
+    ("generic-ordering", {"z": "last", "a": 1, "m": {"y": 1, "b": [1, 2, {"k": None}]}}),
+    ("generic-html", {"html": "<a href=\"x\">&</a>", "nl": "line1\nline2", "u": "\u2028\u00e9\u2603"}),
+    ("generic-empty-map", {}),
+    ("generic-empty-list", []),
+    ("generic-list", [1, "two", {"three": 3}, None, True, 1.5, 1e21, 12345678901234567890]),
+    ("generic-string", "hello"),
+    ("generic-string-multiline", "a\nb\n"),
+    ("generic-number", 42),
+    ("generic-float", 1.25),
+    ("generic-bool", True),
+    ("generic-nested-empty", {"a": {}, "b": [], "c": [[]], "d": [{}]}),
+    ("generic-null-field", {"a": None}),
+    ("generic-nodata", None),
+    ("generic-trunc-marker", {"truncated": True, "tokens_returned": 90, "tokens_total": 18400, "cache_id": "out_abc", "hint": "symbrowse cache get out_abc --range 40-120", "head": "HEAD TEXT", "foot": "FOOT TEXT"}),
+    ("generic-trunc-string", {"truncated": "yes"}),
+    ("generic-trunc-missing", {"truncated": True, "head": "h"}),
+    ("yaml-specials", {"colon": "a: b", "yes": "yes", "num": "123", "float": "1.5", "empty": "", "lead": " x", "trail": "x ", "hash": "# c", "dash": "- x", "quote": "it's", "dq": "say \"hi\"", "uni": "caf\u00e9 \u2603", "null": "null", "tilde": "~", "bool": "true", "octal": "0o17", "time": "2026-01-02", "multi": "a\nb", "multi-trail": "a\nb\n\n", "multi-lead": "  a\nb", "key with space": 1, "k:colon": 2, "123": 3, "true": 4}),
+    ("yaml-numbers", {"i": 1, "neg": -5, "f": 0.1, "big": 12345678901234567890, "exp": 1e21, "small": 1e-7, "zero": 0, "fz": 0.0}),
+    ("yaml-sequences", {"list": [[1, 2], [3, [4, 5]], {"a": 1, "b": [2]}, [], {}, None, "s"]}),
+    ("yaml-emoji", {"a": "x\U0001F600y", "b": "\U0001F600", "c": "a\u00a0b", "d": "caf\u00e9"}),
+    ("yaml-bom", {"a": "\ufeffa", "b": "x\ufeffy", "c": "\ufeff"}),
+    ("yaml-docmarker", {"a": "---", "b": "...", "c": "--- x", "d": "-\nx", "e": "-", "f": "- ", "g": "?", "h": ": x", "i": "a #b", "j": "a#b"}),
+    ("yaml-seq-multiline", {"list": ["a\nb", {"k": "x\ny"}, ["p\nq"]]}),
+    ("yaml-long-line", {"a": "word " * 40, "b": "x" * 200, "c": "a b " * 30 + "\t"}),
+    ("yaml-keys-special", {"a\nb": 1, "": 2, " lead": 3, "x#": 4, "- k": 5, "\U0001F600": 6, "k\tt": 7, "yes": 8, "null": 9, "1.5": 10}),
+    ("yaml-nested-seq-map", {"l": [[{"a": 1, "b": [1, {"c": [2]}]}]], "m": [{"x": [[1], []]}, {"y": {"z": [{}]}}]}),
+    ("yaml-top-seq", [{"a": 1}, {"b": []}, [1, [2]], "x"]),
+    ("yaml-literal-variants", {"a": "x\n", "b": "x\n\n", "c": "\n", "d": "\nx", "e": " x\ny", "f": "x \ny", "g": "x\n y", "h": "x\n\ny", "i": "x\ty\nz", "j": "\n\n", "k": "x\n\n\n", "l": "x\r\ny", "m": "a\u2028b\nc", "n": "  \n", "o": "x\n  "}),
+    ("yaml-key-order", {"e10": 1, "e2": 2, "a_b": 3, "aB": 4, "Z": 5, "e02": 6, "e1": 7, "10": 8, "9": 9, "x-1": 10, "x_1": 11, "x1": 12}),
+    ("yaml-contract-mix", {"tab": "a\tb", "emoji": "x\U0001F600", "yes": "yes", "num": "123", "empty": "", "colon": "a: b", "bom": "\ufeffa", "d": "\nx", "c": "x\n\n"}),
+    ("yaml-empty-and-null", {"e": "", "n": None, "s": " ", "t": "\t", "z": "0", "o": "0x1F", "f": "1e3", "b": "On"}),
+]
+
+# (field, global, project, env, flag) -- flag is the `config show --<flag>`
+# option of the Go CLI; list values are TOML arrays / comma-separated env text.
+CONFIG_MATRIX = [
+    ("log_level", "info", "debug", "error", ("--log-level", "trace")),
+    ("log_format", "json", "text", "json", ("--log-format", "flagfmt")),
+    ("config_dir", "g-config", "p-config", "e-config", ("--config-dir", "f-config")),
+    ("cache_dir", "g-cache", "p-cache", "e-cache", ("--cache-dir", "f-cache")),
+    ("state_dir", "g-state", "p-state", "e-state", ("--state-dir", "f-state")),
+    ("executable_path", "g-exe", "p-exe", "e-exe", ("--executable-path", "f-exe")),
+    ("cdp_endpoint", "http://g:9222", "http://p:9222", "http://e:9222", None),
+    ("engine", "static", "safari-attach", "safari-bidi", None),
+    ("allowed_domains", ["g.example"], ["p.example", "*.p.example"], "e.example, *.e.example,,", None),
+    ("ssrf_enabled", True, False, True, None),
+    ("allow_private", True, False, True, None),
+    ("headless", True, False, True, None),
+    ("cache_ttl_hours", 11, 22, 33, None),
+    ("fetch_robots", False, True, False, None),
+    ("fetch_user_agent", "g-agent", "p-agent", "e-agent", None),
+    ("fetch_no_cache", True, False, True, None),
+    ("idle_timeout", 11, 22, 33, None),
+    ("operation_timeout", 11, 22, 33, None),
+    ("read_timeout", 11, 22, 33, None),
+    ("state_expire_days", 11, 22, 33, None),
+    ("autosave", "always", "never", "always", None),
+    ("autosave_interval", 11, 22, 33, None),
+    ("autosave_key", "g-key", "p-key", "e-key", None),
+    ("upload_dirs", ["g-up"], ["p-up", "p-up2"], "e-up, e-up2", None),
+    ("daemon_log", "g.log", "p.log", "e.log", None),
+    ("approval_timeout", 11, 22, 33, None),
+]
+ENV_NAMES = {"ssrf_enabled": "SYMBROWSE_SSRF"}
+
+
+def _toml(field, value):
+    if isinstance(value, bool):
+        return "%s = %s\n" % (field, "true" if value else "false")
+    if isinstance(value, int):
+        return "%s = %d\n" % (field, value)
+    if isinstance(value, list):
+        return "%s = [%s]\n" % (field, ", ".join(json.dumps(v) for v in value))
+    return "%s = %s\n" % (field, json.dumps(value))
+
+
+def _env_text(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, list):
+        return ",".join(value)
+    return str(value)
+
+
+def config_scenarios(add):
+    """CFG-001/CFG-002/CFG-005: every setting through every layer of
+    defaults < global TOML < project TOML < env < flags, XDG/HOME handling and
+    engine validation. All run `config show --json` (or a daemon-down command
+    whose error names the derived paths)."""
+    glob_file = "home/.config/symbrowse/config.toml"
+    proj_file = "cwd/.symbrowse.toml"
+    for field, g, p, e, flag in CONFIG_MATRIX:
+        env_name = ENV_NAMES.get(field, "SYMBROWSE_" + field.upper())
+        layers = {"g": g, "p": p, "e": e}
+        for combo in ("g", "p", "e", "gp", "ge", "pe", "gpe"):
+            files, env = {}, {}
+            if "g" in combo:
+                files[glob_file] = _toml(field, g)
+            if "p" in combo:
+                files[proj_file] = _toml(field, p)
+            if "e" in combo:
+                env[env_name] = _env_text(e)
+            kw = {}
+            if files:
+                kw["files"] = files
+            if env:
+                kw["env"] = env
+            add("cfgm-%s-%s" % (field, combo), ["config", "show", "--json"], **kw)
+        if flag:
+            for combo in ("f", "ef", "pef", "gpef"):
+                files, env = {}, {}
+                if "g" in combo:
+                    files[glob_file] = _toml(field, g)
+                if "p" in combo:
+                    files[proj_file] = _toml(field, p)
+                if "e" in combo:
+                    env[env_name] = _env_text(e)
+                kw = {}
+                if files:
+                    kw["files"] = files
+                if env:
+                    kw["env"] = env
+                add("cfgm-%s-%s" % (field, combo), ["config", "show", "--json", flag[0], flag[1]], **kw)
+    # Empty environment values are ignored; invalid values fail with the source.
+    add("cfgm-env-empty-ignored", ["config", "show", "--json"], files={glob_file: "log_level = \"info\"\n"}, env={"SYMBROWSE_LOG_LEVEL": "", "SYMBROWSE_READ_TIMEOUT": ""})
+    for name, env in (
+        ("bool", {"SYMBROWSE_HEADLESS": "maybe"}),
+        ("int", {"SYMBROWSE_READ_TIMEOUT": "abc"}),
+        ("int-zero", {"SYMBROWSE_READ_TIMEOUT": "0"}),
+        ("int-neg-idle", {"SYMBROWSE_IDLE_TIMEOUT": "-1"}),
+        ("int-zero-idle", {"SYMBROWSE_IDLE_TIMEOUT": "0"}),
+        ("int-zero-op", {"SYMBROWSE_OPERATION_TIMEOUT": "0"}),
+        ("int-zero-approval", {"SYMBROWSE_APPROVAL_TIMEOUT": "0"}),
+        ("int-neg-expire", {"SYMBROWSE_STATE_EXPIRE_DAYS": "-1"}),
+        ("int-neg-ttl", {"SYMBROWSE_CACHE_TTL_HOURS": "-5"}),
+        ("autosave", {"SYMBROWSE_AUTOSAVE": "sometimes"}),
+        ("engine", {"SYMBROWSE_ENGINE": "wat"}),
+        ("bool-numeric", {"SYMBROWSE_HEADLESS": "1"}),
+        ("bool-upper", {"SYMBROWSE_HEADLESS": "TRUE"}),
+        ("bool-T", {"SYMBROWSE_FETCH_ROBOTS": "F"}),
+        ("int-plus", {"SYMBROWSE_READ_TIMEOUT": "+5"}),
+        ("int-space", {"SYMBROWSE_READ_TIMEOUT": " 5"}),
+    ):
+        add("cfgm-env-bad-" + name, ["config", "show", "--json"], env=env)
+        add("cfgm-env-bad-%s-text" % name, ["config", "show"], env=env)
+    for name, content in (
+        ("toml-syntax", "log_level = \n"),
+        ("toml-type", "read_timeout = \"x\"\n"),
+        ("toml-bool-type", "headless = \"yes\"\n"),
+        ("toml-unknown-key", "bogus = 1\nlog_level = \"info\"\n"),
+        ("toml-engine", "engine = \"wat\"\n"),
+        ("toml-zero-timeout", "operation_timeout = 0\n"),
+        ("toml-neg", "idle_timeout = -1\n"),
+        ("toml-autosave", "autosave = \"x\"\n"),
+        ("toml-list-type", "allowed_domains = \"a\"\n"),
+        ("toml-float", "read_timeout = 1.5\n"),
+        ("toml-empty-file", ""),
+        ("toml-comment-only", "# nothing\n"),
+        ("toml-empty-list", "allowed_domains = []\nupload_dirs = []\n"),
+        ("toml-empty-string", "log_level = \"\"\nautosave_key = \"\"\n"),
+        ("toml-table", "[log_level]\nx = 1\n"),
+    ):
+        add("cfgm-global-" + name, ["config", "show", "--json"], files={glob_file: content})
+        add("cfgm-project-" + name, ["config", "show", "--json"], files={proj_file: content})
+    # Global file removed by an unreadable-path trick is not portable; the
+    # project file is read relative to the working directory only.
+    add("cfgm-project-in-parent-ignored", ["config", "show", "--json"], files={"project-parent.toml": ".", ".symbrowse.toml": "log_level = \"debug\"\n"})
+    # CFG-002: HOME and every XDG variable present/absent/empty/relative/unclean.
+    xdg_values = (
+        ("abs", "$HOME/x"),
+        ("slash", "$HOME/x/"),
+        ("double", "$HOME//x"),
+        ("dots", "$HOME/a/../x/./y"),
+        ("rel", "rel"),
+        ("rel-dot", "./rel"),
+        ("rel-dotdot", "../rel"),
+        ("empty", ""),
+        ("root", "/"),
+        ("space", "$HOME/with space"),
+        ("unicode", "$HOME/caf\u00e9"),
+    )
+    for var, field in (("XDG_CONFIG_HOME", "config_dir"), ("XDG_CACHE_HOME", "cache_dir"), ("XDG_STATE_HOME", "state_dir")):
+        for name, value in xdg_values:
+            add("xdg-%s-%s" % (var.lower(), name), ["config", "show", "--json"], env={var: value})
+    add("xdg-all-abs", ["config", "show", "--json"], env={"XDG_CONFIG_HOME": "$HOME/c", "XDG_CACHE_HOME": "$HOME/ca", "XDG_STATE_HOME": "$HOME/s"})
+    add("xdg-all-empty", ["config", "show", "--json"], env={"XDG_CONFIG_HOME": "", "XDG_CACHE_HOME": "", "XDG_STATE_HOME": ""})
+    add("xdg-all-rel", ["config", "show", "--json"], env={"XDG_CONFIG_HOME": "rc", "XDG_CACHE_HOME": "rca", "XDG_STATE_HOME": "rs"})
+    add("xdg-config-global-file", ["config", "show", "--json"], env={"XDG_CONFIG_HOME": "$HOME/c"}, files={"home/c/symbrowse/config.toml": "log_level = \"info\"\n", glob_file: "log_level = \"warn\"\n"})
+    add("xdg-config-rel-global-file", ["config", "show", "--json"], env={"XDG_CONFIG_HOME": "rc"}, files={"cwd/rc/symbrowse/config.toml": "log_level = \"info\"\n"})
+    add("xdg-config-empty-falls-back-to-home", ["config", "show", "--json"], env={"XDG_CONFIG_HOME": ""}, files={glob_file: "log_level = \"info\"\n"})
+    add("xdg-state-daemon-log", ["config", "show", "--json"], env={"XDG_STATE_HOME": "$HOME/s", "SYMBROWSE_STATE_DIR": "$HOME/override"})
+    add("xdg-state-daemon-log-explicit", ["config", "show", "--json"], env={"XDG_STATE_HOME": "$HOME/s", "SYMBROWSE_DAEMON_LOG": "$HOME/d.log"})
+    add("xdg-state-flag-daemon-log", ["config", "show", "--json", "--state-dir", "fs"], env={"XDG_STATE_HOME": "$HOME/s"})
+    add("home-empty", ["config", "show", "--json"], env={"HOME": ""})
+    add("home-empty-text", ["config", "show"], env={"HOME": ""})
+    add("home-empty-xdg-set", ["config", "show", "--json"], env={"HOME": "", "XDG_CONFIG_HOME": "$HOME/c", "XDG_CACHE_HOME": "$HOME/ca", "XDG_STATE_HOME": "$HOME/s"})
+    add("home-empty-version", ["version", "--json"], env={"HOME": ""})
+    add("home-empty-open", ["open", "https://example.com/"], env={"HOME": ""}, daemon="down")
+    add("home-trailing-slash", ["config", "show", "--json"], env={"HOME": "$HOME/"})
+    add("home-dots", ["config", "show", "--json"], env={"HOME": "$HOME/./x/.."})
+    add("home-relative", ["config", "show", "--json"], env={"HOME": "rel-home"})
+    # Socket and daemon-log paths derived from the same roots (darwin: HOME based).
+    for name, env in (
+        ("default", {}),
+        ("xdg-state", {"XDG_STATE_HOME": "$HOME/s"}),
+        ("xdg-cache", {"XDG_CACHE_HOME": "$HOME/ca"}),
+        ("xdg-runtime", {"XDG_RUNTIME_DIR": "$HOME/run"}),
+        ("state-env", {"SYMBROWSE_STATE_DIR": "$HOME/se"}),
+        ("log-env", {"SYMBROWSE_DAEMON_LOG": "$HOME/l.log"}),
+        ("tmpdir", {"TMPDIR": "$HOME/tmpx"}),
+    ):
+        add("socket-" + name, ["daemon", "status", "--json"], env=env, daemon="down", platform="darwin")
+        add("socket-%s-session" % name, ["open", "https://example.com/", "--session", "alt.1_x-y", "--json"], env=env, daemon="down", platform="darwin")
+    add("socket-session-invalid-dot", ["open", "x", "--session", ".hidden"], daemon="down")
+    add("socket-session-invalid-long", ["open", "x", "--session", "a" * 65], daemon="down")
+    add("socket-session-64", ["open", "x", "--session", "a" * 64, "--json"], daemon="down", platform="darwin")
+    add("socket-session-invalid-empty", ["open", "x", "--session", ""], daemon="down")
+    add("socket-session-invalid-dash", ["open", "x", "--session", "-a"], daemon="down")
+    add("socket-session-invalid-space", ["open", "x", "--session", "a b"], daemon="down")
+    # CFG-005: engine selection (daemon/mcp flags validate; config engine from env/TOML/flag).
+    for engine in ("chrome", "static", "safari-attach", "safari-bidi", "wat", "", "Chrome"):
+        add("engine-mcp-flag-%s" % (engine or "empty"), ["mcp", "--engine", engine, "--list-profiles"])
+        add("engine-mcp-flag-bad-tools-%s" % (engine or "empty"), ["mcp", "--engine", engine, "--tools", "nope"])
+        add("engine-env-%s" % (engine or "empty"), ["config", "show", "--json"], env={"SYMBROWSE_ENGINE": engine})
+        if engine:
+            add("engine-toml-%s" % engine, ["config", "show", "--json"], files={proj_file: "engine = %s\n" % json.dumps(engine)})
+    for engine in ("wat", "Chrome"):
+        add("engine-daemon-flag-%s" % engine, ["daemon", "--engine", engine], daemon="down")
+        add("engine-daemon-flag-%s-json" % engine, ["daemon", "--engine", engine, "--json"], daemon="down")
+        add("engine-daemon-env-%s" % engine, ["daemon"], env={"SYMBROWSE_ENGINE": engine}, daemon="down")
+        add("engine-daemon-toml-%s" % engine, ["daemon"], files={proj_file: "engine = %s\n" % json.dumps(engine)}, daemon="down")
+        add("engine-mcp-env-%s" % engine, ["mcp"], env={"SYMBROWSE_ENGINE": engine})
+        add("engine-mcp-toml-%s" % engine, ["mcp"], files={proj_file: "engine = %s\n" % json.dumps(engine)})
+    add("engine-flag-beats-env-bad", ["mcp", "--engine", "static", "--list-profiles"], env={"SYMBROWSE_ENGINE": "wat"})
+    add("engine-env-beats-toml-bad", ["config", "show", "--json"], env={"SYMBROWSE_ENGINE": "static"}, files={proj_file: "engine = \"wat\"\n"})
+    add("engine-project-beats-global", ["config", "show", "--json"], files={glob_file: "engine = \"static\"\n", proj_file: "engine = \"safari-attach\"\n"})
+    add("engine-default-source", ["config", "show"])
+
+
 def local_scenarios():
     s = []
     def add(id, argv, **kw):
@@ -294,7 +584,195 @@ def local_scenarios():
     add("doctor-fix", ["doctor", "--fix"], files={"home/fakechrome": "#!/bin/sh\necho 'Fake Chrome 1.2.3'\n"}, exec_files=["home/fakechrome"], env={"SYMBROWSE_EXECUTABLE_PATH": "$HOME/fakechrome"}, path="/var/empty", platform="darwin")
     add("doctor-no-chrome", ["doctor"], env={"SYMBROWSE_EXECUTABLE_PATH": "$HOME/missing"}, path="/var/empty", platform="darwin")
     add("doctor-no-chrome-json", ["doctor", "--json"], env={"SYMBROWSE_EXECUTABLE_PATH": "$HOME/missing"}, path="/var/empty", platform="darwin")
+    contract_scenarios(add)
     return s
+
+
+def contract_scenarios(add):
+    """Contract rows CLI-002..CLI-006 (browse contract matrix): aliases, argument
+    validation, inherited output-flag placement, eval input resolution, batch."""
+    # CLI-002: goto is the compatibility alias of open (separate cobra command,
+    # same argv shape and same frame except the command name).
+    add("alias-goto-session", ["goto", "https://example.com/", "--session", "work"])
+    add("alias-goto-noargs", ["goto"], daemon="down")
+    add("alias-goto-twoargs", ["goto", "a", "b"])
+    add("alias-goto-json-before", ["--json", "goto", "https://example.com/"])
+    add("alias-goto-help", ["goto", "--help"])
+    add("alias-help-goto", ["help", "goto"])
+    add("batch-alias-goto", ["batch", "--json", "goto https://example.com/", "open https://example.com/"])
+    # CLI-003: missing, extra, repeated and -- terminated arguments.
+    add("args-version-extra", ["version", "extra"])
+    add("args-version-extra-json", ["version", "extra", "--json"])
+    add("args-state-save-noargs", ["state", "save"])
+    add("args-state-save-two", ["state", "save", "a", "b"])
+    add("args-state-save-dd", ["state", "save", "--", "login"])
+    add("args-state-load-noargs", ["state", "load"])
+    add("args-open-dd", ["open", "--", "https://example.com/"])
+    add("args-open-dd-dash", ["open", "--", "-weird"])
+    add("args-open-dd-two", ["open", "--", "a", "b"])
+    add("args-open-dd-flag-literal", ["open", "--", "--json"])
+    add("args-open-dd-after-url", ["open", "https://example.com/", "--"])
+    add("args-open-dd-then-flag", ["open", "https://example.com/", "--", "--json"])
+    add("args-open-session-dd", ["open", "--session", "work", "--", "https://example.com/"])
+    add("args-click-dd-dash", ["click", "--", "-x"])
+    add("args-fill-dd", ["fill", "--", "#q", "-v"])
+    add("args-fill-dd-short", ["fill", "#q", "--", "-v"])
+    add("args-get-text-dd", ["get", "text", "--", "#a"])
+    add("args-tab-switch-two", ["tab", "switch", "a", "b"])
+    add("args-daemon-status-extra", ["daemon", "status", "extra"])
+    add("args-session-list-extra", ["session", "list", "extra"])
+    add("args-cookies-list-extra", ["cookies", "list", "extra"])
+    add("args-snapshot-extra", ["snapshot", "extra"])
+    add("args-snapshot-depth-repeat", ["snapshot", "--depth", "1", "--depth", "2"])
+    add("args-snapshot-depth-bad", ["snapshot", "--depth", "x"])
+    add("args-snapshot-depth-missing", ["snapshot", "--depth"])
+    add("args-wait-ms-repeat", ["wait", "--ms", "1", "--ms", "2"])
+    add("args-session-repeat", ["open", "https://example.com/", "--session", "a", "--session", "work"])
+    add("args-session-eq", ["open", "https://example.com/", "--session=work"])
+    add("args-session-missing", ["open", "https://example.com/", "--session"])
+    add("args-flag-eq-bool", ["snapshot", "--compact=true"])
+    add("args-flag-eq-bool-false", ["snapshot", "--compact=false"])
+    add("args-flag-eq-bool-bad", ["snapshot", "--compact=maybe"])
+    add("args-help-flag-extra", ["open", "--help", "extra"])
+    add("args-short-help", ["open", "-h"])
+    add("args-unknown-short", ["open", "-z"])
+    add("args-unknown-nested", ["state", "frobnicate"])
+    add("args-unknown-nested-json", ["state", "frobnicate", "--json"])
+    add("args-group-noargs", ["state"])
+    add("args-group-noargs-json", ["state", "--json"])
+    # CLI-004: inherited --json/--output placement, = syntax and repeats.
+    for place, argv in (
+        ("root-first", ["--json", "config", "show"]),
+        ("between", ["config", "--json", "show"]),
+        ("last", ["config", "show", "--json"]),
+        ("out-root-first", ["--output", "yaml", "config", "show"]),
+        ("out-between", ["config", "--output", "yaml", "show"]),
+        ("out-last", ["config", "show", "--output", "yaml"]),
+        ("out-eq-root", ["--output=yaml", "config", "show"]),
+        ("out-eq-between", ["config", "--output=yaml", "show"]),
+        ("out-eq-last", ["config", "show", "--output=yaml"]),
+        ("out-eq-json", ["config", "show", "--output=json"]),
+        ("out-eq-text", ["config", "show", "--output=text"]),
+        ("out-eq-bad", ["config", "show", "--output=xml"]),
+        ("out-bad-root", ["--output", "xml", "config", "show"]),
+        ("out-missing-last", ["config", "show", "--output"]),
+        ("out-eq-empty", ["config", "show", "--output="]),
+        ("json-eq-true", ["config", "show", "--json=true"]),
+        ("json-eq-false", ["config", "show", "--json=false"]),
+        ("json-eq-bad", ["config", "show", "--json=maybe"]),
+        ("json-repeat", ["config", "show", "--json", "--json"]),
+        ("out-repeat", ["config", "show", "--output", "yaml", "--output", "json"]),
+        ("out-repeat-rev", ["config", "show", "--output", "json", "--output", "yaml"]),
+        ("json-then-out", ["config", "show", "--json", "--output", "yaml"]),
+        ("out-then-json", ["config", "show", "--output", "yaml", "--json"]),
+        ("json-false-then-out", ["config", "show", "--json=false", "--output", "yaml"]),
+        ("json-both-ends", ["--json", "config", "show", "--output", "yaml"]),
+        ("version-json-first", ["--json", "version"]),
+        ("version-out-eq-first", ["--output=yaml", "version"]),
+        ("version-json-out-yaml", ["version", "--json", "--output", "yaml"]),
+        ("version-out-yaml-json", ["version", "--output", "yaml", "--json"]),
+        ("version-out-text-json", ["version", "--output", "text", "--json"]),
+        ("version-json-false-out-json", ["version", "--json=false", "--output", "json"]),
+        ("version-dd-json", ["version", "--", "--json"]),
+        ("unknown-json-first", ["--json", "frobnicate"]),
+        ("nested-json-first", ["--json", "state", "frobnicate"]),
+        ("nested-unknown-flag-json", ["config", "--json", "show", "--nope"]),
+        ("help-json", ["--json", "--help"]),
+        ("help-sub-out", ["config", "--output", "yaml", "--help"]),
+    ):
+        add("flags-" + place, argv)
+    for place, argv in (
+        ("open-json-first", ["--json", "open", "https://example.com/"]),
+        ("open-json-between", ["open", "--json", "https://example.com/"]),
+        ("open-out-first", ["--output", "yaml", "open", "https://example.com/"]),
+        ("open-out-between", ["open", "--output=yaml", "https://example.com/"]),
+        ("open-json-session-first", ["--json", "--session", "work", "open", "https://example.com/"]),
+        ("session-list-json-between", ["session", "--json", "list"]),
+        ("tab-list-out-between", ["tab", "--output", "yaml", "list"]),
+        ("cookies-json-between", ["cookies", "--json", "list"]),
+        ("get-json-between", ["get", "--json", "title"]),
+        ("get-out-eq-between", ["get", "--output=yaml", "title"]),
+        ("snapshot-json-first-flags", ["--json", "snapshot", "--compact"]),
+    ):
+        add("flags-daemon-" + place, argv)
+    add("flags-daemon-open-err-json-first", ["--json", "open", "https://example.com/"], responses={"*": ERR("not_found", "element not found: #go", "run snapshot first")})
+    add("flags-daemon-open-err-out-eq", ["--output=yaml", "open", "https://example.com/"], responses={"*": ERR("not_found", "element not found: #go", "run snapshot first")})
+    add("flags-daemon-down-json-first", ["--json", "open", "https://example.com/"], daemon="down")
+    # CLI-005: eval input resolution.
+    add("eval-stdin-json", ["eval", "--stdin", "--json"], stdin="1+1", responses={"eval": OK({"result": 2})})
+    add("eval-stdin-yaml", ["eval", "--stdin", "--output", "yaml"], stdin="1+1", responses={"eval": OK({"result": 2})})
+    add("eval-stdin-crlf", ["eval", "--stdin"], stdin="1+2\r\n", responses={"eval": OK({"result": 3})})
+    add("eval-stdin-empty", ["eval", "--stdin"], stdin="")
+    add("eval-stdin-blank", ["eval", "--stdin"], stdin="  \n")
+    add("eval-stdin-multiline", ["eval", "--stdin"], stdin="const a = 1;\na + 1\n")
+    add("eval-stdin-with-arg", ["eval", "--stdin", "1+1"], stdin="2+2")
+    add("eval-stdin-with-arg-before", ["eval", "1+1", "--stdin"], stdin="2+2")
+    add("eval-stdin-with-base64", ["eval", "--stdin", "--base64", "MSsx"], stdin="2+2")
+    add("eval-base64-with-arg", ["eval", "--base64", "MSsx", "3+3"])
+    add("eval-base64-bad", ["eval", "--base64", "!!!"])
+    add("eval-base64-bad-json", ["eval", "--base64", "!!!", "--json"])
+    add("eval-base64-empty", ["eval", "--base64", ""])
+    add("eval-base64-padded-newline", ["eval", "--base64", "MSsx\n"])
+    add("eval-base64-url-alphabet", ["eval", "--base64", "Pz8_"])
+    add("eval-base64-unpadded", ["eval", "--base64", "MQ"])
+    add("eval-base64-multiline", ["eval", "--base64", "YSA9IDE7CmEgKyAx"])
+    add("eval-base64-invalid-utf8", ["eval", "--base64", "/w=="])
+    add("eval-base64-whitespace-only", ["eval", "--base64", "IA=="])
+    add("eval-two-args", ["eval", "1+1", "2+2"])
+    add("eval-empty-arg", ["eval", ""])
+    add("eval-dd-expr", ["eval", "--", "-1"])
+    add("eval-expr-flaglike", ["eval", "--", "--stdin"])
+    add("eval-json-noexpr", ["eval", "--json"])
+    add("eval-session", ["eval", "1+1", "--session", "work"])
+    add("eval-noexpr-down", ["eval"], daemon="down")
+    # CLI-006: batch (JSON-producing version, mcp --list-profiles, --bail, dry-run).
+    add("batch-version-json", ["batch", "--json", "version --json", "version"])
+    add("batch-version-text", ["batch", "--json", "version"])
+    add("batch-mcp-profiles", ["batch", "--json", "mcp --list-profiles"])
+    add("batch-mcp-profiles-text", ["batch", "mcp --list-profiles"])
+    add("batch-mixed-json", ["batch", "--json", "version --json", "bogus cmd", "open https://example.com/", "config show --json"])
+    add("batch-mixed-yaml", ["batch", "--output", "yaml", "version --json", "bogus cmd", "open https://example.com/"])
+    add("batch-bail-json", ["batch", "--bail", "--json", "version --json", "bogus cmd", "open https://example.com/"])
+    add("batch-bail-first-ok", ["batch", "--bail", "--json", "version --json", "open https://example.com/"])
+    add("batch-bail-yaml", ["batch", "--bail", "--output", "yaml", "bogus", "version"])
+    add("batch-bail-text", ["batch", "--bail", "version", "bogus cmd", "version"])
+    add("batch-dry-bail-json", ["batch", "--dry-run", "--bail", "--json", "bogus cmd", "version"])
+    add("batch-dry-version", ["batch", "--dry-run", "--json", "version --json"])
+    add("batch-dry-mcp-profiles", ["batch", "--dry-run", "--json", "mcp --list-profiles", "open https://example.com/"])
+    add("batch-dry-stdin", ["batch", "--dry-run", "--json"], stdin="[\"open https://example.com/\", \"snapshot\"]")
+    add("batch-dry-nothing-sent", ["batch", "--dry-run", "click #a", "fill #q x"], daemon="down")
+    add("batch-down-json", ["batch", "--json", "open https://example.com/", "version --json"], daemon="down")
+    add("batch-down-bail-json", ["batch", "--bail", "--json", "open https://example.com/", "version --json"], daemon="down")
+    add("batch-stdin-json-mixed", ["batch", "--json"], stdin="[\"version --json\", \"bogus cmd\", \"snapshot\"]")
+    add("batch-stdin-bail", ["batch", "--bail", "--json"], stdin="[\"bogus\", \"snapshot\"]")
+    add("batch-args-over-stdin", ["batch", "--json", "version --json"], stdin="[\"snapshot\"]")
+    add("batch-quoted-args", ["batch", "--json", "fill #q 'hello world'", "eval \"1 + 1\""])
+    add("batch-empty-item", ["batch", "--json", "", "version --json"])
+    add("batch-blank-item", ["batch", "--json", "   ", "version --json"])
+    add("batch-unterminated-quote", ["batch", "--json", "fill #q 'oops", "version --json"])
+    add("batch-session-flag", ["batch", "--json", "open https://example.com/", "--session", "work"])
+    add("batch-item-output-flag", ["batch", "--json", "version --output yaml", "version --output json"])
+    add("batch-item-session", ["batch", "--json", "open https://example.com/ --session work"])
+    add("batch-help-item", ["batch", "--json", "help open"])
+    add("batch-noargs-tty", ["batch"], stdin="")
+    # OUT-003: every dedicated human renderer branch (text) and the same payloads
+    # as --output yaml, driven through a daemon response so both formats see
+    # identical data.
+    for name, data in HUMAN_PAYLOADS:
+        responses = {"*": OK(data) if data is not None else OK()}
+        add("human-" + name, ["open", "https://example.com/"], responses=responses)
+        add("human-yaml-" + name, ["open", "https://example.com/", "--output", "yaml"], responses=responses)
+        add("human-json-" + name, ["open", "https://example.com/", "--json"], responses=responses)
+    config_scenarios(add)
+    # CLI-005: printEvalResult variants and the -b shorthand.
+    for name, data in (("exception", {"exception_text": "ReferenceError: x"}), ("null", {"value": None}), ("string", {"value": "hi \"there\" <b>"}), ("number", {"value": 3.5}), ("int", {"value": 42}), ("bool", {"value": False}), ("object", {"value": {"b": 1, "a": [1, 2]}}), ("array", {"value": [1, "x", None]}), ("missing", {}), ("empty-exception", {"exception_text": "", "value": 7})):
+        add("eval-print-" + name, ["eval", "x"], responses={"eval": OK(data)})
+    add("eval-short-b", ["eval", "-b", "MSsx"])
+    add("eval-short-b-stdin", ["eval", "-b", "--stdin"], stdin="MSsx")
+    add("eval-b-stdin-trailing-newline", ["eval", "--base64", "--stdin"], stdin="MSsx\n")
+    # OUT-003: yaml.v3 style choice for control characters (tab) in strings.
+    for name, value in (("tab-single", "a\tb"), ("tab-lead", "\tab"), ("tab-trail", "ab\t"), ("tab-multi", "a\tb\nc"), ("tab-multi-trail", "a\tb\nc\n"), ("tab-only", "\t"), ("cr-multi", "a\r\nb"), ("esc-single", "a\u001bb"), ("esc-multi", "a\u001bb\nc"), ("nel-single", "a\u0085b"), ("bom-single", "\ufeffa")):
+        add("yaml-" + name, ["eval", "1", "--output", "yaml"], responses={"eval": OK({"result": value})})
 
 
 def build_scenarios():
@@ -385,6 +863,7 @@ def mask_text(text, kinds):
         text = re.sub(r"(?<![0-9a-f])[0-9a-f]{16}(?![0-9a-f])", "<HEX16>", text)
     if "duration" in kinds:
         text = re.sub(r"(duration_ms\"?:\s?)\d+", r"\g<1>0", text)
+        text = re.sub(r"(durationms\"?:\s?)\d+", r"\g<1>0", text)
         text = re.sub(r"tokens_est: \d+", "tokens_est: 0", text)
     return text
 
@@ -462,7 +941,9 @@ def main():
     parser.add_argument("--scratch", required=True)
     parser.add_argument("--only")
     args = parser.parse_args()
-    go_version = subprocess.run(["/opt/homebrew/bin/go", "version"], capture_output=True, text=True).stdout.strip()
+    # The toolchain that built the oracle binary (embedded build info), not the
+    # one installed on the recording host.
+    go_version = subprocess.run(["go", "version", args.go], capture_output=True, text=True).stdout.strip()
     scenarios = build_scenarios()
     out = []
     for index, sc in enumerate(scenarios):

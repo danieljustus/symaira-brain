@@ -55,39 +55,35 @@ pub(crate) fn run_mcp(
     allow_private: bool,
     engine: Option<String>,
 ) -> ExitCode {
-    if let Err(error) = registry::validate_profile_selection(&profiles) {
-        let _ = writeln!(io::stderr(), "{error}");
-        return ExitCode::from(1);
-    }
+    // Go `resolveMCPEngine` runs before the tool profiles are checked: the
+    // configuration (exit 9 on failure) and the engine name come first.
     let context = match LoadContext::from_process(FlagOverrides::default()) {
         Ok(context) => context,
-        Err(error) => {
-            let _ = writeln!(io::stderr(), "{error}");
-            return ExitCode::from(1);
-        }
+        // MCP stdout carries JSON-RPC only: report on stderr.
+        Err(error) => return write_config_error(Format::Text, &error.to_string()),
     };
     let config = match load(&context) {
         Ok(result) => result.config,
-        Err(error) => {
-            if is_transport_retired(&error.to_string()) {
-                // MCP stdout carries JSON-RPC only: report on stderr.
-                return write_transport_retired(Format::Text, &error.to_string());
-            }
-            if selection_code(&error.to_string()).is_some() {
-                return write_config_error(Format::Text, &error.to_string());
-            }
-            let _ = writeln!(io::stderr(), "{error}");
-            return ExitCode::from(1);
-        }
+        Err(error) => return write_config_error(Format::Text, &error.to_string()),
     };
     let daemon_log_path = config.daemon_log.clone();
+    // An explicitly empty `--engine ""` and an unset engine both mean the default.
     let engine = engine.unwrap_or(config.engine);
+    let engine = if engine.is_empty() {
+        "chrome".to_owned()
+    } else {
+        engine
+    };
     let allow_private = allow_private || config.allow_private;
     if let Err(message) = validate_engine(&engine) {
         if selection_code(&message).is_some() {
             return write_config_error(Format::Text, &message);
         }
         let _ = writeln!(io::stderr(), "{message}");
+        return ExitCode::from(1);
+    }
+    if let Err(error) = registry::validate_profile_selection(&profiles) {
+        let _ = writeln!(io::stderr(), "{error}");
         return ExitCode::from(1);
     }
     let stdin = io::stdin();
@@ -212,37 +208,26 @@ pub(crate) fn render_state_key_init(
 pub(crate) fn run_daemon(
     session: String,
     mode: String,
-    engine: String,
+    engine: Option<String>,
     ssrf: Option<bool>,
     allow_private: Option<bool>,
     format: Format,
 ) -> ExitCode {
+    // Configuration failures exit 9 like every other command (Go returns the
+    // `config.Load` error unchanged).
     let context = match LoadContext::from_process(FlagOverrides::default()) {
         Ok(context) => context,
-        Err(error) => {
-            let _ = writeln!(io::stderr(), "daemon configuration: {error}");
-            return ExitCode::from(1);
-        }
+        Err(error) => return write_config_error(format, &error.to_string()),
     };
     let config = match load(&context) {
         Ok(result) => result.config,
-        Err(error) => {
-            if is_transport_retired(&error.to_string()) {
-                return write_transport_retired(format, &error.to_string());
-            }
-            if selection_code(&error.to_string()).is_some() {
-                return write_config_error(format, &error.to_string());
-            }
-            let _ = writeln!(io::stderr(), "daemon configuration: {error}");
-            return ExitCode::from(1);
-        }
+        Err(error) => return write_config_error(format, &error.to_string()),
     };
+    // Engine precedence: `--engine` (only when given) > environment > TOML >
+    // default, as in Go `runDaemon`; an empty value means the default.
+    let engine = engine.unwrap_or_else(|| config.engine.clone());
     let engine = if engine.is_empty() {
-        if config.engine.is_empty() {
-            "chrome".to_owned()
-        } else {
-            config.engine.clone()
-        }
+        "chrome".to_owned()
     } else {
         engine
     };
@@ -251,6 +236,15 @@ pub(crate) fn run_daemon(
     } else {
         mode
     };
+    // Go validates the engine name before anything else is resolved.
+    if mode == "browser"
+        && let Err(error) = validate_engine(&engine)
+    {
+        if selection_code(&error).is_some() {
+            return write_config_error(format, &error);
+        }
+        return write_batch_error(format, ErrorCode::Internal, &error, 1);
+    }
     // The static transport does not accept a browser engine. Keep the
     // browser default only for browser mode; an inherited engine must not
     // poison an explicit transport selection.

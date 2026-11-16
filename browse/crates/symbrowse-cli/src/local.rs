@@ -62,7 +62,17 @@ pub fn dispatch(ctx: &mut Ctx<'_>, key: &str, args: &[String]) -> Outcome {
                     engine: flag("engine"),
                     mode: flag("mode"),
                 };
-                Outcome::Raw(legacy::run_config_show(format, overrides))
+                if ctx.captured {
+                    // A batch item must land in the item's captured stdout
+                    // (and report failures as the item's error), never leak
+                    // onto the process stdout.
+                    let rendered =
+                        legacy::render_config_show(format, overrides).map_err(CliError::plain)?;
+                    ctx.print(&rendered);
+                    Outcome::Done
+                } else {
+                    Outcome::Raw(legacy::run_config_show(format, overrides))
+                }
             }
             "mcp" => {
                 if ctx.flags.bool("list-profiles") {
@@ -101,7 +111,9 @@ fn daemon(ctx: &Ctx<'_>) -> Result<ExitCode, CliError> {
     Ok(legacy::run_daemon(
         ctx.flags.string("session", "default"),
         ctx.flags.string("mode", ""),
-        ctx.flags.string("engine", "chrome"),
+        ctx.flags
+            .changed("engine")
+            .then(|| ctx.flags.string("engine", "")),
         tri("ssrf"),
         tri("allow-private"),
         ctx.format()?,

@@ -277,6 +277,6 @@ mod unix;
 use connection::*;
 mod helpers;
 use helpers::*;
-pub use helpers::{default_socket_path, socket_path, validate_session};
+pub use helpers::{default_socket_path, socket_path, try_default_socket_path, validate_session};
 #[cfg(test)]
 mod tests;

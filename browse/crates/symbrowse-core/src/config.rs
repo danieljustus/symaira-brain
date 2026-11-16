@@ -255,20 +255,76 @@ fn process_env(
     Ok(env)
 }
 
+/// A process variable that is set to a non-empty value (Go compares with `== ""`).
+fn non_empty_var(name: &str) -> Option<std::ffi::OsString> {
+    std::env::var_os(name).filter(|value| !value.is_empty())
+}
+
+/// Go `filepath.Clean` for slash-separated paths: drops empty and `.`
+/// elements, resolves `..` lexically and returns `.` for an empty result.
+#[must_use]
+pub fn go_clean(path: &str) -> String {
+    let rooted = path.starts_with('/');
+    let mut parts: Vec<&str> = Vec::new();
+    for part in path.split('/') {
+        match part {
+            "" | "." => {}
+            ".." => {
+                if parts.last().is_some_and(|last| *last != "..") {
+                    parts.pop();
+                } else if !rooted {
+                    parts.push("..");
+                }
+            }
+            other => parts.push(other),
+        }
+    }
+    let joined = parts.join("/");
+    match (rooted, joined.is_empty()) {
+        (true, true) => "/".to_owned(),
+        (true, false) => format!("/{joined}"),
+        (false, true) => ".".to_owned(),
+        (false, false) => joined,
+    }
+}
+
+/// Go `filepath.Join`: empty elements are ignored, the rest is joined with
+/// `/` and cleaned, so `XDG_*` values such as `a//b/../c` normalise the same
+/// way as in the Go configuration loader.
+#[must_use]
+pub fn go_join(elements: &[&str]) -> String {
+    let non_empty: Vec<&str> = elements
+        .iter()
+        .copied()
+        .filter(|element| !element.is_empty())
+        .collect();
+    if non_empty.is_empty() {
+        return String::new();
+    }
+    go_clean(&non_empty.join("/"))
+}
+
 impl LoadContext {
     /// Captures the process environment without reading configuration files.
     pub fn from_process(flags: FlagOverrides) -> std::result::Result<Self, ConfigError> {
-        let home = std::env::var_os("HOME")
-            .or_else(|| std::env::var_os("USERPROFILE"))
+        // Go `os.UserHomeDir` treats an empty `$HOME` like an unset one and
+        // `DefaultPaths` does the same for every XDG base directory.
+        let home = non_empty_var("HOME")
+            .or_else(|| cfg!(windows).then(|| non_empty_var("USERPROFILE")).flatten())
             .map(PathBuf::from)
-            .ok_or_else(|| ConfigError("cannot determine home directory".to_owned()))?;
+            .ok_or_else(|| {
+                ConfigError(
+                    "failed to determine configuration home: cannot determine home directory: $HOME is not defined"
+                        .to_owned(),
+                )
+            })?;
         let cwd = std::env::current_dir().map_err(|error| ConfigError(error.to_string()))?;
         Ok(Self {
             home,
             cwd,
-            xdg_config_home: std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from),
-            xdg_cache_home: std::env::var_os("XDG_CACHE_HOME").map(PathBuf::from),
-            xdg_state_home: std::env::var_os("XDG_STATE_HOME").map(PathBuf::from),
+            xdg_config_home: non_empty_var("XDG_CONFIG_HOME").map(PathBuf::from),
+            xdg_cache_home: non_empty_var("XDG_CACHE_HOME").map(PathBuf::from),
+            xdg_state_home: non_empty_var("XDG_STATE_HOME").map(PathBuf::from),
             env: process_env(std::env::vars_os())?,
             flags,
         })
@@ -308,24 +364,29 @@ struct PartialConfig {
 
 /// Resolves defaults < global TOML < project TOML < environment < flags.
 pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
-    let config_home = context
-        .xdg_config_home
-        .clone()
-        .unwrap_or_else(|| context.home.join(".config"));
-    let cache_home = context
-        .xdg_cache_home
-        .clone()
-        .unwrap_or_else(|| context.home.join(".cache"));
-    let state_home = context
-        .xdg_state_home
-        .clone()
-        .unwrap_or_else(|| context.home.join(".local").join("state"));
+    // `DefaultPaths`: an unset or empty XDG variable falls back to the home
+    // based default; every result is a `filepath.Join`-cleaned path.
+    let home = display(&context.home);
+    let base = |xdg: &Option<PathBuf>, fallback: &[&str]| -> String {
+        match xdg.as_ref().filter(|path| !path.as_os_str().is_empty()) {
+            Some(path) => display(path),
+            None => {
+                let mut elements = vec![home.as_str()];
+                elements.extend_from_slice(fallback);
+                go_join(&elements)
+            }
+        }
+    };
+    let config_home = base(&context.xdg_config_home, &[".config"]);
+    let cache_home = base(&context.xdg_cache_home, &[".cache"]);
+    let state_home = base(&context.xdg_state_home, &[".local", "state"]);
+    let state_app = go_join(&[&state_home, APP_NAME]);
     let mut config = Config {
         log_level: "warn".to_owned(),
         log_format: "text".to_owned(),
-        config_dir: display(config_home.join(APP_NAME)),
-        cache_dir: display(cache_home.join(APP_NAME)),
-        state_dir: display(state_home.join(APP_NAME)),
+        config_dir: go_join(&[&config_home, APP_NAME]),
+        cache_dir: go_join(&[&cache_home, APP_NAME]),
+        state_dir: state_app.clone(),
         executable_path: String::new(),
         cdp_endpoint: String::new(),
         engine: "chrome".to_owned(),
@@ -346,7 +407,7 @@ pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
         autosave_interval: 30,
         autosave_key: String::new(),
         upload_dirs: vec![display(&context.cwd)],
-        daemon_log: display(state_home.join(APP_NAME).join("daemon.log")),
+        daemon_log: go_join(&[&state_app, "daemon.log"]),
         approval_timeout: 60,
     };
     let mut sources = FIELDS
@@ -356,14 +417,14 @@ pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
     apply_file(
         &mut config,
         &mut sources,
-        &config_home.join(APP_NAME).join("config.toml"),
+        Path::new(&go_join(&[&config_home, APP_NAME, "config.toml"])),
         "global",
     )
     .map_err(|error| ConfigError(format!("failed to load global configuration: {error}")))?;
     apply_file(
         &mut config,
         &mut sources,
-        &context.cwd.join(".symbrowse.toml"),
+        Path::new(&go_join(&[&display(&context.cwd), ".symbrowse.toml"])),
         "project",
     )
     .map_err(|error| ConfigError(format!("failed to load project configuration: {error}")))?;
@@ -372,7 +433,7 @@ pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
     })?;
     apply_flags(&mut config, &mut sources, &context.flags);
     if sources["daemon_log"] == "default" {
-        config.daemon_log = display(Path::new(&config.state_dir).join("daemon.log"));
+        config.daemon_log = go_join(&[&config.state_dir, "daemon.log"]);
     }
     validate(&config).map_err(|error| ConfigError(format!("invalid configuration: {error}")))?;
     Ok(Result { config, sources })
@@ -720,7 +781,7 @@ fn parse_go_bool(name: &str, value: &str) -> std::result::Result<bool, ConfigErr
         "1" | "t" | "T" | "true" | "TRUE" | "True" => Ok(true),
         "0" | "f" | "F" | "false" | "FALSE" | "False" => Ok(false),
         _ => Err(ConfigError(format!(
-            "invalid {name} {value:?}: parsing {value:?}: invalid syntax"
+            "invalid {name} {value:?}: strconv.ParseBool: parsing {value:?}: invalid syntax"
         ))),
     }
 }

@@ -7,7 +7,7 @@ use std::time::Instant;
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::output::{write_yaml_field, write_yaml_sequence_item, yaml_scalar};
+use crate::output::{write_yaml_value, yaml_scalar};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
@@ -273,31 +273,13 @@ pub fn render_yaml(report: &Report) -> String {
     output
 }
 
+/// A result field sits in column 10 of the `- command:` item; its value
+/// follows yaml.v3's layout (literal blocks in column 12).
 fn write_result_value(output: &mut String, key: &str, value: &Value) {
     output.push_str("          ");
     output.push_str(key);
     output.push(':');
-    match value {
-        Value::Object(values) if !values.is_empty() => {
-            output.push('\n');
-            for (child_key, child_value) in values {
-                write_yaml_field(output, child_key, child_value, 12);
-            }
-        }
-        Value::Array(values) if !values.is_empty() => {
-            output.push('\n');
-            for child in values {
-                write_yaml_sequence_item(output, child, 12);
-            }
-        }
-        Value::Object(_) => output.push_str(" {}\n"),
-        Value::Array(_) => output.push_str(" []\n"),
-        _ => {
-            output.push(' ');
-            output.push_str(&yaml_scalar(value));
-            output.push('\n');
-        }
-    }
+    write_yaml_value(output, value, 10, false);
 }
 
 const fn risk_class_name(class: RiskClass) -> &'static str {

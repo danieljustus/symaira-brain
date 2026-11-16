@@ -172,31 +172,122 @@ pub fn default_log_path() -> PathBuf {
         .unwrap_or_else(|| default_state_dir().join("daemon.log"))
 }
 
+/// Go `socketBaseDir` (`internal/daemon/path.go`) with the process facts passed
+/// in, so both platform branches are checkable on any host. macOS keeps the
+/// socket under `~/Library/Caches`; elsewhere `$XDG_RUNTIME_DIR/symbrowse` wins
+/// over `<user cache dir>/symbrowse/run`. Every result is `filepath.Join`-clean.
+pub fn socket_base_dir(
+    macos: bool,
+    home: Option<&str>,
+    xdg_runtime_dir: Option<&str>,
+    xdg_cache_home: Option<&str>,
+) -> Result<PathBuf, String> {
+    use symbrowse_core::config::go_join;
+    let home = home.filter(|value| !value.is_empty());
+    if macos {
+        let home = home.ok_or("determine home directory: $HOME is not defined")?;
+        return Ok(PathBuf::from(go_join(&[
+            home,
+            "Library",
+            "Caches",
+            "symbrowse",
+            "run",
+        ])));
+    }
+    if let Some(runtime) = xdg_runtime_dir.filter(|value| !value.is_empty()) {
+        return Ok(PathBuf::from(go_join(&[runtime, "symbrowse"])));
+    }
+    // Go `os.UserCacheDir` on Unix.
+    let cache = match xdg_cache_home.filter(|value| !value.is_empty()) {
+        Some(cache) if cache.starts_with('/') => cache.to_owned(),
+        Some(_) => {
+            return Err("determine cache directory: path in $XDG_CACHE_HOME is relative".into());
+        }
+        None => {
+            let home = home.ok_or(
+                "determine cache directory: neither $XDG_CACHE_HOME nor $HOME are defined",
+            )?;
+            format!("{home}/.cache")
+        }
+    };
+    Ok(PathBuf::from(go_join(&[&cache, "symbrowse", "run"])))
+}
+
+/// The default socket of `session` as Go's `daemon.SocketPath` resolves it, or
+/// the Go error text when the home or cache directory is undefined.
+pub fn try_default_socket_path(session: &str) -> Result<PathBuf, String> {
+    let var = |name: &str| std::env::var(name).ok();
+    socket_base_dir(
+        cfg!(target_os = "macos"),
+        var("HOME").as_deref(),
+        var("XDG_RUNTIME_DIR").as_deref(),
+        var("XDG_CACHE_HOME").as_deref(),
+    )
+    .map(|base| base.join(format!("{session}.sock")))
+}
+
+/// Infallible variant for daemon-internal callers: without a usable home the
+/// socket falls back to the temporary directory instead of failing startup.
 #[must_use]
 pub fn default_socket_path(session: &str) -> PathBuf {
-    if cfg!(target_os = "macos") {
-        return std::env::var_os("HOME").map_or_else(
-            || std::env::temp_dir().join(format!("symbrowse-{session}.sock")),
-            |home| {
-                PathBuf::from(home)
-                    .join("Library/Caches/symbrowse/run")
-                    .join(format!("{session}.sock"))
-            },
-        );
-    }
-    if let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") {
-        return PathBuf::from(runtime)
-            .join("symbrowse")
-            .join(format!("{session}.sock"));
-    }
-    default_state_dir()
-        .join("run")
-        .join(format!("{session}.sock"))
+    try_default_socket_path(session)
+        .unwrap_or_else(|_| std::env::temp_dir().join(format!("symbrowse-{session}.sock")))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn socket_base_dir_follows_go_path_go_on_every_platform() {
+        let dir = |macos, home, runtime, cache| socket_base_dir(macos, home, runtime, cache);
+        // darwin: HOME based, XDG ignored, path cleaned.
+        assert_eq!(
+            dir(true, Some("/Users/u"), Some("/run/u"), Some("/c")).unwrap(),
+            PathBuf::from("/Users/u/Library/Caches/symbrowse/run")
+        );
+        assert_eq!(
+            dir(true, Some("/Users//u/./x/.."), None, None).unwrap(),
+            PathBuf::from("/Users/u/Library/Caches/symbrowse/run")
+        );
+        assert_eq!(
+            dir(true, Some(""), None, None).unwrap_err(),
+            "determine home directory: $HOME is not defined"
+        );
+        assert_eq!(
+            dir(true, None, None, None).unwrap_err(),
+            "determine home directory: $HOME is not defined"
+        );
+        // elsewhere: runtime dir first, then the user cache dir.
+        assert_eq!(
+            dir(false, Some("/h"), Some("/run/user/1000"), Some("/c")).unwrap(),
+            PathBuf::from("/run/user/1000/symbrowse")
+        );
+        assert_eq!(
+            dir(false, Some("/h"), Some(""), Some("/c/")).unwrap(),
+            PathBuf::from("/c/symbrowse/run")
+        );
+        assert_eq!(
+            dir(false, Some("/h"), None, None).unwrap(),
+            PathBuf::from("/h/.cache/symbrowse/run")
+        );
+        assert_eq!(
+            dir(false, Some("/h"), None, Some("")).unwrap(),
+            PathBuf::from("/h/.cache/symbrowse/run")
+        );
+        assert_eq!(
+            dir(false, Some("/h"), None, Some("rel")).unwrap_err(),
+            "determine cache directory: path in $XDG_CACHE_HOME is relative"
+        );
+        assert_eq!(
+            dir(false, None, None, None).unwrap_err(),
+            "determine cache directory: neither $XDG_CACHE_HOME nor $HOME are defined"
+        );
+        assert_eq!(
+            dir(false, Some(""), None, Some("/c")).unwrap(),
+            PathBuf::from("/c/symbrowse/run")
+        );
+    }
 
     #[test]
     fn spec_paths_are_one_configured_tree() {

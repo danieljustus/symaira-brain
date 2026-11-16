@@ -129,6 +129,12 @@ pub fn default_socket_path(session: &str) -> PathBuf {
     crate::spec::default_socket_path(session)
 }
 
+/// Go `daemon.SocketPath`: the default socket, or Go's error text when the
+/// home or cache directory is undefined.
+pub fn try_default_socket_path(session: &str) -> Result<PathBuf, String> {
+    crate::spec::try_default_socket_path(session)
+}
+
 pub(super) fn builtin_handler(frame: Frame) -> HandlerResult {
     if !frame.cmd.starts_with("state.") {
         return Err(DaemonError {
