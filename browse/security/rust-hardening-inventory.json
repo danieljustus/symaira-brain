@@ -125,7 +125,7 @@
         "license": "BSD-3-Clause AND MIT",
         "name": "brotli",
         "source": "registry",
-        "version": "9.1.1",
+        "version": "9.1.3",
         "workspace_member": false
       },
       {
@@ -580,7 +580,7 @@
         "license": "MIT",
         "name": "h2",
         "source": "registry",
-        "version": "0.4.19",
+        "version": "0.4.20",
         "workspace_member": false
       },
       {
@@ -1084,7 +1084,7 @@
         "license": "MIT OR Apache-2.0",
         "name": "rand",
         "source": "registry",
-        "version": "0.10.3",
+        "version": "0.10.4",
         "workspace_member": false
       },
       {
