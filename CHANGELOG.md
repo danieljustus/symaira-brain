@@ -9,6 +9,8 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.16.0] - 2026-11-17
+
 ### Fixed
 - Browse: the Chrome launcher passes the privacy switches of the Go launcher
   (`disable-component-update`, `disable-domain-reliability`,
@@ -26,7 +28,9 @@ the [Unreleased] section is moved into a dated version section.
   empty. All three engines return the Go shape again; Firefox `read` no longer
   requires a URL (#780).
 - `symbrain setup` installs the Rust `symbrowse` v0.15.0 archives from the
-  symaira-brain release instead of the retired standalone v0.8.0 (#780).
+  symaira-brain release instead of the retired standalone v0.8.0 (#780). The
+  Browse fixes in this release ship in the v0.16.0 `symbrowse` archives; the
+  managed pin moves to them once they are published.
 - Browse: `symbrowse upgrade` works again. It queried the retired
   symaira-browse repository, and on macOS every check failed anyway because
   the client demanded TLS 1.3, which native-tls there cannot negotiate (the
