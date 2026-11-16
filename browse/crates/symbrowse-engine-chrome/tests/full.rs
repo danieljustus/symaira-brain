@@ -73,6 +73,7 @@ async fn blank_page_attaches_before_navigation_and_remains_usable() {
             executable: chrome_executable(),
             user_data_dir: profile,
             headless: true,
+            disable_webrtc: false,
         },
         Duration::from_secs(20),
     )
@@ -137,6 +138,7 @@ async fn blank_page_data_url_navigation_completes_and_remains_usable() {
             executable: chrome_executable(),
             user_data_dir: profile,
             headless: true,
+            disable_webrtc: false,
         },
         Duration::from_secs(20),
     )
@@ -197,6 +199,7 @@ async fn blank_page_navigation_handles_redirect_reload_and_http_error_loads() {
             executable: chrome_executable(),
             user_data_dir: profile,
             headless: true,
+            disable_webrtc: false,
         },
         Duration::from_secs(20),
     )
@@ -418,6 +421,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
             executable: chrome_executable(),
             user_data_dir: profile.clone(),
             headless: true,
+            disable_webrtc: false,
         },
         Duration::from_secs(20),
     )

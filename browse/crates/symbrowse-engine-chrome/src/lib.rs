@@ -60,6 +60,9 @@ pub enum BrowserMode {
         executable: PathBuf,
         user_data_dir: PathBuf,
         headless: bool,
+        /// Set when a domain allowlist is active: WebRTC traffic bypasses CDP
+        /// request interception, so the allowlist disables it per process.
+        disable_webrtc: bool,
     },
     Attach {
         endpoint: String,

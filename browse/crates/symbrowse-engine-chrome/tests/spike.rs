@@ -26,6 +26,7 @@ async fn real_launch_probe_is_opt_in() {
             executable,
             user_data_dir: profile.clone(),
             headless: true,
+            disable_webrtc: false,
         },
         url: "data:text/html,<title>test</title><h1>test</h1>".to_owned(),
         timeout: std::time::Duration::from_secs(10),

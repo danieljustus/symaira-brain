@@ -12,6 +12,10 @@ use crate::{
 };
 
 const CHROME_ENV: &str = "SYMBROWSE_CHROME_EXECUTABLE";
+/// Launch attempts before endpoint discovery is reported as failed. Chrome on
+/// root CI runners (snap/AppArmor, small /dev/shm) occasionally never exposes
+/// its DevTools endpoint; a fresh process reliably does.
+const MAX_LAUNCH_ATTEMPTS: u32 = 3;
 
 /// Resolve a usable Chrome/Chromium executable without requiring host-specific
 /// environment configuration. An explicit environment value remains strict:
@@ -127,26 +131,88 @@ pub(crate) async fn connect(
             executable,
             user_data_dir,
             headless,
+            disable_webrtc,
         } => {
-            let mut builder = BrowserConfig::builder()
-                .chrome_executable(executable)
-                .user_data_dir(Path::new(user_data_dir))
-                .launch_timeout(timeout)
-                .request_timeout(timeout)
-                .arg("--no-first-run")
-                .arg("--no-default-browser-check")
-                .arg("--disable-background-networking");
-            if *headless {
-                builder = builder.new_headless_mode();
+            let is_root = rustix::process::geteuid().is_root();
+            let mut last_error = None;
+            for _ in 0..MAX_LAUNCH_ATTEMPTS {
+                let mut builder = BrowserConfig::builder()
+                    .chrome_executable(executable)
+                    .user_data_dir(Path::new(user_data_dir))
+                    .launch_timeout(timeout)
+                    .request_timeout(timeout);
+                for arg in launch_args(*disable_webrtc, is_root) {
+                    builder = if arg.values.is_empty() {
+                        builder.arg(arg.key)
+                    } else {
+                        builder.arg((arg.key, arg.values.as_slice()))
+                    };
+                }
+                if *headless {
+                    builder = builder.new_headless_mode();
+                }
+                if is_root {
+                    builder = builder.no_sandbox();
+                }
+                match Browser::launch(builder.build()?).await {
+                    Ok((browser, handler)) => {
+                        return Ok(Connected {
+                            browser,
+                            handler,
+                            mode: ConnectionMode::Launch,
+                        });
+                    }
+                    Err(error) => last_error = Some(error),
+                }
             }
-            let (browser, handler) = Browser::launch(builder.build()?).await?;
-            Ok(Connected {
-                browser,
-                handler,
-                mode: ConnectionMode::Launch,
-            })
+            Err(format!(
+                "launch Chrome (after {MAX_LAUNCH_ATTEMPTS} attempts): {}",
+                last_error.map_or_else(String::new, |error| error.to_string())
+            )
+            .into())
         }
     }
+}
+
+/// One Chrome switch without its leading dashes; chromiumoxide adds them and
+/// merges repeated keys (e.g. its own `disable-features` default).
+#[derive(Debug, PartialEq, Eq)]
+struct LaunchArg {
+    key: &'static str,
+    values: Vec<&'static str>,
+}
+
+const fn switch(key: &'static str) -> LaunchArg {
+    LaunchArg {
+        key,
+        values: Vec::new(),
+    }
+}
+
+/// Privacy and security switches of the Go launcher (ENG-002) that
+/// chromiumoxide's defaults do not already set. `no-first-run`,
+/// `disable-background-networking`, `disable-sync` and `disable-dev-shm-usage`
+/// are chromiumoxide defaults; the sandbox switches for root come from
+/// `BrowserConfigBuilder::no_sandbox`.
+fn launch_args(disable_webrtc: bool, is_root: bool) -> Vec<LaunchArg> {
+    let mut args = vec![
+        switch("no-default-browser-check"),
+        switch("disable-component-update"),
+        switch("disable-domain-reliability"),
+        LaunchArg {
+            key: "disable-features",
+            values: vec!["OptimizationHints", "MediaRouter"],
+        },
+    ];
+    if disable_webrtc {
+        // WebRTC is not a regular HTTP request and cannot be intercepted, so
+        // an active allowlist disables it at the process level.
+        args.push(switch("disable-webrtc"));
+    }
+    if is_root {
+        args.push(switch("disable-gpu"));
+    }
+    args
 }
 
 #[cfg(test)]
@@ -172,5 +238,28 @@ mod tests {
         if let Ok(path) = discover_chrome_executable() {
             assert!(is_executable(&path));
         }
+    }
+
+    #[test]
+    fn launch_args_match_the_go_launcher_switches() {
+        let keys = |args: Vec<LaunchArg>| args.into_iter().map(|arg| arg.key).collect::<Vec<_>>();
+        let base = keys(launch_args(false, false));
+        assert_eq!(
+            base,
+            [
+                "no-default-browser-check",
+                "disable-component-update",
+                "disable-domain-reliability",
+                "disable-features"
+            ]
+        );
+        assert!(base.iter().all(|key| !key.starts_with('-')));
+        assert!(keys(launch_args(true, false)).contains(&"disable-webrtc"));
+        assert!(!base.contains(&"disable-webrtc"));
+        assert!(keys(launch_args(false, true)).contains(&"disable-gpu"));
+        assert_eq!(
+            launch_args(false, false)[3].values,
+            ["OptimizationHints", "MediaRouter"]
+        );
     }
 }

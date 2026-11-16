@@ -78,6 +78,7 @@ jobs:
             -- --exact blank_page_data_url_navigation_completes_and_remains_usable --nocapture
           cargo test --locked -p symbrowse-engine-chrome --test full \
             -- --exact blank_page_attaches_before_navigation_and_remains_usable --nocapture
+          cargo test --locked -p symbrowse-engine-chrome --test launch_args -- --nocapture
 
       # RUST-012: ENG-005/006/007 through the production daemon (Unix socket) on
       # every runner, plus the frozen Go-oracle replay. The suite fails when a

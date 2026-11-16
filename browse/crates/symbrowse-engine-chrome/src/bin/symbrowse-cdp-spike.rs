@@ -80,6 +80,7 @@ fn parse(args: &[String]) -> Result<ProbeConfig, String> {
             executable,
             user_data_dir: temp_profile(),
             headless,
+            disable_webrtc: false,
         },
         |endpoint| BrowserMode::Attach { endpoint },
     );

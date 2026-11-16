@@ -9,6 +9,21 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Fixed
+- Browse: the Chrome launcher passes the privacy switches of the Go launcher
+  (`disable-component-update`, `disable-domain-reliability`,
+  `disable-features=OptimizationHints,MediaRouter`, `no-default-browser-check`),
+  `--disable-webrtc` while a domain allowlist is active, and `--no-sandbox`
+  and `--disable-gpu` when it runs as root (`--disable-dev-shm-usage` is always
+  set). A failed
+  launch is retried up to three times. Previously the extra switches were
+  passed with doubled dashes and Chrome ignored them (#779).
+
+### Changed
+- Browse contract rows FETCH-001 (random domain and non-honest fetch presets,
+  which depended on the retired impersonation transport) and ENG-002 (exact
+  Chrome argv) are accepted differences (#779).
+
 ## [v0.15.0] - 2026-11-16
 
 ### Added

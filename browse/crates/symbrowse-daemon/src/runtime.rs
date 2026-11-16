@@ -1650,6 +1650,7 @@ impl DispatchRuntime {
                 executable,
                 user_data_dir: self.spec.user_data_dir(),
                 headless: true,
+                disable_webrtc: self.allowlist.is_some(),
             },
             timeout,
         )

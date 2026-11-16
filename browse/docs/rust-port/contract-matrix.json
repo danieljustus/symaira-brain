@@ -609,7 +609,7 @@
       "seam": "HTTP profile selection",
       "fixture": "chrome/firefox/opera/safari/edge/ios/honest/random/unknown; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md) ; #773 macOS arm64 fetch p95 value gate vs fixed 6.4834 ms Go-baseline ceiling: Rust release p95 0.568/0.628/0.689 ms over three 30-sample runs (port/evidence/fetch-control-773/macos-fetch-p95; local only, Linux/native CI rows pending)",
       "go_oracle": "go test ./internal/fetch/fetch -run Profile",
-      "expected": "preset selection, random domain and unknown->chrome warning match",
+      "expected": "Accepted difference (maintainer decision 2026-11-16, #779): profile parsing and the unknown->chrome warning match Go (11 cases, frozen-Go vs Rust). The random domain resolution and the non-honest presets depend on the retired impersonation transport (FETCH-002) and are absent by design.",
       "comparison": "network",
       "platforms": [
         "darwin-amd64",
@@ -619,7 +619,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "accepted-difference"
     },
     {
       "id": "FETCH-002",
@@ -773,7 +773,7 @@
       "seam": "Chrome launch/attach",
       "fixture": "docs/rust-port/rust011-cdp-probe.json + docs/rust-port/rust011-cdp-feasibility.md",
       "go_oracle": "go test ./internal/engine/chrome ./internal/engine/doctor -run 'Launch|Attach|Discover|Timeout'",
-      "expected": "argv, process ownership, endpoint attach and diagnostics match",
+      "expected": "Accepted difference (maintainer decision 2026-11-16, #779): the Rust launcher passes every privacy and security switch of the Go chromeArgs (no-first-run, no-default-browser-check, disable-background-networking, disable-component-update, disable-domain-reliability, disable-features=OptimizationHints,MediaRouter, disable-sync, disable-webrtc under an active allowlist, disable-dev-shm-usage always, no-sandbox and disable-gpu as root) and retries a failed launch up to three times like the Go endpoint loop. The remaining argv differs because chromiumoxide adds its own defaults and discovers the endpoint itself; exact argv parity would need a launch redesign and is not a product contract. Evidence: crates/symbrowse-engine-chrome/tests/launch_args.rs reads the switches back from the running browser (Browser.getBrowserCommandLine).",
       "comparison": "process",
       "platforms": [
         "darwin-amd64",
@@ -783,7 +783,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "accepted-difference"
     },
     {
       "id": "ENG-003",
