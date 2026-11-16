@@ -9,6 +9,14 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Changed
+- Skills: rendered `SKILL.md` frontmatter keeps the single-quoted style for
+  number-like strings (`version: '2'`) instead of the double quotes the
+  retired Go renderer wrote (`version: "2"`). Both are the same YAML value,
+  but render bytes, `output_digest` and install `source_hash` differ from the
+  last Go render. Documented in `docs/adr/skills-yaml-scalar-quoting-835.md`
+  (#835).
+
 ## [v0.14.0] - 2026-11-13
 
 ### Added

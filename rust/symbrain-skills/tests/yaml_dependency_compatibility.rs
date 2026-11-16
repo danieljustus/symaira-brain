@@ -1,4 +1,8 @@
-//! Dependency migration controls, not acceptance of the open Go encoder residuals.
+//! Dependency migration controls for the YAML encoder.
+//!
+//! The single-quoted scalar style (`version: '2'`) is an accepted, documented
+//! difference from the retired Go encoder (`version: "2"`); see
+//! `docs/adr/skills-yaml-scalar-quoting-835.md`.
 
 use serde_json::json;
 use symbrain_skills::{RenderMetadata, load_bundle, parse_skill_md, render_target};
