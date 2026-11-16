@@ -262,7 +262,21 @@ mod tests {
             .write(true)
             .open(first_lock_path)
             .expect("open first lock for release check");
-        FileExt::try_lock_exclusive(&first_lock)
-            .expect("first lock is released when later acquisition fails");
+        // A sibling test that forks between our open and its exec briefly holds
+        // a duplicate of the lock descriptor (flock follows the open file
+        // description), so allow a short grace period before failing.
+        let mut attempt = 0;
+        loop {
+            match FileExt::try_lock_exclusive(&first_lock) {
+                Ok(()) => break,
+                Err(error) if attempt < 50 && error.kind() == std::io::ErrorKind::WouldBlock => {
+                    attempt += 1;
+                    std::thread::sleep(Duration::from_millis(20));
+                }
+                Err(error) => {
+                    panic!("first lock is released when later acquisition fails: {error:?}")
+                }
+            }
+        }
     }
 }
