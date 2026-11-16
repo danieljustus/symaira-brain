@@ -44,6 +44,7 @@
 		7B8B462DD361B6B165D18C13 /* FocusedActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47443B2DCCCC694F3675786 /* FocusedActions.swift */; };
 		82A1D045FA7F349F12E30BB8 /* CredentialSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB065E219277083B0893A1D5 /* CredentialSheets.swift */; };
 		83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBD3F0F9378282E7AC6067E /* ModelTests.swift */; };
+		86E28AB43B482873EE749E7B /* VaultIntakeDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6FE2438036AB8FAF4D86116 /* VaultIntakeDecodingTests.swift */; };
 		8CF4C06F57A2883FFFF98B3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E451D0841FDC285609A50119 /* Assets.xcassets */; };
 		8EA39F6E785C3480C8DBBC5B /* Destination.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6A5038FB5CA9774501DC74 /* Destination.swift */; };
 		9060A5B00F1287761356A40A /* ModuleSourceBuildTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */; };
@@ -148,6 +149,7 @@
 		D3F95704B5E65C06E71D0C1A /* CLIErrorFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIErrorFormatterTests.swift; sourceTree = "<group>"; };
 		D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleModels.swift; sourceTree = "<group>"; };
 		D66DEE385C4CA00E4B3D5438 /* SymBrain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SymBrain.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6FE2438036AB8FAF4D86116 /* VaultIntakeDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultIntakeDecodingTests.swift; sourceTree = "<group>"; };
 		D73778742BF7F8F6CCBAFD35 /* SymBrainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainApp.swift; sourceTree = "<group>"; };
 		DC4B9E8F673FEC673FDCD831 /* MobileRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileRootView.swift; sourceTree = "<group>"; };
 		DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIErrorFormatter.swift; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 				3EA7C2993F5D8F89ADAC15AC /* SymairaToolRegistryTests.swift */,
 				E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */,
 				C171C21BAFD3C232CE72CCC0 /* TestTemporaryDirectory.swift */,
+				D6FE2438036AB8FAF4D86116 /* VaultIntakeDecodingTests.swift */,
 				6BA4B3D6BA95C2B0343233E7 /* VaultIntakeStateMachineTests.swift */,
 			);
 			name = SymBrainCoreTests;
@@ -666,6 +669,7 @@
 				48B4E517D136771338846AE3 /* SymairaToolRegistryTests.swift in Sources */,
 				F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */,
 				59293C2017EF55064FF036F8 /* TestTemporaryDirectory.swift in Sources */,
+				86E28AB43B482873EE749E7B /* VaultIntakeDecodingTests.swift in Sources */,
 				263C4CD15FA59655855FD872 /* VaultIntakeStateMachineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

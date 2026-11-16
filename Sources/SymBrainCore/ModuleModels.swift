@@ -550,6 +550,18 @@ public struct VaultIntakeFileResult: Decodable, Sendable, Equatable, Identifiabl
     public var id: String { file }
     public var isOK: Bool { status == "ok" }
     public init(file: String, status: String, reason: String?, provenance: VaultIntakeProvenance?, suggestions: [VaultIntakeSuggestion], duplicates: [String]) { self.file = file; self.status = status; self.reason = reason; self.provenance = provenance; self.suggestions = suggestions; self.duplicates = duplicates }
+    enum CodingKeys: String, CodingKey { case file, status, reason, provenance, suggestions, duplicates }
+    /// The CLI omits `suggestions` and `duplicates` when they are empty
+    /// (`duplicates` for every source without duplicates, `suggestions` for
+    /// error results), so both decode as empty lists when absent.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        file = try c.decode(String.self, forKey: .file); status = try c.decode(String.self, forKey: .status)
+        reason = try c.decodeIfPresent(String.self, forKey: .reason)
+        provenance = try c.decodeIfPresent(VaultIntakeProvenance.self, forKey: .provenance)
+        suggestions = try c.decodeIfPresent([VaultIntakeSuggestion].self, forKey: .suggestions) ?? []
+        duplicates = try c.decodeIfPresent([String].self, forKey: .duplicates) ?? []
+    }
 }
 
 public struct VaultIntakeProvenance: Decodable, Sendable, Equatable {
