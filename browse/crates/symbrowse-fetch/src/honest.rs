@@ -20,7 +20,10 @@ use crate::{
     retry::{is_transient_status, parse_retry_after},
 };
 
-const DEFAULT_USER_AGENT: &str = "symfetch/0.1 (+https://github.com/danieljustus/symaira-fetch)";
+// The `symfetch` product token stays because operators address it in
+// robots.txt; the contact URL must resolve so they can identify the client.
+const DEFAULT_USER_AGENT: &str =
+    "symfetch/0.1 (+https://github.com/danieljustus/symaira-brain/tree/main/browse)";
 
 #[path = "honest/headers.rs"]
 mod headers;

@@ -59,3 +59,17 @@ pub(super) fn implicit_gzip(request: &Request, method: &Method) -> bool {
                 && !value.is_empty()
         })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_user_agent_names_the_browse_module() {
+        let headers = request_headers(&Request::default(), &Method::GET).unwrap();
+        assert_eq!(
+            headers[USER_AGENT],
+            "symfetch/0.1 (+https://github.com/danieljustus/symaira-brain/tree/main/browse)"
+        );
+    }
+}
