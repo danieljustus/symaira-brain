@@ -63,6 +63,16 @@ fn bare(version: &str) -> &str {
     version.strip_prefix('v').unwrap_or(version)
 }
 
+/// Reviewed repository moves: `(core, sealed repo, shipped repo)`. The Rust
+/// `symbrowse` ships with the symaira-brain release since v0.15.0, after the
+/// standalone repository was retired (#780). Everything else about the core's
+/// policy (binary, asset prefix, cosign, optional flag) must still match.
+const MOVED_REPOS: &[(&str, &str, &str)] = &[(
+    "symbrowse",
+    "danieljustus/symaira-browse",
+    "danieljustus/symaira-brain",
+)];
+
 /// Compares the shipped manifest with the sealed Go-era oracle manifest by
 /// structure and policy, deliberately NOT by pin values (#997).
 ///
@@ -85,7 +95,12 @@ fn assert_embedded_manifest_matches_sealed_structure(shipped: &Manifest, sealed:
             sha256: std::collections::BTreeMap::default(),
             ..core.clone()
         };
-        assert_eq!(policy(new), policy(old), "{name} policy");
+        let mut old_policy = policy(old);
+        if let Some((_, from, to)) = MOVED_REPOS.iter().find(|(core, _, _)| core == name) {
+            assert_eq!(old.repo, *from, "{name} sealed repo");
+            old_policy.repo = (*to).to_string();
+        }
+        assert_eq!(policy(new), old_policy, "{name} policy");
         assert_eq!(
             bare(&new.version).split('.').count(),
             bare(&old.version).split('.').count(),
