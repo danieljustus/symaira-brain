@@ -15,14 +15,26 @@ the [Unreleased] section is moved into a dated version section.
   `disable-features=OptimizationHints,MediaRouter`, `no-default-browser-check`),
   `--disable-webrtc` while a domain allowlist is active, and `--no-sandbox`
   and `--disable-gpu` when it runs as root (`--disable-dev-shm-usage` is always
-  set). A failed
-  launch is retried up to three times. Previously the extra switches were
-  passed with doubled dashes and Chrome ignored them (#779).
+  set). A failed launch is retried up to three times. Previously the extra
+  switches were passed with doubled dashes and Chrome ignored them (#779).
+- Browse: `symbrowse open` and `goto` in Chrome mode answered only at the
+  25 s operation timeout. The daemon sent `Page.navigate` through
+  chromiumoxide, which held the response for its own lifecycle watcher; it now
+  dispatches over a direct CDP session and polls the document like Go (#780).
+- Browse: `read` in Chrome, Safari and Firefox mode returned the page text
+  where the CLI renders Go's `{html, title, url}`, so the rendered document was
+  empty. All three engines return the Go shape again; Firefox `read` no longer
+  requires a URL (#780).
 
 ### Changed
 - Browse contract rows FETCH-001 (random domain and non-honest fetch presets,
   which depended on the retired impersonation transport) and ENG-002 (exact
   Chrome argv) are accepted differences (#779).
+- Browse release rows REL-001 to REL-004 are at parity with the v0.15.0
+  release; REL-006 (Go/Rust selection) and PERF-002 are accepted differences
+  after the Go removal. The Chrome native E2E workflow now also runs the CLI
+  flow test and records PERF measurements with `port/bench/chrome_flow.py`
+  (#780).
 
 ## [v0.15.0] - 2026-11-16
 

@@ -124,7 +124,7 @@ impl SafariRuntime {
                     self.navigate(url).await.map_err(runtime_error)?;
                 }
                 let value = self
-                    .eval("document.body?.innerText ?? ''")
+                    .eval(symbrowse_engine_chrome::READ_MATERIAL)
                     .await
                     .map_err(runtime_error)?;
                 Ok((Some(value), Vec::new()))

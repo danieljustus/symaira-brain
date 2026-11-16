@@ -1101,8 +1101,11 @@ impl DispatchRuntime {
         url: &str,
         operation: &OperationContext,
     ) -> Result<Value, DaemonError> {
-        let navigated = page
-            .cdp("Page.navigate", json!({"url": url}))
+        // Not `page.cdp`: chromiumoxide holds that response until its own
+        // lifecycle watcher sees the load, which in a daemon-launched browser
+        // only ends at its 30 s request timeout.
+        let (navigated, _session) = page
+            .dispatch_navigation(url)
             .await
             .map_err(|error| failed(format!("{action} {url:?}: {error}")))?;
         if let Some(text) = navigation_error_text(&navigated) {

@@ -14,10 +14,15 @@ mod parity;
 
 pub use full::{
     Artifact, ChromeCapabilities, ChromePage, ChromeSession, DialogInfo, FindOptions, FrameInfo,
-    InteractionResult, NetworkCapture, NetworkEvent, ScreenshotOptions, UnsupportedOperation,
-    capabilities, is_http_response_navigation,
+    InteractionResult, NavigationSession, NetworkCapture, NetworkEvent, ScreenshotOptions,
+    UnsupportedOperation, capabilities, is_http_response_navigation,
 };
 pub use parity::{ConsoleEntry, ErrorEntry, NetworkRequestEntry, NetworkRoute};
+
+/// Go `readPage`: the page material every browser engine returns for `read`
+/// (`document.documentElement.outerHTML`, `document.title`, `location.href`).
+pub const READ_MATERIAL: &str =
+    "({html: document.documentElement.outerHTML, title: document.title, url: location.href})";
 
 /// Canonical capability partition used by the daemon handshake. Only names
 /// backed by commands in `DispatchRuntime` are advertised here.

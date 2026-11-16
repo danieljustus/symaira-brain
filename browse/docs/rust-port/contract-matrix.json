@@ -1040,7 +1040,8 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-16, release.yml run 43943112828 (tag v0.15.0): `build (linux/amd64)`, `build (linux/arm64)` and `build (darwin/arm64)` each built symbrowse natively and passed `Package and smoke-test the archives` (scripts/rust-release/smoke.py --product symbrowse: version, help, native flag validation) on its own runner. The published darwin_arm64 binary runs here and prints `symbrowse 0.15.0`. Current Rust-only release contract: docs/rust-port/rust016-release-gates.md (three targets per #990, no Go fallback per #1003/#782); the six-target and Go-v0.8.0 wording above is historical."
     },
     {
       "id": "REL-002",
@@ -1057,7 +1058,8 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-16, published v0.15.0 assets read back: symbrowse_0.15.0_{darwin_arm64,linux_amd64,linux_arm64}.tar.gz, each holding exactly AGENTS.md, LICENSE, README.md and symbrowse (tar -tzf). Current Rust-only release contract: docs/rust-port/rust016-release-gates.md (three targets per #990, no Go fallback per #1003/#782); the six-target and Go-v0.8.0 wording above is historical."
     },
     {
       "id": "REL-003",
@@ -1074,7 +1076,8 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-16, v0.15.0 read back locally: the three archive sha256 values equal their lines in the signed checksums.txt; `cosign verify-blob` with identity https://github.com/danieljustus/symaira-brain/.github/workflows/release.yml@refs/tags/v0.15.0 and issuer https://token.actions.githubusercontent.com: Verified OK for all three archives and for checksums.txt; each archive has a CycloneDX `<archive>.sbom.json` with its own .sig/.pem (CycloneDX replaces the Go-era SPDX per the current contract). Current Rust-only release contract: docs/rust-port/rust016-release-gates.md (three targets per #990, no Go fallback per #1003/#782); the six-target and Go-v0.8.0 wording above is historical."
     },
     {
       "id": "REL-004",
@@ -1087,7 +1090,8 @@
         "darwin-amd64",
         "darwin-arm64"
       ],
-      "status": "todo"
+      "status": "parity",
+      "evidence": "2026-11-16, published v0.15.0 darwin_arm64 binary: codesign Identifier com.symaira.browse.cli, flags 0x10000(runtime), Authority Developer ID Application: Daniel Justus (M4744F3TAA); `spctl -a -t install`: accepted, source=Notarized Developer ID (bare Mach-O, so no stapled ticket). release.yml run 43943112828 (tag v0.15.0) step `Sign, notarize and repackage the darwin binaries` succeeded. amd64 is out of scope (#990). Current Rust-only release contract: docs/rust-port/rust016-release-gates.md (three targets per #990, no Go fallback per #1003/#782); the six-target and Go-v0.8.0 wording above is historical."
     },
     {
       "id": "REL-005",
@@ -1107,7 +1111,7 @@
       "seam": "dual implementation rollback",
       "fixture": "Go-default, Rust opt-in, Rust-default, forced Go and missing sibling binary",
       "go_oracle": "run launcher matrix with isolated PATH and SYMBROWSE_IMPL",
-      "expected": "selection is explicit, observable and never strands the last known-good Go path",
+      "expected": "Accepted difference (maintainer decision 2026-10-30 in #782, Go removed in #1003): there is no Go implementation to select or fall back to, so the SYMBROWSE_IMPL selection and the last-known-good Go path do not exist. Rollback means the previous Rust release (docs/rust-port/rust016-release-gates.md).",
       "comparison": "process",
       "platforms": [
         "darwin-amd64",
@@ -1117,7 +1121,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "todo"
+      "status": "accepted-difference"
     },
     {
       "id": "PERF-001",
@@ -1142,7 +1146,7 @@
       "seam": "MCP/daemon steady state",
       "fixture": "paired initialize/list/call and 100-frame daemon workload",
       "go_oracle": "run neutral benchmark harness with isolated sockets/HOME",
-      "expected": "Rust p95 <=110% Go; no unbounded task/channel growth",
+      "expected": "Accepted difference (maintainer decision 2026-11-16, #780): no Go reference exists after Go removal, so the measured Rust numbers are the new baseline: docs/rust-port/perf-2026-11-15.json `perf_002_mcp_daemon_steady_state` (darwin-arm64, 2 sessions x 8 rounds x 100 frames): semantic checks all passed, bounded_no_unbounded_growth=true (RSS growth over 200 frames 49-197 KB mcp/spawned daemon, about 2 MB static daemon, limit 4 MB; thread and fd growth 0), mcp initialize+list p95 at 0.43/0.80 of the frozen Go p95. Linux numbers come from the PERF step of .github/workflows/browse-chrome-native-e2e.yml.",
       "comparison": "manual-gate",
       "platforms": [
         "darwin-amd64",
@@ -1152,7 +1156,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "todo",
+      "status": "accepted-difference",
       "evidence": "2026-11-15 partial, row stays todo: docs/rust-port/perf-2026-11-15.json. mcp initialize+tools/list p95 is within 110% of the frozen Go p95 (34.76 ms) in median-of-rounds in both sessions (15.1 and 27.9 ms). 100-frame steady state (mcp ping + tools/call fetch_batch through its auto-spawned daemon; static daemon ping + fetch.url), 16 rounds: all 3200 semantic checks passed; RSS growth <= 2.0 MiB over 200 frames, threads and fds unchanged. Missing: baseline.json has no Go reference for the daemon/tools-call frame workload, so the p95 ratio cannot be formed for it; no task/channel counters are exposed. Same host-contention caveat as PERF-001."
     },
     {
@@ -1171,7 +1175,7 @@
         "windows-arm64"
       ],
       "status": "todo",
-      "evidence": "2026-11-15 partial, row stays todo: docs/rust-port/perf-2026-11-15.json. Static fetch (loopback rust016-static-fetch-html-v1, unmodified run.py x3, fetch_p95_gate.py recomputed): p95 0.94/1.28/0.82 ms vs the 6.4834 ms ceiling (Go 5.894 ms x 1.10), pass. Real-Chrome fixture flow not measured: baseline.json has no Go Chrome reference and port/bench/chrome_pair.py needs a Go binary."
+      "evidence": "2026-11-16 (#780): the real-Chrome half has no Go reference after Go removal; per the maintainer decision of 2026-11-16 it is recorded as a new Rust baseline instead of a paired ratio. port/bench/chrome_flow.py measures the historical PERF-003 flow (local fixture, CLI open + read, isolated root, 30 runs, nearest-rank p95) and runs on all three native runners in .github/workflows/browse-chrome-native-e2e.yml. Its first run showed that every CLI `open` in Chrome mode hung until the 25 s operation timeout and that `read` rendered an empty page; both are fixed and covered by crates/symbrowse-cli/tests/chrome_cli_flow.rs. The static-fetch half is met on darwin-arm64 (docs/rust-port/perf-2026-11-15.json: 0.82-1.28 ms p95 vs the 6.4834 ms ceiling). Row stays todo until the CI Chrome-flow numbers are recorded."
     },
     {
       "id": "PERF-004",

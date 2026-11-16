@@ -461,6 +461,23 @@ async fn send_page_navigate(
     target_id: &str,
     url: &str,
 ) -> Result<DirectCdpSocket, Box<dyn Error + Send + Sync>> {
+    let (socket, result) = dispatch_page_navigate(websocket_address, target_id, url).await?;
+    let result: page::NavigateReturns = serde_json::from_value(result)?;
+    if let Some(error) = page_navigate_error(result) {
+        perf_diagnostic("navigation.cdp.navigate.error_text=true");
+        return Err(Box::new(error));
+    }
+    perf_diagnostic("navigation.cdp.navigate.response");
+    Ok(socket)
+}
+
+/// Attaches a direct CDP session to `target_id` and sends `Page.navigate`,
+/// returning the session and the unfiltered protocol result.
+async fn dispatch_page_navigate(
+    websocket_address: &str,
+    target_id: &str,
+    url: &str,
+) -> Result<(DirectCdpSocket, Value), Box<dyn Error + Send + Sync>> {
     let (mut socket, _) = connect_async(websocket_address).await?;
     perf_diagnostic("navigation.cdp.attach.start");
     let attached = direct_cdp_command(
@@ -480,13 +497,13 @@ async fn send_page_navigate(
         .ok_or("Target.attachToTarget response is missing sessionId")?;
     perf_diagnostic("navigation.cdp.navigate.start");
     let result = direct_cdp_command(&mut socket, page_navigate_request(2, session_id, url)).await?;
-    let result: page::NavigateReturns = serde_json::from_value(result)?;
-    if let Some(error) = page_navigate_error(result) {
-        perf_diagnostic("navigation.cdp.navigate.error_text=true");
-        return Err(Box::new(error));
-    }
-    perf_diagnostic("navigation.cdp.navigate.response");
-    Ok(socket)
+    Ok((socket, result))
+}
+
+/// Keeps the direct CDP session of a dispatched navigation attached; drop it
+/// once the caller has observed the navigation outcome.
+pub struct NavigationSession {
+    _socket: DirectCdpSocket,
 }
 
 impl ChromePage {
@@ -559,6 +576,22 @@ impl ChromePage {
             Ok(result) => result,
             Err(error) => Err(Box::new(error)),
         }
+    }
+
+    /// Sends `Page.navigate` over a direct CDP session and returns its raw
+    /// result (`frameId`, `loaderId`, `errorText`). chromiumoxide holds a
+    /// `Page.navigate` sent through `cdp` until its own frame-lifecycle watcher
+    /// sees the load, which in a daemon-launched browser never happens before
+    /// its 30 s request timeout. Callers poll document state, as the Go
+    /// adapter does, while the returned session is alive.
+    pub async fn dispatch_navigation(
+        &self,
+        url: &str,
+    ) -> Result<(Value, NavigationSession), Box<dyn Error + Send + Sync>> {
+        let (socket, result) =
+            dispatch_page_navigate(&self.websocket_address, self.page.target_id().inner(), url)
+                .await?;
+        Ok((result, NavigationSession { _socket: socket }))
     }
 
     async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
@@ -685,13 +718,10 @@ impl ChromePage {
         Ok(response.result.result.value.unwrap_or(Value::Null))
     }
 
+    /// Raw page material for the `read` command, Go's `readPage` shape
+    /// (`html`, `title`, `url`); rendering happens on the CLI side.
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        Ok(self
-            .page
-            .evaluate("document.body?.innerText ?? ''")
-            .await?
-            .into_value::<String>()?
-            .into())
+        self.evaluate_runtime_json(crate::READ_MATERIAL).await
     }
 
     /// Evaluate a bounded JSON-producing script for shared browser state

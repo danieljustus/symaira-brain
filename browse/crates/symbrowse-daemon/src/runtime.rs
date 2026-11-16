@@ -1425,7 +1425,21 @@ impl DispatchRuntime {
             return result;
         }
         match frame.cmd.as_str() {
-            "open" | "goto" | "read" => {
+            "read" => {
+                if let Some(url) = args
+                    .get("url")
+                    .and_then(Value::as_str)
+                    .filter(|url| !url.is_empty())
+                {
+                    session.navigate(url).await.map_err(firefox_error)?;
+                }
+                let value = session
+                    .evaluate(symbrowse_engine_chrome::READ_MATERIAL)
+                    .await
+                    .map_err(firefox_error)?;
+                Ok((Some(value.value.unwrap_or(Value::Null)), Vec::new()))
+            }
+            "open" | "goto" => {
                 let url = required_string(args, "url")?;
                 let navigation = session.navigate(url).await.map_err(firefox_error)?;
                 let value = session.evaluate("({url: location.href, title: document.title, content: document.body?.innerText ?? ''})").await.map_err(firefox_error)?;

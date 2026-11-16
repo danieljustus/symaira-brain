@@ -189,10 +189,18 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     );
     assert_eq!(opened["success"], true, "open response: {opened}");
     let script = request(&socket, "read", json!({}));
+    // Go `readPage` shape: the CLI renders `html`, `title` and `url`.
     assert!(
-        script["data"]
+        script["data"]["html"]
             .as_str()
-            .is_some_and(|text| text.contains("native")),
+            .is_some_and(|html| html.contains("<h1>native</h1>")),
+        "read response: {script}"
+    );
+    assert_eq!(script["data"]["title"], "daemon", "read response: {script}");
+    assert!(
+        script["data"]["url"]
+            .as_str()
+            .is_some_and(|url| url.starts_with("data:text/html")),
         "read response: {script}"
     );
     case("ENG-005.navigate-read");
@@ -228,9 +236,9 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     assert_eq!(switched["success"], true, "tab.switch response: {switched}");
     let original = request(&socket, "read", json!({}));
     assert!(
-        original["data"]
+        original["data"]["html"]
             .as_str()
-            .is_some_and(|text| text.contains("native")),
+            .is_some_and(|html| html.contains("native")),
         "switched tab read: {original}"
     );
     let closed = request(&socket, "tab.close", json!({"tab":"second"}));

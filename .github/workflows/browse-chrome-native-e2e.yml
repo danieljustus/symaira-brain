@@ -27,7 +27,7 @@ jobs:
             platform: darwin-arm64
             cft: mac-arm64
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 45
+    timeout-minutes: 75
     defaults:
       run:
         working-directory: browse
@@ -79,6 +79,8 @@ jobs:
           cargo test --locked -p symbrowse-engine-chrome --test full \
             -- --exact blank_page_attaches_before_navigation_and_remains_usable --nocapture
           cargo test --locked -p symbrowse-engine-chrome --test launch_args -- --nocapture
+          # The user path: CLI + autostarted daemon, open then read (#780).
+          cargo test --locked -p symbrowse-cli --test chrome_cli_flow -- --nocapture
 
       # RUST-012: ENG-005/006/007 through the production daemon (Unix socket) on
       # every runner, plus the frozen Go-oracle replay. The suite fails when a
@@ -99,3 +101,36 @@ jobs:
               capability-truth timeout cleanup; do
             grep -F "PARITY_CASE ENG-009.$case_id.chrome PASS" "$RUNNER_TEMP/browse-chrome-corpus.log"
           done
+
+      # PERF-001..004 on an idle runner, plus the Rust real-Chrome flow that
+      # replaces the Go-paired PERF-003 reference (maintainer decision
+      # 2026-11-16, #780). Measurement only: the verdict is recorded from the
+      # uploaded reports, so a slow runner does not fail this job.
+      - name: Build the release binary for PERF measurements
+        run: cargo build --release --locked -p symbrowse-cli
+
+      - name: Measure PERF-001..004 and the Rust Chrome flow
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/browse-perf-${{ matrix.platform }}"
+          mkdir -p "$out"
+          binary="$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys; print(json.load(sys.stdin)["target_directory"])')/release/symbrowse"
+          base="$(mktemp -d /tmp/sbperf.XXXX)"
+          python3 -B port/bench/perf_evidence.py --rust "$binary" --rounds 8 --base "$base" \
+            --output "$out/perf-evidence.json"
+          launcher=()
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            launcher=(--chrome-launcher "$SYMBROWSE_CHROME_EXECUTABLE")
+          fi
+          python3 -B port/bench/chrome_flow.py --rust "$binary" \
+            --chrome "${{ steps.cft.outputs.executable }}" "${launcher[@]}" \
+            --chrome-version "${{ steps.cft.outputs.version }}" --runs 30 \
+            --output "$out/chrome-flow.json"
+
+      - name: Upload PERF reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browse-perf-${{ matrix.platform }}
+          path: ${{ runner.temp }}/browse-perf-${{ matrix.platform }}
+          if-no-files-found: error
