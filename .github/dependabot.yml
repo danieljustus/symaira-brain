@@ -24,6 +24,10 @@ updates:
         patterns:
           - "symaira-core-*"
       cargo-minor-patch:
+        # Without this exclusion Dependabot ranks this group as more specific
+        # and swallows the CoreKit crates, whose Git tag bump it then drops.
+        exclude-patterns:
+          - "symaira-core-*"
         update-types:
           - "minor"
           - "patch"
