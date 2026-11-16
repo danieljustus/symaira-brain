@@ -31,11 +31,12 @@
 > - **Rollback:** the previous Rust release. There is no Go fallback and no
 >   `SYMBROWSE_IMPL` switch; Go-era assets (v0.8.0 of the deleted
 >   `symaira-browse` repository) remain only as history.
-> - **Managed manifest:** `rust/symbrain-managed/assets/manifest.json` still pins
->   the deleted `symaira-browse` v0.8.0 until the first release that ships these
->   archives. Then it is repinned to `danieljustus/symaira-brain` with the
->   sha256 values of the published archives; digests are never filled in before
->   real artifacts exist.
+> - **Managed manifest:** `rust/symbrain-managed/assets/manifest.json` pins
+>   `danieljustus/symaira-brain` v0.15.0, the first release that ships these
+>   archives, with the sha256 values read back from the published release and
+>   cosign-verified against the release workflow identity (2026-11-16, #780).
+>   The sealed Go-era manifest still names `symaira-browse`; the structure
+>   check allows exactly this reviewed repository move.
 
 Status: **prepared, blocked, no cutover** *(historical, 2026-09-07)*
 

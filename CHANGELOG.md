@@ -25,6 +25,8 @@ the [Unreleased] section is moved into a dated version section.
   where the CLI renders Go's `{html, title, url}`, so the rendered document was
   empty. All three engines return the Go shape again; Firefox `read` no longer
   requires a URL (#780).
+- `symbrain setup` installs the Rust `symbrowse` v0.15.0 archives from the
+  symaira-brain release instead of the retired standalone v0.8.0 (#780).
 
 ### Changed
 - Browse contract rows FETCH-001 (random domain and non-honest fetch presets,
