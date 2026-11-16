@@ -127,11 +127,28 @@ def process_round(binary: Path, root: Path) -> dict:
     return result
 
 
+LINUX = platform.system() == "Linux"
+
+
 def ps_stats(pid: int) -> dict:
     rss_kb = int(subprocess.check_output(["ps", "-o", "rss=", "-p", str(pid)], text=True).strip())
-    threads = len(subprocess.check_output(["ps", "-M", "-p", str(pid)], text=True).strip().splitlines()) - 1
-    fds = len([line for line in subprocess.run(["lsof", "-p", str(pid)], capture_output=True, text=True).stdout.splitlines()[1:]])
+    if LINUX:
+        # `ps -M` is macOS-only; /proc is exact on Linux.
+        status = Path(f"/proc/{pid}/status").read_text()
+        threads = int(next(line.split()[1] for line in status.splitlines() if line.startswith("Threads:")))
+        fds = len(os.listdir(f"/proc/{pid}/fd"))
+    else:
+        threads = len(subprocess.check_output(["ps", "-M", "-p", str(pid)], text=True).strip().splitlines()) - 1
+        fds = len([line for line in subprocess.run(["lsof", "-p", str(pid)], capture_output=True, text=True).stdout.splitlines()[1:]])
     return {"rss_bytes": rss_kb * 1024, "threads": threads, "open_fds": fds}
+
+
+def socket_path(env: dict[str, str], session: str) -> Path:
+    """Daemon socket for `session`, the rule of symbrowse-daemon spec.rs: macOS
+    uses $HOME/Library/Caches/symbrowse/run, elsewhere $XDG_RUNTIME_DIR/symbrowse."""
+    if platform.system() == "Darwin":
+        return Path(env["HOME"]) / "Library" / "Caches" / "symbrowse" / "run" / f"{session}.sock"
+    return Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"
 
 
 class Fixture(BaseHTTPRequestHandler):
@@ -153,7 +170,23 @@ def frame_summary(durations: list[int]) -> dict:
 
 def daemon_pid_for(sock: Path, exclude: int) -> int:
     """PID of the process serving `sock` (the daemon the mcp server auto-spawned)."""
-    out = subprocess.run(["lsof", "-t", str(sock)], capture_output=True, text=True).stdout.split()
+    if LINUX:
+        # Linux lsof does not match a Unix socket by its path: find the
+        # listening inode in /proc/net/unix, then the process holding it.
+        inodes = {line.split()[6] for line in Path("/proc/net/unix").read_text().splitlines()[1:]
+                  if line.split()[-1] == str(sock)}
+        out = []
+        for entry in Path("/proc").iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                links = {os.readlink(fd) for fd in (entry / "fd").iterdir()}
+            except OSError:
+                continue
+            if any(f"socket:[{inode}]" in links for inode in inodes):
+                out.append(entry.name)
+    else:
+        out = subprocess.run(["lsof", "-t", str(sock)], capture_output=True, text=True).stdout.split()
     pids = [int(value) for value in out if int(value) != exclude and int(value) != os.getpid()]
     if not pids:
         raise RuntimeError(f"no process serves {sock}")
@@ -169,7 +202,7 @@ def mcp_steady(binary: Path, root: Path, port: int) -> dict:
     env = env_for(root)
     proc = subprocess.Popen([str(binary), "mcp"], stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=env, cwd=root, bufsize=0)
-    sock = Path(env["HOME"]) / "Library" / "Caches" / "symbrowse" / "run" / "default.sock"
+    sock = socket_path(env, "default")
 
     def rpc(payload: dict) -> bytes:
         proc.stdin.write((json.dumps(payload) + "\n").encode())
@@ -229,14 +262,13 @@ def daemon_steady(binary: Path, root: Path, port: int) -> dict:
     """One long-lived static daemon: FRAMES daemon.ping + FRAMES fetch.url on one session."""
     env = env_for(root)
     session = "perf"
-    sock_path = root / "runtime" / "symbrowse" / f"{session}.sock"
-    alt = Path(env["HOME"]) / "Library" / "Caches" / "symbrowse" / "run" / f"{session}.sock"
+    sock_path = socket_path(env, session)
     proc = subprocess.Popen([str(binary), "daemon", "--session", session, "--mode", "static"],
                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL, env=env, cwd=root, start_new_session=True)
 
     def send(frame: dict) -> bytes:
-        path = sock_path if sock_path.exists() else alt
+        path = sock_path
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as conn:
             conn.settimeout(15)
             conn.connect(str(path))
@@ -251,7 +283,7 @@ def daemon_steady(binary: Path, root: Path, port: int) -> dict:
 
     try:
         deadline = time.monotonic() + 10
-        while time.monotonic() < deadline and not (sock_path.exists() or alt.exists()):
+        while time.monotonic() < deadline and not sock_path.exists():
             if proc.poll() is not None:
                 raise RuntimeError("daemon exited before creating its socket")
             time.sleep(0.02)
