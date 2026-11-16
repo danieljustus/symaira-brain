@@ -600,7 +600,9 @@ new implementation without migration.
 ## Security notes
 
 symbrain's job is **least exposure**, not call-time hardening — see the
-boundary table above. Concretely:
+boundary table above. The vulnerability-report scope for each shipped module
+(gateway, Browse, Operate) is in [.github/SECURITY.md](.github/SECURITY.md#scope).
+Concretely:
 
 - **What it protects against:** an over-broad harness connection seeing or
   using tools it has no business touching. A `restricted` profile's vault

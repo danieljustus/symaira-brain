@@ -32,8 +32,44 @@ credited to you unless you prefer to remain anonymous.
 
 ## Scope
 
-See the [Security notes](../README.md#security-notes) section of the
-README for what `symbrain` protects against by design (least exposure at
-the profile/capability level) and what it explicitly does not protect
-against (call-time policy enforcement, which is the guard module's job —
-`symbrain guard`, absorbed into this repository).
+Reports are in scope for every module this repository ships. Each module
+has its own security boundary:
+
+### Gateway (`symbrain mcp`)
+
+The gateway's job is least exposure at the profile/capability level. In
+scope: a harness seeing or calling a tool, server or vault mode that its
+profile does not expose; secret material escaping redaction into the audit
+log. See the [Security notes](../README.md#security-notes) section of the
+README for the full model.
+
+### Browse (`symbrowse`)
+
+The Browse module renders pages written by others, so page content is
+untrusted. In scope:
+
+- hostile page content reaching the agent outside the prompt-injection
+  boundary ([browse/docs/injection.md](../browse/docs/injection.md));
+- a bypass of the SSRF guard ([browse/docs/ssrf.md](../browse/docs/ssrf.md))
+  or of the domain allowlist ([browse/docs/allowlist.md](../browse/docs/allowlist.md));
+- secrets escaping redaction into the action journal, traces or command
+  output;
+- cookies or storage state leaking from one session into another;
+- takeover of a session while it is handed over to a human (2FA, CAPTCHA,
+  approval).
+
+### Operate (`symoperate`)
+
+In scope: any action performed outside the permission set granted with
+`symoperate serve --grant` or the host's macOS privacy permissions.
+
+### Explicit non-goals
+
+- Brain performs no call-time approval, risk scoring or human confirmation
+  for the tools a profile does expose. That is the guard module's job
+  (`symbrain guard`, absorbed into this repository); report guard bypasses
+  under the guard module.
+- A remote `cdp_endpoint` configured by the operator is trusted by that
+  operator. Behavior of the browser behind it is out of scope.
+- A malicious or compromised harness process abusing tools its profile
+  legitimately exposes.
