@@ -92,14 +92,25 @@ fn assert_embedded_manifest_matches_sealed_structure(shipped: &Manifest, sealed:
             "{name} version shape"
         );
         // Same archives, only re-versioned: map each sealed asset name onto the
-        // shipped version and require exactly the shipped asset set.
+        // shipped version. Releases after the 2026-10-29 platform scope change
+        // no longer publish Windows or macOS Intel archives, so only those may
+        // be missing; every other sealed archive must still be pinned and no
+        // archive may be added.
         let repinned: std::collections::BTreeSet<String> = old
             .sha256
             .keys()
             .map(|asset| asset.replace(bare(&old.version), bare(&new.version)))
             .collect();
         let pinned: std::collections::BTreeSet<String> = new.sha256.keys().cloned().collect();
-        assert_eq!(pinned, repinned, "{name} pinned archives");
+        let unsupported =
+            |asset: &str| asset.contains("_windows_") || asset.contains("_darwin_amd64.");
+        let missing: Vec<&String> = repinned.difference(&pinned).collect();
+        let added: Vec<&String> = pinned.difference(&repinned).collect();
+        assert!(added.is_empty(), "{name} unexpected archives {added:?}");
+        assert!(
+            missing.iter().all(|asset| unsupported(asset)),
+            "{name} missing supported archives {missing:?}"
+        );
         for (asset, digest) in &new.sha256 {
             assert!(
                 digest.len() == 64 && digest.bytes().all(|b| b.is_ascii_hexdigit()),

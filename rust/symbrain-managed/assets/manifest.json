@@ -2,43 +2,39 @@
   "schema_version": 1,
   "cores": {
     "symvault": {
-      "version": "v0.23.2",
+      "version": "v0.24.1",
       "repo": "danieljustus/symaira-vault",
       "binary_name": "symvault",
       "asset_prefix": "symaira-vault",
       "has_cosign": true,
       "sha256": {
-        "symaira-vault_0.23.2_darwin_amd64.tar.gz": "80c3a6312c596e469fc133cab7d14709feb8a1f4adbab6de6525b7405fd01147",
-        "symaira-vault_0.23.2_darwin_arm64.tar.gz": "a996399fac3a8f6765ab370412aa098f5162c357b45fda0908c021d3cb3fc43c",
-        "symaira-vault_0.23.2_linux_amd64.tar.gz": "a5abe9e440013d4891b545a2abd4f26bb1b823c8f1ff8c7c63529227447b5655",
-        "symaira-vault_0.23.2_linux_arm64.tar.gz": "03372d509e76b0d0ef960ff4799d3790ef25f24a4b55dcb9e5979618f485cdc4"
+        "symaira-vault_0.24.1_darwin_arm64.tar.gz": "fb021430ea9ed14c9e9d6b1d048a32513c1dedf65c24fd7f4598d89afdb1aeea",
+        "symaira-vault_0.24.1_linux_amd64.tar.gz": "368be53e3d9d3add6c546298eb91c062966a2e51724bbc9d5b79d0c726524827",
+        "symaira-vault_0.24.1_linux_arm64.tar.gz": "b795081bfaa95e7a25b6c8bb7530994309c89b14dccb2025e00a796b277b7c54"
       }
     },
     "symcockpit": {
-      "version": "0.9.0",
+      "version": "0.12.1",
       "repo": "danieljustus/symaira-cockpit",
       "binary_name": "symcockpit",
       "asset_prefix": "symcockpit",
       "has_cosign": false,
       "sha256": {
-        "symcockpit_0.9.0_darwin_universal.tar.gz": "a828214f873b477cf8f6fb82d967a815631a4a400ea62a501568d734576a88e2"
+        "symcockpit_0.12.1_darwin_universal.tar.gz": "74a5bc302c12405832d2a53e44e734272ebaf2263d4184102299ff1ae50176ff"
       },
       "platforms": ["darwin"],
       "asset_arch": "universal"
     },
     "symdesk": {
-      "version": "v0.12.2",
+      "version": "v0.13.2",
       "repo": "danieljustus/symaira-desktop",
       "binary_name": "symdesk",
       "asset_prefix": "symaira-desktop",
       "has_cosign": true,
       "sha256": {
-        "symaira-desktop_0.12.2_darwin_amd64.tar.gz": "4897e8a4de91b09a699650338860c3485940d6c1d875e4ed580291722d7df02f",
-        "symaira-desktop_0.12.2_darwin_arm64.tar.gz": "00d9bab214e3e54f0578821622578ce489498cd6dabce810c6257bcf79d0fcc2",
-        "symaira-desktop_0.12.2_linux_amd64.tar.gz": "2655779e3846f19a22e6a8258f699b6af6d1e2721026cf871a9f6b6e1431b1fe",
-        "symaira-desktop_0.12.2_linux_arm64.tar.gz": "cc7d1dc37e22182b7dc7fbe72d9aa0c9adff490882b2121133e6f12fa35bb359",
-        "symaira-desktop_0.12.2_windows_amd64.zip": "1252192f3d82bf860b049d1a9c04fac082687155e24b0e39f074bcbead8807aa",
-        "symaira-desktop_0.12.2_windows_arm64.zip": "e2bedd1d58bfbbdc3eba4be590852f40c39489919c24786547fd8a56baa57485"
+        "symaira-desktop_0.13.2_darwin_arm64.tar.gz": "134c6e64f47e363d4fbc980a4abfad0908bb0c26c996ee4a641a4142184a2edf",
+        "symaira-desktop_0.13.2_linux_amd64.tar.gz": "22533c85b04421f41c726015a2ccb7dad94e898b5929a47b83465efbfd251f74",
+        "symaira-desktop_0.13.2_linux_arm64.tar.gz": "b591018701329563ef26818298b7405931721a9e11b3b5a59877871ce0b4c037"
       }
     },
     "symbrowse": {
