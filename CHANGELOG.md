@@ -27,6 +27,14 @@ the [Unreleased] section is moved into a dated version section.
   requires a URL (#780).
 - `symbrain setup` installs the Rust `symbrowse` v0.15.0 archives from the
   symaira-brain release instead of the retired standalone v0.8.0 (#780).
+- Browse: `symbrowse upgrade` works again. It queried the retired
+  symaira-browse repository, and on macOS every check failed anyway because
+  the client demanded TLS 1.3, which native-tls there cannot negotiate (the
+  floor is now TLS 1.2 on macOS, 1.3 elsewhere). It now reads the
+  symaira-brain release, picks the `symbrowse_<version>_<os>_<arch>.tar.gz`
+  archive (not the `symbrain` one or a signature file), verifies it against
+  `checksums.txt` and installs the extracted binary instead of the archive.
+  Installs under `~/.symaira/bin` are left to `symbrain setup` (#780).
 
 ### Changed
 - Browse contract rows FETCH-001 (random domain and non-honest fetch presets,

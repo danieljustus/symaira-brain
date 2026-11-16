@@ -2005,6 +2005,7 @@ dependencies = [
 name = "symbrowse-cli"
 version = "0.0.0"
 dependencies = [
+ "flate2",
  "html5ever",
  "markup5ever_rcdom",
  "reqwest",

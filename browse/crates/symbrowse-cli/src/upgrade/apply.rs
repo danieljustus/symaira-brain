@@ -15,12 +15,18 @@ use sha2::{Digest, Sha256};
 use super::Release;
 
 const MAX_ASSET_BODY: usize = 1 << 30;
+const BINARY: &str = "symbrowse";
+/// Uncompressed archive bound (the release archive unpacks to about 10 MB),
+/// so a hostile gzip stream cannot exhaust memory.
+const MAX_UNPACKED_ARCHIVE: u64 = 256 << 20;
 const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(15 * 60);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum InstallMethod {
     DirectDownload,
     Homebrew,
+    /// `~/.symaira/bin`, owned by `symbrain setup` and its pinned manifest.
+    SymbrainManaged,
     GoInstall,
     PackageManager,
     BuildFromSource,
@@ -32,6 +38,7 @@ impl InstallMethod {
         match self {
             Self::DirectDownload => "direct-download",
             Self::Homebrew => "homebrew",
+            Self::SymbrainManaged => "symbrain-managed",
             Self::GoInstall => "go-install",
             Self::PackageManager => "package-manager",
             Self::BuildFromSource => "build-from-source",
@@ -45,6 +52,9 @@ impl InstallMethod {
                 "Re-run the quick install script or download the latest release from GitHub".into()
             }
             Self::Homebrew => format!("Update via Homebrew: brew update && brew upgrade {tool}"),
+            Self::SymbrainManaged => format!(
+                "{tool} is managed by Symaira Brain: upgrade symbrain, then run `symbrain setup`"
+            ),
             Self::GoInstall => {
                 format!("Update via Go: go install github.com/danieljustus/{tool}@latest")
             }
@@ -116,6 +126,9 @@ pub(super) fn detect(binary: &Path) -> Result<InstallMethod, String> {
         }
     }
     if let Some(home) = &home {
+        if abs.starts_with(&format!("{}/.symaira/bin/", resolved(home))) {
+            return Ok(InstallMethod::SymbrainManaged);
+        }
         if abs.starts_with(&format!("{home}/go/bin/")) {
             return Ok(InstallMethod::GoInstall);
         }
@@ -182,8 +195,16 @@ fn select_asset<'a>(
         .assets
         .iter()
         .find(|asset| {
+            // The symaira-brain release also carries symbrain archives and
+            // per-archive .sig/.pem/.sbom.json files for the same platform.
             let name = asset.name.to_lowercase();
-            !name.contains("checksums") && name.contains(goos) && name.contains(goarch)
+            name.starts_with("symbrowse")
+                && !name.contains("checksums")
+                && ![".sig", ".pem", ".json"]
+                    .iter()
+                    .any(|suffix| name.ends_with(suffix))
+                && name.contains(goos)
+                && name.contains(goarch)
         })
         .ok_or_else(|| format!("updateapply: no release asset matches {goos}/{goarch}"))
 }
@@ -219,7 +240,7 @@ fn client() -> Result<reqwest::Client, String> {
                 attempt.stop()
             }
         }))
-        .min_tls_version(reqwest::tls::Version::TLS_1_3)
+        .min_tls_version(super::MIN_TLS_VERSION)
         .build()
         .map_err(|error| format!("create HTTP client: {error}"))
 }
@@ -286,8 +307,11 @@ fn atomic_swap(new_path: &Path, target: &Path) -> Result<(), String> {
     Ok(())
 }
 
-/// `updateapply.Applier.Apply` with `CheckInstallMethod` and no cosign or
-/// archive extraction, exactly like the Go CLI configures it.
+/// `updateapply.Applier.Apply` with `CheckInstallMethod` and no cosign. A
+/// `.tar.gz` asset (the symaira-brain release layout) is verified against
+/// checksums.txt as downloaded, then its `symbrowse` member is installed;
+/// the Go CLI swapped the asset in unextracted, which only worked for bare
+/// binaries.
 pub(super) fn apply(release: &Release, target: &Path) -> Result<(), String> {
     let method =
         detect(target).map_err(|error| format!("updateapply: detect install method: {error}"))?;
@@ -396,13 +420,37 @@ pub(super) fn apply(release: &Release, target: &Path) -> Result<(), String> {
             asset.name
         ));
     }
+    drop(tmp);
+    let mut cleanup = Vec::new();
+    let install = if is_archive(&asset.name) {
+        let archive = fs::File::open(&staged)
+            .map_err(|error| format!("updateapply: open downloaded archive: {error}"))?;
+        let binary = super::archive::extract_binary(archive, BINARY, MAX_UNPACKED_ARCHIVE)
+            .map_err(|error| format!("updateapply: extract {}: {error}", asset.name))?;
+        let unpacked = staging.join(format!(".updateapply-{}.bin.tmp", std::process::id()));
+        let _ = fs::remove_file(&unpacked);
+        cleanup.push(RemoveOnDrop(unpacked.clone()));
+        fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&unpacked)
+            .and_then(|mut file| file.write_all(&binary).and_then(|()| file.flush()))
+            .map_err(|error| format!("updateapply: write extracted binary: {error}"))?;
+        unpacked
+    } else {
+        staged.clone()
+    };
     {
         use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(&staged, fs::Permissions::from_mode(0o755))
+        fs::set_permissions(&install, fs::Permissions::from_mode(0o755))
             .map_err(|error| format!("updateapply: make downloaded asset executable: {error}"))?;
     }
-    drop(tmp);
-    atomic_swap(&staged, &abs)
+    atomic_swap(&install, &abs)
+}
+
+fn is_archive(name: &str) -> bool {
+    let name = name.to_lowercase();
+    name.ends_with(".tar.gz") || name.ends_with(".tgz")
 }
 
 /// Removes the staged download on every exit path (after a successful swap

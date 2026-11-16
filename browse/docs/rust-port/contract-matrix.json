@@ -1098,13 +1098,14 @@
       "seam": "Homebrew and runtime upgrade",
       "fixture": "generated Formula plus upgrade check/apply success, signature failure, wrong asset and rollback",
       "go_oracle": "go test ./cmd/symbrowse -run 'Upgrade'; brew install/test/upgrade in clean prefixes",
-      "expected": "formula name/URL/checksum and runtime release selection, verification, atomic replacement and rollback match",
+      "expected": "Accepted difference (coordinator decision 2026-11-17, run gcc-20261116-215106, following the #1062 release design): symbrowse ships in the symaira-brain release and has no Homebrew formula of its own (Formula/symbrowse.rb in danieljustus/homebrew-tap stays the deprecated Go v0.8.0 formula whose deprecation notice points to symaira-brain); `symbrain setup` installs it from the pinned, cosign-verified managed manifest. `symbrowse upgrade` keeps Go's release selection (latest stable non-draft release, major-zero guard, 24 h cache), checksum verification against checksums.txt, atomic swap with backup and rollback and Homebrew guidance, with three deliberate differences: it reads the symaira-brain release and selects only `symbrowse_<version>_<os>_<arch>.tar.gz`; it installs the archive's `symbrowse` member (Go swapped the asset in unextracted); and installs under ~/.symaira/bin get `symbrain setup` guidance instead of a self-update.",
       "comparison": "process",
       "platforms": [
         "darwin-amd64",
         "darwin-arm64"
       ],
-      "status": "todo"
+      "status": "accepted-difference",
+      "evidence": "2026-11-17: crates/symbrowse-cli/tests/upgrade_check_native.rs covers check from cache, apply of a bare asset, apply from a brain-release archive listed after a same-platform symbrain archive and a .sig decoy (no staging leftovers), checksum mismatch leaving the binary untouched, and the symbrain-managed deferral; src/upgrade/archive.rs unit tests cover the ustar reader (release layout, ./ prefix, directories, GNU long names, missing member, size limit, truncation). Live on macOS 27.2.1 arm64: a dev build copied to an isolated HOME/bin ran `upgrade --check` (found v0.15.0 at https://github.com/danieljustus/symaira-brain/releases/tag/v0.15.0) and `upgrade`, which installed a binary byte-identical to the symbrowse member of symbrowse_0.15.0_darwin_arm64.tar.gz (sha256 5ee9eaae...52c1, Identifier com.symaira.browse.cli) that reports version 0.15.0. Before this change every macOS check failed: the client demanded TLS 1.3, which native-tls (Secure Transport) cannot negotiate; the floor is now TLS 1.2 on macOS and stays TLS 1.3 elsewhere."
     },
     {
       "id": "REL-006",

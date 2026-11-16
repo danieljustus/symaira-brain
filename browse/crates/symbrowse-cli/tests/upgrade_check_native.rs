@@ -11,7 +11,7 @@ use sha2::{Digest, Sha256};
 fn native_upgrade_check_reads_fixture_cache_without_applying_or_networking() {
     let cache_root = tempfile::tempdir().expect("isolated XDG cache");
     let mut hash = Sha256::new();
-    hash.update(b"danieljustus\0symaira-browse");
+    hash.update(b"danieljustus\0symaira-brain");
     let digest = hash
         .finalize()
         .iter()
@@ -130,7 +130,43 @@ fn serve(routes: Vec<(String, Vec<u8>)>) -> (String, std::thread::JoinHandle<()>
     (base, handle)
 }
 
-fn run_apply(corrupt_checksum: bool) -> (std::process::Output, Vec<u8>, tempfile::TempDir) {
+#[derive(Clone, Copy, PartialEq)]
+enum Asset {
+    Bare,
+    CorruptBare,
+    /// symaira-brain release layout: `symbrowse_<v>_<os>_<arch>.tar.gz`
+    /// listed after a same-platform symbrain archive and a .sig decoy.
+    BrainArchive,
+}
+
+/// A gzip-compressed ustar archive with docs and a `symbrowse` member.
+fn release_archive(binary: &[u8]) -> Vec<u8> {
+    fn member(name: &str, data: &[u8]) -> Vec<u8> {
+        let mut header = [0u8; 512];
+        header[..name.len()].copy_from_slice(name.as_bytes());
+        header[100..107].copy_from_slice(b"0000755");
+        header[124..135].copy_from_slice(format!("{:011o}", data.len()).as_bytes());
+        header[156] = b'0';
+        header[257..263].copy_from_slice(b"ustar\0");
+        header[148..156].fill(b' ');
+        let sum: u32 = header.iter().map(|&b| u32::from(b)).sum();
+        header[148..155].copy_from_slice(format!("{sum:06o}\0").as_bytes());
+        let mut out = header.to_vec();
+        out.extend_from_slice(data);
+        out.resize(out.len().div_ceil(512) * 512, 0);
+        out
+    }
+    let mut tar = [member("AGENTS.md", b"docs"), member("symbrowse", binary)].concat();
+    tar.extend_from_slice(&[0u8; 1024]);
+    let mut gz = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+    gz.write_all(&tar).unwrap();
+    gz.finish().unwrap()
+}
+
+fn run_apply(
+    asset: Asset,
+    install_dir: &str,
+) -> (std::process::Output, Vec<u8>, tempfile::TempDir) {
     let (os, arch) = (
         match std::env::consts::OS {
             "macos" => "darwin",
@@ -142,9 +178,16 @@ fn run_apply(corrupt_checksum: bool) -> (std::process::Output, Vec<u8>, tempfile
             other => other,
         },
     );
-    let asset_name = format!("symbrowse_{os}_{arch}");
-    let payload = b"#!/bin/sh\necho upgraded\n".to_vec();
-    let digest = if corrupt_checksum {
+    let binary = b"#!/bin/sh\necho upgraded\n".to_vec();
+    let (asset_name, payload) = if asset == Asset::BrainArchive {
+        (
+            format!("symbrowse_0.0.1_{os}_{arch}.tar.gz"),
+            release_archive(&binary),
+        )
+    } else {
+        (format!("symbrowse_{os}_{arch}"), binary)
+    };
+    let digest = if asset == Asset::CorruptBare {
         "0".repeat(64)
     } else {
         Sha256::digest(&payload)
@@ -159,15 +202,15 @@ fn run_apply(corrupt_checksum: bool) -> (std::process::Output, Vec<u8>, tempfile
     ]);
 
     let root = tempfile::tempdir().unwrap();
-    let install = root.path().join("bin");
-    fs::create_dir(&install).unwrap();
+    let install = root.path().join(install_dir);
+    fs::create_dir_all(&install).unwrap();
     let binary = install.join("symbrowse");
     fs::copy(env!("CARGO_BIN_EXE_symbrowse"), &binary).unwrap();
     let before = fs::read(&binary).unwrap();
 
     let cache_root = root.path().join("cache");
     let mut hash = Sha256::new();
-    hash.update(b"danieljustus\0symaira-browse");
+    hash.update(b"danieljustus\0symaira-brain");
     let digest = hash
         .finalize()
         .iter()
@@ -178,17 +221,25 @@ fn run_apply(corrupt_checksum: bool) -> (std::process::Output, Vec<u8>, tempfile
         .join("updatecheck")
         .join(format!("{digest}.json"));
     fs::create_dir_all(cache.parent().unwrap()).unwrap();
+    let mut assets = Vec::new();
+    if asset == Asset::BrainArchive {
+        for decoy in [
+            format!("symbrain_0.0.1_{os}_{arch}.tar.gz"),
+            format!("{asset_name}.sig"),
+        ] {
+            assets.push(serde_json::json!({"Name": decoy, "BrowserDownloadURL": format!("{base}/decoy"), "Size": 0}));
+        }
+    }
+    assets.push(serde_json::json!({"Name": asset_name, "BrowserDownloadURL": format!("{base}/{asset_name}"), "Size": 0}));
+    assets.push(serde_json::json!({"Name": "checksums.txt", "BrowserDownloadURL": format!("{base}/checksums.txt"), "Size": 0}));
     fs::write(
         &cache,
         serde_json::json!({
             "timestamp": "2099-01-01T00:00:00Z",
             "release": {
                 "TagName": "v0.0.1", "Body": "fixture",
-                "HTMLURL": "https://github.com/danieljustus/symaira-browse/releases/tag/v0.0.1",
-                "Assets": [
-                    {"Name": asset_name, "BrowserDownloadURL": format!("{base}/{asset_name}"), "Size": 0},
-                    {"Name": "checksums.txt", "BrowserDownloadURL": format!("{base}/checksums.txt"), "Size": 0}
-                ]
+                "HTMLURL": "https://github.com/danieljustus/symaira-brain/releases/tag/v0.0.1",
+                "Assets": assets
             }
         })
         .to_string(),
@@ -208,7 +259,7 @@ fn run_apply(corrupt_checksum: bool) -> (std::process::Output, Vec<u8>, tempfile
 
 #[test]
 fn upgrade_applies_verified_asset_atomically() {
-    let (output, _, root) = run_apply(false);
+    let (output, _, root) = run_apply(Asset::Bare, "bin");
     assert!(
         output.status.success(),
         "{}",
@@ -232,7 +283,7 @@ fn upgrade_applies_verified_asset_atomically() {
 
 #[test]
 fn upgrade_checksum_mismatch_leaves_binary_untouched() {
-    let (output, before, root) = run_apply(true);
+    let (output, before, root) = run_apply(Asset::CorruptBare, "bin");
     assert_eq!(output.status.code(), Some(1));
     let envelope: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(envelope["success"], false);
@@ -243,6 +294,46 @@ fn upgrade_checksum_mismatch_leaves_binary_untouched() {
     );
     assert_eq!(
         fs::read(root.path().join("bin").join("symbrowse")).unwrap(),
+        before
+    );
+}
+
+#[test]
+fn upgrade_installs_symbrowse_from_the_brain_release_archive() {
+    let (output, _, root) = run_apply(Asset::BrainArchive, "bin");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    let installed = root.path().join("bin").join("symbrowse");
+    assert_eq!(fs::read(&installed).unwrap(), b"#!/bin/sh\necho upgraded\n");
+    let leftovers: Vec<_> = fs::read_dir(root.path().join("bin"))
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name().to_string_lossy().into_owned())
+        .filter(|name| name != "symbrowse")
+        .collect();
+    assert!(leftovers.is_empty(), "staging files left: {leftovers:?}");
+}
+
+#[test]
+fn upgrade_defers_symbrain_managed_installs_to_symbrain_setup() {
+    let (output, before, root) = run_apply(Asset::BrainArchive, ".symaira/bin");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    let envelope: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        envelope["data"],
+        serde_json::json!({
+            "applied": false, "latest": "v0.0.1", "install_method": "symbrain-managed",
+            "hint": "symbrowse is managed by Symaira Brain: upgrade symbrain, then run `symbrain setup`"
+        })
+    );
+    assert_eq!(
+        fs::read(root.path().join(".symaira/bin/symbrowse")).unwrap(),
         before
     );
 }

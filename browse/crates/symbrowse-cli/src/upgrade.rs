@@ -19,12 +19,22 @@ use symbrowse_core::{
 use time::{Duration, OffsetDateTime, format_description::well_known::Rfc3339};
 
 const OWNER: &str = "danieljustus";
-const REPOSITORY: &str = "symaira-browse";
+// symbrowse ships in the symaira-brain release since v0.15.0; the standalone
+// symaira-browse repository was retired.
+const REPOSITORY: &str = "symaira-brain";
 const CACHE_TTL: Duration = Duration::hours(24);
 const REQUEST_TIMEOUT: StdDuration = StdDuration::from_secs(3);
 const MAX_RESPONSE_BYTES: usize = 1 << 20;
+/// TLS floor for the GitHub release channel. Go pinned TLS 1.3 with its own
+/// stack; native-tls on macOS (Secure Transport) negotiates at most TLS 1.2
+/// and rejects a 1.3 floor, which made every check and apply fail there.
+const MIN_TLS_VERSION: reqwest::tls::Version = if cfg!(target_os = "macos") {
+    reqwest::tls::Version::TLS_1_2
+} else {
+    reqwest::tls::Version::TLS_1_3
+};
 const LATEST_RELEASE_URL: &str =
-    "https://api.github.com/repos/danieljustus/symaira-browse/releases/latest";
+    "https://api.github.com/repos/danieljustus/symaira-brain/releases/latest";
 static NEXT_TEMP_FILE: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -125,7 +135,10 @@ fn apply_upgrade(format: Format, release: &Release) -> ExitCode {
         Ok(method) => method,
         Err(error) => return fail(format!("detect install method: {error}")),
     };
-    if method == apply::InstallMethod::Homebrew {
+    if matches!(
+        method,
+        apply::InstallMethod::Homebrew | apply::InstallMethod::SymbrainManaged
+    ) {
         return render_success(
             format,
             json!({
@@ -307,6 +320,7 @@ fn write_cache(path: &Path, entry: &CacheEntry) {
 }
 
 mod apply;
+mod archive;
 mod cache_dir;
 use cache_dir::safe_cache_dir;
 
@@ -322,7 +336,7 @@ async fn fetch_latest_release(current: &str, latest_url: &str) -> Result<Release
                 attempt.stop()
             }
         }))
-        .min_tls_version(reqwest::tls::Version::TLS_1_3)
+        .min_tls_version(MIN_TLS_VERSION)
         .build()
         .map_err(|error| format!("create HTTP client: {error}"))?;
     let response = client
