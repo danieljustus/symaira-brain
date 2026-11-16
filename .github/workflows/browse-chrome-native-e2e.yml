@@ -117,12 +117,12 @@ jobs:
           base="$(mktemp -d /tmp/sbperf.XXXX)"
           python3 -B port/bench/perf_evidence.py --rust "$binary" --rounds 8 --base "$base" \
             --output "$out/perf-evidence.json"
-          launcher=()
-          if [[ "$RUNNER_OS" == Linux ]]; then
-            launcher=(--chrome-launcher "$SYMBROWSE_CHROME_EXECUTABLE")
-          fi
+          # Always pass the launcher: on Linux it is the --no-sandbox wrapper,
+          # on macOS the executable itself. (macOS bash 3.2 treats an empty
+          # array as unbound under `set -u`.)
           python3 -B port/bench/chrome_flow.py --rust "$binary" \
-            --chrome "${{ steps.cft.outputs.executable }}" "${launcher[@]}" \
+            --chrome "${{ steps.cft.outputs.executable }}" \
+            --chrome-launcher "$SYMBROWSE_CHROME_EXECUTABLE" \
             --chrome-version "${{ steps.cft.outputs.version }}" --runs 30 \
             --output "$out/chrome-flow.json"
 
