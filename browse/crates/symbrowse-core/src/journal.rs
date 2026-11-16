@@ -128,6 +128,16 @@ fn scrub_strings(value: &mut Value) {
         _ => {}
     }
 }
+/// Journal form of a page URL or origin: credential-shaped text scrubbed, and
+/// the opaque origin of a blank or `data:` page (`location.origin` is the
+/// string `"null"`) treated as "no URL known". The Go journal omits both URL
+/// fields in that case, so the entry must not carry the literal text `null`.
+fn journal_url(url: &str) -> String {
+    if url == "null" {
+        return String::new();
+    }
+    crate::secret_text::scrub(url)
+}
 fn replace_values(value: &mut Value, values: &[String]) {
     match value {
         Value::String(text) => {
@@ -206,8 +216,8 @@ impl Store {
         }
         // URLs are journaled verbatim by the callers; their userinfo password
         // and secret query values must not reach the file.
-        entry.url_before = crate::secret_text::scrub(&entry.url_before);
-        entry.url_after = crate::secret_text::scrub(&entry.url_after);
+        entry.url_before = journal_url(&entry.url_before);
+        entry.url_after = journal_url(&entry.url_after);
         entry.reason = self.redactor.redact_text(std::mem::take(&mut entry.reason));
         if !entry.result.is_empty() && !entry.result.starts_with("error") {
             entry.result = "ok".to_owned();
@@ -418,5 +428,70 @@ mod tests {
         assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
         assert!(!store.path().exists());
         let _ = fs::remove_dir_all(root);
+    }
+
+    fn read_entry_line(session: &str, entry: Entry) -> String {
+        let root = std::env::temp_dir().join(format!(
+            "symbrowse-journal-shape-{session}-{}",
+            std::process::id()
+        ));
+        let store = Store::new(&root, session, Redactor::standard(), "fixed").unwrap();
+        store.append(entry).unwrap();
+        let line = fs::read_to_string(store.path()).unwrap();
+        let _ = fs::remove_dir_all(root);
+        line
+    }
+
+    /// Byte shape the sealed Go oracle records for a read command on a page
+    /// without a URL (`journal_tail`/`journal_tail_empty`): no `url_before`
+    /// and no `url_after`, whether the daemon had no page or the page's
+    /// opaque origin (`location.origin` of `about:blank`) is the text `null`.
+    #[test]
+    fn read_command_without_a_url_omits_both_url_fields() {
+        for (label, url) in [("absent", ""), ("opaque", "null")] {
+            let line = read_entry_line(
+                &format!("read-{label}"),
+                Entry {
+                    session: "oracle".to_owned(),
+                    command: "network.requests".to_owned(),
+                    url_before: url.to_owned(),
+                    url_after: url.to_owned(),
+                    result: "ok".to_owned(),
+                    risk_class: "read".to_owned(),
+                    decider: "policy".to_owned(),
+                    ..Entry::default()
+                },
+            );
+            assert_eq!(
+                line,
+                concat!(
+                    r#"{"schema_version":1,"timestamp":"fixed","session":"oracle","#,
+                    r#""command":"network.requests","result":"ok","#,
+                    r#""risk_class":"read","decider":"policy"}"#,
+                    "\n"
+                ),
+                "{label}"
+            );
+        }
+    }
+
+    #[test]
+    fn urls_are_still_scrubbed_and_kept() {
+        let line = read_entry_line(
+            "scrub",
+            Entry {
+                command: "open".to_owned(),
+                url_before: "http://127.0.0.1:1/".to_owned(),
+                url_after: "https://user:hunter2@example.test/a?token=abc123&q=1".to_owned(),
+                ..Entry::default()
+            },
+        );
+        assert!(
+            line.contains(r#""url_before":"http://127.0.0.1:1/""#),
+            "{line}"
+        );
+        assert!(line.contains("example.test/a"), "{line}");
+        assert!(!line.contains("hunter2"), "{line}");
+        assert!(!line.contains("abc123"), "{line}");
     }
 }

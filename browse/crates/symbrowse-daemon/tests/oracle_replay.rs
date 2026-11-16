@@ -32,6 +32,15 @@ const KNOWN_GAPS: &[&str] = &[
     "auth_login_noentry",
 ];
 
+/// Commands the Rust daemon added after the Go oracle was sealed: the Go
+/// daemon answered them `unknown_command`. They are not replayed in place,
+/// because the Rust command starts the selected browser, and a browser that
+/// exists before the oracle's own "no browser yet" steps changes their
+/// answers (`entries: []`, journal URLs, `active_tabs`). They run after the
+/// recorded scenario instead and are checked against their own contract
+/// (`engine_native_corpus` covers them in depth).
+const RUST_EXTENSIONS: &[&str] = &["engine.info"];
+
 /// Keys whose values are explicitly nondeterministic (timestamps, ids, pids,
 /// paths of the isolated roots).
 const NONDETERMINISTIC_KEYS: &[&str] = &[
@@ -340,11 +349,21 @@ fn rust_daemon_matches_frozen_go_oracle() {
     assert_eq!(results.len(), steps.len(), "oracle and scenarios disagree");
     let mut mismatches: BTreeMap<String, (Value, Value)> = BTreeMap::new();
     let mut matched = 0usize;
+    let mut extensions: Vec<(String, Value, Value)> = Vec::new();
     for (step, recorded) in steps.iter().zip(results) {
         let name = step["name"].as_str().unwrap();
         assert_eq!(recorded["name"], step["name"]);
         let mut frame = substitute(&step["frame"], &base, &work);
         frame["session"] = json!(step["session_override"].as_str().unwrap_or(&session));
+        if RUST_EXTENSIONS.contains(&frame["cmd"].as_str().unwrap_or_default()) {
+            assert_eq!(
+                recorded["response"]["error"]["code"], "unknown_command",
+                "{name}: the oracle no longer records {} as unknown; replay it in place",
+                frame["cmd"]
+            );
+            extensions.push((name.to_owned(), frame, recorded["response"].clone()));
+            continue;
+        }
         let actual = if step["approve"].as_bool() == Some(true) {
             let socket_for_worker = socket.clone();
             let frame_for_worker = frame.clone();
@@ -375,6 +394,21 @@ fn rust_daemon_matches_frozen_go_oracle() {
             matched += 1;
         } else {
             mismatches.insert(name.to_owned(), (expected, actual_n));
+        }
+    }
+    for (name, frame, expected) in extensions {
+        let actual = send(&socket, &frame);
+        let data = &actual["data"];
+        let reports_chrome = actual["success"] == json!(true)
+            && data["engine"] == "chrome"
+            && data["kind"] == "chrome"
+            && data["version"]
+                .as_str()
+                .is_some_and(|version| version.starts_with(|c: char| c.is_ascii_digit()));
+        if reports_chrome {
+            matched += 1;
+        } else {
+            mismatches.insert(name, (expected, actual));
         }
     }
     let _ = send(&socket, &json!({"cmd": "daemon.stop", "session": session}));
