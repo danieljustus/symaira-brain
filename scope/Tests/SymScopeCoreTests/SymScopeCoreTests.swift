@@ -130,6 +130,7 @@ final class ContainerServiceListTests: XCTestCase {
                 XCTAssertTrue(
                     note == "docker CLI not found; container inventory unavailable"
                         || note == "docker ps failed; container inventory unavailable"
+                        || note == "docker ps timed out; container inventory unavailable"
                         || notes.isEmpty,
                     "unexpected note: \(note)"
                 )
