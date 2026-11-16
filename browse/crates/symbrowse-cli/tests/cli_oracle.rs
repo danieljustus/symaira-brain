@@ -404,7 +404,10 @@ fn localize_socket_dir(text: &str) -> String {
 /// Untagged scenarios whose recorded outcome depends on a macOS-only facility.
 /// `state-key-init-env` expects the Keychain lookup through `security` to
 /// fail; other platforms have no Keychain step and report the environment key.
-const UNTAGGED_DARWIN_ONLY: &[&str] = &["state-key-init-env"];
+/// `home-empty-open` expects Go's darwin socket directory error: only macOS
+/// derives the daemon socket from `$HOME`; elsewhere `$XDG_RUNTIME_DIR` or the
+/// user cache directory is used (`spec::socket_base_dir` covers both branches).
+const UNTAGGED_DARWIN_ONLY: &[&str] = &["state-key-init-env", "home-empty-open"];
 
 fn platform_mismatch(scenario: &Value) -> bool {
     let darwin_only = scenario
