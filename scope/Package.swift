@@ -13,7 +13,7 @@ let package = Package(
         .executable(name: "symscope", targets: ["symscope"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/danieljustus/symaira-corekit.git", exact: "0.20.0"),
+        .package(url: "https://github.com/danieljustus/symaira-corekit.git", exact: "0.23.0"),
         .package(path: "../history"),
     ],
     targets: [
