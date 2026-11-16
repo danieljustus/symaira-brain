@@ -15,6 +15,7 @@ use symbrain_core::output::OutputFormat;
 use symbrain_skills::gotext::clean;
 
 mod doctor;
+mod doctor_catalog;
 mod env;
 mod flags;
 mod history;

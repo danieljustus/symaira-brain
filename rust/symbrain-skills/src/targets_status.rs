@@ -304,7 +304,7 @@ fn capability_state(spec: TargetSpec, name: &str) -> &'static str {
 ///
 /// A marker directly inside the entry counts, and so does a marker behind a
 /// link, because that is where symlink-mode installs keep it.
-fn is_managed_skill(path: &Path) -> bool {
+pub(crate) fn is_managed_skill(path: &Path) -> bool {
     if fs::metadata(path.join(MARKER_FILE)).is_ok() {
         return true;
     }

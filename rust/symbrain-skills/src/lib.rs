@@ -4,12 +4,17 @@
 #![deny(missing_docs)]
 
 mod cap_root;
+pub mod catalog;
+pub mod catalog_scan;
+pub mod catalog_similarity;
 pub mod config_toml;
 pub mod context_profile;
 pub mod disabled_targets;
 pub mod discover;
 mod encode;
 pub mod gotext;
+pub mod harness_findings;
+pub mod harness_profile;
 pub mod import;
 pub mod install;
 pub mod library;

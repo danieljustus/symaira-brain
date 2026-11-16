@@ -6,8 +6,10 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 use symbrain_core::output::OutputFormat;
+use symbrain_skills::catalog::{CatalogOptions, CatalogReport, catalog_report};
 use symbrain_skills::gotext::join;
 
+use super::doctor_catalog;
 use super::env::Env;
 use super::flags::{self, Verb};
 use super::{finish, json_line, or_dash, serialize_path};
@@ -56,6 +58,9 @@ struct Report<'a> {
     #[serde(serialize_with = "serialize_path")]
     project_dir: &'a Path,
     targets: Vec<Target>,
+    /// Only present behind `--catalog`: the default bytes stay Go-exact.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    catalog: Option<CatalogReport>,
 }
 
 /// Registry skill-root suffixes below the home (user) and project directory.
@@ -77,7 +82,11 @@ pub(super) fn run(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    if let Err(code) = flags::parse(Verb::Doctor, args, stderr) {
+    let (args, catalog_opts) = match doctor_catalog::extract(args, stderr) {
+        Ok(split) => split,
+        Err(code) => return code,
+    };
+    if let Err(code) = flags::parse(Verb::Doctor, &args, stderr) {
         return code;
     }
     let env = Env::load();
@@ -93,6 +102,15 @@ pub(super) fn run(
         })
         .collect();
     let cfg = &env.cfg;
+    let catalog = catalog_opts.catalog.then(|| {
+        catalog_report(&CatalogOptions {
+            home_dir: &env.home_dir,
+            project_dir: &env.project_dir,
+            render_dir: &cfg.render_dir,
+            context_window_tokens: catalog_opts.context_window,
+            disabled_targets: &env.disabled_targets,
+        })
+    });
     let report = Report {
         config: Config {
             library_dir: &cfg.library_dir,
@@ -110,6 +128,7 @@ pub(super) fn run(
         profiles_dir: &cfg.profiles_dir,
         project_dir: &env.project_dir,
         targets,
+        catalog,
     };
     let output = match format {
         OutputFormat::Json => json_line(&report),
@@ -135,6 +154,9 @@ pub(super) fn run(
                     out.extend_from_slice(bytes);
                 }
                 out.push(b'\n');
+            }
+            if let Some(catalog) = &report.catalog {
+                out.extend_from_slice(doctor_catalog::table(catalog).as_bytes());
             }
             out
         }
