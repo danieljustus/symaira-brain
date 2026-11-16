@@ -54,14 +54,13 @@ jobs:
           # Ubuntu runners restrict unprivileged user namespaces, so Chrome needs
           # --no-sandbox there. The wrapper only adds that flag; every engine and
           # daemon test still launches an isolated temp profile.
+          # The real path is written into the wrapper: tests and benchmarks
+          # that clear the environment or drop SYMBROWSE_* must still work.
           if [[ "$RUNNER_OS" == Linux ]]; then
             wrapper="$RUNNER_TEMP/symbrowse-cft/chrome-ci-wrapper"
-            cat > "$wrapper" <<'SH'
-          #!/usr/bin/env bash
-          exec "$SYMBROWSE_CHROME_REAL_EXECUTABLE" --no-sandbox "$@"
-          SH
+            real="${{ steps.cft.outputs.executable }}"
+            printf '#!/usr/bin/env bash\nexec %q --no-sandbox "$@"\n' "$real" > "$wrapper"
             chmod +x "$wrapper"
-            echo "SYMBROWSE_CHROME_REAL_EXECUTABLE=${{ steps.cft.outputs.executable }}" >> "$GITHUB_ENV"
             echo "SYMBROWSE_CHROME_EXECUTABLE=$wrapper" >> "$GITHUB_ENV"
           else
             echo "SYMBROWSE_CHROME_EXECUTABLE=${{ steps.cft.outputs.executable }}" >> "$GITHUB_ENV"
