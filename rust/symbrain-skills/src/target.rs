@@ -80,6 +80,18 @@ pub fn skill_root(
     project: Option<&Path>,
     scope: &str,
 ) -> Option<PathBuf> {
+    let root = skill_root_unregistered(target_name, home, project, scope)?;
+    // Lets the install walk resolve a root the user made a symlink on purpose.
+    crate::install::register_skill_root(&root);
+    Some(root)
+}
+
+fn skill_root_unregistered(
+    target_name: &str,
+    home: &Path,
+    project: Option<&Path>,
+    scope: &str,
+) -> Option<PathBuf> {
     let project = project.filter(|path| !path.as_os_str().is_empty());
     match (target_name, scope) {
         ("opencode", "project") => project.map(|path| path.join(".opencode").join("skills")),

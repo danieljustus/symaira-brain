@@ -109,6 +109,26 @@ pub(crate) fn symlink_points_to(path: &Path, expected: &Path) -> Result<bool, Sk
     Ok(actual == expected)
 }
 
+/// True when `destination` is a real directory that resolves to `source`
+/// itself, as when a skills root is a symlink into the render directory.
+pub(crate) fn destination_is_source(destination: &Path, source: &Path) -> Result<bool, SkillError> {
+    let Some(metadata) = entry_metadata(destination)? else {
+        return Ok(false);
+    };
+    if !metadata.is_dir() {
+        return Ok(false);
+    }
+    Ok(
+        match (
+            std::fs::canonicalize(destination),
+            std::fs::canonicalize(source),
+        ) {
+            (Ok(destination), Ok(source)) => destination == source,
+            _ => false,
+        },
+    )
+}
+
 pub(crate) fn is_symlink(path: &Path) -> bool {
     entry_metadata(path).is_ok_and(|metadata| metadata.is_some_and(|m| m.file_type().is_symlink()))
 }

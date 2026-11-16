@@ -10,9 +10,9 @@ use std::path::{Path, PathBuf};
 use super::base::{base_path_for_scope, write_snapshot_for_scope_locked};
 use super::core::install_path_for;
 use super::destination::{
-    adoption_backup, check_destination, effective_home, effective_mode, entry_exists, is_symlink,
-    is_unmanaged, read_link_at, remove_tombstone, scope_name, source_for_snapshot,
-    symlink_points_to,
+    adoption_backup, check_destination, destination_is_source, effective_home, effective_mode,
+    entry_exists, is_symlink, is_unmanaged, read_link_at, remove_tombstone, scope_name,
+    source_for_snapshot, symlink_points_to,
 };
 use super::lock;
 use super::marker::{MarkerState as MarkerReadState, ensure_writable, marker_bytes};
@@ -182,11 +182,15 @@ pub(crate) fn install_target_inner_locked(
         options.project_dir.as_deref(),
     )?;
     let destination_exists = entry_exists(&destination)?;
-    if !(mode == "symlink" && symlink_points_to(&destination, source)?) {
+    // A skills root linked into the render directory makes the destination
+    // the render tree itself: there is no separate link to publish.
+    let aliased = mode == "symlink" && destination_is_source(&destination, source)?;
+    if !(aliased || mode == "symlink" && symlink_points_to(&destination, source)?) {
         check_destination(&destination, target, name, options.force)?;
     }
     let mut adoption_guard = AdoptionGuard::empty(destination.clone());
-    if destination_exists && options.force && is_unmanaged(&destination, target, name)? {
+    if destination_exists && options.force && !aliased && is_unmanaged(&destination, target, name)?
+    {
         let backup = adoption_backup(&effective_home(&options.home_dir)?, name)?;
         move_entry_to(&destination, &backup)
             .map_err(|error| SkillError(format!("back up unmanaged skill: {error}")))?;
@@ -227,7 +231,7 @@ pub(crate) fn install_target_inner_locked(
     // Hold the old destination and base until both publications succeed. This
     // makes destination and base one rollback transaction, not two independent
     // successful-looking updates.
-    let destination_backup = if entry_exists(&destination)? {
+    let destination_backup = if !aliased && entry_exists(&destination)? {
         backup_existing(&destination, options.fault)?
     } else {
         None
@@ -238,7 +242,15 @@ pub(crate) fn install_target_inner_locked(
         None
     };
     let operation = (|| {
-        if mode == "symlink" {
+        if aliased {
+            replace::write_bytes(
+                &replace::open_trusted_dir(source)?,
+                Path::new(MARKER_FILE),
+                &marker_bytes,
+                0o644,
+                options.fault,
+            )?;
+        } else if mode == "symlink" {
             install_symlink(source, &destination, &marker_bytes, options.fault)?;
         } else {
             install_copy_tree(source, &destination, &marker_bytes, options)?;
@@ -265,7 +277,7 @@ pub(crate) fn install_target_inner_locked(
             Ok(result)
         }
         Err(error) => {
-            if entry_exists(&destination)? {
+            if !aliased && entry_exists(&destination)? {
                 let _ = remove_tree(&destination);
             }
             if let Some(backup) = destination_backup {

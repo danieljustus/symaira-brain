@@ -20,6 +20,7 @@ mod status_compare;
 mod sync;
 mod sync_lock;
 mod transaction;
+mod trusted_root;
 mod uninstall;
 
 pub use base::{
@@ -45,4 +46,5 @@ pub use render_status::{RenderDrift, RenderStatus};
 pub use replace::FaultPoint;
 pub use status::{InstallStatus, StatusKind, StatusOptions, status};
 pub use sync::{ConflictPolicy, SyncOptions, SyncResult, sync, sync_selected};
+pub(crate) use trusted_root::register as register_skill_root;
 pub use uninstall::{uninstall, uninstall_skill};

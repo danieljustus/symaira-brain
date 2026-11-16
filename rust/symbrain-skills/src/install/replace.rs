@@ -152,7 +152,7 @@ pub(crate) fn unique_name(prefix: &str) -> Result<PathBuf, SkillError> {
 /// symlink ancestors. Read-only callers use this to avoid changing status
 /// scans merely by probing absent target roots.
 pub(crate) fn open_existing_dir(path: &Path) -> io::Result<Dir> {
-    let absolute = std::path::absolute(path)?;
+    let absolute = super::trusted_root::resolve(&std::path::absolute(path)?)?;
     let mut current = open_filesystem_root(&absolute)?;
     let mut first_normal = true;
     for component in absolute.components() {
@@ -178,6 +178,7 @@ pub(crate) fn open_existing_dir(path: &Path) -> io::Result<Dir> {
 
 pub(crate) fn open_trusted_dir(path: &Path) -> Result<Dir, SkillError> {
     let absolute = std::path::absolute(path)
+        .and_then(|absolute| super::trusted_root::resolve(&absolute))
         .map_err(|error| SkillError(format!("resolve trusted root: {error}")))?;
     let mut current = open_filesystem_root(&absolute)
         .map_err(|error| SkillError(format!("open filesystem root: {error}")))?;
