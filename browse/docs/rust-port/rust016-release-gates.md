@@ -290,3 +290,30 @@ reference, and Linux numbers are not measured by any workflow. All four PERF row
 `todo`, RUST-016 stays `blocked`. Next: rerun `perf_evidence.py` + `perf_verdict.py` on an
 idle host (or a native CI runner), and decide whether the daemon/Chrome rows get a
 fixed ceiling in the manner of the #773 fetch gate.
+
+## 2026-11-16 native CI performance evidence (PERF-001..004, #780)
+
+Measured by the "Measure PERF-001..004 and the Rust Chrome flow" step of
+`.github/workflows/browse-chrome-native-e2e.yml`, run
+[43970380636](https://github.com/danieljustus/symaira-brain/actions/runs/43970380636)
+at `8e1898c82`, on GitHub-hosted darwin-arm64, linux-amd64 and linux-arm64 runners
+(release builds, Chrome 157.0.8103.78). Same tools and rules as 2026-11-15; Go is not run
+and the darwin-arm64 `baseline.json` stays the reference, so Linux ratios are indicative.
+Summary: `perf-2026-11-16-ci.json`; raw samples, verdicts and Chrome-flow reports:
+`port/evidence/perf-2026-11-16-ci/`. The maintainer decision of 2026-11-16 (#780) applies:
+PERF-002 and the real-Chrome half of PERF-003 become Rust baselines.
+
+| Gate | darwin-arm64 (load 22–33) | linux-amd64 / linux-arm64 (load 2.8–3.6) |
+|---|---|---|
+| CLI p95 ≤ 110 % Go (PERF-001) | `version --json` 17.96 ms vs 9.92 **fail** (0/8 rounds), `--help` 19.08 vs 14.35 **fail** (1/8), `config show` 18.83 vs 42.4 pass, `mcp` 19.34 vs 38.2 pass. `/bin/echo` control p95 6.9–13.6 ms | all four pass in 8/8 rounds: 1.9–2.2 ms / 3.2–3.6 ms (ratio 0.05–0.37) |
+| Median RSS (PERF-001/004) | 0.21–0.23 of Go, pass | not compared (no Linux Go baseline) |
+| Steady state (PERF-002) | semantic checks pass, RSS growth ≤ 2.0 MB, threads/fds 0 | semantic checks pass, threads/fds 0; static daemon +8.7–9.2 MB at 200 frames, but a 4000-frame probe plateaus at +3.0 MB (warm-up, bounded) |
+| Static fetch p95 (PERF-003) | 1.59 ms vs 6.4834 ms ceiling, pass | 0.78 / 1.68 ms, pass |
+| Real-Chrome flow (PERF-003 baseline) | p95 2746 ms, median 1630 ms, 30/30 | p95 453 / 599 ms, median 402 / 568 ms, 30/30 |
+| Binary size (PERF-004) | 10,463,680 B, −42.9 % vs Go | −29.5 % / −37.7 % vs the darwin Go binary |
+
+**Verdict.** PERF-002 and PERF-003 → `accepted-difference` with these baselines. PERF-004's
+value criterion holds on every platform. PERF-001 stays `todo`: Linux passes clearly, but on the
+hosted macOS runner spawning `/bin/echo` alone takes as long as the `version --json` limit, so it
+is not the idle host the decision asks for. Remaining: rerun `perf_evidence.py` +
+`perf_verdict.py` on an idle Apple Silicon host. PERF-004 follows PERF-001.

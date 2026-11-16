@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "report_version": "perf003-real-chrome-rust-v1",
+  "source_revision": "8e1898c82db0f5a70fcbf897b6598717e1cbc781",
+  "host": {
+    "system": "Linux",
+    "machine": "x86_64"
+  },
+  "fixture": {
+    "id": "perf003-local-chrome-html-v1",
+    "title": "PERF-003 Chrome fixture",
+    "content_token": "chrome-fixture-token-9281",
+    "flow": [
+      "open",
+      "read"
+    ]
+  },
+  "chrome": {
+    "version": "157.0.8103.78",
+    "binary_sha256": "f60cb86024464df9740504a1584b605c2b3cf107625ff11e1da22c875c1627e8"
+  },
+  "binary": {
+    "sha256": "719b7741e0d2159edbc8c624347a4340a428ea9eebe7f8dae506aaa5b4ec3c25",
+    "size_bytes": 12919840
+  },
+  "runs": 30,
+  "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+  "status": "measured",
+  "samples": [
+    {
+      "status": "pass",
+      "duration_ns": 384559745,
+      "open_cli_duration_ns": 370956860,
+      "read_cli_duration_ns": 13598706,
+      "sample_index": 0,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 402872418,
+      "open_cli_duration_ns": 392106435,
+      "read_cli_duration_ns": 10762881,
+      "sample_index": 1,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 404790222,
+      "open_cli_duration_ns": 392866861,
+      "read_cli_duration_ns": 11920341,
+      "sample_index": 2,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 453239387,
+      "open_cli_duration_ns": 442552849,
+      "read_cli_duration_ns": 10683838,
+      "sample_index": 3,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 399976578,
+      "open_cli_duration_ns": 388649894,
+      "read_cli_duration_ns": 11323405,
+      "sample_index": 4,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 390655388,
+      "open_cli_duration_ns": 379163665,
+      "read_cli_duration_ns": 11488842,
+      "sample_index": 5,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 392497519,
+      "open_cli_duration_ns": 381803784,
+      "read_cli_duration_ns": 10689966,
+      "sample_index": 6,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 455859485,
+      "open_cli_duration_ns": 445182194,
+      "read_cli_duration_ns": 10674193,
+      "sample_index": 7,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 401343998,
+      "open_cli_duration_ns": 389357550,
+      "read_cli_duration_ns": 11983517,
+      "sample_index": 8,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 403937953,
+      "open_cli_duration_ns": 391804368,
+      "read_cli_duration_ns": 12130613,
+      "sample_index": 9,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 392878744,
+      "open_cli_duration_ns": 380338952,
+      "read_cli_duration_ns": 12536640,
+      "sample_index": 10,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 380331613,
+      "open_cli_duration_ns": 369473646,
+      "read_cli_duration_ns": 10854505,
+      "sample_index": 11,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 445024190,
+      "open_cli_duration_ns": 432903841,
+      "read_cli_duration_ns": 12116762,
+      "sample_index": 12,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 429659316,
+      "open_cli_duration_ns": 418922836,
+      "read_cli_duration_ns": 10733469,
+      "sample_index": 13,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 416002632,
+      "open_cli_duration_ns": 404287247,
+      "read_cli_duration_ns": 11712149,
+      "sample_index": 14,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 411839291,
+      "open_cli_duration_ns": 400728227,
+      "read_cli_duration_ns": 11107812,
+      "sample_index": 15,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 434851377,
+      "open_cli_duration_ns": 424148655,
+      "read_cli_duration_ns": 10699240,
+      "sample_index": 16,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 421492692,
+      "open_cli_duration_ns": 410906266,
+      "read_cli_duration_ns": 10583545,
+      "sample_index": 17,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 390042769,
+      "open_cli_duration_ns": 378041120,
+      "read_cli_duration_ns": 11999048,
+      "sample_index": 18,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 380285679,
+      "open_cli_duration_ns": 366888005,
+      "read_cli_duration_ns": 13394763,
+      "sample_index": 19,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 420441422,
+      "open_cli_duration_ns": 408999745,
+      "read_cli_duration_ns": 11438475,
+      "sample_index": 20,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 367010781,
+      "open_cli_duration_ns": 355313418,
+      "read_cli_duration_ns": 11694955,
+      "sample_index": 21,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 397601546,
+      "open_cli_duration_ns": 382563021,
+      "read_cli_duration_ns": 15035907,
+      "sample_index": 22,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 382327814,
+      "open_cli_duration_ns": 360895040,
+      "read_cli_duration_ns": 21429380,
+      "sample_index": 23,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 410257547,
+      "open_cli_duration_ns": 399427333,
+      "read_cli_duration_ns": 10827090,
+      "sample_index": 24,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 403648885,
+      "open_cli_duration_ns": 392888679,
+      "read_cli_duration_ns": 10757559,
+      "sample_index": 25,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 400549215,
+      "open_cli_duration_ns": 388159518,
+      "read_cli_duration_ns": 12386041,
+      "sample_index": 26,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 390605454,
+      "open_cli_duration_ns": 379970282,
+      "read_cli_duration_ns": 10631958,
+      "sample_index": 27,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 401363289,
+      "open_cli_duration_ns": 388256179,
+      "read_cli_duration_ns": 13104203,
+      "sample_index": 28,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    },
+    {
+      "status": "pass",
+      "duration_ns": 432913838,
+      "open_cli_duration_ns": 422228276,
+      "read_cli_duration_ns": 10682975,
+      "sample_index": 29,
+      "fixture_url": "http://127.0.0.1:39415/fixture.html"
+    }
+  ],
+  "sample_count": 30,
+  "p95_duration_ns": 453239387,
+  "median_duration_ns": 402117853,
+  "stages": {
+    "open_cli": {
+      "status": "complete",
+      "samples": 30,
+      "median_duration_ns": 390580959,
+      "p95_duration_ns": 442552849
+    },
+    "read_cli": {
+      "status": "complete",
+      "samples": 30,
+      "median_duration_ns": 11463658,
+      "p95_duration_ns": 15035907
+    }
+  }
+}

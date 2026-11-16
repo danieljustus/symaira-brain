@@ -1,0 +1,359 @@
+{
+  "binary": {
+    "path": "/Users/runner/work/symaira-brain/symaira-brain/browse/target/release/symbrowse",
+    "size_bytes": 10463680,
+    "sha256": "901fb14f8f16123122234eec4a76e07bec74cc4a3fa47fcbe6f4430430e7dddd"
+  },
+  "go_baseline": {
+    "source": "docs/rust-port/baseline.json",
+    "captured_at": "2026-09-06T12:44:22+02:00",
+    "oracle": "652453d1595fc302bd69c328e7da8a21dbee28b9",
+    "binary_size_bytes": 18330466
+  },
+  "rounds": 8,
+  "round_loads_1min": [
+    [
+      32.6,
+      30.1
+    ],
+    [
+      30.1,
+      27.9
+    ],
+    [
+      27.9,
+      27.9
+    ],
+    [
+      27.9,
+      25.9
+    ],
+    [
+      25.9,
+      24.0
+    ],
+    [
+      24.0,
+      23.9
+    ],
+    [
+      23.9,
+      23.9
+    ],
+    [
+      23.9,
+      22.1
+    ]
+  ],
+  "process_workloads": {
+    "version-json": {
+      "go_p95_ns": 9015375,
+      "go_median_ns": 8547084,
+      "go_median_rss_bytes": 25362432,
+      "p95_limit_ns": 9916912,
+      "rust_p95_ns_per_round": [
+        15036583,
+        14655417,
+        17016792,
+        26446083,
+        20674584,
+        34338250,
+        18912292,
+        11789709
+      ],
+      "rust_median_ns_per_round": [
+        9697458,
+        11049874,
+        11895666,
+        13880042,
+        11935541,
+        14999666,
+        11866812,
+        8483292
+      ],
+      "rust_p95_median_of_rounds_ns": 17964542,
+      "rust_p95_best_round_ns": 11789709,
+      "rust_p95_worst_round_ns": 34338250,
+      "rounds_p95_within_limit": 0,
+      "rounds": 8,
+      "p95_ratio_vs_go": 1.9927,
+      "p95_pass": false,
+      "rust_median_rss_bytes": 5566464,
+      "rss_ratio_vs_go": 0.2195,
+      "rss_pass": true
+    },
+    "root-help": {
+      "go_p95_ns": 13042417,
+      "go_median_ns": 8685875,
+      "go_median_rss_bytes": 25526272,
+      "p95_limit_ns": 14346658,
+      "rust_p95_ns_per_round": [
+        11384833,
+        19482708,
+        16782417,
+        19320708,
+        20706792,
+        19483709,
+        18847958,
+        18460917
+      ],
+      "rust_median_ns_per_round": [
+        8790791,
+        11732083,
+        9758812,
+        12728812,
+        11820020,
+        12507562,
+        11962812,
+        11389895
+      ],
+      "rust_p95_median_of_rounds_ns": 19084333,
+      "rust_p95_best_round_ns": 11384833,
+      "rust_p95_worst_round_ns": 20706792,
+      "rounds_p95_within_limit": 1,
+      "rounds": 8,
+      "p95_ratio_vs_go": 1.4633,
+      "p95_pass": false,
+      "rust_median_rss_bytes": 5410816,
+      "rss_ratio_vs_go": 0.212,
+      "rss_pass": true
+    },
+    "config-show-json": {
+      "go_p95_ns": 38582417,
+      "go_median_ns": 18632250,
+      "go_median_rss_bytes": 25542656,
+      "p95_limit_ns": 42440658,
+      "rust_p95_ns_per_round": [
+        13612458,
+        27215583,
+        13959708,
+        18500625,
+        19157875,
+        29680333,
+        19488792,
+        13118250
+      ],
+      "rust_median_ns_per_round": [
+        11073416,
+        12868937,
+        11068813,
+        12048312,
+        10281625,
+        15923979,
+        12229270,
+        10009896
+      ],
+      "rust_p95_median_of_rounds_ns": 18829250,
+      "rust_p95_best_round_ns": 13118250,
+      "rust_p95_worst_round_ns": 29680333,
+      "rounds_p95_within_limit": 8,
+      "rounds": 8,
+      "p95_ratio_vs_go": 0.488,
+      "p95_pass": true,
+      "rust_median_rss_bytes": 5824512,
+      "rss_ratio_vs_go": 0.228,
+      "rss_pass": true
+    },
+    "mcp-initialize-list": {
+      "go_p95_ns": 34755125,
+      "go_median_ns": 20375708,
+      "go_median_rss_bytes": 26673152,
+      "p95_limit_ns": 38230637,
+      "rust_p95_ns_per_round": [
+        12353834,
+        20461000,
+        18030959,
+        20989125,
+        28836250,
+        19506208,
+        19172792,
+        12848750
+      ],
+      "rust_median_ns_per_round": [
+        9023875,
+        14002875,
+        11311812,
+        11917104,
+        12708375,
+        11590937,
+        13950979,
+        10585542
+      ],
+      "rust_p95_median_of_rounds_ns": 19339500,
+      "rust_p95_best_round_ns": 12353834,
+      "rust_p95_worst_round_ns": 28836250,
+      "rounds_p95_within_limit": 8,
+      "rounds": 8,
+      "p95_ratio_vs_go": 0.5565,
+      "p95_pass": true,
+      "rust_median_rss_bytes": 6066176,
+      "rss_ratio_vs_go": 0.2274,
+      "rss_pass": true
+    }
+  },
+  "steady_state": {
+    "frames_per_series": 100,
+    "semantic_checks_all_passed": true,
+    "rss_growth_bytes_over_200_frames": {
+      "mcp_process": [
+        49152,
+        0,
+        0,
+        0,
+        0,
+        32768,
+        0,
+        0
+      ],
+      "mcp_spawned_daemon": [
+        114688,
+        114688,
+        114688,
+        98304,
+        65536,
+        98304,
+        98304,
+        98304
+      ],
+      "static_daemon": [
+        1966080,
+        1933312,
+        1867776,
+        1982464,
+        1900544,
+        1998848,
+        1933312,
+        1998848
+      ]
+    },
+    "thread_growth_static_daemon": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "fd_growth_static_daemon": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "thread_growth_mcp_spawned_daemon": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "growth_limit_bytes": 4194304,
+    "bounded_no_unbounded_growth": true,
+    "mcp_ping_p95_ns_per_round": [
+      97958,
+      90708,
+      53042,
+      128000,
+      104625,
+      100875,
+      47750,
+      34500
+    ],
+    "mcp_tools_call_fetch_batch_p95_ns_per_round": [
+      3107792,
+      4680833,
+      2365667,
+      3407334,
+      3389625,
+      2792417,
+      2642084,
+      1263875
+    ],
+    "mcp_tools_call_fetch_batch_median_ns": 1497635,
+    "daemon_ping_p95_ns_per_round": [
+      206834,
+      233334,
+      177250,
+      129917,
+      90708,
+      195417,
+      62708,
+      104208
+    ],
+    "daemon_fetch_url_p95_ns_per_round": [
+      3069625,
+      1316333,
+      5604625,
+      1597667,
+      1653916,
+      1573083,
+      889125,
+      1244417
+    ],
+    "daemon_fetch_url_median_ns": 758551
+  },
+  "verdict": {
+    "PERF-001": {
+      "threshold": "p95 <= 110% Go and median RSS <= 80% Go",
+      "measured_pass": false
+    },
+    "PERF-002": {
+      "threshold": "p95 <= 110% Go; no unbounded task/channel growth",
+      "mcp_initialize_list_p95_pass": true,
+      "steady_state_bounded": true,
+      "go_reference_for_100_frame_daemon_workload": "absent from baseline.json",
+      "measured_pass": false
+    },
+    "PERF-003": {
+      "threshold": "fetch p95 <= 6.4834 ms (Go 5.894 ms x 1.10) plus real-Chrome fixture flow",
+      "fetch_p95_median_of_rounds_ns": 1585375,
+      "fetch_p95_pass": true,
+      "chrome_flow_go_reference": "absent from baseline.json; not measured",
+      "measured_pass": false
+    },
+    "PERF-004": {
+      "threshold": ">=20% smaller binary OR >=20% lower median RSS, with all no-regression gates passing",
+      "size_reduction_percent_vs_go_v0_8_0": 42.92,
+      "median_rss_reduction_percent_by_workload": {
+        "version-json": 78.05,
+        "root-help": 78.8,
+        "config-show-json": 77.2,
+        "mcp-initialize-list": 77.26
+      },
+      "value_criterion_met": true,
+      "all_no_regression_gates_pass": false,
+      "measured_pass": false
+    }
+  },
+  "control_echo": {
+    "median_ns_per_round": [
+      5290896,
+      6750458,
+      3845979,
+      4662479,
+      5821458,
+      8582000,
+      5295750,
+      3945270
+    ],
+    "p95_ns_per_round": [
+      8833667,
+      12455334,
+      8238708,
+      10337250,
+      13618000,
+      12932000,
+      8052166,
+      6909000
+    ]
+  }
+}

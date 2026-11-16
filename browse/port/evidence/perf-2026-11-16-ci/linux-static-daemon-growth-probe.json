@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "purpose": "Check whether the Linux static daemon's RSS keeps growing beyond the 200-frame steady-state sample",
+  "binary": "symbrowse v0.15.0 linux_arm64 release archive (cosign-verified), not the 8e1898c82 CI build",
+  "environment": "python:3.12-slim container (Docker on the macOS development host), isolated HOME/XDG, loopback fixture",
+  "workload": "static daemon, alternating daemon.ping and fetch.url, 5 warmup pings, VmRSS from /proc after each mark",
+  "samples": [
+    {
+      "frames": 200,
+      "rss_kb": 17204,
+      "growth_kb": 8400,
+      "fetch_ok": 100
+    },
+    {
+      "frames": 500,
+      "rss_kb": 11808,
+      "growth_kb": 3004,
+      "fetch_ok": 250
+    },
+    {
+      "frames": 1000,
+      "rss_kb": 11868,
+      "growth_kb": 3064,
+      "fetch_ok": 500
+    },
+    {
+      "frames": 2000,
+      "rss_kb": 11872,
+      "growth_kb": 3068,
+      "fetch_ok": 1000
+    },
+    {
+      "frames": 4000,
+      "rss_kb": 11892,
+      "growth_kb": 3088,
+      "fetch_ok": 2000
+    }
+  ],
+  "reading": "Transient warm-up peak at 200 frames, then a plateau about 3 MB above start that stays flat to 4000 frames: bounded, not a leak."
+}

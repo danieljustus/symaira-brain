@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "report_version": "perf-2026-11-16-ci",
+  "issue": "danieljustus/symaira-brain#780",
+  "work_item": "RUST-016",
+  "captured_at": "2026-11-16T22:28:23Z..22:48:43Z (workflow_dispatch)",
+  "source_revision": "8e1898c82db0f5a70fcbf897b6598717e1cbc781",
+  "workflow_run": "https://github.com/danieljustus/symaira-brain/actions/runs/43970380636",
+  "workflow": ".github/workflows/browse-chrome-native-e2e.yml (Measure PERF-001..004 and the Rust Chrome flow)",
+  "go_baseline": "docs/rust-port/baseline.json (Go v0.8.0, darwin-arm64, 2026-09-06); Go is not run",
+  "cross_platform_note": "The Go baseline exists only for darwin-arm64. Linux ratios against it (latency, RSS, binary size) are indicative, not a same-platform comparison.",
+  "platforms": {
+    "darwin-arm64": {
+      "host": {
+        "system": "Darwin",
+        "machine": "arm64",
+        "runner": "GitHub-hosted"
+      },
+      "binary": {
+        "path": "/Users/runner/work/symaira-brain/symaira-brain/browse/target/release/symbrowse",
+        "size_bytes": 10463680,
+        "sha256": "901fb14f8f16123122234eec4a76e07bec74cc4a3fa47fcbe6f4430430e7dddd"
+      },
+      "load1_range_during_rounds": [
+        22.1,
+        32.6
+      ],
+      "control_echo_p95_ms_range": [
+        6.91,
+        13.62
+      ],
+      "perf_001_cli": {
+        "version-json": {
+          "rust_p95_median_of_rounds_ms": 17.96,
+          "p95_limit_ms": 9.92,
+          "p95_ratio_vs_go": 1.9927,
+          "rounds_p95_within_limit": "0/8",
+          "p95_pass": false,
+          "median_rss_ratio_vs_go": 0.2195
+        },
+        "root-help": {
+          "rust_p95_median_of_rounds_ms": 19.08,
+          "p95_limit_ms": 14.35,
+          "p95_ratio_vs_go": 1.4633,
+          "rounds_p95_within_limit": "1/8",
+          "p95_pass": false,
+          "median_rss_ratio_vs_go": 0.212
+        },
+        "config-show-json": {
+          "rust_p95_median_of_rounds_ms": 18.83,
+          "p95_limit_ms": 42.44,
+          "p95_ratio_vs_go": 0.488,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.228
+        },
+        "mcp-initialize-list": {
+          "rust_p95_median_of_rounds_ms": 19.34,
+          "p95_limit_ms": 38.23,
+          "p95_ratio_vs_go": 0.5565,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.2274
+        }
+      },
+      "perf_002_steady_state": {
+        "semantic_checks_all_passed": true,
+        "rss_growth_bytes_over_200_frames_max": {
+          "mcp_process": 49152,
+          "mcp_spawned_daemon": 114688,
+          "static_daemon": 1998848
+        },
+        "thread_and_fd_growth_static_daemon_max": 0,
+        "bounded_no_unbounded_growth_200_frame_heuristic": true
+      },
+      "perf_003_fetch_p95_median_of_rounds_ms": 1.585,
+      "perf_003_chrome_flow": {
+        "chrome": "157.0.8103.78",
+        "samples": 30,
+        "p95_ms": 2746.4,
+        "median_ms": 1630.0,
+        "open_p95_ms": 2648.8,
+        "read_p95_ms": 102.1
+      },
+      "perf_004_size_reduction_percent_vs_go_v0_8_0_darwin_arm64": 42.92
+    },
+    "linux-amd64": {
+      "host": {
+        "system": "Linux",
+        "machine": "x86_64",
+        "runner": "GitHub-hosted"
+      },
+      "binary": {
+        "path": "/home/runner/work/symaira-brain/symaira-brain/browse/target/release/symbrowse",
+        "size_bytes": 12919840,
+        "sha256": "719b7741e0d2159edbc8c624347a4340a428ea9eebe7f8dae506aaa5b4ec3c25"
+      },
+      "load1_range_during_rounds": [
+        3.4,
+        3.6
+      ],
+      "control_echo_p95_ms_range": [
+        0.37,
+        0.5
+      ],
+      "perf_001_cli": {
+        "version-json": {
+          "rust_p95_median_of_rounds_ms": 1.89,
+          "p95_limit_ms": 9.92,
+          "p95_ratio_vs_go": 0.2101,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.9304
+        },
+        "root-help": {
+          "rust_p95_median_of_rounds_ms": 1.93,
+          "p95_limit_ms": 14.35,
+          "p95_ratio_vs_go": 0.1478,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.9244
+        },
+        "config-show-json": {
+          "rust_p95_median_of_rounds_ms": 2.06,
+          "p95_limit_ms": 42.44,
+          "p95_ratio_vs_go": 0.0533,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.9238
+        },
+        "mcp-initialize-list": {
+          "rust_p95_median_of_rounds_ms": 2.15,
+          "p95_limit_ms": 38.23,
+          "p95_ratio_vs_go": 0.062,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.8847
+        }
+      },
+      "perf_002_steady_state": {
+        "semantic_checks_all_passed": true,
+        "rss_growth_bytes_over_200_frames_max": {
+          "mcp_process": 0,
+          "mcp_spawned_daemon": 1781760,
+          "static_daemon": 9220096
+        },
+        "thread_and_fd_growth_static_daemon_max": 0,
+        "bounded_no_unbounded_growth_200_frame_heuristic": false
+      },
+      "perf_003_fetch_p95_median_of_rounds_ms": 0.776,
+      "perf_003_chrome_flow": {
+        "chrome": "157.0.8103.78",
+        "samples": 30,
+        "p95_ms": 453.2,
+        "median_ms": 402.1,
+        "open_p95_ms": 442.6,
+        "read_p95_ms": 15.0
+      },
+      "perf_004_size_reduction_percent_vs_go_v0_8_0_darwin_arm64": 29.52
+    },
+    "linux-arm64": {
+      "host": {
+        "system": "Linux",
+        "machine": "aarch64",
+        "runner": "GitHub-hosted"
+      },
+      "binary": {
+        "path": "/home/runner/work/symaira-brain/symaira-brain/browse/target/release/symbrowse",
+        "size_bytes": 11416768,
+        "sha256": "0228c148fc7c598235ef5a20711d95e79544d4e0ee6d5a9942ff14247af54dac"
+      },
+      "load1_range_during_rounds": [
+        2.8,
+        3.1
+      ],
+      "control_echo_p95_ms_range": [
+        0.69,
+        0.91
+      ],
+      "perf_001_cli": {
+        "version-json": {
+          "rust_p95_median_of_rounds_ms": 3.3,
+          "p95_limit_ms": 9.92,
+          "p95_ratio_vs_go": 0.3662,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.8828
+        },
+        "root-help": {
+          "rust_p95_median_of_rounds_ms": 3.19,
+          "p95_limit_ms": 14.35,
+          "p95_ratio_vs_go": 0.2449,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.8771
+        },
+        "config-show-json": {
+          "rust_p95_median_of_rounds_ms": 3.34,
+          "p95_limit_ms": 42.44,
+          "p95_ratio_vs_go": 0.0866,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.8765
+        },
+        "mcp-initialize-list": {
+          "rust_p95_median_of_rounds_ms": 3.61,
+          "p95_limit_ms": 38.23,
+          "p95_ratio_vs_go": 0.1037,
+          "rounds_p95_within_limit": "8/8",
+          "p95_pass": true,
+          "median_rss_ratio_vs_go": 0.8394
+        }
+      },
+      "perf_002_steady_state": {
+        "semantic_checks_all_passed": true,
+        "rss_growth_bytes_over_200_frames_max": {
+          "mcp_process": 0,
+          "mcp_spawned_daemon": 1806336,
+          "static_daemon": 8704000
+        },
+        "thread_and_fd_growth_static_daemon_max": 0,
+        "bounded_no_unbounded_growth_200_frame_heuristic": false
+      },
+      "perf_003_fetch_p95_median_of_rounds_ms": 1.682,
+      "perf_003_chrome_flow": {
+        "chrome": "157.0.8103.78",
+        "samples": 30,
+        "p95_ms": 599.2,
+        "median_ms": 567.5,
+        "open_p95_ms": 585.5,
+        "read_p95_ms": 31.9
+      },
+      "perf_004_size_reduction_percent_vs_go_v0_8_0_darwin_arm64": 37.72
+    }
+  },
+  "rows": {
+    "PERF-001": "todo",
+    "PERF-002": "accepted-difference",
+    "PERF-003": "accepted-difference",
+    "PERF-004": "todo"
+  },
+  "artifacts": {
+    "raw_verdicts_chrome_flow": "port/evidence/perf-2026-11-16-ci/",
+    "linux_growth_probe": "port/evidence/perf-2026-11-16-ci/linux-static-daemon-growth-probe.json"
+  }
+}
