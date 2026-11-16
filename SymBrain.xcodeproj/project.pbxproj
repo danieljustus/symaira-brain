@@ -918,7 +918,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.14.0;
+				MARKETING_VERSION = 0.15.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -966,7 +966,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.14.0;
+				MARKETING_VERSION = 0.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = "Symaira Brain";
@@ -990,7 +990,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.14.0;
+				MARKETING_VERSION = 0.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = "Symaira Brain";
@@ -1015,7 +1015,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.14.0;
+				MARKETING_VERSION = 0.15.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

@@ -9,6 +9,25 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.15.0] - 2026-11-16
+
+### Added
+- `symbrain skills validate --targets` checks each enabled target's rendered
+  bundle against recorded harness delivery limits (Hermes `skill_view` budget
+  and 60-character trigger window, nested `SKILL.md`, Codex shell-read size)
+  and reports advisory warnings. `symbrain skills doctor --catalog
+  [--context-window N]` adds a read-only per-target section with the skill
+  count and description size against the listing budget, same-named skills
+  across roots and lookalike descriptions. Default output of both commands is
+  unchanged (#1064, #1065).
+- Browse: Safari is advertised on macOS after its native gate passed; Linux
+  stays unadvertised and an explicit Safari request never falls back to
+  another engine.
+- Releases now ship the Rust `symbrowse` archives, and a manual iOS
+  TestFlight workflow builds and uploads the iOS companion (#1062).
+- `.github/SECURITY.md` defines the vulnerability-report scope per shipped
+  module (gateway, Browse, Operate) and the explicit non-goals (#1073).
+
 ### Changed
 - Skills: rendered `SKILL.md` frontmatter keeps the single-quoted style for
   number-like strings (`version: '2'`) instead of the double quotes the
@@ -16,6 +35,28 @@ the [Unreleased] section is moved into a dated version section.
   but render bytes, `output_digest` and install `source_hash` differ from the
   last Go render. Documented in `docs/adr/skills-yaml-scalar-quoting-835.md`
   (#835).
+- Browse: 15 more contract rows (CLI, output, config and fetch) reach parity
+  with the frozen Go implementation; the Rust CLI, config and human output
+  were aligned where the recorded corpus differed (#779).
+- `symbrain setup` installs symvault v0.24.1, symcockpit 0.12.1 and symdesk
+  v0.13.2. These releases no longer publish Windows or macOS Intel archives,
+  which are unsupported since the 2026-10-29 platform scope change (#1077).
+
+### Fixed
+- Skills install into a configured skills root that is itself a symlink
+  (for example `~/.claude/skills`) instead of failing with `ENOTDIR`; links
+  below the root are still rejected (#1066).
+- `symvault://` credential references resolve again: the usage resolver
+  passed `--print` after the `--` separator, which symvault rejected.
+- GUI: Vault intake results decode when `symvault intake --json` omits empty
+  `duplicates` or `suggestions` lists (#1067).
+- Browse: the Chrome oracle replay runs `engine.info` after the recorded
+  scenario and the journal omits the URL of a blank page, matching the Go
+  entry shape (#1063). State names reject C1 control characters (#1061). The
+  static fetch User-Agent links to a contact page that exists (#1072).
+- Dependencies: symaira-corekit 0.23.0 for the macOS app, Operate and Scope
+  and `symaira-core-llm` v0.23.0, rusqlite 0.42.0, and the h2 0.4.20,
+  rand 0.10.4, brotli 9.1.3 and zip 9.6.0 updates.
 
 ## [v0.14.0] - 2026-11-13
 

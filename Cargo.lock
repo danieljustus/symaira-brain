@@ -1601,7 +1601,7 @@ dependencies = [
 
 [[package]]
 name = "symaira-cutover"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "serde_json",
  "sha2",
@@ -1610,7 +1610,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-activity"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "chrono",
  "serde",
@@ -1624,7 +1624,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-adapter"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "cap-fs-ext",
  "cap-std",
@@ -1640,7 +1640,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-audit"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "cap-fs-ext",
  "cap-std",
@@ -1654,7 +1654,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-broker"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1664,7 +1664,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-catalog"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1673,7 +1673,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-cli"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "chrono",
  "flate2",
@@ -1709,7 +1709,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-core"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "chrono",
  "serde",
@@ -1720,7 +1720,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-gateway"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "chrono",
  "serde",
@@ -1742,7 +1742,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-guard-core"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "base64 0.23.1",
  "chrono",
@@ -1757,7 +1757,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-harness"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "cap-fs-ext",
  "cap-std",
@@ -1773,7 +1773,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-instructions"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "ambient-authority",
  "cap-fs-ext",
@@ -1788,7 +1788,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-managed"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "chrono",
  "flate2",
@@ -1804,7 +1804,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-mcp"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1813,7 +1813,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-memory"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "base64 0.23.1",
  "bytes",
@@ -1840,7 +1840,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-patterns"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1851,7 +1851,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-policy"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1862,7 +1862,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-skills"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "ambient-authority",
  "cap-fs-ext",
@@ -1884,7 +1884,7 @@ dependencies = [
 
 [[package]]
 name = "symbrain-usage"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "base64 0.23.1",
  "cap-std",
@@ -1905,7 +1905,7 @@ dependencies = [
 
 [[package]]
 name = "symguard-cli"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "chrono",
  "serde",
