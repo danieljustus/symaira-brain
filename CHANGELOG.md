@@ -9,6 +9,15 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Fixed
+- `symbrain setup` installs the Rust `symbrowse` v0.16.0 archives (cosign
+  verified), which carry the Chrome `open`/`read`, Chrome launch switch and
+  `symbrowse upgrade` fixes of v0.16.0 (#780).
+- `symbrain setup` failed for symcockpit 0.12.1: its archive starts with a
+  `./` root directory entry, which the extractor rejected as an unsafe path.
+  The archive root directory is now skipped; parent traversal, absolute and
+  link entries are still rejected.
+
 ## [v0.16.0] - 2026-11-17
 
 ### Fixed

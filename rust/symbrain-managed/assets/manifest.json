@@ -38,16 +38,16 @@
       }
     },
     "symbrowse": {
-      "version": "v0.15.0",
+      "version": "v0.16.0",
       "repo": "danieljustus/symaira-brain",
       "binary_name": "symbrowse",
       "asset_prefix": "symbrowse",
       "has_cosign": true,
       "optional": true,
       "sha256": {
-        "symbrowse_0.15.0_darwin_arm64.tar.gz": "0232a5298f0d291d71e7ce59c8f9c70e9b73c33debd1582342d98b9ed9aa97c9",
-        "symbrowse_0.15.0_linux_amd64.tar.gz": "9ed3908396638499ff305b16729edf32c024935680bcc205c29116d63f7d2869",
-        "symbrowse_0.15.0_linux_arm64.tar.gz": "74ca86a8594fcee37596f0c725d9e22c8b9d4dc253dff16c04b21886b403d365"
+        "symbrowse_0.16.0_darwin_arm64.tar.gz": "ef34fde73635d23b06f9d04ad80e53cb93ae8258a9e39289e87de1fc792a27df",
+        "symbrowse_0.16.0_linux_amd64.tar.gz": "c52d73251f99e6d4e15d305492b27e113db386cf00495468eb4624e735575f71",
+        "symbrowse_0.16.0_linux_arm64.tar.gz": "79125c1e5ae9a08f2496a0f6651bc942286134e59e4293eba6de09c52e8b8d4c"
       }
     }
   }
