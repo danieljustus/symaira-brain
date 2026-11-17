@@ -9,6 +9,8 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.16.1] - 2026-11-17
+
 ### Fixed
 - `symbrain setup` installs the Rust `symbrowse` v0.16.0 archives (cosign
   verified), which carry the Chrome `open`/`read`, Chrome launch switch and
