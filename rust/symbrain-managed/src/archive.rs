@@ -146,10 +146,16 @@ fn extract_tar_gz(
     {
         let mut entry = entry.map_err(|error| ManagedError::Archive(format!("tar: {error}")))?;
         let raw_name = String::from_utf8_lossy(entry.path_bytes().as_ref()).to_string();
+        let entry_type = entry.header().entry_type();
+        // `tar -czf x.tar.gz -C dir .` records the archive root as a `./`
+        // directory entry (symcockpit 0.12.1 does); nothing is written for
+        // directories, so it is skipped rather than rejected as a path.
+        if entry_type.is_dir() && is_archive_root(&raw_name) {
+            continue;
+        }
         let path = safe_archive_path(&raw_name).map_err(|error| {
             ManagedError::Archive(format!("unsafe tar entry {raw_name:?}: {error}"))
         })?;
-        let entry_type = entry.header().entry_type();
         if entry_type.is_symlink() || entry_type.is_hard_link() {
             return Err(ManagedError::Archive(format!(
                 "unsafe tar link entry {raw_name:?}"
@@ -173,6 +179,15 @@ fn extract_tar_gz(
         }
     }
     selection.finish(&core.binary_name)
+}
+
+fn is_archive_root(name: &str) -> bool {
+    let normalized = name.replace('\\', "/");
+    normalized.starts_with('.')
+        && normalized
+            .split('/')
+            .filter(|part| !part.is_empty())
+            .all(|part| part == ".")
 }
 
 fn extract_zip(
