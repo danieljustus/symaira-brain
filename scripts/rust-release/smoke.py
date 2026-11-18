@@ -7,7 +7,10 @@
 
 Checks that the archive holds no Go fallback, that `<product> version` reports
 V, that `<product> help` succeeds and that a malformed flag is rejected by the
-native CLI itself. The product defaults to symbrain. The environment is minimal
+native CLI itself. The product defaults to symbrain. The symbrain archive also
+bundles the workers (symbrowse everywhere, symoperate and symscope on macOS);
+each must be present and executable and its `version` must succeed, and
+symbrowse must report V (it is built from the same release version). The environment is minimal
 and owned: an empty HOME/XDG tree and a PATH of the extracted archive plus the
 system directories.
 """
@@ -24,6 +27,10 @@ import zipfile
 from pathlib import Path
 
 PRODUCTS = ["symbrain", "symbrowse"]
+# Workers shipped inside the symbrain archive of the platform running the smoke test.
+BUNDLED_WORKERS = {"darwin": ["symbrowse", "symoperate", "symscope"], "linux": ["symbrowse"]}
+# Workers built with the release version baked in; the Swift workers carry their own.
+VERSIONED_WORKERS = {"symbrowse"}
 MALFORMED_ARGS = {
     "symbrain": ["skills", "targets", "--candidate-smoke-unknown"],
     "symbrowse": ["--candidate-smoke-unknown"],
@@ -80,6 +87,11 @@ def main(argv: list[str]) -> int:
     rust = candidate / (product + exe)
     if not rust.is_file() or (os.name != "nt" and not os.access(rust, os.X_OK)):
         raise SystemExit(f"missing executable {rust.name}")
+    workers = BUNDLED_WORKERS.get(sys.platform, []) if product == "symbrain" else []
+    for worker in workers:
+        path = candidate / (worker + exe)
+        if not path.is_file() or (os.name != "nt" and not os.access(path, os.X_OK)):
+            raise SystemExit(f"missing executable {path.name}")
     leftovers = sorted(p.name for p in candidate.iterdir() if p.name.startswith(f"{product}-go"))
     if leftovers:
         raise SystemExit(f"archive still ships a Go fallback: {leftovers}")
@@ -96,10 +108,16 @@ def main(argv: list[str]) -> int:
         usage = run(rust, ["help"], env, work)
         if usage.returncode != 0 or b"Usage:" not in usage.stdout:
             raise SystemExit(f"{product} help failed: {usage!r}")
+        for worker in workers:
+            reported = run(candidate / (worker + exe), ["version"], env, work)
+            if reported.returncode != 0 or not reported.stdout.strip() or (
+                    worker in VERSIONED_WORKERS and args.version.encode() not in reported.stdout):
+                raise SystemExit(f"{worker} version failed or did not report {args.version}: {reported!r}")
         malformed = run(rust, MALFORMED_ARGS[product], env, work)
         if malformed.returncode == 0 or not malformed.stderr or b"Go fallback" in malformed.stderr:
             raise SystemExit(f"native CLI did not reject the malformed flag itself: {malformed!r}")
-    print(f"release smoke: PASS {product} {args.version}: Rust-only archive; version, help and flag validation are native")
+    print(f"release smoke: PASS {product} {args.version}: Rust-only archive; version, help and flag validation are native"
+          + (f"; bundled {', '.join(workers)} run" if workers else ""))
     return 0
 
 if __name__ == "__main__":

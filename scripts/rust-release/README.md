@@ -5,8 +5,8 @@
 | Job | Output |
 |---|---|
 | `test` | `make rust-check` and the release-tooling unit tests on the tagged commit. |
-| `build` (three native runners) | `symbrain_<version>_<os>_<arch>.tar.gz` (built from the root workspace) and `symbrowse_<version>_<os>_<arch>.tar.gz` (built from `browse/`, its own workspace and toolchain, `--locked --release`) for macOS arm64 and Linux amd64/arm64. Each archive contains only its product binary, `AGENTS.md`, `LICENSE` and `README.md` (no Go fallback) and is smoke-tested on its own platform. |
-| `release` | Developer ID signed and notarized darwin binaries (`com.symaira.brain.cli`, `com.symaira.browse.cli`), `checksums.txt` (all six archives), the archive contract check, one CycloneDX SBOM per archive, a keyless cosign signature and certificate for every asset, the GitHub release (read back and re-verified) and the Homebrew formula (`symbrain` only) pushed to `danieljustus/homebrew-tap`. |
+| `build` (three native runners) | `symbrain_<version>_<os>_<arch>.tar.gz` (built from the root workspace) and `symbrowse_<version>_<os>_<arch>.tar.gz` (built from `browse/`, its own workspace and toolchain, `--locked --release`) for macOS arm64 and Linux amd64/arm64. The `symbrain` archive is the release bundle: besides `symbrain` it holds the built-in workers `symbrowse` (all platforms) and, on macOS, `symoperate` and `symscope` (SwiftPM, release configuration), each a top-level executable. The standalone `symbrowse` archive is unchanged and holds only its own binary. Every archive also has `AGENTS.md`, `LICENSE` and `README.md` (no Go fallback) and is smoke-tested on its own platform. |
+| `release` | Developer ID signed and notarized darwin binaries (`com.symaira.brain.cli`, `com.symaira.browse.cli`, `com.symaira.operate.cli`, `com.symaira.scope.cli`), `checksums.txt` (all six archives), the archive contract check, one CycloneDX SBOM per archive, a keyless cosign signature and certificate for every asset, the GitHub release (read back and re-verified) and the Homebrew formula (`symbrain` only) pushed to `danieljustus/homebrew-tap`. |
 | `macos-gui-dmg`, `bump-homebrew` | Signed and notarized GUI DMG and the Homebrew cask. |
 
 Linux builds run on Ubuntu 22.04, so they need glibc 2.35 or newer. Apple
@@ -25,11 +25,11 @@ gh workflow run rust-release.yml --ref main   # unpublished candidate
 
 | Script | Purpose |
 |---|---|
-| `package.py archive` | Reproducible archive for one product (`--product symbrain`, the default, or `symbrowse`) and platform (same inputs + `SOURCE_DATE_EPOCH` → same bytes). |
+| `package.py archive` | Reproducible archive for one product (`--product symbrain`, the default, or `symbrowse`) and platform (same inputs + `SOURCE_DATE_EPOCH` → same bytes). `--extra-binary NAME=PATH` (repeatable, symbrain only) bundles a worker at the top level of the archive. |
 | `package.py checksums` | `checksums.txt` in `sha256sum` format. |
-| `package.py verify` | Release contract: exactly the six archives (both products on all three platforms), exact members and modes, documentation identical to the tree, matching checksums. |
-| `smoke.py` | Native smoke test of one archive (`--product`): no Go fallback, `version`, `help` and native flag validation. |
-| `manifests.py` | Homebrew formula (`Formula/symbrain.rb`) from a `checksums.txt`. |
+| `package.py verify` | Release contract: exactly the six archives (both products on all three platforms), exact members and modes (the symbrain archive including its bundled workers per platform), documentation identical to the tree, matching checksums. |
+| `smoke.py` | Native smoke test of one archive (`--product`): no Go fallback, `version`, `help` and native flag validation; for the symbrain archive also `version` of every bundled worker. |
+| `manifests.py` | Homebrew formula (`Formula/symbrain.rb`) from a `checksums.txt`; it installs every binary of the platform's symbrain archive (macOS four, Linux two). |
 
 ## Verifying a release
 

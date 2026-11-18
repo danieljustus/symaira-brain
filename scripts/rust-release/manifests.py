@@ -3,8 +3,11 @@
 
   manifests.py --version 0.13.0 --checksums dist/checksums.txt --out manifests
 
-Writes `symbrain.rb` (danieljustus/homebrew-tap, Formula/). The archives carry
-only the Rust `symbrain` binary; there is no Go fallback and no Go rollback.
+Writes `symbrain.rb` (danieljustus/homebrew-tap, Formula/). The symbrain archive
+is the release bundle: `symbrain` and `symbrowse` everywhere, plus `symoperate`
+and `symscope` on macOS (package.BUNDLED_WORKERS); the formula installs every
+binary the archive of that platform holds. There is no Go fallback and no Go
+rollback. The standalone symbrowse archive is never a formula source.
 The layout follows the formula GoReleaser published for v0.12.x so a diff
 against the tap history stays small.
 """
@@ -15,6 +18,10 @@ import argparse
 import re
 import sys
 from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import package  # noqa: E402
 
 REPOSITORY = "https://github.com/danieljustus/symaira-brain"
 DESCRIPTION = "Portable agent context with an MCP gateway for vault, memory, and skills"
@@ -47,7 +54,7 @@ def formula(version: str, digests: dict[tuple[str, str], str]) -> str:
                 f'      sha256 "{digests[(goos, arch)]}"\n'
                 + ("\n" if blank else "")
                 + "      define_method(:install) do\n"
-                + '        bin.install "symbrain"\n'
+                + "".join(f'        bin.install "{binary}"\n' for binary in ["symbrain", *package.BUNDLED_WORKERS[goos]])
                 + "      end\n    end\n")
 
     return ("# typed: false\n# frozen_string_literal: true\n\n"
@@ -60,7 +67,12 @@ def formula(version: str, digests: dict[tuple[str, str], str]) -> str:
             + block("linux", "amd64", "Hardware::CPU.intel? && Hardware::CPU.is_64_bit?", False)
             + block("linux", "arm64", "Hardware::CPU.arm? && Hardware::CPU.is_64_bit?", False)
             + "  end\n\n  test do\n"
-            '    system "#{bin}/symbrain", "version"\n  end\nend\n')
+            '    system "#{bin}/symbrain", "version"\n'
+            '    system "#{bin}/symbrowse", "version"\n'
+            "    if OS.mac?\n"
+            '      assert_predicate bin/"symoperate", :executable?\n'
+            '      assert_predicate bin/"symscope", :executable?\n'
+            "    end\n  end\nend\n")
 
 
 def main(argv: list[str]) -> int:
