@@ -344,7 +344,7 @@ workspace is macOS only (GUIDELINES.md section 12).
 |---|---|
 | `symbrain init` | Create XDG directories, default config, and example profiles |
 | `symbrain doctor [--json]` | Check environment, config, profiles, and child binaries |
-| `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
+| `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin`; workers that ship beside `symbrain` (`symbrowse`, `symoperate`, `symscope`) are never downloaded, and `--modules` without `--from-source` is a deprecated no-op |
 | `symbrain setup --from-source DIR [--modules browse,operate,scope]` | Build optional module binaries (browse/operate/scope) from in-repo sources at `DIR` and install them into the managed directory with a provenance sidecar; `doctor`/`setup --fix` treat this as intentional and skip unless `--force-release` |
 | `symbrain browse \| operate \| scope <args>` | Pass-through to the bundled `symbrowse`, `symoperate` or `symscope` worker (arguments, stdio and exit code unchanged; `operate`/`scope` macOS only) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` |

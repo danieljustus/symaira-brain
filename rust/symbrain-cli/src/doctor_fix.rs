@@ -23,7 +23,7 @@ pub(super) fn run_fix(force_release: bool, stdout: &mut dyn Write, stderr: &mut 
         return exit::GENERIC;
     };
     let _ = writeln!(stdout, "symbrain doctor --fix\n");
-    let enabled = match crate::setup_cli::enabled_cores() {
+    let enabled = match crate::setup_cli::repairable_cores() {
         Ok(enabled) => enabled,
         Err(error) => {
             let _ = stderr.write_all("  ✗  ".as_bytes());

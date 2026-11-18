@@ -8,6 +8,7 @@ use symbrain_core::version::{self, VersionInfo};
 
 mod activity_cli;
 mod audit_cli;
+mod bundled_workers;
 mod cli_flags;
 mod config_cli;
 mod stdio_output;

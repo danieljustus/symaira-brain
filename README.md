@@ -314,6 +314,8 @@ symbrain config set modules.browse true   # opt in to installing it at all
 symbrain setup                            # now also installs symbrowse
 ```
 
+`modules.browse`, `modules.operate`, `modules.scope` and `setup --modules` are deprecated compatibility settings: when `symbrowse` ships beside `symbrain`, `symbrain setup` and `doctor --fix` use that copy and no longer download it (`setup` prints a note), and `symbrain browse|operate|scope <args>` runs the bundled worker directly.
+
 Then enable it in a profile like any foreign server:
 
 ```toml

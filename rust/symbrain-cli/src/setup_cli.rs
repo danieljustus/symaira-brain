@@ -11,6 +11,27 @@ use symbrain_managed::{
 #[path = "setup_config.rs"]
 mod config;
 pub(crate) use config::enabled_cores;
+
+/// Optional cores setup would download: the config selection minus the
+/// workers that ship beside `symbrain`, which are noted instead.
+fn installable_cores(
+    stderr: &mut dyn Write,
+) -> Result<BTreeMap<String, bool>, config::ConfigError> {
+    let (remaining, bundled) = crate::bundled_workers::installable(enabled_cores()?);
+    for binary in bundled {
+        let module = binary.strip_prefix("sym").unwrap_or(&binary);
+        let _ = writeln!(
+            stderr,
+            "symbrain setup: {binary} ships with symbrain and is not downloaded; modules.{module} is deprecated and no longer needed"
+        );
+    }
+    Ok(remaining)
+}
+
+/// Same selection for repair, without the note.
+pub(crate) fn repairable_cores() -> Result<BTreeMap<String, bool>, config::ConfigError> {
+    Ok(crate::bundled_workers::installable(enabled_cores()?).0)
+}
 pub(crate) use config::parse_go_bool;
 #[path = "setup_args.rs"]
 mod flags;
@@ -104,8 +125,12 @@ fn run_setup(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) 
         );
     }
     if !parsed.modules.is_empty() {
-        let _ = writeln!(stderr, "symbrain setup: --modules requires --from-source");
-        return exit::USAGE;
+        // Browse, Operate and Scope ship with symbrain; without --from-source
+        // there is nothing to select, so the flag is accepted and ignored.
+        let _ = writeln!(
+            stderr,
+            "symbrain setup: --modules is deprecated and has no effect without --from-source: browse, operate and scope ship with symbrain"
+        );
     }
     let manifest = match Manifest::load_embedded() {
         Ok(manifest) => manifest,
@@ -119,7 +144,7 @@ fn run_setup(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) 
             return exit::GENERIC;
         }
     };
-    let enabled = match enabled_cores() {
+    let enabled = match installable_cores(stderr) {
         Ok(enabled) => enabled,
         Err(error) => {
             let prefix = if parsed.fix {
