@@ -346,6 +346,7 @@ workspace is macOS only (GUIDELINES.md section 12).
 | `symbrain doctor [--json]` | Check environment, config, profiles, and child binaries |
 | `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
 | `symbrain setup --from-source DIR [--modules browse,operate,scope]` | Build optional module binaries (browse/operate/scope) from in-repo sources at `DIR` and install them into the managed directory with a provenance sidecar; `doctor`/`setup --fix` treat this as intentional and skip unless `--force-release` |
+| `symbrain browse \| operate \| scope <args>` | Pass-through to the bundled `symbrowse`, `symoperate` or `symscope` worker (arguments, stdio and exit code unchanged; `operate`/`scope` macOS only) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` |
 | `symbrain config` | Inspect and edit the global config (path, get, set) |
 | `symbrain harness list [--project DIR]` | Inspect every known harness and its registered MCP servers |

@@ -58,7 +58,7 @@ pub fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
     };
 
     let child_args = args.get(1..).unwrap_or_default();
-    execute_child(&binary, child_args, stderr)
+    execute_child(&binary, child_args, "symbrain vault", stderr)
 }
 
 pub(super) fn admin_binary(action: &str, stderr: &mut dyn Write) -> Option<PathBuf> {
@@ -181,7 +181,14 @@ fn child_exit_code(status: std::process::ExitStatus) -> u8 {
     })
 }
 
-fn execute_child(path: &Path, args: &[OsString], stderr: &mut dyn Write) -> u8 {
+/// Runs `path` with inherited stdio and returns its exit code, `context`
+/// prefixing the spawn-failure line (`symbrain vault`, `symbrain browse`, ...).
+pub(super) fn execute_child(
+    path: &Path,
+    args: &[OsString],
+    context: &str,
+    stderr: &mut dyn Write,
+) -> u8 {
     match Command::new(path)
         .args(args)
         .stdin(Stdio::inherit())
@@ -195,7 +202,7 @@ fn execute_child(path: &Path, args: &[OsString], stderr: &mut dyn Write) -> u8 {
         Err(error) => {
             let _ = writeln!(
                 stderr,
-                "symbrain vault: fork/exec {}: {}",
+                "{context}: fork/exec {}: {}",
                 path.display(),
                 go_error(&error)
             );

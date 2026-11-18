@@ -37,6 +37,7 @@ mod sync_cli;
 mod usage_cli;
 mod vault_admin;
 mod vault_config;
+mod worker_cli;
 
 const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide <request-id> --approve|--deny\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
 
@@ -114,6 +115,7 @@ fn run_native(
         "skills" => skills_cli::run(rest, stdout, stderr, format),
         "activity" => activity_cli::run(rest, stdout, stderr, format),
         "vault" => vault_admin::run(args, stdout, stderr),
+        "browse" | "operate" | "scope" => worker_cli::run(cmd.as_ref(), rest, stderr),
         "guard" => guard_cli::run(rest, stdout, stderr).unwrap_or(exit::USAGE),
         _ => {
             let _ = writeln!(stderr, "symbrain: unknown command {cmd:?}\n");
