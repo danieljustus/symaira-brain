@@ -5,14 +5,22 @@
       --rust target/release/symbrain --out dist
   package.py archive --version V --os linux --arch amd64 --product symbrowse \
       --rust browse/target/release/symbrowse --out dist
+  package.py archive --version V --os darwin --arch arm64 \\
+      --rust target/release/symbrain --out dist \\
+      --extra-binary symbrowse=browse/target/release/symbrowse \\
+      --extra-binary symoperate=.../symoperate --extra-binary symscope=.../symscope
   package.py checksums --dir dist
   package.py verify --version V --dir dist
 
 Archive names and documentation members keep the GoReleaser layout of the Go
 releases (`<product>_<version>_<os>_<arch>.tar.gz`, product `symbrain` or
-`symbrowse`). Each archive holds only its product binary and the documentation
-(the repository-root AGENTS.md, LICENSE and README.md for every product); there
-is no Go fallback. `verify` requires the full matrix: every product on every
+`symbrowse`). Since the release bundle (product boundaries revision 8) the
+`symbrain` archive also carries the built-in workers as top-level executables:
+`symbrowse` everywhere, plus `symoperate` and `symscope` on darwin (Operate and
+Scope are macOS-only). The standalone `symbrowse` archive stays unchanged for
+this release and holds only its own binary. Every archive carries the
+documentation (the repository-root AGENTS.md, LICENSE and README.md); there is
+no Go fallback. `verify` requires the full matrix: every product on every
 platform. Output is byte-for-byte reproducible for the same inputs and
 SOURCE_DATE_EPOCH.
 """
@@ -33,6 +41,8 @@ ROOT = Path(__file__).resolve().parents[2]
 DOCS = ["AGENTS.md", "LICENSE", "README.md"]
 PLATFORMS = [("darwin", "arm64"), ("linux", "amd64"), ("linux", "arm64")]
 PRODUCTS = ["symbrain", "symbrowse"]
+# Worker executables bundled into the symbrain archive of each OS.
+BUNDLED_WORKERS = {"darwin": ["symbrowse", "symoperate", "symscope"], "linux": ["symbrowse"]}
 VERSION = re.compile(r"^[0-9A-Za-z.+-]+$")
 
 
@@ -40,10 +50,38 @@ def archive_name(version: str, goos: str, goarch: str, product: str = "symbrain"
     return f"{product}_{version}_{goos}_{goarch}.tar.gz"
 
 
-def members(rust: Path, product: str = "symbrain") -> list[tuple[str, bytes, int]]:
+def expected_members(product: str, goos: str) -> list[str]:
+    """Every member name the archive of this product and OS must hold."""
+    workers = BUNDLED_WORKERS[goos] if product == "symbrain" else []
+    return sorted([*DOCS, product, *workers])
+
+
+def members(rust: Path, product: str = "symbrain", extras: dict[str, Path] | None = None) -> list[tuple[str, bytes, int]]:
     entries = [(name, (ROOT / name).read_bytes(), 0o644) for name in DOCS]
     entries.append((product, rust.read_bytes(), 0o755))
+    entries += [(name, path.read_bytes(), 0o755) for name, path in (extras or {}).items()]
     return sorted(entries)
+
+
+def parse_extras(specs: list[str], product: str, goos: str) -> dict[str, Path]:
+    """Validate repeated `--extra-binary NAME=PATH` arguments for one archive."""
+    extras: dict[str, Path] = {}
+    for spec in specs:
+        name, sep, raw = spec.partition("=")
+        if not sep or not raw:
+            raise SystemExit(f"--extra-binary expects NAME=PATH, got {spec!r}")
+        if product != "symbrain":
+            raise SystemExit(f"--extra-binary is only valid for the symbrain archive, not {product}")
+        if name not in BUNDLED_WORKERS[goos]:
+            raise SystemExit(f"{name!r} is not a bundled worker of the {goos} symbrain archive "
+                             f"(allowed: {', '.join(BUNDLED_WORKERS[goos])})")
+        if name in extras:
+            raise SystemExit(f"duplicate --extra-binary {name}")
+        path = Path(raw)
+        if not path.is_file() or path.stat().st_size == 0:
+            raise SystemExit(f"--extra-binary {name}: {path} is not a non-empty file")
+        extras[name] = path
+    return extras
 
 
 def write_archive(path: Path, entries: list[tuple[str, bytes, int]], epoch: int) -> None:
@@ -96,18 +134,20 @@ def verify(version: str, directory: Path) -> list[str]:
             problems.append(f"{name}: checksum mismatch")
         with tarfile.open(path) as archive:
             entries = {m.name: m for m in archive.getmembers()}
-            if sorted(entries) != sorted([*DOCS, product]):
+            goos = name.split("_")[2]
+            if sorted(entries) != expected_members(product, goos):
                 problems.append(f"{name}: members {sorted(entries)}")
                 continue
             for member, info in entries.items():
-                mode = 0o755 if member == product else 0o644
+                executable = member not in DOCS
+                mode = 0o755 if executable else 0o644
                 if not info.isfile() or info.mode != mode or (info.uid, info.gid) != (0, 0):
                     problems.append(f"{name}: {member} is not a root-owned {oct(mode)} file")
                 data = archive.extractfile(info).read()
                 if member in docs and data != docs[member]:
                     problems.append(f"{name}: {member} differs from the source tree")
-                if member == product and not data:
-                    problems.append(f"{name}: empty {product} binary")
+                if executable and not data:
+                    problems.append(f"{name}: empty {member} binary")
     return problems
 
 
@@ -120,6 +160,9 @@ def main(argv: list[str]) -> int:
     build.add_argument("--arch", required=True, choices=sorted({p[1] for p in PLATFORMS}))
     build.add_argument("--product", default="symbrain", choices=PRODUCTS)
     build.add_argument("--rust", required=True, type=Path, help="path of the built product binary")
+    build.add_argument("--extra-binary", action="append", default=[], metavar="NAME=PATH",
+                       help="worker executable to bundle at the top level of the symbrain archive "
+                            "(symbrowse; symoperate and symscope on darwin); repeatable")
     build.add_argument("--out", required=True, type=Path)
     sums = commands.add_parser("checksums")
     sums.add_argument("--dir", required=True, type=Path)
@@ -146,7 +189,8 @@ def main(argv: list[str]) -> int:
     epoch = int(os.environ.get("SOURCE_DATE_EPOCH", "0"))
     args.out.mkdir(parents=True, exist_ok=True)
     path = args.out / archive_name(args.version, args.os, args.arch, args.product)
-    write_archive(path, members(args.rust, args.product), epoch)
+    extras = parse_extras(args.extra_binary, args.product, args.os)
+    write_archive(path, members(args.rust, args.product, extras), epoch)
     print(path)
     return 0
 
