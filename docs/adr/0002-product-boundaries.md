@@ -1,6 +1,6 @@
 # Symaira product and execution boundaries
 
-**Contract ID: PB-2026-09-09. Revision: 5 (Symaira Media added as specialized product, 2026-11-09). Status: accepted architecture; Browse, Operate and Scope source/consumer cutover completed 2026-09-13; release-distribution migration remains pending.**
+**Contract ID: PB-2026-09-09. Revision: 7 (voice input added to Desktop, 2026-11-18). Status: accepted architecture; Browse, Operate and Scope source/consumer cutover completed 2026-09-13; release-distribution migration remains pending.**
 
 This decision governs product ownership, optional modules, credential UI, distribution and migration gates. Browse, Operate and Scope sources are now in Brain; `symaira-browse` is archived and Cockpit is tune-only. No signed Brain-built module release artifact, package-manager replacement or Vault-management-UI retirement is claimed by this revision. Existing tagged artifacts remain supported migration inputs until their explicit release cutovers.
 
@@ -10,7 +10,7 @@ The canonical workspace text is `docs/product-boundaries.md`. Repository-local c
 
 | Owner | Owns | Does not own |
 |---|---|---|
-| **Symaira Desktop** (`symdesk`) | Documents, notes, document retrieval, ingest/OCR, meeting artifacts, contacts, PDF output and project journals; human knowledge-work UI plus CLI/MCP/API | A universal tool launcher, a duplicate agent-memory store, credential cryptography or Mac hardware control |
+| **Symaira Desktop** (`symdesk`) | Documents, notes, document retrieval, ingest/OCR, meeting artifacts, voice input into the focused application through the Meet agent on macOS and the Desktop keyboard extension on iOS, contacts, PDF output and project journals; human knowledge-work UI plus CLI/MCP/API | A universal tool launcher, a duplicate agent-memory store, credential cryptography or Mac hardware control |
 | **Symaira Brain** (`symbrain`) | Portable agent context, memory/entities, skills, harness profiles/inventory, exposure control, audit and the separate guard layer; human administration UI and CLI; optional Browse, Operate and Scope modules | Document ownership, an autonomous replacement for every harness, compulsory system-wide mediation or credential master-key storage |
 | **Symaira Cockpit** (`symcockpit`) | Mac hardware/system tuning: thermals, power, display and sensors/HUD (formerly Tune) | Long-term ownership of Operate, Scope or harness-configuration inventory |
 | **Symaira Vault** (`symvault`) | Independently usable credential CLI/service, encryption/storage, unlock, authorization, grants, credential execution and recovery | A separate long-term general-purpose management app or a dependency on Brain to use credentials |
@@ -18,7 +18,7 @@ The canonical workspace text is `docs/product-boundaries.md`. Repository-local c
 | **Symaira Fritz** (`symfritz`) | FRITZ!Box/network-device administration | Generic agent context or a mandatory Brain dependency |
 | **Symaira Media** (`symmedia`) | Self-hosted media platform any household can run: acquisition, library, streaming server, web administration, accounts and invitations, CLI/MCP; App Store client apps for iOS, iPadOS, macOS and tvOS; absorbs Symaira Watch (`symaira-watch`) | Documents, agent memory, credential master-key storage, hosted content, bundled indexer or source lists |
 
-Desktop and Brain are the two primary products. Cockpit, EraseMe, Fritz and Media remain specialized products. Browse, Operate and Scope are optional Brain capabilities, not additional primary products. Vault remains an independently distributable technical service/CLI; its normal graphical management experience belongs to Brain. CoreKit and AppKit are infrastructure libraries, not user-facing applications.
+Desktop and Brain are the two primary products. Cockpit, EraseMe, Fritz and Media remain specialized products. Browse, Operate and Scope are optional Brain capabilities, not additional primary products. Vault remains an independently distributable technical service/CLI; its normal graphical management experience belongs to Brain. CoreKit, including its Swift AppKit package, is an infrastructure library, not a user-facing application.
 
 A human-facing UI and an agent-facing API may coexist in any product. Data ownership follows the domain, not the caller. Desktop remains usable without Brain; Brain remains usable without Desktop, Browse, Operate, Scope or Vault.
 
@@ -54,6 +54,8 @@ Separate processes are defense-in-depth, not complete isolation against a compro
 
 Desktop owns original work artifacts; Brain may store explicitly promoted, provenance-bearing context and references, not a second independently editable document source of truth. Define deletion/refresh behavior for derived context. Secret values must not enter either product's general search index or durable memory.
 
+Voice input is a human-initiated input surface owned by Desktop, not an automation capability. On macOS it is hosted in the Meet agent; on iOS, audio capture and recognition run in the Desktop app and the keyboard extension only sends start and stop requests and inserts returned text. It records only while the user holds or has explicitly toggled the dictation control, keeps no audio or text history unless the user enables it, and respects secure text entry. No raw audio crosses an app group. The permissions needed to insert text stay confined to the Meet agent and the Desktop keyboard extension; no MCP tool, agent profile or Brain module may trigger dictation or text insertion. Dictation settings live as Markdown in the document vault. Optional post-processing by an external model requires a separate, visible opt-in per destination.
+
 Cockpit remains the independent hardware/system-tuning product: thermals, power, display, sensors and HUD. Its functionality does not require Brain or the optional Scope module. Scope owns ports, containers, daemons, local service health and machine diagnostics in Brain; harness inventory remains Brain-owned, not duplicated. Neither Scope nor Operate transfers hardware-control ownership or Cockpit privileged helpers into Brain. Shared facts must use a bounded interface rather than duplicate a domain store.
 
 The sole target product name is **Symaira Cockpit**, with `symcockpit` as CLI and `symaira-cockpit` as repository. Tune/SymTune ceases to be a separate product or visible module name. The redundant `symcockpit tune …` layer is retired toward direct Cockpit commands only through a reviewed command map with collision checks, help/completion/MCP tests and a documented deprecation window. Existing spellings below describe current implementation, not new target commands. Internal `SymTune*` targets, source paths and legacy identifiers are migration work, not a permanent naming exception; preserve compatibility until their consumers are migrated. Do not cosmetically rename shipped helper, signing, Keychain, bundle or data identifiers without an explicit tested migration and rollback.
@@ -62,11 +64,11 @@ Keep browser session/profile data and optional activity episodes separate from l
 
 ## 5. Shared libraries and contracts
 
-CoreKit and AppKit remain separate repositories with independent versioning. CoreKit owns shared backend infrastructure and language-neutral wire fixtures; AppKit owns genuinely shared Swift/native foundations. The Go-to-Rust transition does not change domain ownership. Read actual manifests for implementation language and supported platforms; do not treat historical Go-only descriptions as perpetual requirements.
+CoreKit is the single shared-library repository. It owns shared backend infrastructure (Rust crates), the language-neutral wire fixtures and, since revision 6, the genuinely shared Swift/native foundations formerly kept in the separate `symaira-appkit` repository. That Swift package keeps the name AppKit, lives under `swift/` and is resolved from the CoreKit repository root; Rust crates and Swift products share one tag series, while every consumer still pins its own exact revision or version. The Go-to-Rust transition does not change domain ownership. Read actual manifests for implementation language and supported platforms; do not treat historical Go-only descriptions as perpetual requirements.
 
 A module belongs in a kit only when at least two real consumers need the same semantics and coordination costs are justified. No credential cryptography, document business rules, browser engine, hardware control or agent policy is moved to a kit merely to bypass a product boundary. Product-specific views, models and IPC adapters remain product-owned.
 
-Use immutable dependency pins and explicit compatibility tests. Cross-language schema fixtures have one authoritative source and verified snapshots; no compulsory cross-language release version. No new shared service, account, billing system or commercial edition is introduced.
+Use immutable dependency pins and explicit compatibility tests. Cross-language schema fixtures have one authoritative source (CoreKit `contracts/`); CoreKit's Rust and Swift tests read it directly and other repositories use verified snapshots. A shared repository tag does not force Rust and Swift consumers to move their pins together. No new shared service, account, billing system or commercial edition is introduced.
 
 ## 6. Standalone-first and failure policy
 
@@ -102,8 +104,12 @@ Do not rename shipped bundle identifiers, Keychain namespaces, `symvault://` ref
 
 ## 9. Supersession
 
-This contract supersedes conflicting product-placement/UI rules in the workspace `repo-konsolidierung.md` (Browse independence, Operate/Scope-in-Cockpit, separate credential-product UI), `desk-brain-vault-merge-design.md` (separate management product), and the earlier architecture consultation (Operate retirement recommendation). It retains Desktop/Brain separation, independent credential execution, independent Cockpit hardware/system tuning, and separate CoreKit/AppKit.
+This contract supersedes conflicting product-placement/UI rules in the workspace `repo-konsolidierung.md` (Browse independence, Operate/Scope-in-Cockpit, separate credential-product UI), `desk-brain-vault-merge-design.md` (separate management product), and the earlier architecture consultation (Operate retirement recommendation). It retains Desktop/Brain separation, independent credential execution, independent Cockpit hardware/system tuning, and, until revision 6, separate CoreKit/AppKit repositories.
 
 Brain ADR 0001 remains applicable to controlled MCP forwarding and the distinction between exposure policy and call-time guard enforcement. Its historical state-core-only examples do not prohibit the optional modules accepted here. Existing language-port parity, safety and data contracts remain in force; historical rationale is preserved with supersession notices, not rewritten into fictitious history.
 
 Revision 5 (2026-11-09, Daniel) adds Symaira Media as a specialized product after its approved architecture plan (`symaira-media/docs/`, decisions D04 and D33). `symaira-watch` is absorbed into Media and is archived after Media milestone M4. No other ownership changes.
+
+Revision 6 (2026-11-10, Daniel) merges the `symaira-appkit` repository into `symaira-corekit` with its full history (CoreKit ADR 0006). AppKit's module rules (two genuine consumers, no product-domain views, no third-party dependencies) are unchanged; Swift consumers switch their exact pin from the archived AppKit repository to the CoreKit repository. No other ownership changes.
+
+Revision 7 (2026-11-18, Daniel) adds voice input (push-to-talk dictation into the focused application) to Desktop, hosted in the Meet agent on macOS and in the Desktop app with its keyboard extension on iOS. It is a human input surface, not an Operate capability, and grants agents no insertion rights. No other ownership changes.
