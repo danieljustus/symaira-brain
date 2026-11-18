@@ -12,6 +12,8 @@ use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
 use serde_json::value::RawValue;
 
+use crate::locate::Search;
+
 const PROTOCOL_VERSION: &str = "2024-11-05";
 /// MCP protocol revisions supported by this broker.
 pub const SUPPORTED_PROTOCOL_VERSIONS: &[&str] = &["2024-11-05", "2025-03-26", "2025-06-18"];
@@ -69,8 +71,10 @@ impl From<io::Error> for BrokerError {
     }
 }
 
-/// Resolves the child binary path: explicit override wins, then the managed
-/// directory (`~/.symaira/bin`), then PATH.
+/// Resolves the child binary path: explicit override wins. The bundled
+/// workers (`symbrowse`, `symoperate`, `symscope`) are then looked up next to
+/// the running executable (symlinks resolved); every child falls back to the
+/// managed directory (`~/.symaira/bin`), then PATH.
 ///
 /// # Errors
 /// Returns an error when the binary is not found or not executable.
@@ -93,14 +97,10 @@ pub fn discover(binary_name: &str, override_path: &str) -> Result<String, Broker
         )));
     }
 
-    if let Ok(home) = std::env::var("HOME") {
-        let managed_dir = std::path::PathBuf::from(home).join(".symaira").join("bin");
-        if let Some(managed) = find_in_dir(&managed_dir, binary_name) {
-            return Ok(managed.to_string_lossy().to_string());
-        }
-    }
-
-    which(binary_name).ok_or_else(|| {
+    Search::from_environment()
+        .find(binary_name)
+        .map(|path| path.to_string_lossy().to_string())
+        .ok_or_else(|| {
         let path_var = "$PATH";
         BrokerError::Io(io::Error::new(
             io::ErrorKind::NotFound,
@@ -122,7 +122,7 @@ fn is_usable_executable(path: &std::path::Path) -> bool {
     }
 }
 
-fn find_in_dir(directory: &std::path::Path, binary: &str) -> Option<std::path::PathBuf> {
+pub(crate) fn find_in_dir(directory: &std::path::Path, binary: &str) -> Option<std::path::PathBuf> {
     executable_names(binary)
         .into_iter()
         .map(|name| directory.join(name))
@@ -131,14 +131,6 @@ fn find_in_dir(directory: &std::path::Path, binary: &str) -> Option<std::path::P
 
 fn executable_names(binary: &str) -> Vec<OsString> {
     vec![OsString::from(binary)]
-}
-
-fn which(binary: &str) -> Option<String> {
-    std::env::var_os("PATH").and_then(|paths| {
-        std::env::split_paths(&paths)
-            .find_map(|dir| find_in_dir(&dir, binary))
-            .map(|path| path.to_string_lossy().to_string())
-    })
 }
 
 #[derive(Debug, Clone, Serialize)]

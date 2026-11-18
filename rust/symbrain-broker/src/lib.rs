@@ -3,6 +3,7 @@
 #![deny(unsafe_code)]
 
 mod client;
+mod locate;
 mod server;
 
 pub use client::{
