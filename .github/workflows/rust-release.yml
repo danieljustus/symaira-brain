@@ -1,5 +1,6 @@
 # Unpublished release candidate. Builds the six supported release archives
-# (symbrain and symbrowse on each of the three native targets) exactly like
+# (symbrain, bundling its workers, and symbrowse on each of the three native
+# targets) exactly like
 # release.yml, verifies them against the release archive contract and
 # smoke-tests each one on its native platform. It never
 # creates a tag, release or tap update and never signs; signing and publication
@@ -54,7 +55,8 @@ jobs:
           # Ubuntu 22.04 keeps the glibc floor at 2.35 for the dynamically linked CLI.
           - { os: linux, arch: amd64, runner: ubuntu-22.04 }
           - { os: linux, arch: arm64, runner: ubuntu-22.04-arm }
-          - { os: darwin, arch: arm64, runner: macos-15 }
+          # macos-26: operate/ and scope/ need Swift 6.2 and the macOS 26 SDK (as in ci.yml).
+          - { os: darwin, arch: arm64, runner: macos-26 }
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     defaults:
@@ -96,12 +98,29 @@ jobs:
           SYMBROWSE_VERSION: ${{ env.VERSION }}
         run: cargo auditable build --locked --release -p symbrowse-cli
 
+      # Operate and Scope are macOS-only SwiftPM packages; the Linux legs skip
+      # them. The Rust deployment floor must not leak into the Swift packages.
+      - name: Build symoperate and symscope
+        if: matrix.os == 'darwin'
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          for module in operate scope; do
+            env -u MACOSX_DEPLOYMENT_TARGET swift build -c release --package-path "$module" \
+              --scratch-path "$RUNNER_TEMP/swift-$module"
+          done
+
       - name: Package archives
         run: |
           set -euo pipefail
+          extra=(--extra-binary "symbrowse=browse/target/release/symbrowse$EXE")
+          if [ "${{ matrix.os }}" = darwin ]; then
+            extra+=(--extra-binary "symoperate=$RUNNER_TEMP/swift-operate/release/symoperate"
+                    --extra-binary "symscope=$RUNNER_TEMP/swift-scope/release/symscope")
+          fi
           python scripts/rust-release/package.py archive --version "$VERSION" \
             --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" \
-            --rust "target/release/symbrain$EXE" --out "$RUNNER_TEMP/dist"
+            --rust "target/release/symbrain$EXE" --out "$RUNNER_TEMP/dist" "${extra[@]}"
           python scripts/rust-release/package.py archive --version "$VERSION" \
             --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" --product symbrowse \
             --rust "browse/target/release/symbrowse$EXE" --out "$RUNNER_TEMP/dist"

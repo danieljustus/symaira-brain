@@ -1,7 +1,9 @@
 name: Release
 
-# A v* tag builds the Rust CLIs (symbrain and the optional symbrowse worker from
-# browse/) on the three supported native targets, signs and notarizes the macOS
+# A v* tag builds the Rust CLIs (symbrain and the symbrowse worker from browse/)
+# and, on macOS, the SwiftPM workers symoperate and symscope on the three
+# supported native targets. The symbrain archive is the release bundle: it holds
+# every worker built for its platform. The workflow signs and notarizes the macOS
 # binaries, signs every asset with cosign, publishes the GitHub release and the
 # Homebrew formula, then the GUI DMG and cask. Both products ship as
 # <product>_<version>_<os>_<arch>.tar.gz with an SBOM, signature and
@@ -60,7 +62,8 @@ jobs:
           # Ubuntu 22.04 keeps the glibc floor at 2.35 for the dynamically linked CLI.
           - { os: linux, arch: amd64, runner: ubuntu-22.04 }
           - { os: linux, arch: arm64, runner: ubuntu-22.04-arm }
-          - { os: darwin, arch: arm64, runner: macos-15 }
+          # macos-26: operate/ and scope/ need Swift 6.2 and the macOS 26 SDK (as in ci.yml).
+          - { os: darwin, arch: arm64, runner: macos-26 }
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     defaults:
@@ -105,12 +108,30 @@ jobs:
         working-directory: browse
         run: SYMBROWSE_VERSION="$VERSION" cargo auditable build --locked --release -p symbrowse-cli
 
+      # Operate and Scope are macOS-only SwiftPM packages (local dependency on
+      # history/); the Linux legs skip them. MACOSX_DEPLOYMENT_TARGET is the Rust
+      # floor and must not leak into the Swift packages, which declare macOS 26.
+      - name: Build symoperate and symscope
+        if: matrix.os == 'darwin'
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          for module in operate scope; do
+            env -u MACOSX_DEPLOYMENT_TARGET swift build -c release --package-path "$module" \
+              --scratch-path "$RUNNER_TEMP/swift-$module"
+          done
+
       - name: Package and smoke-test the archives
         run: |
           set -euo pipefail
+          extra=(--extra-binary "symbrowse=browse/target/release/symbrowse")
+          if [ "${{ matrix.os }}" = darwin ]; then
+            extra+=(--extra-binary "symoperate=$RUNNER_TEMP/swift-operate/release/symoperate"
+                    --extra-binary "symscope=$RUNNER_TEMP/swift-scope/release/symscope")
+          fi
           python scripts/rust-release/package.py archive --version "$VERSION" \
             --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" \
-            --rust target/release/symbrain --out "$RUNNER_TEMP/dist"
+            --rust target/release/symbrain --out "$RUNNER_TEMP/dist" "${extra[@]}"
           python scripts/rust-release/package.py archive --version "$VERSION" \
             --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" --product symbrowse \
             --rust browse/target/release/symbrowse --out "$RUNNER_TEMP/dist"
@@ -232,23 +253,31 @@ jobs:
           echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
           export API_KEY_PATH
           dist="$RUNNER_TEMP/dist"
-          # product:code-signing identifier; each darwin archive is unpacked,
-          # its binary signed and notarized, and the archive rebuilt.
-          for entry in symbrain:com.symaira.brain.cli symbrowse:com.symaira.browse.cli; do
-            product="${entry%%:*}"
+          # The symbrain archive carries every darwin binary; each is signed and
+          # notarized once (binary:code-signing identifier), then both darwin
+          # archives are rebuilt from the signed files. The standalone symbrowse
+          # archive reuses the signed symbrowse of the bundle.
+          work="$RUNNER_TEMP/darwin-arm64"
+          mkdir -p "$work"
+          tar -xzf "$dist/symbrain_${VERSION}_darwin_arm64.tar.gz" -C "$work" \
+            symbrain symbrowse symoperate symscope
+          for entry in symbrain:com.symaira.brain.cli symbrowse:com.symaira.browse.cli \
+                       symoperate:com.symaira.operate.cli symscope:com.symaira.scope.cli; do
+            binary="${entry%%:*}"
             identifier="${entry#*:}"
-            archive="$dist/${product}_${VERSION}_darwin_arm64.tar.gz"
-            work="$RUNNER_TEMP/darwin-arm64-$product"
-            mkdir -p "$work"
-            tar -xzf "$archive" -C "$work"
             codesign --force --options runtime --timestamp --identifier "$identifier" \
-              --sign "$CODESIGN_IDENTITY" "$work/$product"
+              --sign "$CODESIGN_IDENTITY" "$work/$binary"
             BIN_IDENTIFIER="$identifier" bash scripts/notarize-and-verify.sh \
-              "$work/$product" bin "$RUNNER_TEMP/notary-darwin-arm64-$product"
-            rm "$archive"
-            python scripts/rust-release/package.py archive --version "$VERSION" --os darwin --arch arm64 \
-              --product "$product" --rust "$work/$product" --out "$dist"
+              "$work/$binary" bin "$RUNNER_TEMP/notary-darwin-arm64-$binary"
           done
+          rm "$dist/symbrain_${VERSION}_darwin_arm64.tar.gz" "$dist/symbrowse_${VERSION}_darwin_arm64.tar.gz"
+          python scripts/rust-release/package.py archive --version "$VERSION" --os darwin --arch arm64 \
+            --rust "$work/symbrain" --out "$dist" \
+            --extra-binary "symbrowse=$work/symbrowse" \
+            --extra-binary "symoperate=$work/symoperate" \
+            --extra-binary "symscope=$work/symscope"
+          python scripts/rust-release/package.py archive --version "$VERSION" --os darwin --arch arm64 \
+            --product symbrowse --rust "$work/symbrowse" --out "$dist"
           python scripts/rust-release/package.py checksums --dir "$dist"
           python scripts/rust-release/package.py verify --version "$VERSION" --dir "$dist"
 
