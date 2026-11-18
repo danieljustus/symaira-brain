@@ -29,7 +29,7 @@ gh workflow run rust-release.yml --ref main   # unpublished candidate
 | `package.py checksums` | `checksums.txt` in `sha256sum` format. |
 | `package.py verify` | Release contract: exactly the six archives (both products on all three platforms), exact members and modes (the symbrain archive including its bundled workers per platform), documentation identical to the tree, matching checksums. |
 | `smoke.py` | Native smoke test of one archive (`--product`): no Go fallback, `version`, `help` and native flag validation; for the symbrain archive also `version` of every bundled worker. |
-| `manifests.py` | Homebrew formula (`Formula/symbrain.rb`) from a `checksums.txt`; it installs every binary of the platform's symbrain archive (macOS four, Linux two). |
+| `manifests.py` | Homebrew formula (`Formula/symbrain.rb`) from a `checksums.txt`; it installs every binary of the platform's symbrain archive (macOS four, Linux two), declares `conflicts_with` the standalone `symbrowse` formula, and also renders `Formula/symbrowse.rb`, a disabled stub that points remaining users to symbrain (the release workflow commits both files together). |
 
 ## Verifying a release
 

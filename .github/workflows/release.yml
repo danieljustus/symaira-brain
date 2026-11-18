@@ -346,10 +346,14 @@ jobs:
           git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/danieljustus/homebrew-tap.git" "$tap"
           mkdir -p "$tap/Formula"
           cp "$RUNNER_TEMP/manifests/symbrain.rb" "$tap/Formula/symbrain.rb"
+          # symbrowse.rb is the disabled stub that points the retired standalone
+          # formula at symbrain; both land in the same commit so the tap never
+          # holds a symbrain formula that conflicts with an installable symbrowse.
+          cp "$RUNNER_TEMP/manifests/symbrowse.rb" "$tap/Formula/symbrowse.rb"
           cd "$tap"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Formula/symbrain.rb
+          git add Formula/symbrain.rb Formula/symbrowse.rb
           if git diff --cached --quiet; then
             echo "Formula already current"
             exit 0
