@@ -110,5 +110,59 @@ class ReleaseVerifierTests(unittest.TestCase):
         self.assertEqual(verify_release.verify_tap_links(formula, cask, manifest), before)
 
 
+    def test_bundled_symbrain_archives_hold_exactly_the_members_package_py_enforces(self) -> None:
+        docs = ["AGENTS.md", "LICENSE", "README.md"]
+        cases = {
+            "symbrain_0.17.0_darwin_arm64.tar.gz": ["symbrain", "symbrowse", "symoperate", "symscope"],
+            "symbrain_0.17.0_linux_amd64.tar.gz": ["symbrain", "symbrowse"],
+            "symbrain_0.17.0_linux_arm64.tar.gz": ["symbrain", "symbrowse"],
+            "symbrowse_0.17.0_darwin_arm64.tar.gz": ["symbrowse"],
+            "symbrowse_0.17.0_linux_amd64.tar.gz": ["symbrowse"],
+        }
+        for name, binaries in cases.items():
+            with self.subTest(name=name):
+                verify_release.verify_archive_members(name, docs + binaries, bundled=True)
+
+    def test_bundle_member_set_is_the_package_py_definition(self) -> None:
+        package = verify_release.package
+        for goos in ("darwin", "linux"):
+            for product in ("symbrain", "symbrowse"):
+                name = f"{product}_1.0.0_{goos}_arm64.tar.gz"
+                self.assertEqual(verify_release.expected_archive_members(name, bundled=True),
+                                 package.expected_members(product, goos))
+
+    def test_partial_or_surplus_bundles_are_rejected(self) -> None:
+        docs = ["AGENTS.md", "LICENSE", "README.md"]
+        bad = {
+            "symbrain_0.17.0_darwin_arm64.tar.gz": ["symbrain", "symbrowse", "symoperate"],
+            "symbrain_0.17.0_darwin_arm64.tar.gz ": ["symbrain"],
+            "symbrain_0.17.0_linux_amd64.tar.gz": ["symbrain"],
+            "symbrain_0.17.0_linux_amd64.tar.gz  ": ["symbrain", "symbrowse", "symscope"],
+            "symbrowse_0.17.0_linux_amd64.tar.gz": ["symbrowse", "symbrain"],
+        }
+        for name, binaries in bad.items():
+            with self.subTest(name=name, binaries=binaries):
+                with self.assertRaisesRegex(SystemExit, "unexpected archive contents"):
+                    verify_release.verify_archive_members(name.strip(), docs + binaries, bundled=True)
+        with self.assertRaisesRegex(SystemExit, "duplicate archive entries"):
+            verify_release.verify_archive_members("symbrain_0.17.0_linux_amd64.tar.gz",
+                                                  docs + ["symbrain", "symbrowse", "symbrowse"], bundled=True)
+
+    def test_historical_single_binary_archives_still_verify_without_the_bundle_flag(self) -> None:
+        docs = ["AGENTS.md", "LICENSE", "README.md"]
+        verify_release.verify_archive_members("symbrain_0.11.0_darwin_arm64.tar.gz", docs + ["symbrain"], bundled=False)
+        verify_release.verify_archive_members("symbrain_0.11.0_windows_amd64.zip", docs + ["symbrain.exe"], bundled=False)
+        with self.assertRaisesRegex(SystemExit, "unexpected archive contents"):
+            verify_release.verify_archive_members("symbrain_0.17.0_linux_amd64.tar.gz",
+                                                  docs + ["symbrain", "symbrowse"], bundled=False)
+
+    def test_bundle_mode_comes_from_the_manifest_or_the_flag(self) -> None:
+        self.assertFalse(verify_release.is_bundled({}, False))
+        self.assertTrue(verify_release.is_bundled({"bundled_workers": True}, False))
+        self.assertTrue(verify_release.is_bundled({}, True))
+        with self.assertRaisesRegex(SystemExit, "bundled_workers"):
+            verify_release.is_bundled({"bundled_workers": "yes"}, False)
+
+
 if __name__ == "__main__":
     unittest.main()

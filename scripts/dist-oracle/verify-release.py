@@ -18,12 +18,18 @@ import json
 import re
 import stat
 import subprocess
+import sys
 import tarfile
 import zipfile
 from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
+# The archive member contract lives in package.py (what `package.py verify`
+# enforces at release time); this verifier reuses it instead of a second list.
+sys.path.insert(0, str(HERE.parent / "rust-release"))
+import package  # noqa: E402  (scripts/rust-release/package.py)
+
 DEFAULT_MANIFEST = HERE / "fixtures" / "manifest_v0.11.0.json"
 DEFAULT_TAP_MANIFEST = HERE / "fixtures" / "tap_v0.11.0.json"
 OIDC_ISSUER = "https://token.actions.githubusercontent.com"
@@ -51,6 +57,31 @@ def archive_product(name: str) -> str:
 
 def archive_binary_name(name: str) -> str:
     return archive_product(name) + (".exe" if "_windows_" in name else "")
+
+
+def expected_archive_members(name: str, bundled: bool) -> list[str]:
+    """Member names the archive `name` must hold, sorted.
+
+    Bundled releases (symbrain carries symbrowse everywhere plus symoperate and
+    symscope on macOS) use package.expected_members. Older captures hold one
+    binary per archive next to the three documents.
+    """
+    product = archive_product(name)
+    if bundled:
+        return package.expected_members(product, name.split("_")[2])
+    return sorted([*package.DOCS, archive_binary_name(name)])
+
+
+def verify_archive_members(name: str, names: list[str], bundled: bool) -> None:
+    require(len(names) == len(set(names)), f"duplicate archive entries in {name}")
+    require(sorted(names) == expected_archive_members(name, bundled), f"unexpected archive contents in {name}: {names}")
+
+
+def is_bundled(manifest: dict, flag: bool) -> bool:
+    """Bundle mode: the `--bundled-workers` flag, else the manifest's `bundled_workers`."""
+    recorded = manifest.get("bundled_workers", False)
+    require(isinstance(recorded, bool), "manifest bundled_workers must be a boolean")
+    return flag or recorded
 
 
 def verify_tap_links(formula: str, cask: str, manifest: dict) -> tuple[int, int]:
@@ -126,6 +157,7 @@ def main() -> None:
     parser.add_argument("--cask", required=True, type=Path, help="read-only Homebrew cask file")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--tap-manifest", type=Path, default=DEFAULT_TAP_MANIFEST)
+    parser.add_argument("--bundled-workers", action="store_true", help="expect bundled symbrain archives (also set by `bundled_workers: true` in the manifest)")
     parser.add_argument("--verify-signatures", action="store_true", help="verify cosign signatures, certificate identity, issuer, and Rekor inclusion")
     parser.add_argument("--verify-sboms", action="store_true", help="parse each SBOM with the syft CLI")
     args = parser.parse_args()
@@ -179,12 +211,10 @@ def main() -> None:
         print(f"ok: {len(signed)} cosign signatures, workflow identity, OIDC issuer, and transparency proofs")
 
     archive_names = {name for name in assets if name.endswith((".tar.gz", ".zip"))}
+    bundled = is_bundled(manifest, args.bundled_workers)
     for name in sorted(archive_names):
-        names = archive_file_names(args.assets, name)
-        binary = archive_binary_name(name)
-        require(len(names) == len(set(names)), f"duplicate archive entries in {name}")
-        require(set(names) == {"AGENTS.md", "LICENSE", "README.md", binary}, f"unexpected archive contents in {name}: {names}")
-    print(f"ok: {len(archive_names)} archive file sets and binary names")
+        verify_archive_members(name, archive_file_names(args.assets, name), bundled)
+    print(f"ok: {len(archive_names)} archive file sets and binary names" + (" (bundled workers)" if bundled else ""))
 
     sboms = sorted(name for name in assets if name.endswith(".sbom.json"))
     for name in sboms:
