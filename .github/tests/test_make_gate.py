@@ -114,7 +114,19 @@ class GoFreeGate(unittest.TestCase):
 class DependencyPolicy(unittest.TestCase):
     def test_rejects_unknown_sources_and_ignored_advisories(self) -> None:
         policy = tomllib.loads((ROOT / "deny.toml").read_text())
-        self.assertEqual(policy.get("advisories", {}).get("ignore", []), [], "dependency gate must not silently ignore advisories")
+        # Every ignore must be explicit: an object with an id and a reason that
+        # names the tracking issue, mirrored in .cargo/audit.toml for cargo-audit.
+        ignores = policy.get("advisories", {}).get("ignore", [])
+        for entry in ignores:
+            self.assertIsInstance(entry, dict, "advisory ignores need an id and a reason")
+            self.assertTrue(entry.get("reason", "").strip(), f"{entry} lacks a reason")
+            self.assertRegex(entry["reason"], r"#\d+", f"{entry['id']} must name its tracking issue")
+        audit = tomllib.loads((ROOT / ".cargo/audit.toml").read_text())
+        self.assertEqual(
+            sorted(e["id"] for e in ignores),
+            sorted(audit.get("advisories", {}).get("ignore", [])),
+            "deny.toml and .cargo/audit.toml must ignore the same advisories",
+        )
         self.assertTrue(policy.get("licenses", {}).get("allow"), "dependency gate requires an explicit license allowlist")
         self.assertEqual(policy["sources"]["unknown-registry"], "deny")
         self.assertEqual(policy["sources"]["unknown-git"], "deny")

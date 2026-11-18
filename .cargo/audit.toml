@@ -1,0 +1,8 @@
+# cargo-audit policy for the root workspace (`make rust-audit`, `make rust-check`).
+# Keep this list identical to [advisories].ignore in deny.toml.
+[advisories]
+ignore = [
+    # RUSTSEC-2026-0543: `chrono` is unmaintained and no fixed version exists.
+    # Tracked in issue #1091; remove this entry when chrono is migrated to `time`.
+    "RUSTSEC-2026-0543",
+]

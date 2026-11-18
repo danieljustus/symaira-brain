@@ -2,7 +2,12 @@
 all-features = true
 
 [advisories]
-ignore = []
+ignore = [
+    # RUSTSEC-2026-0543: `chrono` is unmaintained and no fixed version exists.
+    # Tracked in issue #1091; remove this entry when chrono is migrated to `time`.
+    # Keep in sync with .cargo/audit.toml.
+    { id = "RUSTSEC-2026-0543", reason = "chrono unmaintained, no fixed version; migrate to time (#1091)" },
+]
 
 [licenses]
 confidence-threshold = 0.8
