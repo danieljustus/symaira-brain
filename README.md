@@ -1,6 +1,6 @@
 # Symaira Brain
 
-> **Current product state — source/consumer cutover completed 2026-09-13:** Brain is the primary agent-context/control product and owns the optional Browse, Operate and Scope modules. Their sources are in this repository, direct managed binaries are verified, `symaira-browse` is archived, and Cockpit is tune-only. The separate `symvault` service remains independently usable and its management-UI replacement is still a separate gate. No signed Brain-built module release or package-manager replacement has shipped. See [PB-2026-09-09](docs/adr/0002-product-boundaries.md).
+> **Current product state — source/consumer cutover completed 2026-09-13:** Brain is the primary agent-context/control product and owns the optional Browse, Operate and Scope modules. Their sources are in this repository, direct managed binaries are verified, `symaira-browse` is archived, and Cockpit is tune-only. The separate `symvault` service remains independently usable and its management-UI replacement is still a separate gate. No signed Brain-built module release or package-manager replacement has shipped. See [PB-2026-09-09](docs/adr/0002-product-boundaries.md). From the next release on, every Brain release ships `symbrowse` (and, on macOS, `symoperate` and `symscope`) in the same archive as `symbrain` and finds them next to its own executable before searching `PATH`, so these workers no longer need a separate install.
 
 [![CI](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/danieljustus/symaira-brain?label=Release)](https://github.com/danieljustus/symaira-brain/releases/latest)
@@ -307,7 +307,7 @@ typically exposes nothing.
 [PB-2026-09-09](docs/adr/0002-product-boundaries.md) makes Browse an optional Brain
 module — Symaira's own MCP server, not a third-party foreign one, but wired
 through the same foreign-server mechanism above (`browse` is not one of the
-four reserved core aliases). Nothing installs or activates it by default:
+four reserved core aliases). Nothing installs or activates it by default. From the next release on, the `symbrowse` binary ships in the same archive as `symbrain` (the same holds for `symoperate` and `symscope` on macOS); enabling and configuring the module stays explicit:
 
 ```bash
 symbrain config set modules.browse true   # opt in to installing it at all
