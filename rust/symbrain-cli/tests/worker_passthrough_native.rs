@@ -28,6 +28,8 @@ fn symbrain(root: &Path, path_dir: &Path, args: &[&str], stdin: &str, exit: i32)
     let mut child = Command::new(env!("CARGO_BIN_EXE_symbrain"))
         .args(args)
         .env_clear()
+        // Keep the coverage profile destination; a cleared environment drops it.
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .current_dir(root)
         .env("HOME", root.join("home"))
         .env("XDG_CONFIG_HOME", root.join("config"))
@@ -101,6 +103,8 @@ fn operate_and_scope_run_their_own_workers_on_macos() {
     }
 }
 
+// Off macOS only `browse` remains in the table below.
+#[allow(clippy::single_element_loop)]
 #[test]
 fn missing_worker_is_one_stderr_line_and_exit_one() {
     for (command, worker) in [
@@ -158,6 +162,8 @@ fn worker_next_to_the_symbrain_executable_wins_over_an_empty_path() {
     let status = Command::new(&relocated)
         .args(["browse", "hello"])
         .env_clear()
+        // Keep the coverage profile destination; a cleared environment drops it.
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .env("HOME", root.path().join("home"))
         .env("PATH", &empty)
         .env("FAKE_WORKER_LOG", root.path().join("args.log"))

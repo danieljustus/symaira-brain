@@ -47,6 +47,8 @@ impl Home {
         Command::new(binary)
             .args(args)
             .env_clear()
+            // Keep the coverage profile destination; a cleared environment drops it.
+            .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
             .envs(coverage::profile_environment())
             .env("HOME", self.root.path().join("home"))
             .env("XDG_CONFIG_HOME", self.root.path().join("config"))

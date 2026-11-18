@@ -10,6 +10,8 @@ fn symbrain(root: &std::path::Path, args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_symbrain"))
         .args(args)
         .env_clear()
+        // Keep the coverage profile destination; a cleared environment drops it.
+        .envs(std::env::var_os("LLVM_PROFILE_FILE").map(|path| ("LLVM_PROFILE_FILE", path)))
         .envs(coverage::profile_environment())
         .env("HOME", root.join("home"))
         .env("XDG_CONFIG_HOME", root.join("config"))
