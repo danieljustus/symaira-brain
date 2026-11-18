@@ -55,7 +55,11 @@ pub(crate) fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Wr
     match subcommand.to_str() {
         Some("path") => run_path(sub_args, stdout),
         Some("get") => symbrain_core::config::run_config_get(sub_args, stdout, stderr),
-        Some("set") => symbrain_core::config::run_config_set(sub_args, stdout, stderr),
+        Some("set") => {
+            let code = symbrain_core::config::run_config_set(sub_args, stdout, stderr);
+            note_deprecated_module_key(sub_args, code, stderr);
+            code
+        }
         _ => {
             let _ = writeln!(
                 stderr,
@@ -64,6 +68,20 @@ pub(crate) fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Wr
             );
             exit::NO_INPUT
         }
+    }
+}
+
+/// Browse, Operate and Scope ship with symbrain, so `modules.*` still stores
+/// but no longer selects anything; say so after a successful set.
+fn note_deprecated_module_key(args: &[OsString], code: u8, stderr: &mut dyn Write) {
+    let Some(key) = args.first().and_then(|key| key.to_str()) else {
+        return;
+    };
+    if code == exit::OK && matches!(key, "modules.browse" | "modules.operate" | "modules.scope") {
+        let _ = writeln!(
+            stderr,
+            "symbrain config: {key} is deprecated and has no effect: browse, operate and scope ship with symbrain"
+        );
     }
 }
 
