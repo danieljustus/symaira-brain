@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/danieljustus/symaira-corekit.git",
       "state" : {
-        "revision" : "a5b0c631b97d4472f7ea4eb145f67468f366340e",
-        "version" : "0.23.0"
+        "revision" : "8e056c9ad76d5b6ea0f0f8b63370760df7216819",
+        "version" : "0.23.1"
       }
     }
   ],
