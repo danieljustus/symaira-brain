@@ -348,52 +348,18 @@ fn build_backends(
     }
 
     for alias in profile.server_aliases() {
-        if symbrain_policy::is_core_alias(&alias) {
-            continue;
-        }
         let config = profile.server(&alias);
-        if !config.enabled {
+        // The workers that ship beside symbrain are gateway backends of their
+        // own aliases: a profile that enables the alias starts the worker, one
+        // that does not starts nothing. The policy still decides which of the
+        // worker's tools are exposed (operate/scope are default-deny).
+        if let Some(worker) = BUNDLED_WORKERS.iter().find(|worker| worker.alias == alias) {
+            if config.enabled {
+                start_worker(worker, stderr, managed, backends);
+            }
             continue;
         }
-        // Optional Cockpit modules are independently gated by global config
-        // and profile opt-in. They are never treated as foreign commands,
-        // and their public stdio entrypoints are the unified dispatcher
-        // subcommands verified in symaira-cockpit's source.
-        if alias == SERVER_OPERATE || alias == SERVER_SCOPE {
-            if !optional_module_enabled(&alias) {
-                continue;
-            }
-            let (binary, binary_env, command) = if alias == SERVER_OPERATE {
-                (OPERATE_BINARY, OPERATE_BINARY_ENV, "operate")
-            } else {
-                (SCOPE_BINARY, SCOPE_BINARY_ENV, "scope")
-            };
-            let override_path = env::var(binary_env)
-                .ok()
-                .filter(|value| !value.is_empty())
-                .or_else(|| configured_module_path(&alias));
-            let discovered = if let Some(path) = override_path.as_deref() {
-                symbrain_broker::discover(binary, path).map(|path| (path, false))
-            } else {
-                symbrain_broker::discover(binary, "")
-                    .map(|path| (path, false))
-                    .or_else(|_| {
-                        symbrain_broker::discover("symcockpit", "").map(|path| (path, true))
-                    })
-            };
-            match discovered {
-                Ok((path, legacy)) => {
-                    let args = if legacy {
-                        vec![command.to_string(), "serve".to_string()]
-                    } else {
-                        vec!["serve".to_string()]
-                    };
-                    insert_managed(&alias, path, args, managed, backends);
-                }
-                Err(error) => {
-                    let _ = writeln!(stderr, "symbrain mcp: {alias}: {error}");
-                }
-            }
+        if symbrain_policy::is_core_alias(&alias) || !config.enabled {
             continue;
         }
         if !config.url.is_empty() && config.command.is_empty() {
@@ -427,30 +393,53 @@ fn build_backends(
     }
 }
 
-fn optional_module_enabled(alias: &str) -> bool {
-    let key = match alias {
-        SERVER_OPERATE => "operate",
-        SERVER_SCOPE => "scope",
-        _ => return false,
-    };
-    if let Some(value) = std::env::var_os(format!("SYMBRAIN_MODULES_{}", key.to_uppercase())) {
-        return matches!(
-            value.to_string_lossy().as_ref(),
-            "1" | "t" | "T" | "TRUE" | "True" | "true"
-        );
+/// A built-in worker served as the stdio backend of one profile alias.
+struct BundledWorker {
+    alias: &'static str,
+    binary: &'static str,
+    /// Environment override for the binary path; wins over `servers.<alias>.binary_path`.
+    binary_env: &'static str,
+    /// The worker's stdio MCP entry command (`symoperate serve`, `symscope serve`).
+    args: &'static [&'static str],
+}
+
+const BUNDLED_WORKERS: [BundledWorker; 2] = [
+    BundledWorker {
+        alias: SERVER_OPERATE,
+        binary: OPERATE_BINARY,
+        binary_env: OPERATE_BINARY_ENV,
+        args: &["serve"],
+    },
+    BundledWorker {
+        alias: SERVER_SCOPE,
+        binary: SCOPE_BINARY,
+        binary_env: SCOPE_BINARY_ENV,
+        args: &["serve"],
+    },
+];
+
+/// Resolves the worker (override, next to the executable, managed directory,
+/// `PATH`) and registers it as a backend. A worker that cannot be found is
+/// reported once on stderr and left out, like any other missing backend.
+fn start_worker(
+    worker: &BundledWorker,
+    stderr: &mut dyn Write,
+    managed: &mut Vec<Arc<ManagedServer>>,
+    backends: &mut BTreeMap<String, Arc<dyn GatewayBackend>>,
+) {
+    let override_path = env::var(worker.binary_env)
+        .ok()
+        .filter(|value| !value.is_empty())
+        .or_else(|| configured_module_path(worker.alias));
+    match symbrain_broker::discover(worker.binary, override_path.as_deref().unwrap_or_default()) {
+        Ok(path) => {
+            let args = worker.args.iter().map(|arg| (*arg).to_string()).collect();
+            insert_managed(worker.alias, path, args, managed, backends);
+        }
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain mcp: {}: {error}", worker.alias);
+        }
     }
-    let path = symbrain_core::xdg::config_path();
-    let Ok(contents) = std::fs::read_to_string(path) else {
-        return false;
-    };
-    let Ok(document) = contents.parse::<DocumentMut>() else {
-        return false;
-    };
-    document
-        .get("modules")
-        .and_then(|item| item.get(key))
-        .and_then(Item::as_bool)
-        .unwrap_or(false)
 }
 
 fn insert_managed(
