@@ -14,13 +14,13 @@ use symbrain_core::exit;
 use crate::passthrough;
 
 /// A built-in worker reachable through a `symbrain` subcommand.
-struct Worker {
-    command: &'static str,
-    binary: &'static str,
-    macos_only: bool,
+pub(crate) struct Worker {
+    pub(crate) command: &'static str,
+    pub(crate) binary: &'static str,
+    pub(crate) macos_only: bool,
 }
 
-const WORKERS: [Worker; 3] = [
+pub(crate) const WORKERS: [Worker; 3] = [
     Worker {
         command: "browse",
         binary: "symbrowse",

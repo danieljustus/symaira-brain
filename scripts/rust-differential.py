@@ -689,6 +689,36 @@ def map_sealed_pins(data: bytes, substitutions: list[tuple["re.Pattern[bytes]", 
     return data
 
 
+# Declared CLI additions (migration/cli-additions.md). The sealed Go transcripts
+# of the top-level usage stay byte-identical on disk; replay inserts the declared
+# command lines after the recorded `guard` line before comparing, exactly as the
+# product prints them. Only the cases below print the top-level usage, and the
+# run fails unless exactly these were rewritten, so the comparison cannot widen.
+_CLI_ADDITIONS = _REPO_ROOT / "rust/symbrain-cli/assets/cli-additions.json"
+_USAGE_HEADER = "symbrain \u2014 portable agent-context layer for AI harnesses".encode()
+_USAGE_ANCHOR = b"  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n"
+USAGE_CASES = frozenset({
+    "help", "help_long", "help_short", "no_args", "json_help",
+    "unknown_command_quoted", "unknown_fallback",
+})
+
+
+def with_cli_additions(data: bytes) -> bytes:
+    """`data` with the declared additions applied if it holds the top-level usage."""
+    if _USAGE_HEADER not in data:
+        return data
+    if data.count(_USAGE_ANCHOR) != 1:
+        raise RuntimeError("recorded usage does not hold the anchor line exactly once")
+    document = json.loads(_CLI_ADDITIONS.read_text(encoding="utf-8"))
+    if document["schema_version"] != 1:
+        raise RuntimeError("unsupported cli-additions schema_version")
+    lines = b""
+    for entry in document["additions"]:
+        note = " (macOS only)" if entry["platform"] == "macos" else ""
+        lines += f"  {entry['name']:<11} {entry['short']}{note}\n".encode()
+    return data.replace(_USAGE_ANCHOR, _USAGE_ANCHOR + lines, 1)
+
+
 def _version_without_tag(version: str) -> str:
     return version.removeprefix("v")
 
@@ -6179,6 +6209,7 @@ def main() -> int:
     RELEASE_BASE_URL = fixture_server.__enter__()
     failures: list[str] = []
     known_gaps: list[str] = []
+    usage_rewritten: set[str] = set()
     def windows_skip_reason(case: Case) -> str | None:
         if os.name != "nt":
             return None
@@ -6253,11 +6284,12 @@ def main() -> int:
                 rust_run_env = native_only_env(rust_env) if case.native else rust_env
                 if mode == "replay":
                     entry = recorded[case.name]
-                    go_result = subprocess.CompletedProcess(
-                        list(go_argv), entry["returncode"],
-                        map_sealed_pins(_unb64(entry["stdout"]), pin_substitutions),
-                        map_sealed_pins(_unb64(entry["stderr"]), pin_substitutions),
-                    )
+                    sealed_out = map_sealed_pins(_unb64(entry["stdout"]), pin_substitutions)
+                    sealed_err = map_sealed_pins(_unb64(entry["stderr"]), pin_substitutions)
+                    go_out, go_err = with_cli_additions(sealed_out), with_cli_additions(sealed_err)
+                    if (go_out, go_err) != (sealed_out, sealed_err):
+                        usage_rewritten.add(case.name)
+                    go_result = subprocess.CompletedProcess(list(go_argv), entry["returncode"], go_out, go_err)
                 else:
                     go_result = journal.run(case.name, "Go", run, go_binary, go_argv, go_env, case.stdin, case.pty)
                 if mode == "record":
@@ -6509,6 +6541,12 @@ def main() -> int:
         print("\n".join(failures), file=sys.stderr)
         return 1
     fixture_server.__exit__()
+    if mode == "replay" and not case_prefix and not excluded_prefixes and usage_rewritten != USAGE_CASES:
+        print(
+            f"FAIL: CLI additions rewrote {sorted(usage_rewritten)}, expected exactly {sorted(USAGE_CASES)}",
+            file=sys.stderr,
+        )
+        return 1
     if mode == "record":
         assert fixture_path is not None
         document = {

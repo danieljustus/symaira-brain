@@ -13,10 +13,10 @@ fn execute(args: &[&str]) -> (u8, String, String) {
 }
 
 #[test]
-fn help_matches_frozen_usage() {
+fn help_matches_frozen_usage_plus_additions() {
     let (code, stdout, stderr) = execute(&["help"]);
     assert_eq!(code, exit::OK);
-    assert_eq!(stdout, USAGE);
+    assert_eq!(stdout, cli_additions::usage());
     assert!(stderr.is_empty());
 }
 
@@ -24,7 +24,7 @@ fn help_matches_frozen_usage() {
 fn missing_command_prints_help_and_exits_usage() {
     let (code, stdout, stderr) = execute(&[]);
     assert_eq!(code, exit::USAGE);
-    assert_eq!(stdout, USAGE);
+    assert_eq!(stdout, cli_additions::usage());
     assert!(stderr.is_empty());
 }
 
@@ -150,7 +150,7 @@ fn json_help_exits_usage_with_unknown_command() {
     assert_eq!(code, exit::USAGE);
     assert!(stdout.is_empty());
     assert!(stderr.starts_with("symbrain: unknown command \"--json\"\n\n"));
-    assert!(stderr.contains(USAGE));
+    assert!(stderr.contains(cli_additions::usage()));
 }
 
 #[test]

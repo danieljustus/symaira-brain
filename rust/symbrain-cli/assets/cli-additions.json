@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "additions": [
+    {
+      "name": "browse",
+      "short": "Agent-operated browser via the built-in symbrowse worker",
+      "platform": "any"
+    },
+    {
+      "name": "operate",
+      "short": "GUI automation via the built-in symoperate worker",
+      "platform": "macos"
+    },
+    {
+      "name": "scope",
+      "short": "Local ports, containers and daemons via the built-in symscope worker",
+      "platform": "macos"
+    }
+  ]
+}

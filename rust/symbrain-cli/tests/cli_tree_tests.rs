@@ -9,6 +9,8 @@
 //! No assertions are weakened — divergences are reported with case id, expected
 //! vs actual bytes, and first differing offset.
 
+#[path = "common/cli_additions.rs"]
+mod additions;
 #[path = "common/doctor_header.rs"]
 mod doctor_header;
 
@@ -255,6 +257,29 @@ fn cli_tree_fixture_matches_native_binary() {
     let cases = load_fixture();
     assert_eq!(cases.len(), 88, "fixture must contain 88 cases");
 
+    // The recorded top-level usage gets the declared additions
+    // (migration/cli-additions.md). Exactly these cases print it; every other
+    // case is compared exactly as recorded.
+    let rewritten: Vec<&str> = cases
+        .iter()
+        .filter(|case| {
+            additions::with_additions(&case.stdout) != case.stdout
+                || additions::with_additions(&case.stderr) != case.stderr
+        })
+        .map(|case| case.id.as_str())
+        .collect();
+    assert_eq!(
+        rewritten,
+        [
+            "go --help",
+            "go -h",
+            "go help",
+            "go",
+            "go bogus",
+            "go --unknown"
+        ]
+    );
+
     let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .unwrap()
@@ -305,8 +330,9 @@ fn cli_tree_fixture_matches_native_binary() {
         let actual_stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let norm_stdout =
             normalize_stdout(&actual_stdout, root.path().to_str().unwrap(), &repo_root);
-        let expected_stdout =
-            normalize_tokenized_paths(&normalize_accepted_differences(&case.stdout));
+        let expected_stdout = normalize_tokenized_paths(&normalize_accepted_differences(
+            &additions::with_additions(&case.stdout),
+        ));
 
         if norm_stdout != expected_stdout {
             let diff = first_diff_offset(norm_stdout.as_bytes(), expected_stdout.as_bytes());
@@ -342,8 +368,9 @@ fn cli_tree_fixture_matches_native_binary() {
             root.path().to_str().unwrap(),
             &repo_root,
         ));
-        let expected_stderr =
-            normalize_tokenized_paths(&normalize_accepted_differences(&case.stderr));
+        let expected_stderr = normalize_tokenized_paths(&normalize_accepted_differences(
+            &additions::with_additions(&case.stderr),
+        ));
 
         if norm_stderr != expected_stderr {
             let diff = first_diff_offset(norm_stderr.as_bytes(), expected_stderr.as_bytes());

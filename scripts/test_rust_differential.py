@@ -59,6 +59,41 @@ class SealedPinMappingTests(unittest.TestCase):
 
 
 @unittest.skipUnless(os.name == "posix", "process groups and PTYs are POSIX-only")
+class CliAdditionsTests(unittest.TestCase):
+    """Declared CLI additions are applied to the sealed top-level usage and to nothing else."""
+
+    FIXTURES = ("darwin", "linux")
+
+    def sealed_cases(self, os_name):
+        path = DIFFERENTIAL._REPO_ROOT / f"rust/symbrain-cli/tests/fixtures/rust_differential_go.{os_name}.json"
+        return json.loads(path.read_text(encoding="utf-8"))["cases"]
+
+    def test_exactly_the_usage_cases_are_rewritten_in_every_sealed_transcript(self):
+        for os_name in self.FIXTURES:
+            rewritten = set()
+            for name, entry in self.sealed_cases(os_name).items():
+                for stream in ("stdout", "stderr"):
+                    data = DIFFERENTIAL._unb64(entry[stream])
+                    if DIFFERENTIAL.with_cli_additions(data) != data:
+                        rewritten.add(name)
+            self.assertEqual(rewritten, DIFFERENTIAL.USAGE_CASES, os_name)
+
+    def test_rewrite_inserts_only_the_declared_lines_after_the_guard_line(self):
+        sealed = DIFFERENTIAL._unb64(self.sealed_cases("linux")["help"]["stdout"])
+        added = DIFFERENTIAL.with_cli_additions(sealed)
+        declared = json.loads(DIFFERENTIAL._CLI_ADDITIONS.read_text(encoding="utf-8"))["additions"]
+        lines = [line for line in added.decode().splitlines(keepends=True) if line not in sealed.decode()]
+        self.assertEqual([line.split()[0] for line in lines], [entry["name"] for entry in declared])
+        self.assertEqual(added.replace("".join(lines).encode(), b"", 1), sealed)
+        anchor_at = added.index(DIFFERENTIAL._USAGE_ANCHOR) + len(DIFFERENTIAL._USAGE_ANCHOR)
+        self.assertTrue(added[anchor_at:].startswith(lines[0].encode()))
+
+    def test_other_text_is_untouched_and_a_missing_anchor_is_an_error(self):
+        self.assertEqual(DIFFERENTIAL.with_cli_additions(b"anything else\n"), b"anything else\n")
+        with self.assertRaises(RuntimeError):
+            DIFFERENTIAL.with_cli_additions(DIFFERENTIAL._USAGE_HEADER + b"\n")
+
+
 class ChildDeadlineTests(unittest.TestCase):
     """#946: PTY and pipe children get a real deadline and die with their whole process group."""
 
