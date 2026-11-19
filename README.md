@@ -335,14 +335,12 @@ only stops `setup`/`doctor --fix` from reinstalling it.
 
 ### Scope (optional module)
 
-Scope (ports, containers, background daemons, local MCP-server health) is the optional Brain-managed `symscope` binary. Enable the Scope module explicitly, then configure the profile entry:
+Scope (ports, containers, background daemons, local MCP-server health) is the `symscope` worker that ships with `symbrain` (macOS). `symbrain mcp` starts it as `symscope serve` whenever the profile enables `[servers.scope]` and exposes only the tools named in `tools_allow`; `command` and `args` in that entry are not used (`servers.scope.binary_path` overrides the lookup, a missing binary is reported once on stderr and skipped):
 
 ```toml
 [servers.scope]
-enabled = true
-command = "symscope"
-args    = ["serve"]
-access  = "write"   # none of its 7 tools declare readOnlyHint; "read" hides all of them
+enabled     = true
+tools_allow = ["scan", "ports_list", "ports_suggest", "mcp_list", "mcp_health", "daemons_list", "conflicts"]
 ```
 
 All 7 tools (`scan`, `ports_list`, `ports_suggest`, `mcp_list`, `mcp_health`,
@@ -376,6 +374,8 @@ access      = "read"
 tools_read  = ["version", "permissions_status", "get_policy"]
 tools_allow = ["version", "permissions_status", "get_policy"]
 ```
+
+`symbrain mcp` starts the bundled `symoperate` as `symoperate serve` when the profile enables `[servers.operate]` (like Scope: `command` and `args` are not used, `servers.operate.binary_path` overrides the lookup).
 
 Both `tools_read` (so `access = "read"` doesn't hide them — none carry
 `readOnlyHint`) and `tools_allow` (the actual enforcement: the gateway
