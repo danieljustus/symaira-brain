@@ -3,6 +3,8 @@
 
 BINARY := symbrain
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+# Dated nightly for cargo-fuzz (same date as browse-hardening.yml NIGHTLY); never floating `nightly`.
+FUZZ_TOOLCHAIN ?= nightly-2026-10-29
 # The repository is Rust-only. The historical Go behavior is replayed from
 # committed, sha256-sealed fixtures (scripts/oracle-freeze); no target needs a
 # Go toolchain.
@@ -197,8 +199,8 @@ rust-check: rust-replay-checks
 ## rust-fuzz-build: Compile every MCP fuzz target with nightly libFuzzer
 rust-fuzz-build:
 	$(EXTERNAL_RUN) cargo metadata --locked --format-version 1 --manifest-path fuzz/Cargo.toml >/dev/null
-	$(EXTERNAL_RUN) cargo +nightly fuzz build frame-decoder
-	$(EXTERNAL_RUN) cargo +nightly fuzz build jsonrpc-envelope
+	$(EXTERNAL_RUN) cargo +$(FUZZ_TOOLCHAIN) fuzz build frame-decoder
+	$(EXTERNAL_RUN) cargo +$(FUZZ_TOOLCHAIN) fuzz build jsonrpc-envelope
 
 ## rust-fuzz-smoke: Exercise both MCP fuzz targets without mutating tracked seeds
 rust-fuzz-smoke: rust-fuzz-build
@@ -208,8 +210,8 @@ rust-fuzz-smoke: rust-fuzz-build
 	mkdir -p "$$tmp/frame" "$$tmp/envelope"; \
 	cp fuzz/corpus/frame_decoder/* "$$tmp/frame/"; \
 	cp fuzz/corpus/jsonrpc_envelope/* "$$tmp/envelope/"; \
-	$(EXTERNAL_RUN) cargo +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
-	$(EXTERNAL_RUN) cargo +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
+	$(EXTERNAL_RUN) cargo +$(FUZZ_TOOLCHAIN) fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
+	$(EXTERNAL_RUN) cargo +$(FUZZ_TOOLCHAIN) fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
 
 ## rust-fetch-static-slice: Run the Browse static-document slice (RUST-008, FETCH-006/007/008)
 #
@@ -226,7 +228,7 @@ rust-fetch-static-slice:
 ## rust-fetch-fuzz-build: Compile the Browse dom-input fuzz target with nightly libFuzzer
 rust-fetch-fuzz-build:
 	cd browse && $(EXTERNAL_RUN) cargo metadata --locked --format-version 1 --manifest-path fuzz/Cargo.toml >/dev/null
-	cd browse && $(EXTERNAL_RUN) cargo +nightly fuzz build dom-input
+	cd browse && $(EXTERNAL_RUN) cargo +$(FUZZ_TOOLCHAIN) fuzz build dom-input
 
 ## rust-fetch-fuzz-smoke: Run dom-input over a scratch copy of its tracked seeds
 rust-fetch-fuzz-smoke: rust-fetch-fuzz-build
@@ -234,7 +236,7 @@ rust-fetch-fuzz-smoke: rust-fetch-fuzz-build
 	tmp=$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$$TMPDIR/symbrowse-dom.XXXXXX"'); \
 	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
 	cp browse/fuzz/corpus/dom_input/* "$$tmp/"; \
-	cd browse && $(EXTERNAL_RUN) cargo +nightly fuzz run dom-input "$$tmp" -- -runs=2000 -max_len=65536 -rss_limit_mb=2048
+	cd browse && $(EXTERNAL_RUN) cargo +$(FUZZ_TOOLCHAIN) fuzz run dom-input "$$tmp" -- -runs=2000 -max_len=65536 -rss_limit_mb=2048
 
 ## test: Run all Rust tests
 test:

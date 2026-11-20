@@ -15,7 +15,7 @@ cd "$root"
 
 runs="${FUZZ_RUNS:-64}"
 max_len="${FUZZ_MAX_LEN:-65536}"
-toolchain="${FUZZ_TOOLCHAIN:-nightly}"
+toolchain="${FUZZ_TOOLCHAIN:-nightly-2026-10-29}"
 case "$runs" in ''|*[!0-9]*) echo "FUZZ_RUNS must be an integer" >&2; exit 2;; esac
 if [ "$runs" -lt 1 ] || [ "$runs" -gt 4096 ]; then
   echo "FUZZ_RUNS must be between 1 and 4096" >&2
