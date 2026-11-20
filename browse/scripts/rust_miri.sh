@@ -11,7 +11,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
-toolchain="${MIRI_TOOLCHAIN:-nightly}"
+toolchain="${MIRI_TOOLCHAIN:-nightly-2026-10-29}"
 
 cargo "+$toolchain" miri setup
 # Pure property suite: YAML totality, authenticated state round trips,
