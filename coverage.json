@@ -1,0 +1,27 @@
+{
+  "schema_version": 2,
+  "commit_sha": "5903d6c632668691357fd83320cf72efe4d8917b",
+  "total": 87.2,
+  "crates": {
+    "rust/symaira-cutover": 93.0,
+    "rust/symbrain-activity": 95.2,
+    "rust/symbrain-adapter": 77.2,
+    "rust/symbrain-audit": 86.9,
+    "rust/symbrain-broker": 84.9,
+    "rust/symbrain-catalog": 100.0,
+    "rust/symbrain-cli": 81.7,
+    "rust/symbrain-core": 93.1,
+    "rust/symbrain-gateway": 74.9,
+    "rust/symbrain-guard-core": 90.9,
+    "rust/symbrain-harness": 85.7,
+    "rust/symbrain-instructions": 90.8,
+    "rust/symbrain-managed": 71.6,
+    "rust/symbrain-mcp": 91.6,
+    "rust/symbrain-memory": 91.3,
+    "rust/symbrain-patterns": 97.8,
+    "rust/symbrain-policy": 92.6,
+    "rust/symbrain-skills": 85.5,
+    "rust/symbrain-usage": 88.9,
+    "rust/symguard-cli": 85.4
+  }
+}
