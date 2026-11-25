@@ -18,11 +18,11 @@ fs2 = "=0.4.3"
 futures = "=0.3.34"
 futures-util = { version = "=0.3.34", features = ["sink"] }
 getrandom = "=0.4.3"
-h2 = "=0.4.20"
+h2 = "=0.4.21"
 httparse = "=1.10.1"
 httpdate = "=1.0.3"
 http = "=1.5.0"
-hyper = { version = "=1.12.0", features = ["client", "http1"] }
+hyper = { version = "=1.13.0", features = ["client", "http1"] }
 hyper-util = { version = "=0.1.21", features = ["tokio"] }
 native-tls = "=0.2.18"
 tokio-native-tls = "=0.3.1"
@@ -39,7 +39,7 @@ nix = { version = "=0.31.3", features = ["fs", "poll", "signal", "socket", "user
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.151"
 symaira-core-version = { git = "https://github.com/danieljustus/symaira-corekit", rev = "d382b8615ce879bac6f23c7250e13667934e8f93", version = "=0.0.0" }
-sha2 = "=0.11.1"
+sha2 = "=0.11.2"
 symbrowse-core = { path = "crates/symbrowse-core", version = "=0.0.0" }
 symbrowse-daemon = { path = "crates/symbrowse-daemon", version = "=0.0.0" }
 symbrowse-engine = { path = "crates/symbrowse-engine", version = "=0.0.0" }
@@ -47,11 +47,11 @@ symbrowse-mcp = { path = "crates/symbrowse-mcp", version = "=0.0.0" }
 symbrowse-protocol = { path = "crates/symbrowse-protocol", version = "=0.0.0" }
 time = { version = "=0.3.55", features = ["formatting", "local-offset", "macros", "parsing"] }
 tokio = { version = "=1.54.1", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "sync", "time"] }
-toml = "=1.2.1"
-url = "=2.5.8"
+toml = "=1.2.3"
+url = "=2.5.9"
 wait-timeout = "=0.2.1"
-yaml-rust2 = "=0.13.0"
-zeroize = "=1.9.1"
+yaml-rust2 = "=0.13.2"
+zeroize = "=1.9.2"
 proptest = "=1.12.0"
 
 [profile.release]
