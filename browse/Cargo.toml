@@ -48,7 +48,7 @@ symbrowse-protocol = { path = "crates/symbrowse-protocol", version = "=0.0.0" }
 time = { version = "=0.3.55", features = ["formatting", "local-offset", "macros", "parsing"] }
 tokio = { version = "=1.54.1", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "sync", "time"] }
 toml = "=1.2.1"
-url = "=2.5.8"
+url = "=2.5.9"
 wait-timeout = "=0.2.1"
 yaml-rust2 = "=0.13.0"
 zeroize = "=1.9.1"
