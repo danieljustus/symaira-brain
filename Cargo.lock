@@ -1572,12 +1572,12 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "symaira-core-exit"
 version = "0.0.0"
-source = "git+https://github.com/danieljustus/symaira-corekit?tag=v0.23.0#a5b0c631b97d4472f7ea4eb145f67468f366340e"
+source = "git+https://github.com/danieljustus/symaira-corekit?tag=v0.27.0#a589c3ec5f227097fe11524508e598583373daf4"
 
 [[package]]
 name = "symaira-core-llm"
 version = "0.0.0"
-source = "git+https://github.com/danieljustus/symaira-corekit?tag=v0.23.0#a5b0c631b97d4472f7ea4eb145f67468f366340e"
+source = "git+https://github.com/danieljustus/symaira-corekit?tag=v0.27.0#a589c3ec5f227097fe11524508e598583373daf4"
 dependencies = [
  "reqwest",
  "serde",
@@ -1592,7 +1592,7 @@ dependencies = [
 [[package]]
 name = "symaira-core-secretref"
 version = "0.0.0"
-source = "git+https://github.com/danieljustus/symaira-corekit?tag=v0.23.0#a5b0c631b97d4472f7ea4eb145f67468f366340e"
+source = "git+https://github.com/danieljustus/symaira-corekit?tag=v0.27.0#a589c3ec5f227097fe11524508e598583373daf4"
 dependencies = [
  "rustix",
  "serde",

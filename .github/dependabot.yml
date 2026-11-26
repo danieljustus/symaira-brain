@@ -7,7 +7,7 @@ updates:
       - "/fuzz"
       - "/browse/fuzz"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     ignore:
       # The pinned CoreKit requires serde_json =1.0.151, so any newer version
       # fails to resolve. Remove after danieljustus/symaira-corekit#475.
@@ -37,7 +37,13 @@ updates:
     schedule:
       interval: "weekly"
     groups:
+      symaira-corekit:
+        patterns:
+          - "danieljustus/symaira-corekit*"
       actions-minor-patch:
+        # The CoreKit action group above must win over this broader group.
+        exclude-patterns:
+          - "danieljustus/symaira-corekit*"
         update-types:
           - "minor"
           - "patch"
@@ -51,7 +57,7 @@ updates:
       - "/operate"
       - "/scope"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     cooldown:
       exclude:
         - "*symaira-corekit*"
