@@ -46,7 +46,7 @@ sha2 = "0.11.1"
 rusqlite = { version = "0.42.0", features = ["bundled", "functions"] }
 regex = "1"
 ureq = { version = "=3.4.1", default-features = false, features = ["rustls"] }
-symaira-core-llm = { version = "=0.0.0", git = "https://github.com/danieljustus/symaira-corekit", tag = "v0.27.1", package = "symaira-core-llm" }
+symaira-core-llm = { version = "=0.0.0", git = "https://github.com/danieljustus/symaira-corekit", tag = "v0.28.0", package = "symaira-core-llm" }
 symbrain-activity = { version = "0.16.1", path = "rust/symbrain-activity" }
 symbrain-memory = { version = "0.16.1", path = "rust/symbrain-memory" }
 symbrain-audit = { version = "0.16.1", path = "rust/symbrain-audit" }
