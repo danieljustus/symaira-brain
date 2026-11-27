@@ -38,7 +38,7 @@ rustix = { version = "=1.1.6", features = ["process"] }
 nix = { version = "=0.31.3", features = ["fs", "poll", "signal", "socket", "user"] }
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = "=1.0.151"
-symaira-core-version = { git = "https://github.com/danieljustus/symaira-corekit", tag = "v0.27.0", version = "=0.0.0" }
+symaira-core-version = { git = "https://github.com/danieljustus/symaira-corekit", tag = "v0.27.1", version = "=0.0.0" }
 sha2 = "=0.11.1"
 symbrowse-core = { path = "crates/symbrowse-core", version = "=0.0.0" }
 symbrowse-daemon = { path = "crates/symbrowse-daemon", version = "=0.0.0" }
