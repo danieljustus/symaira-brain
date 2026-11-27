@@ -14,7 +14,7 @@ options:
 packages:
   symaira-corekit:
     url: https://github.com/danieljustus/symaira-corekit.git
-    exactVersion: 0.27.0
+    exactVersion: 0.27.1
 
 targets:
   SymBrainCore:
